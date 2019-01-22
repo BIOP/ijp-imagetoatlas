@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+		http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.scijava</groupId>
+		<artifactId>pom-scijava</artifactId>
+		<version>24.0.0</version>
+		<relativePath />
+	</parent>
+
+	<groupId>ch.epfl.biop</groupId>
+	<artifactId>ImageToAtlasRegister</artifactId>
+	<version>0.1.0-SNAPSHOT</version>
+
+	<name>Plugin To Register Images to Atlases</name>
+	<description>Collection of tools to register atlases to images in FIJI.</description>
+	<url>http://biop.epfl.ch</url>
+	<inceptionYear>2018</inceptionYear>
+	<organization>
+		<name>BIOP</name>
+		<url>http://biop.epfl.ch</url>
+	</organization>
+	<licenses>
+		<license>
+			<name>Simplified BSD License</name>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+	<developers>
+		<developer>
+			<id>nicokiaru</id>
+			<name>Nicolas Chiaruttini</name>
+			<url>http://imagej.net/User:NicoKiaru</url>
+			<roles>
+				<role>founder</role>
+				<role>lead</role>
+				<role>developer</role>
+				<role>debugger</role>
+				<role>reviewer</role>
+				<role>support</role>
+				<role>maintainer</role>
+			</roles>
+		</developer>
+		<developer>
+			<id>oburri</id>
+			<name>Olivier Burri</name>
+			<url>http://biop.epfl.ch/INFO_Facility.html</url>
+			<roles>
+				<role>founder</role>
+				<role>lead</role>
+				<role>developer</role>
+				<role>debugger</role>
+				<role>reviewer</role>
+				<role>support</role>
+				<role>maintainer</role>
+			</roles>
+		</developer>
+		<developer>
+			<id>romainGuiet</id>
+			<name>Romain Guiet</name>
+			<url>http://biop.epfl.ch/INFO_Facility.html</url>
+			<roles>
+				<role>founder</role>
+				<role>lead</role>
+				<role>developer</role>
+				<role>debugger</role>
+				<role>reviewer</role>
+				<role>support</role>
+				<role>maintainer</role>
+			</roles>
+		</developer>
+	</developers>
+	<contributors >
+
+		<contributor>
+			<name>Nicolas Chiaruttini</name>
+			<url>http://biop.epfl.ch/INFO_Facility.html</url>
+			<roles><role>founder</role></roles>
+			<properties><id>NicoKiaru</id></properties>
+		</contributor>
+		
+		<contributor>
+			<name>Romain Guiet</name>
+			<url>http://biop.epfl.ch/INFO_Facility.html</url>
+			<roles><role>founder</role></roles>
+			<properties><id>romainGuiet</id></properties>
+		</contributor>
+		
+		<contributor>
+			<name>Olivier Burri</name>
+			<url>http://biop.epfl.ch/INFO_Facility.html</url>
+			<roles><role>founder</role></roles>
+			<properties><id>oburri</id></properties>
+		</contributor>
+	</contributors>
+
+	<mailingLists>
+		<mailingList>
+			<name>Image.sc Forum</name>
+			<archive>https://forum.image.sc/</archive>
+		</mailingList>
+	</mailingLists>
+
+	<scm>
+		<connection>scm:git:git://github.com/</connection>
+		<developerConnection>scm:git:git@github.com:</developerConnection>
+		<tag>HEAD</tag>
+		<url>https://github.com/</url>
+	</scm>
+
+	<issueManagement>
+		<system>GitHub Issues</system>
+		<url></url>
+	</issueManagement>
+
+	<ciManagement>
+		<system>None</system>
+	</ciManagement>
+
+	<repositories>
+		<!-- NB: for project parent -->
+		<repository>
+			<id>imagej.public</id>
+			<url>http://maven.imagej.net/content/groups/public</url>
+		</repository>
+	</repositories>
+	
+	<properties>
+		<package-name>ch.epfl.biop.aba</package-name>
+		<main-class>ch.epfl.biop.aba.DummyCommand</main-class>
+		<license.licenseName>N/A</license.licenseName>
+		<license.copyrightOwners>N/A</license.copyrightOwners>
+	</properties>
+
+	<dependencies>
+        <!-- ImageJ dependencies -->
+        <dependency>
+            <groupId>net.imagej</groupId>
+            <artifactId>imagej</artifactId>
+        </dependency>
+        <!-- Third party dependencies -->
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>itextpdf</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.xmlgraphics</groupId>
+            <artifactId>batik-bridge</artifactId>
+            <exclusions>
+                <exclusion>
+                    <!--
+                    NB: jython is an unshaded uber-JAR;
+                    depending on it brings in duplicate classes.
+                    See: https://imagej.net/Uber-JAR
+                    -->
+                    <groupId>org.python</groupId>
+                    <artifactId>jython</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.xmlgraphics</groupId>
+            <artifactId>batik-svg-dom</artifactId>
+            <exclusions>
+                <exclusion>
+                    <!--
+                    NB: jython is an unshaded uber-JAR;
+                    depending on it brings in duplicate classes.
+                    See: https://imagej.net/Uber-JAR
+                    -->
+                    <groupId>org.python</groupId>
+                    <artifactId>jython</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+		<dependency>
+			<groupId>org.apache.xmlgraphics</groupId>
+			<artifactId>batik-gvt</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20180813</version>
+		</dependency>
+        <dependency>
+            <groupId>net.imagej</groupId>
+            <artifactId>imagej-legacy</artifactId>
+        </dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+		</dependency>
+		<dependency>
+  			<groupId>sc.fiji</groupId>
+  			<artifactId>bigdataviewer_fiji</artifactId>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>2.8.5</version>
+		</dependency>
+		<dependency>
+			<groupId>ch.epfl.biop</groupId>
+			<artifactId>BIOPWrappers</artifactId>
+			<version>0.2.0-SNAPSHOT</version>
+		</dependency>
+	</dependencies>
+</project>
