@@ -13,7 +13,7 @@
 
 	<groupId>ch.epfl.biop</groupId>
 	<artifactId>ImageToAtlasRegister</artifactId>
-	<version>0.1.0-SNAPSHOT</version>
+	<version>0.1.1-SNAPSHOT</version>
 
 	<name>Plugin To Register Images to Atlases</name>
 	<description>Collection of tools to register atlases to images in FIJI.</description>
@@ -185,10 +185,6 @@
 			<artifactId>json</artifactId>
 			<version>20180813</version>
 		</dependency>
-        <dependency>
-            <groupId>net.imagej</groupId>
-            <artifactId>imagej-legacy</artifactId>
-        </dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
@@ -206,7 +202,7 @@
 		<dependency>
 			<groupId>ch.epfl.biop</groupId>
 			<artifactId>BIOPWrappers</artifactId>
-			<version>0.2.0-SNAPSHOT</version>
+			<version>0.2.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 </project>
