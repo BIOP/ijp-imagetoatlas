@@ -20,8 +20,18 @@ import ch.epfl.biop.atlas.AtlasOntology;
 public class AllenOntology implements AtlasOntology {
 
 	static File cachedJSONFile;
-	
-	@Override
+
+
+    public Integer getRootIndex() {
+        return new Integer(8); // 997 -1 ou 1 ou 8
+    }
+
+    @Override
+    public String getNamingDisplayProperty() {
+        return "acronym";
+    }
+
+    @Override
 	public List<String> getKeys(String key) {
 		return properties;
 	}

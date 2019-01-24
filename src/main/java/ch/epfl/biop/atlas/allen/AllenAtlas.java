@@ -50,10 +50,10 @@ abstract public class AllenAtlas extends BiopAtlas {
     	return cmd.cr_out;
     }
 
-	@Override
+	/*@Override
 	public JPanel getPanel(Context ctx) {
 		JPanel jpanel = new JPanel();
 		return jpanel;
-	}
-	
+	}*/
+
 }

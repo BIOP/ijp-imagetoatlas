@@ -14,7 +14,7 @@ import ij.plugin.frame.RoiManager;
 import ij.process.FloatPolygon;
 import net.imglib2.realtransform.AffineTransform3D;
 
-abstract public class BiopAtlas implements ScijavaPanelizable, Closeable {
+abstract public class BiopAtlas implements Closeable {
 
     // An atlas is : an ontology and an xml hdf5 data source
 
@@ -118,5 +118,6 @@ abstract public class BiopAtlas implements ScijavaPanelizable, Closeable {
             }
         }
     }
+
 
 }

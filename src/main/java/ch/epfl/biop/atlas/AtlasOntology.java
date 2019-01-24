@@ -20,5 +20,8 @@ public interface AtlasOntology {
 	public List<String> getKeys(String key);
 	public Map<String, String> getProperties(int id);
 	public Integer getIdFromPooledProperties(String prop);
+	public Integer getRootIndex();
+
+	public String getNamingDisplayProperty();
 
 }
