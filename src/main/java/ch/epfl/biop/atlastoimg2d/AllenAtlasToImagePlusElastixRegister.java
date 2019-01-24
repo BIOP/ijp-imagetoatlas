@@ -1,6 +1,7 @@
 package ch.epfl.biop.atlastoimg2d;
 
-import org.scijava.object.ObjectService;
+import ch.epfl.biop.wrappers.elastix.RegisterHelper;
+import org.scijava.display.DisplayService;
 
 import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
 import ch.epfl.biop.wrappers.elastix.ij2commands.Elastix_Register;
@@ -8,12 +9,16 @@ import ch.epfl.biop.wrappers.transformix.ij2commands.Transformix_TransformROIs;
 import ij.ImagePlus;
 import ij.plugin.frame.RoiManager;
 
+// Big question : should I add ROIs linked to that once the registration is done ?
+
+// Probably yes, Or I should launch a command asking for manual improvements ?
+
 public class AllenAtlasToImagePlusElastixRegister extends AtlasToImagePlus2D_Core {
 	
 	Thread registerThread;
 	
 	@Override
-	public void register(ImagePlus imp) {
+	public void register() {
 		if ((registerThread!=null)&&(registerThread.isAlive())) {
 			System.out.println("Registration in progress... cancel it before re running it");
 			return;
@@ -36,7 +41,7 @@ public class AllenAtlasToImagePlusElastixRegister extends AtlasToImagePlus2D_Cor
 		ImagePlus imgAtlas = this.ba.map.getCurrentStructuralImage();
 		
 		Elastix_Register er = new Elastix_Register();
-		er.movingImage=imp;
+		er.movingImage=this.imageUsedForRegistration;
 		er.fixedImage=imgAtlas;
 		er.rigid=false;//true;
 		er.fast_affine=true;
@@ -61,6 +66,7 @@ public class AllenAtlasToImagePlusElastixRegister extends AtlasToImagePlus2D_Cor
 		this.er=er;
 		this.registrationSet=true;
 		os.addObject(er.rh);
+		os.getContext().getService(DisplayService.class).createDisplay(er.rh);
 	}
 	
 	void cancelRegistration() {
@@ -90,6 +96,10 @@ public class AllenAtlasToImagePlusElastixRegister extends AtlasToImagePlus2D_Cor
 		} else {
 			System.out.println("Registration not set.");
 		}
+	}
+
+    public RegisterHelper getRegistration() {
+		return this.er.rh;
 	}
 
 }

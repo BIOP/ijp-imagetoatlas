@@ -35,7 +35,6 @@ public class AlignImageToAtlas implements Command {
 	@Parameter(type = ItemIO.OUTPUT)
 	public AllenAtlasToImagePlusElastixRegister aligner;
 
-	
 	@Parameter
 	boolean setLocationInteractively = true;
 	
@@ -70,7 +69,8 @@ public class AlignImageToAtlas implements Command {
 		
 		aligner.setAtlasLocation(ba.map.getCurrentLocation());
 		if (os!=null) aligner.setObjectService(os);
-		aligner.register(imp);
+		aligner.setImage(imp);
+		aligner.register();
 	}
 	
 }

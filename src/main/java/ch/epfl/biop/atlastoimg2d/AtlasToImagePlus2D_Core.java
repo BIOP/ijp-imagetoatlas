@@ -1,6 +1,7 @@
 package ch.epfl.biop.atlastoimg2d;
 
 import ch.epfl.biop.fiji.objectgui.ScijavaPanelizable;
+import ch.epfl.biop.wrappers.elastix.RegisterHelper;
 import org.scijava.Context;
 import org.scijava.object.ObjectService;
 
@@ -8,11 +9,15 @@ import ch.epfl.biop.atlas.BiopAtlas;
 import ij.ImagePlus;
 
 import javax.swing.JPanel;
+import java.io.File;
+import java.net.URL;
 
-abstract public class AtlasToImagePlus2D_Core implements AtlasToImg2D<ImagePlus>, ScijavaPanelizable {
+abstract public class AtlasToImagePlus2D_Core implements AtlasToImg2D<ImagePlus> {
 
 	BiopAtlas ba;
 	Object atlasLocation;
+
+	ImagePlus imageUsedForRegistration;
 	
 	boolean interactive=true;
 	
@@ -55,9 +60,35 @@ abstract public class AtlasToImagePlus2D_Core implements AtlasToImg2D<ImagePlus>
 		return registrationSet;
 	}
 
-	public JPanel getPanel(Context ctx) {
-		return new JPanel();
+	public BiopAtlas getAtlas() {
+		return this.ba;
 	}
+
+	public Object getAtlasLocation() {
+		return this.atlasLocation;
+	}
+
+	public File save(String path) {
+		return null;
+	}
+
+	public void load(URL url) {
+
+	}
+
+	public void load(File file) {
+
+	}
+
+
+    @Override
+    public void setImage(ImagePlus img) {
+        imageUsedForRegistration = img;
+    }
+
+	//public JPanel getPanel(Context ctx) {
+	//	return new JPanel();
+	//}
 
 	/*@Override
 	abstract public void register(); 

@@ -15,7 +15,7 @@ import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
 
 @Plugin(type = DisplayViewer.class)
-public class SwingAtlasDisplayViewer extends
+public class SwingAtlasViewer extends
         EasySwingDisplayViewer<BiopAtlas> implements TreeSelectionListener {
 
     @Parameter
@@ -23,7 +23,7 @@ public class SwingAtlasDisplayViewer extends
 
     private JTree tree;
 
-    public SwingAtlasDisplayViewer()
+    public SwingAtlasViewer()
     {
         super( BiopAtlas.class );
     }
