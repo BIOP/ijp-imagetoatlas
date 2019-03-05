@@ -1,14 +1,11 @@
 package ch.epfl.biop.atlastoimg2d;
 
-import ch.epfl.biop.fiji.objectgui.ScijavaPanelizable;
-import ch.epfl.biop.wrappers.elastix.RegisterHelper;
 import org.scijava.Context;
 import org.scijava.object.ObjectService;
 
 import ch.epfl.biop.atlas.BiopAtlas;
 import ij.ImagePlus;
 
-import javax.swing.JPanel;
 import java.io.File;
 import java.net.URL;
 
@@ -21,11 +18,11 @@ abstract public class AtlasToImagePlus2D_Core implements AtlasToImg2D<ImagePlus>
 	
 	boolean interactive=true;
 	
-	ObjectService os;
-	
+	Context ctx;
+
 	@Override
-	public void setObjectService(ObjectService os) {
-		this.os = os;
+	public void setScijavaContext(Context ctx) {
+		this.ctx = ctx;
 	}	
 	
 	public void setInteractive(boolean flag) {

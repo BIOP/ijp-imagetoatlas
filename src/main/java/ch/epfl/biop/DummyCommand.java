@@ -27,6 +27,8 @@ public class DummyCommand {
 		// Checker board : v=((x%50)<25)*128+((y%50)<25)*128
         final ImageJ ij = new ImageJ();
         ij.ui().showUI();
+
+
         
         //BiopWrappersCheck.reportAllWrappers();
         //try {

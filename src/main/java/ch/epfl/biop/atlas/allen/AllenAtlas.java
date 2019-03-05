@@ -13,7 +13,7 @@ import org.scijava.Context;
 import javax.swing.*;
 
 abstract public class AllenAtlas extends BiopAtlas {
-
+	// http://download.alleninstitute.org/informatics-archive/current-release/mouse_ccf/
 	@Override
 	public void close() throws IOException {
 		

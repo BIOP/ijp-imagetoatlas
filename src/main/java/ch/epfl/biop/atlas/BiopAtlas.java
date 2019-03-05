@@ -6,13 +6,11 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.StringTokenizer;
 
-import ch.epfl.biop.fiji.objectgui.ScijavaPanelizable;
 import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.plugin.frame.RoiManager;
 import ij.process.FloatPolygon;
-import net.imglib2.realtransform.AffineTransform3D;
 
 abstract public class BiopAtlas implements Closeable {
 

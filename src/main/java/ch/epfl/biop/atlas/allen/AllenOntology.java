@@ -108,7 +108,9 @@ public class AllenOntology implements AtlasOntology {
     public Map<Integer, List<Integer>> ontologyIdToChildrenIds;
     
     public static ArrayList<String> properties;// = {"name", "acronym"};
-    
+    public Map<Integer, Integer> ontologyIdToOriginalId; // Used to retrieve the original index if the command modulo has been used
+
+
     void putOntologyIntoHashMaps() {
         ontologyNameToId = new HashMap<>();
         ontologyAcronymToId = new HashMap<>();
@@ -117,10 +119,69 @@ public class AllenOntology implements AtlasOntology {
         ontologyIdToParentId = new HashMap<>();
         ontologyIdToChildrenIds = new HashMap<>();
         ontologyIdentifierToStructureId = new HashMap<>();
+        ontologyIdToOriginalId = new HashMap();
         JSONObject root = (JSONObject) ontologyJSON.getJSONArray("msg").get(0);
         registerOntologyObject(root, -1);
     }
-	
+
+    /**
+     * For some weird reason, ids in the allen brain ontology have huge indices:
+     * 4584253562 for instance. These values, when converted to float, are losing precision,
+     * which means that they become useless.
+     *
+     * With this function, every index is transformed by its modulo of keymodulo
+     * Turns out the modulo 65000 has no duplicate index. Contrary to the modulo 65536
+     * which has 1 duplicate (1105) for instance.
+     *
+     * The annotation map has to be converted the same way...
+     * @param keyModulo
+     */
+    public void mutateToModulo(int keyModulo) {
+        ontologyIdToName = mutateMapKeysModulo(ontologyIdToName, keyModulo, new String());
+        ontologyIdToAcronym = mutateMapKeysModulo(ontologyIdToAcronym, keyModulo, new String());
+        ontologyIdToParentId = mutateMapKeysModulo(ontologyIdToParentId, keyModulo, new Integer(0));
+        ontologyIdToOriginalId = mutateMapKeysModulo(ontologyIdToOriginalId, keyModulo, new Integer(0));
+        ontologyIdToChildrenIds = mutateMapKeysModulo(ontologyIdToChildrenIds, keyModulo, new ArrayList<Integer>(){});
+
+        ontologyIdToParentId = mutateMapValuesModulo(ontologyIdToParentId, keyModulo, new Integer(0));
+        ontologyNameToId = mutateMapValuesModulo(ontologyNameToId, keyModulo, new String());
+        ontologyAcronymToId = mutateMapValuesModulo(ontologyAcronymToId, keyModulo, new String());
+        ontologyIdentifierToStructureId = mutateMapValuesModulo(ontologyIdentifierToStructureId, keyModulo, new String());
+
+        // Case ontologyIdToChildrenIds to be handled separately
+        Map<Integer, List<Integer>> map_out = new HashMap<>();
+        ontologyIdToChildrenIds.forEach((k,v) -> {
+            ArrayList<Integer> newChildIds = new ArrayList<>();
+            map_out.put(k,newChildIds);
+            v.forEach(id -> {
+                newChildIds.add(id % keyModulo);
+            });
+        });
+        ontologyIdToChildrenIds = map_out;
+
+    }
+
+    <T> Map<Integer, T> mutateMapKeysModulo(Map<Integer, T> map_in, int mod, T value) {
+        Map<Integer,T> map_out = new HashMap<>();
+        map_in.forEach((k,v) -> {
+            Integer newKey = k % mod;
+            if (map_out.containsKey(newKey)) {
+                System.err.println("Error: duplicate key k % "+mod+" = "+newKey+" k= "+k);
+            } else {
+                map_out.put(newKey,v);
+            }
+        });
+        return map_out; // Warning by IntelliJ. Does it make sense ?
+    }
+
+    <T> Map<T, Integer> mutateMapValuesModulo(Map<T, Integer> map_in, int mod, T value) {
+        Map<T, Integer> map_out = new HashMap<>();
+        map_in.forEach((k,v) -> {
+            map_out.put(k,v % mod);
+        });
+        return map_out;
+    }
+
     void registerOntologyObject(JSONObject obj, int idOrigin) {
         JSONArray structures = (JSONArray) obj.get("children");
         ArrayList<Integer> childrenIds = new ArrayList<>();
@@ -133,6 +194,7 @@ public class AllenOntology implements AtlasOntology {
             name = jsonObject.getString("name");
             acronym = jsonObject.getString("acronym");
             ontologyIdToAcronym.put(id, acronym);
+            ontologyIdToOriginalId.put(id,id);
             ontologyAcronymToId.put(acronym.trim().toUpperCase(), id);
             ontologyIdToName.put(id, name);
             ontologyIdentifierToStructureId.put(name.trim().toUpperCase(), id);
@@ -140,12 +202,10 @@ public class AllenOntology implements AtlasOntology {
             ontologyIdentifierToStructureId.put(Integer.toString(id), id);
             ontologyNameToId.put(name.trim().toUpperCase(), id);
             if (jsonObject.has("parent_structure_id")) {
-                //id_Parent = jsonObject.getString("parent_structure_id");
                 ontologyIdToParentId.put(id, jsonObject.getInt("parent_structure_id"));
             }
-            registerOntologyObject(jsonObject, id);//.getJSONObject("children"));
+            registerOntologyObject(jsonObject, id);
         }
-        //}
         ontologyIdToChildrenIds.put(idOrigin,childrenIds);
     }
 

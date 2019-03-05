@@ -40,7 +40,7 @@ public class AllenAtlasToImagePlusElastixRegister extends AtlasToImagePlus2D_Cor
 		
 		ImagePlus imgAtlas = this.ba.map.getCurrentStructuralImage();
 		
-		Elastix_Register er = new Elastix_Register();
+		er = new Elastix_Register();
 		er.movingImage=this.imageUsedForRegistration;
 		er.fixedImage=imgAtlas;
 		er.rigid=false;//true;
@@ -49,7 +49,9 @@ public class AllenAtlasToImagePlusElastixRegister extends AtlasToImagePlus2D_Cor
 		er.spline=false;//true;
 		
 		// Actually Perform the registration
-		System.out.println("Registration in progress ... this can take up to 2 minutes.");
+
+		er.run();
+		/*System.out.println("Registration in progress ... this can take up to 2 minutes.");
 		registerThread = new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -57,17 +59,22 @@ public class AllenAtlasToImagePlusElastixRegister extends AtlasToImagePlus2D_Cor
 				notifyRegistrationDone(er);
 			}
 		});
-		registerThread.start();
+		registerThread.start();*/
+
+		//notifyRegistrationDone(er);
+
+		// elastix registration done
+
 	}
 	
 	public Elastix_Register er;
 
-	void notifyRegistrationDone(Elastix_Register er) {
+	/*void notifyRegistrationDone(Elastix_Register er) {
 		this.er=er;
 		this.registrationSet=true;
-		os.addObject(er.rh);
-		os.getContext().getService(DisplayService.class).createDisplay(er.rh);
-	}
+		//os.addObject(er.rh);
+		//os.getContext().getService(DisplayService.class).createDisplay(er.rh);
+	}*/
 	
 	void cancelRegistration() {
 		if ((registerThread!=null)&&(registerThread.isAlive())) {

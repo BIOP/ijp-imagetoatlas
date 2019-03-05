@@ -59,9 +59,14 @@ public class ConstructROIsFromImgLabel implements Command {
 
 		HashSet<Integer> possibleValues = new HashSet<>();
 		existingPixelValues.forEach(id -> {
+			System.out.println("id="+id);
 			possibleValues.addAll(atlas.ontology.getAllParents((int)(float)id));
 		});
-		
+
+		for (Integer possibleValue : possibleValues) {
+			System.out.println(possibleValue);
+		}
+
 		Map<Integer, ArrayList<Integer>> childrenContained = new HashMap<>();
 		
 		atlas.ontology.getParentToChildrenMap().forEach((k,v) -> {

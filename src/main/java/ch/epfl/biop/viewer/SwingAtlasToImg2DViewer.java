@@ -7,6 +7,8 @@ import org.scijava.plugin.Plugin;
 import org.scijava.ui.viewer.DisplayViewer;
 
 import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 @Plugin(type = DisplayViewer.class)
 public class SwingAtlasToImg2DViewer extends EasySwingDisplayViewer<AtlasToImg2D> {
@@ -33,16 +35,29 @@ public class SwingAtlasToImg2DViewer extends EasySwingDisplayViewer<AtlasToImg2D
 
     @Override
     protected void redraw() {
+        System.out.println("Redraw from "+this+" called.");
+        if (atlasToImg.isRegistrationSet()) {
 
+        }
     }
 
     AtlasToImg2D atlasToImg = null;
 
+    JPanel mainPanel;
+
     @Override
     protected JPanel createDisplayPanel(AtlasToImg2D value) {
         atlasToImg = value;
+        mainPanel = new JPanel();
 
-        return new JPanel();
+        JButton backToAtlasView = new JButton("Set Atlas to Choosen Location");
+
+        backToAtlasView.addActionListener(actionEvent -> atlasToImg.getAtlas().map.setCurrentLocation(
+                        atlasToImg.getAtlasLocation())
+        );
+
+        mainPanel.add(backToAtlasView);
+        return mainPanel;
     }
 
     // Needs a button to add a transformation, or to retry the registration
@@ -53,5 +68,16 @@ public class SwingAtlasToImg2DViewer extends EasySwingDisplayViewer<AtlasToImg2D
     // BUtton reset registration
     // Button re-run registration
     // Button put atlas ROI to ROIManager
+
+
+    // 1: Image (type T) toString
+    // 2: Atlas
+    // 3: Atlas location
+    // 4: Registration
+    // 5: Rois
+    // 6: Filter
+    // 7: Actions
+    //
+
 
 }

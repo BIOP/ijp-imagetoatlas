@@ -7,17 +7,19 @@ import net.imglib2.realtransform.AffineTransform3D;
 
 public interface AtlasMap {
 	
-	public void initialize(String atlasName);
-	public void setDataSource(URL dataSource);
-	public URL getDataSource();
+	void initialize(String atlasName);
+	void setDataSource(URL dataSource);
+	URL getDataSource();
 	
-	public void show();
-	public void hide();
-	
-	public ImagePlus getCurrentStructuralImage();
-	public ImagePlus getCurrentLabelImage();
+	void show();
+	void hide();
 
-	public Object getCurrentLocation();
-	public void setCurrentLocation(Object location);
+	void setStructureImageChannel(int channel_index);
+
+	ImagePlus getCurrentStructuralImage();
+	ImagePlus getCurrentLabelImage();
+
+	Object getCurrentLocation();
+	void setCurrentLocation(Object location);
 	
 }

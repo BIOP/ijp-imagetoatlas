@@ -1,6 +1,7 @@
 package ch.epfl.biop.atlastoimg2d;
 
 import ch.epfl.biop.wrappers.elastix.RegisterHelper;
+import org.scijava.Context;
 import org.scijava.object.ObjectService;
 
 import ch.epfl.biop.atlas.BiopAtlas;
@@ -39,7 +40,7 @@ public interface AtlasToImg2D<T> { // T = image type (Image Plus or QuPath Image
 	//T transformImgToAtlas();
 	void putRoisToImageJ(ConvertibleRois cr);
 	void putRoisToQuPath(ConvertibleRois cr);
-	void setObjectService(ObjectService os);
+	void setScijavaContext(Context ctx);
 
 	File save(String path);
 	void load(URL url);

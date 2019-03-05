@@ -206,8 +206,8 @@
 		</dependency>
 		<dependency>
 			<groupId>ch.epfl.biop</groupId>
-			<artifactId>BIOPWrappers</artifactId>
-			<version>0.2.2-SNAPSHOT</version>
+			<artifactId>ijl-utilities-wrappers</artifactId>
+			<version>0.2.3-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.mycompany</groupId>

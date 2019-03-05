@@ -52,16 +52,21 @@ public class AllenMap implements AtlasMap {
 	public void hide() {
 		bdv.getViewerFrame().setVisible(false);
 	}
-	
-	public ImagePlus getImagePlusChannel(int channel) {
+
+    @Override
+    public void setStructureImageChannel(int channel_index) {
+        StructureChannel = channel_index;
+    }
+
+    public ImagePlus getImagePlusChannel(int channel) {
 		BDVSliceToImgPlus bs = new BDVSliceToImgPlus();
 		// Feeds argument
 		bs.bdv=this.bdv;
 		bs.mipmapLevel = 0;
-		bs.xSize=250;
-		bs.ySize=250;
+		bs.xSize=600;
+		bs.ySize=600;
 		bs.zSize=0;
-		bs.samplingInXVoxelUnit=1.0;
+		bs.samplingInXVoxelUnit=0.1;//1.0;
 		bs.interpolate=false;
 		bs.sourceIndex = channel;
 		bs.run();
@@ -91,15 +96,27 @@ public class AllenMap implements AtlasMap {
         AffineTransform3D transformedSourceToViewer = new AffineTransform3D(); // Empty Transform
         // 1 - viewer transform
         viewerState.getViewerTransform( transformedSourceToViewer ); // Get current transformation by the viewer state and puts it into sourceToImgPlus
-		return transformedSourceToViewer;
+		System.out.println("getCurrentLocation");
+
+		System.out.println(transformedSourceToViewer.toString());
+		return transformedSourceToViewer.copy();
 	}
 
 	@Override
 	public void setCurrentLocation(Object location) {
 		// TODO Auto-generated method stub
+
 		AffineTransform3D at3D = (AffineTransform3D) location;
-		ViewerState viewerState = bdv.getViewer().getState();
-        viewerState.setViewerTransform(at3D);
+		System.out.println("setCurrentLocation");
+		System.out.println(at3D.toString());
+		//ViewerState viewerState = bdv.getViewer().getState();
+		//viewerState.
+		bdv.getViewer().transformChanged(at3D);
+		/*viewerState.setViewerTransform(at3D);
+		bdv.getViewer()
+        bdv.toggleManualTransformation();
+        bdv.getManualTransformEditor().transformChanged(at3D);
+		bdv.toggleManualTransformation();*/
 	}
 
 }
