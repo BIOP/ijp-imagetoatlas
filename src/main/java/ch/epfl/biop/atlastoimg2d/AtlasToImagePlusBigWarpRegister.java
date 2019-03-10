@@ -1,25 +1,53 @@
 package ch.epfl.biop.atlastoimg2d;
 
-import ch.epfl.biop.wrappers.elastix.RegisterHelper;
-import org.scijava.display.DisplayService;
-
 import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
-import ch.epfl.biop.wrappers.elastix.ij2commands.Elastix_Register;
-import ch.epfl.biop.wrappers.transformix.ij2commands.Transformix_TransformROIs;
 import ij.ImagePlus;
-import ij.plugin.frame.RoiManager;
+import bigwarp.BigWarp;
+import bigwarp.BigWarpInit;
+import mpicbg.spim.data.SpimDataException;
 
 // Big question : should I add ROIs linked to that once the registration is done ?
 
 // Probably yes, Or I should launch a command asking for manual improvements ?
 
-public class AllenAtlasToImagePlusElastixRegister extends AtlasToImagePlus2D_Core {
+public class AtlasToImagePlusBigWarpRegister extends AtlasToImagePlus2D_Core {
 	
 	Thread registerThread;
 	
 	@Override
 	public void register() {
-		if ((registerThread!=null)&&(registerThread.isAlive())) {
+		if (this.atlasLocation==null) {
+			this.atlasLocation = this.ba.map.getCurrentLocation();
+		} else {
+			this.ba.map.setCurrentLocation(this.atlasLocation);
+		}
+
+		ImagePlus imgAtlas = this.ba.map.getCurrentStructuralImage();
+
+		try
+		{
+			//new RepeatingReleasedEventsFixer().install();
+			final BigWarp bw = new BigWarp( BigWarpInit.createBigWarpDataFromImages( imgAtlas, this.imageUsedForRegistration ), "Big Warp",  null );
+			bw.getViewerFrameP().getViewerPanel().requestRepaint();
+			bw.getViewerFrameQ().getViewerPanel().requestRepaint();
+			bw.getLandmarkFrame().repaint();
+		}
+		catch (final SpimDataException e)
+		{
+			e.printStackTrace();
+			return;
+		}
+
+		//imageUsedForRegistration
+
+		// BigWarp between imgAtlas = imageUsedForRegistration
+
+
+
+		// First : select the location
+
+
+		/*if ((registerThread!=null)&&(registerThread.isAlive())) {
 			System.out.println("Registration in progress... cancel it before re running it");
 			return;
 		}
@@ -37,7 +65,7 @@ public class AllenAtlasToImagePlusElastixRegister extends AtlasToImagePlus2D_Cor
 		} else {
 			this.ba.map.setCurrentLocation(this.atlasLocation);
 		}
-		
+
 		ImagePlus imgAtlas = this.ba.map.getCurrentStructuralImage();
 		
 		er = new Elastix_Register();
@@ -66,8 +94,13 @@ public class AllenAtlasToImagePlusElastixRegister extends AtlasToImagePlus2D_Cor
 		// elastix registration done
 
 	}
-	
-	public Elastix_Register er;
+
+	@Override
+	public Object getRegistration() {
+		return null;
+	}
+
+	//public Elastix_Register er;
 
 	/*void notifyRegistrationDone(Elastix_Register er) {
 		this.er=er;
@@ -77,14 +110,14 @@ public class AllenAtlasToImagePlusElastixRegister extends AtlasToImagePlus2D_Cor
 	}*/
 	
 	void cancelRegistration() {
-		if ((registerThread!=null)&&(registerThread.isAlive())) {
+	/*	if ((registerThread!=null)&&(registerThread.isAlive())) {
 			registerThread.interrupt();
-		}
+		}*/
 	}
 
 	@Override
 	public void putRoisToImageJ(ConvertibleRois cr) {
-		if (this.registrationSet) {
+		/*if (this.registrationSet) {
 			Transformix_TransformROIs ttr = new Transformix_TransformROIs();
 			ttr.cr_in = cr;
 			ttr.roisFromRoiManager = false;
@@ -93,7 +126,7 @@ public class AllenAtlasToImagePlusElastixRegister extends AtlasToImagePlus2D_Cor
 			ttr.cr_out.to(RoiManager.class);
 		} else {
 			System.out.println("Registration not set.");
-		}
+		}*/
 	}
 
 	@Override
@@ -105,8 +138,8 @@ public class AllenAtlasToImagePlusElastixRegister extends AtlasToImagePlus2D_Cor
 		}
 	}
 
-    public RegisterHelper getRegistration() {
+    /*public RegisterHelper getRegistration() {
 		return this.er.rh;
-	}
+	}*/
 
 }

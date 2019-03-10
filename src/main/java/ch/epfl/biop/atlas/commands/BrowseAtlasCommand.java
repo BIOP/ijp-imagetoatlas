@@ -3,6 +3,7 @@ package ch.epfl.biop.atlas.commands;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import ch.epfl.biop.atlas.allen.adultmousebrain.AllenBrainAdultMouseAtlasCCF2017;
 import org.scijava.ItemIO;
 import org.scijava.command.Command;
 import org.scijava.command.CommandModule;
@@ -21,7 +22,7 @@ public class BrowseAtlasCommand implements Command {
 	@Parameter(type = ItemIO.OUTPUT)
 	BiopAtlas ba;
 	
-	@Parameter(choices={"Adult Mouse Allen Brain v2","Adult Mouse Allen Brain v3"})
+	@Parameter(choices={"Adult Mouse Allen Brain v2","Adult Mouse Allen Brain v3","Adult Mouse Allen Brain CCF 2017"})
 	String atlasId;
 	
 	@Parameter
@@ -29,7 +30,6 @@ public class BrowseAtlasCommand implements Command {
 	
 	@Override
 	public void run() {
-		BiopAtlas biopatlas;
 		Future<CommandModule> f=null;
 		switch(atlasId) {
 		case "Adult Mouse Allen Brain v2":
@@ -37,7 +37,10 @@ public class BrowseAtlasCommand implements Command {
 			break;
 		case "Adult Mouse Allen Brain v3":
 			f = cs.run(AllenBrainAdultMouseAtlasV3.class, true);
-			break;	
+			break;
+		case "Adult Mouse Allen Brain CCF 2017":
+			f = cs.run(AllenBrainAdultMouseAtlasCCF2017.class, true);
+			break;
 		}
 		if (f!=null) {
 			try {

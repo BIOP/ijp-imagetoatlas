@@ -26,14 +26,15 @@ public interface AtlasToImg2D<T> { // T = image type (Image Plus or QuPath Image
 	
 	// ---- Registration
     void setAtlasLocation(Object location);
-	Object getAtlasLocation();
+	Object getAtlasLocation(); // returns null if not set
 
 
     void setImage(T img); // Let's try to handle QuPath and Fiji
+	T getImage();
 	void register();
 	void resetRegistration();
 	boolean isRegistrationSet(); // flag if registration is set
-	RegisterHelper getRegistration();
+	Object getRegistration();
 	
 	// ---- Transformations
 	// ConvertibleRois transformRoisAtlasToImg(ConvertibleRois in);
@@ -45,5 +46,15 @@ public interface AtlasToImg2D<T> { // T = image type (Image Plus or QuPath Image
 	File save(String path);
 	void load(URL url);
 	void load(File file);
+
+	// WORKFLOW:
+	// -> Get Atlas slice location in 2D
+	// -> Get Atlas structure slice
+	// -> Get registration
+	// -> Transform label image according to registration
+	// -> Compute ROIs
+	// -> Display ROIs from any structure to any image
+
+
 
 }

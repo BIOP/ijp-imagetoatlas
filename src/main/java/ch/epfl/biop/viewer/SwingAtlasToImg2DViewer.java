@@ -1,14 +1,13 @@
 package ch.epfl.biop.viewer;
 
-import ch.epfl.biop.atlas.BiopAtlas;
 import ch.epfl.biop.atlastoimg2d.AtlasToImg2D;
 import net.imagej.ui.swing.viewer.EasySwingDisplayViewer;
 import org.scijava.plugin.Plugin;
 import org.scijava.ui.viewer.DisplayViewer;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.*;
+import java.util.HashMap;
 
 @Plugin(type = DisplayViewer.class)
 public class SwingAtlasToImg2DViewer extends EasySwingDisplayViewer<AtlasToImg2D> {
@@ -45,18 +44,88 @@ public class SwingAtlasToImg2DViewer extends EasySwingDisplayViewer<AtlasToImg2D
 
     JPanel mainPanel;
 
+    HashMap<String, JPanel> panes;
+
+    void updateAllPanes() {
+        updateAtlasImageIdPane();
+    }
+
+    void updateAtlasImageIdPane() {
+        JPanel pane = this.panes.get(AtlasImageId);
+        if (pane.getComponentCount()==0) {
+            // let's init this
+            pane.setLayout(new FlowLayout());
+            pane.add(new JTextField("ATLAS ="));
+            pane.add(new JTextField("Undef"));
+            pane.add(new JTextField("Image ="));
+            pane.add(new JTextField("Undef"));
+        }
+        if (atlasToImg.getAtlas()!=null) {
+            // Atlas is set
+            ((JTextField)(pane.getComponent(1))).setText(atlasToImg.getAtlas().toString());
+        } else {
+            // Atlas not set
+            ((JTextField)(pane.getComponent(1))).setText("Undef");
+        }
+
+    }
+
+
+
+    final public static String AtlasImageId = "Image + Atlas Ids";
+    final public static String AtlasSliceSelection = "Atlas Slice Selection";
+    final public static String Registration = "Registration";
+    final public static String ROIDisplayExport ="Atlas Region Display/Export";
+
+
     @Override
     protected JPanel createDisplayPanel(AtlasToImg2D value) {
         atlasToImg = value;
+        panes = new HashMap<>();
         mainPanel = new JPanel();
+        mainPanel.setLayout( new BorderLayout());
 
         JButton backToAtlasView = new JButton("Set Atlas to Choosen Location");
 
-        backToAtlasView.addActionListener(actionEvent -> atlasToImg.getAtlas().map.setCurrentLocation(
-                        atlasToImg.getAtlasLocation())
+        backToAtlasView.addActionListener(actionEvent -> {
+                if (atlasToImg.getAtlasLocation()!=null) {
+                    atlasToImg.getAtlas().map.setCurrentLocation(atlasToImg.getAtlasLocation());
+                }
+            }
         );
 
-        mainPanel.add(backToAtlasView);
+        // WORKFLOW:
+        // -> Set Image to be aligned with (User input)
+        // -> Get Atlas slice location in 2D (Potential user input)
+        // -> Get Atlas structure slice
+        // -> Do registration (Potential user input)
+        // -> Transform label image according to registration
+        // -> Compute ROIs
+        // -> Display ROIs from any structure to any image
+        JTabbedPane tabbedPane = new JTabbedPane();
+        JPanel imageAtlasIdPanel = new JPanel();
+        panes.put(AtlasImageId, imageAtlasIdPanel);
+        JScrollPane scroll = new JScrollPane(imageAtlasIdPanel);
+        tabbedPane.addTab(AtlasImageId, scroll);
+
+        JPanel atlasSliceSelectionPane = new JPanel();
+        panes.put(AtlasSliceSelection, atlasSliceSelectionPane);
+        scroll = new JScrollPane(atlasSliceSelectionPane);
+        tabbedPane.addTab(AtlasSliceSelection, scroll);
+
+        JPanel registrationPane = new JPanel();
+        panes.put(Registration, registrationPane);
+        scroll = new JScrollPane(registrationPane);
+        tabbedPane.addTab(Registration, scroll);
+
+        JPanel displayAtlasRegionPane = new JPanel();
+        panes.put(ROIDisplayExport, displayAtlasRegionPane);
+        scroll = new JScrollPane(displayAtlasRegionPane);
+        tabbedPane.addTab(ROIDisplayExport, scroll);
+
+        mainPanel.add(tabbedPane, BorderLayout.CENTER);
+        updateAllPanes();
+        //mainPanel.add(backToAtlasView);
         return mainPanel;
     }
 
@@ -68,6 +137,16 @@ public class SwingAtlasToImg2DViewer extends EasySwingDisplayViewer<AtlasToImg2D
     // BUtton reset registration
     // Button re-run registration
     // Button put atlas ROI to ROIManager
+
+
+    // WORKFLOW:
+    // -> Set Image to be aligned with (User input)
+    // -> Get Atlas slice location in 2D (Potential user input)
+    // -> Get Atlas structure slice
+    // -> Do registration (Potential user input)
+    // -> Transform label image according to registration
+    // -> Compute ROIs
+    // -> Display ROIs from any structure to any image
 
 
     // 1: Image (type T) toString

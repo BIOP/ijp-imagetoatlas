@@ -2,7 +2,8 @@ package ch.epfl.biop.atlastoimg2d.commands;
 
 import ch.epfl.biop.atlas.BiopAtlas;
 import ch.epfl.biop.atlas.commands.BrowseAtlasCommand;
-import ch.epfl.biop.atlastoimg2d.AllenAtlasToImagePlusElastixRegister;
+import ch.epfl.biop.atlastoimg2d.AtlasToImagePlusBigWarpRegister;
+import ch.epfl.biop.atlastoimg2d.AtlasToImagePlusElastixRegister;
 import ch.epfl.biop.atlastoimg2d.AtlasToImg2D;
 import ij.ImagePlus;
 import org.scijava.Context;
@@ -10,7 +11,6 @@ import org.scijava.ItemIO;
 import org.scijava.command.Command;
 import org.scijava.command.CommandModule;
 import org.scijava.command.CommandService;
-import org.scijava.object.ObjectService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
@@ -22,6 +22,9 @@ public class ImageToAtlasConstruct implements Command {
 
     @Parameter(type = ItemIO.OUTPUT)
     public AtlasToImg2D aligner;
+
+    @Parameter(choices={"Elastix","BigWarp"})
+    String registrationType;
 
     @Parameter(required = false)
     public BiopAtlas ba;
@@ -53,7 +56,12 @@ public class ImageToAtlasConstruct implements Command {
             return;
         }
 
-        aligner = new AllenAtlasToImagePlusElastixRegister();
+        switch (registrationType) {
+            case "Elastix": aligner = new AtlasToImagePlusElastixRegister();
+                break;
+            case "BigWarp": aligner = new AtlasToImagePlusBigWarpRegister();
+                break;
+        }
         aligner.setAtlas(ba);
         aligner.setImage(imp);
         aligner.setScijavaContext(ctx);

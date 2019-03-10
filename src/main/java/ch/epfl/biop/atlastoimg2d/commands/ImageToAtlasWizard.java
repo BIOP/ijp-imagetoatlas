@@ -8,14 +8,9 @@ import org.scijava.ItemIO;
 import org.scijava.command.Command;
 import org.scijava.command.CommandModule;
 import org.scijava.command.CommandService;
-import org.scijava.object.ObjectService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
-import ch.epfl.biop.atlas.BiopAtlas;
-import ch.epfl.biop.atlas.commands.BrowseAtlasCommand;
-import ch.epfl.biop.atlastoimg2d.AllenAtlasToImagePlusElastixRegister;
-import ij.ImagePlus;
 import ij.gui.WaitForUserDialog;
 
 @Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Image To Atlas>Wizard")
@@ -42,8 +37,10 @@ public class ImageToAtlasWizard implements Command {
 	@Override
 	public void run() {
 		try {
-			Future<CommandModule> task = cs.run(ImageToAtlasConstruct.class, true);
-			CommandModule cm = task.get();
+			Future<CommandModule> task;
+			CommandModule cm;
+			task = cs.run(ImageToAtlasConstruct.class, true);
+			cm = task.get();
 			aligner = (AtlasToImg2D) cm.getOutput("aligner");
 
 			WaitForUserDialog dialog = new WaitForUserDialog("Choose slice","Pick carefully the slice you'd like.");
@@ -78,7 +75,7 @@ public class ImageToAtlasWizard implements Command {
 			return;
 		}
 		
-		aligner = new AllenAtlasToImagePlusElastixRegister();
+		aligner = new AtlasToImagePlusElastixRegister();
 		aligner.setAtlas(ba);
 		// Wait for user to choose its slice
 		

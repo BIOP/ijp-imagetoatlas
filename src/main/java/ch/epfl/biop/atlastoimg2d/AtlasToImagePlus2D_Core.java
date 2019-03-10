@@ -1,7 +1,6 @@
 package ch.epfl.biop.atlastoimg2d;
 
 import org.scijava.Context;
-import org.scijava.object.ObjectService;
 
 import ch.epfl.biop.atlas.BiopAtlas;
 import ij.ImagePlus;
@@ -82,6 +81,11 @@ abstract public class AtlasToImagePlus2D_Core implements AtlasToImg2D<ImagePlus>
     public void setImage(ImagePlus img) {
         imageUsedForRegistration = img;
     }
+
+    @Override
+	public ImagePlus getImage() {
+		return this.imageUsedForRegistration;
+	}
 
 	//public JPanel getPanel(Context ctx) {
 	//	return new JPanel();
