@@ -1,12 +1,13 @@
 package ch.epfl.biop.registration;
 
+import bdv.ij.ApplyBigwarpPlugin;
 import bigwarp.BigWarp;
 import bigwarp.BigWarpInit;
 import ij.ImagePlus;
 import ij.gui.WaitForUserDialog;
 import mpicbg.spim.data.SpimDataException;
 import net.imglib2.Point;
-
+import bdv.viewer.Interpolation;
 import java.util.List;
 import java.util.function.Function;
 
@@ -33,7 +34,7 @@ public class BigWarp2DRegistration implements Registration<ImagePlus> {
         try
         {
             //new RepeatingReleasedEventsFixer().install();
-            bw = new BigWarp( BigWarpInit.createBigWarpDataFromImages( this.fimg, this.mimg ), "Big Warp",  null ); // pb with virtualstack fimg
+            bw = new BigWarp( BigWarpInit.createBigWarpDataFromImages( this.mimg, this.fimg ), "Big Warp",  null ); // pb with virtualstack fimg
             bw.getViewerFrameP().getViewerPanel().requestRepaint();
             bw.getViewerFrameQ().getViewerPanel().requestRepaint();
             bw.getLandmarkFrame().repaint();
@@ -51,8 +52,18 @@ public class BigWarp2DRegistration implements Registration<ImagePlus> {
 
     @Override
     public Function<ImagePlus, ImagePlus> getImageRegistration() {
-
-        return null;
+        // See https://github.com/saalfeldlab/bigwarp/blob/e490dd2ce87c6bcf3355e01e562586421f978303/scripts/Apply_Bigwarp_Xfm.groovy
+        return ((img) -> {
+                   /* ImagePlus warped = ApplyBigwarpPlugin.apply(
+                            img, fimg, bw.getLandmarkPanel().getTableModel(),
+                            "Target", "", "Target",
+                            null, null, null,
+                            Interpolation.NEARESTNEIGHBOR, false, 1 );*/
+                    return ApplyBigwarpPlugin.apply(
+                            img, fimg, bw.getLandmarkPanel().getTableModel(),
+                            "Target", "", "Target",
+                            null, null, null,
+                            Interpolation.NEARESTNEIGHBOR, false, 1 );});
     }
 
     @Override

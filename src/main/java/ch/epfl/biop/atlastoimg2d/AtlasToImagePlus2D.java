@@ -62,7 +62,7 @@ public class AtlasToImagePlus2D implements AtlasToImg2D<ImagePlus> {
             this.ba.map.setCurrentLocation(this.atlasLocation);
         }
 
-        imgAtlas = this.ba.map.getCurrentStructuralImage();
+        imgAtlas = this.ba.map.getCurrentStructuralImage().duplicate();
         imgAtlas.setCalibration(new Calibration());
         atlasLocation=location;
     }
