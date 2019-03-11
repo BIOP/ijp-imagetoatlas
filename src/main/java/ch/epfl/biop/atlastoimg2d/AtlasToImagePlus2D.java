@@ -89,6 +89,8 @@ public class AtlasToImagePlus2D implements AtlasToImg2D<ImagePlus> {
         trImg.setCalibration(new Calibration());
         this.registeredImageSequence.add(trImg);
         this.registeredImageSequence.get(registeredImageSequence.size()-1).show();
+        imgIn.hide();
+        imgAtlas.hide();
     }
 
     @Override

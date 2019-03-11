@@ -70,6 +70,11 @@ public class BigWarp2DGridRegistration implements Registration<ImagePlus> {
             WaitForUserDialog dialog = new WaitForUserDialog("Choose slice","Please perform carefully your registration then press ok.");
             dialog.show();
 
+            bw.getViewerFrameP().setVisible(false);
+            bw.getViewerFrameQ().setVisible(false);
+            bw.getLandmarkFrame().setVisible(false);
+
+
         }
         catch (final SpimDataException e)
         {
