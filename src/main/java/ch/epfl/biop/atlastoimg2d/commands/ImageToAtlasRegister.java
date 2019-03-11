@@ -2,10 +2,7 @@ package ch.epfl.biop.atlastoimg2d.commands;
 
 
 import ch.epfl.biop.atlastoimg2d.AtlasToImg2D;
-import ch.epfl.biop.registration.BigWarp2DRegistration;
-import ch.epfl.biop.registration.CropAndScaleRegistration;
-import ch.epfl.biop.registration.Elastix2DRegistration;
-import ch.epfl.biop.registration.Registration;
+import ch.epfl.biop.registration.*;
 import ch.epfl.biop.wrappers.elastix.RegisterHelper;
 import org.scijava.Context;
 import org.scijava.ItemIO;
@@ -19,7 +16,7 @@ public class ImageToAtlasRegister implements Command {
     @Parameter(type = ItemIO.BOTH)
     AtlasToImg2D aligner;
 
-    @Parameter(choices={"Crop and Scale","Elastix","BigWarp"})
+    @Parameter(choices={"Crop and Scale","Elastix","BigWarp", "BigWarp Grid"})
     String registrationType;
 
     @Parameter
@@ -36,6 +33,9 @@ public class ImageToAtlasRegister implements Command {
                 break;
             case "BigWarp":
                 aligner.addRegistration( new BigWarp2DRegistration());
+                break;
+            case "BigWarp Grid":
+                aligner.addRegistration( new BigWarp2DGridRegistration());
                 break;
             case "Crop and Scale":
                 aligner.addRegistration( new CropAndScaleRegistration());

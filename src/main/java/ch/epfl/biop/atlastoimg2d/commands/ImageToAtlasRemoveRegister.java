@@ -6,7 +6,7 @@ import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
-@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Image To Atlas>Add Registration")
+@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Image To Atlas>Remove Last Registration")
 public class ImageToAtlasRemoveRegister implements Command{
 
     @Parameter(type = ItemIO.BOTH)

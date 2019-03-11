@@ -112,7 +112,7 @@ public class AtlasToImagePlus2D implements AtlasToImg2D<ImagePlus> {
 
     @Override
     public ArrayList<Registration<ImagePlus>> getRegistrations() {
-        return null;
+        return this.registrationSequence;
     }
 
     @Override

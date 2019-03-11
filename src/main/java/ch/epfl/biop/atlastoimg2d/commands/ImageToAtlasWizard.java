@@ -53,7 +53,7 @@ public class ImageToAtlasWizard implements Command {
 				} else {
 					cs.run(ImageToAtlasRegister.class,true,"aligner", aligner ).get();
 					dialogw = new YesNoCancelDialog(IJ.getInstance(),
-							"Are you happy with the registration you've just done ?", "Delete last registration ?");
+							"Was this registration ok ?", "Keep Registration ?");
 					if (dialogw.cancelPressed()||(!dialogw.yesPressed())) {
 
 						dialogw = new YesNoCancelDialog(IJ.getInstance(),
