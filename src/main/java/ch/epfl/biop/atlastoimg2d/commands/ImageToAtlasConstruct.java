@@ -2,7 +2,7 @@ package ch.epfl.biop.atlastoimg2d.commands;
 
 import ch.epfl.biop.atlas.BiopAtlas;
 import ch.epfl.biop.atlas.commands.BrowseAtlasCommand;
-import ch.epfl.biop.atlastoimg2d.AtlasToImagePlusBigWarpRegister;
+import ch.epfl.biop.atlastoimg2d.AtlasToImagePlus2D;
 import ch.epfl.biop.atlastoimg2d.AtlasToImagePlusElastixRegister;
 import ch.epfl.biop.atlastoimg2d.AtlasToImg2D;
 import ij.ImagePlus;
@@ -23,8 +23,8 @@ public class ImageToAtlasConstruct implements Command {
     @Parameter(type = ItemIO.OUTPUT)
     public AtlasToImg2D aligner;
 
-    @Parameter(choices={"Elastix","BigWarp"})
-    String registrationType;
+   // @Parameter(choices={"Elastix","BigWarp"})
+   // String registrationType;
 
     @Parameter(required = false)
     public BiopAtlas ba;
@@ -56,12 +56,9 @@ public class ImageToAtlasConstruct implements Command {
             return;
         }
 
-        switch (registrationType) {
-            case "Elastix": aligner = new AtlasToImagePlusElastixRegister();
-                break;
-            case "BigWarp": aligner = new AtlasToImagePlusBigWarpRegister();
-                break;
-        }
+        aligner = new AtlasToImagePlus2D();
+
+
         aligner.setAtlas(ba);
         aligner.setImage(imp);
         aligner.setScijavaContext(ctx);

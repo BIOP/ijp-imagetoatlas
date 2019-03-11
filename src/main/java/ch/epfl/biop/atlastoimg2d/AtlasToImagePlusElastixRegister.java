@@ -13,7 +13,9 @@ import ij.plugin.frame.RoiManager;
 
 // Probably yes, Or I should launch a command asking for manual improvements ?
 
-public class AtlasToImagePlusElastixRegister extends AtlasToImagePlus2D_Core {
+public class AtlasToImagePlusElastixRegister {}
+
+/*extends AtlasToImagePlus2D_Core {
 	
 	Thread registerThread;
 	
@@ -65,7 +67,7 @@ public class AtlasToImagePlusElastixRegister extends AtlasToImagePlus2D_Core {
 
 		// elastix registration done
 
-	}
+	/*}
 	
 	public Elastix_Register er;
 
@@ -76,7 +78,7 @@ public class AtlasToImagePlusElastixRegister extends AtlasToImagePlus2D_Core {
 		//os.getContext().getService(DisplayService.class).createDisplay(er.rh);
 	}*/
 	
-	void cancelRegistration() {
+	/*void cancelRegistration() {
 		if ((registerThread!=null)&&(registerThread.isAlive())) {
 			registerThread.interrupt();
 		}
@@ -109,4 +111,4 @@ public class AtlasToImagePlusElastixRegister extends AtlasToImagePlus2D_Core {
 		return this.er.rh;
 	}
 
-}
+}*/

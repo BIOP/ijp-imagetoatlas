@@ -8,7 +8,7 @@ import ij.ImagePlus;
 import java.io.File;
 import java.net.URL;
 
-abstract public class AtlasToImagePlus2D_Core implements AtlasToImg2D<ImagePlus> {
+abstract public class AtlasToImagePlus2D_Core {} /* implements AtlasToImg2D<ImagePlus> {
 
 	BiopAtlas ba;
 	Object atlasLocation;
@@ -115,4 +115,4 @@ abstract public class AtlasToImagePlus2D_Core implements AtlasToImg2D<ImagePlus>
 		return null;
 	}*/
 
-}
+//}

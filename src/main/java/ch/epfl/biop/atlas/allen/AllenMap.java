@@ -63,10 +63,10 @@ public class AllenMap implements AtlasMap {
 		// Feeds argument
 		bs.bdv=this.bdv;
 		bs.mipmapLevel = 0;
-		bs.xSize=600;
-		bs.ySize=600;
+		bs.xSize=300;
+		bs.ySize=300;
 		bs.zSize=0;
-		bs.samplingInXVoxelUnit=0.1;//1.0;
+		bs.samplingInXVoxelUnit=0.05;//1.0;
 		bs.interpolate=false;
 		bs.sourceIndex = channel;
 		bs.run();

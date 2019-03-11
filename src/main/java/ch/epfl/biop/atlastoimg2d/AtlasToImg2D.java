@@ -1,5 +1,6 @@
 package ch.epfl.biop.atlastoimg2d;
 
+import ch.epfl.biop.registration.Registration;
 import ch.epfl.biop.wrappers.elastix.RegisterHelper;
 import org.scijava.Context;
 import org.scijava.object.ObjectService;
@@ -9,13 +10,14 @@ import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
 
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
 
 // Keep a link or even a hard file to image src and dest
 
 public interface AtlasToImg2D<T> { // T = image type (Image Plus or QuPath Image or BDV
 	
 	//
-	void setInteractive(boolean flag);
+	//void setInteractive(boolean flag);
 	
 	// ---- Initialization : an Image and an Atlas
 	void setAtlas(BiopAtlas ba);
@@ -29,12 +31,16 @@ public interface AtlasToImg2D<T> { // T = image type (Image Plus or QuPath Image
 	Object getAtlasLocation(); // returns null if not set
 
 
+	void addRegistration(Registration<T> reg);
+	void rmLastRegistration();
+	void resetRegistrations();
+	boolean isRegistrationSet(); // flag if registration is set
+	ArrayList<Registration<T>> getRegistrations();
+
     void setImage(T img); // Let's try to handle QuPath and Fiji
 	T getImage();
 	void register();
-	void resetRegistration();
-	boolean isRegistrationSet(); // flag if registration is set
-	Object getRegistration();
+	//Object getRegistration();
 	
 	// ---- Transformations
 	// ConvertibleRois transformRoisAtlasToImg(ConvertibleRois in);
