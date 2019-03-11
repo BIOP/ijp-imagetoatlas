@@ -10,6 +10,10 @@ import org.scijava.ui.UIService;
 
 import org.scijava.Priority;
 
+/**
+ * Enables Atlas to be garbage collected if the Big Data Viewer window is closed by the user
+ */
+
 @Plugin(type = PostprocessorPlugin.class, priority = Priority.VERY_LOW - 1)
 public class AtlasProcessorPlugin extends AbstractPostprocessorPlugin {
 
@@ -25,11 +29,7 @@ public class AtlasProcessorPlugin extends AbstractPostprocessorPlugin {
 			// no UIService available for displaying results
 			return;
 		} else {
-			//ui.addUI(new UserInterface());
-			/*ui.getVisibleUIs().forEach(e -> {
-				System.out.println("e.getIdentifier="+e.getIdentifier());
-				//System.out.println(e.);
-			});*/
+
 		}
 		
 		module.getInfo().outputs().forEach(output -> {

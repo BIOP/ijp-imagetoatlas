@@ -8,7 +8,7 @@ import org.scijava.plugin.Plugin;
 import ch.epfl.biop.atlas.BiopAtlas;
 import ij.ImagePlus;
 
-@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Export Slice as ImagePlus")
+@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Export Current Atlas Slice as ImagePlus")
 public class GetAtlasSlice implements Command{
 	@Parameter
 	BiopAtlas atlas;

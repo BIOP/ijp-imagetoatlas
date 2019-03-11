@@ -17,8 +17,8 @@ abstract public class BiopAtlas implements Closeable {
     // An atlas is : an ontology and an xml hdf5 data source
 
     //--------------------------- Source
-    // Source 1 of the xml hdf5 is the label image, leaves only data
-    // Source 2 .. n -> Different visualisation
+    // Sources contains the xml hdf5 label image, leaves only data
+    // Source -> then several imaging modalities Different visualisation
     public AtlasMap map;
     
     //--------------------------- Ontology

@@ -1,6 +1,5 @@
 package ch.epfl.biop.atlas.commands;
 
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,7 +20,6 @@ import ch.epfl.biop.java.utilities.roi.ROIReShape;
 import ch.epfl.biop.java.utilities.roi.SelectToROIKeepLines;
 import ij.ImagePlus;
 import ij.gui.Roi;
-import ij.plugin.filter.ThresholdToSelection;
 import ij.plugin.frame.RoiManager;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
@@ -70,7 +68,6 @@ public class ConstructROIsFromImgLabel implements Command {
 		Map<Integer, ArrayList<Integer>> childrenContained = new HashMap<>();
 		
 		atlas.ontology.getParentToChildrenMap().forEach((k,v) -> {
-		//AtlasDataPreferences.ontologyIdToChildrenIds.forEach((k, v) -> {
 			ArrayList<Integer> filtered = new ArrayList<>();
 			filtered.addAll(v.stream().filter(id -> possibleValues.contains(id)).collect(Collectors.toList()));
 			childrenContained.put(k, filtered);

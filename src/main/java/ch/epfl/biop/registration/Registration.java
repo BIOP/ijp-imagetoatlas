@@ -15,6 +15,4 @@ public interface Registration<T> {
     Function<T,T> getImageRegistration();
     Function<List<Point>, List<Point>> getPtsRegistration();
 
-   /* T transformImg(T img);
-    List<Point> transformPts(List<Point> pts); */
 }

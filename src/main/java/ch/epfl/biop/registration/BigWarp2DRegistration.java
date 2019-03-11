@@ -54,11 +54,6 @@ public class BigWarp2DRegistration implements Registration<ImagePlus> {
     public Function<ImagePlus, ImagePlus> getImageRegistration() {
         // See https://github.com/saalfeldlab/bigwarp/blob/e490dd2ce87c6bcf3355e01e562586421f978303/scripts/Apply_Bigwarp_Xfm.groovy
         return ((img) -> {
-                   /* ImagePlus warped = ApplyBigwarpPlugin.apply(
-                            img, fimg, bw.getLandmarkPanel().getTableModel(),
-                            "Target", "", "Target",
-                            null, null, null,
-                            Interpolation.NEARESTNEIGHBOR, false, 1 );*/
                     return ApplyBigwarpPlugin.apply(
                             img, fimg, bw.getLandmarkPanel().getTableModel(),
                             "Target", "", "Target",

@@ -7,18 +7,14 @@ import ij.ImagePlus;
 import ij.measure.Calibration;
 import org.scijava.Context;
 
-import java.awt.*;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.function.Function;
 
 public class AtlasToImagePlus2D implements AtlasToImg2D<ImagePlus> {
 
-
     BiopAtlas ba;
     Object atlasLocation;
-
 
     boolean interactive=true;
 
@@ -29,8 +25,6 @@ public class AtlasToImagePlus2D implements AtlasToImg2D<ImagePlus> {
     ArrayList<ImagePlus> registeredImageSequence = new ArrayList<>();
 
     ImagePlus imageUsedForRegistration;
-
-
 
     @Override
     public void setScijavaContext(Context ctx) {
