@@ -1,15 +1,18 @@
 package ch.epfl.biop.atlastoimg2d;
 
 import ch.epfl.biop.atlas.BiopAtlas;
+import ch.epfl.biop.atlas.commands.ConstructROIsFromImgLabel;
 import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
 import ch.epfl.biop.registration.Registration;
 import ij.ImagePlus;
 import ij.measure.Calibration;
 import org.scijava.Context;
+import org.scijava.command.CommandService;
 
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 
 public class AtlasToImagePlus2D implements AtlasToImg2D<ImagePlus> {
 
@@ -47,6 +50,8 @@ public class AtlasToImagePlus2D implements AtlasToImg2D<ImagePlus> {
 
     ImagePlus imgAtlas;
 
+    ConvertibleRois untransformedRois;
+
     @Override
     public void setAtlasLocation(Object location) {
 
@@ -59,6 +64,20 @@ public class AtlasToImagePlus2D implements AtlasToImg2D<ImagePlus> {
         imgAtlas = this.ba.map.getCurrentStructuralImage().duplicate();
         imgAtlas.setCalibration(new Calibration());
         atlasLocation=location;
+
+        //ConvertibleRois cr = new ConvertibleRois();
+        ImagePlus imgLabel = this.ba.map.getCurrentLabelImage();
+        //cr.set(imgLabel);
+
+        CommandService cs = ctx.getService(CommandService.class);
+        try {
+            untransformedRois = (ConvertibleRois) cs.run(ConstructROIsFromImgLabel.class, true, "atlas", this.ba, "labelImg", imgLabel, "smoothen", false).get().getOutput("cr_out");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        //
     }
 
     boolean registrationSet = false;
@@ -97,6 +116,8 @@ public class AtlasToImagePlus2D implements AtlasToImg2D<ImagePlus> {
     public void rmLastRegistration() {
         assert registeredImageSequence.size()>0;
         assert registeredImageSequence.size()==registrationSequence.size();
+        this.registeredImageSequence.get(registeredImageSequence.size()-1).changes=false;
+        this.registeredImageSequence.get(registeredImageSequence.size()-1).close();
         registrationSequence.remove(registrationSequence.size()-1);
         registeredImageSequence.remove(registeredImageSequence.size()-1);
     }
@@ -156,5 +177,29 @@ public class AtlasToImagePlus2D implements AtlasToImg2D<ImagePlus> {
     @Override
     public void load(File file) {
 
+    }
+
+    @Override
+    public void putTransformedRoisToObjectService() {
+    /*    System.out.println("--------------------------------- ");
+        ConvertibleRois cr = new ConvertibleRois();
+        ArrayList<Roi> arrayIni = (ArrayList<Roi>) this.untransformedRois.to(ArrayList.class);
+        cr.set(arrayIni);
+        RealPointList list = ((RealPointList) cr.to(RealPointList.class));
+        System.out.println("list.size="+list.ptList.size());
+        System.out.println("list.get(0).getDoublePosition(0) BEFORE="+list.ptList.get(0).getDoublePosition(0));
+        Collections.reverse(this.registrationSequence);
+        for (Registration reg : this.registrationSequence) {
+            System.out.println("apply transform");
+            list = reg.getPtsRegistration(list);
+           // RealPointList list_out = (reg.getPtsRegistration()).apply(list);//.getPtsRegistration().apply(list);
+        }
+        System.out.println("list.get(0).getDoublePosition(0) AFTER="+list.ptList.get(0).getDoublePosition(0));
+        Collections.reverse(this.registrationSequence);
+        cr.clear();
+        cr.setInitialArrayList(arrayIni);
+        cr.set(list);
+        cr.to(RoiManager.class);
+        ctx.getService(ObjectService.class).addObject(cr);*/
     }
 }

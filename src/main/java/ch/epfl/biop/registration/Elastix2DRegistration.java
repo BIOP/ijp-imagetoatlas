@@ -1,17 +1,16 @@
 package ch.epfl.biop.registration;
 
+import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
+import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import ch.epfl.biop.wrappers.elastix.RegisterHelper;
 import ch.epfl.biop.wrappers.elastix.ij2commands.Elastix_Register;
 import ch.epfl.biop.wrappers.transformix.TransformHelper;
 import ij.ImagePlus;
-import net.imglib2.Point;
+import net.imglib2.RealPoint;
 import org.scijava.Context;
 import org.scijava.command.CommandModule;
 import org.scijava.command.CommandService;
 import org.scijava.plugin.Parameter;
-import org.scijava.plugin.Plugin;
-import org.scijava.command.Command;
-
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -66,8 +65,22 @@ public class Elastix2DRegistration implements Registration<ImagePlus> {
         };
     }
 
+    /*@Override
+    public Function<RealPointList, RealPointList> getPtsRegistration() {
+        return (list) -> {
+            ConvertibleRois cr = new ConvertibleRois();
+            cr.set(list);
+            TransformHelper th = new TransformHelper();
+            th.setTransformFile(rh);
+            th.setRois(cr);
+            th.transform();
+            ConvertibleRois cr_out = th.getTransformedRois();;
+            return ((RealPointList) cr_out.to(RealPointList.class));
+        };
+    }*/
+
     @Override
-    public Function<List<Point>, List<Point>> getPtsRegistration() {
+    public RealPointList getPtsRegistration(RealPointList pts) {
         return null;
     }
 

@@ -3,11 +3,14 @@ package ch.epfl.biop.registration;
 import bdv.ij.ApplyBigwarpPlugin;
 import bigwarp.BigWarp;
 import bigwarp.BigWarpInit;
+import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import ij.ImagePlus;
 import ij.gui.WaitForUserDialog;
 import mpicbg.spim.data.SpimDataException;
 import net.imglib2.Point;
 import bdv.viewer.Interpolation;
+import net.imglib2.RealPoint;
+
 import java.util.List;
 import java.util.function.Function;
 
@@ -65,8 +68,13 @@ public class BigWarp2DRegistration implements Registration<ImagePlus> {
                             Interpolation.NEARESTNEIGHBOR, false, 1 );});
     }
 
+    /*@Override
+    public Function<RealPointList, RealPointList> getPtsRegistration() {
+        return null;
+    }*/
+
     @Override
-    public Function<List<Point>, List<Point>> getPtsRegistration() {
+    public RealPointList getPtsRegistration(RealPointList pts) {
         return null;
     }
 }

@@ -1,8 +1,6 @@
 package ch.epfl.biop.registration;
 
-import net.imglib2.Point;
-
-import java.util.List;
+import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import java.util.function.Function;
 
 public interface Registration<T> {
@@ -13,6 +11,6 @@ public interface Registration<T> {
     void register();
 
     Function<T,T> getImageRegistration();
-    Function<List<Point>, List<Point>> getPtsRegistration();
+    RealPointList getPtsRegistration(RealPointList pts);
 
 }

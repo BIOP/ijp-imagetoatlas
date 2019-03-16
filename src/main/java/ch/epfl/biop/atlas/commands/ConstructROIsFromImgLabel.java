@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import ch.epfl.biop.java.utilities.roi.types.IJShapeRoiArray;
 import org.scijava.ItemIO;
 import org.scijava.command.Command;
 import org.scijava.object.ObjectService;
@@ -169,12 +170,12 @@ public class ConstructROIsFromImgLabel implements Command {
 		
 		
 		cr_out = new ConvertibleRois();
-		ArrayList<Roi> roiArrayCV = ConvertibleRois.convertRoisToPolygonRois(roiArray); // Dissociates ShapeROI into multiple Polygon Rois
+		/*IJShapeRoiArray roiArrayCV = ConvertibleRois.convertRoisToPolygonRois(roiArray); // Dissociates ShapeROI into multiple Polygon Rois
 		
 
 		
 		roiArrayCV.replaceAll(roi -> ROIReShape.smoothenWithConstrains(roi, movablePx));
-		roiArrayCV.replaceAll(roi -> ROIReShape.smoothenWithConstrains(roi, movablePx));
+		roiArrayCV.replaceAll(roi -> ROIReShape.smoothenWithConstrains(roi, movablePx));*/
 		
 		
 		
@@ -192,13 +193,13 @@ public class ConstructROIsFromImgLabel implements Command {
 		//if (resampleRoiLength>0) {
 		//	roiArrayCV.replaceAll(r -> ROIReShape.reSample(r,this.resampleRoiLength)); // resample roi
 		//}
-		cr_out.set(roiArrayCV);
+/*		cr_out.set(new IJShapeRoiArray(roiArray));//roiArrayCV);
 		cr_out.to(RoiManager.class);
 		if (os!=null) {
 			os.addObject(cr_out);
 		} else {
 			System.err.println("Object Service not set");
-		}
+		} */
 	}
 
 }
