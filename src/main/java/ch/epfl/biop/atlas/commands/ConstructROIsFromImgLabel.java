@@ -38,7 +38,7 @@ public class ConstructROIsFromImgLabel implements Command {
 	
 	@Parameter(type = ItemIO.OUTPUT)
 	public ConvertibleRois cr_out;
-	
+
 	@Parameter
 	public ObjectService os;
 	
@@ -80,7 +80,8 @@ public class ConstructROIsFromImgLabel implements Command {
 				isLeaf.add(k);
 			}
 		});
-		
+
+
 		FloatProcessor fp = new FloatProcessor(ip.getWidth(), ip.getHeight());	
 		fp.setFloatArray(pixels);
 		ImagePlus imgFloatCopy = new ImagePlus("FloatLabel",fp);
@@ -117,10 +118,6 @@ public class ConstructROIsFromImgLabel implements Command {
 				movablePx[x][y]=(!is3Colored)&&(!isCrossed);
 			}
 		}
-		
-
-		//SelectToROIKeepLines.filterMergable=true;
-		//SelectToROIKeepLines.splitable = movablePx;
 		
 		boolean containsLeaf=true;
 		while (containsLeaf) {
@@ -164,42 +161,19 @@ public class ConstructROIsFromImgLabel implements Command {
 			);
 			containsLeaf = existingPixelValues.stream().anyMatch(v -> isLeaf.contains((int) (float) v));
 		}
-		
-		
-		
-		
-		
-		cr_out = new ConvertibleRois();
-		/*IJShapeRoiArray roiArrayCV = ConvertibleRois.convertRoisToPolygonRois(roiArray); // Dissociates ShapeROI into multiple Polygon Rois
-		
 
-		
-		roiArrayCV.replaceAll(roi -> ROIReShape.smoothenWithConstrains(roi, movablePx));
-		roiArrayCV.replaceAll(roi -> ROIReShape.smoothenWithConstrains(roi, movablePx));*/
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		//if (smoothen) {
-		//	roiArrayCV.replaceAll(r -> ROIReShape.smoothen(r)); // smoothen ROI
-		//}
-		//if (resampleRoiLength>0) {
-		//	roiArrayCV.replaceAll(r -> ROIReShape.reSample(r,this.resampleRoiLength)); // resample roi
-		//}
-/*		cr_out.set(new IJShapeRoiArray(roiArray));//roiArrayCV);
-		cr_out.to(RoiManager.class);
+		cr_out = new ConvertibleRois();
+
+		IJShapeRoiArray output = new IJShapeRoiArray(roiArray);
+		output.smoothenWithConstrains(movablePx);
+		output.smoothenWithConstrains(movablePx);
+
+		cr_out.set(output);
 		if (os!=null) {
 			os.addObject(cr_out);
 		} else {
 			System.err.println("Object Service not set");
-		} */
+		}
 	}
 
 }

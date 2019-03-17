@@ -2,6 +2,7 @@ package ch.epfl.biop.atlas.commands;
 
 import ch.epfl.biop.atlas.BiopAtlas;
 import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
+import ch.epfl.biop.java.utilities.roi.types.IJShapeRoiArray;
 import ij.ImagePlus;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
@@ -84,11 +85,11 @@ public class PutAtlasStructureToImage implements Command {
 		}
 
 		// Convert  regions of interest to roi ArrayList
-        ArrayList<Roi> rois = (ArrayList<Roi>) cr.to(ArrayList.class);
+        IJShapeRoiArray rois = (IJShapeRoiArray) cr.to(IJShapeRoiArray.class);
 
-        rois.forEach( roi -> {
+        /*rois.rois.forEach( roi -> {
             roi.setName(roi.getName().replaceAll("(\\d+)(-)(\\d+)","$1")); // changes "123-5" to "123"
-        });
+        });*/
         // Gets the Roi Manager
         RoiManager roiManager = RoiManager.getRoiManager();
         if (roiManager==null) {
@@ -98,61 +99,15 @@ public class PutAtlasStructureToImage implements Command {
         RoiManager finalRoiManager = roiManager;
         
         // Duplicate ROIs (of interest for our purpose) into RoiManager with user specified naming convention
-        rois.stream()
+        rois.rois.stream()
+                .map (roi -> roi.getRoi())
         .filter(roi -> isInteger(roi.getName()))
-        .filter(roi -> ids.contains(Integer.valueOf(roi.getName()))).forEach(roi -> {
-            FloatPolygon pol = roi.getFloatPolygon();
-            PolygonRoi roiOut = new PolygonRoi(pol.xpoints.clone(), pol.ypoints.clone(), pol.npoints, ij.gui.Roi.POLYGON );
-            roiOut.setStrokeColor(roi.getStrokeColor());
-
-            // Computes center of mass in X -> determines if it is L or R
-
-            /*float avgX = 0;
-            for (int i=0;i<pol.xpoints.length;i++) {
-                avgX+=pol.xpoints[i];
-            }
-            avgX = avgX / (float) (pol.xpoints.length);
-            String suffix ="";
-
-            boolean isLeft = (avgX<xLimitBetweenRightAndLeft);
-            boolean isRight = (!isLeft);
-
-            if (this.addRLSuffix) {
-                if (isRight) suffix = "_R";
-                if (isLeft) suffix = "_L";
-            }*/
-
-            boolean append = true;
-
-            /*switch (rlChoice) {
-                case ("Both"): // append, no problem
-                    break;
-                case ("Left"):
-                    append = isLeft;
-                    break;
-                case ("Right"):
-                    append = isRight;
-                    break;
-            }*/
-            if (append) {
-            	String name = atlas.ontology.getProperties(Integer.valueOf(roi.getName())).get(namingChoice);
-                roiOut.setName(name);
-              /*  switch (namingChoice) {
-                    case ("Acronym"):
-                    	
-                        //roiOut.setName(roiPrefix + ontologyIdToAcronym.get(Integer.valueOf(roi.getName())) + suffix);
-                        break;
-                    case ("Name"):
-                        //roiOut.setName(roiPrefix + AtlasDataPreferences.ontologyIdToName.get(Integer.valueOf(roi.getName())) + suffix);
-                        break;
-                    case ("Structure Id"):
-                        //roiOut.setName(roiPrefix + roi.getName() + suffix);
-                        break;
-                }*/
-                
-                finalRoiManager.addRoi(roiOut);//(Roi)roi.clone());
-            }
-        } );
+        .filter(roi -> ids.contains(Integer.valueOf(roi.getName())))
+        .forEach(roi -> {
+            String name = atlas.ontology.getProperties(Integer.valueOf(roi.getName())).get(namingChoice);
+            roi.setName(name);
+            finalRoiManager.addRoi(roi);
+        });
 
         if (namingChoice.equals("Roi Manager Index (no suffix)")) {
             for (int i=0;i<roiManager.getCount();i++) {

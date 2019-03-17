@@ -2,6 +2,7 @@ package ch.epfl.biop.registration;
 
 import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
+import ch.epfl.biop.java.utilities.roi.types.TransformixOutputRoisFile;
 import ch.epfl.biop.wrappers.elastix.RegisterHelper;
 import ch.epfl.biop.wrappers.elastix.ij2commands.Elastix_Register;
 import ch.epfl.biop.wrappers.transformix.TransformHelper;
@@ -81,7 +82,14 @@ public class Elastix2DRegistration implements Registration<ImagePlus> {
 
     @Override
     public RealPointList getPtsRegistration(RealPointList pts) {
-        return null;
+        ConvertibleRois cr = new ConvertibleRois();
+        cr.set(pts);
+        TransformHelper th = new TransformHelper();
+        th.setTransformFile(rh);
+        th.setRois(cr);
+        th.transform();
+        ConvertibleRois cr_out = th.getTransformedRois();;
+        return ConvertibleRois.transformixFileToRealPointList((TransformixOutputRoisFile) cr_out.to(TransformixOutputRoisFile.class));//((RealPointList) cr_out.to(RealPointList.class));
     }
 
 }

@@ -3,15 +3,20 @@ package ch.epfl.biop.atlastoimg2d;
 import ch.epfl.biop.atlas.BiopAtlas;
 import ch.epfl.biop.atlas.commands.ConstructROIsFromImgLabel;
 import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
+import ch.epfl.biop.java.utilities.roi.types.IJShapeRoiArray;
+import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import ch.epfl.biop.registration.Registration;
 import ij.ImagePlus;
 import ij.measure.Calibration;
+import ij.plugin.frame.RoiManager;
 import org.scijava.Context;
 import org.scijava.command.CommandService;
+import org.scijava.object.ObjectService;
 
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.concurrent.ExecutionException;
 
 public class AtlasToImagePlus2D implements AtlasToImg2D<ImagePlus> {
@@ -108,8 +113,15 @@ public class AtlasToImagePlus2D implements AtlasToImg2D<ImagePlus> {
         trImg.setCalibration(new Calibration());
         this.registeredImageSequence.add(trImg);
         this.registeredImageSequence.get(registeredImageSequence.size()-1).show();
-        imgIn.hide();
+        if (this.registrationSequence.size()>1) {
+            imgIn.hide();
+        }
         imgAtlas.hide();
+    }
+
+    @Override
+    public void showLastImage() {
+        this.registeredImageSequence.get(registeredImageSequence.size()-1).show();
     }
 
     @Override
@@ -181,9 +193,9 @@ public class AtlasToImagePlus2D implements AtlasToImg2D<ImagePlus> {
 
     @Override
     public void putTransformedRoisToObjectService() {
-    /*    System.out.println("--------------------------------- ");
+        System.out.println("--------------------------------- ");
         ConvertibleRois cr = new ConvertibleRois();
-        ArrayList<Roi> arrayIni = (ArrayList<Roi>) this.untransformedRois.to(ArrayList.class);
+        IJShapeRoiArray arrayIni = (IJShapeRoiArray) this.untransformedRois.to(IJShapeRoiArray.class);
         cr.set(arrayIni);
         RealPointList list = ((RealPointList) cr.to(RealPointList.class));
         System.out.println("list.size="+list.ptList.size());
@@ -197,9 +209,9 @@ public class AtlasToImagePlus2D implements AtlasToImg2D<ImagePlus> {
         System.out.println("list.get(0).getDoublePosition(0) AFTER="+list.ptList.get(0).getDoublePosition(0));
         Collections.reverse(this.registrationSequence);
         cr.clear();
-        cr.setInitialArrayList(arrayIni);
+        list.shapeRoiList = new IJShapeRoiArray(arrayIni);
         cr.set(list);
         cr.to(RoiManager.class);
-        ctx.getService(ObjectService.class).addObject(cr);*/
+        ctx.getService(ObjectService.class).addObject(cr);
     }
 }

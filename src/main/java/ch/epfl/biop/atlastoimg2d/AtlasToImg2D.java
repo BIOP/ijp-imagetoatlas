@@ -28,7 +28,7 @@ public interface AtlasToImg2D<T> { // T = image type (Image Plus or QuPath Image
     void setAtlasLocation(Object location);
 	Object getAtlasLocation(); // returns null if not set
 
-
+	void showLastImage();
 	void addRegistration(Registration<T> reg);
 	void rmLastRegistration();
 	void resetRegistrations();

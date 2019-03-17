@@ -75,6 +75,12 @@ public class BigWarp2DRegistration implements Registration<ImagePlus> {
 
     @Override
     public RealPointList getPtsRegistration(RealPointList pts) {
-        return null;
+        for (RealPoint pt : pts.ptList) {
+            double[] tr = bw.getTransform().apply( new double[] {
+                pt.getDoublePosition(0), pt.getDoublePosition(1)
+            });
+            pt.setPosition(tr);
+        }
+        return pts;
     }
 }

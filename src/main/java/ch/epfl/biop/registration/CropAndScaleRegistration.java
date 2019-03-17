@@ -60,8 +60,8 @@ public class CropAndScaleRegistration implements Registration<ImagePlus> {
         ArrayList<RealPoint> cvtList = new ArrayList<>();
 
         for (RealPoint p : list.ptList) {
-            float npx = p.getFloatPosition(0)*scale+roi.getBounds().x;
-            float npy = p.getFloatPosition(1)*scale+roi.getBounds().y;
+            float npx = p.getFloatPosition(0)/scale+roi.getBounds().x;
+            float npy = p.getFloatPosition(1)/scale+roi.getBounds().y;
             RealPoint cpt = new RealPoint(npx, npy);
             //.setPosition(0,(double) npx);//.setPosition(new float[]{npx, npy});
             cvtList.add(cpt);
@@ -76,7 +76,7 @@ public class CropAndScaleRegistration implements Registration<ImagePlus> {
         }).collect(Collectors.toList());*/
 
 
-        System.out.println("cvtList.size()="+cvtList.size());
+        //System.out.println("cvtList.size()="+cvtList.size());
         return new RealPointList(cvtList);
     }
 

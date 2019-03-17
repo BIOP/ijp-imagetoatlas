@@ -16,6 +16,7 @@ public class ImageToAtlasRemoveRegister implements Command{
     public void run() {
         if (aligner.getRegistrations().size()>0) {
             aligner.rmLastRegistration();
+            aligner.showLastImage();
         } else {
             System.err.println("Error : no registration left.");
         }

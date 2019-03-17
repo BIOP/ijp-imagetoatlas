@@ -23,7 +23,7 @@ public class AllenOntology implements AtlasOntology {
 
 
     public Integer getRootIndex() {
-        return new Integer(8); // 997 -1 ou 1 ou 8
+        return new Integer(997); // 997 -1 ou 1 ou 8
     }
 
     @Override
@@ -121,7 +121,7 @@ public class AllenOntology implements AtlasOntology {
         ontologyIdentifierToStructureId = new HashMap<>();
         ontologyIdToOriginalId = new HashMap();
         JSONObject root = (JSONObject) ontologyJSON.getJSONArray("msg").get(0);
-        registerOntologyObject(root, -1);
+        registerOntologyObject(root, 997);
     }
 
     /**
@@ -245,7 +245,7 @@ public class AllenOntology implements AtlasOntology {
     }
     
     public Integer getParent(int id) {
-    	return null;
+    	return ontologyIdToParentId.get(id);
     }
 
     public ArrayList<Integer> getAllParents(int id) {
