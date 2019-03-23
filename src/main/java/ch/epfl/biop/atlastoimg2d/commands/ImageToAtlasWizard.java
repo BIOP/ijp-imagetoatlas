@@ -39,7 +39,7 @@ public class ImageToAtlasWizard implements Command {
 			        aligner.getAtlas().map.getCurrentLocation()
             );
 
-			cs.run(ImageToAtlasRegister.class,true,"aligner", aligner ).get();
+			//cs.run(ImageToAtlasRegister.class,true,"aligner", aligner ).get();
 
 			// ---- Adds as many registration as the user wants
 			boolean registrationDone = false;

@@ -18,6 +18,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Function;
 
 public class AtlasToImagePlus2D implements AtlasToImg2D<ImagePlus> {
 
@@ -99,15 +100,28 @@ public class AtlasToImagePlus2D implements AtlasToImg2D<ImagePlus> {
 
     @Override
     public void addRegistration(Registration<ImagePlus> reg) {
-        reg.setFixedImage(imgAtlas);
+       this.addRegistration(reg, imagePlus -> imagePlus, imagePlus -> imagePlus);
+    }
+
+    @Override
+    public void addRegistration(Registration<ImagePlus> reg, Function<ImagePlus, ImagePlus> preprocessFixedImage, Function<ImagePlus, ImagePlus> preprocessMovingImage) {
+        ImagePlus f = preprocessFixedImage.apply(imgAtlas);
+        imgAtlas.hide();
+
+        reg.setFixedImage(f);
         ImagePlus imgIn;
         if (registrationSequence.size()==0) {
             imgIn = this.imageUsedForRegistration;
         } else {
             imgIn = this.registeredImageSequence.get(registeredImageSequence.size()-1);
         }
-        reg.setMovingImage(imgIn);
+        ImagePlus m = preprocessMovingImage.apply(imgIn);
+        reg.setMovingImage(m);
         reg.register();
+        m.hide();
+        f.hide();
+
+
         this.registrationSequence.add(reg);
         ImagePlus trImg = reg.getImageRegistration().apply(imgIn);
         trImg.setCalibration(new Calibration());
@@ -116,7 +130,11 @@ public class AtlasToImagePlus2D implements AtlasToImg2D<ImagePlus> {
         if (this.registrationSequence.size()>1) {
             imgIn.hide();
         }
-        imgAtlas.hide();
+        m.changes = false;
+        m.close();
+
+        f.changes = false;
+        f.close();
     }
 
     @Override
@@ -126,7 +144,7 @@ public class AtlasToImagePlus2D implements AtlasToImg2D<ImagePlus> {
 
     @Override
     public void rmLastRegistration() {
-        assert registeredImageSequence.size()>0;
+        assert registeredImageSequence.size()>1;
         assert registeredImageSequence.size()==registrationSequence.size();
         this.registeredImageSequence.get(registeredImageSequence.size()-1).changes=false;
         this.registeredImageSequence.get(registeredImageSequence.size()-1).close();

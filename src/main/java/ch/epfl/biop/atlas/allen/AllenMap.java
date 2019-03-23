@@ -8,7 +8,9 @@ import bdv.viewer.ViewerOptions;
 import bdv.viewer.state.ViewerState;
 import ch.epfl.biop.atlas.AtlasMap;
 import ch.epfl.biop.bdvslicer.ij2command.BDVSliceToImgPlus;
+import ij.IJ;
 import ij.ImagePlus;
+import ij.Prefs;
 import mpicbg.spim.data.SpimDataException;
 import net.imglib2.realtransform.AffineTransform3D;
 
@@ -72,21 +74,68 @@ public class AllenMap implements AtlasMap {
 		bs.run();
 		return bs.imp;
 	}
-	
+
+	final static public int AvgChannel = 0;
+	final static public int NisslChannel = 1;
+
 	@Override
 	public ImagePlus getCurrentStructuralImage() {
-		ImagePlus imgNissl = this.getImagePlusChannel(StructureChannel);
+		ImagePlus imgNissl = this.getImagePlusChannel(NisslChannel).duplicate(); // Virtual images are causing problems
 		imgNissl.setTitle("Nissl");
-		imgNissl.getProcessor().setMinAndMax(0, 255);
+		imgNissl.getProcessor().setMinAndMax(0, 25000);
+
+
+		ImagePlus imgAvg = this.getImagePlusChannel(AvgChannel).duplicate();
+		imgAvg.setTitle("Avg");
+		imgAvg.getProcessor().setMinAndMax(0, 255);
+
+
+		ImagePlus imgLabel = this.getImagePlusChannel(LabelChannel).duplicate();
+		imgLabel.setTitle("Label_Edge");
+		imgLabel.getProcessor().setMinAndMax(0, 25000);
+
+		imgLabel.show();
+
+		IJ.run(imgLabel, "Find Edges", "");
+		ImagePlus imgTemp = imgLabel;
+		imgLabel = IJ.getImage();
+
+		IJ.setRawThreshold(imgLabel, 1, 65535, null);
+
+		Prefs.blackBackground = true;
+		IJ.run(imgLabel,"Make Binary", "thresholded remaining black");
+		IJ.run(imgLabel, "16-bit", "");
+		IJ.run(imgLabel, "Smooth", "");
+
 		imgNissl.show();
-		return imgNissl;
+		imgAvg.show();
+
+		ImagePlus imp_out = new ImagePlus();
+		IJ.run(imp_out, "Merge Channels...", "c1=Avg c2=Nissl c3=Label_Edge create keep");
+
+		imp_out = IJ.getImage();
+
+		imgLabel.changes=false;
+		imgLabel.close();
+
+		imgNissl.changes=false;
+		imgNissl.close();
+
+		imgAvg.changes=false;
+		imgAvg.close();
+
+		imgTemp.changes=false;
+		imgTemp.close();
+
+		return imp_out;
 	}
+
 
 	@Override
 	public ImagePlus getCurrentLabelImage() {
-		ImagePlus imgLabel = this.getImagePlusChannel(LabelChannel);
+		ImagePlus imgLabel = this.getImagePlusChannel(LabelChannel).duplicate();
 		imgLabel.setTitle("Label");
-		imgLabel.show();
+		//imgLabel.show();
 		return imgLabel;
 	}
 

@@ -39,8 +39,6 @@ abstract public class AllenAtlas extends BiopAtlas {
 	}
 	
     public ConvertibleRois getCurrentROIs() {
-    	// Is the view perpendicular to Z ? -> We can take better ROIs
-    	// Otherwise return ROIs from Image Label
     	ConstructROIsFromImgLabel cmd = new ConstructROIsFromImgLabel();
     	cmd.atlas=this;
     	cmd.labelImg=this.map.getCurrentLabelImage();
@@ -49,11 +47,5 @@ abstract public class AllenAtlas extends BiopAtlas {
     	cmd.labelImg.close();
     	return cmd.cr_out;
     }
-
-	/*@Override
-	public JPanel getPanel(Context ctx) {
-		JPanel jpanel = new JPanel();
-		return jpanel;
-	}*/
 
 }

@@ -9,6 +9,7 @@ import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.function.Function;
 
 // Keep a link or even a hard file to image src and dest
 
@@ -30,6 +31,7 @@ public interface AtlasToImg2D<T> { // T = image type (Image Plus or QuPath Image
 
 	void showLastImage();
 	void addRegistration(Registration<T> reg);
+	void addRegistration(Registration<T> reg, Function<T,T> preprocessFixedImage, Function<T,T> preprocessMovingImage);
 	void rmLastRegistration();
 	void resetRegistrations();
 	boolean isRegistrationSet(); // flag if registration is set

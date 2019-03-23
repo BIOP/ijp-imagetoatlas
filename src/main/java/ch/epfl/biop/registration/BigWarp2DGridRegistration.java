@@ -9,10 +9,8 @@ import ij.ImagePlus;
 import ij.gui.Roi;
 import ij.gui.WaitForUserDialog;
 import mpicbg.spim.data.SpimDataException;
-import net.imglib2.Point;
 import net.imglib2.RealPoint;
 
-import java.util.List;
 import java.util.function.Function;
 
 public class BigWarp2DGridRegistration implements Registration<ImagePlus> {
@@ -55,6 +53,7 @@ public class BigWarp2DGridRegistration implements Registration<ImagePlus> {
                 roiPresent = fimg.getRoi()!=null;
             }
             this.roi=fimg.getRoi();
+            fimg.hide();
 
             for (int x = 0;x<w;x+=spacing) {
                 for (int y = 0;y<h;y+=spacing) {
@@ -88,18 +87,12 @@ public class BigWarp2DGridRegistration implements Registration<ImagePlus> {
     @Override
     public Function<ImagePlus, ImagePlus> getImageRegistration() {
         // See https://github.com/saalfeldlab/bigwarp/blob/e490dd2ce87c6bcf3355e01e562586421f978303/scripts/Apply_Bigwarp_Xfm.groovy
-        return ((img) -> {
-                    return ApplyBigwarpPlugin.apply(
+        return ((img) -> ApplyBigwarpPlugin.apply(
                             img, fimg, bw.getLandmarkPanel().getTableModel(),
                             "Target", "", "Target",
                             null, null, null,
-                            Interpolation.NEARESTNEIGHBOR, false, 1 );});
+                            Interpolation.NEARESTNEIGHBOR, false, 1 ));
     }
-
-    /*@Override
-    public Function<RealPointList, RealPointList> getPtsRegistration() {
-        return null;
-    }*/
 
     @Override
     public RealPointList getPtsRegistration(RealPointList pts) {
