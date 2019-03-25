@@ -6,13 +6,12 @@ import ch.epfl.biop.java.utilities.roi.types.TransformixOutputRoisFile;
 import ch.epfl.biop.wrappers.elastix.RegisterHelper;
 import ch.epfl.biop.wrappers.elastix.ij2commands.Elastix_Register;
 import ch.epfl.biop.wrappers.transformix.TransformHelper;
+import ch.epfl.biop.wrappers.transformix.ij2commands.Transformix_TransformImgPlus;
 import ij.ImagePlus;
-import net.imglib2.RealPoint;
 import org.scijava.Context;
 import org.scijava.command.CommandModule;
 import org.scijava.command.CommandService;
 import org.scijava.plugin.Parameter;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.function.Function;
@@ -38,15 +37,12 @@ public class Elastix2DRegistration implements Registration<ImagePlus> {
     @Override
     public void register() {
         CommandService cs = ctx.getService(CommandService.class);
-
         Future<CommandModule> cmd = cs.run(Elastix_Register.class,true,
                 "movingImage", mimg,
                 "fixedImage", fimg);
-
         try {
             CommandModule cm = cmd.get();
             rh = (RegisterHelper) (cm.getOutput("rh"));
-
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
@@ -57,28 +53,21 @@ public class Elastix2DRegistration implements Registration<ImagePlus> {
     @Override
     public Function<ImagePlus, ImagePlus> getImageRegistration() {
         return (img) -> {
-            TransformHelper th = new TransformHelper();
-            th.setTransformFile(rh);
-            th.setImage(img);
-            th.transform();
-            ImagePlus img_out = (ImagePlus) (th.getTransformedImage().to(ImagePlus.class));
+            CommandService cs = ctx.getService(CommandService.class);
+            Future<CommandModule> cmd = cs.run(Transformix_TransformImgPlus.class,true,
+                    "img_in", img, "rh", rh);
+            ImagePlus img_out = null;
+            try {
+                CommandModule cm = cmd.get();
+                img_out = (ImagePlus) (cm.getOutput("img_out"));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
             return img_out;
         };
     }
-
-    /*@Override
-    public Function<RealPointList, RealPointList> getPtsRegistration() {
-        return (list) -> {
-            ConvertibleRois cr = new ConvertibleRois();
-            cr.set(list);
-            TransformHelper th = new TransformHelper();
-            th.setTransformFile(rh);
-            th.setRois(cr);
-            th.transform();
-            ConvertibleRois cr_out = th.getTransformedRois();;
-            return ((RealPointList) cr_out.to(RealPointList.class));
-        };
-    }*/
 
     @Override
     public RealPointList getPtsRegistration(RealPointList pts) {
@@ -89,7 +78,7 @@ public class Elastix2DRegistration implements Registration<ImagePlus> {
         th.setRois(cr);
         th.transform();
         ConvertibleRois cr_out = th.getTransformedRois();;
-        return ConvertibleRois.transformixFileToRealPointList((TransformixOutputRoisFile) cr_out.to(TransformixOutputRoisFile.class));//((RealPointList) cr_out.to(RealPointList.class));
+        return ConvertibleRois.transformixFileToRealPointList((TransformixOutputRoisFile) cr_out.to(TransformixOutputRoisFile.class));
     }
 
 }

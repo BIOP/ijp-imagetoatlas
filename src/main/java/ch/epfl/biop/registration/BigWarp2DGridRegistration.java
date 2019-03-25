@@ -5,6 +5,7 @@ import bdv.viewer.Interpolation;
 import bigwarp.BigWarp;
 import bigwarp.BigWarpInit;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
+import ij.CompositeImage;
 import ij.ImagePlus;
 import ij.gui.Roi;
 import ij.gui.WaitForUserDialog;
@@ -13,23 +14,21 @@ import net.imglib2.RealPoint;
 
 import java.util.function.Function;
 
-public class BigWarp2DGridRegistration implements Registration<ImagePlus> {
+public class BigWarp2DGridRegistration extends BigWarp2DRegistration implements Registration<ImagePlus> {
 
-    ImagePlus fimg, mimg;
+    //ImagePlus fimg, mimg;
 
     @Override
     public void setFixedImage(ImagePlus fimg) {
-        System.out.println("fimg = "+fimg.getTitle());
         this.fimg = fimg;
     }
 
     @Override
     public void setMovingImage(ImagePlus mimg) {
-        System.out.println("mimg = "+mimg.getTitle());
         this.mimg = mimg;
     }
 
-    BigWarp bw;
+    //BigWarp bw;
 
     int spacing = 50;
 
@@ -41,6 +40,20 @@ public class BigWarp2DGridRegistration implements Registration<ImagePlus> {
         {
             //new RepeatingReleasedEventsFixer().install();
             bw = new BigWarp( BigWarpInit.createBigWarpDataFromImages( this.mimg, this.fimg ), "Big Warp",  null ); // pb with virtualstack fimg
+
+            int shiftChannel = this.mimg.getNChannels();
+            if (this.mimg instanceof CompositeImage) {
+                transferChannelSettings((CompositeImage) this.mimg, bw.getSetupAssignments(), bw.getViewerFrameP().getViewerPanel().getVisibilityAndGrouping(), 0);
+            } else {
+                transferImpSettings(this.mimg, bw.getSetupAssignments(), 0);
+            }
+
+            if (this.fimg instanceof CompositeImage) {
+                transferChannelSettings((CompositeImage) this.fimg, bw.getSetupAssignments(), bw.getViewerFrameQ().getViewerPanel().getVisibilityAndGrouping(), shiftChannel);
+            } else {
+                transferImpSettings(this.fimg, bw.getSetupAssignments(), shiftChannel);
+            }
+
             // Adds grid points evenly spaced in the whole image
             int w = fimg.getWidth();
             int h = fimg.getHeight();
@@ -84,24 +97,4 @@ public class BigWarp2DGridRegistration implements Registration<ImagePlus> {
         }
     }
 
-    @Override
-    public Function<ImagePlus, ImagePlus> getImageRegistration() {
-        // See https://github.com/saalfeldlab/bigwarp/blob/e490dd2ce87c6bcf3355e01e562586421f978303/scripts/Apply_Bigwarp_Xfm.groovy
-        return ((img) -> ApplyBigwarpPlugin.apply(
-                            img, fimg, bw.getLandmarkPanel().getTableModel(),
-                            "Target", "", "Target",
-                            null, null, null,
-                            Interpolation.NEARESTNEIGHBOR, false, 1 ));
-    }
-
-    @Override
-    public RealPointList getPtsRegistration(RealPointList pts) {
-        for (RealPoint pt : pts.ptList) {
-            double[] tr = bw.getTransform().apply( new double[] {
-                    pt.getDoublePosition(0), pt.getDoublePosition(1)
-            });
-            pt.setPosition(tr);
-        }
-        return pts;
-    }
 }

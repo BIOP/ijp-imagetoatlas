@@ -65,7 +65,7 @@ public class ImageToAtlasRegister implements Command {
                 chs_int.add(Integer.valueOf(st.trim())-1);
             }
             if (chs_int.size()!=0) {
-                preprocessFixed = (im) -> filterChannels(im, chs_int);
+                preprocessMoving = (im) -> filterChannels(im, chs_int);
             }
         }
 
@@ -96,7 +96,7 @@ public class ImageToAtlasRegister implements Command {
         }
 
         ImagePlus imp_out = (new Concatenator()).concatenate(kept_channels, false);
-        //imp_out.show();
+        imp_out.show();
         return imp_out;
 
     }

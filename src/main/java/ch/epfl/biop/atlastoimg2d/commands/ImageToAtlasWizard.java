@@ -45,6 +45,8 @@ public class ImageToAtlasWizard implements Command {
 			boolean registrationDone = false;
 
 			while (!registrationDone) {
+				dialog = new WaitForUserDialog("You can change the image before performing the next registration.","Click when you're done.");
+				dialog.show();
 				YesNoCancelDialog dialogw = new YesNoCancelDialog(IJ.getInstance(),
 						"Register slice", "Do you want to add a registration ?");
 

@@ -139,7 +139,11 @@ public class AtlasToImagePlus2D implements AtlasToImg2D<ImagePlus> {
 
     @Override
     public void showLastImage() {
-        this.registeredImageSequence.get(registeredImageSequence.size()-1).show();
+        if (registeredImageSequence.size()==0) {
+            this.imageUsedForRegistration.show();
+        } else {
+            this.registeredImageSequence.get(registeredImageSequence.size() - 1).show();
+        }
     }
 
     @Override

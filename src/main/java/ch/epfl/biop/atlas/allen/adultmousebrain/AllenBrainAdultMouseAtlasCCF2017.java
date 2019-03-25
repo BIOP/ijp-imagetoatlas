@@ -22,14 +22,14 @@ import java.util.List;
 public class AllenBrainAdultMouseAtlasCCF2017 extends AllenAtlas implements Command {
 
 	public String toString() {
-		return "Adult Mouse Brain - Allen Brain Atlas V3";//"Adult Mouse Brain Allen Atlas CCF v2";
+		return "Adult Mouse Brain - Allen Brain Atlas V3";
 	}
 	
 	public static String keyPrefix = AllenBrainAdultMouseAtlasCCF2017.class.getName()+".";
 	
 	static String defaultMapUrl = "file:/home/nico/Dropbox/BIOP/ABA/Data/new/ccf2017-mod65000.h5.xml";
 	@Parameter  
-	String mapUrl = Prefs.get(keyPrefix+"mapUrl",defaultMapUrl);//"/home/nico/Dropbox/BIOP/ABA/BrainServerTest/export.xml");
+	String mapUrl = Prefs.get(keyPrefix+"mapUrl",defaultMapUrl);
 
 	// AWS server : http://ec2-18-218-179-145.us-east-2.compute.amazonaws.com:8081/allen_brain/
 	static String defaultOntologyUrl = "file:/home/nico/Dropbox/BIOP/ABA/BrainServerTest/1.json";
