@@ -8,9 +8,7 @@ import ij.gui.Roi;
 import net.imglib2.RealPoint;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class CropAndScaleRegistration implements Registration<ImagePlus> {
     ImagePlus fimg, mimg;

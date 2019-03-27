@@ -26,9 +26,7 @@ public class BigWarp2DRegistration implements Registration<ImagePlus> {
     ImagePlus fimg, mimg;
 
     @Override
-    public void setFixedImage(ImagePlus fimg) {
-        this.fimg = fimg;
-    }
+    public void setFixedImage(ImagePlus fimg) { this.fimg = fimg; }
 
     @Override
     public void setMovingImage(ImagePlus mimg) {
@@ -41,6 +39,7 @@ public class BigWarp2DRegistration implements Registration<ImagePlus> {
     public void register() {
         try
         {
+
             //new RepeatingReleasedEventsFixer().install();
             bw = new BigWarp( BigWarpInit.createBigWarpDataFromImages( this.mimg, this.fimg ), "Big Warp",  null ); // pb with virtualstack fimg
 

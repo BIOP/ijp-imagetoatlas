@@ -12,6 +12,7 @@ import ij.gui.WaitForUserDialog;
 import mpicbg.spim.data.SpimDataException;
 import net.imglib2.RealPoint;
 
+import javax.swing.*;
 import java.util.function.Function;
 
 public class BigWarp2DGridRegistration extends BigWarp2DRegistration implements Registration<ImagePlus> {
@@ -67,6 +68,17 @@ public class BigWarp2DGridRegistration extends BigWarp2DRegistration implements 
             }
             this.roi=fimg.getRoi();
             fimg.hide();
+
+            String s = (String) JOptionPane.showInputDialog(
+                    null,
+                    "Choose grid spacing in pixels",
+                    "Big Warp Grid",
+                    JOptionPane.PLAIN_MESSAGE,
+                    null,
+                    null,
+                    "50");
+
+            spacing = Integer.valueOf(s);
 
             for (int x = 0;x<w;x+=spacing) {
                 for (int y = 0;y<h;y+=spacing) {
