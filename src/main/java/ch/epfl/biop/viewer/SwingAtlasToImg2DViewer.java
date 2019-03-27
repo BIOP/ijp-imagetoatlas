@@ -35,9 +35,9 @@ public class SwingAtlasToImg2DViewer extends EasySwingDisplayViewer<AtlasToImg2D
     @Override
     protected void redraw() {
         System.out.println("Redraw from "+this+" called.");
-        if (atlasToImg.isRegistrationSet()) {
+        /*if (atlasToImg.isRegistrationSet()) {
 
-        }
+        }*/
     }
 
     AtlasToImg2D atlasToImg = null;

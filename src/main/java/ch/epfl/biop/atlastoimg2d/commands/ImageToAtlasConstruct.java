@@ -3,7 +3,6 @@ package ch.epfl.biop.atlastoimg2d.commands;
 import ch.epfl.biop.atlas.BiopAtlas;
 import ch.epfl.biop.atlas.commands.BrowseAtlasCommand;
 import ch.epfl.biop.atlastoimg2d.AtlasToImagePlus2D;
-import ch.epfl.biop.atlastoimg2d.AtlasToImagePlusElastixRegister;
 import ch.epfl.biop.atlastoimg2d.AtlasToImg2D;
 import ij.ImagePlus;
 import org.scijava.Context;

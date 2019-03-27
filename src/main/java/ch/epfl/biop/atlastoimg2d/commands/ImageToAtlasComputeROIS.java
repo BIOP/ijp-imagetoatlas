@@ -12,10 +12,14 @@ public class ImageToAtlasComputeROIS implements Command{
     @Parameter(type = ItemIO.BOTH)
     AtlasToImg2D aligner;
 
+    @Parameter(label="Put in Roi Manager ?")
+    boolean putRoiManager;
+
     @Override
     public void run() {
         if (aligner.getRegistrations().size()>0) {
             aligner.putTransformedRoisToObjectService();
+            if (putRoiManager) aligner.putTransformedRoisToImageJROIManager();
         } else {
             System.err.println("Error : no registration done.");
         }

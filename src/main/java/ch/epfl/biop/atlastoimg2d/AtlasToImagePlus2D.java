@@ -25,8 +25,6 @@ public class AtlasToImagePlus2D implements AtlasToImg2D<ImagePlus> {
     BiopAtlas ba;
     Object atlasLocation;
 
-    boolean interactive=true;
-
     Context ctx;
 
     ArrayList<Registration<ImagePlus>> registrationSequence = new ArrayList<>();
@@ -35,28 +33,21 @@ public class AtlasToImagePlus2D implements AtlasToImg2D<ImagePlus> {
 
     ImagePlus imageUsedForRegistration;
 
+    ImagePlus imgAtlas;
+
+    ConvertibleRois untransformedRois;
+
+    ConvertibleRois transformedRois;
+
     @Override
     public void setScijavaContext(Context ctx) {
         this.ctx = ctx;
-    }
-
-    public void setInteractive(boolean flag) {
-        interactive = flag;
     }
 
     @Override
     public void setAtlas(BiopAtlas ba) {
         this.ba=ba;
     }
-
-    @Override
-    public boolean isInitialized() {
-        return (ba!=null);
-    }
-
-    ImagePlus imgAtlas;
-
-    ConvertibleRois untransformedRois;
 
     @Override
     public void setAtlasLocation(Object location) {
@@ -71,9 +62,7 @@ public class AtlasToImagePlus2D implements AtlasToImg2D<ImagePlus> {
         imgAtlas.setCalibration(new Calibration());
         atlasLocation=location;
 
-        //ConvertibleRois cr = new ConvertibleRois();
         ImagePlus imgLabel = this.ba.map.getCurrentLabelImage();
-        //cr.set(imgLabel);
 
         CommandService cs = ctx.getService(CommandService.class);
         try {
@@ -83,10 +72,7 @@ public class AtlasToImagePlus2D implements AtlasToImg2D<ImagePlus> {
         } catch (ExecutionException e) {
             e.printStackTrace();
         }
-        //
     }
-
-    boolean registrationSet = false;
 
     @Override
     public BiopAtlas getAtlas() {
@@ -121,7 +107,6 @@ public class AtlasToImagePlus2D implements AtlasToImg2D<ImagePlus> {
         m.hide();
         f.hide();
 
-
         this.registrationSequence.add(reg);
         ImagePlus trImg = reg.getImageRegistration().apply(imgIn);
         trImg.setCalibration(new Calibration());
@@ -135,6 +120,8 @@ public class AtlasToImagePlus2D implements AtlasToImg2D<ImagePlus> {
 
         f.changes = false;
         f.close();
+
+        this.computeTransformedRois();
     }
 
     @Override
@@ -154,17 +141,13 @@ public class AtlasToImagePlus2D implements AtlasToImg2D<ImagePlus> {
         this.registeredImageSequence.get(registeredImageSequence.size()-1).close();
         registrationSequence.remove(registrationSequence.size()-1);
         registeredImageSequence.remove(registeredImageSequence.size()-1);
+
+        this.computeTransformedRois();
     }
 
     @Override
     public void resetRegistrations() {
-        registrationSet = false;
         registrationSequence = new ArrayList<>();
-    }
-
-    @Override
-    public boolean isRegistrationSet() {
-        return registrationSet;
     }
 
     @Override
@@ -184,56 +167,45 @@ public class AtlasToImagePlus2D implements AtlasToImg2D<ImagePlus> {
     }
 
     @Override
-    public void register() {
-
+    public void putTransformedRoisToImageJROIManager() {
+        transformedRois.to(RoiManager.class);
     }
 
     @Override
-    public void putRoisToImageJ(ConvertibleRois cr) {
-
-    }
-
-    @Override
-    public void putRoisToQuPath(ConvertibleRois cr) {
-
-    }
-
-    @Override
-    public File save(String path) {
-        return null;
+    public void save(String path) {
+        System.err.println("Unsupported save operation");
     }
 
     @Override
     public void load(URL url) {
-
+        System.err.println("Unsupported load operation from URL");
     }
 
     @Override
     public void load(File file) {
+        System.err.println("Unsupported load operation from file");
+    }
 
+    public void computeTransformedRois() {
+        transformedRois = new ConvertibleRois();
+        IJShapeRoiArray arrayIni = (IJShapeRoiArray) this.untransformedRois.to(IJShapeRoiArray.class);
+        transformedRois.set(arrayIni);
+        RealPointList list = ((RealPointList) transformedRois.to(RealPointList.class));
+        // Perform reverse transformation, in the reverse order:
+        //  - From atlas coordinates -> image coordinates
+        Collections.reverse(this.registrationSequence);
+        for (Registration reg : this.registrationSequence) {
+            list = reg.getPtsRegistration(list);
+        }
+        Collections.reverse(this.registrationSequence);
+        transformedRois.clear();
+        list.shapeRoiList = new IJShapeRoiArray(arrayIni);
+        transformedRois.set(list);
     }
 
     @Override
     public void putTransformedRoisToObjectService() {
-        System.out.println("--------------------------------- ");
-        ConvertibleRois cr = new ConvertibleRois();
-        IJShapeRoiArray arrayIni = (IJShapeRoiArray) this.untransformedRois.to(IJShapeRoiArray.class);
-        cr.set(arrayIni);
-        RealPointList list = ((RealPointList) cr.to(RealPointList.class));
-        System.out.println("list.size="+list.ptList.size());
-        System.out.println("list.get(0).getDoublePosition(0) BEFORE="+list.ptList.get(0).getDoublePosition(0));
-        Collections.reverse(this.registrationSequence);
-        for (Registration reg : this.registrationSequence) {
-            System.out.println("apply transform");
-            list = reg.getPtsRegistration(list);
-           // RealPointList list_out = (reg.getPtsRegistration()).apply(list);//.getPtsRegistration().apply(list);
-        }
-        System.out.println("list.get(0).getDoublePosition(0) AFTER="+list.ptList.get(0).getDoublePosition(0));
-        Collections.reverse(this.registrationSequence);
-        cr.clear();
-        list.shapeRoiList = new IJShapeRoiArray(arrayIni);
-        cr.set(list);
-        cr.to(RoiManager.class);
-        ctx.getService(ObjectService.class).addObject(cr);
+        //computeTransformedRois();
+        ctx.getService(ObjectService.class).addObject(transformedRois);
     }
 }
