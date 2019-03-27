@@ -135,6 +135,7 @@ public class AllenMap implements AtlasMap {
 	public ImagePlus getCurrentLabelImage() {
 		ImagePlus imgLabel = this.getImagePlusChannel(LabelChannel).duplicate();
 		imgLabel.setTitle("Label");
+		imgLabel.getProcessor().setMinAndMax(0, 65535);
 		//imgLabel.show();
 		return imgLabel;
 	}

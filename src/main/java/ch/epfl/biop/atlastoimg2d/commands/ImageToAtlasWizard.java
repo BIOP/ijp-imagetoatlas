@@ -3,7 +3,9 @@ package ch.epfl.biop.atlastoimg2d.commands;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import ch.epfl.biop.atlas.commands.PutAtlasStructureToImage;
 import ch.epfl.biop.atlastoimg2d.AtlasToImg2D;
+import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
 import ij.IJ;
 import ij.gui.YesNoCancelDialog;
 import org.scijava.ItemIO;
@@ -45,10 +47,10 @@ public class ImageToAtlasWizard implements Command {
 			boolean registrationDone = false;
 
 			while (!registrationDone) {
-				dialog = new WaitForUserDialog("You can change the image before performing the next registration.","Click when you're done.");
+				dialog = new WaitForUserDialog("Modify images ?","Perform changes on images. Click when you're done.");
 				dialog.show();
 				YesNoCancelDialog dialogw = new YesNoCancelDialog(IJ.getInstance(),
-						"Register slice", "Do you want to add a registration ?");
+						"Register slice", "Add a registration ?");
 
 				if (dialogw.cancelPressed()||(!dialogw.yesPressed())) {
 					registrationDone=true;
@@ -67,8 +69,21 @@ public class ImageToAtlasWizard implements Command {
 				}
 			}
 
-			// ---- Ok -> now let's output what is good
-			// TODO
+			// ---- Ok -> now let's compute the transformed ROI
+			YesNoCancelDialog dialogw = new YesNoCancelDialog(IJ.getInstance(),
+					"Compute ROIs ?", "Only if you're happy with the current registration.");
+
+			if (dialogw.yesPressed()) {
+				ConvertibleRois cr = (ConvertibleRois) cs.run(ImageToAtlasComputeROIS.class,true,"aligner", aligner ).get().getOutput("");
+				dialogw = new YesNoCancelDialog(IJ.getInstance(),
+						"Diplay ROIs ?", "Display brain regions ?");
+				if (dialogw.yesPressed()) {
+					cs.run(PutAtlasStructureToImage.class,true,"atlas", aligner.getAtlas(), "cr", cr ).get();
+
+				}
+
+			}
+
 
 		} catch (InterruptedException e) {
 			e.printStackTrace();
