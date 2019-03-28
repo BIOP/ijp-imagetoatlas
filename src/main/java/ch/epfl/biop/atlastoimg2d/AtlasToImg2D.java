@@ -1,5 +1,6 @@
 package ch.epfl.biop.atlastoimg2d;
 
+import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
 import ch.epfl.biop.registration.Registration;
 import org.scijava.Context;
 
@@ -15,7 +16,12 @@ public interface AtlasToImg2D<T> { // T = image type (Image Plus or QuPath Image
 	// ---- Initialization : an Image and an Atlas
 	void setAtlas(BiopAtlas ba);
 	BiopAtlas getAtlas();
-	
+	void setScijavaContext(Context ctx);
+
+	// ---- Initial image to be registered
+	void setImage(T img); // Let's try to handle QuPath and Fiji
+	T getImage();
+
 	// ---- Registration
     void setAtlasLocation(Object location);
 	Object getAtlasLocation(); // returns null if not set
@@ -27,13 +33,10 @@ public interface AtlasToImg2D<T> { // T = image type (Image Plus or QuPath Image
 	void resetRegistrations();
 	ArrayList<Registration<T>> getRegistrations();
 
-    void setImage(T img); // Let's try to handle QuPath and Fiji
-	T getImage();
-	
-	// ---- Transformations
+	// ---- ROIs
+	ConvertibleRois getTransformedRois();
 	void putTransformedRoisToImageJROIManager();
-	void putTransformedRoisToObjectService();
-	void setScijavaContext(Context ctx);
+	//void putTransformedRoisToObjectService();
 
 	void save(String path);
 	void load(URL url);
@@ -42,8 +45,7 @@ public interface AtlasToImg2D<T> { // T = image type (Image Plus or QuPath Image
 	// WORKFLOW:
 	// -> Get Atlas slice location in 2D
 	// -> Get Atlas structure slice
-	// -> Get registration
-	// -> Transform label image according to registration
+	// -> Get registrations
 	// -> Compute ROIs
 	// -> Display ROIs from any structure to any image
 

@@ -74,7 +74,7 @@ public class ImageToAtlasWizard implements Command {
 					"Compute ROIs ?", "Only if you're happy with the current registration.");
 
 			if (dialogw.yesPressed()) {
-				ConvertibleRois cr = (ConvertibleRois) cs.run(ImageToAtlasComputeROIS.class,true,"aligner", aligner ).get().getOutput("");
+				ConvertibleRois cr = (ConvertibleRois) cs.run(ImageToAtlasComputeROIS.class,true,"aligner", aligner ).get().getOutput("cr");
 				dialogw = new YesNoCancelDialog(IJ.getInstance(),
 						"Diplay ROIs ?", "Display brain regions ?");
 				if (dialogw.yesPressed()) {

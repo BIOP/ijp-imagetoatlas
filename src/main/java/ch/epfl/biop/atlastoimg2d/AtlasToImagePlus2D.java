@@ -156,6 +156,11 @@ public class AtlasToImagePlus2D implements AtlasToImg2D<ImagePlus> {
     }
 
     @Override
+    public ConvertibleRois getTransformedRois() {
+        return transformedRois;
+    }
+
+    @Override
     public void setImage(ImagePlus img) {
         imageUsedForRegistration = img;
         imageUsedForRegistration.setCalibration(new Calibration());
@@ -203,9 +208,9 @@ public class AtlasToImagePlus2D implements AtlasToImg2D<ImagePlus> {
         transformedRois.set(list);
     }
 
-    @Override
+    /*@Override
     public void putTransformedRoisToObjectService() {
         //computeTransformedRois();
         ctx.getService(ObjectService.class).addObject(transformedRois);
-    }
+    }*/
 }
