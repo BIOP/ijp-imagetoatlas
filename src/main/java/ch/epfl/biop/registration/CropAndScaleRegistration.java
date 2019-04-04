@@ -5,6 +5,7 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.WaitForUserDialog;
 import ij.gui.Roi;
+import ij.plugin.Duplicator;
 import net.imglib2.RealPoint;
 
 import java.util.ArrayList;
@@ -47,7 +48,7 @@ public class CropAndScaleRegistration implements Registration<ImagePlus> {
     public Function<ImagePlus, ImagePlus> getImageRegistration() {
         return (img) -> {
             img.setRoi(this.roi);
-            ImagePlus imcropped = img.duplicate().crop();
+            ImagePlus imcropped = (new Dupliqcator()).run(img);//.duplicate().crop();
             IJ.run(imcropped, "Scale...", "x="+scale+" y="+scale+" interpolation=None create");
             return IJ.getImage();
         };
