@@ -121,6 +121,24 @@ public class AllenOntology implements AtlasOntology {
         ontologyIdentifierToStructureId = new HashMap<>();
         ontologyIdToOriginalId = new HashMap();
         JSONObject root = (JSONObject) ontologyJSON.getJSONArray("msg").get(0);
+
+        // ------ fix root node
+
+        int id = root.getInt("id");
+        String name = root.getString("name");
+        String acronym = root.getString("acronym");
+        ontologyIdToAcronym.put(id, acronym);
+        ontologyIdToOriginalId.put(id,id);
+        ontologyAcronymToId.put(acronym.trim().toUpperCase(), id);
+        ontologyIdToName.put(id, name);
+        ontologyIdentifierToStructureId.put(name.trim().toUpperCase(), id);
+        ontologyIdentifierToStructureId.put(acronym.trim().toUpperCase(), id);
+        ontologyIdentifierToStructureId.put(Integer.toString(id), id);
+        ontologyNameToId.put(name.trim().toUpperCase(), id);
+
+        // ------ end fix root node
+
+
         registerOntologyObject(root, 997);
     }
 
@@ -137,6 +155,7 @@ public class AllenOntology implements AtlasOntology {
      * @param keyModulo
      */
     public void mutateToModulo(int keyModulo) {
+
         ontologyIdToName = mutateMapKeysModulo(ontologyIdToName, keyModulo, new String());
         ontologyIdToAcronym = mutateMapKeysModulo(ontologyIdToAcronym, keyModulo, new String());
         ontologyIdToParentId = mutateMapKeysModulo(ontologyIdToParentId, keyModulo, new Integer(0));
@@ -171,7 +190,7 @@ public class AllenOntology implements AtlasOntology {
                 map_out.put(newKey,v);
             }
         });
-        return map_out; // Warning by IntelliJ. Does it make sense ?
+        return map_out;
     }
 
     <T> Map<T, Integer> mutateMapValuesModulo(Map<T, Integer> map_in, int mod, T value) {
@@ -283,7 +302,6 @@ public class AllenOntology implements AtlasOntology {
 	@Override
 	public void setDataSource(URL dataSource) {
 		this.dataSource=dataSource;
-		
 	}
 
 	@Override

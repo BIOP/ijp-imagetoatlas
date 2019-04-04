@@ -47,7 +47,7 @@ public class CropAndScaleRegistration implements Registration<ImagePlus> {
     public Function<ImagePlus, ImagePlus> getImageRegistration() {
         return (img) -> {
             img.setRoi(this.roi);
-            ImagePlus imcropped = img.duplicate();//.crop();
+            ImagePlus imcropped = img.duplicate().crop();
             IJ.run(imcropped, "Scale...", "x="+scale+" y="+scale+" interpolation=None create");
             return IJ.getImage();
         };
@@ -56,41 +56,12 @@ public class CropAndScaleRegistration implements Registration<ImagePlus> {
     @Override
     public RealPointList getPtsRegistration(RealPointList list) {
         ArrayList<RealPoint> cvtList = new ArrayList<>();
-
         for (RealPoint p : list.ptList) {
             float npx = p.getFloatPosition(0)/scale+roi.getBounds().x;
             float npy = p.getFloatPosition(1)/scale+roi.getBounds().y;
             RealPoint cpt = new RealPoint(npx, npy);
-            //.setPosition(0,(double) npx);//.setPosition(new float[]{npx, npy});
             cvtList.add(cpt);
         }
-        /*
-        List<RealPoint> cvtList = list.ptList.stream().map(pt -> {
-            RealPoint cpt = new RealPoint();
-            float npx = pt.getFloatPosition(0)*scale+roi.getBounds().x;
-            float npy = pt.getFloatPosition(1)*scale+roi.getBounds().y;
-            cpt.setPosition(new float[]{npx, npy});
-            return cpt;
-        }).collect(Collectors.toList());*/
-
-
-        //System.out.println("cvtList.size()="+cvtList.size());
         return new RealPointList(cvtList);
     }
-
-    /*@Override
-    public Function<RealPointList, RealPointList> getPtsRegistration() {
-        return (list) -> {
-            System.out.println("apply transform crop n scale");
-            List<RealPoint> cvtList = list.ptList.stream().map(pt -> {
-                RealPoint cpt = new RealPoint();
-                float npx = pt.getFloatPosition(0)*scale+roi.getBounds().x;
-                float npy = pt.getFloatPosition(1)*scale+roi.getBounds().y;
-                cpt.setPosition(new float[]{npx, npy});
-                return cpt;
-            }).collect(Collectors.toList());
-            System.out.println("cvtList.size()="+cvtList.size());
-            return new RealPointList(cvtList);
-        };
-    }*/
 }

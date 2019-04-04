@@ -1,8 +1,6 @@
 package ch.epfl.biop.viewer;
 
 import ch.epfl.biop.atlas.BiopAtlas;
-import ch.epfl.biop.atlas.allen.AllenAtlas;
-import ch.epfl.biop.atlas.allen.AllenOntology;
 import net.imagej.ui.swing.viewer.EasySwingDisplayViewer;
 import org.scijava.Context;
 import org.scijava.plugin.Parameter;
@@ -81,7 +79,6 @@ public class SwingAtlasViewer extends
         //String name = index+":"+((AllenOntology) atlas.ontology).ontologyIdToOriginalId.get(index);
         final DefaultMutableTreeNode node = new DefaultMutableTreeNode(
                 atlas.ontology.getProperties(index).get(atlas.ontology.getNamingDisplayProperty())
-                //name
             );
         basenode.add(node);
         atlas.ontology.getChildren(index).forEach( i -> {

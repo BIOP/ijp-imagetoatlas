@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import ch.epfl.biop.java.utilities.roi.types.IJShapeRoiArray;
+import ij.IJ;
 import org.scijava.ItemIO;
 import org.scijava.command.Command;
 import org.scijava.object.ObjectService;
@@ -41,14 +42,16 @@ public class ConstructROIsFromImgLabel implements Command {
 
 	@Parameter
 	public ObjectService os;
-	
+
 	@Override
 	public void run() {
-
+		// Gets pixel array and convert them to Float -> no loss of precision for int 16 or
+		// even RGB 24
 		ArrayList<Roi> roiArray = new ArrayList<>();
 		ImageProcessor ip = labelImg.getProcessor();
 		float[][] pixels = ip.getFloatArray();
-		
+
+		// Gets all existing values in the image
 		HashSet<Float> existingPixelValues = new HashSet<>();
 		for (int x=0;x<ip.getWidth();x++) {
 			for (int y=0;y<ip.getHeight();y++) {
@@ -56,18 +59,18 @@ public class ConstructROIsFromImgLabel implements Command {
 			}
 		}
 
+		// All the parents of the existing label will be met at some point
+		// keep a list of possible values encountered in the tree
 		HashSet<Integer> possibleValues = new HashSet<>();
 		existingPixelValues.forEach(id -> {
-			//System.out.println("id="+id);
 			possibleValues.addAll(atlas.ontology.getAllParents((int)(float)id));
+			possibleValues.add((int)(float)id);
 		});
 
-		/*for (Integer possibleValue : possibleValues) {
-			System.out.println(possibleValue);
-		}*/
-
+		// Goes opposite
+		// List all the values of the children that will be encountered for each label
+		// For instance some children node will never be met because they are not part of the slice
 		Map<Integer, ArrayList<Integer>> childrenContained = new HashMap<>();
-		
 		atlas.ontology.getParentToChildrenMap().forEach((k,v) -> {
 			ArrayList<Integer> filtered = new ArrayList<>();
 			filtered.addAll(v.stream().filter(id -> possibleValues.contains(id)).collect(Collectors.toList()));
@@ -80,7 +83,6 @@ public class ConstructROIsFromImgLabel implements Command {
 				isLeaf.add(k);
 			}
 		});
-
 
 		FloatProcessor fp = new FloatProcessor(ip.getWidth(), ip.getHeight());	
 		fp.setFloatArray(pixels);
@@ -118,7 +120,6 @@ public class ConstructROIsFromImgLabel implements Command {
 				movablePx[x][y]=(!is3Colored)&&(!isCrossed);
 			}
 		}
-		
 		boolean containsLeaf=true;
 		while (containsLeaf) {
 			List<Float> leavesValues = existingPixelValues
@@ -126,34 +127,28 @@ public class ConstructROIsFromImgLabel implements Command {
 				.filter(v -> isLeaf.contains((int) (float) v))
 				.collect(Collectors.toList());
 			leavesValues.forEach(v -> {
-					//ip.setThreshold( v,v,ImageProcessor.NO_LUT_UPDATE);
-					fp.setThreshold( v,v,ImageProcessor.NO_LUT_UPDATE);
-				
 					fp.setThreshold( v,v,ImageProcessor.NO_LUT_UPDATE);
 					Roi roi = SelectToROIKeepLines.run(imgFloatCopy, movablePx, true);//ThresholdToSelection.run(imgFloatCopy);
-					
-					
-					//Roi roi = ThresholdToSelection.run(labelImg);
+
 					roi.setName(Integer.toString((int) (double) v));
 					roiArray.add(roi);
 					if (atlas.ontology.getParentToParentMap().containsKey((int) (double)v)) {
 						int parentId = atlas.ontology.getParentToParentMap().get((int) (double)v);
-						//ip.setColor(parentId);
-						//ip.fill(roi);
 						fp.setColor(parentId);
 						fp.fill(roi);
 						if (childrenContained.get(parentId)!=null) {
-							childrenContained.get(parentId).remove(new Integer((int) (float) v));
-							existingPixelValues.add((float)parentId);	
+							if (childrenContained.get(new Integer((int) (float)v)).size()==0) {
+								childrenContained.get(parentId).remove(new Integer((int) (float) v));
+							}
+							existingPixelValues.add((float)parentId);
 						}
 					}
 				}
 			);
 			existingPixelValues.removeAll(leavesValues);
-			leavesValues.stream().map(v -> new Integer((int)(float)v)).forEach(e ->
-				childrenContained.remove(e));
-				isLeaf.clear();
-				childrenContained.forEach((k,v) -> {
+			leavesValues.stream().map(v -> new Integer((int)(float)v)).forEach(e -> childrenContained.remove(e));
+			isLeaf.clear();
+			childrenContained.forEach((k,v) -> {
 					if (v.size()==0) {
 						isLeaf.add(k);
 					}
