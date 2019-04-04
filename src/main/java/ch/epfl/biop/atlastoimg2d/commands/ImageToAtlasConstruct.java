@@ -4,6 +4,7 @@ import ch.epfl.biop.atlas.BiopAtlas;
 import ch.epfl.biop.atlas.commands.BrowseAtlasCommand;
 import ch.epfl.biop.atlastoimg2d.AtlasToImagePlus2D;
 import ch.epfl.biop.atlastoimg2d.AtlasToImg2D;
+import ij.IJ;
 import ij.ImagePlus;
 import org.scijava.Context;
 import org.scijava.ItemIO;
@@ -59,6 +60,10 @@ public class ImageToAtlasConstruct implements Command {
 
 
         aligner.setAtlas(ba);
+        // Convert to RGB Stack in case the input image is a RGB image
+        if (imp.getType()==ImagePlus.COLOR_RGB) {
+           IJ.run(imp, "RGB Stack", "");
+        }
         aligner.setImage(imp);
         aligner.setScijavaContext(ctx);
     }
