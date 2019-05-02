@@ -11,6 +11,7 @@ import ij.Prefs;
 import net.imglib2.type.numeric.ARGBType;
 import org.scijava.ItemIO;
 import org.scijava.command.Command;
+import org.scijava.object.ObjectService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
@@ -26,18 +27,21 @@ public class AllenBrainAdultMouseAtlasCCF2017 extends AllenAtlas implements Comm
 	}
 	
 	public static String keyPrefix = AllenBrainAdultMouseAtlasCCF2017.class.getName()+".";
-	
-	static String defaultMapUrl = "file:/home/nico/Dropbox/BIOP/ABA/Data/new/ccf2017-mod65000.h5.xml";
+
+	// AWS server : http://ec2-18-222-96-84.us-east-2.compute.amazonaws.com:8081/ccf_2017/
+	static String defaultMapUrl = "http://ec2-18-222-96-84.us-east-2.compute.amazonaws.com:8081/ccf_2017/";//"file:/home/nico/Dropbox/BIOP/ABA/Data/new/ccf2017-mod65000.xml";
 	@Parameter  
 	String mapUrl = Prefs.get(keyPrefix+"mapUrl",defaultMapUrl);
 
-	// AWS server : http://ec2-18-218-179-145.us-east-2.compute.amazonaws.com:8081/allen_brain/
-	static String defaultOntologyUrl = "file:/home/nico/Dropbox/BIOP/ABA/BrainServerTest/1.json";
+	static String defaultOntologyUrl = "http://ec2-18-222-96-84.us-east-2.compute.amazonaws.com/1.json";//file:/home/nico/Dropbox/BIOP/ABA/BrainServerTest/1.json";
     @Parameter
     String ontologyUrl = Prefs.get(keyPrefix+"ontologyUrl",defaultOntologyUrl);
 
 	@Parameter(type= ItemIO.OUTPUT)
 	BiopAtlas ba;
+
+	@Parameter
+	ObjectService os;
 
 	final static public int CHANNEL_AVERAGE = 0;
 
@@ -54,6 +58,8 @@ public class AllenBrainAdultMouseAtlasCCF2017 extends AllenAtlas implements Comm
 			this.map.show();
 
 			BigDataViewer bdv = ((AllenMap) this.map).bdv;
+
+			os.addObject(bdv);
 
 			bdv.getViewer().getState().setDisplayMode(DisplayMode.FUSEDGROUP);
 			bdv.getViewer().getVisibilityAndGrouping().setFusedEnabled(true);

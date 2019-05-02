@@ -1,11 +1,16 @@
 package ch.epfl.biop.bdvslicer.ij2command;
 
+import bdv.BigDataViewer;
+import bdv.viewer.Interpolation;
+import bdv.viewer.Source;
+import bdv.viewer.state.ViewerState;
 import ij.ImagePlus;
 import net.imagej.ImageJ;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealRandomAccessible;
 import net.imglib2.img.display.imagej.ImageJFunctions;
+import net.imglib2.interpolation.randomaccess.NearestNeighborInterpolatorFactory;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.realtransform.RealViews;
 import net.imglib2.type.numeric.RealType;
@@ -15,13 +20,8 @@ import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
-import bdv.BigDataViewer;
-import bdv.viewer.Interpolation;
-import bdv.viewer.Source;
-import bdv.viewer.state.ViewerState;
-
-@Plugin(type = Command.class, menuPath = "Plugins>BigDataViewer>Current View to ImgPlus")
-public class BDVSliceToImgPlus<T extends RealType<T>> implements Command {
+@Plugin(type = Command.class, menuPath = "Plugins>BigDataViewer>Current View to ImgPlus Fast")
+public class FastBDVSliceToImgPlus<T extends RealType<T>> implements Command {
 
     @Parameter
     public int sourceIndex =0;
@@ -70,7 +70,7 @@ public class BDVSliceToImgPlus<T extends RealType<T>> implements Command {
         }
 
         // Get real random accessible from the source
-        final RealRandomAccessible< T > ipimg = s.getInterpolatedSource(timepoint, mipmapLevel, interpolation );
+        final RandomAccessibleInterval< T > ipimg = s.getSource(timepoint, mipmapLevel );
 
         //final RealRandomAccessible< T > ipimg = s.getSource(timepoint, mipmapLevel);//.getInterpolatedSource(timepoint, mipmapLevel, interpolation );
 
@@ -99,7 +99,8 @@ public class BDVSliceToImgPlus<T extends RealType<T>> implements Command {
         transformedSourceToViewer.concatenate( sourceTransform ); // Concatenate viewer state transform and source transform to know the final slice of the source
 
         //Gets randomAccessible view ...
-        RandomAccessible< T > ra = RealViews.affine( ipimg, transformedSourceToViewer ); // Gets the view
+
+        RandomAccessible< T > ra = RealViews.affine( Views.interpolate(Views.extendZero(ipimg), new NearestNeighborInterpolatorFactory<>()), transformedSourceToViewer ); // Gets the view
 
         // ... interval
         RandomAccessibleInterval<T> view =
@@ -124,7 +125,7 @@ public class BDVSliceToImgPlus<T extends RealType<T>> implements Command {
         double f0 = t.get(axis,0);
         double f1 = t.get(axis,1);
         double f2 = t.get(axis,2);
-        return java.lang.Math.sqrt(f0*f0+f1*f1+f2*f2);
+        return Math.sqrt(f0*f0+f1*f1+f2*f2);
     }
 
     public static void main(final String... args) throws Exception {
@@ -134,6 +135,6 @@ public class BDVSliceToImgPlus<T extends RealType<T>> implements Command {
         ij.command().run(OpenBDVServer.class, true,
                 "urlServer","http://fly.mpi-cbg.de:8081",
                 "datasetName", "Drosophila").get();
-        ij.command().run(BDVSliceToImgPlus.class, true);//.getOutput();
+        ij.command().run(FastBDVSliceToImgPlus.class, true);//.getOutput();
     }
 }

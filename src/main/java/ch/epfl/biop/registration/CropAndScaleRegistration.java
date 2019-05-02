@@ -49,7 +49,7 @@ public class CropAndScaleRegistration implements Registration<ImagePlus> {
         return (img) -> {
             img.setRoi(this.roi);
             ImagePlus imcropped = (new Duplicator()).run(img);//.duplicate().crop();
-            IJ.run(imcropped, "Scale...", "x="+scale+" y="+scale+" interpolation=None create");
+            IJ.run(imcropped, "Scale...", "x="+scale+" y="+scale+" interpolation=Bilinear create");
             return IJ.getImage();
         };
     }

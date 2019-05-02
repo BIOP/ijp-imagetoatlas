@@ -4,15 +4,31 @@ import java.net.URL;
 
 import bdv.BigDataViewer;
 import bdv.ij.util.ProgressWriterIJ;
+import bdv.util.AxisOrder;
+import bdv.util.Bdv;
+import bdv.util.BdvOptions;
+import bdv.util.RealRandomAccessibleIntervalSource;
+import bdv.viewer.Source;
+import bdv.viewer.SourceAndConverter;
 import bdv.viewer.ViewerOptions;
+import bdv.viewer.state.SourceGroup;
 import bdv.viewer.state.ViewerState;
 import ch.epfl.biop.atlas.AtlasMap;
+import ch.epfl.biop.atlas.allen.adultmousebrain.ProceduralLayerRealRandomAccess;
 import ch.epfl.biop.bdvslicer.ij2command.BDVSliceToImgPlus;
+import ch.epfl.biop.bdvslicer.ij2command.FastBDVSliceToImgPlus;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;
 import mpicbg.spim.data.SpimDataException;
+import net.imglib2.FinalInterval;
+import net.imglib2.RealInterval;
+import net.imglib2.RealRandomAccess;
+import net.imglib2.RealRandomAccessible;
+import net.imglib2.converter.Converter;
 import net.imglib2.realtransform.AffineTransform3D;
+import net.imglib2.type.numeric.ARGBType;
+import net.imglib2.type.numeric.integer.UnsignedByteType;
 
 public class AllenMap implements AtlasMap {
 
@@ -30,6 +46,66 @@ public class AllenMap implements AtlasMap {
 				address = address.substring(5, address.length());
 			}
 			bdv = BigDataViewer.open( address, atlasName, new ProgressWriterIJ(), ViewerOptions.options() );
+			/*bdv.getViewer().getState().addSource(
+					new SourceAndConverter<>();
+			);*/
+
+			/*final Bdv bdv = options.values.addTo();
+			final BdvHandle handle = ( bdv == null )
+					? new BdvHandleFrame( options )
+					: bdv.getBdvHandle();*/
+			/*
+			BdvOptions options = Bdv.options();
+			RealRandomAccess img = new ProceduralLayerRealRandomAccess();
+			final AxisOrder axisOrder = AxisOrder.getAxisOrder(
+					options.values.axisOrder(),
+					img,
+					false );
+			final AffineTransform3D sourceTransform = options.values.getSourceTransform();
+			//final UnsignedByteType type = img.get();
+			//return addRealRandomAccessible( handle, img, interval, type, name, axisOrder, sourceTransform );
+
+
+			FinalInterval interval = new FinalInterval(
+					new long[]{ 0, 0, 0 },
+					new long[]{ 500, 500, 500 } );
+
+			final Source< UnsignedByteType > s = new RealRandomAccessibleIntervalSource<UnsignedByteType>(
+					new RealRandomAccessible<UnsignedByteType>() {
+						@Override
+						public RealRandomAccess<UnsignedByteType> realRandomAccess() {
+							return img;
+						}
+
+						@Override
+						public RealRandomAccess<UnsignedByteType> realRandomAccess(RealInterval realInterval) {
+							return img;
+						}
+
+						@Override
+						public int numDimensions() {
+							return 3;
+						}
+					},
+					interval,
+					new UnsignedByteType(),
+					sourceTransform,
+					"SubRegion");
+			SourceAndConverter<UnsignedByteType> sac = new SourceAndConverter<>(
+					s,
+					new Converter<UnsignedByteType, ARGBType>() {
+						@Override
+						public void convert(UnsignedByteType unsignedByteType, ARGBType argbType) {
+							argbType.set(32768);// = new ARGBType(65536);
+						}
+					}
+			);
+
+			bdv.getViewer().getState().addSource(sac);
+			bdv.getViewer().getState().setCurrentSource(s);
+			bdv.getViewer().getVisibilityAndGrouping().setSourceActive(s,true);*/
+
+
 		} catch (SpimDataException e) {
 			e.printStackTrace();
 		}
@@ -61,7 +137,7 @@ public class AllenMap implements AtlasMap {
     }
 
     public ImagePlus getImagePlusChannel(int channel) {
-		BDVSliceToImgPlus bs = new BDVSliceToImgPlus();
+		FastBDVSliceToImgPlus bs = new FastBDVSliceToImgPlus();
 		// Feeds argument
 		bs.bdv=this.bdv;
 		bs.mipmapLevel = 0;

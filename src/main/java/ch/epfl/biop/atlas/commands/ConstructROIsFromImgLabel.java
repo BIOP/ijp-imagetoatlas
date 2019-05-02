@@ -43,6 +43,8 @@ public class ConstructROIsFromImgLabel implements Command {
 	@Parameter
 	public ObjectService os;
 
+	//RoiManager roiManager;
+
 	@Override
 	public void run() {
 		// Gets pixel array and convert them to Float -> no loss of precision for int 16 or
@@ -121,6 +123,17 @@ public class ConstructROIsFromImgLabel implements Command {
 			}
 		}
 		boolean containsLeaf=true;
+		HashSet<Float> monitored = new HashSet<Float>();
+		/*monitored.add(945f);
+		monitored.add(369f);
+		monitored.add(322f);*/
+
+		/*roiManager = RoiManager.getRoiManager();
+		if (roiManager==null) {
+			roiManager = new RoiManager();
+		}
+		roiManager.reset();*/
+
 		while (containsLeaf) {
 			List<Float> leavesValues = existingPixelValues
 				.stream()
@@ -132,8 +145,20 @@ public class ConstructROIsFromImgLabel implements Command {
 
 					roi.setName(Integer.toString((int) (double) v));
 					roiArray.add(roi);
+
+					//roiManager.addRoi(roi);
+
+					/*if (monitored.contains(v)) {
+						System.out.println("id="+v+" step 0");
+						roiManager.addRoi(roi);
+					}*/
+
 					if (atlas.ontology.getParentToParentMap().containsKey((int) (double)v)) {
+
 						int parentId = atlas.ontology.getParentToParentMap().get((int) (double)v);
+						if (monitored.contains(v)) {
+							System.out.println("id="+v+" has a parent : "+parentId);
+						}
 						fp.setColor(parentId);
 						fp.fill(roi);
 						if (childrenContained.get(parentId)!=null) {
@@ -141,6 +166,10 @@ public class ConstructROIsFromImgLabel implements Command {
 								childrenContained.get(parentId).remove(new Integer((int) (float) v));
 							}
 							existingPixelValues.add((float)parentId);
+						}
+					} else {
+						if (monitored.contains(v)) {
+							System.out.println("id="+v+" has no parent!");
 						}
 					}
 				}
