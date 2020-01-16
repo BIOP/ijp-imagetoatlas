@@ -1,7 +1,7 @@
 package ch.epfl.biop;
 
-import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
-import ch.epfl.biop.java.utilities.roi.types.ImageJRoisFile;
+//import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
+//import ch.epfl.biop.java.utilities.roi.types.ImageJRoisFile;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.plugin.frame.RoiManager;

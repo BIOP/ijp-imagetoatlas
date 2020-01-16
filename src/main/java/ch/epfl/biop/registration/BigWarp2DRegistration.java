@@ -44,7 +44,7 @@ public class BigWarp2DRegistration implements Registration<ImagePlus> {
             bw = new BigWarp( BigWarpInit.createBigWarpDataFromImages( this.mimg, this.fimg ), "Big Warp",  null ); // pb with virtualstack fimg
 
             int shiftChannel = this.mimg.getNChannels();
-            if (this.mimg instanceof CompositeImage) {
+            /*if (this.mimg instanceof CompositeImage) {
                 transferChannelSettings((CompositeImage) this.mimg, bw.getSetupAssignments(), bw.getViewerFrameP().getViewerPanel().getVisibilityAndGrouping(), 0);
             } else {
                 transferImpSettings(this.mimg, bw.getSetupAssignments(), 0);
@@ -54,7 +54,7 @@ public class BigWarp2DRegistration implements Registration<ImagePlus> {
                 transferChannelSettings((CompositeImage) this.fimg, bw.getSetupAssignments(), bw.getViewerFrameQ().getViewerPanel().getVisibilityAndGrouping(), shiftChannel);
             } else {
                 transferImpSettings(this.fimg, bw.getSetupAssignments(), shiftChannel);
-            }
+            }*/
 
             bw.getViewerFrameP().getViewerPanel().requestRepaint();
             bw.getViewerFrameQ().getViewerPanel().requestRepaint();

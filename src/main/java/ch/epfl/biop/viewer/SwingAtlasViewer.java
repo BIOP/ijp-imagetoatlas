@@ -1,10 +1,10 @@
 package ch.epfl.biop.viewer;
 
 import ch.epfl.biop.atlas.BiopAtlas;
-import net.imagej.ui.swing.viewer.EasySwingDisplayViewer;
 import org.scijava.Context;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
+import org.scijava.ui.swing.viewer.EasySwingDisplayViewer;
 import org.scijava.ui.viewer.DisplayViewer;
 
 import javax.swing.*;

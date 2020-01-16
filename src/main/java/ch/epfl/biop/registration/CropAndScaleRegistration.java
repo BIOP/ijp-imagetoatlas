@@ -15,6 +15,7 @@ public class CropAndScaleRegistration implements Registration<ImagePlus> {
     ImagePlus fimg, mimg;
 
     Roi roi;
+
     float scale = 1f;
 
     @Override

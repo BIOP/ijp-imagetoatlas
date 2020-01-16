@@ -7,13 +7,13 @@
 	<parent>
 		<groupId>org.scijava</groupId>
 		<artifactId>pom-scijava</artifactId>
-		<version>24.0.0</version>
+		<version>27.0.1</version>
 		<relativePath />
 	</parent>
 
 	<groupId>ch.epfl.biop</groupId>
 	<artifactId>ImageToAtlasRegister</artifactId>
-	<version>0.1.4</version>
+	<version>0.1.41</version>
 
 	<name>Plugin To Register Images to Atlases</name>
 	<description>Collection of tools to register atlases to images in FIJI.</description>
@@ -133,6 +133,10 @@
 		<main-class>ch.epfl.biop.aba.DummyCommand</main-class>
 		<license.licenseName>N/A</license.licenseName>
 		<license.copyrightOwners>N/A</license.copyrightOwners>
+		<!--<bigdataviewer-core.version>7.0.0</bigdataviewer-core.version>
+		<bigdataviewer-vistools.version>1.0.0-beta-15</bigdataviewer-vistools.version>
+		<bigwarp_fiji.version>5.0.0</bigwarp_fiji.version>
+		<bigdataviewer_fiji.version>6.0.1</bigdataviewer_fiji.version>-->
 	</properties>
 
 	<dependencies>
@@ -204,25 +208,38 @@
 			<artifactId>gson</artifactId>
 			<version>2.8.5</version>
 		</dependency>
+
 		<dependency>
 			<groupId>ch.epfl.biop</groupId>
 			<artifactId>ijl-utilities-wrappers</artifactId>
-			<version>0.3.1</version>
+			<version>0.3.13</version>
 		</dependency>
+
 		<dependency>
-			<groupId>com.mycompany</groupId>
-			<artifactId>example-imagej-display</artifactId>
-			<version>0.1.0-SNAPSHOT</version>
+			<groupId>org.scijava</groupId>
+			<artifactId>scijava-ui-swing</artifactId>
+			<version>0.13.0</version>
 		</dependency>
+
 		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>bigwarp_fiji</artifactId>
-			<version>3.1.3-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>bigdataviewer-vistools</artifactId>
 		</dependency>
+
+		<dependency>
+			<groupId>sc.fiji</groupId>
+			<artifactId>bigdataviewer-core</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>sc.fiji</groupId>
+			<artifactId>bigdataviewer_fiji</artifactId>
+		</dependency>
+
 	</dependencies>
 </project>

@@ -1,8 +1,8 @@
 package ch.epfl.biop.viewer;
 
 import ch.epfl.biop.atlastoimg2d.AtlasToImg2D;
-import net.imagej.ui.swing.viewer.EasySwingDisplayViewer;
 import org.scijava.plugin.Plugin;
+import org.scijava.ui.swing.viewer.EasySwingDisplayViewer;
 import org.scijava.ui.viewer.DisplayViewer;
 
 import javax.swing.*;
