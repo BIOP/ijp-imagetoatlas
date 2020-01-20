@@ -13,7 +13,7 @@
 
 	<groupId>ch.epfl.biop</groupId>
 	<artifactId>ImageToAtlasRegister</artifactId>
-	<version>0.1.41</version>
+	<version>0.1.42-SNAPSHOT</version>
 
 	<name>Plugin To Register Images to Atlases</name>
 	<description>Collection of tools to register atlases to images in FIJI.</description>
@@ -133,10 +133,12 @@
 		<main-class>ch.epfl.biop.aba.DummyCommand</main-class>
 		<license.licenseName>N/A</license.licenseName>
 		<license.copyrightOwners>N/A</license.copyrightOwners>
+		<scijava.app.directory>C:\Users\chiarutt\Desktop\bdv-allen\fiji-win64\Fiji.app</scijava.app.directory>
 		<!--<bigdataviewer-core.version>7.0.0</bigdataviewer-core.version>
 		<bigdataviewer-vistools.version>1.0.0-beta-15</bigdataviewer-vistools.version>
 		<bigwarp_fiji.version>5.0.0</bigwarp_fiji.version>
 		<bigdataviewer_fiji.version>6.0.1</bigdataviewer_fiji.version>-->
+		<scijava-ui-swing.version>0.13.0</scijava-ui-swing.version>
 	</properties>
 
 	<dependencies>
@@ -151,7 +153,7 @@
             <artifactId>imagej-legacy</artifactId>
         </dependency>
         <!-- Third party dependencies -->
-        <dependency>
+        <!--<dependency>
             <groupId>com.itextpdf</groupId>
             <artifactId>itextpdf</artifactId>
         </dependency>
@@ -159,66 +161,67 @@
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-bridge</artifactId>
             <exclusions>
-                <exclusion>
+                <exclusion> -->
                     <!--
                     NB: jython is an unshaded uber-JAR;
                     depending on it brings in duplicate classes.
                     See: https://imagej.net/Uber-JAR
                     -->
-                    <groupId>org.python</groupId>
+                 <!--   <groupId>org.python</groupId>
                     <artifactId>jython</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
+        </dependency>-->
+        <!--
+		<dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-svg-dom</artifactId>
             <exclusions>
-                <exclusion>
+                <exclusion> -->
                     <!--
                     NB: jython is an unshaded uber-JAR;
                     depending on it brings in duplicate classes.
                     See: https://imagej.net/Uber-JAR
                     -->
-                    <groupId>org.python</groupId>
+                 <!--   <groupId>org.python</groupId>
                     <artifactId>jython</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
-		<dependency>
+        </dependency> -->
+		<!--<dependency>
 			<groupId>org.apache.xmlgraphics</groupId>
 			<artifactId>batik-gvt</artifactId>
-		</dependency>
+		</dependency>-->
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
 			<version>20180813</version>
 		</dependency>
-		<dependency>
+		<!-- <dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
-		</dependency>
+		</dependency>-->
 		<dependency>
   			<groupId>sc.fiji</groupId>
   			<artifactId>bigdataviewer_fiji</artifactId>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
-		<dependency>
+		<!--<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
 			<version>2.8.5</version>
-		</dependency>
+		</dependency>-->
 
 		<dependency>
 			<groupId>ch.epfl.biop</groupId>
 			<artifactId>ijl-utilities-wrappers</artifactId>
-			<version>0.3.13</version>
+			<version>0.3.14-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.scijava</groupId>
 			<artifactId>scijava-ui-swing</artifactId>
-			<version>0.13.0</version>
+			<!--<version>0.13.0</version>-->
 		</dependency>
 
 		<dependency>
@@ -234,11 +237,6 @@
 		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>bigdataviewer-core</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>sc.fiji</groupId>
-			<artifactId>bigdataviewer_fiji</artifactId>
 		</dependency>
 
 	</dependencies>
