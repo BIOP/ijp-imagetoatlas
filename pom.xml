@@ -13,7 +13,7 @@
 
 	<groupId>ch.epfl.biop</groupId>
 	<artifactId>ImageToAtlasRegister</artifactId>
-	<version>0.1.42-SNAPSHOT</version>
+	<version>0.1.42</version>
 
 	<name>Plugin To Register Images to Atlases</name>
 	<description>Collection of tools to register atlases to images in FIJI.</description>
