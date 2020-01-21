@@ -13,6 +13,7 @@ import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.StringTokenizer;
@@ -36,9 +37,6 @@ public class PutAtlasStructureToImage implements Command {
     Boolean addAncestors=false;
 
     @Parameter
-    Boolean addLeavesOnly=false;
-
-    @Parameter
     Boolean clearRoiManager=false;
 
     @Parameter(label="Roi Naming",choices={"name","acronym","id","Roi Manager Index (no suffix)"})
@@ -49,9 +47,6 @@ public class PutAtlasStructureToImage implements Command {
 
     //@Parameter(label="Right Left",choices={"Both","Left","Right"})
     //String rlChoice;
-
-    @Parameter
-    boolean addRLSuffix=false;
 
     @Parameter
     boolean outputLabelImage;
@@ -65,7 +60,7 @@ public class PutAtlasStructureToImage implements Command {
 		
 		// Fetch all structures required by the user and put structure ids into a HashSet
 		while (st.hasMoreTokens()) {
-	        Integer structureId=-1;
+	        Integer structureId;
 			String structure_key = st.nextToken().trim().toUpperCase();
 			if (atlas.ontology.getIdFromPooledProperties(structure_key)!=null) {
 			//if (AtlasDataPreferences.ontologyIdentifierToStructureId.containsKey(structure_key)) {
@@ -75,10 +70,10 @@ public class PutAtlasStructureToImage implements Command {
     	        ids.add(structureId);
     	        if (addDescendants) ids.addAll(atlas.ontology.getAllChildren(structureId));
     	        if (addAncestors) ids.addAll(atlas.ontology.getAllParents(structureId));
-    	        if (addLeavesOnly) {
+    	        /*if (addLeavesOnly) {
     	        	ids.remove(structureId);
     	        	ids.addAll(atlas.ontology.getAllLeaves(structureId));
-    	        }
+    	        }*/
 			} else {
                 System.err.println("Structure key"+structure_key+" not found in ontology, abort command.");
             }   
@@ -116,9 +111,22 @@ public class PutAtlasStructureToImage implements Command {
         }
 
         if (outputLabelImage) {
-            ((ImagePlus) cr.to(ImagePlus.class)).show();
+            // The line below do not work because a pixel can have multiple indexes
+            //((ImagePlus) cr.to(ImagePlus.class)).show();
+
+            System.err.println("Impossible to output a correct label image\n" +
+                    " !!!!! OUTPUTING a label image is not possible because:\n" +
+                    "            // * We cannot output an image with enough range because some ids are above > 65536\n" +
+                    "            // * We can output an image with 32 bits float, but there is not enough precsion because\n" +
+                    "            // some ids are very big but with very little difference :\n" +
+                    "            // Like:\n" +
+                    "            // * 41234567891231\n" +
+                    "            // * 41234567891234\n" +
+                    "            // This difference is lost in translation in float 32 bits...");
+
         }		
 	}
+
 	
     public boolean isInteger( String input ) {
         try {

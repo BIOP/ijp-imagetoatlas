@@ -6,22 +6,22 @@ import java.util.Map;
 
 public interface AtlasOntology {
 	
-	public void initialize();
-	public void setDataSource(URL dataSource);
-	public URL getDataSource();
+	void initialize();
+	void setDataSource(URL dataSource);
+	URL getDataSource();
 	
-	public Map<Integer,List<Integer>> getParentToChildrenMap(); 
-	public Map<Integer,Integer> getParentToParentMap(); 
-	public List<Integer> getAllLeaves(int id);
-	public List<Integer> getAllChildren(int id);
-	public List<Integer> getAllParents(int id);
-	public Integer getParent(int id);
-	public List<Integer> getChildren(int id);
-	public List<String> getKeys(String key);
-	public Map<String, String> getProperties(int id);
-	public Integer getIdFromPooledProperties(String prop);
-	public Integer getRootIndex();
+	Map<Integer,List<Integer>> getParentToChildrenMap();
+	Map<Integer,Integer> getParentToParentMap();
+	List<Integer> getAllLeaves(int id);
+	List<Integer> getAllChildren(int id);
+	List<Integer> getAllParents(int id);
+	Integer getParent(int id);
+	List<Integer> getChildren(int id);
+	List<String> getKeys(String key);
+	Map<String, String> getProperties(int id);
+	Integer getIdFromPooledProperties(String prop);
+	Integer getRootIndex();
 
-	public String getNamingDisplayProperty();
+	String getNamingDisplayProperty();
 
 }
