@@ -6,11 +6,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -180,9 +176,16 @@ public class AllenOntology implements AtlasOntology {
 
     }
 
+    HashSet<Float> occupiedIds = new HashSet<>();
+
     <T> Map<Integer, T> mutateMapKeysModulo(Map<Integer, T> map_in, int mod, T value) {
         Map<Integer,T> map_out = new HashMap<>();
         map_in.forEach((k,v) -> {
+            /*System.out.println(k);
+            if (occupiedIds.contains(k)) {
+                System.out.println("id : "+k+" has a duplicate with "+((float)k));
+                occupiedIds.add((float)k);
+            }*/
             Integer newKey = k % mod;
             if (map_out.containsKey(newKey)) {
                 System.err.println("Error: duplicate key k % "+mod+" = "+newKey+" k= "+k);

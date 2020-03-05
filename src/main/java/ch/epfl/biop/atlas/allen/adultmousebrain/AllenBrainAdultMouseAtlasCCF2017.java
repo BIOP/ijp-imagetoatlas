@@ -17,7 +17,9 @@ import org.scijava.plugin.Plugin;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Allen Brain Adult Mouse Brain CCF 2017")
 public class AllenBrainAdultMouseAtlasCCF2017 extends AllenAtlas implements Command {
@@ -49,10 +51,28 @@ public class AllenBrainAdultMouseAtlasCCF2017 extends AllenAtlas implements Comm
 
 	final static public int CHANNEL_LABELMOD65000 = 2;
 
+	int previousId ;
 	@Override
 	public void run() {
         try {
 			this.initialize(new URL(mapUrl), new URL(ontologyUrl));
+			/*
+			List<Integer> idList = ((AllenOntology)this.ontology).ontologyIdToParentId.keySet().stream().collect(Collectors.toList());
+			Collections.sort(idList);
+
+			previousId = 0;
+
+			idList.stream().forEach(id -> {
+				boolean identical = ((float)id==((float)previousId));
+				if (identical) {
+					System.out.println(((AllenOntology) this.ontology).ontologyIdToAcronym.get(id) + "\t" + id + "\t:\t" + (float) (id) + "\t ISSUE!!");
+				} else {
+					System.out.println(((AllenOntology) this.ontology).ontologyIdToAcronym.get(id) + "\t" + id + "\t:\t" + (float) (id) + "\t ok. ");
+
+				}
+				previousId = id;
+			});*/
+
 			((AllenOntology)this.ontology).mutateToModulo(65000); // Solves issue of very big indexes in allen brain ontology. The map has also been moduloed.
 			((AllenMap)this.map).LabelChannel=2;
 			this.map.show();
