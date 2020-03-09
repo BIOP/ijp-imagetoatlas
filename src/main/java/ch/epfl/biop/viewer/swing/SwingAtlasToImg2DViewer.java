@@ -1,4 +1,4 @@
-package ch.epfl.biop.viewer;
+package ch.epfl.biop.viewer.swing;
 
 import ch.epfl.biop.atlastoimg2d.AtlasToImg2D;
 import org.scijava.plugin.Plugin;

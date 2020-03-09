@@ -2,16 +2,12 @@ package ch.epfl.biop.atlas.allen;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 
 import ch.epfl.biop.atlas.BiopAtlas;
 import ch.epfl.biop.atlas.commands.ConstructROIsFromImgLabel;
 import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
-import org.scijava.Context;
-
-import javax.swing.*;
 
 abstract public class AllenAtlas extends BiopAtlas {
 	// http://download.alleninstitute.org/informatics-archive/current-release/mouse_ccf/
@@ -32,17 +28,17 @@ abstract public class AllenAtlas extends BiopAtlas {
 	}
 	
 	public void runOnClose(Runnable onClose) {
-		((AllenMap) map).bdv.getViewerFrame().addWindowListener(new WindowAdapter() {
+		/*((AllenMap) map).bdvh.getViewerFrame().addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
 				onClose.run();
 			}
-		});
+		});*/
 	}
 	
     public ConvertibleRois getCurrentROIs() {
     	ConstructROIsFromImgLabel cmd = new ConstructROIsFromImgLabel();
     	cmd.atlas=this;
-    	cmd.labelImg=this.map.getCurrentLabelImage();
+    	cmd.labelImg=this.map.getCurrentLabelImageAsImagePlus();
     	cmd.smoothen=true;
     	cmd.run();
     	cmd.labelImg.close();

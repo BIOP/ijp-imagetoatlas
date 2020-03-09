@@ -1,4 +1,4 @@
-package ch.epfl.biop.registration;
+package ch.epfl.biop.registration.imageplus;
 
 import bdv.ij.ApplyBigwarpPlugin;
 import bdv.tools.brightness.ConverterSetup;
@@ -9,6 +9,7 @@ import bigwarp.BigWarp;
 import bigwarp.BigWarpInit;
 import ch.epfl.biop.fiji.imageplusutils.ImagePlusFunctions;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
+import ch.epfl.biop.registration.Registration;
 import ij.CompositeImage;
 import ij.IJ;
 import ij.ImagePlus;

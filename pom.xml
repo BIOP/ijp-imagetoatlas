@@ -134,10 +134,13 @@
 		<license.licenseName>N/A</license.licenseName>
 		<license.copyrightOwners>N/A</license.copyrightOwners>
 		<scijava.app.directory>C:\Users\chiarutt\Desktop\bdv-allen\fiji-win64\Fiji.app</scijava.app.directory>
-		<bigdataviewer-core.version>7.0.0</bigdataviewer-core.version>
-		<!--<bigdataviewer-vistools.version>1.0.0-beta-15</bigdataviewer-vistools.version>
+		<!--<bigdataviewer-core.version>7.0.0</bigdataviewer-core.version>
+		<bigdataviewer-vistools.version>1.0.0-beta-15</bigdataviewer-vistools.version>
 		<bigwarp_fiji.version>5.0.0</bigwarp_fiji.version>
 		<bigdataviewer_fiji.version>6.0.1</bigdataviewer_fiji.version>-->
+		<bigdataviewer-core.version>7.0.0</bigdataviewer-core.version>
+		<bigdataviewer-vistools.version>1.0.0-beta-15</bigdataviewer-vistools.version>
+		<bigwarp_fiji.version>5.0.0</bigwarp_fiji.version>
 		<scijava-ui-swing.version>0.13.0</scijava-ui-swing.version>
 	</properties>
 
@@ -152,76 +155,26 @@
             <groupId>net.imagej</groupId>
             <artifactId>imagej-legacy</artifactId>
         </dependency>
-        <!-- Third party dependencies -->
-        <!--<dependency>
-            <groupId>com.itextpdf</groupId>
-            <artifactId>itextpdf</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.xmlgraphics</groupId>
-            <artifactId>batik-bridge</artifactId>
-            <exclusions>
-                <exclusion> -->
-                    <!--
-                    NB: jython is an unshaded uber-JAR;
-                    depending on it brings in duplicate classes.
-                    See: https://imagej.net/Uber-JAR
-                    -->
-                 <!--   <groupId>org.python</groupId>
-                    <artifactId>jython</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>-->
-        <!--
-		<dependency>
-            <groupId>org.apache.xmlgraphics</groupId>
-            <artifactId>batik-svg-dom</artifactId>
-            <exclusions>
-                <exclusion> -->
-                    <!--
-                    NB: jython is an unshaded uber-JAR;
-                    depending on it brings in duplicate classes.
-                    See: https://imagej.net/Uber-JAR
-                    -->
-                 <!--   <groupId>org.python</groupId>
-                    <artifactId>jython</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency> -->
-		<!--<dependency>
-			<groupId>org.apache.xmlgraphics</groupId>
-			<artifactId>batik-gvt</artifactId>
-		</dependency>-->
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
 			<version>20180813</version>
 		</dependency>
-		<!-- <dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
-		</dependency>-->
+
 		<dependency>
   			<groupId>sc.fiji</groupId>
   			<artifactId>bigdataviewer_fiji</artifactId>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
-		<!--<dependency>
-			<groupId>com.google.code.gson</groupId>
-			<artifactId>gson</artifactId>
-			<version>2.8.5</version>
-		</dependency>-->
 
 		<dependency>
 			<groupId>ch.epfl.biop</groupId>
 			<artifactId>ijl-utilities-wrappers</artifactId>
-			<version>0.3.14</version>
+			<version>0.3.15-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.scijava</groupId>
 			<artifactId>scijava-ui-swing</artifactId>
-			<!--<version>0.13.0</version>-->
 		</dependency>
 
 		<dependency>
@@ -237,6 +190,18 @@
 		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>bigdataviewer-core</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>sc.fiji</groupId>
+			<artifactId>bigdataviewer-playground</artifactId>
+			<version>0.1.5-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>ch.epfl.biop</groupId>
+			<artifactId>bigdataviewer-bioformats</artifactId>
+			<version>0.2.1-SNAPSHOT</version>
 		</dependency>
 
 	</dependencies>

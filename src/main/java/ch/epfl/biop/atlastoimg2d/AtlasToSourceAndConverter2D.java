@@ -1,5 +1,8 @@
 package ch.epfl.biop.atlastoimg2d;
 
+import bdv.util.RandomAccessibleIntervalSource;
+import bdv.viewer.Source;
+import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.BiopAtlas;
 import ch.epfl.biop.atlas.commands.ConstructROIsFromImgLabel;
 import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
@@ -9,8 +12,14 @@ import ch.epfl.biop.registration.Registration;
 import ij.ImagePlus;
 import ij.measure.Calibration;
 import ij.plugin.frame.RoiManager;
+import net.imglib2.img.array.ArrayImg;
+import net.imglib2.img.array.ArrayImgs;
+import net.imglib2.util.Util;
 import org.scijava.Context;
 import org.scijava.command.CommandService;
+import sc.fiji.bdvpg.services.SourceAndConverterServices;
+import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterUtils;
+import sc.fiji.bdvpg.sourceandconverter.transform.SourceResampler;
 
 import java.io.File;
 import java.net.URL;
@@ -18,21 +27,22 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
-public class AtlasToImagePlus2D implements AtlasToImg2D<ImagePlus> {
+public class AtlasToSourceAndConverter2D implements AtlasToImg2D<SourceAndConverter[]> {
 
     BiopAtlas ba;
     Object atlasLocation;
 
     Context ctx;
 
-    ArrayList<Registration<ImagePlus>> registrationSequence = new ArrayList<>();
+    ArrayList<Registration<SourceAndConverter[]>> registrationSequence = new ArrayList<>();
 
-    ArrayList<ImagePlus> registeredImageSequence = new ArrayList<>();
+    ArrayList<SourceAndConverter[]> registeredImageSequence = new ArrayList<>();
 
-    ImagePlus imageUsedForRegistration;
+    SourceAndConverter[] imageUsedForRegistration;
 
-    ImagePlus imgAtlas;
+    SourceAndConverter[] imgAtlas;
 
     ConvertibleRois untransformedRois;
 
@@ -57,8 +67,10 @@ public class AtlasToImagePlus2D implements AtlasToImg2D<ImagePlus> {
             this.ba.map.setCurrentLocation(this.atlasLocation);
         }
 
-        imgAtlas = this.ba.map.getCurrentStructuralImageAsImagePlus().duplicate();
-        imgAtlas.setCalibration(new Calibration());
+        //TODO imgAtlas = this.ba.map.getCurrentStructuralImageAsImagePlus().duplicate();
+        //TODO imgAtlas.setCalibration(new Calibration());
+
+        imgAtlas = this.ba.map.getCurrentStructuralImageAsSacs();
         atlasLocation=location;
 
         ImagePlus imgLabel = this.ba.map.getCurrentLabelImageAsImagePlus();
@@ -84,41 +96,50 @@ public class AtlasToImagePlus2D implements AtlasToImg2D<ImagePlus> {
     }
 
     @Override
-    public void addRegistration(Registration<ImagePlus> reg) {
-       this.addRegistration(reg, imagePlus -> imagePlus, imagePlus -> imagePlus);
+    public void addRegistration(Registration<SourceAndConverter[]> reg) {
+       this.addRegistration(reg, image -> image, image -> image);
     }
 
     @Override
-    public void addRegistration(Registration<ImagePlus> reg, Function<ImagePlus, ImagePlus> preprocessFixedImage, Function<ImagePlus, ImagePlus> preprocessMovingImage) {
-        ImagePlus f = preprocessFixedImage.apply(imgAtlas);
-        imgAtlas.hide();
+    public void addRegistration(Registration<SourceAndConverter[]> reg, Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixedImage, Function<SourceAndConverter[], SourceAndConverter[]> preprocessMovingImage) {
+        SourceAndConverter[] f = preprocessFixedImage.apply(imgAtlas);
+        //imgAtlas.hide();
 
         reg.setFixedImage(f);
-        ImagePlus imgIn;
+        SourceAndConverter[] imgIn;
         if (registrationSequence.size()==0) {
             imgIn = this.imageUsedForRegistration;
         } else {
             imgIn = this.registeredImageSequence.get(registeredImageSequence.size()-1);
         }
-        ImagePlus m = preprocessMovingImage.apply(imgIn);
+        SourceAndConverter[] m = preprocessMovingImage.apply(imgIn);
         reg.setMovingImage(m);
         reg.register();
-        m.hide();
-        f.hide();
+        SourceAndConverterServices.getSourceAndConverterDisplayService()
+                .removeFromActiveBdv(m);
+
+        SourceAndConverterServices.getSourceAndConverterDisplayService()
+                .removeFromActiveBdv(f);
 
         this.registrationSequence.add(reg);
-        ImagePlus trImg = reg.getImageRegistration().apply(imgIn);
-        trImg.setCalibration(new Calibration());
+        SourceAndConverter[] trImg = reg.getImageRegistration().apply(imgIn);
+        //trImg.setCalibration(new Calibration());
         this.registeredImageSequence.add(trImg);
-        this.registeredImageSequence.get(registeredImageSequence.size()-1).show();
-        if (this.registrationSequence.size()>1) {
-            imgIn.hide();
-        }
-        m.changes = false;
-        m.close();
 
-        f.changes = false;
-        f.close();
+        SourceAndConverterServices.getSourceAndConverterDisplayService()
+                .show(this.registeredImageSequence.get(registeredImageSequence.size()-1));
+        if (this.registrationSequence.size()>1) {
+            SourceAndConverterServices.getSourceAndConverterDisplayService()
+                    .removeFromActiveBdv(imgIn);
+        }
+
+        SourceAndConverterServices.getSourceAndConverterDisplayService()
+                .removeFromActiveBdv(m);
+
+
+        SourceAndConverterServices.getSourceAndConverterDisplayService()
+                .removeFromActiveBdv(f);
+
 
         this.computeTransformedRois();
     }
@@ -126,9 +147,9 @@ public class AtlasToImagePlus2D implements AtlasToImg2D<ImagePlus> {
     @Override
     public void showLastImage() {
         if (registeredImageSequence.size()==0) {
-            this.imageUsedForRegistration.show();
+            SourceAndConverterServices.getSourceAndConverterDisplayService().show(this.imageUsedForRegistration);
         } else {
-            this.registeredImageSequence.get(registeredImageSequence.size() - 1).show();
+            SourceAndConverterServices.getSourceAndConverterDisplayService().show(this.registeredImageSequence.get(registeredImageSequence.size() - 1));
         }
     }
 
@@ -136,8 +157,8 @@ public class AtlasToImagePlus2D implements AtlasToImg2D<ImagePlus> {
     public void rmLastRegistration() {
         assert registeredImageSequence.size()>1;
         assert registeredImageSequence.size()==registrationSequence.size();
-        this.registeredImageSequence.get(registeredImageSequence.size()-1).changes=false;
-        this.registeredImageSequence.get(registeredImageSequence.size()-1).close();
+        //TODO this.registeredImageSequence.get(registeredImageSequence.size()-1).changes=false;
+        //TODO this.registeredImageSequence.get(registeredImageSequence.size()-1).close();
         registrationSequence.remove(registrationSequence.size()-1);
         registeredImageSequence.remove(registeredImageSequence.size()-1);
 
@@ -150,7 +171,7 @@ public class AtlasToImagePlus2D implements AtlasToImg2D<ImagePlus> {
     }
 
     @Override
-    public ArrayList<Registration<ImagePlus>> getRegistrations() {
+    public ArrayList<Registration<SourceAndConverter[]>> getRegistrations() {
         return this.registrationSequence;
     }
 
@@ -160,13 +181,13 @@ public class AtlasToImagePlus2D implements AtlasToImg2D<ImagePlus> {
     }
 
     @Override
-    public void setImage(ImagePlus img) {
+    public void setImage(SourceAndConverter[] img) {
         imageUsedForRegistration = img;
-        imageUsedForRegistration.setCalibration(new Calibration());
+        //TODO imageUsedForRegistration.setCalibration(new Calibration());
     }
 
     @Override
-    public ImagePlus getImage() {
+    public SourceAndConverter[] getImage() {
         return this.imageUsedForRegistration;
     }
 

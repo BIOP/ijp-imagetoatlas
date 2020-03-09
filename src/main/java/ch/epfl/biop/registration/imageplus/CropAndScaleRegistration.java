@@ -1,6 +1,7 @@
-package ch.epfl.biop.registration;
+package ch.epfl.biop.registration.imageplus;
 
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
+import ch.epfl.biop.registration.Registration;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.WaitForUserDialog;

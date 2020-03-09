@@ -77,11 +77,11 @@ public class AllenBrainAdultMouseAtlasCCF2017 extends AllenAtlas implements Comm
 			((AllenMap)this.map).LabelChannel=2;
 			this.map.show();
 
-			BigDataViewer bdv = ((AllenMap) this.map).bdv;
+			//BigDataViewer bdv = ((AllenMap) this.map).bdv;
 
-			os.addObject(bdv);
+			//os.addObject(bdv);
 
-			bdv.getViewer().getState().setDisplayMode(DisplayMode.FUSEDGROUP);
+			/*bdv.getViewer().getState().setDisplayMode(DisplayMode.FUSEDGROUP);
 			bdv.getViewer().getVisibilityAndGrouping().setFusedEnabled(true);
 
 			List<ConverterSetup> setups = bdv.getSetupAssignments().getConverterSetups();
@@ -92,7 +92,7 @@ public class AllenBrainAdultMouseAtlasCCF2017 extends AllenAtlas implements Comm
 
 			setups.get(CHANNEL_AVERAGE).setColor(new ARGBType(ARGBType.rgba(255f,0f,0f,0f)));
 			setups.get(CHANNEL_NISSL).setColor(new ARGBType(ARGBType.rgba(0f,255f,0f,0f)));
-			setups.get(CHANNEL_LABELMOD65000).setColor(new ARGBType(ARGBType.rgba(0f,0f,255f,0f)));
+			setups.get(CHANNEL_LABELMOD65000).setColor(new ARGBType(ARGBType.rgba(0f,0f,255f,0f)));*/
 			
 	        Prefs.set(keyPrefix + "mapUrl", mapUrl);
 	        Prefs.set(keyPrefix + "ontologyUrl", ontologyUrl);

@@ -1,6 +1,7 @@
 package ch.epfl.biop.bdvslicer.ij2command;
 
 import bdv.BigDataViewer;
+import bdv.util.BdvHandle;
 import bdv.viewer.Interpolation;
 import bdv.viewer.Source;
 import bdv.viewer.state.ViewerState;
@@ -20,6 +21,8 @@ import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
+import javax.swing.*;
+
 @Plugin(type = Command.class, menuPath = "Plugins>BigDataViewer>Current View to ImgPlus Fast")
 public class FastBDVSliceToImgPlus<T extends RealType<T>> implements Command {
 
@@ -30,7 +33,7 @@ public class FastBDVSliceToImgPlus<T extends RealType<T>> implements Command {
     public int mipmapLevel=0;
 
     @Parameter
-    public BigDataViewer bdv;
+    public BdvHandle bdvh;
 
     @Parameter(type = ItemIO.OUTPUT)
     public ImagePlus imp;
@@ -55,7 +58,7 @@ public class FastBDVSliceToImgPlus<T extends RealType<T>> implements Command {
     @Override
     public void run() {
         // Retrieve viewer state from big data viewer
-        ViewerState viewerState = bdv.getViewer().getState();
+        ViewerState viewerState = bdvh.getViewerPanel().getState();
         timepoint = viewerState.getCurrentTimepoint();
 
         // Get the source
@@ -81,8 +84,8 @@ public class FastBDVSliceToImgPlus<T extends RealType<T>> implements Command {
         viewerState.getViewerTransform( transformedSourceToViewer ); // Get current transformation by the viewer state and puts it into sourceToImgPlus
 
         //Center on the display center of the viewer ...
-        double w = bdv.getViewerFrame().getViewerPanel().getDisplay().getWidth();
-        double h = bdv.getViewerFrame().getViewerPanel().getDisplay().getHeight();
+        double w = bdvh.getViewerPanel().getDisplay().getWidth();
+        double h = bdvh.getViewerPanel().getDisplay().getHeight();
         transformedSourceToViewer.translate(new double[]{-w/2,-h/2,0});
 
         // Getting an image independent of the view scaling unit
@@ -110,7 +113,7 @@ public class FastBDVSliceToImgPlus<T extends RealType<T>> implements Command {
 
         //ImageJFunctions.w
         // Wraps as an ImagePlus -> ItemIO returned
-        imp = ImageJFunctions.wrap(view,bdv.getViewerFrame().getTitle()
+        imp = ImageJFunctions.wrap(view, SwingUtilities.getWindowAncestor(bdvh.getViewerPanel()).getName()
                 +"- ["+ sourceIndex +","+ timepoint +","+mipmapLevel+"]"
                 +"[(+"+ xSize +","+(-xSize)+");"
                 +"(+"+ ySize +","+(-ySize)+");"

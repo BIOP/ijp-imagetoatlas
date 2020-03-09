@@ -1,12 +1,15 @@
-package ch.epfl.biop.atlastoimg2d.commands;
+package ch.epfl.biop.atlastoimg2d.commands.imageplus;
 
 import ch.epfl.biop.atlastoimg2d.AtlasToImg2D;
 import ch.epfl.biop.fiji.imageplusutils.ImagePlusFunctions;
 import ch.epfl.biop.registration.*;
+import ch.epfl.biop.registration.imageplus.BigWarp2DGridRegistration;
+import ch.epfl.biop.registration.imageplus.BigWarp2DRegistration;
+import ch.epfl.biop.registration.imageplus.CropAndScaleRegistration;
+import ch.epfl.biop.registration.imageplus.Elastix2DRegistration;
 import ij.CompositeImage;
 import ij.ImagePlus;
 import ij.plugin.ChannelSplitter;
-import ij.plugin.Concatenator;
 import ij.plugin.Duplicator;
 import ij.process.ImageProcessor;
 import ij.process.LUT;
@@ -16,7 +19,6 @@ import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.function.Function;
 

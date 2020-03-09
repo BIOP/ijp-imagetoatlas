@@ -1,8 +1,9 @@
-package ch.epfl.biop.registration;
+package ch.epfl.biop.registration.imageplus;
 
 import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import ch.epfl.biop.java.utilities.roi.types.TransformixOutputRoisFile;
+import ch.epfl.biop.registration.Registration;
 import ch.epfl.biop.wrappers.elastix.RegisterHelper;
 import ch.epfl.biop.wrappers.elastix.ij2commands.Elastix_Register;
 import ch.epfl.biop.wrappers.transformix.TransformHelper;

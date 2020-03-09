@@ -1,19 +1,15 @@
-package ch.epfl.biop.registration;
+package ch.epfl.biop.registration.imageplus;
 
-import bdv.ij.ApplyBigwarpPlugin;
-import bdv.viewer.Interpolation;
 import bigwarp.BigWarp;
 import bigwarp.BigWarpInit;
-import ch.epfl.biop.java.utilities.roi.types.RealPointList;
+import ch.epfl.biop.registration.Registration;
 import ij.CompositeImage;
 import ij.ImagePlus;
 import ij.gui.Roi;
 import ij.gui.WaitForUserDialog;
 import mpicbg.spim.data.SpimDataException;
-import net.imglib2.RealPoint;
 
 import javax.swing.*;
-import java.util.function.Function;
 
 public class BigWarp2DGridRegistration extends BigWarp2DRegistration implements Registration<ImagePlus> {
 

@@ -9,7 +9,7 @@ import ch.epfl.biop.atlas.BiopAtlas;
 import ij.ImagePlus;
 
 @Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Export Current Atlas Slice as ImagePlus")
-public class GetAtlasSlice implements Command{
+public class GetAtlasSliceAsImagePlus implements Command{
 	@Parameter
 	BiopAtlas atlas;
 	
@@ -21,8 +21,8 @@ public class GetAtlasSlice implements Command{
 	
 	@Override
 	public void run() {
-		imageLabel = atlas.map.getCurrentLabelImage();
-		imageStructure = atlas.map.getCurrentStructuralImage();
+		imageLabel = atlas.map.getCurrentLabelImageAsImagePlus();
+		imageStructure = atlas.map.getCurrentStructuralImageAsImagePlus();
 	}
 	
 }

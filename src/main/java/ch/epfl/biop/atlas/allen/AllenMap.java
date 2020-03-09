@@ -1,13 +1,12 @@
 package ch.epfl.biop.atlas.allen;
 
 import java.net.URL;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import bdv.BigDataViewer;
 import bdv.ij.util.ProgressWriterIJ;
-import bdv.util.AxisOrder;
-import bdv.util.Bdv;
-import bdv.util.BdvOptions;
-import bdv.util.RealRandomAccessibleIntervalSource;
+import bdv.util.*;
 import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
 import bdv.viewer.ViewerOptions;
@@ -21,94 +20,67 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;
 import mpicbg.spim.data.SpimDataException;
+import mpicbg.spim.data.generic.AbstractSpimData;
 import net.imglib2.FinalInterval;
 import net.imglib2.RealInterval;
 import net.imglib2.RealRandomAccess;
 import net.imglib2.RealRandomAccessible;
 import net.imglib2.converter.Converter;
+import net.imglib2.img.array.ArrayImg;
+import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
+import net.imglib2.util.Util;
+import sc.fiji.bdvpg.services.SourceAndConverterServices;
+import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterUtils;
+import sc.fiji.bdvpg.sourceandconverter.transform.SourceResampler;
+import sc.fiji.bdvpg.spimdata.importer.SpimDataFromXmlImporter;
 
 public class AllenMap implements AtlasMap {
 
-	public BigDataViewer bdv;
+	public BdvHandle bdvh;
+
+	List<SourceAndConverter> sacs;
+
 	URL dataSource;
 	public int StructureChannel = 0;
 	public int LabelChannel = 1;
+
+	final static public int AvgChannel = 0;
+	final static public int NisslChannel = 1;
 	
 	@Override
 	public void initialize(String atlasName) {
-		try {
+		//try {
 			String address =  this.getDataSource().toString();
 			// Hacky Mac HackFace
 			if (address.startsWith("file:")) {
-				address = address.substring(5, address.length());
+				address = address.substring(5);
 			}
-			bdv = BigDataViewer.open( address, atlasName, new ProgressWriterIJ(), ViewerOptions.options() );
-			/*bdv.getViewer().getState().addSource(
-					new SourceAndConverter<>();
-			);*/
 
-			/*final Bdv bdv = options.values.addTo();
-			final BdvHandle handle = ( bdv == null )
-					? new BdvHandleFrame( options )
-					: bdv.getBdvHandle();*/
-			/*
-			BdvOptions options = Bdv.options();
-			RealRandomAccess img = new ProceduralLayerRealRandomAccess();
-			final AxisOrder axisOrder = AxisOrder.getAxisOrder(
-					options.values.axisOrder(),
-					img,
-					false );
-			final AffineTransform3D sourceTransform = options.values.getSourceTransform();
-			//final UnsignedByteType type = img.get();
-			//return addRealRandomAccessible( handle, img, interval, type, name, axisOrder, sourceTransform );
+			SpimDataFromXmlImporter importer = new SpimDataFromXmlImporter(address);
+			//importer.run();
+
+			sacs = SourceAndConverterServices
+				.getSourceAndConverterService()
+				.getSourceAndConverterFromSpimdata(importer.get());
+
+			bdvh = SourceAndConverterServices
+					.getSourceAndConverterDisplayService()
+					.getNewBdv();
+
+			SourceAndConverterServices
+					.getSourceAndConverterDisplayService()
+					.show(bdvh, sacs.toArray(new SourceAndConverter[sacs.size()]));
+
+			//bdv = BigDataViewer.open( address, atlasName, new ProgressWriterIJ(), ViewerOptions.options() );
 
 
-			FinalInterval interval = new FinalInterval(
-					new long[]{ 0, 0, 0 },
-					new long[]{ 500, 500, 500 } );
 
-			final Source< UnsignedByteType > s = new RealRandomAccessibleIntervalSource<UnsignedByteType>(
-					new RealRandomAccessible<UnsignedByteType>() {
-						@Override
-						public RealRandomAccess<UnsignedByteType> realRandomAccess() {
-							return img;
-						}
-
-						@Override
-						public RealRandomAccess<UnsignedByteType> realRandomAccess(RealInterval realInterval) {
-							return img;
-						}
-
-						@Override
-						public int numDimensions() {
-							return 3;
-						}
-					},
-					interval,
-					new UnsignedByteType(),
-					sourceTransform,
-					"SubRegion");
-			SourceAndConverter<UnsignedByteType> sac = new SourceAndConverter<>(
-					s,
-					new Converter<UnsignedByteType, ARGBType>() {
-						@Override
-						public void convert(UnsignedByteType unsignedByteType, ARGBType argbType) {
-							argbType.set(32768);// = new ARGBType(65536);
-						}
-					}
-			);
-
-			bdv.getViewer().getState().addSource(sac);
-			bdv.getViewer().getState().setCurrentSource(s);
-			bdv.getViewer().getVisibilityAndGrouping().setSourceActive(s,true);*/
-
-
-		} catch (SpimDataException e) {
+		/*} catch (SpimDataException e) {
 			e.printStackTrace();
-		}
+		}*/
 	}
 
 	@Override
@@ -123,12 +95,12 @@ public class AllenMap implements AtlasMap {
 
 	@Override
 	public void show() {
-		bdv.getViewerFrame().setVisible(true);
+		//bdv.getViewerFrame().setVisible(true);
 	}
 
 	@Override
 	public void hide() {
-		bdv.getViewerFrame().setVisible(false);
+		//bdv.getViewerFrame().setVisible(false);
 	}
 
     @Override
@@ -139,23 +111,47 @@ public class AllenMap implements AtlasMap {
     public ImagePlus getImagePlusChannel(int channel) {
 		FastBDVSliceToImgPlus bs = new FastBDVSliceToImgPlus();
 		// Feeds argument
-		bs.bdv=this.bdv;
+		bs.bdvh=this.bdvh;
 		bs.mipmapLevel = 0;
 		bs.xSize=300;
 		bs.ySize=300;
 		bs.zSize=0;
-		bs.samplingInXVoxelUnit=0.05;//1.0;
+		bs.samplingInXVoxelUnit=0.05e3;//1.0;
 		bs.interpolate=false;
 		bs.sourceIndex = channel;
 		bs.run();
 		return bs.imp;
 	}
 
-	final static public int AvgChannel = 0;
-	final static public int NisslChannel = 1;
+	public double getNormTransform(int axis, AffineTransform3D t) {
+		double f0 = t.get(axis,0);
+		double f1 = t.get(axis,1);
+		double f2 = t.get(axis,2);
+		return Math.sqrt(f0*f0+f1*f1+f2*f2);
+	}
+
+	public SourceAndConverter getSacChannel(int channel) {
+		ArrayImg rai = ArrayImgs.unsignedBytes((long) 600,(long) 600,(long) 1);
+		AffineTransform3D at3D = (AffineTransform3D) this.getCurrentLocation();
+
+		double xNorm = getNormTransform(0,at3D);//trans
+		double samplingInXVoxelUnit=0.05e3;//1.0;
+		at3D.scale(samplingInXVoxelUnit/xNorm);
+
+		Source src = new RandomAccessibleIntervalSource(rai, Util.getTypeFromInterval(rai), at3D.inverse(), "AB_"+channel);
+		SourceAndConverter model;
+		model = SourceAndConverterUtils.createSourceAndConverter(src);
+
+		if (model == null) {
+			System.out.println("model is nul");
+		}
+		SourceResampler sampler = new SourceResampler(null, model, false);
+
+		return sampler.apply(sacs.get(channel));
+	}
 
 	@Override
-	public ImagePlus getCurrentStructuralImage() {
+	public ImagePlus getCurrentStructuralImageAsImagePlus() {
 		ImagePlus imgNissl = this.getImagePlusChannel(NisslChannel).duplicate(); // Virtual images are causing problems
 		imgNissl.setTitle("Nissl");
 		imgNissl.getProcessor().setMinAndMax(0, 25000);
@@ -206,9 +202,8 @@ public class AllenMap implements AtlasMap {
 		return imp_out;
 	}
 
-
 	@Override
-	public ImagePlus getCurrentLabelImage() {
+	public ImagePlus getCurrentLabelImageAsImagePlus() {
 		ImagePlus imgLabel = this.getImagePlusChannel(LabelChannel).duplicate();
 		imgLabel.setTitle("Label");
 		imgLabel.getProcessor().setMinAndMax(0, 65535);
@@ -217,8 +212,22 @@ public class AllenMap implements AtlasMap {
 	}
 
 	@Override
+	public SourceAndConverter[] getCurrentStructuralImageAsSacs() {
+		SourceAndConverter[] out = new SourceAndConverter[3];
+		out[0] = getSacChannel(AvgChannel);
+		out[1] = getSacChannel(NisslChannel);
+		out[2] = getSacChannel(LabelChannel);
+		return out;
+	}
+
+	@Override
+	public SourceAndConverter[] getCurrentLabelImageAsSacs() {
+		return new SourceAndConverter[0];
+	}
+
+	@Override
 	public Object getCurrentLocation() {
-        ViewerState viewerState = bdv.getViewer().getState();
+        ViewerState viewerState = bdvh.getViewerPanel().getState();
         AffineTransform3D transformedSourceToViewer = new AffineTransform3D(); // Empty Transform
         // 1 - viewer transform
         viewerState.getViewerTransform( transformedSourceToViewer ); // Get current transformation by the viewer state and puts it into sourceToImgPlus
@@ -237,7 +246,7 @@ public class AllenMap implements AtlasMap {
 		System.out.println(at3D.toString());
 		//ViewerState viewerState = bdv.getViewer().getState();
 		//viewerState.
-		bdv.getViewer().transformChanged(at3D);
+		bdvh.getViewerPanel().transformChanged(at3D);
 		/*viewerState.setViewerTransform(at3D);
 		bdv.getViewer()
         bdv.toggleManualTransformation();

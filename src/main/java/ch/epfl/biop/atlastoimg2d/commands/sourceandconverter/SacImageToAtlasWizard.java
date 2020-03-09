@@ -1,12 +1,15 @@
-package ch.epfl.biop.atlastoimg2d.commands;
-
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+package ch.epfl.biop.atlastoimg2d.commands.sourceandconverter;
 
 import ch.epfl.biop.atlas.commands.PutAtlasStructureToImage;
 import ch.epfl.biop.atlastoimg2d.AtlasToImg2D;
+import ch.epfl.biop.atlastoimg2d.AtlasToSourceAndConverter2D;
+import ch.epfl.biop.atlastoimg2d.commands.imageplus.ImageToAtlasComputeROIS;
+import ch.epfl.biop.atlastoimg2d.commands.imageplus.ImageToAtlasConstruct;
+import ch.epfl.biop.atlastoimg2d.commands.imageplus.ImageToAtlasRegister;
+import ch.epfl.biop.atlastoimg2d.commands.imageplus.ImageToAtlasRemoveRegister;
 import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
 import ij.IJ;
+import ij.gui.WaitForUserDialog;
 import ij.gui.YesNoCancelDialog;
 import org.scijava.ItemIO;
 import org.scijava.command.Command;
@@ -15,25 +18,26 @@ import org.scijava.command.CommandService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
-import ij.gui.WaitForUserDialog;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
-@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Image To Atlas>Wizard")
-public class ImageToAtlasWizard implements Command {
+@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Image To Atlas (BDV)>Wizard")
+public class SacImageToAtlasWizard implements Command {
 
 	@Parameter
 	public CommandService cs;
 	
 	@Parameter(type = ItemIO.OUTPUT)
-	public AtlasToImg2D aligner;
+	public AtlasToSourceAndConverter2D aligner;
 
 	@Override
 	public void run() {
 		try {
 			Future<CommandModule> task;
 			CommandModule cm;
-			task = cs.run(ImageToAtlasConstruct.class, true);
+			task = cs.run(SacImageToAtlasConstruct.class, true);
 			cm = task.get();
-			aligner = (AtlasToImg2D) cm.getOutput("aligner");
+			aligner = (AtlasToSourceAndConverter2D) cm.getOutput("aligner");
 
 			WaitForUserDialog dialog = new WaitForUserDialog("Choose slice","Pick carefully the slice you'd like.");
 			dialog.show();
@@ -46,6 +50,7 @@ public class ImageToAtlasWizard implements Command {
 			// ---- Adds as many registration as the user wants
 			boolean registrationDone = false;
 
+
 			while (!registrationDone) {
 				dialog = new WaitForUserDialog("Modify images ?","Perform changes on images. Click when you're done.");
 				dialog.show();
@@ -55,7 +60,7 @@ public class ImageToAtlasWizard implements Command {
 				if (dialogw.cancelPressed()||(!dialogw.yesPressed())) {
 					registrationDone=true;
 				} else {
-					cs.run(ImageToAtlasRegister.class,true,"aligner", aligner ).get();
+					cs.run(SacImageToAtlasRegister.class,true,"aligner", aligner ).get();
 					dialogw = new YesNoCancelDialog(IJ.getInstance(),
 							"Was this registration ok ?", "Keep Registration ?");
 					if (dialogw.cancelPressed()||(!dialogw.yesPressed())) {
@@ -68,22 +73,22 @@ public class ImageToAtlasWizard implements Command {
 					}
 				}
 			}
-
+			/*
 			// ---- Ok -> now let's compute the transformed ROI
 			YesNoCancelDialog dialogw = new YesNoCancelDialog(IJ.getInstance(),
 					"Compute ROIs ?", "Only if you're happy with the current registration.");
 
 			if (dialogw.yesPressed()) {
-				ConvertibleRois cr = (ConvertibleRois) cs.run(ImageToAtlasComputeROIS.class,true,"aligner", aligner ).get().getOutput("cr");
+				ConvertibleRois cr = (ConvertibleRois) cs.run(SacImageToAtlasComputeROIS.class,true,"aligner", aligner ).get().getOutput("cr");
 				dialogw = new YesNoCancelDialog(IJ.getInstance(),
 						"Diplay ROIs ?", "Display brain regions ?");
 				if (dialogw.yesPressed()) {
-					cs.run(PutAtlasStructureToImage.class,true,"atlas", aligner.getAtlas(), "cr", cr ).get();
+					cs.run(SacPutAtlasStructureToImage.class,true,"atlas", aligner.getAtlas(), "cr", cr ).get();
 
 				}
 
 			}
-
+			*/
 
 		} catch (InterruptedException e) {
 			e.printStackTrace();
