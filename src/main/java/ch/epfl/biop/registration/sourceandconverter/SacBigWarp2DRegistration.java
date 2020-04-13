@@ -39,7 +39,13 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
     @Override
     public void setMovingImage(SourceAndConverter[] mimg) {
         AffineTransform3D at3D = new AffineTransform3D();
-        mimg[0].getSpimSource().getSourceTransform(0,0, at3D);
+        if (mimg[0] == null) {
+            System.err.println("No moving source defined (index 0)");
+            return;
+        }
+        mimg[0]
+                .getSpimSource()
+                .getSourceTransform(0,0, at3D);
         SourceAffineTransformer sat =
                 new SourceAffineTransformer(null, at3D.inverse());
 

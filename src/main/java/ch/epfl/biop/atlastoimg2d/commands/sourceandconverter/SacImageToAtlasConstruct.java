@@ -25,7 +25,7 @@ public class SacImageToAtlasConstruct implements Command {
     @Parameter(required = false)
     public BiopAtlas ba;
 
-    @Parameter(type = ItemIO.INPUT)
+    @Parameter
     public SourceAndConverter[] sacs;
 
     @Parameter
@@ -38,6 +38,12 @@ public class SacImageToAtlasConstruct implements Command {
 
     @Override
     public void run() {
+        // WEIRD BUG !! Launching a command inside a command destroys the input!
+        // Need to capture sacs input before they are lost...
+        aligner = new AtlasToSourceAndConverter2D();
+        aligner.setImage(sacs);
+        aligner.setScijavaContext(ctx);
+
         if (ba==null) {
             // Atlas not set -> need to set one
             Future<CommandModule> f = cs.run(BrowseAtlasCommand.class, true);
@@ -54,10 +60,6 @@ public class SacImageToAtlasConstruct implements Command {
             return;
         }
 
-        aligner = new AtlasToSourceAndConverter2D();
-
         aligner.setAtlas(ba);
-        aligner.setImage(sacs);
-        aligner.setScijavaContext(ctx);
     }
 }

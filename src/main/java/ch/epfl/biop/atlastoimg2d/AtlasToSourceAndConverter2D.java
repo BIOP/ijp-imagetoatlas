@@ -95,10 +95,6 @@ public class AtlasToSourceAndConverter2D implements AtlasToImg2D<SourceAndConver
 
     @Override
     public void addRegistration(Registration<SourceAndConverter[]> reg, Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixedImage, Function<SourceAndConverter[], SourceAndConverter[]> preprocessMovingImage) {
-       /* GenericDialog gd = new GenericDialog("zut");
-        Set<String> set = new HashSet();
-        gd.addChoice(label, items, choice);
-        gd.showDialog();*/
 
         SourceAndConverter[] f = preprocessFixedImage.apply(imgAtlas);
         //imgAtlas.hide();
@@ -110,7 +106,13 @@ public class AtlasToSourceAndConverter2D implements AtlasToImg2D<SourceAndConver
         } else {
             imgIn = this.registeredImageSequence.get(registeredImageSequence.size()-1);
         }
+        if ((imgIn == null)||(imgIn.length==0)) {
+            System.err.println("Error : no image found for registration");
+            return;
+        }
+
         SourceAndConverter[] m = preprocessMovingImage.apply(imgIn);
+
         reg.setMovingImage(m);
         reg.register();
         SourceAndConverterServices.getSourceAndConverterDisplayService()
