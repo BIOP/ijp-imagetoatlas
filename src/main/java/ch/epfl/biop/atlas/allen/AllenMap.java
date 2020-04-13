@@ -9,6 +9,7 @@ import bdv.ij.util.ProgressWriterIJ;
 import bdv.util.*;
 import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
+import bdv.viewer.SynchronizedViewerState;
 import bdv.viewer.ViewerOptions;
 import bdv.viewer.state.SourceGroup;
 import bdv.viewer.state.ViewerState;
@@ -25,17 +26,23 @@ import net.imglib2.FinalInterval;
 import net.imglib2.RealInterval;
 import net.imglib2.RealRandomAccess;
 import net.imglib2.RealRandomAccessible;
+import net.imglib2.cache.img.DiskCachedCellImgFactory;
+import net.imglib2.cache.img.DiskCachedCellImgOptions;
 import net.imglib2.converter.Converter;
 import net.imglib2.img.array.ArrayImg;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
+import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.util.Util;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterUtils;
+import sc.fiji.bdvpg.sourceandconverter.importer.EmptySourceAndConverterCreator;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceResampler;
 import sc.fiji.bdvpg.spimdata.importer.SpimDataFromXmlImporter;
+
+import static net.imglib2.cache.img.DiskCachedCellImgOptions.options;
 
 public class AllenMap implements AtlasMap {
 
@@ -131,24 +138,84 @@ public class AllenMap implements AtlasMap {
 	}
 
 	public SourceAndConverter getSacChannel(int channel) {
-		ArrayImg rai = ArrayImgs.unsignedBytes((long) 600,(long) 600,(long) 1);
+		//ArrayImg rai = ArrayImgs.unsignedBytes((long) 600,(long) 600,(long) 1);
+		//AffineTransform3D at3D = (AffineTransform3D) this.getCurrentLocation();
+
+
+
+		/*double xNorm = getNormTransform(0,at3D);//trans
+		double samplingInXVoxelUnit=0.05e3;//1.0;
+		at3D.scale(samplingInXVoxelUnit/xNorm);*/
+
+		//Source src = new RandomAccessibleIntervalSource(rai, Util.getTypeFromInterval(rai), at3D.inverse(), "AB_"+channel);
+		SourceAndConverter model = createModelSource();
+		//model = SourceAndConverterUtils.createSourceAndConverter(src);
+
+		SourceResampler sampler = new SourceResampler(null, model, true, false);
+
+		SourceAndConverter sacIn3D = sampler.apply(sacs.get(channel));
+
+		// Now restricted to a 2D registration problem
+
+		return sacIn3D;
+	}
+
+
+	private SourceAndConverter createModelSource() {
+		// Origin is in fact the point 0,0,0 of the image
+		// Get current big dataviewer transformation : source transform and viewer transform
 		AffineTransform3D at3D = (AffineTransform3D) this.getCurrentLocation();
 
-		double xNorm = getNormTransform(0,at3D);//trans
-		double samplingInXVoxelUnit=0.05e3;//1.0;
-		at3D.scale(samplingInXVoxelUnit/xNorm);
+		//Center on the display center of the viewer ...
+		double w = bdvh.getViewerPanel().getDisplay().getWidth();
+		double h = bdvh.getViewerPanel().getDisplay().getHeight();
+		// Center on the display center of the viewer ...
+		at3D.translate(-w / 2, -h / 2, 0);
+		// Getting an image independent of the view scaling unit (not sure)
+		double xNorm = getNormTransform(0, at3D);//trans
+		at3D.scale(1/xNorm);
 
-		Source src = new RandomAccessibleIntervalSource(rai, Util.getTypeFromInterval(rai), at3D.inverse(), "AB_"+channel);
-		SourceAndConverter model;
-		model = SourceAndConverterUtils.createSourceAndConverter(src);
+		double samplingXYInPhysicalUnit = 0.02; // 20 microns per pixel
 
-		if (model == null) {
-			System.out.println("model is nul");
+		double samplingZInPhysicalUnit = 0.01; // 10 microns but irrelevant -> slice only
+
+		int xSize = 15; // in millimeter
+		int ySize = 15; // in millimeter
+		int zSize = 0; // one slice
+
+		at3D.scale(1./samplingXYInPhysicalUnit, 1./samplingXYInPhysicalUnit, 1./samplingZInPhysicalUnit);
+		at3D.translate((xSize/(2*samplingXYInPhysicalUnit)), (ySize/(2*samplingXYInPhysicalUnit)), (zSize/(samplingZInPhysicalUnit)));
+
+		long nPx = (long)(xSize / samplingXYInPhysicalUnit);
+		long nPy = (long)(ySize / samplingXYInPhysicalUnit);
+		long nPz;
+		if (samplingZInPhysicalUnit==0) {
+			nPz = 1;
+		} else {
+			nPz = 1+(long)(zSize / (samplingZInPhysicalUnit/2.0)); // TODO : check div by 2
 		}
-		SourceResampler sampler = new SourceResampler(null, model, false);
 
-		return sampler.apply(sacs.get(channel));
+
+		// Dummy ImageFactory
+		final int[] cellDimensions = new int[] { 32, 32, 32 };
+
+		// Cached Image Factory Options
+		final DiskCachedCellImgOptions factoryOptions = options()
+				.cellDimensions( cellDimensions )
+				.cacheType( DiskCachedCellImgOptions.CacheType.BOUNDED )
+				.maxCacheSize( 1 );
+
+		// Creates cached image factory of Type UnsignedShort
+		final DiskCachedCellImgFactory<UnsignedShortType> factory = new DiskCachedCellImgFactory<>( new UnsignedShortType(), factoryOptions );
+
+		// At least a pixel in all directions
+		if (nPz == 0) nPz = 1;
+		if (nPx == 0) nPx = 1;
+		if (nPy == 0) nPy = 1;
+
+		return new EmptySourceAndConverterCreator("Model_", at3D.inverse(), nPx, nPy, nPz, factory).get();
 	}
+
 
 	@Override
 	public ImagePlus getCurrentStructuralImageAsImagePlus() {
@@ -227,7 +294,7 @@ public class AllenMap implements AtlasMap {
 
 	@Override
 	public Object getCurrentLocation() {
-        ViewerState viewerState = bdvh.getViewerPanel().getState();
+        SynchronizedViewerState viewerState = bdvh.getViewerPanel().state();
         AffineTransform3D transformedSourceToViewer = new AffineTransform3D(); // Empty Transform
         // 1 - viewer transform
         viewerState.getViewerTransform( transformedSourceToViewer ); // Get current transformation by the viewer state and puts it into sourceToImgPlus

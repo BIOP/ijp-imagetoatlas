@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.scijava</groupId>
 		<artifactId>pom-scijava</artifactId>
-		<version>27.0.1</version>
+		<version>28.0.0</version>
 		<relativePath />
 	</parent>
 
@@ -134,13 +134,15 @@
 		<license.licenseName>N/A</license.licenseName>
 		<license.copyrightOwners>N/A</license.copyrightOwners>
 		<scijava.app.directory>C:\Users\chiarutt\Desktop\bdv-allen\fiji-win64\Fiji.app</scijava.app.directory>
-		<!--<bigdataviewer-core.version>7.0.0</bigdataviewer-core.version>
-		<bigdataviewer-vistools.version>1.0.0-beta-15</bigdataviewer-vistools.version>
-		<bigwarp_fiji.version>5.0.0</bigwarp_fiji.version>
-		<bigdataviewer_fiji.version>6.0.1</bigdataviewer_fiji.version>-->
-		<bigdataviewer-core.version>7.0.0</bigdataviewer-core.version>
-		<bigdataviewer-vistools.version>1.0.0-beta-15</bigdataviewer-vistools.version>
-		<bigwarp_fiji.version>5.0.0</bigwarp_fiji.version>
+		<scijava-maven-plugin.version>1.1.0</scijava-maven-plugin.version>
+
+		<bigdataviewer-core.version>9.0.0</bigdataviewer-core.version>
+		<imglib2.version>5.9.0</imglib2.version>
+		<imglib2-cache.version>1.0.0-beta-13</imglib2-cache.version>
+		<spim_data.version>2.2.3</spim_data.version>
+		<ui-behaviour.version>2.0.1</ui-behaviour.version>
+		<bigdataviewer-vistools.version>1.0.0-beta-19-table-SNAPSHOT</bigdataviewer-vistools.version>
+
 		<scijava-ui-swing.version>0.13.0</scijava-ui-swing.version>
 	</properties>
 
@@ -155,15 +157,11 @@
             <groupId>net.imagej</groupId>
             <artifactId>imagej-legacy</artifactId>
         </dependency>
+
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
 			<version>20180813</version>
-		</dependency>
-
-		<dependency>
-  			<groupId>sc.fiji</groupId>
-  			<artifactId>bigdataviewer_fiji</artifactId>
 		</dependency>
 
 		<dependency>
@@ -195,13 +193,13 @@
 		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>bigdataviewer-playground</artifactId>
-			<version>0.1.5-SNAPSHOT</version>
+			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>ch.epfl.biop</groupId>
 			<artifactId>bigdataviewer-bioformats</artifactId>
-			<version>0.2.1-SNAPSHOT</version>
+			<version>0.2.2-SNAPSHOT</version>
 		</dependency>
 
 	</dependencies>

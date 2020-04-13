@@ -50,7 +50,6 @@ public class SacImageToAtlasWizard implements Command {
 			// ---- Adds as many registration as the user wants
 			boolean registrationDone = false;
 
-
 			while (!registrationDone) {
 				dialog = new WaitForUserDialog("Modify images ?","Perform changes on images. Click when you're done.");
 				dialog.show();

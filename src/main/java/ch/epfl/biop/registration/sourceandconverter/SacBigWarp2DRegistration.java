@@ -8,8 +8,10 @@ import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import ch.epfl.biop.registration.Registration;
 import ij.gui.WaitForUserDialog;
 import net.imglib2.RealPoint;
+import net.imglib2.realtransform.AffineTransform3D;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import sc.fiji.bdvpg.sourceandconverter.register.BigWarpLauncher;
+import sc.fiji.bdvpg.sourceandconverter.transform.SourceAffineTransformer;
 
 import java.util.Arrays;
 import java.util.List;
@@ -21,11 +23,31 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
     SourceAndConverter[] fimg, mimg;
 
     @Override
-    public void setFixedImage(SourceAndConverter[] fimg) { this.fimg = fimg; }
+    public void setFixedImage(SourceAndConverter[] fimg) {
+        AffineTransform3D at3D = new AffineTransform3D();
+        fimg[0].getSpimSource().getSourceTransform(0,0, at3D);
+        SourceAffineTransformer sat =
+                new SourceAffineTransformer(null, at3D.inverse());
+
+        this.fimg = new SourceAndConverter[fimg.length];
+
+        for (int i=0;i<fimg.length;i++) {
+            this.fimg[i] = sat.apply(fimg[i]);
+        }
+    }
 
     @Override
     public void setMovingImage(SourceAndConverter[] mimg) {
-        this.mimg = mimg;
+        AffineTransform3D at3D = new AffineTransform3D();
+        mimg[0].getSpimSource().getSourceTransform(0,0, at3D);
+        SourceAffineTransformer sat =
+                new SourceAffineTransformer(null, at3D.inverse());
+
+        this.mimg = new SourceAndConverter[mimg.length];
+
+        for (int i=0;i<mimg.length;i++) {
+            this.mimg[i] = sat.apply(mimg[i]);
+        }
     }
 
     BigWarpLauncher bwl;

@@ -1,7 +1,5 @@
 package ch.epfl.biop.atlastoimg2d;
 
-import bdv.util.RandomAccessibleIntervalSource;
-import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.BiopAtlas;
 import ch.epfl.biop.atlas.commands.ConstructROIsFromImgLabel;
@@ -10,16 +8,11 @@ import ch.epfl.biop.java.utilities.roi.types.IJShapeRoiArray;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import ch.epfl.biop.registration.Registration;
 import ij.ImagePlus;
-import ij.measure.Calibration;
+import ij.gui.GenericDialog;
 import ij.plugin.frame.RoiManager;
-import net.imglib2.img.array.ArrayImg;
-import net.imglib2.img.array.ArrayImgs;
-import net.imglib2.util.Util;
 import org.scijava.Context;
 import org.scijava.command.CommandService;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
-import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterUtils;
-import sc.fiji.bdvpg.sourceandconverter.transform.SourceResampler;
 
 import java.io.File;
 import java.net.URL;
@@ -27,11 +20,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class AtlasToSourceAndConverter2D implements AtlasToImg2D<SourceAndConverter[]> {
 
     BiopAtlas ba;
+
     Object atlasLocation;
 
     Context ctx;
@@ -102,6 +95,11 @@ public class AtlasToSourceAndConverter2D implements AtlasToImg2D<SourceAndConver
 
     @Override
     public void addRegistration(Registration<SourceAndConverter[]> reg, Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixedImage, Function<SourceAndConverter[], SourceAndConverter[]> preprocessMovingImage) {
+       /* GenericDialog gd = new GenericDialog("zut");
+        Set<String> set = new HashSet();
+        gd.addChoice(label, items, choice);
+        gd.showDialog();*/
+
         SourceAndConverter[] f = preprocessFixedImage.apply(imgAtlas);
         //imgAtlas.hide();
 
@@ -182,8 +180,8 @@ public class AtlasToSourceAndConverter2D implements AtlasToImg2D<SourceAndConver
 
     @Override
     public void setImage(SourceAndConverter[] img) {
+        // TODO : default sorting
         imageUsedForRegistration = img;
-        //TODO imageUsedForRegistration.setCalibration(new Calibration());
     }
 
     @Override

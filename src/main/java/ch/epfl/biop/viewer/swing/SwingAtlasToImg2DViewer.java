@@ -70,13 +70,10 @@ public class SwingAtlasToImg2DViewer extends EasySwingDisplayViewer<AtlasToImg2D
 
     }
 
-
-
     final public static String AtlasImageId = "Image + Atlas Ids";
     final public static String AtlasSliceSelection = "Atlas Slice Selection";
     final public static String Registration = "Registration";
     final public static String ROIDisplayExport ="Atlas Region Display/Export";
-
 
     @Override
     protected JPanel createDisplayPanel(AtlasToImg2D value) {
