@@ -16,7 +16,7 @@ import java.util.function.Consumer;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Image To Atlas (BDV)>Start")
+@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Image To Atlas>Start (BDV)")
 public class SacImageToAtlasConstruct implements Command {
 
     @Parameter(type = ItemIO.OUTPUT)

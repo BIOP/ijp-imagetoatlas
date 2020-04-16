@@ -115,6 +115,7 @@ public class AtlasToSourceAndConverter2D implements AtlasToImg2D<SourceAndConver
 
         reg.setMovingImage(m);
         reg.register();
+
         SourceAndConverterServices.getSourceAndConverterDisplayService()
                 .removeFromActiveBdv(m);
 
@@ -128,6 +129,7 @@ public class AtlasToSourceAndConverter2D implements AtlasToImg2D<SourceAndConver
 
         SourceAndConverterServices.getSourceAndConverterDisplayService()
                 .show(this.registeredImageSequence.get(registeredImageSequence.size()-1));
+
         if (this.registrationSequence.size()>1) {
             SourceAndConverterServices.getSourceAndConverterDisplayService()
                     .removeFromActiveBdv(imgIn);
@@ -157,8 +159,10 @@ public class AtlasToSourceAndConverter2D implements AtlasToImg2D<SourceAndConver
     public void rmLastRegistration() {
         assert registeredImageSequence.size()>1;
         assert registeredImageSequence.size()==registrationSequence.size();
-        //TODO this.registeredImageSequence.get(registeredImageSequence.size()-1).changes=false;
-        //TODO this.registeredImageSequence.get(registeredImageSequence.size()-1).close();
+
+        SourceAndConverterServices.getSourceAndConverterService()
+                .remove(registeredImageSequence.get(registeredImageSequence.size()-1));
+
         registrationSequence.remove(registrationSequence.size()-1);
         registeredImageSequence.remove(registeredImageSequence.size()-1);
 

@@ -1,13 +1,7 @@
 package ch.epfl.biop.atlastoimg2d.commands.sourceandconverter;
 
-import ch.epfl.biop.atlas.commands.PutAtlasStructureToImage;
-import ch.epfl.biop.atlastoimg2d.AtlasToImg2D;
 import ch.epfl.biop.atlastoimg2d.AtlasToSourceAndConverter2D;
-import ch.epfl.biop.atlastoimg2d.commands.imageplus.ImageToAtlasComputeROIS;
-import ch.epfl.biop.atlastoimg2d.commands.imageplus.ImageToAtlasConstruct;
-import ch.epfl.biop.atlastoimg2d.commands.imageplus.ImageToAtlasRegister;
-import ch.epfl.biop.atlastoimg2d.commands.imageplus.ImageToAtlasRemoveRegister;
-import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
+import ch.epfl.biop.atlastoimg2d.commands.ImageToAtlasRemoveRegister;
 import ij.IJ;
 import ij.gui.WaitForUserDialog;
 import ij.gui.YesNoCancelDialog;
@@ -21,7 +15,7 @@ import org.scijava.plugin.Plugin;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Image To Atlas (BDV)>Wizard")
+@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Image To Atlas>Wizard (BDV)")
 public class SacImageToAtlasWizard implements Command {
 
 	@Parameter

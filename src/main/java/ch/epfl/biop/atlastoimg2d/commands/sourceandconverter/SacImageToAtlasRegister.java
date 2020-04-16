@@ -17,7 +17,7 @@ import org.scijava.plugin.Plugin;
 import java.util.ArrayList;
 import java.util.function.Function;
 
-@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Image To Atlas (BDV)>Add Registration")
+@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Image To Atlas>Add Registration (BDV)")
 public class SacImageToAtlasRegister implements Command {
 
     @Parameter(type = ItemIO.BOTH)

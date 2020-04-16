@@ -136,12 +136,12 @@
 		<scijava.app.directory>C:\Users\chiarutt\Desktop\bdv-allen\fiji-win64\Fiji.app</scijava.app.directory>
 		<scijava-maven-plugin.version>1.1.0</scijava-maven-plugin.version>
 
-		<bigdataviewer-core.version>9.0.0</bigdataviewer-core.version>
 		<imglib2.version>5.9.0</imglib2.version>
-		<imglib2-cache.version>1.0.0-beta-13</imglib2-cache.version>
-		<spim_data.version>2.2.3</spim_data.version>
+		<imglib2-ij.version>2.0.0-beta-46</imglib2-ij.version>
+		<bigdataviewer-core.version>9.0.1</bigdataviewer-core.version>
+		<bigdataviewer-vistools.version>1.0.0-beta-20</bigdataviewer-vistools.version>
+		<spim_data.version>2.2.4</spim_data.version>
 		<ui-behaviour.version>2.0.1</ui-behaviour.version>
-		<bigdataviewer-vistools.version>1.0.0-beta-19-table-SNAPSHOT</bigdataviewer-vistools.version>
 
 		<scijava-ui-swing.version>0.13.0</scijava-ui-swing.version>
 	</properties>
@@ -167,7 +167,7 @@
 		<dependency>
 			<groupId>ch.epfl.biop</groupId>
 			<artifactId>ijl-utilities-wrappers</artifactId>
-			<version>0.3.15-SNAPSHOT</version>
+			<version>0.3.15</version>
 		</dependency>
 
 		<dependency>
@@ -193,13 +193,13 @@
 		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>bigdataviewer-playground</artifactId>
-			<version>0.1.7-SNAPSHOT</version>
+			<version>0.1.8-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>ch.epfl.biop</groupId>
 			<artifactId>bigdataviewer-bioformats</artifactId>
-			<version>0.2.2-SNAPSHOT</version>
+			<version>0.2.2</version>
 		</dependency>
 
 	</dependencies>

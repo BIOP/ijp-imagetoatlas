@@ -9,9 +9,12 @@ import ch.epfl.biop.registration.Registration;
 import ij.gui.WaitForUserDialog;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
+import net.imglib2.realtransform.RealTransformSequence;
+import net.imglib2.realtransform.ThinplateSplineTransform;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import sc.fiji.bdvpg.sourceandconverter.register.BigWarpLauncher;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceAffineTransformer;
+import sc.fiji.bdvpg.sourceandconverter.transform.SourceRealTransformer;
 
 import java.util.Arrays;
 import java.util.List;
@@ -24,10 +27,10 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
 
     @Override
     public void setFixedImage(SourceAndConverter[] fimg) {
-        AffineTransform3D at3D = new AffineTransform3D();
-        fimg[0].getSpimSource().getSourceTransform(0,0, at3D);
+        at3Dfixed = new AffineTransform3D();
+        fimg[0].getSpimSource().getSourceTransform(0,0, at3Dfixed);
         SourceAffineTransformer sat =
-                new SourceAffineTransformer(null, at3D.inverse());
+                new SourceAffineTransformer(null, at3Dfixed.inverse().copy());
 
         this.fimg = new SourceAndConverter[fimg.length];
 
@@ -36,18 +39,20 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
         }
     }
 
+    AffineTransform3D at3Dmoving, at3Dfixed;
+
     @Override
     public void setMovingImage(SourceAndConverter[] mimg) {
-        AffineTransform3D at3D = new AffineTransform3D();
+        at3Dmoving = new AffineTransform3D();
         if (mimg[0] == null) {
             System.err.println("No moving source defined (index 0)");
             return;
         }
         mimg[0]
                 .getSpimSource()
-                .getSourceTransform(0,0, at3D);
+                .getSourceTransform(0,0, at3Dmoving);
         SourceAffineTransformer sat =
-                new SourceAffineTransformer(null, at3D.inverse());
+                new SourceAffineTransformer(null, at3Dmoving.inverse().copy());
 
         this.mimg = new SourceAndConverter[mimg.length];
 
@@ -93,22 +98,49 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
 
     @Override
     public Function<SourceAndConverter[], SourceAndConverter[]> getImageRegistration() {
-        // See https://github.com/saalfeldlab/bigwarp/blob/e490dd2ce87c6bcf3355e01e562586421f978303/scripts/Apply_Bigwarp_Xfm.groovy
-        /*return ((img) ->
-            ImagePlusFunctions.splitApplyRecompose(
-                    imp -> ApplyBigwarpPlugin.apply(
-                                imp, fimg, bw.getLandmarkPanel().getTableModel(),
-                                "Target", "", "Target",
-                                null, null, null,
-                                Interpolation.NEARESTNEIGHBOR, false, 1 ),
-                    img));*/
+        // Pb : 2D vs 3D
 
-        return null;
+        //ThinplateSplineTransform tr2D = new ThinplateSplineTransform(bwl.getBigWarp().getTransform());
+
+        double[][] ptI = new double[3][bwl.getBigWarp().getTransform().getNumLandmarks()];
+        double[][] ptF = new double[3][bwl.getBigWarp().getTransform().getNumLandmarks()];
+
+        for (int i = 0;i<bwl.getBigWarp().getTransform().getNumLandmarks();i++) {
+            ptF[0][i] = bwl.getBigWarp().getLandmarkPanel().getTableModel().getFixedPoint(i)[0];
+            ptF[1][i] = bwl.getBigWarp().getLandmarkPanel().getTableModel().getFixedPoint(i)[1];
+            ptF[2][i] = 0;
+
+            ptI[0][i] = bwl.getBigWarp().getLandmarkPanel().getTableModel().getMovingPoint(i)[0];
+            ptI[1][i] = bwl.getBigWarp().getLandmarkPanel().getTableModel().getMovingPoint(i)[1];
+            ptI[2][i] = 0;
+        }
+
+        ThinplateSplineTransform tr3D = new ThinplateSplineTransform(ptF,ptI);
+        RealTransformSequence rts = new RealTransformSequence();
+
+        // Looks ok
+        //rts.add(at3Dfixed.inverse().copy());
+        rts.add(tr3D);
+        rts.add(at3Dmoving.copy());
+
+        SourceRealTransformer srt = new SourceRealTransformer(null, rts);
+        SourceAffineTransformer sat = new SourceAffineTransformer(null, at3Dfixed.copy());
+
+        // Yes but mipmap is screwed up
+
+        return (sacs) -> {
+            SourceAndConverter[] out = new SourceAndConverter[sacs.length];
+            for (int i = 0; i<sacs.length; i++) {
+                out[i] = sat.apply(srt.apply(sacs[i]));
+            }
+            return out;
+        };
 
     }
 
     @Override
     public RealPointList getPtsRegistration(RealPointList pts) {
+        // Pb : 2D vs 3D
         for (RealPoint pt : pts.ptList) {
             double[] tr = bwl.getBigWarp().getTransform().apply( new double[] {
                 pt.getDoublePosition(0), pt.getDoublePosition(1)
