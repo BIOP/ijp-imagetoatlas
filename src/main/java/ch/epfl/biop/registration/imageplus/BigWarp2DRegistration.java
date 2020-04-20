@@ -85,7 +85,7 @@ public class BigWarp2DRegistration implements Registration<ImagePlus> {
                                 imp, fimg, bw.getLandmarkPanel().getTableModel(),
                                 "Target", "", "Target",
                                 null, null, null,
-                                Interpolation.NEARESTNEIGHBOR, false, 1 ),
+                                Interpolation.NEARESTNEIGHBOR, false, 1 ).get(0),
                     img));
     }
 
