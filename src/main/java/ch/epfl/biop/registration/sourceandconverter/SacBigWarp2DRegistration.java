@@ -1,16 +1,18 @@
 package ch.epfl.biop.registration.sourceandconverter;
 
+import bdv.gui.TransformTypeSelectDialog;
 import bdv.tools.brightness.ConverterSetup;
 import bdv.util.BdvHandle;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import ch.epfl.biop.registration.Registration;
 import ij.gui.WaitForUserDialog;
+import mpicbg.models.AbstractAffineModel2D;
 import net.imglib2.RealPoint;
+import net.imglib2.realtransform.AffineTransform;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.realtransform.RealTransformSequence;
 import net.imglib2.realtransform.ThinplateSplineTransform;
-import net.imglib2.util.LinAlgHelpers;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import sc.fiji.bdvpg.sourceandconverter.register.BigWarpLauncher;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceAffineTransformer;
@@ -36,20 +38,20 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
         // We do not want to touch the scaling...
         double[] m = at3Dfixed.getRowPackedCopy();
 
-        double sx = Math.sqrt(m[0]*m[0]+m[1]*m[1]+m[2]*m[2]);
-        double sy = Math.sqrt(m[4]*m[4]+m[5]*m[5]+m[6]*m[6]);
-        double sz = Math.sqrt(m[8]*m[8]+m[9]*m[9]+m[10]*m[10]);
+        double sx = Math.sqrt(m[0]*m[0]+m[4]*m[4]+m[8]*m[8]);
+        double sy = Math.sqrt(m[1]*m[1]+m[5]*m[5]+m[9]*m[9]);
+        double sz = Math.sqrt(m[2]*m[2]+m[6]*m[6]+m[10]*m[10]);
 
         m[0] /= sx;
-        m[1] /= sx;
-        m[2] /= sx;
+        m[4] /= sx;
+        m[8] /= sx;
 
-        m[4] /= sy;
+        m[1] /= sy;
         m[5] /= sy;
-        m[6] /= sy;
+        m[9] /= sy;
 
-        m[8] /= sz;
-        m[9] /= sz;
+        m[2] /= sz;
+        m[6] /= sz;
         m[10] /= sz;
 
         at3Dfixed.set(m);
@@ -78,20 +80,20 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
         // We do not want to touch the scaling...
         double[] m = at3Dmoving.getRowPackedCopy();
 
-        double sx = Math.sqrt(m[0]*m[0]+m[1]*m[1]+m[2]*m[2]);
-        double sy = Math.sqrt(m[4]*m[4]+m[5]*m[5]+m[6]*m[6]);
-        double sz = Math.sqrt(m[8]*m[8]+m[9]*m[9]+m[10]*m[10]);
+        double sx = Math.sqrt(m[0]*m[0]+m[4]*m[4]+m[8]*m[8]);
+        double sy = Math.sqrt(m[1]*m[1]+m[5]*m[5]+m[9]*m[9]);
+        double sz = Math.sqrt(m[2]*m[2]+m[6]*m[6]+m[10]*m[10]);
 
         m[0] /= sx;
-        m[1] /= sx;
-        m[2] /= sx;
+        m[4] /= sx;
+        m[8] /= sx;
 
-        m[4] /= sy;
+        m[1] /= sy;
         m[5] /= sy;
-        m[6] /= sy;
+        m[9] /= sy;
 
-        m[8] /= sz;
-        m[9] /= sz;
+        m[2] /= sz;
+        m[6] /= sz;
         m[10] /= sz;
 
         at3Dmoving.set(m);
@@ -143,47 +145,41 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
 
     @Override
     public Function<SourceAndConverter[], SourceAndConverter[]> getImageRegistration() {
-        // Pb : 2D vs 3D
 
-        //ThinplateSplineTransform tr2D = new ThinplateSplineTransform(bwl.getBigWarp().getTransform());
+        //if (bwl.getBigWarp().getTransformType().equals(TransformTypeSelectDialog.TPS)) {
+            // Thin Plate Spline
 
-        double[][] ptI = new double[3][bwl.getBigWarp().getTransform().getNumLandmarks()];
-        double[][] ptF = new double[3][bwl.getBigWarp().getTransform().getNumLandmarks()];
+            double[][] ptI = new double[3][bwl.getBigWarp().getTransform().getNumLandmarks()];
+            double[][] ptF = new double[3][bwl.getBigWarp().getTransform().getNumLandmarks()];
 
-        for (int i = 0;i<bwl.getBigWarp().getTransform().getNumLandmarks();i++) {
-            ptF[0][i] = bwl.getBigWarp().getLandmarkPanel().getTableModel().getFixedPoint(i)[0];
-            ptF[1][i] = bwl.getBigWarp().getLandmarkPanel().getTableModel().getFixedPoint(i)[1];
-            ptF[2][i] = 0;
+            for (int i = 0;i<bwl.getBigWarp().getTransform().getNumLandmarks();i++) {
+                ptF[0][i] = bwl.getBigWarp().getLandmarkPanel().getTableModel().getFixedPoint(i)[0];
+                ptF[1][i] = bwl.getBigWarp().getLandmarkPanel().getTableModel().getFixedPoint(i)[1];
+                ptF[2][i] = 0;
 
-            ptI[0][i] = bwl.getBigWarp().getLandmarkPanel().getTableModel().getMovingPoint(i)[0];
-            ptI[1][i] = bwl.getBigWarp().getLandmarkPanel().getTableModel().getMovingPoint(i)[1];
-            ptI[2][i] = 0;
-        }
-
-        ThinplateSplineTransform tr3D = new ThinplateSplineTransform(ptF,ptI);
-        RealTransformSequence rts = new RealTransformSequence();
-
-        // Looks ok
-        //rts.add(at3Dfixed.inverse().copy());
-        rts.add(tr3D);
-        rts.add(at3Dmoving.copy());
-
-        SourceRealTransformer srt = new SourceRealTransformer(null, rts);
-        SourceAffineTransformer sat = new SourceAffineTransformer(null, at3Dfixed.copy());
-
-        // Yes but mipmap is screwed up
-
-        // MipmapOrdering.MipmapHints
-        // https://github.com/bigdataviewer/bigdataviewer-core/blob/master/src/main/java/bdv/util/MipmapTransforms.java
-
-
-        return (sacs) -> {
-            SourceAndConverter[] out = new SourceAndConverter[sacs.length];
-            for (int i = 0; i<sacs.length; i++) {
-                out[i] = sat.apply(srt.apply(sacs[i]));
+                ptI[0][i] = bwl.getBigWarp().getLandmarkPanel().getTableModel().getMovingPoint(i)[0];
+                ptI[1][i] = bwl.getBigWarp().getLandmarkPanel().getTableModel().getMovingPoint(i)[1];
+                ptI[2][i] = 0;
             }
-            return out;
-        };
+
+            ThinplateSplineTransform tr3D = new ThinplateSplineTransform(ptF,ptI);
+            RealTransformSequence rts = new RealTransformSequence();
+
+            rts.add(tr3D);
+            rts.add(at3Dmoving.copy());
+
+            SourceRealTransformer srt = new SourceRealTransformer(null, rts);
+            SourceAffineTransformer sat = new SourceAffineTransformer(null, at3Dfixed.copy());
+
+            return (sacs) -> {
+                SourceAndConverter[] out = new SourceAndConverter[sacs.length];
+                for (int i = 0; i<sacs.length; i++) {
+                    out[i] = sat.apply(srt.apply(sacs[i]));
+                }
+                return out;
+            };
+        //} /*else {
+            // TODO Just an affine transform : Let's make this quicker to compute */
 
     }
 
