@@ -3,7 +3,6 @@ package ch.epfl.biop.registration.sourceandconverter;
 import bdv.tools.brightness.ConverterSetup;
 import bdv.util.BdvHandle;
 import bdv.viewer.SourceAndConverter;
-import bigwarp.BigWarp;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import ch.epfl.biop.registration.Registration;
 import ij.gui.WaitForUserDialog;
@@ -11,6 +10,7 @@ import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.realtransform.RealTransformSequence;
 import net.imglib2.realtransform.ThinplateSplineTransform;
+import net.imglib2.util.LinAlgHelpers;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import sc.fiji.bdvpg.sourceandconverter.register.BigWarpLauncher;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceAffineTransformer;
@@ -25,10 +25,35 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
 
     SourceAndConverter[] fimg, mimg;
 
+    AffineTransform3D at3Dmoving, at3Dfixed;
+
     @Override
     public void setFixedImage(SourceAndConverter[] fimg) {
         at3Dfixed = new AffineTransform3D();
+
         fimg[0].getSpimSource().getSourceTransform(0,0, at3Dfixed);
+
+        // We do not want to touch the scaling...
+        double[] m = at3Dfixed.getRowPackedCopy();
+
+        double sx = Math.sqrt(m[0]*m[0]+m[1]*m[1]+m[2]*m[2]);
+        double sy = Math.sqrt(m[4]*m[4]+m[5]*m[5]+m[6]*m[6]);
+        double sz = Math.sqrt(m[8]*m[8]+m[9]*m[9]+m[10]*m[10]);
+
+        m[0] /= sx;
+        m[1] /= sx;
+        m[2] /= sx;
+
+        m[4] /= sy;
+        m[5] /= sy;
+        m[6] /= sy;
+
+        m[8] /= sz;
+        m[9] /= sz;
+        m[10] /= sz;
+
+        at3Dfixed.set(m);
+
         SourceAffineTransformer sat =
                 new SourceAffineTransformer(null, at3Dfixed.inverse().copy());
 
@@ -38,8 +63,6 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
             this.fimg[i] = sat.apply(fimg[i]);
         }
     }
-
-    AffineTransform3D at3Dmoving, at3Dfixed;
 
     @Override
     public void setMovingImage(SourceAndConverter[] mimg) {
@@ -51,6 +74,28 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
         mimg[0]
                 .getSpimSource()
                 .getSourceTransform(0,0, at3Dmoving);
+
+        // We do not want to touch the scaling...
+        double[] m = at3Dmoving.getRowPackedCopy();
+
+        double sx = Math.sqrt(m[0]*m[0]+m[1]*m[1]+m[2]*m[2]);
+        double sy = Math.sqrt(m[4]*m[4]+m[5]*m[5]+m[6]*m[6]);
+        double sz = Math.sqrt(m[8]*m[8]+m[9]*m[9]+m[10]*m[10]);
+
+        m[0] /= sx;
+        m[1] /= sx;
+        m[2] /= sx;
+
+        m[4] /= sy;
+        m[5] /= sy;
+        m[6] /= sy;
+
+        m[8] /= sz;
+        m[9] /= sz;
+        m[10] /= sz;
+
+        at3Dmoving.set(m);
+
         SourceAffineTransformer sat =
                 new SourceAffineTransformer(null, at3Dmoving.inverse().copy());
 
@@ -127,6 +172,10 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
         SourceAffineTransformer sat = new SourceAffineTransformer(null, at3Dfixed.copy());
 
         // Yes but mipmap is screwed up
+
+        // MipmapOrdering.MipmapHints
+        // https://github.com/bigdataviewer/bigdataviewer-core/blob/master/src/main/java/bdv/util/MipmapTransforms.java
+
 
         return (sacs) -> {
             SourceAndConverter[] out = new SourceAndConverter[sacs.length];
