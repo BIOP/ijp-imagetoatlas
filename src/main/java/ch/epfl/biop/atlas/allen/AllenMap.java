@@ -2,42 +2,19 @@ package ch.epfl.biop.atlas.allen;
 
 import java.net.URL;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import bdv.BigDataViewer;
-import bdv.ij.util.ProgressWriterIJ;
 import bdv.util.*;
-import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
 import bdv.viewer.SynchronizedViewerState;
-import bdv.viewer.ViewerOptions;
-import bdv.viewer.state.SourceGroup;
-import bdv.viewer.state.ViewerState;
 import ch.epfl.biop.atlas.AtlasMap;
-import ch.epfl.biop.atlas.allen.adultmousebrain.ProceduralLayerRealRandomAccess;
-import ch.epfl.biop.bdvslicer.ij2command.BDVSliceToImgPlus;
 import ch.epfl.biop.bdvslicer.ij2command.FastBDVSliceToImgPlus;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;
-import mpicbg.spim.data.SpimDataException;
-import mpicbg.spim.data.generic.AbstractSpimData;
-import net.imglib2.FinalInterval;
-import net.imglib2.RealInterval;
-import net.imglib2.RealRandomAccess;
-import net.imglib2.RealRandomAccessible;
 import net.imglib2.cache.img.DiskCachedCellImgFactory;
 import net.imglib2.cache.img.DiskCachedCellImgOptions;
-import net.imglib2.converter.Converter;
-import net.imglib2.img.array.ArrayImg;
-import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.realtransform.AffineTransform3D;
-import net.imglib2.type.numeric.ARGBType;
-import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
-import net.imglib2.util.Util;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
-import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterUtils;
 import sc.fiji.bdvpg.sourceandconverter.importer.EmptySourceAndConverterCreator;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceResampler;
 import sc.fiji.bdvpg.spimdata.importer.SpimDataFromXmlImporter;
@@ -51,43 +28,47 @@ public class AllenMap implements AtlasMap {
 	List<SourceAndConverter> sacs;
 
 	URL dataSource;
-	public int StructureChannel = 0;
-	public int LabelChannel = 1;
 
-	final static public int AvgChannel = 0;
+	public String name;
+
+	// Original source order
+	final static private int AraSetupId = 0;
+	final static private int LabelBorberSetupId = 1;
+	final static private int NisslSetupId = 2;
+	final static private int LabelSetupId = 3;
+
+	// Re ordered channel
+	final static public int AraChannel = 0;
 	final static public int NisslChannel = 1;
+	final static public int LabelBorderChannel = 2;
+	final static public int LabelChannel = 3;
 	
 	@Override
 	public void initialize(String atlasName) {
-		//try {
-			String address =  this.getDataSource().toString();
-			// Hacky Mac HackFace
-			if (address.startsWith("file:")) {
-				address = address.substring(5);
-			}
-
-			SpimDataFromXmlImporter importer = new SpimDataFromXmlImporter(address);
-			//importer.run();
-
-			sacs = SourceAndConverterServices
-				.getSourceAndConverterService()
-				.getSourceAndConverterFromSpimdata(importer.get());
-
-			bdvh = SourceAndConverterServices
-					.getSourceAndConverterDisplayService()
-					.getNewBdv();
-
-			SourceAndConverterServices
-					.getSourceAndConverterDisplayService()
-					.show(bdvh, sacs.toArray(new SourceAndConverter[sacs.size()]));
-
-			//bdv = BigDataViewer.open( address, atlasName, new ProgressWriterIJ(), ViewerOptions.options() );
+		this.name = atlasName;
 
 
+		String address =  this.getDataSource().toString();
+		// Hacky Mac HackFace
+		if (address.startsWith("file:")) {
+			address = address.substring(5);
+		}
 
-		/*} catch (SpimDataException e) {
-			e.printStackTrace();
-		}*/
+		SpimDataFromXmlImporter importer = new SpimDataFromXmlImporter(address);
+
+		sacs = SourceAndConverterServices
+			.getSourceAndConverterService()
+			.getSourceAndConverterFromSpimdata(importer.get());
+
+		bdvh = SourceAndConverterServices
+				.getSourceAndConverterDisplayService()
+				.getNewBdv();
+
+		// Following line should be done with show
+		/*SourceAndConverterServices
+				.getSourceAndConverterDisplayService()
+				.show(bdvh, sacs.toArray(new SourceAndConverter[sacs.size()]));*/
+
 	}
 
 	@Override
@@ -102,18 +83,17 @@ public class AllenMap implements AtlasMap {
 
 	@Override
 	public void show() {
-		//bdv.getViewerFrame().setVisible(true);
+		SourceAndConverterServices
+				.getSourceAndConverterDisplayService()
+				.show(bdvh, sacs.toArray(new SourceAndConverter[sacs.size()]));
 	}
 
 	@Override
 	public void hide() {
-		//bdv.getViewerFrame().setVisible(false);
+		SourceAndConverterServices
+				.getSourceAndConverterDisplayService()
+				.remove(bdvh, sacs.toArray(new SourceAndConverter[sacs.size()]));
 	}
-
-    @Override
-    public void setStructureImageChannel(int channel_index) {
-        StructureChannel = channel_index;
-    }
 
     public ImagePlus getImagePlusChannel(int channel) {
 		FastBDVSliceToImgPlus bs = new FastBDVSliceToImgPlus();
@@ -138,20 +118,10 @@ public class AllenMap implements AtlasMap {
 	}
 
 	public SourceAndConverter getSacChannel(int channel) {
-		//ArrayImg rai = ArrayImgs.unsignedBytes((long) 600,(long) 600,(long) 1);
-		//AffineTransform3D at3D = (AffineTransform3D) this.getCurrentLocation();
 
-
-
-		/*double xNorm = getNormTransform(0,at3D);//trans
-		double samplingInXVoxelUnit=0.05e3;//1.0;
-		at3D.scale(samplingInXVoxelUnit/xNorm);*/
-
-		//Source src = new RandomAccessibleIntervalSource(rai, Util.getTypeFromInterval(rai), at3D.inverse(), "AB_"+channel);
 		SourceAndConverter model = createModelSource();
-		//model = SourceAndConverterUtils.createSourceAndConverter(src);
 
-		SourceResampler sampler = new SourceResampler(null, model, true, false);
+		SourceResampler sampler = new SourceResampler(null, model, true, true);
 
 		SourceAndConverter sacIn3D = sampler.apply(sacs.get(channel));
 
@@ -159,7 +129,6 @@ public class AllenMap implements AtlasMap {
 
 		return sacIn3D;
 	}
-
 
 	private SourceAndConverter createModelSource() {
 		// Origin is in fact the point 0,0,0 of the image
@@ -195,7 +164,6 @@ public class AllenMap implements AtlasMap {
 			nPz = 1+(long)(zSize / (samplingZInPhysicalUnit/2.0)); // TODO : check div by 2
 		}
 
-
 		// Dummy ImageFactory
 		final int[] cellDimensions = new int[] { 32, 32, 32 };
 
@@ -216,7 +184,6 @@ public class AllenMap implements AtlasMap {
 		return new EmptySourceAndConverterCreator("Model_", at3D.inverse(), nPx, nPy, nPz, factory).get();
 	}
 
-
 	@Override
 	public ImagePlus getCurrentStructuralImageAsImagePlus() {
 		ImagePlus imgNissl = this.getImagePlusChannel(NisslChannel).duplicate(); // Virtual images are causing problems
@@ -224,9 +191,9 @@ public class AllenMap implements AtlasMap {
 		imgNissl.getProcessor().setMinAndMax(0, 25000);
 
 
-		ImagePlus imgAvg = this.getImagePlusChannel(AvgChannel).duplicate();
-		imgAvg.setTitle("Avg");
-		imgAvg.getProcessor().setMinAndMax(0, 255);
+		ImagePlus imgAra = this.getImagePlusChannel(AraChannel).duplicate();
+		imgAra.setTitle("Ara");
+		imgAra.getProcessor().setMinAndMax(0, 255);
 
 
 		ImagePlus imgLabel = this.getImagePlusChannel(LabelChannel).duplicate();
@@ -247,10 +214,10 @@ public class AllenMap implements AtlasMap {
 		IJ.run(imgLabel, "Smooth", "");
 
 		imgNissl.show();
-		imgAvg.show();
+		imgAra.show();
 
 		ImagePlus imp_out = new ImagePlus();
-		IJ.run(imp_out, "Merge Channels...", "c1=Avg c2=Nissl c3=Label_Edge create keep");
+		IJ.run(imp_out, "Merge Channels...", "c1=Ara c2=Nissl c3=Label_Edge create keep");
 
 		imp_out = IJ.getImage();
 
@@ -260,8 +227,8 @@ public class AllenMap implements AtlasMap {
 		imgNissl.changes=false;
 		imgNissl.close();
 
-		imgAvg.changes=false;
-		imgAvg.close();
+		imgAra.changes=false;
+		imgAra.close();
 
 		imgTemp.changes=false;
 		imgTemp.close();
@@ -280,10 +247,11 @@ public class AllenMap implements AtlasMap {
 
 	@Override
 	public SourceAndConverter[] getCurrentStructuralImageAsSacs() {
-		SourceAndConverter[] out = new SourceAndConverter[3];
-		out[0] = getSacChannel(AvgChannel);
-		out[1] = getSacChannel(NisslChannel);
-		out[2] = getSacChannel(LabelChannel);
+		SourceAndConverter[] out = new SourceAndConverter[4];
+		out[AraChannel] = getSacChannel(AraSetupId);
+		out[NisslChannel] = getSacChannel(NisslSetupId);
+		out[LabelBorderChannel] = getSacChannel(LabelBorberSetupId);
+		out[LabelChannel] = getSacChannel(LabelSetupId);
 		return out;
 	}
 
@@ -298,9 +266,6 @@ public class AllenMap implements AtlasMap {
         AffineTransform3D transformedSourceToViewer = new AffineTransform3D(); // Empty Transform
         // 1 - viewer transform
         viewerState.getViewerTransform( transformedSourceToViewer ); // Get current transformation by the viewer state and puts it into sourceToImgPlus
-		System.out.println("getCurrentLocation");
-
-		System.out.println(transformedSourceToViewer.toString());
 		return transformedSourceToViewer.copy();
 	}
 
@@ -309,16 +274,11 @@ public class AllenMap implements AtlasMap {
 		// TODO Auto-generated method stub
 
 		AffineTransform3D at3D = (AffineTransform3D) location;
-		System.out.println("setCurrentLocation");
-		System.out.println(at3D.toString());
-		//ViewerState viewerState = bdv.getViewer().getState();
-		//viewerState.
 		bdvh.getViewerPanel().transformChanged(at3D);
-		/*viewerState.setViewerTransform(at3D);
-		bdv.getViewer()
-        bdv.toggleManualTransformation();
-        bdv.getManualTransformEditor().transformChanged(at3D);
-		bdv.toggleManualTransformation();*/
 	}
 
+	@Override
+	public String toString() {
+		return name;
+	}
 }

@@ -74,7 +74,7 @@ public class AllenBrainAdultMouseAtlasCCF2017 extends AllenAtlas implements Comm
 			});*/
 
 			((AllenOntology)this.ontology).mutateToModulo(65000); // Solves issue of very big indexes in allen brain ontology. The map has also been moduloed.
-			((AllenMap)this.map).LabelChannel=2;
+			//((AllenMap)this.map).LabelChannel=2;
 			this.map.show();
 
 			//BigDataViewer bdv = ((AllenMap) this.map).bdv;

@@ -180,6 +180,7 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
             };
         //} /*else {
             // TODO Just an affine transform : Let's make this quicker to compute */
+            // see https://github.com/saalfeldlab/bigwarp/blob/master/scripts/Bigwarp_affinePart.groovy
 
     }
 
