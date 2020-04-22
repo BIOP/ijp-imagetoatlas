@@ -6,7 +6,6 @@ import bdv.util.*;
 import bdv.viewer.SourceAndConverter;
 import bdv.viewer.SynchronizedViewerState;
 import ch.epfl.biop.atlas.AtlasMap;
-import ch.epfl.biop.bdvslicer.ij2command.FastBDVSliceToImgPlus;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;
@@ -86,6 +85,15 @@ public class AllenMap implements AtlasMap {
 		SourceAndConverterServices
 				.getSourceAndConverterDisplayService()
 				.show(bdvh, sacs.toArray(new SourceAndConverter[sacs.size()]));
+		SourceAndConverterServices
+				.getSourceAndConverterDisplayService()
+				.remove(bdvh,sacs.get(LabelSetupId));
+
+		AffineTransform3D at3D = new AffineTransform3D();
+		at3D.translate(6.7, 5.0,0);
+		at3D.scale(60);
+		bdvh.getViewerPanel().setCurrentViewerTransform(at3D);
+		bdvh.getViewerPanel().requestRepaint();
 	}
 
 	@Override
@@ -96,7 +104,7 @@ public class AllenMap implements AtlasMap {
 	}
 
     public ImagePlus getImagePlusChannel(int channel) {
-		FastBDVSliceToImgPlus bs = new FastBDVSliceToImgPlus();
+		/*FastBDVSliceToImgPlus bs = new FastBDVSliceToImgPlus();
 		// Feeds argument
 		bs.bdvh=this.bdvh;
 		bs.mipmapLevel = 0;
@@ -107,7 +115,8 @@ public class AllenMap implements AtlasMap {
 		bs.interpolate=false;
 		bs.sourceIndex = channel;
 		bs.run();
-		return bs.imp;
+		return bs.imp;*/
+		return null;
 	}
 
 	public double getNormTransform(int axis, AffineTransform3D t) {
@@ -238,7 +247,7 @@ public class AllenMap implements AtlasMap {
 
 	@Override
 	public ImagePlus getCurrentLabelImageAsImagePlus() {
-		ImagePlus imgLabel = this.getImagePlusChannel(LabelChannel).duplicate();
+		ImagePlus imgLabel = this.getImagePlusChannel(LabelSetupId).duplicate(); // TODO : solve indexing confusion
 		imgLabel.setTitle("Label");
 		imgLabel.getProcessor().setMinAndMax(0, 65535);
 		//imgLabel.show();

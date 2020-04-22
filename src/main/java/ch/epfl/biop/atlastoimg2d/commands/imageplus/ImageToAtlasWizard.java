@@ -5,6 +5,7 @@ import java.util.concurrent.Future;
 
 import ch.epfl.biop.atlas.commands.PutAtlasStructureToImage;
 import ch.epfl.biop.atlastoimg2d.AtlasToImg2D;
+import ch.epfl.biop.atlastoimg2d.commands.ImageToAtlasComputeROIS;
 import ch.epfl.biop.atlastoimg2d.commands.ImageToAtlasRemoveRegister;
 import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
 import ij.IJ;

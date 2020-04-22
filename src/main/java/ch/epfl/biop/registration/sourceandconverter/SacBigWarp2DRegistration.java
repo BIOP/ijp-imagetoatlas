@@ -129,8 +129,15 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
 
             SourceAndConverterServices.getSourceAndConverterDisplayService().pairClosing(bdvhQ,bdvhP);
 
+            bdvhP.getViewerPanel().state().setViewerTransform(at3Dfixed.copy());
+            //bdvhP.getViewerPanel().state().setViewerTransform(at3Dmoving.copy());
+
             bdvhP.getViewerPanel().requestRepaint();
             bdvhQ.getViewerPanel().requestRepaint();
+
+
+
+
             bwl.getBigWarp().getLandmarkFrame().repaint();
 
             WaitForUserDialog dialog = new WaitForUserDialog("Choose slice","Please perform carefully your registration then press ok.");
@@ -187,11 +194,34 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
     @Override
     public RealPointList getPtsRegistration(RealPointList pts) {
         // Pb : 2D vs 3D
-        for (RealPoint pt : pts.ptList) {
-            double[] tr = bwl.getBigWarp().getTransform().apply( new double[] {
-                pt.getDoublePosition(0), pt.getDoublePosition(1)
+        for
+        (RealPoint pt : pts.ptList) {
+            //double ptx = pt.getDoublePosition(0);
+            //double pty = pt.getDoublePosition(1);
+            //double ptz = pt.getDoublePosition(2);
+
+            RealPoint p0 = new RealPoint(3);
+            p0.setPosition(pt.getDoublePosition(0),0);
+            p0.setPosition(pt.getDoublePosition(1),1);
+
+            RealPoint p1 = new RealPoint(3);
+            at3Dmoving.apply(p0, p1);
+
+            double[] pxy2 = bwl.getBigWarp().getTransform().apply( new double[] {
+                p1.getDoublePosition(0), p1.getDoublePosition(1)
             });
-            pt.setPosition(tr);
+
+            RealPoint p2 = new RealPoint(3);
+            p2.setPosition(pxy2[0], 0);
+            p2.setPosition(pxy2[1], 1);
+            p2.setPosition(p1.getDoublePosition(2), 2);
+
+            RealPoint p3 = new RealPoint(3);
+
+            at3Dfixed.apply(p2, p3);
+
+            pt.setPosition(p3.getDoublePosition(0),0);
+            pt.setPosition(p3.getDoublePosition(1),1);
         }
         return pts;
     }

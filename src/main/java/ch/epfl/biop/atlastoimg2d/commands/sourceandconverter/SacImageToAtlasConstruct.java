@@ -11,6 +11,9 @@ import org.scijava.command.CommandModule;
 import org.scijava.command.CommandService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
+import sc.fiji.bdvpg.scijava.command.bdv.BdvSourcesAdderCommand;
+import sc.fiji.bdvpg.services.SourceAndConverterServices;
+
 import java.util.function.Consumer;
 
 import java.util.concurrent.ExecutionException;
@@ -44,6 +47,15 @@ public class SacImageToAtlasConstruct implements Command {
         aligner.setImage(sacs);
         aligner.setScijavaContext(ctx);
 
+        // Show sacs if not present before
+        try {
+            cs.run(BdvSourcesAdderCommand.class, true, "sacs", sacs).get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+
         if (ba==null) {
             // Atlas not set -> need to set one
             Future<CommandModule> f = cs.run(BrowseAtlasCommand.class, true);
@@ -61,5 +73,6 @@ public class SacImageToAtlasConstruct implements Command {
         }
 
         aligner.setAtlas(ba);
+
     }
 }

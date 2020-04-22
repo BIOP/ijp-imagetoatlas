@@ -1,4 +1,4 @@
-package ch.epfl.biop.atlastoimg2d.commands.imageplus;
+package ch.epfl.biop.atlastoimg2d.commands;
 
 import ch.epfl.biop.atlastoimg2d.AtlasToImg2D;
 import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
