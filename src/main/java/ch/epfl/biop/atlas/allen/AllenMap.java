@@ -6,6 +6,7 @@ import bdv.util.*;
 import bdv.viewer.SourceAndConverter;
 import bdv.viewer.SynchronizedViewerState;
 import ch.epfl.biop.atlas.AtlasMap;
+import ch.epfl.biop.scijava.command.ExportToImagePlusCommand;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;
@@ -63,11 +64,6 @@ public class AllenMap implements AtlasMap {
 				.getSourceAndConverterDisplayService()
 				.getNewBdv();
 
-		// Following line should be done with show
-		/*SourceAndConverterServices
-				.getSourceAndConverterDisplayService()
-				.show(bdvh, sacs.toArray(new SourceAndConverter[sacs.size()]));*/
-
 	}
 
 	@Override
@@ -103,20 +99,16 @@ public class AllenMap implements AtlasMap {
 				.remove(bdvh, sacs.toArray(new SourceAndConverter[sacs.size()]));
 	}
 
-    public ImagePlus getImagePlusChannel(int channel) {
-		/*FastBDVSliceToImgPlus bs = new FastBDVSliceToImgPlus();
-		// Feeds argument
-		bs.bdvh=this.bdvh;
-		bs.mipmapLevel = 0;
-		bs.xSize=300;
-		bs.ySize=300;
-		bs.zSize=0;
-		bs.samplingInXVoxelUnit=0.05e3;//1.0;
-		bs.interpolate=false;
-		bs.sourceIndex = channel;
-		bs.run();
-		return bs.imp;*/
-		return null;
+    public ImagePlus getSacChannelAsImagePlus(int channel) {
+
+		ExportToImagePlusCommand export = new ExportToImagePlusCommand();
+
+		export.level=0;
+		export.timepoint=0;
+		export.sac=getSacChannel(channel);
+		export.run();
+
+		return export.imp_out;
 	}
 
 	public double getNormTransform(int axis, AffineTransform3D t) {
@@ -130,11 +122,15 @@ public class AllenMap implements AtlasMap {
 
 		SourceAndConverter model = createModelSource();
 
-		SourceResampler sampler = new SourceResampler(null, model, true, true);
+		boolean interpolate = true;
+
+		if (channel == LabelSetupId) {
+			interpolate = false;
+		}
+
+		SourceResampler sampler = new SourceResampler(null, model, true, interpolate);
 
 		SourceAndConverter sacIn3D = sampler.apply(sacs.get(channel));
-
-		// Now restricted to a 2D registration problem
 
 		return sacIn3D;
 	}
@@ -153,9 +149,9 @@ public class AllenMap implements AtlasMap {
 		double xNorm = getNormTransform(0, at3D);//trans
 		at3D.scale(1/xNorm);
 
-		double samplingXYInPhysicalUnit = 0.02; // 20 microns per pixel
+		double samplingXYInPhysicalUnit = 0.01; // 10 microns per pixel
 
-		double samplingZInPhysicalUnit = 0.01; // 10 microns but irrelevant -> slice only
+		double samplingZInPhysicalUnit = 0.01; // 10 microns but irrelevant - just used for calibration -> slice only
 
 		int xSize = 15; // in millimeter
 		int ySize = 15; // in millimeter
@@ -193,45 +189,50 @@ public class AllenMap implements AtlasMap {
 		return new EmptySourceAndConverterCreator("Model_", at3D.inverse(), nPx, nPy, nPz, factory).get();
 	}
 
+
+	ImagePlus imgNissl, imgAra, imgLabelBorder;
+
 	@Override
 	public ImagePlus getCurrentStructuralImageAsImagePlus() {
-		ImagePlus imgNissl = this.getImagePlusChannel(NisslChannel).duplicate(); // Virtual images are causing problems
-		imgNissl.setTitle("Nissl");
-		imgNissl.getProcessor().setMinAndMax(0, 25000);
 
+		Thread getNissl = new Thread(() -> {
+			imgNissl = this.getSacChannelAsImagePlus(NisslSetupId);
+			imgNissl.setTitle("Nissl");
+		});
 
-		ImagePlus imgAra = this.getImagePlusChannel(AraChannel).duplicate();
-		imgAra.setTitle("Ara");
-		imgAra.getProcessor().setMinAndMax(0, 255);
+		Thread getAra = new Thread(() -> {
+			imgAra = this.getSacChannelAsImagePlus(AraSetupId);
+			imgAra.setTitle("Ara");
+		});
 
+		Thread getImgLabelBorder = new Thread(() -> {
+			imgLabelBorder = this.getSacChannelAsImagePlus(LabelBorberSetupId);
+			imgLabelBorder.setTitle("Label_Edge");
+		});
 
-		ImagePlus imgLabel = this.getImagePlusChannel(LabelChannel).duplicate();
-		imgLabel.setTitle("Label_Edge");
-		imgLabel.getProcessor().setMinAndMax(0, 25000);
+		getNissl.start();
+		getAra.start();
+		getImgLabelBorder.start();
 
-		imgLabel.show();
-
-		IJ.run(imgLabel, "Find Edges", "");
-		ImagePlus imgTemp = imgLabel;
-		imgLabel = IJ.getImage();
-
-		IJ.setRawThreshold(imgLabel, 1, 65535, null);
-
-		Prefs.blackBackground = true;
-		IJ.run(imgLabel,"Make Binary", "thresholded remaining black");
-		IJ.run(imgLabel, "16-bit", "");
-		IJ.run(imgLabel, "Smooth", "");
+		try {
+			getNissl.join();
+			getAra.join();
+			getImgLabelBorder.join();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 
 		imgNissl.show();
 		imgAra.show();
+		imgLabelBorder.show();
 
 		ImagePlus imp_out = new ImagePlus();
 		IJ.run(imp_out, "Merge Channels...", "c1=Ara c2=Nissl c3=Label_Edge create keep");
 
 		imp_out = IJ.getImage();
 
-		imgLabel.changes=false;
-		imgLabel.close();
+		imgLabelBorder.changes=false;
+		imgLabelBorder.close();
 
 		imgNissl.changes=false;
 		imgNissl.close();
@@ -239,19 +240,16 @@ public class AllenMap implements AtlasMap {
 		imgAra.changes=false;
 		imgAra.close();
 
-		imgTemp.changes=false;
-		imgTemp.close();
-
 		return imp_out;
 	}
 
 	@Override
 	public ImagePlus getCurrentLabelImageAsImagePlus() {
-		ImagePlus imgLabel = this.getImagePlusChannel(LabelSetupId).duplicate(); // TODO : solve indexing confusion
-		imgLabel.setTitle("Label");
-		imgLabel.getProcessor().setMinAndMax(0, 65535);
+		//ImagePlus imgLabel = this.getSacChannelAsImagePlus(LabelSetupId).duplicate(); // TODO : solve indexing confusion
+		//imgLabel.setTitle("Label");
+		//imgLabel.getProcessor().setMinAndMax(0, 65535);
 		//imgLabel.show();
-		return imgLabel;
+		return this.getSacChannelAsImagePlus(LabelSetupId); //imgLabel;
 	}
 
 	@Override
