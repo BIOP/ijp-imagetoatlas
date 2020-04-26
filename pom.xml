@@ -142,10 +142,9 @@
 		<bigdataviewer-vistools.version>1.0.0-beta-20</bigdataviewer-vistools.version>
 		<spim_data.version>2.2.4</spim_data.version>
 		<ui-behaviour.version>2.0.1</ui-behaviour.version>
-		<bigwarp_fiji.version>5.1.0</bigwarp_fiji.version>
+		<bigwarp_fiji.version>5.1.1-SNAPSHOT</bigwarp_fiji.version>
 
 		<scijava-ui-swing.version>0.13.0</scijava-ui-swing.version>
-
 
 	</properties>
 
