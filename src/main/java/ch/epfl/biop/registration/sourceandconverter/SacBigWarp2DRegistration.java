@@ -9,8 +9,7 @@ import ch.epfl.biop.registration.Registration;
 import ij.gui.WaitForUserDialog;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
-import net.imglib2.realtransform.RealTransformSequence;
-import net.imglib2.realtransform.ThinplateSplineTransform;
+import net.imglib2.realtransform.InvertibleRealTransformSequence;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import sc.fiji.bdvpg.sourceandconverter.register.BigWarpLauncher;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceAffineTransformer;
@@ -107,6 +106,7 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
     }
 
     BigWarpLauncher bwl;
+    InvertibleRealTransformSequence irts;
 
     @Override
     public void register() {
@@ -153,6 +153,10 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
             SourceAffineTransformer satm = new SourceAffineTransformer(null, at3Dmoving.inverse().copy());
             SourceRealTransformer srt = new SourceRealTransformer(null, bwl.getBigWarp().getTransformation());// rts);
             SourceAffineTransformer satf = new SourceAffineTransformer(null, at3Dfixed.copy());
+            irts = new InvertibleRealTransformSequence();
+            irts.add(at3Dmoving.inverse());
+            irts.add(bwl.getBigWarp().getTransformation());
+            irts.add(at3Dfixed);
 
             return (sacs) -> {
                 SourceAndConverter[] out = new SourceAndConverter[sacs.length];
@@ -162,11 +166,15 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
                 return out;
             };
         } else {
-            // TODO Just an affine transform : Let's make this quicker to compute
-            // see https://github.com/saalfeldlab/bigwarp/blob/master/scripts/Bigwarp_affinePart.groovy
+            // Just an affine transform
             SourceAffineTransformer satm = new SourceAffineTransformer(null, at3Dmoving.inverse().copy());
             SourceAffineTransformer srt = new SourceAffineTransformer(null, bwl.getBigWarp().affine3d().inverse());// rts);
             SourceAffineTransformer satf = new SourceAffineTransformer(null, at3Dfixed.copy());
+
+            irts = new InvertibleRealTransformSequence();
+            irts.add(at3Dmoving.inverse());
+            irts.add(bwl.getBigWarp().affine3d().inverse());
+            irts.add(at3Dfixed);
 
             return (sacs) -> {
                 SourceAndConverter[] out = new SourceAndConverter[sacs.length];
@@ -175,42 +183,38 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
                 }
                 return out;
             };
-
         }
-
     }
 
     @Override
     public RealPointList getPtsRegistration(RealPointList pts) {
-        // Pb : 2D vs 3D
+        // Transform 2D in 3D
         for
         (RealPoint pt : pts.ptList) {
-            //double ptx = pt.getDoublePosition(0);
-            //double pty = pt.getDoublePosition(1);
-            //double ptz = pt.getDoublePosition(2);
+            RealPoint pi = new RealPoint(3);
+            pi.setPosition(pt.getDoublePosition(0),0);
+            pi.setPosition(pt.getDoublePosition(1),1);
+            pi.setPosition(0,2);
 
-            RealPoint p0 = new RealPoint(3);
-            p0.setPosition(pt.getDoublePosition(0),0);
-            p0.setPosition(pt.getDoublePosition(1),1);
+            RealPoint pf0 = new RealPoint(3);
 
-            RealPoint p1 = new RealPoint(3);
-            at3Dmoving.apply(p0, p1);
+            at3Dfixed.inverse().apply(pi,pf0);
 
-            double[] pxy2 = bwl.getBigWarp().getTransform().apply( new double[] {
-                p1.getDoublePosition(0), p1.getDoublePosition(1)
-            });
 
-            RealPoint p2 = new RealPoint(3);
-            p2.setPosition(pxy2[0], 0);
-            p2.setPosition(pxy2[1], 1);
-            p2.setPosition(p1.getDoublePosition(2), 2);
+            RealPoint pf1 = new RealPoint(3);
+            bwl.getBigWarp().getTransformation().inverse().apply(pf0,pf1);
 
-            RealPoint p3 = new RealPoint(3);
 
-            at3Dfixed.apply(p2, p3);
+            RealPoint pf2 = new RealPoint(3);
+            at3Dmoving.apply(pf1,pf2);
 
-            pt.setPosition(p3.getDoublePosition(0),0);
-            pt.setPosition(p3.getDoublePosition(1),1);
+            //irts.apply(pi, pf);
+
+            pt.setPosition(pf2.getDoublePosition(0),0);
+            pt.setPosition(pf2.getDoublePosition(1),1);
+            if (Math.random()>0.99) {
+                System.out.println(pf2.getDoublePosition(0)+":"+pf2.getDoublePosition(1));
+            }
         }
         return pts;
     }
