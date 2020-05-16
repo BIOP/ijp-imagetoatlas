@@ -9,41 +9,54 @@ import org.scijava.ItemIO;
 import org.scijava.command.Command;
 import org.scijava.command.CommandModule;
 import org.scijava.command.CommandService;
-import org.scijava.object.ObjectService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Image To Atlas>Wizard (BDV)")
-public class SacImageToAtlasWizard implements Command {
+@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Wizard (not working) (BDV)")
+public class SacMultiImageToAtlasWizard implements Command {
 
 	@Parameter
 	public CommandService cs;
-	
-	@Parameter(type = ItemIO.OUTPUT)
-	public AtlasToSourceAndConverter2D aligner;
+
+	//@Parameter(type = ItemIO.OUTPUT)
+	//public AtlasToSourceAndConverter2D aligner;
 
 	@Override
 	public void run() {
 		try {
 			Future<CommandModule> task;
 			CommandModule cm;
-			task = cs.run(SacImageToAtlasConstruct.class, true);
-			cm = task.get();
-			aligner = (AtlasToSourceAndConverter2D) cm.getOutput("aligner");
 
-			WaitForUserDialog dialog = new WaitForUserDialog("Choose slice","Pick carefully the slice you'd like.");
-			dialog.show();
-			aligner.setAtlasLocation(
-			        aligner.getAtlas().map.getCurrentLocation()
-            );
+
+
+			boolean allImagesAdded = false;
+
+			while (!allImagesAdded) {
+				YesNoCancelDialog dialogw = new YesNoCancelDialog(IJ.getInstance(),
+						"Register a 2D slice", "Do you want to add a 2D Slice");
+
+				if (dialogw.cancelPressed()||(!dialogw.yesPressed())) {
+					allImagesAdded=true;
+				} else {
+					task = cs.run(SacImageToAtlasConstruct.class, true);
+					cm = task.get();
+					AtlasToSourceAndConverter2D aligner = (AtlasToSourceAndConverter2D) cm.getOutput("aligner");
+
+					WaitForUserDialog dialog = new WaitForUserDialog("Choose slice","Pick carefully the slice you'd like.");
+					dialog.show();
+					aligner.setAtlasLocation(
+							aligner.getAtlas().map.getCurrentLocation()
+					);
+				}
+			}
 
 			//cs.run(ImageToAtlasRegister.class,true,"aligner", aligner ).get();
 
 			// ---- Adds as many registration as the user wants
-			boolean registrationDone = false;
+			/*boolean registrationDone = false;
 
 			while (!registrationDone) {
 				dialog = new WaitForUserDialog("Modify images ?","Perform changes on images. Click when you're done.");
@@ -66,7 +79,7 @@ public class SacImageToAtlasWizard implements Command {
 						}
 					}
 				}
-			}
+			}*/
 			/*
 			// ---- Ok -> now let's compute the transformed ROI
 			YesNoCancelDialog dialogw = new YesNoCancelDialog(IJ.getInstance(),

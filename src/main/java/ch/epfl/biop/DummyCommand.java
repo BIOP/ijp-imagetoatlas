@@ -2,6 +2,7 @@ package ch.epfl.biop;
 
 //import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
 //import ch.epfl.biop.java.utilities.roi.types.ImageJRoisFile;
+import bigwarp.BigWarp;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.plugin.frame.RoiManager;
@@ -20,6 +21,8 @@ public class DummyCommand {
 	public static void main(String[] args) {
         final ImageJ ij = new ImageJ();
         ij.ui().showUI();
+
+        System.out.println("BigWarp hash:"+org.scijava.util.VersionUtils.getVersion(BigWarp.class));
 
         /*ImagePlus imp = IJ.openImage("/home/nico/Dropbox/BIOP/2019-02 Laura Ca/ModelEx-stack.tif");
         imp.show();*/

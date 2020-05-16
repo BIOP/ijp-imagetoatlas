@@ -193,27 +193,21 @@
 		</dependency>
 
 		<dependency>
-			<groupId>sc.fiji</groupId>
-			<artifactId>bigdataviewer-playground</artifactId>
-			<version>0.2.0-SNAPSHOT</version>
-		</dependency>
-
-		<dependency>
 			<groupId>ch.epfl.biop</groupId>
 			<artifactId>bigdataviewer-bioformats</artifactId>
-			<version>0.2.4</version>
+			<version>0.2.5</version>
 		</dependency>
 
 		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>bigdataviewer-playground</artifactId>
-			<version>0.2.0-SNAPSHOT</version>
+			<version>0.2.1-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>ch.epfl.biop</groupId>
 			<artifactId>bigdataviewer-biop-tools</artifactId>
-			<version>0.1.5</version>
+			<version>0.1.6</version>
 		</dependency>
 
 	</dependencies>

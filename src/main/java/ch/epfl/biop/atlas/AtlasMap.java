@@ -43,8 +43,11 @@ public interface AtlasMap {
 	ImagePlus getCurrentStructuralImageAsImagePlus();
 	ImagePlus getCurrentLabelImageAsImagePlus();
 
-	SourceAndConverter[] getCurrentStructuralImageAsSacs();
-	SourceAndConverter[] getCurrentLabelImageAsSacs();
+	SourceAndConverter[] getCurrentStructuralImageSliceAsSacs();
+	SourceAndConverter getCurrentLabelImageSliceAsSac();
+
+	SourceAndConverter[] getStructuralImages();
+	SourceAndConverter getLabelImage();
 
 	Object getCurrentLocation();
 	void setCurrentLocation(Object location);

@@ -104,8 +104,10 @@ public class AllenMap implements AtlasMap {
 		ExportToImagePlusCommand export = new ExportToImagePlusCommand();
 
 		export.level=0;
-		export.timepoint=0;
-		export.sac=getSacChannel(channel);
+		export.timepointBegin=0;
+		export.timepointEnd=0;
+		export.sacs = new SourceAndConverter[1];
+		export.sacs[0] = getSacChannel(channel);
 		export.run();
 
 		return export.imp_out;
@@ -128,7 +130,7 @@ public class AllenMap implements AtlasMap {
 			interpolate = false;
 		}
 
-		SourceResampler sampler = new SourceResampler(null, model, true, interpolate);
+		SourceResampler sampler = new SourceResampler(null, model, true,false, interpolate);
 
 		SourceAndConverter sacIn3D = sampler.apply(sacs.get(channel));
 
@@ -253,7 +255,7 @@ public class AllenMap implements AtlasMap {
 	}
 
 	@Override
-	public SourceAndConverter[] getCurrentStructuralImageAsSacs() {
+	public SourceAndConverter[] getCurrentStructuralImageSliceAsSacs() {
 		SourceAndConverter[] out = new SourceAndConverter[4];
 		out[AraChannel] = getSacChannel(AraSetupId);
 		out[NisslChannel] = getSacChannel(NisslSetupId);
@@ -263,8 +265,22 @@ public class AllenMap implements AtlasMap {
 	}
 
 	@Override
-	public SourceAndConverter[] getCurrentLabelImageAsSacs() {
-		return new SourceAndConverter[0];
+	public SourceAndConverter getCurrentLabelImageSliceAsSac() {
+		return getSacChannel(LabelSetupId);
+	}
+
+	@Override
+	public SourceAndConverter[] getStructuralImages() {
+		SourceAndConverter[] out = new SourceAndConverter[3];
+		out[AraChannel] = sacs.get(AraSetupId);
+		out[NisslChannel] = sacs.get(NisslSetupId);
+		out[LabelBorderChannel] = sacs.get(LabelBorberSetupId);
+		return out;
+	}
+
+	@Override
+	public SourceAndConverter getLabelImage() {
+		return sacs.get(LabelSetupId);
 	}
 
 	@Override

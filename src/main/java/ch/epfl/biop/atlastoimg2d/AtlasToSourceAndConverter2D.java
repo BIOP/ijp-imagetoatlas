@@ -8,7 +8,6 @@ import ch.epfl.biop.java.utilities.roi.types.IJShapeRoiArray;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import ch.epfl.biop.registration.Registration;
 import ij.ImagePlus;
-import ij.gui.GenericDialog;
 import ij.plugin.frame.RoiManager;
 import org.scijava.Context;
 import org.scijava.command.CommandService;
@@ -63,7 +62,7 @@ public class AtlasToSourceAndConverter2D implements AtlasToImg2D<SourceAndConver
         //TODO imgAtlas = this.ba.map.getCurrentStructuralImageAsImagePlus().duplicate();
         //TODO imgAtlas.setCalibration(new Calibration());
 
-        imgAtlas = this.ba.map.getCurrentStructuralImageAsSacs();
+        imgAtlas = this.ba.map.getCurrentStructuralImageSliceAsSacs();
         atlasLocation=location;
 
         ImagePlus imgLabel = this.ba.map.getCurrentLabelImageAsImagePlus();

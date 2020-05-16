@@ -202,8 +202,8 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
 
 
             RealPoint pf1 = new RealPoint(3);
-            bwl.getBigWarp().getTransformation().inverse().apply(pf0,pf1);
-
+            bwl.getBigWarp().unwrap2d(bwl.getBigWarp().getTransformation()).inverse().apply(pf0,pf1);
+            //bwl.getBigWarp().getTransformation().inverse().apply(pf0,pf1);
 
             RealPoint pf2 = new RealPoint(3);
             at3Dmoving.apply(pf1,pf2);
