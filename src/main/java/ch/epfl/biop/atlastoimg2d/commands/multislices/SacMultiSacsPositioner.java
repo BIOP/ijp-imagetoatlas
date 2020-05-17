@@ -1,6 +1,5 @@
 package ch.epfl.biop.atlastoimg2d.commands.multislices;
 
-import bdv.tools.transformation.TransformedSource;
 import bdv.util.BdvHandle;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.BiopAtlas;
@@ -16,7 +15,6 @@ import org.scijava.command.Command;
 import org.scijava.command.CommandService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import sc.fiji.bdvpg.bdv.BdvCreator;
 import sc.fiji.bdvpg.bdv.projector.Projection;
 import sc.fiji.bdvpg.scijava.command.bdv.BdvSourcesAdderCommand;
 import sc.fiji.bdvpg.scijava.command.bdv.BdvWindowCreatorCommand;
@@ -166,26 +164,7 @@ public class SacMultiSacsPositioner implements Command {
         SourceAndConverterServices.getSourceAndConverterService().register(slicingModel);
         //SourceAndConverterServices.getSourceAndConverterDisplayService().show(slicingModel);
 
-        ZStepSetter zSetter = new ZStepSetter();
-
-        SourceMosaicZSlicer mosaic = new SourceMosaicZSlicer(null, slicingModel, true, false, true, zSetter::getStep);
-
-        SourceAndConverter[] slicedSources = new SourceAndConverter[ba.map.getStructuralImages().length];
-
-
-        for (int index = 0; index<ba.map.getStructuralImages().length;index++) {
-            SourceAndConverter sac = ba.map.getStructuralImages()[index];
-            SourceAndConverter reslicedSac = mosaic.apply(sac);
-            SourceAndConverterServices.getSourceAndConverterService()
-                    .register(reslicedSac);
-            slicedSources[index] = reslicedSac;
-        }
-
-        cs.run(SlicerAdjuster.class, true,
-                "modelSlicing", slicingModel,
-                        "slicedSources", slicedSources,
-                        "zSetter", zSetter,
-                        "originalAffineTransform3D", slicingTransfom);
+        //MultiSlicePositioner.ZStepSetter zSetter = new MultiSlicePositioner.ZStepSetter();
         try {
             // creates new bdv window
             bdvMultiSlicer = (BdvHandle) cs.run(BdvWindowCreatorCommand.class, true,
@@ -196,7 +175,27 @@ public class SacMultiSacsPositioner implements Command {
                     "projector", Projection.SUM_PROJECTOR)
                     .get().getOutput("bdvh");
 
+            MultiSlicePositioner mp = new MultiSlicePositioner(bdvMultiSlicer, slicingModel);
 
+            SourceMosaicZSlicer mosaic = new SourceMosaicZSlicer(null, slicingModel, true, false, true, mp.getzStepSetter()::getStep);
+
+            SourceAndConverter[] slicedSources = new SourceAndConverter[ba.map.getStructuralImages().length];
+
+            for (int index = 0; index<ba.map.getStructuralImages().length;index++) {
+                SourceAndConverter sac = ba.map.getStructuralImages()[index];
+                SourceAndConverter reslicedSac = mosaic.apply(sac);
+                SourceAndConverterServices.getSourceAndConverterService()
+                        .register(reslicedSac);
+                slicedSources[index] = reslicedSac;
+            }
+
+            cs.run(SlicerAdjuster.class, true,
+                    "modelSlicing", slicingModel,
+                            "slicedSources", slicedSources,
+                            "zSetter", mp.getzStepSetter(),
+                            "originalAffineTransform3D", slicingTransfom);
+
+            //bdvMultiSlicer.getViewerPanel().setTransferHandler(new MultiSlicePositioner.TransferHandler(bdvMultiSlicer, zSetter, slicingModel));
 
             // adds sliced source
             cs.run(BdvSourcesAdderCommand.class, true,
@@ -227,21 +226,5 @@ public class SacMultiSacsPositioner implements Command {
         slicingTransfom.set(-ptRealSpace.getDoublePosition(0)/2.0, 0,3);
         slicingTransfom.set(-ptRealSpace.getDoublePosition(1)/2.0, 1,3);
         slicingTransfom.set(-ptRealSpace.getDoublePosition(2)/2.0, 2,3);
-
-    }
-
-    public class ZStepSetter {
-        int zStep = 1;
-
-        public void setStep(int zStep) {
-            if (zStep>0) {
-                this.zStep = zStep;
-            }
-        }
-
-        public long getStep() {
-            return (long) zStep;
-        }
-
     }
 }

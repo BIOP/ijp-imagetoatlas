@@ -12,7 +12,6 @@ import sc.fiji.bdvpg.services.SourceAndConverterServices;
 
 import java.util.Set;
 
-
 @Plugin(type = InteractiveCommand.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Adjust Slicing")
 public class SlicerAdjuster extends InteractiveCommand {
 
@@ -37,7 +36,7 @@ public class SlicerAdjuster extends InteractiveCommand {
     SourceAndConverter[] slicedSources;
 
     @Parameter
-    SacMultiSacsPositioner.ZStepSetter zSetter;
+    MultiSlicePositioner.ZStepSetter zSetter;
 
     public void run() {
 
