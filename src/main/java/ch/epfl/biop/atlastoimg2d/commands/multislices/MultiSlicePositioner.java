@@ -5,6 +5,7 @@ import bdv.util.BdvHandle;
 import bdv.util.BdvOptions;
 import bdv.util.BdvOverlay;
 import bdv.viewer.SourceAndConverter;
+import bdv.viewer.render.MultiResolutionRenderer;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.ARGBType;
@@ -29,6 +30,9 @@ public class MultiSlicePositioner extends BdvOverlay {
 
     int iSliceNoStep = 0, iSlice = 0;
 
+    List<SliceSources> slices;
+
+
     //final BdvOverlay bdvOverlay;
 
     public MultiSlicePositioner(BdvHandle bdvh, SourceAndConverter slicingModel) {
@@ -37,7 +41,8 @@ public class MultiSlicePositioner extends BdvOverlay {
         zStepSetter = new ZStepSetter();
         this.bdvh.getViewerPanel().setTransferHandler(new MultiSlicePositioner.TransferHandler());
 
-        BdvFunctions.showOverlay( this, "overlay", BdvOptions.options().addTo( bdvh ) );
+        BdvFunctions.showOverlay( this, "MultiSlice Overlay", BdvOptions.options().addTo( bdvh ) );
+
     }
 
     public ZStepSetter getzStepSetter() {
@@ -47,20 +52,12 @@ public class MultiSlicePositioner extends BdvOverlay {
     @Override
     protected void draw(Graphics2D g) {
         int colorCode = this.info.getColor().get();
-        int w = bdvh.getViewerPanel().getWidth();
-        int h = bdvh.getViewerPanel().getHeight();
         g.setColor(new Color(ARGBType.red(colorCode) , ARGBType.green(colorCode), ARGBType.blue(colorCode), ARGBType.alpha(colorCode) ));
-        /*g.drawLine((int)(w/2*Math.random()), h/2-h/4,w/2, h/2+h/4 );
-        g.drawLine(w/2-w/4, h/2,w/2+w/4, h/2 );*/
 
         int nPixX = (int) slicingModel.getSpimSource().getSource(0,0).dimension(0);
         int nPixY = (int) slicingModel.getSpimSource().getSource(0,0).dimension(1);
 
-        //AffineTransform3D at3D = new AffineTransform3D();
-
-        //slicingModel.getSpimSource().getSourceTransform(0,0,at3D); // TODO fix
-
-        double width = nPixX*0.01;//at3D.get(0,0);
+        double width = nPixX*0.01;//at3D.get(0,0); // TODO fix
         double height = nPixY*0.01;//at3D.get(1,1);
 
         RealPoint[][] ptRectWorld = new RealPoint[2][2];
@@ -69,24 +66,23 @@ public class MultiSlicePositioner extends BdvOverlay {
         AffineTransform3D bdvAt3D = new AffineTransform3D();
 
         bdvh.getViewerPanel().state().getViewerTransform(bdvAt3D);
-        //for (int iSlice = 0;iSlice<100;iSlice++) {
-            for (int xp = 0; xp < 2; xp++) {
-                for (int yp = 0; yp < 2; yp++) {
-                    ptRectWorld[xp][yp] = new RealPoint(3);
-                    RealPoint pt = ptRectWorld[xp][yp];
-                    pt.setPosition(width * (iSliceNoStep + xp), 0);
-                    pt.setPosition(height * (1 + yp), 1);
-                    pt.setPosition(0, 2);
-                    bdvAt3D.apply(pt, pt);
-                    ptRectScreen[xp][yp] = new Point((int) pt.getDoublePosition(0), (int) pt.getDoublePosition(1));
-                }
-            }
 
-            g.drawLine(ptRectScreen[0][0].x, ptRectScreen[0][0].y, ptRectScreen[1][0].x, ptRectScreen[1][0].y);
-            g.drawLine(ptRectScreen[1][0].x, ptRectScreen[1][0].y, ptRectScreen[1][1].x, ptRectScreen[1][1].y);
-            g.drawLine(ptRectScreen[1][1].x, ptRectScreen[1][1].y, ptRectScreen[0][1].x, ptRectScreen[0][1].y);
-            g.drawLine(ptRectScreen[0][1].x, ptRectScreen[0][1].y, ptRectScreen[0][0].x, ptRectScreen[0][0].y);
-        //}
+        for (int xp = 0; xp < 2; xp++) {
+            for (int yp = 0; yp < 2; yp++) {
+                ptRectWorld[xp][yp] = new RealPoint(3);
+                RealPoint pt = ptRectWorld[xp][yp];
+                pt.setPosition(width * (iSliceNoStep + xp), 0);
+                pt.setPosition(height * (1 + yp), 1);
+                pt.setPosition(0, 2);
+                bdvAt3D.apply(pt, pt);
+                ptRectScreen[xp][yp] = new Point((int) pt.getDoublePosition(0), (int) pt.getDoublePosition(1));
+            }
+        }
+
+        g.drawLine(ptRectScreen[0][0].x, ptRectScreen[0][0].y, ptRectScreen[1][0].x, ptRectScreen[1][0].y);
+        g.drawLine(ptRectScreen[1][0].x, ptRectScreen[1][0].y, ptRectScreen[1][1].x, ptRectScreen[1][1].y);
+        g.drawLine(ptRectScreen[1][1].x, ptRectScreen[1][1].y, ptRectScreen[0][1].x, ptRectScreen[0][1].y);
+        g.drawLine(ptRectScreen[0][1].x, ptRectScreen[0][1].y, ptRectScreen[0][0].x, ptRectScreen[0][0].y);
 
     }
 
@@ -96,14 +92,12 @@ public class MultiSlicePositioner extends BdvOverlay {
      */
     class TransferHandler extends BdvTransferHandler {
 
-
-
         @Override
         public void updateDropLocation(TransferSupport support, DropLocation dl) {
             // Gets the point in real coordinates
             RealPoint pt3d = new RealPoint(3);
             bdvh.getViewerPanel().displayToGlobalCoordinates(dl.getDropPoint().x, dl.getDropPoint().y, pt3d);
-            // System.out.println(pt3d);
+
             // Gets the location along the slicing axis...
             // First gets which z slice is targeted
 
@@ -111,21 +105,11 @@ public class MultiSlicePositioner extends BdvOverlay {
 
             int nPixX = (int) slicingModel.getSpimSource().getSource(0,0).dimension(0);
 
-            //AffineTransform3D at3D = new AffineTransform3D();
-
-            //slicingModel.getSpimSource().getSourceTransform(0,0,at3D);
-
             double widthX = nPixX*0.01;//at3D.get(0,0); // TODO Fix this
-
-            /*System.out.println(widthX);
-            widthX = nPixX*at3D.get(2,0);
-            System.out.println("or : "+widthX);*/
 
             iSliceNoStep = (int) (pt3d.getDoublePosition(0)/widthX);
 
             iSlice = iSliceNoStep*(int) zStepSetter.getStep();
-
-            //System.out.println("iSlice = "+iSlice+"; iSliceNoStep = "+iSliceNoStep);
 
             //Repaint the overlay only
             bdvh.getViewerPanel().paint();
@@ -134,57 +118,53 @@ public class MultiSlicePositioner extends BdvOverlay {
 
         @Override
         public void importSourcesAndConverters(TransferSupport support, List<SourceAndConverter<?>> sacs) {
-            // Can be extended for custom action on sources import
-            // Do nothing (yet)
+
             int nPixX = (int) slicingModel.getSpimSource().getSource(0,0).dimension(0);
             int nPixY = (int) slicingModel.getSpimSource().getSource(0,0).dimension(1);
-
-            //AffineTransform3D at3D = new AffineTransform3D();
-
-            //slicingModel.getSpimSource().getSourceTransform(0,0,at3D);
+            int nPixZ = (int) slicingModel.getSpimSource().getSource(0,0).dimension(1);
 
             double width = nPixX*0.01;//at3D.get(0,0); // TODO Fix this
             double height = nPixY*0.01;
+
             List<SourceAndConverter<?>> sacsTransformed = new ArrayList<>();
             Optional<BdvHandle> bdvh = getBdvHandleFromViewerPanel(((bdv.viewer.ViewerPanel)support.getComponent()));
             if (bdvh.isPresent()) {
 
                 for (SourceAndConverter sac : sacs) {
+                    // Affine Transform source such as the center is located at the center of where
+                    // we want it to be
                     AffineTransform3D at3D = new AffineTransform3D();
+                    at3D.identity();
+                    //double[] m = at3D.getRowPackedCopy();
                     sac.getSpimSource().getSourceTransform(0,0,at3D);
+                    long[] dims = new long[3];
+                    sac.getSpimSource().getSource(0,0).dimensions(dims);
 
-                    // We do not want to touch the scaling...
-                    double[] m = at3D.getRowPackedCopy();
+                    RealPoint ptCenterGlobal = new RealPoint(3);
+                    RealPoint ptCenterPixel = new RealPoint((double)(dims[0]-1.0)/2.0, (double)(dims[1]-1.0)/2.0, (double)(dims[2]-1.0)/2.0);
 
-                    double sx = Math.sqrt(m[0]*m[0]+m[4]*m[4]+m[8]*m[8]);
-                    double sy = Math.sqrt(m[1]*m[1]+m[5]*m[5]+m[9]*m[9]);
-                    double sz = Math.sqrt(m[2]*m[2]+m[6]*m[6]+m[10]*m[10]);
+                    at3D.apply(ptCenterPixel, ptCenterGlobal);
 
-                    m[0] /= sx;
+                    // Just shifting
+                    double[] m = new AffineTransform3D().getRowPackedCopy();
 
-                    m[1] /= sy;
-                    m[5] /= sy;
-                    m[9] /= sy;
+                    RealPoint shift = new RealPoint(3);
 
-                    m[2] /= sz;
+                    shift.setPosition(new double[]{(iSliceNoStep+0.5)*width, 1.5*height, 0});
 
+                    m[3] = shift.getDoublePosition(0)-ptCenterGlobal.getDoublePosition(0);
 
-                    m[6] /= sz;
-                    m[10] /= sz;
+                    m[7] = shift.getDoublePosition(1)-ptCenterGlobal.getDoublePosition(1);
 
-                    m[3] -= iSliceNoStep*width;
-
-                    m[7] -= height;
+                    m[11] = shift.getDoublePosition(2)-ptCenterGlobal.getDoublePosition(2);
 
                     at3D.set(m);
 
-                    sacsTransformed.add(new SourceAffineTransformer(sac, at3D.inverse().copy()).getSourceOut());
+                    sacsTransformed.add(new SourceAffineTransformer(sac, at3D).getSourceOut());
                 }
 
                 SourceAndConverterServices.getSourceAndConverterDisplayService()
                         .show(bdvh.get(), sacsTransformed.toArray(new SourceAndConverter[sacsTransformed.size()]));
-
-
 
             }
         }
@@ -208,5 +188,20 @@ public class MultiSlicePositioner extends BdvOverlay {
         public long getStep() {
             return (long) zStep;
         }
+    }
+
+    /**
+     * Inner class which contains the information necessary for the viewing of the slices:
+     *
+     */
+    private class SliceSources {
+        // What are they ?
+        SourceAndConverter[] sacs;
+
+        // Where are they ?
+        int iSlice;
+
+        // For fast display : TODO
+
     }
 }
