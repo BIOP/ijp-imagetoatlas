@@ -201,7 +201,7 @@
 		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>bigdataviewer-playground</artifactId>
-			<version>0.2.1c-SNAPSHOT</version>
+			<version>0.2.1d-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
