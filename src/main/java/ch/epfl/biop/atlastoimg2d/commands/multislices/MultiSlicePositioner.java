@@ -52,7 +52,6 @@ public class MultiSlicePositioner extends BdvOverlay {
      */
     Set<SourceAndConverter> containedSources = new HashSet<>();
 
-
     int totalNumberOfActionsRecorded = 30; // TODO : Implement
     List<CancelableAction> userActions = new ArrayList<>();
 
@@ -106,23 +105,45 @@ public class MultiSlicePositioner extends BdvOverlay {
         // Sort slices along slicing axis
 
         if (!avoidOverlap) {
+            System.out.println("Should Overlap");
             slices.forEach(slice -> {
-                yShift.put(slice, new Double(0));
+                yShift.put(slice, new Double(0.5));
             });
         } else {
+
+            System.out.println("Should Not Overlap");
             List<SliceSources> sortedSlices = new ArrayList<>(slices);
             Collections.sort(sortedSlices, Comparator.comparingDouble(s -> s.slicingAxisPosition));
-            slices.forEach(slice -> {
-                yShift.put(slice, new Double(1.5));
-            });
+
+            double lastPositionAlongX = -Double.MAX_VALUE;
+
+            int stairIndex = 0;
+
+            int zStep = (int) zStepSetter.getStep();
+
+            for (SliceSources slice : sortedSlices) {
+                double posX = ((slice.slicingAxisPosition/sizePixX/zStep)+0.5) * sX;
+                if (posX>=(lastPositionAlongX+sX)) {
+                    stairIndex = 0;
+                    lastPositionAlongX = posX;
+                    yShift.put(slice, new Double(1.5));
+                } else {
+                    stairIndex++;
+                    yShift.put(slice, new Double(1.5+stairIndex));
+                }
+            }
+
         }
 
         for (SliceSources src : slices) {
             src.updatePosition();
         }
+
+        bdvh.getViewerPanel().requestRepaint();
     }
 
     public void toggleOverlap() {
+        System.out.println("Toggle Overlap");
         this.avoidOverlap = !avoidOverlap;
         updateDisplay();
     }
@@ -277,13 +298,14 @@ public class MultiSlicePositioner extends BdvOverlay {
 
         public void updatePosition() {
             double posX = ((slicingAxisPosition/sizePixX/zStepSetter.getStep())+0.5) * sX;
-
-
             double posY;
 
             if (yShift.containsKey(this)) {
+                System.out.println("Key present");
+                System.out.println("Value Y shift = "+yShift.get(this));
                 posY = sY * yShift.get(this);
             } else {
+                System.out.println("Key not present");
                 posY = 0;
             }
 
