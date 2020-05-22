@@ -47,12 +47,15 @@ public class MultiSlicePositioner extends BdvOverlay {
 
     List<SliceSources> slices = new ArrayList<>();
 
+    List<SliceSources> selectedSlices = new ArrayList<>();
+
     /**
      * Keep track of already contained sources to avoid duplicates
      */
     Set<SourceAndConverter> containedSources = new HashSet<>();
 
     int totalNumberOfActionsRecorded = 30; // TODO : Implement
+
     List<CancelableAction> userActions = new ArrayList<>();
 
     boolean avoidOverlap = true;
@@ -105,13 +108,11 @@ public class MultiSlicePositioner extends BdvOverlay {
         // Sort slices along slicing axis
 
         if (!avoidOverlap) {
-            System.out.println("Should Overlap");
             slices.forEach(slice -> {
                 yShift.put(slice, new Double(0.5));
             });
         } else {
 
-            System.out.println("Should Not Overlap");
             List<SliceSources> sortedSlices = new ArrayList<>(slices);
             Collections.sort(sortedSlices, Comparator.comparingDouble(s -> s.slicingAxisPosition));
 
@@ -132,7 +133,6 @@ public class MultiSlicePositioner extends BdvOverlay {
                     yShift.put(slice, new Double(1.5+stairIndex));
                 }
             }
-
         }
 
         for (SliceSources src : slices) {
@@ -143,7 +143,6 @@ public class MultiSlicePositioner extends BdvOverlay {
     }
 
     public void toggleOverlap() {
-        System.out.println("Toggle Overlap");
         this.avoidOverlap = !avoidOverlap;
         updateDisplay();
     }
@@ -466,14 +465,13 @@ public class MultiSlicePositioner extends BdvOverlay {
 
         @Override
         public void cancel() {
-
             containedSources.removeAll(Arrays.asList(sliceSource.original_sacs));
             containedSources.removeAll(Arrays.asList(sliceSource.relocated_sacs));
-
             SourceAndConverterServices.getSourceAndConverterDisplayService()
                     .remove(bdvh, sliceSource.relocated_sacs);
-            // cleans object
+            // cleans various object
             yShift.remove(sliceSource);
+            selectedSlices.remove(sliceSource);
             super.cancel();
         }
 
