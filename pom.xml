@@ -145,6 +145,9 @@
 		<bigwarp_fiji.version>5.1.1-SNAPSHOT</bigwarp_fiji.version>
 
 		<scijava-ui-swing.version>0.13.0</scijava-ui-swing.version>
+		<bigdataviewer-biop-tools.version>0.1.7-SNAPSHOT</bigdataviewer-biop-tools.version>
+		<bigdataviewer-playground.version>0.2.2-SNAPSHOT</bigdataviewer-playground.version>
+		<bigdataviewer-bioformats.version>0.2.5</bigdataviewer-bioformats.version>
 
 	</properties>
 
@@ -195,19 +198,19 @@
 		<dependency>
 			<groupId>ch.epfl.biop</groupId>
 			<artifactId>bigdataviewer-bioformats</artifactId>
-			<version>0.2.5</version>
+			<version>${bigdataviewer-bioformats.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>bigdataviewer-playground</artifactId>
-			<version>0.2.1d-SNAPSHOT</version>
+			<version>${bigdataviewer-playground.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>ch.epfl.biop</groupId>
 			<artifactId>bigdataviewer-biop-tools</artifactId>
-			<version>0.1.6</version>
+			<version>${bigdataviewer-biop-tools.version}</version>
 		</dependency>
 
 	</dependencies>

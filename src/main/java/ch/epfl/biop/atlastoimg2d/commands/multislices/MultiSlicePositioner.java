@@ -6,9 +6,12 @@ import bdv.util.BdvHandle;
 import bdv.util.BdvOptions;
 import bdv.util.BdvOverlay;
 import bdv.viewer.SourceAndConverter;
+import ch.epfl.biop.atlastoimg2d.AtlasToSourceAndConverter2D;
+import ch.epfl.biop.sourceandconverter.register.Elastix2DAffineRegister;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.ARGBType;
+import org.scijava.Context;
 import sc.fiji.bdvpg.behaviour.ClickBehaviourInstaller;
 import sc.fiji.bdvpg.scijava.services.ui.swingdnd.BdvTransferHandler;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
@@ -47,15 +50,12 @@ public class MultiSlicePositioner extends BdvOverlay {
 
     List<SliceSources> slices = new ArrayList<>();
 
-    List<SliceSources> selectedSlices = new ArrayList<>();
-
     /**
      * Keep track of already contained sources to avoid duplicates
      */
     Set<SourceAndConverter> containedSources = new HashSet<>();
 
     int totalNumberOfActionsRecorded = 30; // TODO : Implement
-
     List<CancelableAction> userActions = new ArrayList<>();
 
     boolean avoidOverlap = true;
@@ -65,14 +65,14 @@ public class MultiSlicePositioner extends BdvOverlay {
      */
     int iSliceNoStep;
 
-
     /**
      * Shift in Y : control overlay or not of sources
      * @param bdvh
      * @param slicingModel
      */
 
-    Map<SliceSources, Double> yShift = new HashMap<>();
+    //Map<SliceSources, Double> yShift = new HashMap<>();
+
 
     public MultiSlicePositioner(BdvHandle bdvh, SourceAndConverter slicingModel) {
         this.bdvh = bdvh;
@@ -101,7 +101,13 @@ public class MultiSlicePositioner extends BdvOverlay {
 
         new ClickBehaviourInstaller(bdvh, (x,y) -> this.cancelLastAction()).install("cancel_last_action", "ctrl Z");
         new ClickBehaviourInstaller(bdvh, (x,y) -> this.toggleOverlap()).install("toggle_superimpose", "O");
+        new ClickBehaviourInstaller(bdvh, (x,y) -> this.elastixRegister()).install("register_test", "R");
 
+    }
+
+    Context scijavaCtx;
+    public void setScijavaContext(Context ctx) {
+        scijavaCtx = ctx;
     }
 
     public void updateDisplay() {
@@ -109,7 +115,7 @@ public class MultiSlicePositioner extends BdvOverlay {
 
         if (!avoidOverlap) {
             slices.forEach(slice -> {
-                yShift.put(slice, new Double(0.5));
+                slice.yShift = 0.5;
             });
         } else {
 
@@ -127,10 +133,10 @@ public class MultiSlicePositioner extends BdvOverlay {
                 if (posX>=(lastPositionAlongX+sX)) {
                     stairIndex = 0;
                     lastPositionAlongX = posX;
-                    yShift.put(slice, new Double(1.5));
+                    slice.yShift = 1.5;
                 } else {
                     stairIndex++;
-                    yShift.put(slice, new Double(1.5+stairIndex));
+                    slice.yShift = 1.5+stairIndex;
                 }
             }
         }
@@ -149,6 +155,30 @@ public class MultiSlicePositioner extends BdvOverlay {
 
     public ZStepSetter getzStepSetter() {
         return zStepSetter;
+    }
+
+    boolean registrationLaunched = false;
+
+    public void elastixRegister() {
+        /*if (registrationLaunched) {
+            System.err.println("Registration already started... please wait");
+            return;
+        }
+
+        if ((selectedSlices == null)&&(slices.size()>0)) {
+            // no selected source : let's select the last one
+            selectedSlices.add(slices.get(slices.size()-1));
+        }
+
+        if (selectedSlices.size()==0) {
+            System.err.println("No slice available -> no registration");
+            return;
+        }
+
+        registrationLaunched = true;
+
+        new Elastix2DAffineRegister()*/
+
     }
 
     @Override
@@ -259,6 +289,36 @@ public class MultiSlicePositioner extends BdvOverlay {
 
         AffineTransform3D at3D;
 
+        boolean isSelected = false;
+
+        double yShift = 0;
+
+        AtlasToSourceAndConverter2D aligner;
+
+        // For fast display : Icon TODO : see https://github.com/bigdataviewer/bigdataviewer-core/blob/17d2f55d46213d1e2369ad7ef4464e3efecbd70a/src/main/java/bdv/tools/RecordMovieDialog.java#L256-L318
+        public SliceSources(SourceAndConverter[] sacs, double slicingAxisPosition) {
+
+            this.original_sacs = sacs;
+            List<SourceAndConverter<?>> sacsTransformed = new ArrayList<>();
+            at3D = new AffineTransform3D();
+            for (SourceAndConverter sac : sacs) {
+                RealPoint center = new RealPoint(3);
+                center.setPosition(new double[] {0,0,0}); // Center
+                SourceAndConverter zeroCenteredSource = recenterSourcesAppend(sac, center);
+                sacsTransformed.add(new SourceAffineTransformer(zeroCenteredSource, at3D).getSourceOut());
+            }
+
+            this.relocated_sacs = sacsTransformed.toArray(new SourceAndConverter[sacsTransformed.size()]);
+            this.slicingAxisPosition = slicingAxisPosition;
+
+            aligner = new AtlasToSourceAndConverter2D();
+            aligner.setScijavaContext(scijavaCtx);
+            aligner.setImage(sacs);
+
+
+
+        }
+
         public boolean exactMatch(List<SourceAndConverter<?>> testSacs) {
             Set originalSacsSet = new HashSet();
             for (SourceAndConverter sac : original_sacs) {
@@ -278,35 +338,9 @@ public class MultiSlicePositioner extends BdvOverlay {
             return false;
         }
 
-        // For fast display : Icon TODO : see https://github.com/bigdataviewer/bigdataviewer-core/blob/17d2f55d46213d1e2369ad7ef4464e3efecbd70a/src/main/java/bdv/tools/RecordMovieDialog.java#L256-L318
-        public SliceSources(SourceAndConverter[] sacs, double slicingAxisPosition) {
-
-            this.original_sacs = sacs;
-            List<SourceAndConverter<?>> sacsTransformed = new ArrayList<>();
-            at3D = new AffineTransform3D();
-            for (SourceAndConverter sac : sacs) {
-                RealPoint center = new RealPoint(3);
-                center.setPosition(new double[] {0,0,0}); // Center
-                SourceAndConverter zeroCenteredSource = recenterSourcesAppend(sac, center);
-                sacsTransformed.add(new SourceAffineTransformer(zeroCenteredSource, at3D).getSourceOut());
-            }
-
-            this.relocated_sacs = sacsTransformed.toArray(new SourceAndConverter[sacsTransformed.size()]);
-            this.slicingAxisPosition = slicingAxisPosition;
-        }
-
         public void updatePosition() {
             double posX = ((slicingAxisPosition/sizePixX/zStepSetter.getStep())+0.5) * sX;
-            double posY;
-
-            if (yShift.containsKey(this)) {
-                System.out.println("Key present");
-                System.out.println("Value Y shift = "+yShift.get(this));
-                posY = sY * yShift.get(this);
-            } else {
-                System.out.println("Key not present");
-                posY = 0;
-            }
+            double posY = sY * yShift;
 
             AffineTransform3D new_at3D = new AffineTransform3D();
             new_at3D.set(posX,0,3);
@@ -442,9 +476,6 @@ public class MultiSlicePositioner extends BdvOverlay {
                 }
             }
 
-
-            System.out.println("End of sanity check");
-
             sliceSource = new SliceSources(sacs.toArray(new SourceAndConverter[sacs.size()]), slicingAxisPosition);
 
             slices.add(sliceSource);
@@ -452,14 +483,12 @@ public class MultiSlicePositioner extends BdvOverlay {
             containedSources.addAll(Arrays.asList(sliceSource.original_sacs));
             containedSources.addAll(Arrays.asList(sliceSource.relocated_sacs));
 
-
-            System.out.println("Updating display");
             updateDisplay();
 
             SourceAndConverterServices.getSourceAndConverterDisplayService()
                     .show(bdvh, sliceSource.relocated_sacs);
 
-            // The line below should be executed only if the action suceeded ... (if it's executed, calling cancel should have the same effect)
+            // The line below should be executed only if the action succeeded ... (if it's executed, calling cancel should have the same effect)
             super.run();
         }
 
@@ -467,11 +496,9 @@ public class MultiSlicePositioner extends BdvOverlay {
         public void cancel() {
             containedSources.removeAll(Arrays.asList(sliceSource.original_sacs));
             containedSources.removeAll(Arrays.asList(sliceSource.relocated_sacs));
+            slices.remove(sliceSource);
             SourceAndConverterServices.getSourceAndConverterDisplayService()
                     .remove(bdvh, sliceSource.relocated_sacs);
-            // cleans various object
-            yShift.remove(sliceSource);
-            selectedSlices.remove(sliceSource);
             super.cancel();
         }
 
