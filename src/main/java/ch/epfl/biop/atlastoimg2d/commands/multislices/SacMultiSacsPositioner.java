@@ -10,6 +10,7 @@ import net.imglib2.cache.img.DiskCachedCellImgFactory;
 import net.imglib2.cache.img.DiskCachedCellImgOptions;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
+import org.scijava.Context;
 import org.scijava.ItemIO;
 import org.scijava.command.Command;
 import org.scijava.command.CommandService;
@@ -37,6 +38,9 @@ public class SacMultiSacsPositioner implements Command {
 
     @Parameter
     CommandService cs;
+
+    @Parameter
+    Context context;
 
     @Parameter(type = ItemIO.OUTPUT)
     BdvHandle bdvMultiSlicer;
@@ -175,11 +179,14 @@ public class SacMultiSacsPositioner implements Command {
                     "projector", Projection.SUM_PROJECTOR)
                     .get().getOutput("bdvh");
 
-            MultiSlicePositioner mp = new MultiSlicePositioner(bdvMultiSlicer, slicingModel);
+
+            SourceAndConverter[] slicedSources = new SourceAndConverter[ba.map.getStructuralImages().length];
+
+            MultiSlicePositioner mp = new MultiSlicePositioner(bdvMultiSlicer, slicingModel, slicedSources);
 
             SourceMosaicZSlicer mosaic = new SourceMosaicZSlicer(null, slicingModel, true, false, true, mp.getzStepSetter()::getStep);
 
-            SourceAndConverter[] slicedSources = new SourceAndConverter[ba.map.getStructuralImages().length];
+            mp.setScijavaContext(context);
 
             for (int index = 0; index<ba.map.getStructuralImages().length;index++) {
                 SourceAndConverter sac = ba.map.getStructuralImages()[index];

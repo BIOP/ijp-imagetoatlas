@@ -149,6 +149,8 @@
 		<bigdataviewer-playground.version>0.2.2-SNAPSHOT</bigdataviewer-playground.version>
 		<bigdataviewer-bioformats.version>0.2.5</bigdataviewer-bioformats.version>
 
+		<bigdataviewer-selector.version>0.1.1-SNAPSHOT</bigdataviewer-selector.version>
+
 	</properties>
 
 	<dependencies>
@@ -211,6 +213,13 @@
 			<groupId>ch.epfl.biop</groupId>
 			<artifactId>bigdataviewer-biop-tools</artifactId>
 			<version>${bigdataviewer-biop-tools.version}</version>
+		</dependency>
+
+
+		<dependency>
+			<groupId>ch.epfl.biop</groupId>
+			<artifactId>bigdataviewer-selector</artifactId>
+			<version>${bigdataviewer-selector.version}</version>
 		</dependency>
 
 	</dependencies>

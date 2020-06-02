@@ -6,13 +6,21 @@ import bdv.util.BdvHandle;
 import bdv.util.BdvOptions;
 import bdv.util.BdvOverlay;
 import bdv.viewer.SourceAndConverter;
+import ch.epfl.biop.atlas.allen.adultmousebrain.AllenBrainAdultMouseAtlasCCF2017;
 import ch.epfl.biop.atlastoimg2d.AtlasToSourceAndConverter2D;
-import ch.epfl.biop.sourceandconverter.register.Elastix2DAffineRegister;
+import ch.epfl.biop.scijava.command.Elastix2DAffineRegisterCommand;
+import mpicbg.spim.data.generic.AbstractSpimData;
+import mpicbg.spim.data.generic.sequence.AbstractSequenceDescription;
+import mpicbg.spim.data.generic.sequence.BasicViewSetup;
+import mpicbg.spim.data.sequence.Tile;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.ARGBType;
 import org.scijava.Context;
+import org.scijava.command.CommandModule;
+import org.scijava.command.CommandService;
 import sc.fiji.bdvpg.behaviour.ClickBehaviourInstaller;
+import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
 import sc.fiji.bdvpg.scijava.services.ui.swingdnd.BdvTransferHandler;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceAffineTransformer;
@@ -20,6 +28,10 @@ import sc.fiji.bdvpg.sourceandconverter.transform.SourceAffineTransformer;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.Future;
+import java.util.stream.Collectors;
+
+import static sc.fiji.bdvpg.scijava.services.SourceAndConverterService.SPIM_DATA_INFO;
 
 /**
  * All specific functions and method dedicated to the multislice positioner
@@ -58,7 +70,7 @@ public class MultiSlicePositioner extends BdvOverlay {
     int totalNumberOfActionsRecorded = 30; // TODO : Implement
     List<CancelableAction> userActions = new ArrayList<>();
 
-    boolean avoidOverlap = true;
+   // boolean avoidOverlap = true;
 
     /**
      * Current coordinate where Sources are dragged
@@ -71,10 +83,10 @@ public class MultiSlicePositioner extends BdvOverlay {
      * @param slicingModel
      */
 
-    //Map<SliceSources, Double> yShift = new HashMap<>();
+    SourceAndConverter[] slicedSources;
 
-
-    public MultiSlicePositioner(BdvHandle bdvh, SourceAndConverter slicingModel) {
+    public MultiSlicePositioner(BdvHandle bdvh, SourceAndConverter slicingModel, SourceAndConverter[] slicedSources) {
+        this.slicedSources = slicedSources;
         this.bdvh = bdvh;
         this.slicingModel = slicingModel;
         zStepSetter = new ZStepSetter();
@@ -102,8 +114,115 @@ public class MultiSlicePositioner extends BdvOverlay {
         new ClickBehaviourInstaller(bdvh, (x,y) -> this.cancelLastAction()).install("cancel_last_action", "ctrl Z");
         new ClickBehaviourInstaller(bdvh, (x,y) -> this.toggleOverlap()).install("toggle_superimpose", "O");
         new ClickBehaviourInstaller(bdvh, (x,y) -> this.elastixRegister()).install("register_test", "R");
+        new ClickBehaviourInstaller(bdvh, (x,y) -> this.navigateNextSlice()).install("navigate_next_slice", "N");
+        new ClickBehaviourInstaller(bdvh, (x,y) -> this.navigatePreviousSlice()).install("navigate_previous_slice", "P");
 
     }
+
+    int iCurrentSlice = 0;
+
+    public void navigateNextSlice() {
+        iCurrentSlice++;
+        List<SliceSources> sortedSlices = new ArrayList<>(slices);
+        Collections.sort(sortedSlices, Comparator.comparingDouble(s -> s.slicingAxisPosition));
+
+        if (iCurrentSlice>= sortedSlices.size()) {
+            iCurrentSlice = 0;
+        }
+
+        if (sortedSlices.size()>0) {
+            centerBdvViewOn(sortedSlices.get(iCurrentSlice));
+        }
+
+    }
+
+    public void navigatePreviousSlice() {
+        iCurrentSlice--;
+        List<SliceSources> sortedSlices = new ArrayList<>(slices);
+        Collections.sort(sortedSlices, Comparator.comparingDouble(s -> s.slicingAxisPosition));
+
+        if (iCurrentSlice< 0) {
+            iCurrentSlice = sortedSlices.size()-1;
+        }
+
+        if (sortedSlices.size()>0) {
+            centerBdvViewOn(sortedSlices.get(iCurrentSlice));
+        }
+    }
+
+    public void centerBdvViewOn(SliceSources slice) {
+
+        RealPoint centerSlice = getSourceAndConverterCenterPoint(slice.relocated_sacs[0]);
+
+        AffineTransform3D nextAffineTransform = new AffineTransform3D();
+
+        // It should have the same scaling and rotation than the current view
+        AffineTransform3D at3D = new AffineTransform3D();
+        bdvh.getViewerPanel().state().getViewerTransform(at3D);
+        nextAffineTransform.set(at3D);
+
+        // No Shift
+        nextAffineTransform.set(0, 0, 3);
+        nextAffineTransform.set(0, 1, 3);
+        nextAffineTransform.set(0, 2, 3);
+
+        double next_wcx = bdvh.getViewerPanel().getWidth() / 2.0; // Next Window Center X
+        double next_wcy = bdvh.getViewerPanel().getHeight() / 2.0; // Next Window Center Y
+
+        RealPoint centerScreenNextBdv = new RealPoint(new double[]{next_wcx, next_wcy, 0});
+        RealPoint shiftNextBdv = new RealPoint(3);
+
+        nextAffineTransform.inverse().apply(centerScreenNextBdv, shiftNextBdv);
+
+        double sx = -centerSlice.getDoublePosition(0) + shiftNextBdv.getDoublePosition(0);
+        double sy = -centerSlice.getDoublePosition(1) + shiftNextBdv.getDoublePosition(1);
+        double sz = -centerSlice.getDoublePosition(2) + shiftNextBdv.getDoublePosition(2);
+
+        RealPoint shiftWindow = new RealPoint(new double[]{sx, sy, sz});
+        RealPoint shiftMatrix = new RealPoint(3);
+        nextAffineTransform.apply(shiftWindow, shiftMatrix);
+
+        nextAffineTransform.set(shiftMatrix.getDoublePosition(0), 0, 3);
+        nextAffineTransform.set(shiftMatrix.getDoublePosition(1), 1, 3);
+        nextAffineTransform.set(shiftMatrix.getDoublePosition(2), 2, 3);
+
+        bdvh.getViewerPanel().setCurrentViewerTransform(nextAffineTransform);
+        bdvh.getViewerPanel().requestRepaint();
+
+    }
+
+    public RealPoint getSourceAndConverterCenterPoint(SourceAndConverter source) {
+        AffineTransform3D at3D = new AffineTransform3D();
+        at3D.identity();
+        //double[] m = at3D.getRowPackedCopy();
+        source.getSpimSource().getSourceTransform(0,0,at3D);
+        long[] dims = new long[3];
+        source.getSpimSource().getSource(0,0).dimensions(dims);
+
+        RealPoint ptCenterGlobal = new RealPoint(3);
+        RealPoint ptCenterPixel = new RealPoint((dims[0]-1.0)/2.0,(dims[1]-1.0)/2.0, (dims[2]-1.0)/2.0);
+
+        at3D.apply(ptCenterPixel, ptCenterGlobal);
+
+        return ptCenterGlobal;
+    }
+
+    public RealPoint getSourceAndConverterTopLeftPoint(SourceAndConverter source) {
+        AffineTransform3D at3D = new AffineTransform3D();
+        at3D.identity();
+        //double[] m = at3D.getRowPackedCopy();
+        source.getSpimSource().getSourceTransform(0,0,at3D);
+        long[] dims = new long[3];
+        source.getSpimSource().getSource(0,0).dimensions(dims);
+
+        RealPoint ptCenterGlobal = new RealPoint(3);
+        RealPoint ptCenterPixel = new RealPoint((dims[0]-1.0),(dims[1]-1.0), 0);
+
+        at3D.apply(ptCenterPixel, ptCenterGlobal);
+
+        return ptCenterGlobal;
+    }
+
 
     Context scijavaCtx;
     public void setScijavaContext(Context ctx) {
@@ -113,11 +232,11 @@ public class MultiSlicePositioner extends BdvOverlay {
     public void updateDisplay() {
         // Sort slices along slicing axis
 
-        if (!avoidOverlap) {
+        if (cycleToggle==0) {
             slices.forEach(slice -> {
-                slice.yShift = 0.5;
+                slice.yShift = 1.5;
             });
-        } else {
+        } else if (cycleToggle==2) {
 
             List<SliceSources> sortedSlices = new ArrayList<>(slices);
             Collections.sort(sortedSlices, Comparator.comparingDouble(s -> s.slicingAxisPosition));
@@ -139,6 +258,10 @@ public class MultiSlicePositioner extends BdvOverlay {
                     slice.yShift = 1.5+stairIndex;
                 }
             }
+        } else if (cycleToggle==1) {
+            slices.forEach(slice -> {
+                slice.yShift = 0.5;
+            });
         }
 
         for (SliceSources src : slices) {
@@ -148,8 +271,10 @@ public class MultiSlicePositioner extends BdvOverlay {
         bdvh.getViewerPanel().requestRepaint();
     }
 
+    int cycleToggle = 0;
     public void toggleOverlap() {
-        this.avoidOverlap = !avoidOverlap;
+        cycleToggle++;
+        if (cycleToggle==3) cycleToggle = 0;
         updateDisplay();
     }
 
@@ -160,6 +285,33 @@ public class MultiSlicePositioner extends BdvOverlay {
     boolean registrationLaunched = false;
 
     public void elastixRegister() {
+        System.out.println("Elastix Registration");
+        if (slices.size()==0) return;
+        if (iCurrentSlice<0) iCurrentSlice = 0;
+        if (iCurrentSlice>=slices.size()) iCurrentSlice = 0;
+
+        SliceSources slice = slices.get(this.iCurrentSlice);
+        RealPoint rpt = getSourceAndConverterCenterPoint(slice.relocated_sacs[0]);
+        rpt = getSourceAndConverterTopLeftPoint(slice.relocated_sacs[0]);
+
+        Future<CommandModule> task = scijavaCtx.getService(CommandService.class).run(Elastix2DAffineRegisterCommand.class, true,
+                "sac_fixed", slicedSources[0].getSpimSource().getNumMipmapLevels()-1,
+                    "tpFixed", 0,
+                    "levelFixedSource", 2,
+                    "sac_moving", slice.relocated_sacs[0],
+                    "tpMoving", 0,
+                    "levelMovingSource", slice.relocated_sacs[0].getSpimSource().getNumMipmapLevels()-1,
+                    "pxSizeInCurrentUnit", 0.04, // in mm
+                    "interpolate", false,
+                    "showImagePlusRegistrationResult", true,
+                    "px",rpt.getDoublePosition(0),
+                    "py",rpt.getDoublePosition(1),
+                    "pz",rpt.getDoublePosition(2),
+                    "sx",12,
+                    "sy",10
+                );
+
+
         /*if (registrationLaunched) {
             System.err.println("Registration already started... please wait");
             return;
@@ -248,8 +400,37 @@ public class MultiSlicePositioner extends BdvOverlay {
             Optional<BdvHandle> bdvh = getBdvHandleFromViewerPanel(((bdv.viewer.ViewerPanel)support.getComponent()));
             if (bdvh.isPresent()) {
                 double slicingAxisPosition = iSliceNoStep*sizePixX*(int) zStepSetter.getStep();
-                System.out.println("Slice dropped at "+slicingAxisPosition);
-                new CreateSlice(sacs, slicingAxisPosition).run();
+                //System.out.println("Slice dropped at "+slicingAxisPosition);
+                if (sacs.size()>1) {
+                    // Check whether the source can be splitted, maybe based
+                    // Split based on Tile ?
+
+
+                    Map<Tile, List<SourceAndConverter<?>>> sacsGroups =
+                    sacs.stream().collect(Collectors.groupingBy(sac -> {
+                        if (SourceAndConverterServices.getSourceAndConverterService().getMetadata(sac, SPIM_DATA_INFO)!=null) {
+                            SourceAndConverterService.SpimDataInfo sdi = (SourceAndConverterService.SpimDataInfo) SourceAndConverterServices.getSourceAndConverterService().getMetadata(sac, SPIM_DATA_INFO);
+                            AbstractSpimData<AbstractSequenceDescription<BasicViewSetup,?,?>> asd = ( AbstractSpimData<AbstractSequenceDescription<BasicViewSetup,?,?>>)sdi.asd;
+                            BasicViewSetup bvs = asd.getSequenceDescription().getViewSetups().get(sdi.setupId);
+                            return bvs.getAttribute(Tile.class);
+                        } else {
+                            return new Tile(-1);
+                        }
+                    }));
+
+                    List<Tile> sortedTiles = new ArrayList<>();
+
+                    sortedTiles.addAll(sacsGroups.keySet());
+
+                    sortedTiles.sort(Tile::compareTo);
+
+                    sortedTiles.forEach(tile -> {
+                        new CreateSlice(sacsGroups.get(tile), slicingAxisPosition).run();
+                    });
+
+                } else {
+                    new CreateSlice(sacs, slicingAxisPosition).run();
+                }
             }
         }
     }
@@ -314,8 +495,6 @@ public class MultiSlicePositioner extends BdvOverlay {
             aligner = new AtlasToSourceAndConverter2D();
             aligner.setScijavaContext(scijavaCtx);
             aligner.setImage(sacs);
-
-
 
         }
 
@@ -418,14 +597,14 @@ public class MultiSlicePositioner extends BdvOverlay {
         public void run() {
             sliceSource.slicingAxisPosition = newSlicingAxisPosition;
             sliceSource.updatePosition();
-            bdvh.getViewerPanel().requestRepaint();
+            updateDisplay();
             super.run();
         }
 
         public void cancel() {
             sliceSource.slicingAxisPosition = oldSlicingAxisPosition;
             sliceSource.updatePosition();
-            bdvh.getViewerPanel().requestRepaint();
+            updateDisplay();
             super.cancel();
         }
     }
@@ -501,10 +680,7 @@ public class MultiSlicePositioner extends BdvOverlay {
                     .remove(bdvh, sliceSource.relocated_sacs);
             super.cancel();
         }
-
     }
-
-
 
 
 }
