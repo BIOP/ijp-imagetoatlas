@@ -8,6 +8,7 @@ import bdv.util.BdvOverlay;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.allen.adultmousebrain.AllenBrainAdultMouseAtlasCCF2017;
 import ch.epfl.biop.atlastoimg2d.AtlasToSourceAndConverter2D;
+import ch.epfl.biop.bdv.select.SourceSelectorBehaviour;
 import ch.epfl.biop.scijava.command.Elastix2DAffineRegisterCommand;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import mpicbg.spim.data.generic.sequence.AbstractSequenceDescription;
@@ -19,7 +20,10 @@ import net.imglib2.type.numeric.ARGBType;
 import org.scijava.Context;
 import org.scijava.command.CommandModule;
 import org.scijava.command.CommandService;
+import org.scijava.ui.behaviour.io.InputTriggerConfig;
+import org.scijava.ui.behaviour.util.Behaviours;
 import sc.fiji.bdvpg.behaviour.ClickBehaviourInstaller;
+import sc.fiji.bdvpg.behaviour.EditorBehaviourInstaller;
 import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
 import sc.fiji.bdvpg.scijava.services.ui.swingdnd.BdvTransferHandler;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
@@ -42,6 +46,8 @@ public class MultiSlicePositioner extends BdvOverlay {
      * BdvHandle displaying everything
      */
     final BdvHandle bdvh;
+
+    final SourceSelectorBehaviour ssb;
 
     /**
      * Controller of the number of steps displayed
@@ -110,6 +116,25 @@ public class MultiSlicePositioner extends BdvOverlay {
         sZ = nPixZ*sizePixZ;
 
         BdvFunctions.showOverlay( this, "MultiSlice Overlay", BdvOptions.options().addTo( bdvh ) );
+
+
+        Behaviours navigation = new Behaviours(new InputTriggerConfig(), "bdv");
+
+        SourceSelectorBehaviour ssbTemp;
+
+        ssbTemp = (SourceSelectorBehaviour) SourceAndConverterServices.getSourceAndConverterDisplayService().getDisplayMetadata(
+                bdvh, SourceSelectorBehaviour.class.getSimpleName());
+
+        if (ssbTemp == null) {
+            // No source selector installed yet : install one
+            ssbTemp = new SourceSelectorBehaviour(bdvh,"E");
+            EditorBehaviourInstaller ebi = new EditorBehaviourInstaller(ssbTemp);
+            ebi.run();
+
+        }
+
+        ssb = ssbTemp;
+
 
         new ClickBehaviourInstaller(bdvh, (x,y) -> this.cancelLastAction()).install("cancel_last_action", "ctrl Z");
         new ClickBehaviourInstaller(bdvh, (x,y) -> this.toggleOverlap()).install("toggle_superimpose", "O");
@@ -291,8 +316,11 @@ public class MultiSlicePositioner extends BdvOverlay {
         if (iCurrentSlice>=slices.size()) iCurrentSlice = 0;
 
         SliceSources slice = slices.get(this.iCurrentSlice);
-        RealPoint rpt = getSourceAndConverterCenterPoint(slice.relocated_sacs[0]);
-        rpt = getSourceAndConverterTopLeftPoint(slice.relocated_sacs[0]);
+        RealPoint rpt = new RealPoint(3);
+        double posX = ((slice.slicingAxisPosition/sizePixX/zStepSetter.getStep())) * sX;
+        double posY = 0;
+        rpt.setPosition(posX,0);
+        rpt.setPosition(posY,1);
 
         Future<CommandModule> task = scijavaCtx.getService(CommandService.class).run(Elastix2DAffineRegisterCommand.class, true,
                 "sac_fixed", slicedSources[0].getSpimSource().getNumMipmapLevels()-1,
@@ -307,10 +335,11 @@ public class MultiSlicePositioner extends BdvOverlay {
                     "px",rpt.getDoublePosition(0),
                     "py",rpt.getDoublePosition(1),
                     "pz",rpt.getDoublePosition(2),
-                    "sx",12,
-                    "sy",10
+                    "sx",sX,
+                    "sy",sY
                 );
 
+        
 
         /*if (registrationLaunched) {
             System.err.println("Registration already started... please wait");
