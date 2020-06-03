@@ -67,4 +67,14 @@ public class CropAndScaleRegistration implements Registration<ImagePlus> {
         }
         return new RealPointList(cvtList);
     }
+
+    @Override
+    public boolean parallelSupported() {
+        return false;
+    }
+
+    @Override
+    public boolean isManual() {
+        return true;
+    }
 }

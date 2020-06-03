@@ -13,4 +13,7 @@ public interface Registration<T> {
     Function<T,T> getImageRegistration();
     RealPointList getPtsRegistration(RealPointList pts);
 
+    boolean parallelSupported();
+    boolean isManual();
+
 }

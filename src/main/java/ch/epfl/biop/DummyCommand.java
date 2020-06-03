@@ -2,7 +2,9 @@ package ch.epfl.biop;
 
 //import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
 //import ch.epfl.biop.java.utilities.roi.types.ImageJRoisFile;
+import bdv.viewer.SourceAndConverter;
 import bigwarp.BigWarp;
+import ch.epfl.biop.atlastoimg2d.commands.multislices.MultiSlicePositioner;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.plugin.frame.RoiManager;
@@ -12,32 +14,35 @@ import net.imglib2.RandomAccess;
 import net.imglib2.RealRandomAccess;
 import net.imglib2.Sampler;
 import net.imglib2.type.numeric.RealType;
+import sc.fiji.bdvpg.services.SourceAndConverterServices;
 
 import java.io.File;
 
 
 public class DummyCommand {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
         final ImageJ ij = new ImageJ();
         ij.ui().showUI();
 
         System.out.println("BigWarp hash:"+org.scijava.util.VersionUtils.getVersion(BigWarp.class));
 
-        /*ImagePlus imp = IJ.openImage("/home/nico/Dropbox/BIOP/2019-02 Laura Ca/ModelEx-stack.tif");
-        imp.show();*/
+        String scriptTest = "run(\"Open [BioFormats Bdv Bridge]\", \"unit=MILLIMETER splitrgbchannels=false positioniscenter=AUTO switchzandc=AUTO flippositionx=AUTO flippositiony=AUTO flippositionz=AUTO usebioformatscacheblocksize=true cachesizex=512 cachesizey=512 cachesizez=1 refframesizeinunitlocation=0.05 refframesizeinunitvoxsize=0.05 \");\n" +
+                "run(\"Show Sources\", \"sacs=[SpimData 0] autocontrast=true adjustviewonsource=true\");\n" +
+                "run(\"Basic Transformation\", \"sources_in=[SpimData 0] type=Rot180 axis=Z timepoint=0 globalchange=false\");\n" +
+                "run(\"Allen Brain Adult Mouse Brain CCF 2017\", \"\");\n" +
+                "run(\"Position Multiple Slices\");\n";
 
-       /* ImagePlus imp = IJ.openImage("C:\\Users\\chiarutt\\Dropbox\\LabelPb.tif");
-        imp.show();
-        IJ.run("Allen Brain Adult Mouse Brain CCF 2017","");// "mapurl=file:/home/nico/Dropbox/BIOP/ABA/Data/new/ccf2017-mod65000.xml ontologyurl=file:/home/nico/Dropbox/BIOP/ABA/BrainServerTest/1.json");
-        IJ.run(imp, "ConstructROIs", "atlas=[Adult Mouse Brain - Allen Brain Atlas V3] smoothen=false");*/
-        //rm.runCommand(imp,"Show All");
-        //IJ.run("Put Structure to Roi Manager", "atlas=[Adult Mouse Brain - Allen Brain Atlas V3] structure_list=945 adddescendants=true addancestors=true addleavesonly=false clearroimanager=true namingchoice=id roiprefix= addrlsuffix=false outputlabelimage=false");
-//IJ.setTool("zoom");
-        //IJ.run("Close");
+        ij.script().run("test.ijm",scriptTest,true).get();
 
+        MultiSlicePositioner mp = ij.object().getObjects(MultiSlicePositioner.class).get(0);
 
+        for (int i=2;i<10;i++) {
 
+            SourceAndConverter[] sacs = ij.convert().convert("SpimData 0>Tile>"+i, SourceAndConverter[].class);
+
+            mp.createSlice(sacs,i/10+3);
+        }
 
 	}
 

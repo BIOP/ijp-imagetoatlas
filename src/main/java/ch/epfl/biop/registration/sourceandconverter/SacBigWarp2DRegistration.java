@@ -219,4 +219,14 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
         return pts;
     }
 
+    @Override
+    public boolean parallelSupported() {
+        return false;
+    }
+
+    @Override
+    public boolean isManual() {
+        return true;
+    }
+
 }

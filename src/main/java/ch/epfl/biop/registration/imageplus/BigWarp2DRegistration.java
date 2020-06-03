@@ -100,6 +100,16 @@ public class BigWarp2DRegistration implements Registration<ImagePlus> {
         return pts;
     }
 
+    @Override
+    public boolean parallelSupported() {
+        return false;
+    }
+
+    @Override
+    public boolean isManual() {
+        return true;
+    }
+
     /* Methods copied from BigDataviewer FIJI plugin  -> because they have protected access */
 
     public void transferChannelSettings(final CompositeImage ci, final SetupAssignments setupAssignments, final VisibilityAndGrouping visibility, int shiftChannel )

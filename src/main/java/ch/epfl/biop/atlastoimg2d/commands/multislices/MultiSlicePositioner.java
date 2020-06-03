@@ -24,6 +24,7 @@ import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
 import sc.fiji.bdvpg.behaviour.ClickBehaviourInstaller;
 import sc.fiji.bdvpg.behaviour.EditorBehaviourInstaller;
+import sc.fiji.bdvpg.behaviour.EditorBehaviourUnInstaller;
 import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
 import sc.fiji.bdvpg.scijava.services.ui.swingdnd.BdvTransferHandler;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
@@ -39,7 +40,13 @@ import static sc.fiji.bdvpg.scijava.services.SourceAndConverterService.SPIM_DATA
 
 /**
  * All specific functions and method dedicated to the multislice positioner
+ *
+ * Let's think a bit:
+ * There will be a positioning mode and a registration mode
+ * In the registration mode, all slices are displayed, and z step equals 1, and source are overlayed
+ *
  */
+
 public class MultiSlicePositioner extends BdvOverlay {
 
     /**
@@ -120,21 +127,9 @@ public class MultiSlicePositioner extends BdvOverlay {
 
         Behaviours navigation = new Behaviours(new InputTriggerConfig(), "bdv");
 
-        SourceSelectorBehaviour ssbTemp;
-
-        ssbTemp = (SourceSelectorBehaviour) SourceAndConverterServices.getSourceAndConverterDisplayService().getDisplayMetadata(
+        ssb = (SourceSelectorBehaviour) SourceAndConverterServices.getSourceAndConverterDisplayService().getDisplayMetadata(
                 bdvh, SourceSelectorBehaviour.class.getSimpleName());
-
-        if (ssbTemp == null) {
-            // No source selector installed yet : install one
-            ssbTemp = new SourceSelectorBehaviour(bdvh,"E");
-            EditorBehaviourInstaller ebi = new EditorBehaviourInstaller(ssbTemp);
-            ebi.run();
-
-        }
-
-        ssb = ssbTemp;
-
+        new EditorBehaviourUnInstaller(bdvh).run();
 
         new ClickBehaviourInstaller(bdvh, (x,y) -> this.cancelLastAction()).install("cancel_last_action", "ctrl Z");
         new ClickBehaviourInstaller(bdvh, (x,y) -> this.toggleOverlap()).install("toggle_superimpose", "O");
@@ -248,7 +243,6 @@ public class MultiSlicePositioner extends BdvOverlay {
         return ptCenterGlobal;
     }
 
-
     Context scijavaCtx;
     public void setScijavaContext(Context ctx) {
         scijavaCtx = ctx;
@@ -258,9 +252,7 @@ public class MultiSlicePositioner extends BdvOverlay {
         // Sort slices along slicing axis
 
         if (cycleToggle==0) {
-            slices.forEach(slice -> {
-                slice.yShift = 1.5;
-            });
+            slices.forEach(slice -> slice.yShift = 1.5);
         } else if (cycleToggle==2) {
 
             List<SliceSources> sortedSlices = new ArrayList<>(slices);
@@ -284,9 +276,7 @@ public class MultiSlicePositioner extends BdvOverlay {
                 }
             }
         } else if (cycleToggle==1) {
-            slices.forEach(slice -> {
-                slice.yShift = 0.5;
-            });
+            slices.forEach(slice -> slice.yShift = 0.5);
         }
 
         for (SliceSources src : slices) {
@@ -306,8 +296,6 @@ public class MultiSlicePositioner extends BdvOverlay {
     public ZStepSetter getzStepSetter() {
         return zStepSetter;
     }
-
-    boolean registrationLaunched = false;
 
     public void elastixRegister() {
         System.out.println("Elastix Registration");
@@ -338,28 +326,6 @@ public class MultiSlicePositioner extends BdvOverlay {
                     "sx",sX,
                     "sy",sY
                 );
-
-        
-
-        /*if (registrationLaunched) {
-            System.err.println("Registration already started... please wait");
-            return;
-        }
-
-        if ((selectedSlices == null)&&(slices.size()>0)) {
-            // no selected source : let's select the last one
-            selectedSlices.add(slices.get(slices.size()-1));
-        }
-
-        if (selectedSlices.size()==0) {
-            System.err.println("No slice available -> no registration");
-            return;
-        }
-
-        registrationLaunched = true;
-
-        new Elastix2DAffineRegister()*/
-
     }
 
     @Override
@@ -397,6 +363,10 @@ public class MultiSlicePositioner extends BdvOverlay {
         if (userActions.size()>0) {
             userActions.get(userActions.size()-1).cancel();
         }
+    }
+
+    public void createSlice(SourceAndConverter[] sacs, double slicingAxisPosition) {
+        new CreateSlice(Arrays.asList(sacs), slicingAxisPosition).run();
     }
 
     /**

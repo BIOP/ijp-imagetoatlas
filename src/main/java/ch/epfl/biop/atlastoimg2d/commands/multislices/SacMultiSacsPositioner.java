@@ -14,6 +14,7 @@ import org.scijava.Context;
 import org.scijava.ItemIO;
 import org.scijava.command.Command;
 import org.scijava.command.CommandService;
+import org.scijava.object.ObjectService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import sc.fiji.bdvpg.bdv.projector.Projection;
@@ -44,6 +45,9 @@ public class SacMultiSacsPositioner implements Command {
 
     @Parameter(type = ItemIO.OUTPUT)
     BdvHandle bdvMultiSlicer;
+
+    @Parameter
+    ObjectService os;
 
     @Override
     public void run() {
@@ -210,6 +214,8 @@ public class SacMultiSacsPositioner implements Command {
                     "sacs", slicedSources,
                     "autoContrast", false,
                     "adjustViewOnSource", true  ).get();
+
+            os.addObject(mp);
 
         } catch (Exception e) {
 

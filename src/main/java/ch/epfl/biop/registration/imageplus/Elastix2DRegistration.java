@@ -82,4 +82,14 @@ public class Elastix2DRegistration implements Registration<ImagePlus> {
         return ConvertibleRois.transformixFileToRealPointList((TransformixOutputRoisFile) cr_out.to(TransformixOutputRoisFile.class));
     }
 
+    @Override
+    public boolean parallelSupported() {
+        return true;
+    }
+
+    @Override
+    public boolean isManual() {
+        return false;
+    }
+
 }

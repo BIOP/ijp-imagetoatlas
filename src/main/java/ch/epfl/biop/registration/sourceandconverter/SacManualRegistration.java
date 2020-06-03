@@ -32,4 +32,14 @@ public class SacManualRegistration implements Registration<SourceAndConverter[]>
     public RealPointList getPtsRegistration(RealPointList pts) {
         return null;
     }
+
+    @Override
+    public boolean parallelSupported() {
+        return false;
+    }
+
+    @Override
+    public boolean isManual() {
+        return true;
+    }
 }
