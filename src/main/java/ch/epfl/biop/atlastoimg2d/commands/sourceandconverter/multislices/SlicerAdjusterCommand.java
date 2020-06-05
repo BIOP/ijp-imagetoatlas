@@ -1,8 +1,9 @@
-package ch.epfl.biop.atlastoimg2d.commands.multislices;
+package ch.epfl.biop.atlastoimg2d.commands.sourceandconverter.multislices;
 
 import bdv.tools.transformation.TransformedSource;
 import bdv.util.BdvHandle;
 import bdv.viewer.SourceAndConverter;
+import ch.epfl.biop.atlastoimg2d.multislice.MultiSlicePositioner;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
 import org.scijava.command.InteractiveCommand;
@@ -13,7 +14,7 @@ import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import java.util.Set;
 
 @Plugin(type = InteractiveCommand.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Adjust Slicing")
-public class SlicerAdjuster extends InteractiveCommand {
+public class SlicerAdjusterCommand extends InteractiveCommand {
 
     @Parameter(min = "1", max = "50", stepSize = "1", style = "slider")
     int zSamplingSteps = 1;
@@ -66,7 +67,7 @@ public class SlicerAdjuster extends InteractiveCommand {
         slicingTransfom.set(m21, 1,2 );
         slicingTransfom.set(m22, 2,2 );
 
-        SacMultiSacsPositioner.adjustShiftSlicingTransform(slicingTransfom, nPixX, nPixY, nPixZ);
+        SacMultiSacsPositionerCommand.adjustShiftSlicingTransform(slicingTransfom, nPixX, nPixY, nPixZ);
 
         ((TransformedSource) (modelSlicing.getSpimSource())).setFixedTransform(slicingTransfom);
 

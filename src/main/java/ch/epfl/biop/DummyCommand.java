@@ -1,22 +1,10 @@
 package ch.epfl.biop;
 
-//import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
-//import ch.epfl.biop.java.utilities.roi.types.ImageJRoisFile;
 import bdv.viewer.SourceAndConverter;
 import bigwarp.BigWarp;
-import ch.epfl.biop.atlastoimg2d.commands.multislices.MultiSlicePositioner;
-import ij.IJ;
-import ij.ImagePlus;
-import ij.plugin.frame.RoiManager;
+import ch.epfl.biop.atlastoimg2d.multislice.MultiSlicePositioner;
+import mpicbg.spim.data.sequence.Tile;
 import net.imagej.ImageJ;
-import net.imglib2.Localizable;
-import net.imglib2.RandomAccess;
-import net.imglib2.RealRandomAccess;
-import net.imglib2.Sampler;
-import net.imglib2.type.numeric.RealType;
-import sc.fiji.bdvpg.services.SourceAndConverterServices;
-
-import java.io.File;
 
 
 public class DummyCommand {
@@ -37,12 +25,9 @@ public class DummyCommand {
 
         MultiSlicePositioner mp = ij.object().getObjects(MultiSlicePositioner.class).get(0);
 
-        for (int i=2;i<10;i++) {
+        SourceAndConverter[] sacs = ij.convert().convert("SpimData 0>Channel>1", SourceAndConverter[].class);
 
-            SourceAndConverter[] sacs = ij.convert().convert("SpimData 0>Tile>"+i, SourceAndConverter[].class);
-
-            mp.createSlice(sacs,i/10+3);
-        }
+        mp.createSlice(sacs,8, 0.2, Tile.class, new Tile(-1));
 
 	}
 

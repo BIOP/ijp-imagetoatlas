@@ -115,11 +115,11 @@ public class AtlasToSourceAndConverter2D implements AtlasToImg2D<SourceAndConver
         reg.setMovingImage(m);
         reg.register();
 
-        SourceAndConverterServices.getSourceAndConverterDisplayService()
+        /*SourceAndConverterServices.getSourceAndConverterDisplayService()
                 .removeFromActiveBdv(m);
 
         SourceAndConverterServices.getSourceAndConverterDisplayService()
-                .removeFromActiveBdv(f);
+                .removeFromActiveBdv(f);*/
 
         this.registrationSequence.add(reg);
         SourceAndConverter[] trImg = reg.getImageRegistration().apply(imgIn);
@@ -142,7 +142,7 @@ public class AtlasToSourceAndConverter2D implements AtlasToImg2D<SourceAndConver
                 .removeFromActiveBdv(f);
 
 
-        this.computeTransformedRois();
+        //this.computeTransformedRois();
     }
 
     @Override

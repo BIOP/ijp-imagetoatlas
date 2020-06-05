@@ -1,8 +1,9 @@
-package ch.epfl.biop.atlastoimg2d.commands.multislices;
+package ch.epfl.biop.atlastoimg2d.commands.sourceandconverter.multislices;
 
 import bdv.util.BdvHandle;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.BiopAtlas;
+import ch.epfl.biop.atlastoimg2d.multislice.MultiSlicePositioner;
 import ch.epfl.biop.sourceandconverter.transform.SourceMosaicZSlicer;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealPoint;
@@ -21,13 +22,14 @@ import sc.fiji.bdvpg.bdv.projector.Projection;
 import sc.fiji.bdvpg.scijava.command.bdv.BdvSourcesAdderCommand;
 import sc.fiji.bdvpg.scijava.command.bdv.BdvWindowCreatorCommand;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
+import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterUtils;
 import sc.fiji.bdvpg.sourceandconverter.importer.EmptySourceAndConverterCreator;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceAffineTransformer;
 
 import static net.imglib2.cache.img.DiskCachedCellImgOptions.options;
 
 @Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Position Multiple Slices")
-public class SacMultiSacsPositioner implements Command {
+public class SacMultiSacsPositionerCommand implements Command {
 
     @Parameter(choices = {"coronal", "sagittal", "horizontal", "free"})
     String slicingMode;
@@ -188,19 +190,58 @@ public class SacMultiSacsPositioner implements Command {
 
             MultiSlicePositioner mp = new MultiSlicePositioner(bdvMultiSlicer, slicingModel, slicedSources);
 
-            SourceMosaicZSlicer mosaic = new SourceMosaicZSlicer(null, slicingModel, true, false, true, mp.getzStepSetter()::getStep);
+            SourceMosaicZSlicer mosaic = new SourceMosaicZSlicer(null, slicingModel, true, false, false, mp.getzStepSetter()::getStep);
 
             mp.setScijavaContext(context);
 
+            // Recenter around center of source in xy
+            SourceAndConverter sourceUsedForRecenteringXY = ba.map.getStructuralImages()[0];
+
+
+            //sourceUsedForRecenteringXY.getSpimSource().getSource(0,0).dimensions(dims);
+            AffineTransform3D centerTransform = null;
             for (int index = 0; index<ba.map.getStructuralImages().length;index++) {
                 SourceAndConverter sac = ba.map.getStructuralImages()[index];
                 SourceAndConverter reslicedSac = mosaic.apply(sac);
+                if (centerTransform == null) {
+                    centerTransform = new AffineTransform3D();
+                    reslicedSac.getSpimSource().getSourceTransform(0,0,centerTransform);
+                    RealPoint ptCenterGlobal = new RealPoint(3);
+
+                    long[] dims = new long[3];
+                    reslicedSac.getSpimSource().getSource(0,0).dimensions(dims);
+                    dims[0] = dims[0]/dims[2];
+                    RealPoint ptCenterPixel = new RealPoint((dims[0]-1.0)/2.0,(dims[1]-1.0)/2.0, 0);//(dims[2]-1.0)/2.0);
+
+                    centerTransform.apply(ptCenterPixel, ptCenterGlobal);
+                    centerTransform.identity();
+                    centerTransform.translate(-ptCenterGlobal.getDoublePosition(0),
+                            -ptCenterGlobal.getDoublePosition(1),
+                            -ptCenterGlobal.getDoublePosition(2)
+                            );
+
+                }
+
+
+                //RealPoint ptCenter = SourceAndConverterUtils.getSourceAndConverterCenterPoint(reslicedSac);
+                /*
+                long[] dims = new long[3];
+                sourceUsedForRecenteringXY.getSpimSource().getSource(0,0).dimensions(dims);
+
+                System.out.println(ptCenter);
+                ptCenter.setPosition(0,2); // Do not center in Z
+                AffineTransform3D centerTransform = new AffineTransform3D();
+                //centerTransform.translate((dims[0]-1.0)/2.0,(dims[1]-1.0)/2.0, 0);//(dims[2]-1.0)/2.0);
+                centerTransform.translate(ptCenter.getDoublePosition(0), ptCenter.getDoublePosition(1), ptCenter.getDoublePosition(2));
+                */
+
+                reslicedSac = new SourceAffineTransformer(null, centerTransform).apply(reslicedSac);
                 SourceAndConverterServices.getSourceAndConverterService()
                         .register(reslicedSac);
                 slicedSources[index] = reslicedSac;
             }
 
-            cs.run(SlicerAdjuster.class, true,
+            cs.run(SlicerAdjusterCommand.class, true,
                     "modelSlicing", slicingModel,
                             "slicedSources", slicedSources,
                             "zSetter", mp.getzStepSetter(),
