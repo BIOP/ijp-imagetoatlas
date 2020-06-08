@@ -29,8 +29,10 @@ import sc.fiji.bdvpg.behaviour.EditorBehaviourUnInstaller;
 import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
 import sc.fiji.bdvpg.scijava.services.ui.swingdnd.BdvTransferHandler;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
+import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterAndTimeRange;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterUtils;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceAffineTransformer;
+import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
 
 import java.awt.*;
 import java.util.*;
@@ -451,18 +453,21 @@ public class MultiSlicePositioner extends BdvOverlay {
 
         SliceSources slice = slices.get(this.iCurrentSlice);
         RealPoint rpt = new RealPoint(3);
-        double posX = ((slice.slicingAxisPosition/sizePixX/zStepSetter.getStep())) * sX;
-        double posY = 0;
+
+        double posX = -sX/2;
+        double posY = -sY/2;
+
         rpt.setPosition(posX,0);
         rpt.setPosition(posY,1);
+        rpt.setPosition(slice.slicingAxisPosition, 2);
 
         Future<CommandModule> task = scijavaCtx.getService(CommandService.class).run(Elastix2DAffineRegisterCommand.class, true,
                 "sac_fixed", slicedSources[0].getSpimSource().getNumMipmapLevels()-1,
                     "tpFixed", 0,
                     "levelFixedSource", 2,
-                    "sac_moving", slice.relocated_sacs_slicing_mode[0],
+                    "sac_moving", slice.relocated_sacs_registration_mode[0],
                     "tpMoving", 0,
-                    "levelMovingSource", slice.relocated_sacs_slicing_mode[0].getSpimSource().getNumMipmapLevels()-1,
+                    "levelMovingSource", slice.relocated_sacs_registration_mode[0].getSpimSource().getNumMipmapLevels()-1,
                     "pxSizeInCurrentUnit", 0.04, // in mm
                     "interpolate", false,
                     "showImagePlusRegistrationResult", true,
@@ -475,10 +480,17 @@ public class MultiSlicePositioner extends BdvOverlay {
 
             Thread t = new Thread(() -> {
                 try {
-                    SourceAndConverter sac = (SourceAndConverter) task.get().getOutput("registeredSource");
-                    SourceAndConverterServices
+                    //SourceAndConverter sac = (SourceAndConverter) task.get().getOutput("registeredSource");
+
+                    AffineTransform3D at3d = (AffineTransform3D) task.get().getOutput("at3D");
+
+                    SourceTransformHelper.mutate(at3d, new SourceAndConverterAndTimeRange(slice.relocated_sacs_registration_mode[0],0));
+                    
+                    bdvh.getViewerPanel().requestRepaint();
+                    /*SourceAndConverterServices
                             .getSourceAndConverterDisplayService()
-                            .show(bdvh, sac);
+                            .show(bdvh, new SourceAffineTransformer(slice.relocated_sacs_registration_mode[0], at3d).getSourceOut());*/
+
                 } catch (Exception e) {
 
                 }
