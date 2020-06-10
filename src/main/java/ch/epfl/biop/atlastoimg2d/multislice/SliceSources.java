@@ -7,10 +7,7 @@ import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceAffineTransformer;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class SliceSources {
     // What are they ?
@@ -92,6 +89,24 @@ public class SliceSources {
             return true;
         }
 
+        return false;
+    }
+
+    protected boolean isContainingAny(Collection<SourceAndConverter<?>> sacs) {
+        Set originalSacsSet = new HashSet();
+        for (SourceAndConverter sac : original_sacs) {
+            originalSacsSet.add(sac);
+        }
+        if (sacs.stream().distinct().anyMatch(originalSacsSet::contains)) {
+            return true;
+        }
+        Set transformedSacsSet = new HashSet();
+        for (SourceAndConverter sac : relocated_sacs_slicing_mode) {
+            transformedSacsSet.add(sac);
+        }
+        if (sacs.stream().distinct().anyMatch(transformedSacsSet::contains)) {
+            return true;
+        }
         return false;
     }
 

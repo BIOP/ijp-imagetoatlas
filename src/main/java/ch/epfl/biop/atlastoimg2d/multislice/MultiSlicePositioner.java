@@ -5,6 +5,7 @@ import bdv.util.BdvHandle;
 import bdv.util.BdvOptions;
 import bdv.util.BdvOverlay;
 import bdv.viewer.SourceAndConverter;
+import ch.epfl.biop.bdv.select.SelectedSourcesListener;
 import ch.epfl.biop.bdv.select.SourceSelectorBehaviour;
 import ch.epfl.biop.registration.Registration;
 import ch.epfl.biop.scijava.command.Elastix2DAffineRegisterCommand;
@@ -52,7 +53,7 @@ import static sc.fiji.bdvpg.scijava.services.SourceAndConverterService.SPIM_DATA
  *
  */
 
-public class MultiSlicePositioner extends BdvOverlay {
+public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesListener {
 
     /**
      * BdvHandle displaying everything
@@ -164,6 +165,9 @@ public class MultiSlicePositioner extends BdvOverlay {
         common_behaviours.install(bdvh.getTriggerbindings(), COMMON_BEHAVIOURS_KEY);
 
         positioning_behaviours.behaviour((ClickBehaviour)(x,y) ->  this.toggleOverlap(), "toggle_superimpose", "O");
+        positioning_behaviours.behaviour((ClickBehaviour)(x,y) ->  {if (ssb.isEnabled())ssb.disable(); else ssb.enable();}, "toggle_editormode", "E");
+        ssb.addSelectedSourcesListener(this);
+
 
         registration_behaviours.behaviour((ClickBehaviour)(x,y) ->  this.elastixRegister(), "register_test", "R");
 
@@ -533,12 +537,46 @@ public class MultiSlicePositioner extends BdvOverlay {
         g.drawLine(ptRectScreen[1][1].x, ptRectScreen[1][1].y, ptRectScreen[0][1].x, ptRectScreen[0][1].y);
         g.drawLine(ptRectScreen[0][1].x, ptRectScreen[0][1].y, ptRectScreen[0][0].x, ptRectScreen[0][0].y);
 
+        if (currentMode.equals(POSITIONING_MODE) && slices.stream().anyMatch(slice -> slice.isSelected)) {
+            List<SliceSources> sortedSelected = getSortedSlices().stream().filter(slice -> slice.isSelected).collect(Collectors.toList());
+            RealPoint precedentPoint = null;
+            for (SliceSources slice : sortedSelected) {
+                RealPoint sliceCenter = SourceAndConverterUtils.getSourceAndConverterCenterPoint(slice.relocated_sacs_slicing_mode[0]);
+                bdvAt3D.apply(sliceCenter, sliceCenter);
+                g.fillOval((int)sliceCenter.getDoublePosition(0)-5,(int)sliceCenter.getDoublePosition(1)-5,10,10);
+                if (precedentPoint!=null) {
+                    g.drawLine((int)precedentPoint.getDoublePosition(0),(int)precedentPoint.getDoublePosition(1),(int)sliceCenter.getDoublePosition(0),(int)sliceCenter.getDoublePosition(1));
+                }
+                precedentPoint = sliceCenter;
+            }
+        }
+
     }
 
     public void cancelLastAction() {
         if (userActions.size()>0) {
             userActions.get(userActions.size()-1).cancel();
         }
+    }
+
+    @Override
+    public void selectedSourcesUpdated(Collection<SourceAndConverter<?>> selectedSources, String triggerMode) {
+        boolean changed = false;
+        for (SliceSources slice:slices) {
+            if (slice.isContainingAny(selectedSources)) {
+                if (!slice.isSelected) changed = true;
+                slice.isSelected = true;
+            } else {
+                if (slice.isSelected) changed = true;
+                slice.isSelected = false;
+            }
+        }
+        if (changed) bdvh.getViewerPanel().requestRepaint();
+    }
+
+    @Override
+    public void lastSelectionEvent(Collection<SourceAndConverter<?>> lastSelectedSources, String mode, String triggerMode) {
+        // Nothing
     }
 
     /**
@@ -630,7 +668,9 @@ public class MultiSlicePositioner extends BdvOverlay {
         public MoveSlice(SliceSources sliceSource, double slicingAxisPosition ) {
             this.sliceSource = sliceSource;
             this.oldSlicingAxisPosition = sliceSource.slicingAxisPosition;
-            this.newSlicingAxisPosition = slicingAxisPosition;
+            int iSliceNoStep = (int) (slicingAxisPosition / sizePixX);
+            //double slicingAxisPosition = iSliceNoStep*sizePixX;
+            this.newSlicingAxisPosition = iSliceNoStep*sizePixX; //slicingAxisPosition;
         }
 
         public void run() {
