@@ -17,7 +17,6 @@ import sc.fiji.bdvpg.sourceandconverter.transform.SourceRealTransformer;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class SacBigWarp2DRegistration implements Registration<SourceAndConverter[]> {
@@ -146,7 +145,7 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
     }
 
     @Override
-    public Function<SourceAndConverter[], SourceAndConverter[]> getImageRegistration() {
+    public SourceAndConverter[] getTransformedImageMovingToFixed( SourceAndConverter[] sacs) {
 
         if (bwl.getBigWarp().getTransformType().equals(TransformTypeSelectDialog.TPS)) {
             // Thin Plate Spline
@@ -158,13 +157,11 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
             irts.add(bwl.getBigWarp().getTransformation());
             irts.add(at3Dfixed);
 
-            return (sacs) -> {
-                SourceAndConverter[] out = new SourceAndConverter[sacs.length];
-                for (int i = 0; i<sacs.length; i++) {
-                    out[i] = satf.apply(srt.apply(satm.apply(sacs[i])));
-                }
-                return out;
-            };
+            SourceAndConverter[] out = new SourceAndConverter[sacs.length];
+            for (int i = 0; i<sacs.length; i++) {
+                out[i] = satf.apply(srt.apply(satm.apply(sacs[i])));
+            }
+            return out;
         } else {
             // Just an affine transform
             SourceAffineTransformer satm = new SourceAffineTransformer(null, at3Dmoving.inverse().copy());
@@ -176,18 +173,16 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
             irts.add(bwl.getBigWarp().affine3d().inverse());
             irts.add(at3Dfixed);
 
-            return (sacs) -> {
-                SourceAndConverter[] out = new SourceAndConverter[sacs.length];
-                for (int i = 0; i<sacs.length; i++) {
-                    out[i] = satf.apply(srt.apply(satm.apply(sacs[i])));
-                }
-                return out;
-            };
+            SourceAndConverter[] out = new SourceAndConverter[sacs.length];
+            for (int i = 0; i<sacs.length; i++) {
+                out[i] = satf.apply(srt.apply(satm.apply(sacs[i])));
+            }
+            return out;
         }
     }
 
     @Override
-    public RealPointList getPtsRegistration(RealPointList pts) {
+    public RealPointList getTransformedPtsFixedToMoving(RealPointList pts) {
         // Transform 2D in 3D
         for
         (RealPoint pt : pts.ptList) {

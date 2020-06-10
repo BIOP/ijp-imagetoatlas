@@ -3,7 +3,6 @@ package ch.epfl.biop.atlastoimg2d.multislice;
 
 import bdv.tools.transformation.TransformedSource;
 import bdv.viewer.SourceAndConverter;
-import ch.epfl.biop.atlastoimg2d.AtlasToSourceAndConverter2D;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceAffineTransformer;
@@ -37,8 +36,6 @@ public class SliceSources {
 
     double yShift_slicing_mode = 0;
 
-    AtlasToSourceAndConverter2D aligner;
-
     final MultiSlicePositioner mp;
 
     // For fast display : Icon TODO : see https://github.com/bigdataviewer/bigdataviewer-core/blob/17d2f55d46213d1e2369ad7ef4464e3efecbd70a/src/main/java/bdv/tools/RecordMovieDialog.java#L256-L318
@@ -46,9 +43,6 @@ public class SliceSources {
         this.mp = mp;
         this.original_sacs = sacs;
         this.slicingAxisPosition = slicingAxisPosition;
-
-        aligner = new AtlasToSourceAndConverter2D();
-        aligner.setScijavaContext(mp.scijavaCtx);
 
         List<SourceAndConverter<?>> sacsTransformed = new ArrayList<>();
         at3D = new AffineTransform3D();
@@ -80,8 +74,6 @@ public class SliceSources {
         }
         this.relocated_sacs_3D_mode = sacsTransformed.toArray(new SourceAndConverter[sacsTransformed.size()]);
 
-
-        aligner.setImage(relocated_sacs_registration_mode);
     }
 
     protected boolean exactMatch(List<SourceAndConverter<?>> testSacs) {

@@ -24,12 +24,12 @@ public class SacManualRegistration implements Registration<SourceAndConverter[]>
     }
 
     @Override
-    public Function<SourceAndConverter[], SourceAndConverter[]> getImageRegistration() {
+    public SourceAndConverter[] getTransformedImageMovingToFixed(SourceAndConverter[] img) {
         return null;
     }
 
     @Override
-    public RealPointList getPtsRegistration(RealPointList pts) {
+    public RealPointList getTransformedPtsFixedToMoving(RealPointList pts) {
         return null;
     }
 

@@ -1,7 +1,5 @@
 package ch.epfl.biop.registration;
-
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
-import java.util.function.Function;
 
 public interface Registration<T> {
 
@@ -10,8 +8,8 @@ public interface Registration<T> {
 
     void register();
 
-    Function<T,T> getImageRegistration();
-    RealPointList getPtsRegistration(RealPointList pts);
+    T getTransformedImageMovingToFixed(T img);
+    RealPointList getTransformedPtsFixedToMoving(RealPointList pts);
 
     boolean parallelSupported();
     boolean isManual();

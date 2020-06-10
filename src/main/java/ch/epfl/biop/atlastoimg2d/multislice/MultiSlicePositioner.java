@@ -1,12 +1,10 @@
 package ch.epfl.biop.atlastoimg2d.multislice;
 
-import bdv.tools.transformation.TransformedSource;
 import bdv.util.BdvFunctions;
 import bdv.util.BdvHandle;
 import bdv.util.BdvOptions;
 import bdv.util.BdvOverlay;
 import bdv.viewer.SourceAndConverter;
-import ch.epfl.biop.atlastoimg2d.AtlasToSourceAndConverter2D;
 import ch.epfl.biop.bdv.select.SourceSelectorBehaviour;
 import ch.epfl.biop.registration.Registration;
 import ch.epfl.biop.scijava.command.Elastix2DAffineRegisterCommand;
@@ -24,14 +22,12 @@ import org.scijava.command.CommandService;
 import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
-import sc.fiji.bdvpg.behaviour.ClickBehaviourInstaller;
 import sc.fiji.bdvpg.behaviour.EditorBehaviourUnInstaller;
 import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
 import sc.fiji.bdvpg.scijava.services.ui.swingdnd.BdvTransferHandler;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterAndTimeRange;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterUtils;
-import sc.fiji.bdvpg.sourceandconverter.transform.SourceAffineTransformer;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
 
 import java.awt.*;
@@ -320,6 +316,7 @@ public class MultiSlicePositioner extends BdvOverlay {
             bdvh.getTriggerbindings().removeInputTriggerMap(VIEWING3D_BEHAVIOURS_KEY);
             bdvh.getTriggerbindings().removeBehaviourMap(VIEWING3D_BEHAVIOURS_KEY);
             positioning_behaviours.install(bdvh.getTriggerbindings(), POSITIONING_BEHAVIOURS_KEY);
+            navigateCurrentSlice();
         }
     }
 
@@ -352,7 +349,7 @@ public class MultiSlicePositioner extends BdvOverlay {
             bdvh.getTriggerbindings().removeInputTriggerMap(VIEWING3D_BEHAVIOURS_KEY);
             bdvh.getTriggerbindings().removeBehaviourMap(VIEWING3D_BEHAVIOURS_KEY);
             registration_behaviours.install(bdvh.getTriggerbindings(), REGISTRATION_BEHAVIOURS_KEY );
-
+            navigateCurrentSlice();
         }
     }
 
@@ -384,6 +381,7 @@ public class MultiSlicePositioner extends BdvOverlay {
                 bdvh.getTriggerbindings().removeInputTriggerMap(REGISTRATION_BEHAVIOURS_KEY);
                 bdvh.getTriggerbindings().removeBehaviourMap(REGISTRATION_BEHAVIOURS_KEY);
                 viewing3d_behaviours.install(bdvh.getTriggerbindings(),  VIEWING3D_BEHAVIOURS_KEY  );
+                navigateCurrentSlice();
             }
         }
     }
@@ -477,6 +475,7 @@ public class MultiSlicePositioner extends BdvOverlay {
                     "sx",sX,
                     "sy",sY
                 );
+
 
             Thread t = new Thread(() -> {
                 try {
