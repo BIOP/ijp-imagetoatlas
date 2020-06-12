@@ -1,5 +1,8 @@
 package ch.epfl.biop.atlastoimg2d.multislice;
 
+import org.scijava.ui.behaviour.util.Behaviours;
+import org.scijava.ui.behaviour.util.TriggerBehaviourBindings;
+
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
@@ -8,8 +11,17 @@ abstract public class GraphicalHandle extends MouseMotionAdapter {
 
     final GraphicalHandleListener ghl;
 
-    public GraphicalHandle(GraphicalHandleListener ghl) {
+    final Behaviours behaviours;
+
+    final TriggerBehaviourBindings bindings;
+
+    final String nameMap;
+
+    public GraphicalHandle(GraphicalHandleListener ghl, Behaviours behaviours, TriggerBehaviourBindings bindings, String nameMap) {
         this.ghl = ghl;
+        this.behaviours = behaviours;
+        this.bindings = bindings;
+        this.nameMap = nameMap;
         ghl.created(this);
     }
 
@@ -57,14 +69,17 @@ abstract public class GraphicalHandle extends MouseMotionAdapter {
         final int y = e.getY();
 
         if (isPresentAt(x,y)) {
-            if (!mouseAbove) {
+            if ((!mouseAbove)&&(!isDisabled)) {
                 mouseAbove = true;
                 ghl.hover_in(this);
+                behaviours.install(bindings, nameMap);
             }
         } else {
-            if (mouseAbove) {
+            if ((mouseAbove)&&(!isDisabled)) {
                 mouseAbove = false;
                 ghl.hover_out(this);
+                bindings.removeBehaviourMap(nameMap);
+                bindings.removeInputTriggerMap(nameMap);
             }
         }
 

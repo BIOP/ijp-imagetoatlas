@@ -1,5 +1,8 @@
 package ch.epfl.biop.atlastoimg2d.multislice;
 
+import org.scijava.ui.behaviour.util.Behaviours;
+import org.scijava.ui.behaviour.util.TriggerBehaviourBindings;
+
 import java.awt.*;
 import java.util.function.Supplier;
 
@@ -10,10 +13,13 @@ public class CircleGraphicalHandle extends GraphicalHandle{
     Supplier<Integer[]> color;
 
     public CircleGraphicalHandle(GraphicalHandleListener ghl,
+                                 Behaviours behaviours,
+                                 TriggerBehaviourBindings bindings,
+                                 String nameMap,
                                  Supplier<Integer[]> coords,
                                  Supplier<Integer> radius,
                                  Supplier<Integer[]> color) {
-        super(ghl);
+        super(ghl, behaviours, bindings, nameMap);
         this.radius = radius;
         this.color = color;
         this.coords = coords;

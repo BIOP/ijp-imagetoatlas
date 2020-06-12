@@ -5,6 +5,8 @@ import bdv.tools.transformation.TransformedSource;
 import bdv.viewer.SourceAndConverter;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
+import org.scijava.ui.behaviour.io.InputTriggerConfig;
+import org.scijava.ui.behaviour.util.Behaviours;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterUtils;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceAffineTransformer;
 
@@ -39,6 +41,8 @@ public class SliceSources {
     final MultiSlicePositioner mp;
 
     List<GraphicalHandle> ghs = new ArrayList<>();
+
+    Behaviours behavioursHandleSlice;
 
     // For fast display : Icon TODO : see https://github.com/bigdataviewer/bigdataviewer-core/blob/17d2f55d46213d1e2369ad7ef4464e3efecbd70a/src/main/java/bdv/tools/RecordMovieDialog.java#L256-L318
     protected SliceSources(SourceAndConverter[] sacs, double slicingAxisPosition, MultiSlicePositioner mp) {
@@ -76,7 +80,14 @@ public class SliceSources {
         }
         this.relocated_sacs_3D_mode = sacsTransformed.toArray(new SourceAndConverter[sacsTransformed.size()]);
 
+        behavioursHandleSlice = new Behaviours(new InputTriggerConfig());
+
+        behavioursHandleSlice.behaviour(mp.getSelectedSourceDragBehaviour(), "dragSelectedSources"+this.toString(), "button1");
+
         GraphicalHandle gh = new CircleGraphicalHandle(mp,
+                    behavioursHandleSlice,
+                    mp.bdvh.getTriggerbindings(),
+                    this.toString(), // pray for unicity ? TODO : do better than thoughts and prayers
                     this::getBdvHandleCoords,
                     this::getBdvHandleRadius,
                     this::getBdvHandleColor
