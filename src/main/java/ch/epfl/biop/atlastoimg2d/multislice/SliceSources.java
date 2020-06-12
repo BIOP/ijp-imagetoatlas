@@ -5,9 +5,12 @@ import bdv.tools.transformation.TransformedSource;
 import bdv.viewer.SourceAndConverter;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
+import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterUtils;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceAffineTransformer;
 
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 
 public class SliceSources {
     // What are they ?
@@ -34,6 +37,8 @@ public class SliceSources {
     double yShift_slicing_mode = 0;
 
     final MultiSlicePositioner mp;
+
+    List<GraphicalHandle> ghs = new ArrayList<>();
 
     // For fast display : Icon TODO : see https://github.com/bigdataviewer/bigdataviewer-core/blob/17d2f55d46213d1e2369ad7ef4464e3efecbd70a/src/main/java/bdv/tools/RecordMovieDialog.java#L256-L318
     protected SliceSources(SourceAndConverter[] sacs, double slicingAxisPosition, MultiSlicePositioner mp) {
@@ -71,6 +76,49 @@ public class SliceSources {
         }
         this.relocated_sacs_3D_mode = sacsTransformed.toArray(new SourceAndConverter[sacsTransformed.size()]);
 
+        GraphicalHandle gh = new CircleGraphicalHandle(mp,
+                    this::getBdvHandleCoords,
+                    this::getBdvHandleRadius,
+                    this::getBdvHandleColor
+                );
+        ghs.add(gh);
+
+    }
+
+    public Integer[] getBdvHandleCoords() {
+        RealPoint sliceCenter = SourceAndConverterUtils.getSourceAndConverterCenterPoint(relocated_sacs_positioning_mode[0]);
+
+        AffineTransform3D bdvAt3D = new AffineTransform3D();
+
+        mp.bdvh.getViewerPanel().state().getViewerTransform(bdvAt3D);
+        bdvAt3D.apply(sliceCenter, sliceCenter);
+
+        return new Integer[]{(int)sliceCenter.getDoublePosition(0), (int)sliceCenter.getDoublePosition(1)};
+    }
+
+    public Integer[] getBdvHandleColor() {
+        if (isSelected) {
+            return new Integer[]{0,255,0,200};
+
+        } else {
+            return new Integer[]{255,255,0,64};
+        }
+    }
+
+    public Integer getBdvHandleRadius() {
+        return 25;
+    }
+
+    public void drawGraphicalHandles(Graphics2D g) {
+        ghs.forEach(gh -> gh.draw(g));
+    }
+
+    public void disableGraphicalHandles() {
+        ghs.forEach(gh -> gh.disable());
+    }
+
+    public void enableGraphicalHandles() {
+        ghs.forEach(gh -> gh.enable());
     }
 
     protected boolean exactMatch(List<SourceAndConverter<?>> testSacs) {

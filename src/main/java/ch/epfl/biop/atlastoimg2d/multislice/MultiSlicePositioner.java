@@ -1,6 +1,5 @@
 package ch.epfl.biop.atlastoimg2d.multislice;
 
-import bdv.tools.transformation.TransformedSource;
 import bdv.util.BdvFunctions;
 import bdv.util.BdvHandle;
 import bdv.util.BdvOptions;
@@ -21,8 +20,7 @@ import net.imglib2.type.numeric.ARGBType;
 import org.scijava.Context;
 import org.scijava.command.CommandModule;
 import org.scijava.command.CommandService;
-import org.scijava.ui.behaviour.ClickBehaviour;
-import org.scijava.ui.behaviour.DragBehaviour;
+import org.scijava.ui.behaviour.*;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
 import sc.fiji.bdvpg.behaviour.EditorBehaviourUnInstaller;
@@ -34,6 +32,8 @@ import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterUtils;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
 
 import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.Future;
@@ -55,7 +55,7 @@ import static sc.fiji.bdvpg.scijava.services.SourceAndConverterService.SPIM_DATA
  *
  */
 
-public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesListener {
+public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesListener, GraphicalHandleListener, MouseMotionListener {
 
     /**
      * BdvHandle displaying everything
@@ -123,6 +123,9 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     final static String COMMON_BEHAVIOURS_KEY = "multipositioner-behaviours";
     Behaviours common_behaviours = new Behaviours(new InputTriggerConfig(), "multipositioner" );
 
+    final static String DRAG_SOURCES_MAP = "drag_positioning_sources-behaviours";
+    Behaviours drag_sources_positioning = new Behaviours(new InputTriggerConfig(), "drag_positioning_sources" );
+
     public MultiSlicePositioner(BdvHandle bdvh, SourceAndConverter slicingModel, SourceAndConverter[] slicedSources) {
         this.slicedSources = slicedSources;
         this.bdvh = bdvh;
@@ -161,15 +164,22 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
         common_behaviours.behaviour((ClickBehaviour)(x, y) -> this.cancelLastAction(), "cancel_last_action", "ctrl Z");
         common_behaviours.behaviour((ClickBehaviour)(x,y) -> this.navigateNextSlice(), "navigate_next_slice", "N");
-        common_behaviours.behaviour((ClickBehaviour)(x,y) -> this.navigateNextSlice(), "navigate_previous_slice", "M"); // P taken for panel
+        common_behaviours.behaviour((ClickBehaviour)(x,y) -> this.navigatePreviousSlice(), "navigate_previous_slice", "M"); // P taken for panel
         common_behaviours.behaviour((ClickBehaviour)(x,y) -> this.navigateCurrentSlice(), "navigate_current_slice", "C");
         common_behaviours.behaviour((ClickBehaviour)(x,y) -> this.nextMode(), "change_mode", "Q");
         common_behaviours.install(bdvh.getTriggerbindings(), COMMON_BEHAVIOURS_KEY);
 
         positioning_behaviours.behaviour((ClickBehaviour)(x,y) ->  this.toggleOverlap(), "toggle_superimpose", "O");
-        positioning_behaviours.behaviour((ClickBehaviour)(x,y) ->  {if (ssb.isEnabled())ssb.disable(); else ssb.enable();}, "toggle_editormode", "E");
+        positioning_behaviours.behaviour((ClickBehaviour)(x,y) ->  {if (ssb.isEnabled()) {
+            ssb.disable();
+            refreshBlockMap();
+        } else {
+            ssb.enable();
+            refreshBlockMap();
+        }}, "toggle_editormode", "E");
         positioning_behaviours.behaviour((ClickBehaviour)(x,y) ->  this.equalSpacingSelectedSlices(), "equalSpacingSelectedSlices", "A");
-        positioning_behaviours.behaviour(new SelectedSliceSourcesDrag(), "dragSelectedSources", "button3");
+
+        drag_sources_positioning.behaviour(new SelectedSliceSourcesDrag(), "dragSelectedSources", "button1");
 
         ssb.addSelectedSourcesListener(this);
 
@@ -181,7 +191,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         new ClickBehaviourInstaller(bdvh, (x,y) -> this.elastixRegister()).install("register_test", "R");
         new ClickBehaviourInstaller(bdvh, (x,y) -> this.navigateNextSlice()).install("navigate_next_slice", "N");
         new ClickBehaviourInstaller(bdvh, (x,y) -> this.navigatePreviousSlice()).install("navigate_previous_slice", "P");*/
-
+        bdvh.getViewerPanel().getDisplay().addHandler(this);
     }
 
     int iCurrentSlice = 0;
@@ -296,6 +306,8 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
     public void setPositioningMode() {
         if (!currentMode.equals(POSITIONING_MODE)) {
+            ghs.forEach(gh -> gh.enable());
+            slices.forEach(slice -> slice.enableGraphicalHandles());
             // Do stuff
             currentMode = POSITIONING_MODE;
             // Do stuff
@@ -326,10 +338,13 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             positioning_behaviours.install(bdvh.getTriggerbindings(), POSITIONING_BEHAVIOURS_KEY);
             navigateCurrentSlice();
         }
+        refreshBlockMap();
     }
 
     public void setRegistrationMode() {
         if (!currentMode.equals(REGISTRATION_MODE)) {
+            ghs.forEach(gh -> gh.disable());
+            slices.forEach(slice -> slice.disableGraphicalHandles());
             // Do stuff
             currentMode = REGISTRATION_MODE;
             synchronized (slices) {
@@ -359,10 +374,13 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             registration_behaviours.install(bdvh.getTriggerbindings(), REGISTRATION_BEHAVIOURS_KEY );
             navigateCurrentSlice();
         }
+        refreshBlockMap();
     }
 
     public void set3dViewingMode() {
         if (!currentMode.equals(VIEWING3D_MODE)) {
+            ghs.forEach(gh -> gh.disable());
+            slices.forEach(slice -> slice.disableGraphicalHandles());
             currentMode = VIEWING3D_MODE;
             // Do stuff
             synchronized (slices) {
@@ -392,6 +410,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 navigateCurrentSlice();
             }
         }
+        refreshBlockMap();
     }
 
     Context scijavaCtx;
@@ -511,51 +530,57 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     }
 
     @Override
-    protected void draw(Graphics2D g) {
+    protected synchronized void draw(Graphics2D g) {
+        synchronized (slices) {
+            int colorCode = this.info.getColor().get();
+            g.setColor(new Color(ARGBType.red(colorCode) , ARGBType.green(colorCode), ARGBType.blue(colorCode), ARGBType.alpha(colorCode) ));
 
-        int colorCode = this.info.getColor().get();
-        g.setColor(new Color(ARGBType.red(colorCode) , ARGBType.green(colorCode), ARGBType.blue(colorCode), ARGBType.alpha(colorCode) ));
+            g.drawString(currentMode,10,10);
 
-        g.drawString(currentMode,10,10);
+            RealPoint[][] ptRectWorld = new RealPoint[2][2];
+            Point[][] ptRectScreen = new Point[2][2];
 
-        RealPoint[][] ptRectWorld = new RealPoint[2][2];
-        Point[][] ptRectScreen = new Point[2][2];
+            AffineTransform3D bdvAt3D = new AffineTransform3D();
 
-        AffineTransform3D bdvAt3D = new AffineTransform3D();
+            bdvh.getViewerPanel().state().getViewerTransform(bdvAt3D);
 
-        bdvh.getViewerPanel().state().getViewerTransform(bdvAt3D);
-
-        for (int xp = 0; xp < 2; xp++) {
-            for (int yp = 0; yp < 2; yp++) {
-                ptRectWorld[xp][yp] = new RealPoint(3);
-                RealPoint pt = ptRectWorld[xp][yp];
-                pt.setPosition(sX * (iSliceNoStep + xp), 0);
-                pt.setPosition(sY * (1 + yp), 1);
-                pt.setPosition(0, 2);
-                bdvAt3D.apply(pt, pt);
-                ptRectScreen[xp][yp] = new Point((int) pt.getDoublePosition(0), (int) pt.getDoublePosition(1));
-            }
-        }
-
-        g.drawLine(ptRectScreen[0][0].x, ptRectScreen[0][0].y, ptRectScreen[1][0].x, ptRectScreen[1][0].y);
-        g.drawLine(ptRectScreen[1][0].x, ptRectScreen[1][0].y, ptRectScreen[1][1].x, ptRectScreen[1][1].y);
-        g.drawLine(ptRectScreen[1][1].x, ptRectScreen[1][1].y, ptRectScreen[0][1].x, ptRectScreen[0][1].y);
-        g.drawLine(ptRectScreen[0][1].x, ptRectScreen[0][1].y, ptRectScreen[0][0].x, ptRectScreen[0][0].y);
-
-        if (currentMode.equals(POSITIONING_MODE) && slices.stream().anyMatch(slice -> slice.isSelected)) {
-            List<SliceSources> sortedSelected = getSortedSlices().stream().filter(slice -> slice.isSelected).collect(Collectors.toList());
-            RealPoint precedentPoint = null;
-            for (SliceSources slice : sortedSelected) {
-                RealPoint sliceCenter = SourceAndConverterUtils.getSourceAndConverterCenterPoint(slice.relocated_sacs_positioning_mode[0]);
-                bdvAt3D.apply(sliceCenter, sliceCenter);
-                g.fillOval((int)sliceCenter.getDoublePosition(0)-5,(int)sliceCenter.getDoublePosition(1)-5,10,10);
-                if (precedentPoint!=null) {
-                    g.drawLine((int)precedentPoint.getDoublePosition(0),(int)precedentPoint.getDoublePosition(1),(int)sliceCenter.getDoublePosition(0),(int)sliceCenter.getDoublePosition(1));
+            for (int xp = 0; xp < 2; xp++) {
+                for (int yp = 0; yp < 2; yp++) {
+                    ptRectWorld[xp][yp] = new RealPoint(3);
+                    RealPoint pt = ptRectWorld[xp][yp];
+                    pt.setPosition(sX * (iSliceNoStep + xp), 0);
+                    pt.setPosition(sY * (1 + yp), 1);
+                    pt.setPosition(0, 2);
+                    bdvAt3D.apply(pt, pt);
+                    ptRectScreen[xp][yp] = new Point((int) pt.getDoublePosition(0), (int) pt.getDoublePosition(1));
                 }
-                precedentPoint = sliceCenter;
+            }
+
+            g.drawLine(ptRectScreen[0][0].x, ptRectScreen[0][0].y, ptRectScreen[1][0].x, ptRectScreen[1][0].y);
+            g.drawLine(ptRectScreen[1][0].x, ptRectScreen[1][0].y, ptRectScreen[1][1].x, ptRectScreen[1][1].y);
+            g.drawLine(ptRectScreen[1][1].x, ptRectScreen[1][1].y, ptRectScreen[0][1].x, ptRectScreen[0][1].y);
+            g.drawLine(ptRectScreen[0][1].x, ptRectScreen[0][1].y, ptRectScreen[0][0].x, ptRectScreen[0][0].y);
+
+            ghs.forEach(gh -> gh.draw(g));
+
+            for (SliceSources slice : slices) {
+                slice.drawGraphicalHandles(g);
+            }
+
+           if (currentMode.equals(POSITIONING_MODE) && slices.stream().anyMatch(slice -> slice.isSelected)) {
+                List<SliceSources> sortedSelected = getSortedSlices().stream().filter(slice -> slice.isSelected).collect(Collectors.toList());
+                RealPoint precedentPoint = null;
+                for (SliceSources slice : sortedSelected) {
+                    RealPoint sliceCenter = SourceAndConverterUtils.getSourceAndConverterCenterPoint(slice.relocated_sacs_positioning_mode[0]);
+                    bdvAt3D.apply(sliceCenter, sliceCenter);
+                    //g.fillOval((int)sliceCenter.getDoublePosition(0)-5,(int)sliceCenter.getDoublePosition(1)-5,10,10);
+                    if (precedentPoint!=null) {
+                        g.drawLine((int)precedentPoint.getDoublePosition(0),(int)precedentPoint.getDoublePosition(1),(int)sliceCenter.getDoublePosition(0),(int)sliceCenter.getDoublePosition(1));
+                    }
+                    precedentPoint = sliceCenter;
+                }
             }
         }
-
     }
 
     public void cancelLastAction() {
@@ -582,10 +607,14 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         boolean changed = false;
         for (SliceSources slice:slices) {
             if (slice.isContainingAny(selectedSources)) {
-                if (!slice.isSelected) changed = true;
+                if (!slice.isSelected) {
+                    changed = true;
+                }
                 slice.isSelected = true;
             } else {
-                if (slice.isSelected) changed = true;
+                if (slice.isSelected) {
+                    changed = true;
+                }
                 slice.isSelected = false;
             }
         }
@@ -595,6 +624,19 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     @Override
     public void lastSelectionEvent(Collection<SourceAndConverter<?>> lastSelectedSources, String mode, String triggerMode) {
         // Nothing
+    }
+
+    @Override
+    public synchronized void mouseDragged(MouseEvent e) {
+        this.ghs.forEach(gh -> gh.mouseDragged(e));
+        this.slices.forEach(slice -> slice.ghs.forEach(gh -> gh.mouseDragged(e)));
+    }
+
+    @Override
+    public synchronized void mouseMoved(MouseEvent e) {
+        //System.out.println("Mouse moved");
+        this.ghs.forEach(gh -> gh.mouseMoved(e));
+        this.slices.forEach(slice -> slice.ghs.forEach(gh -> gh.mouseMoved(e)));
     }
 
     /**
@@ -885,7 +927,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             iniSlicingAxisPosition = iniSlicePointing*sizePixX*(int) zStepSetter.getStep();
 
             selectedSources =  getSortedSlices().stream().filter(slice -> slice.isSelected).collect(Collectors.toList());
-            if ((selectedSources.size()>0)&&(ssb.isEnabled())) {
+            if (selectedSources.size()>0) {
                 perform = true;
                 selectedSources.stream().forEach(slice -> {
                     initialAxisPositions.put(slice,slice.slicingAxisPosition);
@@ -928,6 +970,117 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 }
                 updateDisplay();
             }
+        }
+    }
+
+    private static final String BLOCKING_MAP = "multipositioner-blocking";
+
+    /*
+     * Create BehaviourMap to block behaviours interfering with
+     * DraBehaviour. The block map is only active while TODO determine conditions
+     */
+    private final BehaviourMap blockMap = new BehaviourMap();
+
+    private void block()
+    {
+        bdvh.getTriggerbindings().addBehaviourMap( BLOCKING_MAP, blockMap );
+    }
+
+    private void unblock()
+    {
+        bdvh.getTriggerbindings().removeBehaviourMap( BLOCKING_MAP );
+    }
+
+    /*private void graphicalHandleChanged(GraphicalHandle gh)
+    {
+        final int index = boxOverlay.getHighlightedCornerIndex();
+        if ( index < 0 )
+            unblock();
+        else
+            block();
+    }*/
+    Set<GraphicalHandle> ghs = new HashSet<>();
+
+    Set<GraphicalHandle> gh_below_mouse = new HashSet<>();
+
+    @Override
+    public synchronized void hover_in(GraphicalHandle gh) {
+        //System.out.println("Hover IN");
+        gh_below_mouse.add(gh);
+        if (gh_below_mouse.size()==1) {
+            block();
+            updateEditability();
+        }
+    }
+
+    @Override
+    public synchronized void hover_out(GraphicalHandle gh) {
+        //System.out.println("Hover OUT");
+        gh_below_mouse.remove(gh);
+        if (gh_below_mouse.size()==0) {
+            unblock();
+            updateEditability();
+        }
+    }
+
+    /*@Override
+    public synchronized void clicked(GraphicalHandle gh) {
+
+    }*/
+
+    @Override
+    public synchronized void created(GraphicalHandle gh) {
+
+    }
+
+    @Override
+    public synchronized void removed(GraphicalHandle gh) {
+        if (gh_below_mouse.contains(gh)) {
+            gh_below_mouse.remove(gh);
+            if (gh_below_mouse.size()==0) unblock();
+            updateEditability();
+        }
+        ghs.remove(gh);
+    }
+
+
+    private static final String[] DRAG_TOGGLE_EDITOR_KEYS = new String[] { "button1" };
+
+    private void refreshBlockMap()
+    {
+        bdvh.getTriggerbindings().removeBehaviourMap( BLOCKING_MAP );
+
+        final Set<InputTrigger> moveCornerTriggers = new HashSet<>();
+        for ( final String s : DRAG_TOGGLE_EDITOR_KEYS )
+            moveCornerTriggers.add( InputTrigger.getFromString( s ) );
+
+        final Map< InputTrigger, Set< String > > bindings = bdvh.getTriggerbindings().getConcatenatedInputTriggerMap().getAllBindings();
+        final Set< String > behavioursToBlock = new HashSet<>();
+        for ( final InputTrigger t : moveCornerTriggers )
+            behavioursToBlock.addAll( bindings.get( t ) );
+
+        blockMap.clear();
+        final Behaviour block = new Behaviour() {};
+        for ( final String key : behavioursToBlock )
+            blockMap.put( key, block );
+    }
+
+    private void updateEditability()
+    {
+        System.out.println("updateEditability called");
+        System.out.println(currentMode.equals(POSITIONING_MODE));
+        System.out.println(currentMode);
+        System.out.println("gh_below_mouse.size() = "+gh_below_mouse.size());
+        if ( currentMode.equals(POSITIONING_MODE) && (gh_below_mouse.size()>0) )
+        {
+            drag_sources_positioning.install( bdvh.getTriggerbindings(), DRAG_SOURCES_MAP );
+            System.out.println("Installed");
+        }
+        else
+        {
+            bdvh.getTriggerbindings().removeInputTriggerMap( DRAG_SOURCES_MAP );
+            bdvh.getTriggerbindings().removeBehaviourMap( DRAG_SOURCES_MAP );
+            //unblock();
         }
     }
 
