@@ -28,6 +28,10 @@ public class DummyCommand {
         SourceAndConverter[] sacs = ij.convert().convert("SpimData 0>Channel>1", SourceAndConverter[].class);
 
         mp.createSlice(sacs,8, 0.2, Tile.class, new Tile(-1));
+        /*mp.getSortedSlices().stream().forEach(slice -> {
+            System.out.println("coucou");
+            mp.moveSlice(slice, 10*Math.random());
+        });*/
 
 	}
 

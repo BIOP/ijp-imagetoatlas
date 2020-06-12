@@ -14,7 +14,7 @@ public class SliceSources {
     SourceAndConverter[] original_sacs;
 
     // Visible to the user in slicing mode
-    SourceAndConverter[] relocated_sacs_slicing_mode;
+    SourceAndConverter[] relocated_sacs_positioning_mode;
 
     // Visible to the user in 3D mode
     SourceAndConverter[] relocated_sacs_3D_mode;
@@ -50,7 +50,7 @@ public class SliceSources {
             sacsTransformed.add(new SourceAffineTransformer(zeroCenteredSource, at3D).getSourceOut());
         }
 
-        this.relocated_sacs_slicing_mode = sacsTransformed.toArray(new SourceAndConverter[sacsTransformed.size()]);
+        this.relocated_sacs_positioning_mode = sacsTransformed.toArray(new SourceAndConverter[sacsTransformed.size()]);
 
         sacsTransformed.clear();
         for (SourceAndConverter sac : sacs) {
@@ -82,7 +82,7 @@ public class SliceSources {
             return true;
         }
         Set transformedSacsSet = new HashSet();
-        for (SourceAndConverter sac : relocated_sacs_slicing_mode) {
+        for (SourceAndConverter sac : relocated_sacs_positioning_mode) {
             transformedSacsSet.add(sac);
         }
         if (transformedSacsSet.containsAll(testSacs) && testSacs.containsAll(transformedSacsSet)) {
@@ -101,7 +101,7 @@ public class SliceSources {
             return true;
         }
         Set transformedSacsSet = new HashSet();
-        for (SourceAndConverter sac : relocated_sacs_slicing_mode) {
+        for (SourceAndConverter sac : relocated_sacs_positioning_mode) {
             transformedSacsSet.add(sac);
         }
         if (sacs.stream().distinct().anyMatch(transformedSacsSet::contains)) {
@@ -118,7 +118,7 @@ public class SliceSources {
         new_at3D.set(posX,0,3);
         new_at3D.set(posY,1,3);
 
-        for (SourceAndConverter sac : relocated_sacs_slicing_mode) {
+        for (SourceAndConverter sac : relocated_sacs_positioning_mode) {
             assert sac.getSpimSource() instanceof TransformedSource;
             ((TransformedSource)sac.getSpimSource()).setFixedTransform(new_at3D);
         }

@@ -1,5 +1,6 @@
 package ch.epfl.biop.atlastoimg2d.multislice;
 
+import bdv.tools.transformation.TransformedSource;
 import bdv.util.BdvFunctions;
 import bdv.util.BdvHandle;
 import bdv.util.BdvOptions;
@@ -21,6 +22,7 @@ import org.scijava.Context;
 import org.scijava.command.CommandModule;
 import org.scijava.command.CommandService;
 import org.scijava.ui.behaviour.ClickBehaviour;
+import org.scijava.ui.behaviour.DragBehaviour;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
 import sc.fiji.bdvpg.behaviour.EditorBehaviourUnInstaller;
@@ -159,15 +161,17 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
         common_behaviours.behaviour((ClickBehaviour)(x, y) -> this.cancelLastAction(), "cancel_last_action", "ctrl Z");
         common_behaviours.behaviour((ClickBehaviour)(x,y) -> this.navigateNextSlice(), "navigate_next_slice", "N");
-        common_behaviours.behaviour((ClickBehaviour)(x,y) -> this.navigateNextSlice(), "navigate_previous_slice", "P");
+        common_behaviours.behaviour((ClickBehaviour)(x,y) -> this.navigateNextSlice(), "navigate_previous_slice", "M"); // P taken for panel
         common_behaviours.behaviour((ClickBehaviour)(x,y) -> this.navigateCurrentSlice(), "navigate_current_slice", "C");
         common_behaviours.behaviour((ClickBehaviour)(x,y) -> this.nextMode(), "change_mode", "Q");
         common_behaviours.install(bdvh.getTriggerbindings(), COMMON_BEHAVIOURS_KEY);
 
         positioning_behaviours.behaviour((ClickBehaviour)(x,y) ->  this.toggleOverlap(), "toggle_superimpose", "O");
         positioning_behaviours.behaviour((ClickBehaviour)(x,y) ->  {if (ssb.isEnabled())ssb.disable(); else ssb.enable();}, "toggle_editormode", "E");
-        ssb.addSelectedSourcesListener(this);
+        positioning_behaviours.behaviour((ClickBehaviour)(x,y) ->  this.equalSpacingSelectedSlices(), "equalSpacingSelectedSlices", "A");
+        positioning_behaviours.behaviour(new SelectedSliceSourcesDrag(), "dragSelectedSources", "button3");
 
+        ssb.addSelectedSourcesListener(this);
 
         registration_behaviours.behaviour((ClickBehaviour)(x,y) ->  this.elastixRegister(), "register_test", "R");
 
@@ -240,7 +244,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         RealPoint centerSlice;
         switch (currentMode) {
             case POSITIONING_MODE:
-                centerSlice = SourceAndConverterUtils.getSourceAndConverterCenterPoint(slice.relocated_sacs_slicing_mode[0]);
+                centerSlice = SourceAndConverterUtils.getSourceAndConverterCenterPoint(slice.relocated_sacs_positioning_mode[0]);
                 break;
             case REGISTRATION_MODE:
                 centerSlice = SourceAndConverterUtils.getSourceAndConverterCenterPoint(slice.relocated_sacs_registration_mode[0]);
@@ -304,7 +308,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                     getSortedSlices().forEach(ss -> {
                         sacsToRemove.addAll(Arrays.asList(ss.relocated_sacs_3D_mode));
                         sacsToRemove.addAll(Arrays.asList(ss.relocated_sacs_registration_mode));
-                        sacsToAdd.addAll(Arrays.asList(ss.relocated_sacs_slicing_mode));
+                        sacsToAdd.addAll(Arrays.asList(ss.relocated_sacs_positioning_mode));
                     });
                     SourceAndConverterServices
                             .getSourceAndConverterDisplayService()
@@ -336,7 +340,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                     List<SourceAndConverter> sacsToAdd = new ArrayList<>();
                     getSortedSlices().forEach(ss -> {
                         sacsToRemove.addAll(Arrays.asList(ss.relocated_sacs_3D_mode));
-                        sacsToRemove.addAll(Arrays.asList(ss.relocated_sacs_slicing_mode));
+                        sacsToRemove.addAll(Arrays.asList(ss.relocated_sacs_positioning_mode));
                         sacsToAdd.addAll(Arrays.asList(ss.relocated_sacs_registration_mode));
                     });
                     SourceAndConverterServices
@@ -368,7 +372,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                     List<SourceAndConverter> sacsToRemove = new ArrayList<>();
                     List<SourceAndConverter> sacsToAdd = new ArrayList<>();
                     getSortedSlices().forEach(ss -> {
-                        sacsToRemove.addAll(Arrays.asList(ss.relocated_sacs_slicing_mode));
+                        sacsToRemove.addAll(Arrays.asList(ss.relocated_sacs_positioning_mode));
                         sacsToRemove.addAll(Arrays.asList(ss.relocated_sacs_registration_mode));
                         sacsToAdd.addAll(Arrays.asList(ss.relocated_sacs_3D_mode));
                     });
@@ -440,6 +444,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     public void toggleOverlap() {
         cycleToggle++;
         if (cycleToggle==3) cycleToggle = 0;
+        navigateCurrentSlice();
         updateDisplay();
     }
 
@@ -541,7 +546,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             List<SliceSources> sortedSelected = getSortedSlices().stream().filter(slice -> slice.isSelected).collect(Collectors.toList());
             RealPoint precedentPoint = null;
             for (SliceSources slice : sortedSelected) {
-                RealPoint sliceCenter = SourceAndConverterUtils.getSourceAndConverterCenterPoint(slice.relocated_sacs_slicing_mode[0]);
+                RealPoint sliceCenter = SourceAndConverterUtils.getSourceAndConverterCenterPoint(slice.relocated_sacs_positioning_mode[0]);
                 bdvAt3D.apply(sliceCenter, sliceCenter);
                 g.fillOval((int)sliceCenter.getDoublePosition(0)-5,(int)sliceCenter.getDoublePosition(1)-5,10,10);
                 if (precedentPoint!=null) {
@@ -556,6 +561,19 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     public void cancelLastAction() {
         if (userActions.size()>0) {
             userActions.get(userActions.size()-1).cancel();
+        }
+    }
+
+    public void equalSpacingSelectedSlices() {
+        List<SliceSources> sortedSelected = getSortedSlices().stream().filter(slice -> slice.isSelected).collect(Collectors.toList());
+        if (sortedSelected.size()>2) {
+            SliceSources first = sortedSelected.get(0);
+            SliceSources last = sortedSelected.get(sortedSelected.size()-1);
+            double totalSpacing = last.slicingAxisPosition-first.slicingAxisPosition;
+            double delta = totalSpacing / (sortedSelected.size()-1);
+            for (int idx = 1;idx<sortedSelected.size()-1;idx++) {
+                moveSlice(sortedSelected.get(idx), first.slicingAxisPosition+((double)idx)*delta);
+            }
         }
     }
 
@@ -656,7 +674,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     }
 
     public void moveSlice(SliceSources slice, double axisPosition) {
-        new MoveSlice(slice, axisPosition);
+        new MoveSlice(slice, axisPosition).run();
     }
 
     public class MoveSlice extends CancelableAction {
@@ -788,12 +806,12 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             slices.add(sliceSource);
 
             containedSources.addAll(Arrays.asList(sliceSource.original_sacs));
-            containedSources.addAll(Arrays.asList(sliceSource.relocated_sacs_slicing_mode));
+            containedSources.addAll(Arrays.asList(sliceSource.relocated_sacs_positioning_mode));
 
             updateDisplay();
 
             SourceAndConverterServices.getSourceAndConverterDisplayService()
-                    .show(bdvh, sliceSource.relocated_sacs_slicing_mode);
+                    .show(bdvh, sliceSource.relocated_sacs_positioning_mode);
 
             // The line below should be executed only if the action succeeded ... (if it's executed, calling cancel should have the same effect)
             super.run();
@@ -806,10 +824,10 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         @Override
         public void cancel() {
             containedSources.removeAll(Arrays.asList(sliceSource.original_sacs));
-            containedSources.removeAll(Arrays.asList(sliceSource.relocated_sacs_slicing_mode));
+            containedSources.removeAll(Arrays.asList(sliceSource.relocated_sacs_positioning_mode));
             slices.remove(sliceSource);
             SourceAndConverterServices.getSourceAndConverterDisplayService()
-                    .remove(bdvh, sliceSource.relocated_sacs_slicing_mode);
+                    .remove(bdvh, sliceSource.relocated_sacs_positioning_mode);
             super.cancel();
         }
     }
@@ -838,6 +856,78 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         @Override
         public void cancel() {
             super.cancel();
+        }
+    }
+
+    class SelectedSliceSourcesDrag implements DragBehaviour {
+
+        int x0, y0;
+
+        Map<SliceSources,Double> initialAxisPositions = new HashMap<>();
+
+        List<SliceSources> selectedSources = new ArrayList<>();
+
+        RealPoint iniPointBdv = new RealPoint(3);
+        double iniSlicePointing;
+        double iniSlicingAxisPosition;
+        boolean perform = false;
+
+        @Override
+        public void init(int x, int y) {
+            // todo : block other actions...
+            x0 = x;
+            y0 = y;
+
+            bdvh.getViewerPanel().getGlobalMouseCoordinates(iniPointBdv);
+
+            // Computes which slice it corresponds to (useful for overlay redraw)
+            iniSlicePointing = iniPointBdv.getDoublePosition(0)/sX;
+            iniSlicingAxisPosition = iniSlicePointing*sizePixX*(int) zStepSetter.getStep();
+
+            selectedSources =  getSortedSlices().stream().filter(slice -> slice.isSelected).collect(Collectors.toList());
+            if ((selectedSources.size()>0)&&(ssb.isEnabled())) {
+                perform = true;
+                selectedSources.stream().forEach(slice -> {
+                    initialAxisPositions.put(slice,slice.slicingAxisPosition);
+                });
+            }
+        }
+
+        @Override
+        public void drag(int x, int y) {
+            if (perform) {
+                RealPoint currentMousePosition = new RealPoint(3);
+                bdvh.getViewerPanel().getGlobalMouseCoordinates(currentMousePosition);
+
+                int currentSlicePointing = (int) (currentMousePosition.getDoublePosition(0) / sX);
+                double currentSlicingAxisPosition = currentSlicePointing * sizePixX * (int) zStepSetter.getStep();
+                double deltaAxis = currentSlicingAxisPosition - iniSlicingAxisPosition;
+
+                for (SliceSources slice : selectedSources) {
+                    slice.slicingAxisPosition = initialAxisPositions.get(slice) + deltaAxis;
+                    slice.updatePosition();
+                }
+
+                updateDisplay();
+            }
+        }
+
+        @Override
+        public void end(int x, int y) {
+            if (perform) {
+                RealPoint currentMousePosition = new RealPoint(3);
+                bdvh.getViewerPanel().getGlobalMouseCoordinates(currentMousePosition);
+
+                int currentSlicePointing = (int) (currentMousePosition.getDoublePosition(0) / sX);
+                double currentSlicingAxisPosition = currentSlicePointing * sizePixX * (int) zStepSetter.getStep();
+                double deltaAxis = currentSlicingAxisPosition - iniSlicingAxisPosition;
+
+                for (SliceSources slice : selectedSources) {
+                        slice.slicingAxisPosition = initialAxisPositions.get(slice);
+                        moveSlice(slice,initialAxisPositions.get(slice) + deltaAxis );
+                }
+                updateDisplay();
+            }
         }
     }
 
