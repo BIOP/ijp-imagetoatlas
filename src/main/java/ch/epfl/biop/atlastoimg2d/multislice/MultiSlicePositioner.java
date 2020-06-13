@@ -587,7 +587,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                     RealPoint ptY = new RealPoint(3);
                     ptY.setPosition(sliceCenter.getDoublePosition(0),0);
 
-                    ptY.setPosition(-sY*0.25,1);
+                    ptY.setPosition(-sY,1);
                     ptY.setPosition(0,2);
 
                     bdvAt3D.apply(sliceCenter, sliceCenter);
@@ -926,8 +926,6 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
     class SelectedSliceSourcesDrag implements DragBehaviour {
 
-        int x0, y0;
-
         Map<SliceSources,Double> initialAxisPositions = new HashMap<>();
 
         List<SliceSources> selectedSources = new ArrayList<>();
@@ -935,6 +933,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         RealPoint iniPointBdv = new RealPoint(3);
         double iniSlicePointing;
         double iniSlicingAxisPosition;
+        double deltaOrigin;
         boolean perform = false;
 
         final SliceSources sliceOrigin;
@@ -945,15 +944,12 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
         @Override
         public void init(int x, int y) {
-            // todo : block other actions...
-            x0 = x;
-            y0 = y;
 
             bdvh.getViewerPanel().getGlobalMouseCoordinates(iniPointBdv);
 
             // Computes which slice it corresponds to (useful for overlay redraw)
-            iniSlicePointing = iniPointBdv.getDoublePosition(0)/sX;
-            iniSlicingAxisPosition = (iniSlicePointing)*sizePixX*(int) zStepSetter.getStep();
+            iniSlicePointing = iniPointBdv.getDoublePosition(0)/sX+0.5;
+            iniSlicingAxisPosition = ((int) iniSlicePointing)*sizePixX*(int) zStepSetter.getStep();
 
             selectedSources =  getSortedSlices().stream().filter(slice -> slice.isSelected).collect(Collectors.toList());
             if ((selectedSources.size()>0)&&(sliceOrigin.isSelected)) {
@@ -964,8 +960,22 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             } else {
                 if (!sliceOrigin.isSelected) {
                     sliceOrigin.isSelected = true;
+                    perform = false;
                 }
             }
+            // Initialize the delta on a step of the zStepper
+            if (perform) {
+                deltaOrigin = iniSlicingAxisPosition - sliceOrigin.slicingAxisPosition;
+                for (SliceSources slice : selectedSources) {
+                    if (initialAxisPositions.containsKey(slice)) {
+                        slice.slicingAxisPosition = initialAxisPositions.get(slice) + deltaOrigin;
+                        slice.updatePosition();
+                    }
+                }
+            }
+
+            updateDisplay();
+
         }
 
         @Override
@@ -974,13 +984,15 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 RealPoint currentMousePosition = new RealPoint(3);
                 bdvh.getViewerPanel().getGlobalMouseCoordinates(currentMousePosition);
 
-                int currentSlicePointing = (int) ( currentMousePosition.getDoublePosition(0) / sX + 0.5);
-                double currentSlicingAxisPosition = (currentSlicePointing) * sizePixX * (int) zStepSetter.getStep();
+                double currentSlicePointing = currentMousePosition.getDoublePosition(0) / sX+0.5;
+                double currentSlicingAxisPosition = ((int) currentSlicePointing) * sizePixX * (int) zStepSetter.getStep();
                 double deltaAxis = currentSlicingAxisPosition - iniSlicingAxisPosition;
 
                 for (SliceSources slice : selectedSources) {
-                    slice.slicingAxisPosition = initialAxisPositions.get(slice) + deltaAxis;
-                    slice.updatePosition();
+                    if (initialAxisPositions.containsKey(slice)) {
+                        slice.slicingAxisPosition = initialAxisPositions.get(slice) + deltaAxis + deltaOrigin;
+                        slice.updatePosition();
+                    }
                 }
 
                 updateDisplay();
@@ -993,13 +1005,15 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 RealPoint currentMousePosition = new RealPoint(3);
                 bdvh.getViewerPanel().getGlobalMouseCoordinates(currentMousePosition);
 
-                int currentSlicePointing = (int) (currentMousePosition.getDoublePosition(0) / sX + 0.5);
-                double currentSlicingAxisPosition = (currentSlicePointing) * sizePixX * (int) zStepSetter.getStep();
+                double currentSlicePointing = currentMousePosition.getDoublePosition(0) / sX+0.5;
+                double currentSlicingAxisPosition = ((int) currentSlicePointing) * sizePixX * (int) zStepSetter.getStep();
                 double deltaAxis = currentSlicingAxisPosition - iniSlicingAxisPosition;
 
                 for (SliceSources slice : selectedSources) {
+                    if (initialAxisPositions.containsKey(slice)) {
                         slice.slicingAxisPosition = initialAxisPositions.get(slice);
-                        moveSlice(slice,initialAxisPositions.get(slice) + deltaAxis );
+                        moveSlice(slice, initialAxisPositions.get(slice) + deltaAxis + deltaOrigin);
+                    }
                 }
                 updateDisplay();
             }
@@ -1092,37 +1106,127 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
     class DragLeft implements DragBehaviour {
 
+        List<SliceSources> slicesDragged;
+        Map<SliceSources,Double> initialAxisPositions = new HashMap<>();
+        double range;
+        double lastAxisPos;
+        RealPoint iniPointBdv = new RealPoint(3);
+        double iniSlicePointing;
+        double iniSlicingAxisPosition;
+
         @Override
         public void init(int x, int y) {
+            slicesDragged = getSortedSlices().stream().filter(slice -> slice.isSelected).collect(Collectors.toList());
 
+            slicesDragged.stream().forEach(slice -> {
+                initialAxisPositions.put(slice,slice.slicingAxisPosition);
+            });
+
+            range = initialAxisPositions.get(slicesDragged.get(initialAxisPositions.size()-1))-initialAxisPositions.get(slicesDragged.get(0));
+            lastAxisPos = initialAxisPositions.get(slicesDragged.get(initialAxisPositions.size()-1));
+
+            // Computes which slice it corresponds to (useful for overlay redraw)
+            bdvh.getViewerPanel().getGlobalMouseCoordinates(iniPointBdv);
+            iniSlicePointing = iniPointBdv.getDoublePosition(0)/sX;
+            iniSlicingAxisPosition = (iniSlicePointing)*sizePixX*(int) zStepSetter.getStep();
         }
 
         @Override
         public void drag(int x, int y) {
+            RealPoint currentMousePosition = new RealPoint(3);
+            bdvh.getViewerPanel().getGlobalMouseCoordinates(currentMousePosition);
 
+            int currentSlicePointing = (int) ( currentMousePosition.getDoublePosition(0) / sX + 0.5);
+            double currentSlicingAxisPosition = (currentSlicePointing) * sizePixX * (int) zStepSetter.getStep();
+
+            double ratio = (lastAxisPos-currentSlicingAxisPosition)/range;
+
+            for (SliceSources slice : slicesDragged) {
+                slice.slicingAxisPosition = lastAxisPos + (initialAxisPositions.get(slice)-lastAxisPos) * ratio;
+                slice.updatePosition();
+            }
+
+            updateDisplay();
         }
 
         @Override
         public void end(int x, int y) {
+            RealPoint currentMousePosition = new RealPoint(3);
+            bdvh.getViewerPanel().getGlobalMouseCoordinates(currentMousePosition);
 
+            int currentSlicePointing = (int) ( currentMousePosition.getDoublePosition(0) / sX + 0.5);
+            double currentSlicingAxisPosition = (currentSlicePointing) * sizePixX * (int) zStepSetter.getStep();
+
+            double ratio = (lastAxisPos-currentSlicingAxisPosition)/range;
+
+            for (SliceSources slice : slicesDragged) {
+                slice.slicingAxisPosition = initialAxisPositions.get(slice);
+                moveSlice(slice, lastAxisPos + (initialAxisPositions.get(slice)-lastAxisPos) * ratio);
+            }
+            updateDisplay();
         }
     }
 
     class DragRight implements DragBehaviour {
 
+        List<SliceSources> slicesDragged;
+        Map<SliceSources,Double> initialAxisPositions = new HashMap<>();
+        double range;
+        double lastAxisPos;
+        RealPoint iniPointBdv = new RealPoint(3);
+        double iniSlicePointing;
+        double iniSlicingAxisPosition;
+
         @Override
         public void init(int x, int y) {
+            slicesDragged = getSortedSlices().stream().filter(slice -> slice.isSelected).collect(Collectors.toList());
 
+            slicesDragged.stream().forEach(slice -> {
+                initialAxisPositions.put(slice,slice.slicingAxisPosition);
+            });
+
+            range = initialAxisPositions.get(slicesDragged.get(initialAxisPositions.size()-1))-initialAxisPositions.get(slicesDragged.get(0));
+            lastAxisPos = initialAxisPositions.get(slicesDragged.get(0));
+
+            // Computes which slice it corresponds to (useful for overlay redraw)
+            bdvh.getViewerPanel().getGlobalMouseCoordinates(iniPointBdv);
+            iniSlicePointing = iniPointBdv.getDoublePosition(0)/sX;
+            iniSlicingAxisPosition = (iniSlicePointing)*sizePixX*(int) zStepSetter.getStep();
         }
 
         @Override
         public void drag(int x, int y) {
+            RealPoint currentMousePosition = new RealPoint(3);
+            bdvh.getViewerPanel().getGlobalMouseCoordinates(currentMousePosition);
 
+            int currentSlicePointing = (int) ( currentMousePosition.getDoublePosition(0) / sX + 0.5);
+            double currentSlicingAxisPosition = (currentSlicePointing) * sizePixX * (int) zStepSetter.getStep();
+
+            double ratio = (lastAxisPos-currentSlicingAxisPosition)/range;
+
+            for (SliceSources slice : slicesDragged) {
+                slice.slicingAxisPosition = lastAxisPos - (initialAxisPositions.get(slice)-lastAxisPos) * ratio;
+                slice.updatePosition();
+            }
+
+            updateDisplay();
         }
 
         @Override
         public void end(int x, int y) {
+            RealPoint currentMousePosition = new RealPoint(3);
+            bdvh.getViewerPanel().getGlobalMouseCoordinates(currentMousePosition);
 
+            int currentSlicePointing = (int) ( currentMousePosition.getDoublePosition(0) / sX + 0.5);
+            double currentSlicingAxisPosition = (currentSlicePointing) * sizePixX * (int) zStepSetter.getStep();
+
+            double ratio = (lastAxisPos-currentSlicingAxisPosition)/range;
+
+            for (SliceSources slice : slicesDragged) {
+                slice.slicingAxisPosition = initialAxisPositions.get(slice);
+                moveSlice(slice, lastAxisPos - (initialAxisPositions.get(slice)-lastAxisPos) * ratio);
+            }
+            updateDisplay();
         }
     }
 
