@@ -44,6 +44,10 @@ abstract public class GraphicalHandle extends MouseMotionAdapter {
 
     boolean mouseAbove = false;
 
+    public boolean isMouseOver() {
+        return mouseAbove;
+    }
+
     protected boolean isDisabled = false;
 
     public synchronized void disable() {

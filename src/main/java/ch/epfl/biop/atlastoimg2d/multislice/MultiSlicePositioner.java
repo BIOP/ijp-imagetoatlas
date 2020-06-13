@@ -178,6 +178,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             refreshBlockMap();
         }}, "toggle_editormode", "E");
         positioning_behaviours.behaviour((ClickBehaviour)(x,y) ->  this.equalSpacingSelectedSlices(), "equalSpacingSelectedSlices", "A");
+        positioning_behaviours.behaviour((ClickBehaviour)(x,y) ->  slices.forEach(slice -> slice.isSelected = true), "selectAllSlices", "ctrl A");
 
         //drag_sources_positioning.behaviour(new SelectedSliceSourcesDrag(), "dragSelectedSources", "button1");
 
@@ -186,15 +187,22 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         registration_behaviours.behaviour((ClickBehaviour)(x,y) ->  this.elastixRegister(), "register_test", "R");
 
         setPositioningMode();
-        /*new ClickBehaviourInstaller(bdvh, (x,y) -> this.cancelLastAction()).install("cancel_last_action", "ctrl Z");
-        new ClickBehaviourInstaller(bdvh, (x,y) -> this.toggleOverlap()).install("toggle_superimpose", "O");
-        new ClickBehaviourInstaller(bdvh, (x,y) -> this.elastixRegister()).install("register_test", "R");
-        new ClickBehaviourInstaller(bdvh, (x,y) -> this.navigateNextSlice()).install("navigate_next_slice", "N");
-        new ClickBehaviourInstaller(bdvh, (x,y) -> this.navigatePreviousSlice()).install("navigate_previous_slice", "P");*/
         bdvh.getViewerPanel().getDisplay().addHandler(this);
+
+        GraphicalHandle ghRight = new CircleGraphicalHandle(this,  new DragRight(), "drag_right", "button1",bdvh.getTriggerbindings(),
+                () -> rightPosition, () -> 50, () -> new Integer[]{255,0,255, 200});
+        GraphicalHandle ghLeft = new CircleGraphicalHandle(this,  new DragLeft(), "drag_right", "button1",bdvh.getTriggerbindings(),
+                () -> leftPosition, () -> 50, () -> new Integer[]{255,0,255,200});
+
+        ghs.add(ghRight);
+        ghs.add(ghLeft);
     }
 
     int iCurrentSlice = 0;
+
+    Integer[] rightPosition = new Integer[]{0,0,0};
+
+    Integer[] leftPosition = new Integer[]{0,0,0};
 
     public void navigateNextSlice() {
         iCurrentSlice++;
@@ -523,10 +531,6 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 }
             });
             t.start();
-            
-
-
-
     }
 
     @Override
@@ -562,7 +566,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             g.drawLine(ptRectScreen[1][1].x, ptRectScreen[1][1].y, ptRectScreen[0][1].x, ptRectScreen[0][1].y);
             g.drawLine(ptRectScreen[0][1].x, ptRectScreen[0][1].y, ptRectScreen[0][0].x, ptRectScreen[0][0].y);
 
-            ghs.forEach(gh -> gh.draw(g));
+
 
             for (SliceSources slice : slices) {
                 slice.drawGraphicalHandles(g);
@@ -573,14 +577,43 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             if (currentMode.equals(POSITIONING_MODE) && slices.stream().anyMatch(slice -> slice.isSelected)) {
                 List<SliceSources> sortedSelected = getSortedSlices().stream().filter(slice -> slice.isSelected).collect(Collectors.toList());
                 RealPoint precedentPoint = null;
-                for (SliceSources slice : sortedSelected) {
+
+
+                for (int i=0;i<sortedSelected.size();i++) {
+                    //for (SliceSources slice : sortedSelected) {
+                    SliceSources slice = sortedSelected.get(i);
                     RealPoint sliceCenter = SourceAndConverterUtils.getSourceAndConverterCenterPoint(slice.relocated_sacs_positioning_mode[0]);
+
+                    RealPoint ptY = new RealPoint(3);
+                    ptY.setPosition(sliceCenter.getDoublePosition(0),0);
+
+                    ptY.setPosition(-sY*0.25,1);
+                    ptY.setPosition(0,2);
+
                     bdvAt3D.apply(sliceCenter, sliceCenter);
+                    bdvAt3D.apply(ptY,ptY);
                     if (precedentPoint!=null) {
                         g.drawLine((int)precedentPoint.getDoublePosition(0),(int)precedentPoint.getDoublePosition(1),(int)sliceCenter.getDoublePosition(0),(int)sliceCenter.getDoublePosition(1));
                     }
                     precedentPoint = sliceCenter;
+                    if (i==0) {
+                        leftPosition[0] = (int)sliceCenter.getDoublePosition(0);
+                        leftPosition[1] = (int) ptY.getDoublePosition(1);
+                    }
+                    if (i== sortedSelected.size()-1) {
+                        rightPosition[0] = (int)sliceCenter.getDoublePosition(0);
+                        rightPosition[1] = (int) ptY.getDoublePosition(1);
+                    }
                 }
+
+                if (sortedSelected.size()>2) {
+                    ghs.forEach(gh -> gh.enable());
+                    g.setColor(new Color(255,0,255,200));
+                    g.drawLine(leftPosition[0],leftPosition[1],rightPosition[0],rightPosition[1]);
+                } else {
+                    ghs.forEach(gh -> gh.disable());
+                }
+                ghs.forEach(gh -> gh.draw(g));
             }
         }
     }
@@ -887,8 +920,8 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         }
     }
 
-    public DragBehaviour getSelectedSourceDragBehaviour() {
-        return new SelectedSliceSourcesDrag();
+    public DragBehaviour getSelectedSourceDragBehaviour(SliceSources slice) {
+        return new SelectedSliceSourcesDrag(slice);
     }
 
     class SelectedSliceSourcesDrag implements DragBehaviour {
@@ -904,6 +937,12 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         double iniSlicingAxisPosition;
         boolean perform = false;
 
+        final SliceSources sliceOrigin;
+
+        public SelectedSliceSourcesDrag(SliceSources slice) {
+            this.sliceOrigin = slice;
+        }
+
         @Override
         public void init(int x, int y) {
             // todo : block other actions...
@@ -917,11 +956,15 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             iniSlicingAxisPosition = (iniSlicePointing)*sizePixX*(int) zStepSetter.getStep();
 
             selectedSources =  getSortedSlices().stream().filter(slice -> slice.isSelected).collect(Collectors.toList());
-            if (selectedSources.size()>0) {
+            if ((selectedSources.size()>0)&&(sliceOrigin.isSelected)) {
                 perform = true;
                 selectedSources.stream().forEach(slice -> {
                     initialAxisPositions.put(slice,slice.slicingAxisPosition);
                 });
+            } else {
+                if (!sliceOrigin.isSelected) {
+                    sliceOrigin.isSelected = true;
+                }
             }
         }
 
@@ -931,7 +974,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 RealPoint currentMousePosition = new RealPoint(3);
                 bdvh.getViewerPanel().getGlobalMouseCoordinates(currentMousePosition);
 
-                int currentSlicePointing = (int) (currentMousePosition.getDoublePosition(0) / sX + 0.5);
+                int currentSlicePointing = (int) ( currentMousePosition.getDoublePosition(0) / sX + 0.5);
                 double currentSlicingAxisPosition = (currentSlicePointing) * sizePixX * (int) zStepSetter.getStep();
                 double deltaAxis = currentSlicingAxisPosition - iniSlicingAxisPosition;
 
@@ -1045,6 +1088,42 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         final Behaviour block = new Behaviour() {};
         for ( final String key : behavioursToBlock )
             blockMap.put( key, block );
+    }
+
+    class DragLeft implements DragBehaviour {
+
+        @Override
+        public void init(int x, int y) {
+
+        }
+
+        @Override
+        public void drag(int x, int y) {
+
+        }
+
+        @Override
+        public void end(int x, int y) {
+
+        }
+    }
+
+    class DragRight implements DragBehaviour {
+
+        @Override
+        public void init(int x, int y) {
+
+        }
+
+        @Override
+        public void drag(int x, int y) {
+
+        }
+
+        @Override
+        public void end(int x, int y) {
+
+        }
     }
 
 }

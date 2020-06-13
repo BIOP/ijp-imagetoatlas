@@ -5,6 +5,7 @@ import bdv.tools.transformation.TransformedSource;
 import bdv.viewer.SourceAndConverter;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
+import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterUtils;
@@ -82,7 +83,8 @@ public class SliceSources {
 
         behavioursHandleSlice = new Behaviours(new InputTriggerConfig());
 
-        behavioursHandleSlice.behaviour(mp.getSelectedSourceDragBehaviour(), "dragSelectedSources"+this.toString(), "button1");
+        behavioursHandleSlice.behaviour(mp.getSelectedSourceDragBehaviour(this), "dragSelectedSources"+this.toString(), "button1");
+        behavioursHandleSlice.behaviour((ClickBehaviour) (x,y) -> isSelected = false, "deselectedSources"+this.toString(), "button3", "ctrl button1");
 
         GraphicalHandle gh = new CircleGraphicalHandle(mp,
                     behavioursHandleSlice,

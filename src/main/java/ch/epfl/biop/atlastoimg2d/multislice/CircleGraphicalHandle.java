@@ -1,5 +1,7 @@
 package ch.epfl.biop.atlastoimg2d.multislice;
 
+import org.scijava.ui.behaviour.Behaviour;
+import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
 import org.scijava.ui.behaviour.util.TriggerBehaviourBindings;
 
@@ -25,6 +27,24 @@ public class CircleGraphicalHandle extends GraphicalHandle{
         this.coords = coords;
     }
 
+    public CircleGraphicalHandle(GraphicalHandleListener ghl,
+                                 Behaviour behaviour,String behaviourName, String trigger,
+                                 TriggerBehaviourBindings bindings,
+                                 Supplier<Integer[]> coords,
+                                 Supplier<Integer> radius,
+                                 Supplier<Integer[]> color) {
+        super(ghl, wrapBehaviours(behaviour, behaviourName, trigger), bindings, behaviour.toString());
+        this.radius = radius;
+        this.color = color;
+        this.coords = coords;
+    }
+
+    static Behaviours wrapBehaviours(Behaviour behaviour, String behaviourName, String trigger) {
+        Behaviours behaviours = new Behaviours(new InputTriggerConfig());
+        behaviours.behaviour(behaviour, behaviourName, trigger);
+        return behaviours;
+    }
+
     Integer[] pos;
     Integer r;
 
@@ -47,6 +67,7 @@ public class CircleGraphicalHandle extends GraphicalHandle{
 
     @Override
     synchronized boolean isPresentAt(int x, int y) {
+        if ((pos == null) || (pos[0] == null) || (pos[1] == null)) return false;
         double d = (pos[0]-x)*(pos[0]-x)+(pos[1]-y)*(pos[1]-y);
         return d*d<4*r*r;
     }
