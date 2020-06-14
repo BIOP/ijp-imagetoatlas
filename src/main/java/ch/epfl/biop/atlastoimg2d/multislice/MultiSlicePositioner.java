@@ -91,6 +91,8 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     int totalNumberOfActionsRecorded = 30; // TODO : Implement
     List<CancelableAction> userActions = new ArrayList<>();
 
+    List<CancelableAction> redoableUserActions = new ArrayList<>();
+
    // boolean avoidOverlap = true;
 
     /**
@@ -163,6 +165,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         setPositioningMode();
 
         common_behaviours.behaviour((ClickBehaviour)(x, y) -> this.cancelLastAction(), "cancel_last_action", "ctrl Z");
+        common_behaviours.behaviour((ClickBehaviour)(x, y) -> this.redoAction(), "redo_last_action", "ctrl Y", "ctrl shift Z");
         common_behaviours.behaviour((ClickBehaviour)(x,y) -> this.navigateNextSlice(), "navigate_next_slice", "N");
         common_behaviours.behaviour((ClickBehaviour)(x,y) -> this.navigatePreviousSlice(), "navigate_previous_slice", "P"); // P taken for panel
         common_behaviours.behaviour((ClickBehaviour)(x,y) -> this.navigateCurrentSlice(), "navigate_current_slice", "C");
@@ -566,8 +569,6 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             g.drawLine(ptRectScreen[1][1].x, ptRectScreen[1][1].y, ptRectScreen[0][1].x, ptRectScreen[0][1].y);
             g.drawLine(ptRectScreen[0][1].x, ptRectScreen[0][1].y, ptRectScreen[0][0].x, ptRectScreen[0][0].y);
 
-
-
             for (SliceSources slice : slices) {
                 slice.drawGraphicalHandles(g);
             }
@@ -577,7 +578,6 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             if (currentMode.equals(POSITIONING_MODE) && slices.stream().anyMatch(slice -> slice.isSelected)) {
                 List<SliceSources> sortedSelected = getSortedSlices().stream().filter(slice -> slice.isSelected).collect(Collectors.toList());
                 RealPoint precedentPoint = null;
-
 
                 for (int i=0;i<sortedSelected.size();i++) {
                     //for (SliceSources slice : sortedSelected) {
@@ -615,12 +615,6 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 }
                 ghs.forEach(gh -> gh.draw(g));
             }
-        }
-    }
-
-    public void cancelLastAction() {
-        if (userActions.size()>0) {
-            userActions.get(userActions.size()-1).cancel();
         }
     }
 
@@ -721,20 +715,56 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
      *
      */
 
+    public void cancelLastAction() {
+        System.out.println("cancelLastAction");
+        System.out.println("userActions size before = "+userActions.size());
+        System.out.println("redoable actions size before = "+redoableUserActions.size());
+        if (userActions.size()>0) {
+            userActions.get(userActions.size()-1).cancel();
+        } else {
+            bdvh.getViewerPanel().showMessage("No action can be cancelled.");
+        }
+        System.out.println("userActions size before = "+userActions.size());
+        System.out.println("redoable actions size before = "+redoableUserActions.size());
+    }
+
+    public void redoAction() {
+        System.out.println("redoAction");
+        System.out.println("userActions size before = "+userActions.size());
+        System.out.println("redoable actions size before = "+redoableUserActions.size());
+        if (redoableUserActions.size()>0) {
+            redoableUserActions.get(redoableUserActions.size()-1).run();
+        } else {
+            bdvh.getViewerPanel().showMessage("No action can be redone.");
+        }
+        System.out.println("userActions size before = "+userActions.size());
+        System.out.println("redoable actions size before = "+redoableUserActions.size());
+    }
+
     public abstract class CancelableAction {
 
         public void run() {
             userActions.add(this);
+            if (redoableUserActions.size()>0) {
+                if (redoableUserActions.get(redoableUserActions.size()-1).equals(this)) {
+                    redoableUserActions.remove(redoableUserActions.size()-1);
+                } else {
+                    // different branch : clear redoable actions
+                    redoableUserActions.clear();
+                }
+            }
         }
 
         public void cancel() {
             if (userActions.get(userActions.size()-1).equals(this)) {
                 userActions.remove(userActions.size()-1);
+                redoableUserActions.add(this);
             } else {
                 System.err.println("Error : cancel not called on the last action");
                 return;
             }
         }
+
     }
 
     public void moveSlice(SliceSources slice, double axisPosition) {
@@ -860,6 +890,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 }
             }
 
+            if (sliceSource==null) // for proper redo function
             sliceSource = new SliceSources(sacs.toArray(new SourceAndConverter[sacs.size()]),
                     slicingAxisPosition,
                     MultiSlicePositioner.this);
