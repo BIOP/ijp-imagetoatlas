@@ -34,6 +34,7 @@ import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.Future;
@@ -56,6 +57,10 @@ import static sc.fiji.bdvpg.scijava.services.SourceAndConverterService.SPIM_DATA
  */
 
 public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesListener, GraphicalHandleListener, MouseMotionListener {
+
+    //
+    static public Object manualActionLock = new Object();
+
 
     /**
      * BdvHandle displaying everything
@@ -199,6 +204,23 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
         ghs.add(ghRight);
         ghs.add(ghLeft);
+
+        System.out.println("start ");
+
+
+        if (this.bdvh.getCardPanel()!=null) {
+            this.bdvh.getCardPanel().addCard( "Registration Options", new RegistrationPanel(this).getPanel(), true);
+            this.bdvh.getCardPanel().setCardExpanded("Sources", false);
+            this.bdvh.getCardPanel().setCardExpanded("Groups", false);
+
+        } else {
+            System.err.println("this.bdvh.getCardPanel() is null!");
+        }
+
+
+        System.out.println("stop");
+        //System.out.println("flag creation = "+flag);
+
     }
 
     int iCurrentSlice = 0;
@@ -716,29 +738,19 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
      */
 
     public void cancelLastAction() {
-        System.out.println("cancelLastAction");
-        System.out.println("userActions size before = "+userActions.size());
-        System.out.println("redoable actions size before = "+redoableUserActions.size());
         if (userActions.size()>0) {
             userActions.get(userActions.size()-1).cancel();
         } else {
             bdvh.getViewerPanel().showMessage("No action can be cancelled.");
         }
-        System.out.println("userActions size before = "+userActions.size());
-        System.out.println("redoable actions size before = "+redoableUserActions.size());
     }
 
     public void redoAction() {
-        System.out.println("redoAction");
-        System.out.println("userActions size before = "+userActions.size());
-        System.out.println("redoable actions size before = "+redoableUserActions.size());
         if (redoableUserActions.size()>0) {
             redoableUserActions.get(redoableUserActions.size()-1).run();
         } else {
             bdvh.getViewerPanel().showMessage("No action can be redone.");
         }
-        System.out.println("userActions size before = "+userActions.size());
-        System.out.println("redoable actions size before = "+redoableUserActions.size());
     }
 
     public abstract class CancelableAction {
@@ -788,6 +800,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         public void run() {
             sliceSource.slicingAxisPosition = newSlicingAxisPosition;
             sliceSource.updatePosition();
+            bdvh.getViewerPanel().showMessage("Moving slice to position "+new DecimalFormat("###.##").format(sliceSource.slicingAxisPosition));
             updateDisplay();
             super.run();
         }
@@ -795,6 +808,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         public void cancel() {
             sliceSource.slicingAxisPosition = oldSlicingAxisPosition;
             sliceSource.updatePosition();
+            bdvh.getViewerPanel().showMessage("Moving slice to position "+new DecimalFormat("###.##").format(sliceSource.slicingAxisPosition));
             updateDisplay();
             super.cancel();
         }
@@ -880,10 +894,11 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 }
 
                 if (!exactMatch) {
-                    System.err.println("A source is already used in the positioner : action ignored");
+                    System.err.println("A source is already used in the positioner : slice not created.");
+
+                    bdvh.getViewerPanel().showMessage("A source is already used in the positioner : slice not created.");
                     return;
                 } else {
-                    System.out.println("Moving Source Instead of creating it");
                     // Move action:
                     new MoveSlice(zeSlice, slicingAxisPosition).run();
                     return;
@@ -905,6 +920,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             SourceAndConverterServices.getSourceAndConverterDisplayService()
                     .show(bdvh, sliceSource.relocated_sacs_positioning_mode);
 
+            bdvh.getViewerPanel().showMessage("Slice added");
             // The line below should be executed only if the action succeeded ... (if it's executed, calling cancel should have the same effect)
             super.run();
         }
@@ -920,6 +936,8 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             slices.remove(sliceSource);
             SourceAndConverterServices.getSourceAndConverterDisplayService()
                     .remove(bdvh, sliceSource.relocated_sacs_positioning_mode);
+
+            bdvh.getViewerPanel().showMessage("Slice removed");
             super.cancel();
         }
     }

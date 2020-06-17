@@ -108,7 +108,7 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
     InvertibleRealTransformSequence irts;
 
     @Override
-    public void register() {
+    public boolean register() {
         {
             List<SourceAndConverter> movingSacs = Arrays.stream(mimg).collect(Collectors.toList());
             List<SourceAndConverter> fixedSacs = Arrays.stream(fimg).collect(Collectors.toList());
@@ -140,6 +140,8 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
             bwl.getBigWarp().getViewerFrameP().setVisible(false);
             bwl.getBigWarp().getViewerFrameQ().setVisible(false);
             bwl.getBigWarp().getLandmarkFrame().setVisible(false);
+
+            return true;
 
         }
     }

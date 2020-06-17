@@ -6,7 +6,7 @@ public interface Registration<T> {
     void setFixedImage(T fimg);
     void setMovingImage(T mimg);
 
-    void register();
+    boolean register();
 
     T getTransformedImageMovingToFixed(T img);
     RealPointList getTransformedPtsFixedToMoving(RealPointList pts);

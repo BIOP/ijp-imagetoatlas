@@ -19,8 +19,8 @@ public class SacManualRegistration implements Registration<SourceAndConverter[]>
     }
 
     @Override
-    public void register() {
-
+    public boolean register() {
+        return true;
     }
 
     @Override

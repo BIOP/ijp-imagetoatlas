@@ -1,4 +1,4 @@
-package ch.epfl.biop.atlastoimg2d.multislice
+package ch.epfl.biop.atlastoimg2d.multislice;
 
 interface GraphicalHandleListener {
 

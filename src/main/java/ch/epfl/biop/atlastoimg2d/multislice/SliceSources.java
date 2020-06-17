@@ -3,6 +3,8 @@ package ch.epfl.biop.atlastoimg2d.multislice;
 
 import bdv.tools.transformation.TransformedSource;
 import bdv.viewer.SourceAndConverter;
+import ch.epfl.biop.SandBoxCompletableFuture;
+import ch.epfl.biop.registration.Registration;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
 import org.scijava.ui.behaviour.ClickBehaviour;
@@ -11,9 +13,11 @@ import org.scijava.ui.behaviour.util.Behaviours;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterUtils;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceAffineTransformer;
 
+import javax.swing.*;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public class SliceSources {
     // What are they ?
@@ -236,5 +240,73 @@ public class SliceSources {
     }
 
     boolean processInProgress = false; // flag : true if a registration process is in progress
+
+
+    public CompletableFuture<Boolean> registrationTasks = CompletableFuture.completedFuture(true);
+
+    private List<Registration> registrations = new ArrayList<>();
+
+    /**
+     * Asynchronous handling of registrations + combining with manual sequential registration if necessary
+     * @param reg
+     */
+
+    protected void addRegistration(Registration reg) {
+
+        if (registrationTasks == null || registrationTasks.isDone()) {
+            registrationTasks = CompletableFuture.supplyAsync(() -> true); // Starts async computation, maybe there's a better way
+        }
+
+        registrationTasks = registrationTasks.thenApplyAsync((flag) -> {
+            //JLabel current = new JLabel();
+            //components.add(current);
+            //demoReportingPanel.add(components.get(components.size()-1), "cell "+location+" "+registrations.size());
+
+            if (flag==false) {
+                System.out.println("Downstream registration failed");
+                //components.remove(current);
+                return false;
+            }
+            boolean out;
+            if (reg.isManual()) {
+                //current.setText("Lock (Manual)");
+                synchronized (MultiSlicePositioner.manualActionLock) {
+                    //current.setText("Current");
+                    out = reg.register();
+                    if (!out) {
+                        //components.remove(current);
+                        //demoReportingPanel.remove(current);
+                        //current.setText("Canceled");
+                    }
+                }
+            } else {
+                //current.setText("In progress...");
+                out = reg.register();
+            }
+            if (out) {
+                //current.setText("Done");
+                registrations.add(reg);
+            } else {
+                //components.remove(current);
+                //demoReportingPanel.remove(current);
+            }
+            System.out.println("Registration done");
+            //demoFrame.repaint();
+            return out;
+        });
+
+        registrationTasks.handle((result, exception) -> {
+            System.out.println(result);
+            if (result == false) {
+                System.out.println("Registration task failed");
+            }
+            System.out.println(exception);
+            return exception;
+        });
+    }
+
+    protected void cancelRegistration(Registration reg) {
+
+    }
 
 }

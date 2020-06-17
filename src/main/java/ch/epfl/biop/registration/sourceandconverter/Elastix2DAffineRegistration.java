@@ -47,7 +47,7 @@ public class Elastix2DAffineRegistration implements Registration<SourceAndConver
     AffineTransform3D at3d;
 
     @Override
-    public void register() {
+    public boolean register() {
 
         try {
              Future<CommandModule> task = ctx
@@ -55,8 +55,10 @@ public class Elastix2DAffineRegistration implements Registration<SourceAndConver
                     .run(Elastix2DAffineRegisterCommand.class, true, scijavaParameters );
 
              at3d = (AffineTransform3D) task.get().getOutput("at3D");
+             return true;
         } catch (Exception e) {
             e.printStackTrace();
+            return false;
         }
     }
 

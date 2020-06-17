@@ -51,6 +51,9 @@ public class SacMultiSacsPositionerCommand implements Command {
     @Parameter
     ObjectService os;
 
+    @Parameter(type = ItemIO.OUTPUT)
+    MultiSlicePositioner mp;
+
     @Override
     public void run() {
 
@@ -188,7 +191,7 @@ public class SacMultiSacsPositionerCommand implements Command {
 
             SourceAndConverter[] slicedSources = new SourceAndConverter[ba.map.getStructuralImages().length];
 
-            MultiSlicePositioner mp = new MultiSlicePositioner(bdvMultiSlicer, slicingModel, slicedSources);
+            mp = new MultiSlicePositioner(bdvMultiSlicer, slicingModel, slicedSources);
 
             SourceMosaicZSlicer mosaic = new SourceMosaicZSlicer(null, slicingModel, true, false, false, mp.getzStepSetter()::getStep);
 
@@ -259,7 +262,7 @@ public class SacMultiSacsPositionerCommand implements Command {
             os.addObject(mp);
 
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
 
     }
