@@ -125,9 +125,6 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     final static String COMMON_BEHAVIOURS_KEY = "multipositioner-behaviours";
     Behaviours common_behaviours = new Behaviours(new InputTriggerConfig(), "multipositioner" );
 
-    //final static String DRAG_SOURCES_MAP = "drag_positioning_sources-behaviours";
-    //Behaviours drag_sources_positioning = new Behaviours(new InputTriggerConfig(), "drag_positioning_sources" );
-
     public MultiSlicePositioner(BdvHandle bdvh, SourceAndConverter slicingModel, SourceAndConverter[] slicedSources) {
         this.slicedSources = slicedSources;
         this.bdvh = bdvh;
@@ -530,54 +527,6 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             }
         }
 
-        /*System.out.println("Elastix Registration");
-        if (slices.size()==0) return;
-        if (iCurrentSlice<0) iCurrentSlice = 0;
-        if (iCurrentSlice>=slices.size()) iCurrentSlice = 0;
-
-        SliceSources slice = slices.get(this.iCurrentSlice);
-        RealPoint rpt = new RealPoint(3);
-
-        double posX = -sX/2;
-        double posY = -sY/2;
-
-        rpt.setPosition(posX,0);
-        rpt.setPosition(posY,1);
-        rpt.setPosition(slice.slicingAxisPosition, 2);
-
-        Future<CommandModule> task = scijavaCtx.getService(CommandService.class).run(Elastix2DAffineRegisterCommand.class, true,
-                "sac_fixed", slicedSources[0].getSpimSource().getNumMipmapLevels()-1,
-                    "tpFixed", 0,
-                    "levelFixedSource", 2,
-                    "sac_moving", slice.relocated_sacs_registration_mode[0],
-                    "tpMoving", 0,
-                    "levelMovingSource", slice.relocated_sacs_registration_mode[0].getSpimSource().getNumMipmapLevels()-1,
-                    "pxSizeInCurrentUnit", 0.04, // in mm
-                    "interpolate", false,
-                    "showImagePlusRegistrationResult", true,
-                    "px",rpt.getDoublePosition(0),
-                    "py",rpt.getDoublePosition(1),
-                    "pz",rpt.getDoublePosition(2),
-                    "sx",sX,
-                    "sy",sY
-                );
-
-
-            Thread t = new Thread(() -> {
-                try {
-                    //SourceAndConverter sac = (SourceAndConverter) task.get().getOutput("registeredSource");
-
-                    AffineTransform3D at3d = (AffineTransform3D) task.get().getOutput("at3D");
-
-                    SourceTransformHelper.mutate(at3d, new SourceAndConverterAndTimeRange(slice.relocated_sacs_registration_mode[0],0));
-                    
-                    bdvh.getViewerPanel().requestRepaint();
-
-                } catch (Exception e) {
-
-                }
-            });
-            t.start();*/
     }
 
     @Override
@@ -669,9 +618,11 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             SliceSources last = sortedSelected.get(sortedSelected.size()-1);
             double totalSpacing = last.slicingAxisPosition-first.slicingAxisPosition;
             double delta = totalSpacing / (sortedSelected.size()-1);
+            new MarkActionSequenceBatch().run();
             for (int idx = 1;idx<sortedSelected.size()-1;idx++) {
                 moveSlice(sortedSelected.get(idx), first.slicingAxisPosition+((double)idx)*delta);
             }
+            new MarkActionSequenceBatch().run();
         }
     }
 
@@ -761,7 +712,18 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
     public void cancelLastAction() {
         if (userActions.size()>0) {
-            userActions.get(userActions.size()-1).cancel();
+            CancelableAction action = userActions.get(userActions.size()-1);
+            if (action instanceof MarkActionSequenceBatch) {
+                action.cancel();
+                action = userActions.get(userActions.size()-1);
+                while (!(action instanceof MarkActionSequenceBatch)) {
+                    action.cancel();
+                    action = userActions.get(userActions.size()-1);
+                }
+                action.cancel();
+            } else {
+                userActions.get(userActions.size() - 1).cancel();
+            }
         } else {
             bdvh.getViewerPanel().showMessage("No action can be cancelled.");
         }
@@ -769,7 +731,19 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
     public void redoAction() {
         if (redoableUserActions.size()>0) {
-            redoableUserActions.get(redoableUserActions.size()-1).run();
+            CancelableAction action = redoableUserActions.get(redoableUserActions.size()-1);
+            if (action instanceof MarkActionSequenceBatch) {
+                action.run();
+                action = redoableUserActions.get(redoableUserActions.size()-1);
+                while (!(action instanceof MarkActionSequenceBatch)) {
+                    action.run();
+                    action = redoableUserActions.get(redoableUserActions.size()-1);
+                }
+                action.run();
+            } else {
+                redoableUserActions.get(redoableUserActions.size() - 1).run();
+            }
+
         } else {
             bdvh.getViewerPanel().showMessage("No action can be redone.");
         }
@@ -862,6 +836,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
             sortedTiles.sort(Comparator.comparingInt(T::getId));
 
+            new MarkActionSequenceBatch().run();
             for (int i = 0; i<sortedTiles.size();i++) {
                 T group = sortedTiles.get(i);
                 CreateSlice cs = new CreateSlice(sacsGroups.get(group), slicingAxisPosition + i * axisIncrement);
@@ -870,6 +845,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                     out.add(cs.getSlice());
                 }
             }
+            new MarkActionSequenceBatch().run();
 
         } else {
             CreateSlice cs = new CreateSlice(sacs, slicingAxisPosition);
@@ -998,6 +974,10 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         return new SelectedSliceSourcesDrag(slice);
     }
 
+    public class MarkActionSequenceBatch extends CancelableAction {
+
+    }
+
     class SelectedSliceSourcesDrag implements DragBehaviour {
 
         Map<SliceSources,Double> initialAxisPositions = new HashMap<>();
@@ -1083,12 +1063,14 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 double currentSlicingAxisPosition = ((int) currentSlicePointing) * sizePixX * (int) zStepSetter.getStep();
                 double deltaAxis = currentSlicingAxisPosition - iniSlicingAxisPosition;
 
+                new MarkActionSequenceBatch().run();
                 for (SliceSources slice : selectedSources) {
                     if (initialAxisPositions.containsKey(slice)) {
                         slice.slicingAxisPosition = initialAxisPositions.get(slice);
                         moveSlice(slice, initialAxisPositions.get(slice) + deltaAxis + deltaOrigin);
                     }
                 }
+                new MarkActionSequenceBatch().run();
 
                 updateDisplay();
             }
@@ -1234,10 +1216,12 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
             double ratio = (lastAxisPos-currentSlicingAxisPosition)/range;
 
+            new MarkActionSequenceBatch().run();
             for (SliceSources slice : slicesDragged) {
                 slice.slicingAxisPosition = initialAxisPositions.get(slice);
                 moveSlice(slice, lastAxisPos + (initialAxisPositions.get(slice)-lastAxisPos) * ratio);
             }
+            new MarkActionSequenceBatch().run();
             updateDisplay();
         }
     }
@@ -1297,10 +1281,12 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
             double ratio = (lastAxisPos-currentSlicingAxisPosition)/range;
 
+            new MarkActionSequenceBatch().run();
             for (SliceSources slice : slicesDragged) {
                 slice.slicingAxisPosition = initialAxisPositions.get(slice);
                 moveSlice(slice, lastAxisPos - (initialAxisPositions.get(slice)-lastAxisPos) * ratio);
             }
+            new MarkActionSequenceBatch().run();
             updateDisplay();
         }
     }

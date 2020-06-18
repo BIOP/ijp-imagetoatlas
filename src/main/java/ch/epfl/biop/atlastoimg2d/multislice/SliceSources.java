@@ -1,7 +1,5 @@
 package ch.epfl.biop.atlastoimg2d.multislice;
 
-
-import bdv.tools.transformation.TransformedSource;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.registration.Registration;
 import ch.epfl.biop.registration.sourceandconverter.AffineTransformedSourceWrapperRegistration;
@@ -13,7 +11,6 @@ import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterUtils;
-import sc.fiji.bdvpg.sourceandconverter.transform.SourceAffineTransformer;
 
 import java.awt.*;
 import java.util.*;
@@ -28,16 +25,11 @@ public class SliceSources {
     // Visible to the user in slicing mode
     SourceAndConverter[] relocated_sacs_positioning_mode;
 
-    // Visible to the user in 3D mode
-    // SourceAndConverter[] relocated_sacs_3D_mode;
-
     // Used for registration : like 3D, but tilt and roll ignored because it is handled on the fixed source side
     SourceAndConverter[] registered_sacs;
 
     // Where are they ?
     double slicingAxisPosition;
-
-    AffineTransform3D at3D;
 
     boolean isSelected = false;
 
@@ -76,38 +68,6 @@ public class SliceSources {
         this.waitForEndOfRegistrations();
 
         updatePosition();
-
-
-        /*List<SourceAndConverter<?>> sacsTransformed = new ArrayList<>();
-        at3D = new AffineTransform3D();
-        for (SourceAndConverter sac : sacs) {
-            RealPoint center = new RealPoint(3);
-            center.setPosition(new double[] {0,0,0}); // Center
-            SourceAndConverter zeroCenteredSource = recenterSourcesAppend(sac, center);
-            sacsTransformed.add(new SourceAffineTransformer(zeroCenteredSource, at3D).getSourceOut());
-        }
-
-        this.relocated_sacs_positioning_mode = sacsTransformed.toArray(new SourceAndConverter[sacsTransformed.size()]);
-
-        sacsTransformed.clear();
-        for (SourceAndConverter sac : sacs) {
-            RealPoint center = new RealPoint(3);
-            center.setPosition(new double[] {0,0,0}); // Center
-            SourceAndConverter zeroCenteredSource = recenterSourcesAppend(sac, center);
-            sacsTransformed.add(new SourceAffineTransformer(zeroCenteredSource, at3D).getSourceOut());
-        }
-
-        this.registered_sacs = sacsTransformed.toArray(new SourceAndConverter[sacsTransformed.size()]);
-
-        sacsTransformed.clear();
-        for (SourceAndConverter sac : sacs) {
-            RealPoint center = new RealPoint(3);
-            center.setPosition(new double[] {0,0,0}); // Center
-            SourceAndConverter zeroCenteredSource = recenterSourcesAppend(sac, center);
-            sacsTransformed.add(new SourceAffineTransformer(zeroCenteredSource, at3D).getSourceOut());
-        }
-
-        this.relocated_sacs_3D_mode = sacsTransformed.toArray(new SourceAndConverter[sacsTransformed.size()]);*/
 
         behavioursHandleSlice = new Behaviours(new InputTriggerConfig());
 
