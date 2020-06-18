@@ -181,7 +181,7 @@ public class SacMultiSacsPositionerCommand implements Command {
         try {
             // creates new bdv window
             bdvMultiSlicer = (BdvHandle) cs.run(BdvWindowCreatorCommand.class, true,
-                    "is2D", true,
+                    "is2D", false, //true,
                     "windowTitle", "Multi Slice Positioner " + ba.toString(),
                     "interpolate", false,
                     "nTimepoints", 1,
@@ -199,7 +199,6 @@ public class SacMultiSacsPositionerCommand implements Command {
 
             // Recenter around center of source in xy
             SourceAndConverter sourceUsedForRecenteringXY = ba.map.getStructuralImages()[0];
-
 
             //sourceUsedForRecenteringXY.getSpimSource().getSource(0,0).dimensions(dims);
             AffineTransform3D centerTransform = null;
@@ -220,7 +219,8 @@ public class SacMultiSacsPositionerCommand implements Command {
                     centerTransform.identity();
                     centerTransform.translate(-ptCenterGlobal.getDoublePosition(0),
                             -ptCenterGlobal.getDoublePosition(1),
-                            -ptCenterGlobal.getDoublePosition(2)
+                            0
+                            //-ptCenterGlobal.getDoublePosition(2)
                             );
 
                 }

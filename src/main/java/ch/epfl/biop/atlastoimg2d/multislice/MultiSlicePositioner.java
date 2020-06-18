@@ -8,7 +8,7 @@ import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.bdv.select.SelectedSourcesListener;
 import ch.epfl.biop.bdv.select.SourceSelectorBehaviour;
 import ch.epfl.biop.registration.Registration;
-import ch.epfl.biop.scijava.command.Elastix2DAffineRegisterCommand;
+import ch.epfl.biop.registration.sourceandconverter.Elastix2DAffineRegistration;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import mpicbg.spim.data.generic.base.Entity;
 import mpicbg.spim.data.generic.sequence.AbstractSequenceDescription;
@@ -18,8 +18,6 @@ import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.ARGBType;
 import org.scijava.Context;
-import org.scijava.command.CommandModule;
-import org.scijava.command.CommandService;
 import org.scijava.ui.behaviour.*;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
@@ -27,9 +25,7 @@ import sc.fiji.bdvpg.behaviour.EditorBehaviourUnInstaller;
 import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
 import sc.fiji.bdvpg.scijava.services.ui.swingdnd.BdvTransferHandler;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
-import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterAndTimeRange;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterUtils;
-import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
@@ -37,7 +33,6 @@ import java.awt.event.MouseMotionListener;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.List;
-import java.util.concurrent.Future;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -249,11 +244,12 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 this.setRegistrationMode();
                 break;
             case REGISTRATION_MODE:
-                this.set3dViewingMode();
-                break;
-            case VIEWING3D_MODE:
                 this.setPositioningMode();
+                // this.set3dViewingMode();
                 break;
+           /* case VIEWING3D_MODE:
+                this.setPositioningMode();
+                break;*/
         }
     }
 
@@ -290,11 +286,11 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 centerSlice = SourceAndConverterUtils.getSourceAndConverterCenterPoint(slice.relocated_sacs_positioning_mode[0]);
                 break;
             case REGISTRATION_MODE:
-                centerSlice = SourceAndConverterUtils.getSourceAndConverterCenterPoint(slice.relocated_sacs_registration_mode[0]);
+                centerSlice = SourceAndConverterUtils.getSourceAndConverterCenterPoint(slice.registered_sacs[0]);
                 break;
-            case VIEWING3D_MODE:
-                centerSlice = SourceAndConverterUtils.getSourceAndConverterCenterPoint(slice.relocated_sacs_3D_mode[0]);
-                break;
+           // case VIEWING3D_MODE:
+           //     centerSlice = SourceAndConverterUtils.getSourceAndConverterCenterPoint(slice.relocated_sacs_3D_mode[0]);
+           //     break;
             default:
                 System.err.println("Invalid multislicer mode");
                 return;
@@ -351,8 +347,8 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                     List<SourceAndConverter> sacsToRemove = new ArrayList<>();
                     List<SourceAndConverter> sacsToAdd = new ArrayList<>();
                     getSortedSlices().forEach(ss -> {
-                        sacsToRemove.addAll(Arrays.asList(ss.relocated_sacs_3D_mode));
-                        sacsToRemove.addAll(Arrays.asList(ss.relocated_sacs_registration_mode));
+                       // sacsToRemove.addAll(Arrays.asList(ss.relocated_sacs_3D_mode));
+                        sacsToRemove.addAll(Arrays.asList(ss.registered_sacs));
                         sacsToAdd.addAll(Arrays.asList(ss.relocated_sacs_positioning_mode));
                     });
                     SourceAndConverterServices
@@ -387,9 +383,9 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                     List<SourceAndConverter> sacsToRemove = new ArrayList<>();
                     List<SourceAndConverter> sacsToAdd = new ArrayList<>();
                     getSortedSlices().forEach(ss -> {
-                        sacsToRemove.addAll(Arrays.asList(ss.relocated_sacs_3D_mode));
+                        //sacsToRemove.addAll(Arrays.asList(ss.relocated_sacs_3D_mode));
                         sacsToRemove.addAll(Arrays.asList(ss.relocated_sacs_positioning_mode));
-                        sacsToAdd.addAll(Arrays.asList(ss.relocated_sacs_registration_mode));
+                        sacsToAdd.addAll(Arrays.asList(ss.registered_sacs));
                     });
                     SourceAndConverterServices
                             .getSourceAndConverterDisplayService()
@@ -424,8 +420,8 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                     List<SourceAndConverter> sacsToAdd = new ArrayList<>();
                     getSortedSlices().forEach(ss -> {
                         sacsToRemove.addAll(Arrays.asList(ss.relocated_sacs_positioning_mode));
-                        sacsToRemove.addAll(Arrays.asList(ss.relocated_sacs_registration_mode));
-                        sacsToAdd.addAll(Arrays.asList(ss.relocated_sacs_3D_mode));
+                        sacsToRemove.addAll(Arrays.asList(ss.registered_sacs));
+                        //sacsToAdd.addAll(Arrays.asList(ss.relocated_sacs_3D_mode));
                     });
                     SourceAndConverterServices
                             .getSourceAndConverterDisplayService()
@@ -505,7 +501,36 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     }
 
     public void elastixRegister() {
-        System.out.println("Elastix Registration");
+
+        for (SliceSources slice : slices) {
+            if (slice.isSelected) {
+                Elastix2DAffineRegistration elastixAffineReg = new Elastix2DAffineRegistration();
+                elastixAffineReg.setScijavaContext(scijavaCtx);
+                RealPoint rpt = new RealPoint(3);
+                double posX = -sX/2;
+                double posY = -sY/2;
+                rpt.setPosition(posX,0);
+                rpt.setPosition(posY,1);
+                rpt.setPosition(slice.slicingAxisPosition, 2);
+                Map<String, Object> params = new HashMap<>();
+                params.put("tpFixed", 0);
+                params.put("levelFixedSource", 2);
+                params.put("tpMoving", 0);
+                params.put("levelMovingSource", slice.registered_sacs[0].getSpimSource().getNumMipmapLevels()-1);
+                params.put("pxSizeInCurrentUnit", 0.04);
+                params.put("interpolate", false);
+                params.put("showImagePlusRegistrationResult", true);
+                params.put("px",rpt.getDoublePosition(0));
+                params.put("py",rpt.getDoublePosition(1));
+                params.put("pz",rpt.getDoublePosition(2));
+                params.put("sx",sX);
+                params.put("sy",sY);
+                elastixAffineReg.setScijavaParameters(params);
+                new RegisterSlice(slice, elastixAffineReg,(sacs) -> new SourceAndConverter[] {sacs[1]}, (sacs) -> new SourceAndConverter[] {sacs[0]}).run();
+            }
+        }
+
+        /*System.out.println("Elastix Registration");
         if (slices.size()==0) return;
         if (iCurrentSlice<0) iCurrentSlice = 0;
         if (iCurrentSlice>=slices.size()) iCurrentSlice = 0;
@@ -547,15 +572,12 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                     SourceTransformHelper.mutate(at3d, new SourceAndConverterAndTimeRange(slice.relocated_sacs_registration_mode[0],0));
                     
                     bdvh.getViewerPanel().requestRepaint();
-                    /*SourceAndConverterServices
-                            .getSourceAndConverterDisplayService()
-                            .show(bdvh, new SourceAffineTransformer(slice.relocated_sacs_registration_mode[0], at3d).getSourceOut());*/
 
                 } catch (Exception e) {
 
                 }
             });
-            t.start();
+            t.start();*/
     }
 
     @Override
@@ -839,7 +861,8 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             sortedTiles.addAll(sacsGroups.keySet());
 
             sortedTiles.sort(Comparator.comparingInt(T::getId));
-            for (int i = 0; i<sortedTiles.size();i++) {
+
+            for (int i = 0; i<sortedTiles.size()/8;i++) {
                 T group = sortedTiles.get(i);
                 CreateSlice cs = new CreateSlice(sacsGroups.get(group), slicingAxisPosition + i * axisIncrement);
                 cs.run();
@@ -959,7 +982,9 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         }
 
         @Override
-        public void run() {
+        public void run() { //
+
+            slice.addRegistration(registration, preprocessFixed, preprocessMoving);
             super.run();
         }
 

@@ -35,20 +35,21 @@ public class Elastix2DAffineRegistration implements Registration<SourceAndConver
     @Override
     public void setFixedImage(SourceAndConverter[] fimg) {
         this.fimg = fimg;
-        scijavaParameters.put("sac_fixed", fimg);
+        assert fimg.length==1;
+        scijavaParameters.put("sac_fixed", fimg[0]);
     }
 
     @Override
     public void setMovingImage(SourceAndConverter[] mimg) {
         this.mimg = mimg;
-        scijavaParameters.put("sac_moving", mimg);
+        assert mimg.length==1;
+        scijavaParameters.put("sac_moving", mimg[0]);
     }
 
     AffineTransform3D at3d;
 
     @Override
     public boolean register() {
-
         try {
              Future<CommandModule> task = ctx
                     .getService(CommandService.class)
