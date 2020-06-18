@@ -208,7 +208,7 @@ public class SliceSources {
         }
     }
 
-    protected synchronized void updatePosition() {
+    protected void updatePosition() {
 
         AffineTransform3D zShiftAffineTransform = new AffineTransform3D();
 
@@ -218,83 +218,18 @@ public class SliceSources {
 
         AffineTransform3D slicingModePositionAffineTransform = new AffineTransform3D();
 
-        double posX = ((slicingAxisPosition/mp.sizePixX/mp.zStepSetter.getStep())) * mp.sX;
-        double posY = mp.sY * yShift_slicing_mode;
+        double slicingAxisSnapped = (((int)(slicingAxisPosition/mp.sizePixX))*mp.sizePixX);
 
-        System.out.println("posX = "+posX);
-        System.out.println("posY = "+posY);
+        double posX = ((slicingAxisSnapped/mp.sizePixX/mp.zStepSetter.getStep())) * mp.sX;
+        double posY = mp.sY * yShift_slicing_mode;
 
         slicingModePositionAffineTransform.translate(posX, posY, -slicingAxisPosition );
 
         slicingModePositioner.setAffineTransform(slicingModePositionAffineTransform);
 
-        /*for (SourceAndConverter sac : registered_sacs) {
-            assert sac.getSpimSource() instanceof TransformedSource;
-            new_at3D = new AffineTransform3D();
-            ((TransformedSource)sac.getSpimSource()).getFixedTransform(new_at3D);
-            new_at3D.set(slicingAxisPosition,2,3);
-            ((TransformedSource)sac.getSpimSource()).setFixedTransform(new_at3D);
-        }*/
-
-        /*new_at3D = new AffineTransform3D();
-
-
-        new_at3D.set(posX,0,3);
-        new_at3D.set(posY,1,3);
-
-        for (int i =
-        )
-
-        for (SourceAndConverter sac : relocated_sacs_positioning_mode) {
-            assert sac.getSpimSource() instanceof TransformedSource;
-            ((TransformedSource)sac.getSpimSource()).setFixedTransform(new_at3D);
-        }*/
-
-        /*for (SourceAndConverter sac : relocated_sacs_3D_mode) {
-            assert sac.getSpimSource() instanceof TransformedSource;
-            new_at3D = new AffineTransform3D();
-            ((TransformedSource)sac.getSpimSource()).getFixedTransform(new_at3D);
-            new_at3D.set(slicingAxisPosition,2,3);
-            ((TransformedSource)sac.getSpimSource()).setFixedTransform(new_at3D);
-        }*/
-
     }
 
-    /**
-     * The source should be affined transformed only
-     * @return
-     */
-    /*public static SourceAndConverter recenterSourcesAppend(SourceAndConverter source, RealPoint center) {
-        // Affine Transform source such as the center is located at the center of where
-        // we want it to be
-        AffineTransform3D at3D = new AffineTransform3D();
-        at3D.identity();
-        //double[] m = at3D.getRowPackedCopy();
-        source.getSpimSource().getSourceTransform(0,0,at3D);
-        long[] dims = new long[3];
-        source.getSpimSource().getSource(0,0).dimensions(dims);
-
-        RealPoint ptCenterGlobal = new RealPoint(3);
-        RealPoint ptCenterPixel = new RealPoint((dims[0]-1.0)/2.0,(dims[1]-1.0)/2.0, (dims[2]-1.0)/2.0);
-
-        at3D.apply(ptCenterPixel, ptCenterGlobal);
-
-        // Just shifting
-        double[] m = new AffineTransform3D().getRowPackedCopy();
-
-        m[3] = center.getDoublePosition(0)-ptCenterGlobal.getDoublePosition(0);
-
-        m[7] = center.getDoublePosition(1)-ptCenterGlobal.getDoublePosition(1);
-
-        m[11] = center.getDoublePosition(2)-ptCenterGlobal.getDoublePosition(2);
-
-        at3D.set(m);
-
-        return new SourceAffineTransformer(source, at3D).getSourceOut();
-    }*/
-
     boolean processInProgress = false; // flag : true if a registration process is in progress
-
 
     public CompletableFuture<Boolean> registrationTasks = CompletableFuture.completedFuture(true);
 
@@ -314,6 +249,7 @@ public class SliceSources {
         }
 
         registrationTasks = registrationTasks.thenApplyAsync((flag) -> {
+            processInProgress = true;
             if (flag==false) {
                 System.out.println("Downstream registration failed");
                 return false;
@@ -349,14 +285,11 @@ public class SliceSources {
                     }
                 }
             } else {
-                //current.setText("Current");
                 reg.setFixedImage(preprocessFixed.apply(mp.slicedSources));
                 reg.setMovingImage(preprocessMoving.apply(registered_sacs));
                 out = reg.register();
                 if (!out) {
-                    //components.remove(current);
-                    //demoReportingPanel.remove(current);
-                    //current.setText("Canceled");
+                    // Registration did not went well ...
                 } else {
                     SourceAndConverterServices.getSourceAndConverterDisplayService()
                             .remove(mp.bdvh, registered_sacs);
@@ -376,14 +309,11 @@ public class SliceSources {
                 }
             }
             if (out) {
-                //current.setText("Done");
                 registrations.add(reg);
             } else {
-                //components.remove(current);
-                //demoReportingPanel.remove(current);
+
             }
-            System.out.println("Registration done");
-            //demoFrame.repaint();
+            processInProgress = false;
             return out;
         });
 
@@ -397,8 +327,15 @@ public class SliceSources {
         });
     }
 
-    protected void cancelRegistration(Registration reg) {
+    // TODO
+    protected void cancelCurrentRegistrations() {
+        registrationTasks.cancel(true);
+    }
 
+    protected void removeLastRegistration() {
+        if (processInProgress) {
+            // TODO
+        }
     }
 
 }

@@ -519,7 +519,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 params.put("levelMovingSource", slice.registered_sacs[0].getSpimSource().getNumMipmapLevels()-1);
                 params.put("pxSizeInCurrentUnit", 0.04);
                 params.put("interpolate", false);
-                params.put("showImagePlusRegistrationResult", true);
+                params.put("showImagePlusRegistrationResult", false);//true);
                 params.put("px",rpt.getDoublePosition(0));
                 params.put("py",rpt.getDoublePosition(1));
                 params.put("pz",rpt.getDoublePosition(2));
@@ -814,9 +814,9 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         public MoveSlice(SliceSources sliceSource, double slicingAxisPosition ) {
             this.sliceSource = sliceSource;
             this.oldSlicingAxisPosition = sliceSource.slicingAxisPosition;
-            int iSliceNoStep = (int) (slicingAxisPosition / sizePixX);
+            // int iSliceNoStep = (int) (slicingAxisPosition / sizePixX);
             //double slicingAxisPosition = iSliceNoStep*sizePixX;
-            this.newSlicingAxisPosition = iSliceNoStep*sizePixX; //slicingAxisPosition;
+            this.newSlicingAxisPosition = slicingAxisPosition;//= iSliceNoStep*sizePixX; //slicingAxisPosition;
         }
 
         public void run() {
@@ -862,7 +862,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
             sortedTiles.sort(Comparator.comparingInt(T::getId));
 
-            for (int i = 0; i<sortedTiles.size()/8;i++) {
+            for (int i = 0; i<sortedTiles.size();i++) {
                 T group = sortedTiles.get(i);
                 CreateSlice cs = new CreateSlice(sacsGroups.get(group), slicingAxisPosition + i * axisIncrement);
                 cs.run();
@@ -1089,6 +1089,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                         moveSlice(slice, initialAxisPositions.get(slice) + deltaAxis + deltaOrigin);
                     }
                 }
+
                 updateDisplay();
             }
         }
