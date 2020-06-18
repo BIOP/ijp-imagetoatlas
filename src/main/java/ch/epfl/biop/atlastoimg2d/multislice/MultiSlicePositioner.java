@@ -86,7 +86,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     /**
      * Keep track of already contained sources to avoid duplicates
      */
-    Set<SourceAndConverter> containedSources = new HashSet<>();
+    //Set<SourceAndConverter> containedSources = new HashSet<>();
 
     int totalNumberOfActionsRecorded = 30; // TODO : Implement
     List<CancelableAction> userActions = new ArrayList<>();
@@ -108,7 +108,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
     SourceAndConverter[] slicedSources;
 
-    private String currentMode = "";//POSITIONING_MODE;
+    public String currentMode = "";//POSITIONING_MODE;
 
     final static String POSITIONING_MODE = "positioning-mode";
     final static String POSITIONING_BEHAVIOURS_KEY = POSITIONING_MODE+"-behaviours";
@@ -478,8 +478,8 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             slices.forEach(slice -> slice.yShift_slicing_mode = 0);
         }
 
-        for (SliceSources src : slices) {
-            src.updatePosition();
+        for (SliceSources slice : slices) {
+            slice.updatePosition();
         }
 
         bdvh.getViewerPanel().requestRepaint();
@@ -531,7 +531,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
     @Override
     protected synchronized void draw(Graphics2D g) {
-        synchronized (slices) {
+        {
             int colorCode = this.info.getColor().get();
             Color color = new Color(ARGBType.red(colorCode) , ARGBType.green(colorCode), ARGBType.blue(colorCode), ARGBType.alpha(colorCode) );
             g.setColor(color);
@@ -873,9 +873,16 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             System.out.println("Create Slice run");
             boolean sacAlreadyPresent = false;
             for (SourceAndConverter sac : sacs) {
-                if (containedSources.contains(sac)) {
-                    sacAlreadyPresent = true;
+                for (SliceSources slice : slices) {
+                   for (SourceAndConverter test : slice.original_sacs) {
+                       if (test.equals(sac)) {
+                           sacAlreadyPresent = true;
+                       }
+                   }
                 }
+                /*if (containedSources.contains(sac)) {
+                    sacAlreadyPresent = true;
+                }*/
             }
 
             if (sacAlreadyPresent) {
@@ -911,15 +918,23 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
             slices.add(sliceSource);
 
-            containedSources.addAll(Arrays.asList(sliceSource.original_sacs));
-            containedSources.addAll(Arrays.asList(sliceSource.relocated_sacs_positioning_mode));
+            //containedSources.addAll(Arrays.asList(sliceSource.original_sacs));
+            //containedSources.addAll(Arrays.asList(sliceSource.relocated_sacs_positioning_mode));
 
             updateDisplay();
 
-            SourceAndConverterServices.getSourceAndConverterDisplayService()
-                    .show(bdvh, sliceSource.relocated_sacs_positioning_mode);
+            if (currentMode.equals(POSITIONING_MODE)) {
+                SourceAndConverterServices.getSourceAndConverterDisplayService()
+                        .show(bdvh, sliceSource.relocated_sacs_positioning_mode);
+                sliceSource.enableGraphicalHandles();
+            } else if (currentMode.equals(REGISTRATION_MODE)) {
+                SourceAndConverterServices.getSourceAndConverterDisplayService()
+                        .show(bdvh, sliceSource.registered_sacs);
+                sliceSource.disableGraphicalHandles();
+            }
 
             bdvh.getViewerPanel().showMessage("Slice added");
+
             // The line below should be executed only if the action succeeded ... (if it's executed, calling cancel should have the same effect)
             super.run();
         }
@@ -930,12 +945,14 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
         @Override
         public void cancel() {
-            containedSources.removeAll(Arrays.asList(sliceSource.original_sacs));
-            containedSources.removeAll(Arrays.asList(sliceSource.relocated_sacs_positioning_mode));
+            //containedSources.removeAll(Arrays.asList(sliceSource.original_sacs));
+            //containedSources.removeAll(Arrays.asList(sliceSource.registered_sacs));
+            //containedSources.removeAll(Arrays.asList(sliceSource.relocated_sacs_positioning_mode));
             slices.remove(sliceSource);
             SourceAndConverterServices.getSourceAndConverterDisplayService()
                     .remove(bdvh, sliceSource.relocated_sacs_positioning_mode);
-
+            SourceAndConverterServices.getSourceAndConverterDisplayService()
+                    .remove(bdvh, sliceSource.registered_sacs);
             bdvh.getViewerPanel().showMessage("Slice removed");
             super.cancel();
         }
@@ -966,6 +983,10 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
         @Override
         public void cancel() {
+            if (slice.removeRegistration(registration)) {
+            } else {
+                System.err.println("Error during registration cancelling");
+            }
             super.cancel();
         }
     }

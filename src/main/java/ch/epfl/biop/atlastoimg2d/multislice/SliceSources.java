@@ -19,6 +19,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 public class SliceSources {
+
     // What are they ?
     SourceAndConverter[] original_sacs;
 
@@ -27,6 +28,8 @@ public class SliceSources {
 
     // Used for registration : like 3D, but tilt and roll ignored because it is handled on the fixed source side
     SourceAndConverter[] registered_sacs;
+
+    Map<Registration, SourceAndConverter[]> registered_sacs_sequence = new HashMap<>();
 
     // Where are they ?
     double slicingAxisPosition;
@@ -48,6 +51,8 @@ public class SliceSources {
     volatile AffineTransformedSourceWrapperRegistration slicingModePositioner;
 
     CenterZeroRegistration centerPositioner;
+
+    Set<Registration> pendingRegistrations = new HashSet<>();
 
     // For fast display : Icon TODO : see https://github.com/bigdataviewer/bigdataviewer-core/blob/17d2f55d46213d1e2369ad7ef4464e3efecbd70a/src/main/java/bdv/tools/RecordMovieDialog.java#L256-L318
     protected SliceSources(SourceAndConverter[] sacs, double slicingAxisPosition, MultiSlicePositioner mp) {
@@ -204,6 +209,8 @@ public class SliceSources {
                                    Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixed,
                                    Function<SourceAndConverter[], SourceAndConverter[]> preprocessMoving) {
 
+        pendingRegistrations.add(reg);
+
         if (registrationTasks == null || registrationTasks.isDone()) {
             registrationTasks = CompletableFuture.supplyAsync(() -> true); // Starts async computation, maybe there's a better way
         }
@@ -223,9 +230,7 @@ public class SliceSources {
                     reg.setMovingImage(preprocessMoving.apply(registered_sacs));
                     out = reg.register();
                     if (!out) {
-                        //components.remove(current);
-                        //demoReportingPanel.remove(current);
-                        //current.setText("Canceled");
+
                     } else {
                         SourceAndConverterServices.getSourceAndConverterDisplayService()
                                 .remove(mp.bdvh, registered_sacs);
@@ -242,6 +247,8 @@ public class SliceSources {
 
                         relocated_sacs_positioning_mode = slicingModePositioner.getTransformedImageMovingToFixed(registered_sacs);
                         updatePosition();
+
+                        registered_sacs_sequence.put(reg, registered_sacs);
                     }
                 }
             } else {
@@ -266,6 +273,8 @@ public class SliceSources {
 
                     relocated_sacs_positioning_mode = slicingModePositioner.getTransformedImageMovingToFixed(registered_sacs);
                     updatePosition();
+
+                    registered_sacs_sequence.put(reg, registered_sacs);
                 }
             }
             if (out) {
@@ -278,11 +287,12 @@ public class SliceSources {
         });
 
         registrationTasks.handle((result, exception) -> {
-            System.out.println(result);
             if (result == false) {
                 System.out.println("Registration task failed");
             }
-            System.out.println(exception);
+            processInProgress = false;
+            pendingRegistrations.remove(reg);
+            System.out.println("Remaining registrations : "+pendingRegistrations.size());
             return exception;
         });
     }
@@ -292,9 +302,56 @@ public class SliceSources {
         registrationTasks.cancel(true);
     }
 
-    protected void removeLastRegistration() {
-        if (processInProgress) {
-            // TODO
+    public synchronized boolean removeRegistration(Registration reg) {
+        if (pendingRegistrations.contains(reg)) {
+            cancelCurrentRegistrations();
+            return true;
+        }
+        if (registrations.contains(reg)) {
+            int idx = registrations.indexOf(reg);
+            if (idx == registrations.size()-1) {
+
+                registrations.remove(reg);
+                registered_sacs_sequence.remove(reg);
+
+                Registration last = registrations.get(registrations.size()-1);
+
+                /*if (mp.currentMode.equals(MultiSlicePositioner.REGISTRATION_MODE)) {
+                    SourceAndConverterServices.getSourceAndConverterDisplayService()
+                            .remove(mp.bdvh, registered_sacs);
+                }*/
+
+                SourceAndConverterServices.getSourceAndConverterService()
+                        .remove(registered_sacs);
+                SourceAndConverterServices.getSourceAndConverterService()
+                        .remove(relocated_sacs_positioning_mode);
+
+                registered_sacs = registered_sacs_sequence.get(last);
+
+                slicingModePositioner = new AffineTransformedSourceWrapperRegistration();
+
+                slicingModePositioner.setMovingImage(registered_sacs);
+                SourceAndConverterServices.getSourceAndConverterService().remove(relocated_sacs_positioning_mode);
+
+                relocated_sacs_positioning_mode = slicingModePositioner.getTransformedImageMovingToFixed(registered_sacs);
+                updatePosition();
+
+                if (mp.currentMode.equals(MultiSlicePositioner.REGISTRATION_MODE)) {
+                    SourceAndConverterServices.getSourceAndConverterDisplayService()
+                            .show(mp.bdvh, registered_sacs);
+                }
+                if (mp.currentMode.equals(MultiSlicePositioner.POSITIONING_MODE)) {
+                    SourceAndConverterServices.getSourceAndConverterDisplayService()
+                            .show(mp.bdvh, relocated_sacs_positioning_mode);
+                    enableGraphicalHandles();
+                }
+
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
         }
     }
 
