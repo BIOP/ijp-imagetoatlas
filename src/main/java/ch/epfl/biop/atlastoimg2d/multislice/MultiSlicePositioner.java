@@ -130,6 +130,9 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         this.bdvh = bdvh;
         this.slicingModel = slicingModel;
         zStepSetter = new ZStepSetter();
+
+        iSliceNoStep = (int) (zStepSetter.getStep());
+
         this.bdvh.getViewerPanel().setTransferHandler(new MultiSlicePositioner.TransferHandler());
 
         nPixX = (int) slicingModel.getSpimSource().getSource(0,0).dimension(0);
@@ -330,12 +333,15 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
     }
 
+    int zStepStored;
+
     public void setPositioningMode() {
         if (!currentMode.equals(POSITIONING_MODE)) {
+            currentMode = POSITIONING_MODE;
+            zStepSetter.setStep(this.zStepStored);
             ghs.forEach(gh -> gh.enable());
             slices.forEach(slice -> slice.enableGraphicalHandles());
             // Do stuff
-            currentMode = POSITIONING_MODE;
             // Do stuff
             synchronized (slices) {
                 if (slices.stream().anyMatch(slice -> slice.processInProgress)) {
@@ -369,10 +375,15 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
     public void setRegistrationMode() {
         if (!currentMode.equals(REGISTRATION_MODE)) {
+
+            currentMode = POSITIONING_MODE;
+            zStepStored = (int) zStepSetter.getStep();
+            zStepSetter.setStep(1);
+            currentMode = REGISTRATION_MODE;
+
             ghs.forEach(gh -> gh.disable());
             slices.forEach(slice -> slice.disableGraphicalHandles());
             // Do stuff
-            currentMode = REGISTRATION_MODE;
             synchronized (slices) {
                 if (slices.stream().anyMatch(slice -> slice.processInProgress)) {
                     System.err.println("Mode cannot be changed if a task is in process");
@@ -727,10 +738,12 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         private int zStep = 1;
 
         public void setStep(int zStep) {
-            if (zStep>0) {
-                this.zStep = zStep;
+            if (currentMode.equals(POSITIONING_MODE)) {
+                if (zStep > 0) {
+                    this.zStep = zStep;
+                }
+                updateDisplay();
             }
-            updateDisplay();
         }
 
         public long getStep() {
