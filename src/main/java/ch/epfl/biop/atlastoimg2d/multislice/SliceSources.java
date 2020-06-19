@@ -92,14 +92,25 @@ public class SliceSources {
     }
 
     public Integer[] getBdvHandleCoords() {
-        RealPoint sliceCenter = SourceAndConverterUtils.getSourceAndConverterCenterPoint(relocated_sacs_positioning_mode[0]);
+        /*RealPoint sliceCenter = SourceAndConverterUtils.getSourceAndConverterCenterPoint(relocated_sacs_positioning_mode[0]);*/
 
         AffineTransform3D bdvAt3D = new AffineTransform3D();
 
         mp.bdvh.getViewerPanel().state().getViewerTransform(bdvAt3D);
+
+        double slicingAxisSnapped = (((int)(slicingAxisPosition/mp.sizePixX))*mp.sizePixX);
+
+        double posX = ((slicingAxisSnapped/mp.sizePixX/mp.zStepSetter.getStep())) * mp.sX;
+        double posY = mp.sY * yShift_slicing_mode;
+
+        RealPoint sliceCenter = new RealPoint(posX, posY, 0);
+
         bdvAt3D.apply(sliceCenter, sliceCenter);
 
+        //double posX = ((slicingAxisSnapped/mp.sizePixX/mp.zStepSetter.getStep())) * mp.sX;
+        //double posY = mp.sY * yShift_slicing_mode;
         return new Integer[]{(int)sliceCenter.getDoublePosition(0), (int)sliceCenter.getDoublePosition(1)};
+        //return new Integer[]{(int)posX, (int)posY};
     }
 
     public Integer[] getBdvHandleColor() {

@@ -575,27 +575,60 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 for (int i=0;i<sortedSelected.size();i++) {
                     //for (SliceSources slice : sortedSelected) {
                     SliceSources slice = sortedSelected.get(i);
-                    RealPoint sliceCenter = SourceAndConverterUtils.getSourceAndConverterCenterPoint(slice.relocated_sacs_positioning_mode[0]);
 
-                    RealPoint ptY = new RealPoint(3);
-                    ptY.setPosition(sliceCenter.getDoublePosition(0),0);
+                    Integer[] coords = slice.getBdvHandleCoords();
+                    RealPoint sliceCenter = new RealPoint(coords[0], coords[1], 0);
+
+                    /*RealPoint sliceCenter = SourceAndConverterUtils.getSourceAndConverterCenterPoint(slice.relocated_sacs_positioning_mode[0]);*/
+
+                    /*RealPoint ptY = new RealPoint(3);
+
+                    double slicingAxisSnapped = (((int)(slice.slicingAxisPosition/sizePixX))*sizePixX);
+
+                    double posX = ((slicingAxisSnapped/sizePixX/zStepSetter.getStep())) * sX;
+
+                    ptY.setPosition(posX,0);
 
                     ptY.setPosition(-sY,1);
-                    ptY.setPosition(0,2);
+                    ptY.setPosition(0,2);*/
 
                     bdvAt3D.apply(sliceCenter, sliceCenter);
-                    bdvAt3D.apply(ptY,ptY);
+                   //bdvAt3D.apply(ptY,ptY);
+
                     if (precedentPoint!=null) {
-                        g.drawLine((int)precedentPoint.getDoublePosition(0),(int)precedentPoint.getDoublePosition(1),(int)sliceCenter.getDoublePosition(0),(int)sliceCenter.getDoublePosition(1));
+                        g.drawLine((int)precedentPoint.getDoublePosition(0),(int)precedentPoint.getDoublePosition(1),
+                                   (int)sliceCenter.getDoublePosition(0),(int)sliceCenter.getDoublePosition(1));
                     }
                     precedentPoint = sliceCenter;
-                    if (i==0) {
-                        leftPosition[0] = (int)sliceCenter.getDoublePosition(0);
-                        leftPosition[1] = (int) ptY.getDoublePosition(1);
+
+                    if (i ==0) {
+                        double slicingAxisSnapped = (((int)(slice.slicingAxisPosition/sizePixX))*sizePixX);
+
+                        double posX = ((slicingAxisSnapped/sizePixX/zStepSetter.getStep())) * sX;
+                        double posY = sY * -1;
+
+                        RealPoint handleLeftPoint = new RealPoint(posX, posY, 0);
+
+                        bdvAt3D.apply(handleLeftPoint, handleLeftPoint);
+
+
+                        leftPosition[0] = (int) handleLeftPoint.getDoublePosition(0);
+                        leftPosition[1] = (int) handleLeftPoint.getDoublePosition(1);
                     }
-                    if (i== sortedSelected.size()-1) {
-                        rightPosition[0] = (int)sliceCenter.getDoublePosition(0);
-                        rightPosition[1] = (int) ptY.getDoublePosition(1);
+
+                    if (i == sortedSelected.size()-1) {
+
+                        double slicingAxisSnapped = (((int)(slice.slicingAxisPosition/sizePixX))*sizePixX);
+
+                        double posX = ((slicingAxisSnapped/sizePixX/zStepSetter.getStep())) * sX;
+                        double posY = sY * -1;
+
+                        RealPoint handleRightPoint = new RealPoint(posX, posY, 0);
+
+                        bdvAt3D.apply(handleRightPoint, handleRightPoint);
+
+                        rightPosition[0] = (int) handleRightPoint.getDoublePosition(0);
+                        rightPosition[1] = (int) handleRightPoint.getDoublePosition(1);
                     }
                 }
 
