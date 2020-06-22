@@ -118,10 +118,6 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     final static String REGISTRATION_BEHAVIOURS_KEY = REGISTRATION_MODE+"-behaviours";
     Behaviours registration_behaviours = new Behaviours(new InputTriggerConfig(), REGISTRATION_MODE);
 
-    final static String VIEWING3D_MODE = "3d_mode";
-    final static String VIEWING3D_BEHAVIOURS_KEY = VIEWING3D_MODE+"-behaviours";
-    Behaviours viewing3d_behaviours = new Behaviours(new InputTriggerConfig(), VIEWING3D_MODE);
-
     final static String COMMON_BEHAVIOURS_KEY = "multipositioner-behaviours";
     Behaviours common_behaviours = new Behaviours(new InputTriggerConfig(), "multipositioner" );
 
@@ -158,7 +154,6 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 bdvh, SourceSelectorBehaviour.class.getSimpleName());
         new EditorBehaviourUnInstaller(bdvh).run();
 
-        // ssb.remove();
         // Disable edit mode by default
         bdvh.getTriggerbindings().removeInputTriggerMap(SourceSelectorBehaviour.SOURCES_SELECTOR_TOGGLE_MAP);
 
@@ -183,8 +178,6 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         positioning_behaviours.behaviour((ClickBehaviour)(x,y) ->  this.equalSpacingSelectedSlices(), "equalSpacingSelectedSlices", "A");
         positioning_behaviours.behaviour((ClickBehaviour)(x,y) ->  slices.forEach(slice -> slice.isSelected = true), "selectAllSlices", "ctrl A");
 
-        //drag_sources_positioning.behaviour(new SelectedSliceSourcesDrag(), "dragSelectedSources", "button1");
-
         ssb.addSelectedSourcesListener(this);
 
         registration_behaviours.behaviour((ClickBehaviour)(x,y) ->  this.elastixRegister(), "register_test", "R");
@@ -200,21 +193,14 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         ghs.add(ghRight);
         ghs.add(ghLeft);
 
-        System.out.println("start ");
-
-
         if (this.bdvh.getCardPanel()!=null) {
             this.bdvh.getCardPanel().addCard( "Registration Options", new RegistrationPanel(this).getPanel(), true);
             this.bdvh.getCardPanel().setCardExpanded("Sources", false);
             this.bdvh.getCardPanel().setCardExpanded("Groups", false);
-
         } else {
             System.err.println("this.bdvh.getCardPanel() is null!");
         }
 
-
-        System.out.println("stop");
-        //System.out.println("flag creation = "+flag);
 
     }
 
@@ -245,11 +231,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 break;
             case REGISTRATION_MODE:
                 this.setPositioningMode();
-                // this.set3dViewingMode();
                 break;
-           /* case VIEWING3D_MODE:
-                this.setPositioningMode();
-                break;*/
         }
     }
 
@@ -288,9 +270,6 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             case REGISTRATION_MODE:
                 centerSlice = SourceAndConverterUtils.getSourceAndConverterCenterPoint(slice.registered_sacs[0]);
                 break;
-           // case VIEWING3D_MODE:
-           //     centerSlice = SourceAndConverterUtils.getSourceAndConverterCenterPoint(slice.relocated_sacs_3D_mode[0]);
-           //     break;
             default:
                 System.err.println("Invalid multislicer mode");
                 return;
@@ -336,41 +315,43 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     int zStepStored;
 
     public void setPositioningMode() {
-        if (!currentMode.equals(POSITIONING_MODE)) {
-            currentMode = POSITIONING_MODE;
-            zStepSetter.setStep(this.zStepStored);
-            ghs.forEach(gh -> gh.enable());
-            slices.forEach(slice -> slice.enableGraphicalHandles());
-            // Do stuff
-            // Do stuff
-            synchronized (slices) {
-                if (slices.stream().anyMatch(slice -> slice.processInProgress)) {
-                    System.err.println("Mode cannot be changed if a task is in process");
-                } else {
-                    List<SourceAndConverter> sacsToRemove = new ArrayList<>();
-                    List<SourceAndConverter> sacsToAdd = new ArrayList<>();
-                    getSortedSlices().forEach(ss -> {
-                       // sacsToRemove.addAll(Arrays.asList(ss.relocated_sacs_3D_mode));
-                        sacsToRemove.addAll(Arrays.asList(ss.registered_sacs));
-                        sacsToAdd.addAll(Arrays.asList(ss.relocated_sacs_positioning_mode));
-                    });
-                    SourceAndConverterServices
-                            .getSourceAndConverterDisplayService()
-                            .remove(bdvh, sacsToRemove.toArray(new SourceAndConverter[0]));
-                    SourceAndConverterServices
-                            .getSourceAndConverterDisplayService()
-                            .show(bdvh, sacsToAdd.toArray(new SourceAndConverter[0]));
-                    ;
+        if (slices.stream().noneMatch(slice -> slice.processInProgress)) {
+            if (!currentMode.equals(POSITIONING_MODE)) {
+                currentMode = POSITIONING_MODE;
+                zStepSetter.setStep(this.zStepStored);
+                ghs.forEach(gh -> gh.enable());
+                slices.forEach(slice -> slice.enableGraphicalHandles());
+                // Do stuff
+                // Do stuff
+                synchronized (slices) {
+                    if (slices.stream().anyMatch(slice -> slice.processInProgress)) {
+                        System.err.println("Mode cannot be changed if a task is in process");
+                    } else {
+                        List<SourceAndConverter> sacsToRemove = new ArrayList<>();
+                        List<SourceAndConverter> sacsToAdd = new ArrayList<>();
+                        getSortedSlices().forEach(ss -> {
+                           // sacsToRemove.addAll(Arrays.asList(ss.relocated_sacs_3D_mode));
+                            sacsToRemove.addAll(Arrays.asList(ss.registered_sacs));
+                            sacsToAdd.addAll(Arrays.asList(ss.relocated_sacs_positioning_mode));
+                        });
+                        SourceAndConverterServices
+                                .getSourceAndConverterDisplayService()
+                                .remove(bdvh, sacsToRemove.toArray(new SourceAndConverter[0]));
+                        SourceAndConverterServices
+                                .getSourceAndConverterDisplayService()
+                                .show(bdvh, sacsToAdd.toArray(new SourceAndConverter[0]));
+                        ;
+                    }
                 }
+                bdvh.getTriggerbindings().removeInputTriggerMap(REGISTRATION_BEHAVIOURS_KEY);
+                bdvh.getTriggerbindings().removeBehaviourMap(REGISTRATION_BEHAVIOURS_KEY);
+                positioning_behaviours.install(bdvh.getTriggerbindings(), POSITIONING_BEHAVIOURS_KEY);
+                navigateCurrentSlice();
             }
-            bdvh.getTriggerbindings().removeInputTriggerMap(REGISTRATION_BEHAVIOURS_KEY);
-            bdvh.getTriggerbindings().removeBehaviourMap(REGISTRATION_BEHAVIOURS_KEY);
-            bdvh.getTriggerbindings().removeInputTriggerMap(VIEWING3D_BEHAVIOURS_KEY);
-            bdvh.getTriggerbindings().removeBehaviourMap(VIEWING3D_BEHAVIOURS_KEY);
-            positioning_behaviours.install(bdvh.getTriggerbindings(), POSITIONING_BEHAVIOURS_KEY);
-            navigateCurrentSlice();
+            refreshBlockMap();
+        } else {
+            bdvh.getViewerPanel().showMessage("Registration in progress : cannot switch to positioning mode.");
         }
-        refreshBlockMap();
     }
 
     public void setRegistrationMode() {
@@ -406,46 +387,8 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             }
             bdvh.getTriggerbindings().removeInputTriggerMap(POSITIONING_BEHAVIOURS_KEY);
             bdvh.getTriggerbindings().removeBehaviourMap(POSITIONING_BEHAVIOURS_KEY);
-            bdvh.getTriggerbindings().removeInputTriggerMap(VIEWING3D_BEHAVIOURS_KEY);
-            bdvh.getTriggerbindings().removeBehaviourMap(VIEWING3D_BEHAVIOURS_KEY);
             registration_behaviours.install(bdvh.getTriggerbindings(), REGISTRATION_BEHAVIOURS_KEY );
             navigateCurrentSlice();
-        }
-        refreshBlockMap();
-    }
-
-    public void set3dViewingMode() {
-        if (!currentMode.equals(VIEWING3D_MODE)) {
-            ghs.forEach(gh -> gh.disable());
-            slices.forEach(slice -> slice.disableGraphicalHandles());
-            currentMode = VIEWING3D_MODE;
-            // Do stuff
-            synchronized (slices) {
-                if (slices.stream().anyMatch(slice -> slice.processInProgress)) {
-                    System.err.println("Mode cannot be changed if a task is in process");
-                } else {
-                    List<SourceAndConverter> sacsToRemove = new ArrayList<>();
-                    List<SourceAndConverter> sacsToAdd = new ArrayList<>();
-                    getSortedSlices().forEach(ss -> {
-                        sacsToRemove.addAll(Arrays.asList(ss.relocated_sacs_positioning_mode));
-                        sacsToRemove.addAll(Arrays.asList(ss.registered_sacs));
-                        //sacsToAdd.addAll(Arrays.asList(ss.relocated_sacs_3D_mode));
-                    });
-                    SourceAndConverterServices
-                            .getSourceAndConverterDisplayService()
-                            .remove(bdvh, sacsToRemove.toArray(new SourceAndConverter[0]));
-                    SourceAndConverterServices
-                            .getSourceAndConverterDisplayService()
-                            .show(bdvh, sacsToAdd.toArray(new SourceAndConverter[0]));
-                    ;
-                }
-                bdvh.getTriggerbindings().removeInputTriggerMap(POSITIONING_BEHAVIOURS_KEY);
-                bdvh.getTriggerbindings().removeBehaviourMap(POSITIONING_BEHAVIOURS_KEY);
-                bdvh.getTriggerbindings().removeInputTriggerMap(REGISTRATION_BEHAVIOURS_KEY);
-                bdvh.getTriggerbindings().removeBehaviourMap(REGISTRATION_BEHAVIOURS_KEY);
-                viewing3d_behaviours.install(bdvh.getTriggerbindings(),  VIEWING3D_BEHAVIOURS_KEY  );
-                navigateCurrentSlice();
-            }
         }
         refreshBlockMap();
     }
@@ -509,7 +452,6 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     }
 
     public void elastixRegister() {
-
         for (SliceSources slice : slices) {
             if (slice.isSelected) {
                 Elastix2DAffineRegistration elastixAffineReg = new Elastix2DAffineRegistration();
@@ -584,33 +526,22 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 RealPoint precedentPoint = null;
 
                 for (int i=0;i<sortedSelected.size();i++) {
-                    //for (SliceSources slice : sortedSelected) {
                     SliceSources slice = sortedSelected.get(i);
 
                     Integer[] coords = slice.getBdvHandleCoords();
                     RealPoint sliceCenter = new RealPoint(coords[0], coords[1], 0);
 
-                    /*RealPoint sliceCenter = SourceAndConverterUtils.getSourceAndConverterCenterPoint(slice.relocated_sacs_positioning_mode[0]);*/
-
-                    /*RealPoint ptY = new RealPoint(3);
-
-                    double slicingAxisSnapped = (((int)(slice.slicingAxisPosition/sizePixX))*sizePixX);
-
-                    double posX = ((slicingAxisSnapped/sizePixX/zStepSetter.getStep())) * sX;
-
-                    ptY.setPosition(posX,0);
-
-                    ptY.setPosition(-sY,1);
-                    ptY.setPosition(0,2);*/
-
-                    bdvAt3D.apply(sliceCenter, sliceCenter);
-                   //bdvAt3D.apply(ptY,ptY);
-
                     if (precedentPoint!=null) {
                         g.drawLine((int)precedentPoint.getDoublePosition(0),(int)precedentPoint.getDoublePosition(1),
                                    (int)sliceCenter.getDoublePosition(0),(int)sliceCenter.getDoublePosition(1));
+                    } else {
+                        precedentPoint = new RealPoint(2);
                     }
-                    precedentPoint = sliceCenter;
+
+                    precedentPoint.setPosition(sliceCenter.getDoublePosition(0),0);
+                    precedentPoint.setPosition(sliceCenter.getDoublePosition(1),1);
+
+                    bdvAt3D.apply(sliceCenter, sliceCenter);
 
                     if (i ==0) {
                         double slicingAxisSnapped = (((int)(slice.slicingAxisPosition/sizePixX))*sizePixX);
@@ -857,7 +788,6 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     }
 
     public <T extends Entity> List<SliceSources> createSlice(SourceAndConverter[] sacsArray, double slicingAxisPosition, double axisIncrement, final Class< T > attributeClass, T defaultEntity) {
-        //new CreateSlice(Arrays.asList(sacs), slicingAxisPosition).run();
         List<SliceSources> out = new ArrayList<>();
         List<SourceAndConverter<?>> sacs = Arrays.asList(sacsArray);
         if ((sacs.size()>1)&&(attributeClass!=null)) {
@@ -916,7 +846,6 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
         @Override
         public void run() {
-            System.out.println("Create Slice run");
             boolean sacAlreadyPresent = false;
             for (SourceAndConverter sac : sacs) {
                 for (SliceSources slice : slices) {
@@ -926,9 +855,6 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                        }
                    }
                 }
-                /*if (containedSources.contains(sac)) {
-                    sacAlreadyPresent = true;
-                }*/
             }
 
             if (sacAlreadyPresent) {
@@ -964,9 +890,6 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
             slices.add(sliceSource);
 
-            //containedSources.addAll(Arrays.asList(sliceSource.original_sacs));
-            //containedSources.addAll(Arrays.asList(sliceSource.relocated_sacs_positioning_mode));
-
             updateDisplay();
 
             if (currentMode.equals(POSITIONING_MODE)) {
@@ -991,9 +914,6 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
         @Override
         public void cancel() {
-            //containedSources.removeAll(Arrays.asList(sliceSource.original_sacs));
-            //containedSources.removeAll(Arrays.asList(sliceSource.registered_sacs));
-            //containedSources.removeAll(Arrays.asList(sliceSource.relocated_sacs_positioning_mode));
             slices.remove(sliceSource);
             SourceAndConverterServices.getSourceAndConverterDisplayService()
                     .remove(bdvh, sliceSource.relocated_sacs_positioning_mode);
@@ -1033,6 +953,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             } else {
                 System.err.println("Error during registration cancelling");
             }
+            bdvh.getViewerPanel().showMessage("Registration cancelled");
             super.cancel();
         }
     }

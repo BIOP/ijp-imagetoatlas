@@ -304,6 +304,7 @@ public class SliceSources {
             processInProgress = false;
             pendingRegistrations.remove(reg);
             System.out.println("Remaining registrations : "+pendingRegistrations.size());
+            System.out.println("exception = "+exception);
             return exception;
         });
     }
@@ -315,7 +316,9 @@ public class SliceSources {
 
     public synchronized boolean removeRegistration(Registration reg) {
         if (pendingRegistrations.contains(reg)) {
+            System.out.println("Attempt to cancel current registrations...");
             cancelCurrentRegistrations();
+            System.out.println("Attempt to cancel current registrations...");
             return true;
         }
         if (registrations.contains(reg)) {
