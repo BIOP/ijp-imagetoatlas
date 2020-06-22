@@ -121,10 +121,11 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     final static String COMMON_BEHAVIOURS_KEY = "multipositioner-behaviours";
     Behaviours common_behaviours = new Behaviours(new InputTriggerConfig(), "multipositioner" );
 
-    public MultiSlicePositioner(BdvHandle bdvh, SourceAndConverter slicingModel, SourceAndConverter[] slicedSources) {
+    public MultiSlicePositioner(BdvHandle bdvh, SourceAndConverter slicingModel, SourceAndConverter[] slicedSources, Context ctx) {
         this.slicedSources = slicedSources;
         this.bdvh = bdvh;
         this.slicingModel = slicingModel;
+        this.scijavaCtx = ctx;
         zStepSetter = new ZStepSetter();
 
         iSliceNoStep = (int) (zStepSetter.getStep());
@@ -197,10 +198,10 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             this.bdvh.getCardPanel().addCard( "Registration Options", new RegistrationPanel(this).getPanel(), true);
             this.bdvh.getCardPanel().setCardExpanded("Sources", false);
             this.bdvh.getCardPanel().setCardExpanded("Groups", false);
+
         } else {
             System.err.println("this.bdvh.getCardPanel() is null!");
         }
-
 
     }
 
@@ -394,9 +395,9 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     }
 
     Context scijavaCtx;
-    public void setScijavaContext(Context ctx) {
-        scijavaCtx = ctx;
-    }
+    //public void setScijavaContext(Context ctx) {
+    //    scijavaCtx = ctx;
+    //}
 
     public List<SliceSources> getSortedSlices() {
         List<SliceSources> sortedSlices = new ArrayList<>(slices);

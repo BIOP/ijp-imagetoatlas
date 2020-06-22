@@ -1,14 +1,9 @@
 package ch.epfl.biop.atlas.allen.adultmousebrain;
 
-import bdv.BigDataViewer;
-import bdv.tools.brightness.ConverterSetup;
-import bdv.viewer.DisplayMode;
 import ch.epfl.biop.atlas.BiopAtlas;
 import ch.epfl.biop.atlas.allen.AllenAtlas;
-import ch.epfl.biop.atlas.allen.AllenMap;
 import ch.epfl.biop.atlas.allen.AllenOntology;
 import ij.Prefs;
-import net.imglib2.type.numeric.ARGBType;
 import org.scijava.ItemIO;
 import org.scijava.command.Command;
 import org.scijava.object.ObjectService;
@@ -17,9 +12,8 @@ import org.scijava.plugin.Plugin;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
+
+// Take ply files from : http://download.alleninstitute.org/informatics-archive/current-release/mouse_ccf/annotation/ccf_2017/structure_meshes/ply/
 
 @Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Allen Brain Adult Mouse Brain CCF 2017")
 public class AllenBrainAdultMouseAtlasCCF2017 extends AllenAtlas implements Command {
