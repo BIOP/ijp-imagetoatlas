@@ -1,13 +1,11 @@
 package ch.epfl.biop.atlastoimg2d.multislice;
 
-import bdv.tools.transformation.TransformedSource;
 import bdv.util.BdvFunctions;
 import bdv.util.BdvHandle;
 import bdv.util.BdvOptions;
 import bdv.util.BdvOverlay;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.BiopAtlas;
-import ch.epfl.biop.atlastoimg2d.commands.sourceandconverter.multislices.SacMultiSacsPositionerCommand;
 import ch.epfl.biop.bdv.select.SelectedSourcesListener;
 import ch.epfl.biop.bdv.select.SourceSelectorBehaviour;
 import ch.epfl.biop.registration.Registration;
@@ -28,9 +26,7 @@ import sc.fiji.bdvpg.behaviour.EditorBehaviourUnInstaller;
 import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
 import sc.fiji.bdvpg.scijava.services.ui.swingdnd.BdvTransferHandler;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
-import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterAndTimeRange;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterUtils;
-import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
@@ -68,16 +64,6 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     final BdvHandle bdvh;
 
     final SourceSelectorBehaviour ssb;
-
-    /**
-     * Controller of the number of steps displayed
-     */
-    //final SlicerSetter zStepSetter;
-
-    /**
-     * The slicing model
-     */
-    //final SourceAndConverter slicingModel;
 
     /**
      * Slicing Model Properties
@@ -137,7 +123,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     public MultiSlicePositioner(BdvHandle bdvh, BiopAtlas biopAtlas, ReslicedAtlas reslicedAtlas, Context ctx) {
         this.reslicedAtlas = reslicedAtlas;
         this.biopAtlas = biopAtlas;
-        this.extendedSlicedSources = reslicedAtlas.extendedSlicedSources;//licedSources;
+        this.extendedSlicedSources = reslicedAtlas.extendedSlicedSources;
 
         this.bdvh = bdvh;
         this.scijavaCtx = ctx;
@@ -231,6 +217,11 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         });
 
         previouszStep = (int) reslicedAtlas.getStep();
+
+        bdvh.getCardPanel().addCard("Slicing Adjustement",
+                new SlicingAdjusterPanel(this,scijavaCtx).getPanel("reslicedAtlas", reslicedAtlas),
+                true);
+
     }
 
     int previouszStep;
@@ -332,7 +323,6 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                     List<SourceAndConverter> sacsToRemove = new ArrayList<>();
                     List<SourceAndConverter> sacsToAdd = new ArrayList<>();
                     getSortedSlices().forEach(ss -> {
-                        // sacsToRemove.addAll(Arrays.asList(ss.relocated_sacs_3D_mode));
                         sacsToRemove.addAll(Arrays.asList(ss.registered_sacs));
                         sacsToAdd.addAll(Arrays.asList(ss.relocated_sacs_positioning_mode));
                     });
@@ -356,18 +346,6 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
                 bdvh.getViewerPanel().state().setSourcesActive(sacToHide, false);
                 bdvh.getViewerPanel().state().setSourcesActive(sacToShow, true);
-
-                /*bdvh.getViewerPanel().state()
-                        .setSourcesActive(Arrays.asList(extendedSlicedSources));
-
-
-                /*SourceAndConverterServices
-                        .getSourceAndConverterDisplayService()
-                        .remove(bdvh, nonextendedSlicedSources);*/
-
-                /*SourceAndConverterServices
-                        .getSourceAndConverterDisplayService()
-                        .show(bdvh, extendedSlicedSources);*/
 
                 bdvh.getTriggerbindings().removeInputTriggerMap(REGISTRATION_BEHAVIOURS_KEY);
                 bdvh.getTriggerbindings().removeBehaviourMap(REGISTRATION_BEHAVIOURS_KEY);
@@ -401,7 +379,6 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                     List<SourceAndConverter> sacsToRemove = new ArrayList<>();
                     List<SourceAndConverter> sacsToAdd = new ArrayList<>();
                     getSortedSlices().forEach(ss -> {
-                        //sacsToRemove.addAll(Arrays.asList(ss.relocated_sacs_3D_mode));
                         sacsToRemove.addAll(Arrays.asList(ss.relocated_sacs_positioning_mode));
                         sacsToAdd.addAll(Arrays.asList(ss.registered_sacs));
                     });
@@ -414,11 +391,6 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                     ;
                 }
             }
-
-            /*SourceAndConverterServices
-                    .getSourceAndConverterDisplayService()
-                    .remove(bdvh, extendedSlicedSources);*/
-
 
             List<SourceAndConverter<?>> sacToShow = new ArrayList<>();
             List<SourceAndConverter<?>> sacToHide = new ArrayList<>();
@@ -881,9 +853,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         public MoveSlice(SliceSources sliceSource, double slicingAxisPosition ) {
             this.sliceSource = sliceSource;
             this.oldSlicingAxisPosition = sliceSource.slicingAxisPosition;
-            // int iSliceNoStep = (int) (slicingAxisPosition / sizePixX);
-            //double slicingAxisPosition = iSliceNoStep*sizePixX;
-            this.newSlicingAxisPosition = slicingAxisPosition;//= iSliceNoStep*sizePixX; //slicingAxisPosition;
+            this.newSlicingAxisPosition = slicingAxisPosition;
         }
 
         public void run() {
