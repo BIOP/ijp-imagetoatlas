@@ -14,6 +14,7 @@ import net.imglib2.type.numeric.integer.UnsignedShortType;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import sc.fiji.bdvpg.sourceandconverter.importer.EmptySourceAndConverterCreator;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceAffineTransformer;
+import sc.fiji.bdvpg.sourceandconverter.transform.SourceResampler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -172,7 +173,6 @@ public class ReslicedAtlas {
 
         // 1 -
 
-        //nonExtendedSlicedSources = new SourceAndConverter[ba.map.getStructuralImages().length];
         extendedSlicedSources = new SourceAndConverter[ba.map.getStructuralImages().length];
 
         SourceMosaicZSlicer mosaic = new SourceMosaicZSlicer(null, slicingModel, true, false, false,
@@ -181,6 +181,7 @@ public class ReslicedAtlas {
         AffineTransform3D centerTransform = null;
         for (int index = 0; index<ba.map.getStructuralImages().length;index++) {
             SourceAndConverter sac = ba.map.getStructuralImages()[index];
+
             SourceAndConverter reslicedSac = mosaic.apply(sac);
             if (centerTransform == null) {
                 centerTransform = new AffineTransform3D();

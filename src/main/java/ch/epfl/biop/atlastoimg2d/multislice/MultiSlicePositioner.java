@@ -185,7 +185,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
         List<SourceAndConverter<?>> sacsToAppend = new ArrayList<>();
         for (int i=0;i<biopAtlas.map.getStructuralImages().length;i++) {
-            sacsToAppend.add(biopAtlas.map.getStructuralImages()[i]);
+        //    sacsToAppend.add(biopAtlas.map.getStructuralImages()[i]);
             sacsToAppend.add(extendedSlicedSources[i]);
         }
 
@@ -298,10 +298,10 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     public void nextMode() {
         switch (currentMode) {
             case POSITIONING_MODE:
-                this.setRegistrationMode();
+                setRegistrationMode();
                 break;
             case REGISTRATION_MODE:
-                this.setPositioningMode();
+                setPositioningMode();
                 break;
         }
     }
@@ -316,6 +316,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             if (!currentMode.equals(POSITIONING_MODE)) {
                 synchronized (slices) {
                     reslicedAtlas.unlock();
+                    reslicedAtlas.setStep(zStepStored);
                     currentMode = POSITIONING_MODE;
                     reslicedAtlas.setStep(this.zStepStored);
                     ghs.forEach(gh -> gh.enable());
@@ -334,7 +335,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                             .show(bdvh, sacsToAdd.toArray(new SourceAndConverter[0]));
                 }
 
-                List<SourceAndConverter<?>> sacToShow = new ArrayList<>();
+                /*List<SourceAndConverter<?>> sacToShow = new ArrayList<>();
                 List<SourceAndConverter<?>> sacToHide = new ArrayList<>();
                 for (int i=0;i<biopAtlas.map.getStructuralImages().length;i++) {
                     SourceAndConverter sac = biopAtlas.map.getStructuralImages()[i];
@@ -345,7 +346,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 }
 
                 bdvh.getViewerPanel().state().setSourcesActive(sacToHide, false);
-                bdvh.getViewerPanel().state().setSourcesActive(sacToShow, true);
+                bdvh.getViewerPanel().state().setSourcesActive(sacToShow, true);*/
 
                 bdvh.getTriggerbindings().removeInputTriggerMap(REGISTRATION_BEHAVIOURS_KEY);
                 bdvh.getTriggerbindings().removeBehaviourMap(REGISTRATION_BEHAVIOURS_KEY);
@@ -363,10 +364,10 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
      */
     public void setRegistrationMode() {
         if (!currentMode.equals(REGISTRATION_MODE)) {
-            reslicedAtlas.lock();
             currentMode = POSITIONING_MODE;
             zStepStored = (int) reslicedAtlas.getStep();
             reslicedAtlas.setStep(1);
+            reslicedAtlas.lock();
             currentMode = REGISTRATION_MODE;
 
             ghs.forEach(gh -> gh.disable());
@@ -392,7 +393,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 }
             }
 
-            List<SourceAndConverter<?>> sacToShow = new ArrayList<>();
+            /*List<SourceAndConverter<?>> sacToShow = new ArrayList<>();
             List<SourceAndConverter<?>> sacToHide = new ArrayList<>();
             for (int i=0;i<biopAtlas.map.getStructuralImages().length;i++) {
                 SourceAndConverter sac = extendedSlicedSources[i];
@@ -403,7 +404,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             }
 
             bdvh.getViewerPanel().state().setSourcesActive(sacToHide, false);
-            bdvh.getViewerPanel().state().setSourcesActive(sacToShow, true);
+            bdvh.getViewerPanel().state().setSourcesActive(sacToShow, true);*/
 
             bdvh.getTriggerbindings().removeInputTriggerMap(POSITIONING_BEHAVIOURS_KEY);
             bdvh.getTriggerbindings().removeBehaviourMap(POSITIONING_BEHAVIOURS_KEY);
