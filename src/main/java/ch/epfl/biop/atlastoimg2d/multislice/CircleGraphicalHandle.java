@@ -69,6 +69,6 @@ public class CircleGraphicalHandle extends GraphicalHandle{
     synchronized boolean isPresentAt(int x, int y) {
         if ((pos == null) || (pos[0] == null) || (pos[1] == null)) return false;
         double d = (pos[0]-x)*(pos[0]-x)+(pos[1]-y)*(pos[1]-y);
-        return d*d<4*r*r;
+        return d*d<10*r*r;
     }
 }

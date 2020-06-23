@@ -4,6 +4,7 @@ import bdv.util.BdvHandle;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.BiopAtlas;
 import ch.epfl.biop.atlastoimg2d.multislice.MultiSlicePositioner;
+import ch.epfl.biop.atlastoimg2d.multislice.ReslicedAtlas;
 import ch.epfl.biop.atlastoimg2d.multislice.SlicingAdjusterPanel;
 import ch.epfl.biop.sourceandconverter.transform.SourceMosaicZSlicer;
 import net.imglib2.RandomAccessibleInterval;
@@ -20,10 +21,8 @@ import org.scijava.object.ObjectService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import sc.fiji.bdvpg.bdv.projector.Projection;
-import sc.fiji.bdvpg.scijava.command.bdv.BdvSourcesAdderCommand;
 import sc.fiji.bdvpg.scijava.command.bdv.BdvWindowCreatorCommand;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
-import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterUtils;
 import sc.fiji.bdvpg.sourceandconverter.importer.EmptySourceAndConverterCreator;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceAffineTransformer;
 
@@ -74,9 +73,14 @@ public class SacMultiSacsPositionerCommand implements Command {
                 break;
         }
 
+        ReslicedAtlas ra = new ReslicedAtlas(ba);
+        ra.setResolution(0.01);
+        ra.setSlicingTransform(slicingTransfom);
+
+
         // No let's check for bounds along the z axis
         // Pick the first SourceAndConverter
-        SourceAndConverter sacForBoundsTesting = ba.map.getStructuralImages()[0];
+        /*SourceAndConverter sacForBoundsTesting = ba.map.getStructuralImages()[0];
 
         // Gets level 0 (and timepoint 0) and source transform
         AffineTransform3D sacTransform = new AffineTransform3D();
@@ -175,8 +179,7 @@ public class SacMultiSacsPositionerCommand implements Command {
         // Wrapped as TransformedSource to adjust slicing
         SourceAndConverter slicingModel = new SourceAffineTransformer(nonWrappedSlicingModel, slicingTransfom).getSourceOut();
 
-        SourceAndConverterServices.getSourceAndConverterService().register(slicingModel);
-        //SourceAndConverterServices.getSourceAndConverterDisplayService().show(slicingModel);
+        SourceAndConverterServices.getSourceAndConverterService().register(slicingModel);*/
 
         //MultiSlicePositioner.ZStepSetter zSetter = new MultiSlicePositioner.ZStepSetter();
         try {
@@ -189,8 +192,7 @@ public class SacMultiSacsPositionerCommand implements Command {
                     "projector", Projection.SUM_PROJECTOR)
                     .get().getOutput("bdvh");
 
-
-            SourceAndConverter[] nonExtendedSlicedSources = new SourceAndConverter[ba.map.getStructuralImages().length];
+            /*SourceAndConverter[] nonExtendedSlicedSources = new SourceAndConverter[ba.map.getStructuralImages().length];
             SourceAndConverter[] extendedSlicedSources = new SourceAndConverter[ba.map.getStructuralImages().length];
 
             SourceMosaicZSlicer mosaic = new SourceMosaicZSlicer(null, slicingModel, true, false, false, () -> {
@@ -201,7 +203,7 @@ public class SacMultiSacsPositionerCommand implements Command {
                 }});
 
             // Recenter around center of source in xy
-            SourceAndConverter sourceUsedForRecenteringXY = ba.map.getStructuralImages()[0];
+            //SourceAndConverter sourceUsedForRecenteringXY = ba.map.getStructuralImages()[0];
 
             //sourceUsedForRecenteringXY.getSpimSource().getSource(0,0).dimensions(dims);
             AffineTransform3D centerTransform = null;
@@ -236,11 +238,13 @@ public class SacMultiSacsPositionerCommand implements Command {
 
             mp = new MultiSlicePositioner(bdvMultiSlicer, slicingModel, extendedSlicedSources, nonExtendedSlicedSources, context);
 
+            /**/
+
+            mp = new MultiSlicePositioner(bdvMultiSlicer, ba, ra, context);
+
             bdvMultiSlicer.getCardPanel().addCard("Slicing Adjustement",
-                    new SlicingAdjusterPanel(mp,context).getPanel("modelSlicing", slicingModel,
-                            "slicedSources", extendedSlicedSources,
-                            "sliceSetter", mp.getzStepSetter(),
-                            "originalAffineTransform3D", slicingTransfom), true);
+                    new SlicingAdjusterPanel(mp,context).getPanel("reslicedAtlas", ra), true);
+
 
             os.addObject(mp);
 

@@ -1,25 +1,15 @@
 package ch.epfl.biop.atlastoimg2d.commands.sourceandconverter.multislices;
 
-import bdv.tools.transformation.TransformedSource;
-import bdv.util.BdvHandle;
-import bdv.viewer.SourceAndConverter;
-import ch.epfl.biop.atlastoimg2d.multislice.MultiSlicePositioner;
-import net.imglib2.RealPoint;
-import net.imglib2.realtransform.AffineTransform3D;
+import ch.epfl.biop.atlastoimg2d.multislice.ReslicedAtlas;
 import org.scijava.command.InteractiveCommand;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import sc.fiji.bdvpg.services.SourceAndConverterServices;
-
-import java.util.Set;
 
 @Plugin(type = InteractiveCommand.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Adjust Slicing")
 public class SlicerAdjusterCommand extends InteractiveCommand {
 
     @Parameter(min = "1", max = "50", stepSize = "1", style = "slider")
     int zSamplingSteps = 1;
-
-    int previouszSampingStep=-1;
 
     @Parameter(min = "-20", max = "+20", stepSize = "1", style = "slider")
     int rotateX = 0;
@@ -28,23 +18,14 @@ public class SlicerAdjusterCommand extends InteractiveCommand {
     int rotateY = 0;
 
     @Parameter
-    SourceAndConverter modelSlicing;
-
-    @Parameter
-    AffineTransform3D originalAffineTransform3D;
-
-    @Parameter
-    SourceAndConverter[] slicedSources;
-
-    @Parameter
-    MultiSlicePositioner.SlicerSetter sliceSetter;
+    ReslicedAtlas reslicedAtlas;
 
     public void run() {
 
-        sliceSetter.setStep(zSamplingSteps);
-        sliceSetter.setRotateX(rotateX/180.0*Math.PI);
-        sliceSetter.setRotateY(rotateY/180.0*Math.PI);
-
+        reslicedAtlas.setStep(zSamplingSteps);
+        reslicedAtlas.setRotateX(rotateX/180.0*Math.PI);
+        reslicedAtlas.setRotateY(rotateY/180.0*Math.PI);
+/*
 
         long nPixX = modelSlicing.getSpimSource().getSource(0,0).max(0);
         long nPixY = modelSlicing.getSpimSource().getSource(0,0).max(1);
@@ -146,11 +127,7 @@ public class SlicerAdjusterCommand extends InteractiveCommand {
 
         bdvhs.forEach(bdv -> bdv.getViewerPanel().requestRepaint());
 
-        previouszSampingStep = zSamplingSteps;
-    }
-
-    public int getZSamplingStep() {
-        return zSamplingSteps;
+        previouszSampingStep = zSamplingSteps;*/
     }
 
 }

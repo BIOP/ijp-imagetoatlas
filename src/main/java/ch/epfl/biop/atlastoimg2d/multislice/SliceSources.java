@@ -99,7 +99,7 @@ public class SliceSources {
 
         double slicingAxisSnapped = (((int)(slicingAxisPosition/mp.sizePixX))*mp.sizePixX);
 
-        double posX = ((slicingAxisSnapped/mp.sizePixX/mp.zStepSetter.getStep())) * mp.sX;
+        double posX = ((slicingAxisSnapped/mp.sizePixX/mp.reslicedAtlas.getStep())) * mp.sX;
         double posY = mp.sY * yShift_slicing_mode;
 
         RealPoint sliceCenter = new RealPoint(posX, posY, 0);
@@ -195,7 +195,7 @@ public class SliceSources {
 
         double slicingAxisSnapped = (((int)(slicingAxisPosition/mp.sizePixX))*mp.sizePixX);
 
-        double posX = ((slicingAxisSnapped/mp.sizePixX/mp.zStepSetter.getStep())) * mp.sX;
+        double posX = ((slicingAxisSnapped/mp.sizePixX/mp.reslicedAtlas.getStep())) * mp.sX;
         double posY = mp.sY * yShift_slicing_mode;
 
         slicingModePositionAffineTransform.translate(posX, posY, -slicingAxisPosition );
