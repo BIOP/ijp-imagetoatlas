@@ -190,11 +190,15 @@ public class SacMultiSacsPositionerCommand implements Command {
                     .get().getOutput("bdvh");
 
 
-            SourceAndConverter[] slicedSources = new SourceAndConverter[ba.map.getStructuralImages().length];
+            SourceAndConverter[] nonExtendedSlicedSources = new SourceAndConverter[ba.map.getStructuralImages().length];
+            SourceAndConverter[] extendedSlicedSources = new SourceAndConverter[ba.map.getStructuralImages().length];
 
-            mp = new MultiSlicePositioner(bdvMultiSlicer, slicingModel, slicedSources, context);
-
-            SourceMosaicZSlicer mosaic = new SourceMosaicZSlicer(null, slicingModel, true, false, false, mp.getzStepSetter()::getStep);
+            SourceMosaicZSlicer mosaic = new SourceMosaicZSlicer(null, slicingModel, true, false, false, () -> {
+                if (mp == null) {
+                    return (long) 1;
+                } else {
+                    return mp.getzStepSetter().getStep();
+                }});
 
             // Recenter around center of source in xy
             SourceAndConverter sourceUsedForRecenteringXY = ba.map.getStructuralImages()[0];
@@ -203,6 +207,7 @@ public class SacMultiSacsPositionerCommand implements Command {
             AffineTransform3D centerTransform = null;
             for (int index = 0; index<ba.map.getStructuralImages().length;index++) {
                 SourceAndConverter sac = ba.map.getStructuralImages()[index];
+                nonExtendedSlicedSources[index] = sac;
                 SourceAndConverter reslicedSac = mosaic.apply(sac);
                 if (centerTransform == null) {
                     centerTransform = new AffineTransform3D();
@@ -226,21 +231,16 @@ public class SacMultiSacsPositionerCommand implements Command {
                 reslicedSac = new SourceAffineTransformer(null, centerTransform).apply(reslicedSac);
                 SourceAndConverterServices.getSourceAndConverterService()
                         .register(reslicedSac);
-                slicedSources[index] = reslicedSac;
+                extendedSlicedSources[index] = reslicedSac;
             }
+
+            mp = new MultiSlicePositioner(bdvMultiSlicer, slicingModel, extendedSlicedSources, nonExtendedSlicedSources, context);
 
             bdvMultiSlicer.getCardPanel().addCard("Slicing Adjustement",
                     new SlicingAdjusterPanel(mp,context).getPanel("modelSlicing", slicingModel,
-                            "slicedSources", slicedSources,
-                            "zSetter", mp.getzStepSetter(),
+                            "slicedSources", extendedSlicedSources,
+                            "sliceSetter", mp.getzStepSetter(),
                             "originalAffineTransform3D", slicingTransfom), true);
-
-            // adds sliced source
-            cs.run(BdvSourcesAdderCommand.class, true,
-                    "bdvh", bdvMultiSlicer,
-                    "sacs", slicedSources,
-                    "autoContrast", false,
-                    "adjustViewOnSource", true  ).get();
 
             os.addObject(mp);
 

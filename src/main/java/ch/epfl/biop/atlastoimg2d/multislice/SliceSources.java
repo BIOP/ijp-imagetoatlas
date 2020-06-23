@@ -10,7 +10,6 @@ import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
-import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterUtils;
 
 import java.awt.*;
 import java.util.*;
@@ -237,7 +236,7 @@ public class SliceSources {
                 //current.setText("Lock (Manual)");
                 synchronized (MultiSlicePositioner.manualActionLock) {
                     //current.setText("Current");
-                    reg.setFixedImage(preprocessFixed.apply(mp.slicedSources));
+                    reg.setFixedImage(preprocessFixed.apply(mp.extendedSlicedSources));
                     reg.setMovingImage(preprocessMoving.apply(registered_sacs));
                     out = reg.register();
                     if (!out) {
@@ -263,7 +262,7 @@ public class SliceSources {
                     }
                 }
             } else {
-                reg.setFixedImage(preprocessFixed.apply(mp.slicedSources));
+                reg.setFixedImage(preprocessFixed.apply(mp.extendedSlicedSources));
                 reg.setMovingImage(preprocessMoving.apply(registered_sacs));
                 out = reg.register();
                 if (!out) {

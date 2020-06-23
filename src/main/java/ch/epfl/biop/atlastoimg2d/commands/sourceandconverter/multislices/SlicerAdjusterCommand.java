@@ -37,11 +37,14 @@ public class SlicerAdjusterCommand extends InteractiveCommand {
     SourceAndConverter[] slicedSources;
 
     @Parameter
-    MultiSlicePositioner.ZStepSetter zSetter;
+    MultiSlicePositioner.SlicerSetter sliceSetter;
 
     public void run() {
 
-        zSetter.setStep(zSamplingSteps);
+        sliceSetter.setStep(zSamplingSteps);
+        sliceSetter.setRotateX(rotateX/180.0*Math.PI);
+        sliceSetter.setRotateY(rotateY/180.0*Math.PI);
+
 
         long nPixX = modelSlicing.getSpimSource().getSource(0,0).max(0);
         long nPixY = modelSlicing.getSpimSource().getSource(0,0).max(1);

@@ -1,10 +1,12 @@
 package ch.epfl.biop.atlastoimg2d.multislice;
 
+import bdv.tools.transformation.TransformedSource;
 import bdv.util.BdvFunctions;
 import bdv.util.BdvHandle;
 import bdv.util.BdvOptions;
 import bdv.util.BdvOverlay;
 import bdv.viewer.SourceAndConverter;
+import ch.epfl.biop.atlastoimg2d.commands.sourceandconverter.multislices.SacMultiSacsPositionerCommand;
 import ch.epfl.biop.bdv.select.SelectedSourcesListener;
 import ch.epfl.biop.bdv.select.SourceSelectorBehaviour;
 import ch.epfl.biop.registration.Registration;
@@ -25,7 +27,9 @@ import sc.fiji.bdvpg.behaviour.EditorBehaviourUnInstaller;
 import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
 import sc.fiji.bdvpg.scijava.services.ui.swingdnd.BdvTransferHandler;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
+import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterAndTimeRange;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterUtils;
+import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
@@ -67,7 +71,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     /**
      * Controller of the number of steps displayed
      */
-    final MultiSlicePositioner.ZStepSetter zStepSetter;
+    final SlicerSetter zStepSetter;
 
     /**
      * The slicing model
@@ -83,17 +87,10 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
     List<SliceSources> slices = new ArrayList<>();
 
-    /**
-     * Keep track of already contained sources to avoid duplicates
-     */
-    //Set<SourceAndConverter> containedSources = new HashSet<>();
-
     int totalNumberOfActionsRecorded = 30; // TODO : Implement
     List<CancelableAction> userActions = new ArrayList<>();
 
     List<CancelableAction> redoableUserActions = new ArrayList<>();
-
-   // boolean avoidOverlap = true;
 
     /**
      * Current coordinate where Sources are dragged
@@ -106,9 +103,11 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
      * @param slicingModel
      */
 
-    SourceAndConverter[] slicedSources;
+    SourceAndConverter[] extendedSlicedSources;
 
-    public String currentMode = "";//POSITIONING_MODE;
+    SourceAndConverter[] nonextendedSlicedSources;
+
+    public String currentMode = "";
 
     final static String POSITIONING_MODE = "positioning-mode";
     final static String POSITIONING_BEHAVIOURS_KEY = POSITIONING_MODE+"-behaviours";
@@ -121,12 +120,25 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     final static String COMMON_BEHAVIOURS_KEY = "multipositioner-behaviours";
     Behaviours common_behaviours = new Behaviours(new InputTriggerConfig(), "multipositioner" );
 
-    public MultiSlicePositioner(BdvHandle bdvh, SourceAndConverter slicingModel, SourceAndConverter[] slicedSources, Context ctx) {
-        this.slicedSources = slicedSources;
+    private static final String BLOCKING_MAP = "multipositioner-blocking";
+
+    public MultiSlicePositioner(BdvHandle bdvh, SourceAndConverter slicingModel, SourceAndConverter[] slicedSources, SourceAndConverter[] nonextendedSlicedSources, Context ctx) {
+        this.extendedSlicedSources = slicedSources;
+
+        this.nonextendedSlicedSources = new SourceAndConverter[nonextendedSlicedSources.length];
+
+        for (int idx = 0 ; idx<nonextendedSlicedSources.length ; idx ++) {
+            this.nonextendedSlicedSources[idx] =
+            SourceTransformHelper
+                    .createNewTransformedSourceAndConverter
+                            (new AffineTransform3D(), new SourceAndConverterAndTimeRange(nonextendedSlicedSources[idx],0));
+        }
+
+        this.nonextendedSlicedSources = nonextendedSlicedSources;
         this.bdvh = bdvh;
         this.slicingModel = slicingModel;
         this.scijavaCtx = ctx;
-        zStepSetter = new ZStepSetter();
+        zStepSetter = new SlicerSetter();
 
         iSliceNoStep = (int) (zStepSetter.getStep());
 
@@ -198,7 +210,6 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             this.bdvh.getCardPanel().addCard( "Registration Options", new RegistrationPanel(this).getPanel(), true);
             this.bdvh.getCardPanel().setCardExpanded("Sources", false);
             this.bdvh.getCardPanel().setCardExpanded("Groups", false);
-
         } else {
             System.err.println("this.bdvh.getCardPanel() is null!");
         }
@@ -318,16 +329,11 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     public void setPositioningMode() {
         if (slices.stream().noneMatch(slice -> slice.processInProgress)) {
             if (!currentMode.equals(POSITIONING_MODE)) {
-                currentMode = POSITIONING_MODE;
-                zStepSetter.setStep(this.zStepStored);
-                ghs.forEach(gh -> gh.enable());
-                slices.forEach(slice -> slice.enableGraphicalHandles());
-                // Do stuff
-                // Do stuff
                 synchronized (slices) {
-                    if (slices.stream().anyMatch(slice -> slice.processInProgress)) {
-                        System.err.println("Mode cannot be changed if a task is in process");
-                    } else {
+                    currentMode = POSITIONING_MODE;
+                    zStepSetter.setStep(this.zStepStored);
+                    ghs.forEach(gh -> gh.enable());
+                    slices.forEach(slice -> slice.enableGraphicalHandles());
                         List<SourceAndConverter> sacsToRemove = new ArrayList<>();
                         List<SourceAndConverter> sacsToAdd = new ArrayList<>();
                         getSortedSlices().forEach(ss -> {
@@ -341,15 +347,22 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                         SourceAndConverterServices
                                 .getSourceAndConverterDisplayService()
                                 .show(bdvh, sacsToAdd.toArray(new SourceAndConverter[0]));
-                        ;
-                    }
                 }
+
+                SourceAndConverterServices
+                        .getSourceAndConverterDisplayService()
+                        .remove(bdvh, nonextendedSlicedSources);
+
+                SourceAndConverterServices
+                        .getSourceAndConverterDisplayService()
+                        .show(bdvh, extendedSlicedSources);
+
                 bdvh.getTriggerbindings().removeInputTriggerMap(REGISTRATION_BEHAVIOURS_KEY);
                 bdvh.getTriggerbindings().removeBehaviourMap(REGISTRATION_BEHAVIOURS_KEY);
                 positioning_behaviours.install(bdvh.getTriggerbindings(), POSITIONING_BEHAVIOURS_KEY);
                 navigateCurrentSlice();
+                refreshBlockMap();
             }
-            refreshBlockMap();
         } else {
             bdvh.getViewerPanel().showMessage("Registration in progress : cannot switch to positioning mode.");
         }
@@ -386,6 +399,15 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                     ;
                 }
             }
+
+            SourceAndConverterServices
+                    .getSourceAndConverterDisplayService()
+                    .remove(bdvh, extendedSlicedSources);
+
+            SourceAndConverterServices
+                    .getSourceAndConverterDisplayService()
+                    .show(bdvh, nonextendedSlicedSources);
+
             bdvh.getTriggerbindings().removeInputTriggerMap(POSITIONING_BEHAVIOURS_KEY);
             bdvh.getTriggerbindings().removeBehaviourMap(POSITIONING_BEHAVIOURS_KEY);
             registration_behaviours.install(bdvh.getTriggerbindings(), REGISTRATION_BEHAVIOURS_KEY );
@@ -448,7 +470,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         updateDisplay();
     }
 
-    public ZStepSetter getzStepSetter() {
+    public SlicerSetter getzStepSetter() {
         return zStepSetter;
     }
 
@@ -665,9 +687,11 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
      * Simple to enable setting z step and allowing its communication
      * in multiple Commands
      */
-    public class ZStepSetter {
+    public class SlicerSetter {
 
         private int zStep = 1;
+        private double rx;
+        private double ry;
 
         public void setStep(int zStep) {
             if (currentMode.equals(POSITIONING_MODE)) {
@@ -676,6 +700,18 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 }
                 updateDisplay();
             }
+        }
+
+        public void setRotateX(double rx) {
+            this.rx = rx;
+            updateDisplay();
+            //updateSlicing();
+        }
+
+        public void setRotateY(double ry) {
+            this.ry = ry;
+            updateDisplay();
+            //updateSlicing();
         }
 
         public long getStep() {
@@ -1065,8 +1101,6 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             }
         }
     }
-
-    private static final String BLOCKING_MAP = "multipositioner-blocking";
 
     /*
      * Create BehaviourMap to block behaviours interfering with
