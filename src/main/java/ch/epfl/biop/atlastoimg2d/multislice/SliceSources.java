@@ -108,6 +108,7 @@ public class SliceSources {
         return new Integer[]{(int)sliceCenter.getDoublePosition(0), (int)sliceCenter.getDoublePosition(1)};
     }
 
+
     public Integer[] getBdvHandleColor() {
         if (isSelected) {
             return new Integer[]{0,255,0,200};
@@ -229,11 +230,14 @@ public class SliceSources {
             }
             boolean out;
             if (reg.isManual()) {
+                System.out.println("Waiting for manual lock...");
                 //current.setText("Lock (Manual)");
                 synchronized (MultiSlicePositioner.manualActionLock) {
+                    System.out.println("Manual lock released...");
                     //current.setText("Current");
-                    reg.setFixedImage(preprocessFixed.apply(mp.extendedSlicedSources));
+                    reg.setFixedImage(preprocessFixed.apply(mp.reslicedAtlas.nonExtendedSlicedSources));
                     reg.setMovingImage(preprocessMoving.apply(registered_sacs));
+                    System.out.println("Registration will start");
                     out = reg.register();
                     if (!out) {
 
@@ -258,7 +262,7 @@ public class SliceSources {
                     }
                 }
             } else {
-                reg.setFixedImage(preprocessFixed.apply(mp.extendedSlicedSources));
+                reg.setFixedImage(preprocessFixed.apply(mp.reslicedAtlas.nonExtendedSlicedSources));
                 reg.setMovingImage(preprocessMoving.apply(registered_sacs));
                 out = reg.register();
                 if (!out) {

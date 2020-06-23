@@ -10,6 +10,7 @@ import ch.epfl.biop.bdv.select.SelectedSourcesListener;
 import ch.epfl.biop.bdv.select.SourceSelectorBehaviour;
 import ch.epfl.biop.registration.Registration;
 import ch.epfl.biop.registration.sourceandconverter.Elastix2DAffineRegistration;
+import ch.epfl.biop.registration.sourceandconverter.SacBigWarp2DRegistration;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import mpicbg.spim.data.generic.base.Entity;
 import mpicbg.spim.data.generic.sequence.AbstractSequenceDescription;
@@ -27,6 +28,7 @@ import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
 import sc.fiji.bdvpg.scijava.services.ui.swingdnd.BdvTransferHandler;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterUtils;
+import sc.fiji.bdvpg.sourceandconverter.transform.SourceResampler;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
@@ -93,7 +95,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
      * @param slicingModel
      */
 
-    SourceAndConverter[] extendedSlicedSources;
+    //SourceAndConverter[] extendedSlicedSources;
 
     public String currentMode = "";
 
@@ -123,7 +125,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     public MultiSlicePositioner(BdvHandle bdvh, BiopAtlas biopAtlas, ReslicedAtlas reslicedAtlas, Context ctx) {
         this.reslicedAtlas = reslicedAtlas;
         this.biopAtlas = biopAtlas;
-        this.extendedSlicedSources = reslicedAtlas.extendedSlicedSources;
+        //this.extendedSlicedSources = reslicedAtlas.extendedSlicedSources;
 
         this.bdvh = bdvh;
         this.scijavaCtx = ctx;
@@ -181,12 +183,14 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
         ssb.addSelectedSourcesListener(this);
 
-        registration_behaviours.behaviour((ClickBehaviour)(x,y) ->  this.elastixRegister(), "register_test", "R");
+        registration_behaviours.behaviour((ClickBehaviour)(x,y) ->  this.elastixRegister(), "register_elastix", "R");
+        registration_behaviours.behaviour((ClickBehaviour)(x,y) ->  this.bigwarpRegister(), "register_test", "W");
+
 
         List<SourceAndConverter<?>> sacsToAppend = new ArrayList<>();
         for (int i=0;i<biopAtlas.map.getStructuralImages().length;i++) {
-        //    sacsToAppend.add(biopAtlas.map.getStructuralImages()[i]);
-            sacsToAppend.add(extendedSlicedSources[i]);
+            sacsToAppend.add(reslicedAtlas.nonExtendedSlicedSources[i]);
+            sacsToAppend.add(reslicedAtlas.extendedSlicedSources[i]);
         }
 
         SourceAndConverterServices.getSourceAndConverterDisplayService()
@@ -335,18 +339,11 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                             .show(bdvh, sacsToAdd.toArray(new SourceAndConverter[0]));
                 }
 
-                /*List<SourceAndConverter<?>> sacToShow = new ArrayList<>();
-                List<SourceAndConverter<?>> sacToHide = new ArrayList<>();
-                for (int i=0;i<biopAtlas.map.getStructuralImages().length;i++) {
-                    SourceAndConverter sac = biopAtlas.map.getStructuralImages()[i];
-                    if (bdvh.getViewerPanel().state().isSourceVisible(sac)) {
-                        sacToHide.add(sac);
-                        sacToShow.add(extendedSlicedSources[i]);
-                    }
-                }
+                SourceAndConverterServices.getSourceAndConverterDisplayService()
+                        .show(bdvh, reslicedAtlas.extendedSlicedSources);
 
-                bdvh.getViewerPanel().state().setSourcesActive(sacToHide, false);
-                bdvh.getViewerPanel().state().setSourcesActive(sacToShow, true);*/
+                SourceAndConverterServices.getSourceAndConverterDisplayService()
+                        .remove(bdvh, reslicedAtlas.nonExtendedSlicedSources);
 
                 bdvh.getTriggerbindings().removeInputTriggerMap(REGISTRATION_BEHAVIOURS_KEY);
                 bdvh.getTriggerbindings().removeBehaviourMap(REGISTRATION_BEHAVIOURS_KEY);
@@ -393,18 +390,11 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 }
             }
 
-            /*List<SourceAndConverter<?>> sacToShow = new ArrayList<>();
-            List<SourceAndConverter<?>> sacToHide = new ArrayList<>();
-            for (int i=0;i<biopAtlas.map.getStructuralImages().length;i++) {
-                SourceAndConverter sac = extendedSlicedSources[i];
-                if (bdvh.getViewerPanel().state().isSourceVisible(sac)) {
-                    sacToHide.add(sac);
-                    sacToShow.add(biopAtlas.map.getStructuralImages()[i]);
-                }
-            }
+            SourceAndConverterServices.getSourceAndConverterDisplayService()
+                    .remove(bdvh, reslicedAtlas.extendedSlicedSources);
 
-            bdvh.getViewerPanel().state().setSourcesActive(sacToHide, false);
-            bdvh.getViewerPanel().state().setSourcesActive(sacToShow, true);*/
+            SourceAndConverterServices.getSourceAndConverterDisplayService()
+                    .show(bdvh, reslicedAtlas.nonExtendedSlicedSources);
 
             bdvh.getTriggerbindings().removeInputTriggerMap(POSITIONING_BEHAVIOURS_KEY);
             bdvh.getTriggerbindings().removeBehaviourMap(POSITIONING_BEHAVIOURS_KEY);
@@ -466,13 +456,22 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
      */
     public void centerBdvViewOn(SliceSources slice) {
 
-        RealPoint centerSlice;
+        RealPoint centerSlice = new RealPoint(3);
+
         switch (currentMode) {
             case POSITIONING_MODE:
-                centerSlice = SourceAndConverterUtils.getSourceAndConverterCenterPoint(slice.relocated_sacs_positioning_mode[0]);
+                AffineTransform3D bdvAt3D = new AffineTransform3D();
+                bdvh.getViewerPanel().state().getViewerTransform(bdvAt3D);
+                double slicingAxisSnapped = (((int)(slice.slicingAxisPosition/sizePixX))*sizePixX);
+                double posX = ((slicingAxisSnapped/sizePixX/reslicedAtlas.getStep())) * sX;
+                double posY = sY * slice.yShift_slicing_mode;
+                centerSlice = new RealPoint(posX, posY, 0);
                 break;
+
             case REGISTRATION_MODE:
-                centerSlice = SourceAndConverterUtils.getSourceAndConverterCenterPoint(slice.registered_sacs[0]);
+                centerSlice.setPosition(0,0);
+                centerSlice.setPosition(0,1);
+                centerSlice.setPosition(slice.slicingAxisPosition,2);
                 break;
             default:
                 System.err.println("Invalid multislicer mode");
@@ -559,8 +558,8 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     public void toggleOverlap() {
         cycleToggle++;
         if (cycleToggle==3) cycleToggle = 0;
-        navigateCurrentSlice();
         updateDisplay();
+        navigateCurrentSlice();
     }
 
     public void elastixRegister() {
@@ -592,6 +591,23 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             }
         }
     }
+
+    public void bigwarpRegister() {
+        for (SliceSources slice : slices) {
+            if (slice.isSelected) {
+                SacBigWarp2DRegistration registration = new SacBigWarp2DRegistration();
+
+                SourceResampler resampler = new SourceResampler(null,
+                            slice.registered_sacs[0],true, false, false
+                        );
+
+                new RegisterSlice(slice, registration,(sacs) ->
+                        Arrays.asList(sacs).stream().map(resampler).collect(Collectors.toList()).toArray(new SourceAndConverter[0]),
+                        Function.identity()).run();
+            }
+        }
+    }
+
 
     @Override
     protected synchronized void draw(Graphics2D g) {

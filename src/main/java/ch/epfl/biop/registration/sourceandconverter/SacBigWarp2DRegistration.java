@@ -110,6 +110,9 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
     @Override
     public boolean register() {
         {
+
+            System.out.println("Register started");
+
             List<SourceAndConverter> movingSacs = Arrays.stream(mimg).collect(Collectors.toList());
             List<SourceAndConverter> fixedSacs = Arrays.stream(fimg).collect(Collectors.toList());
 
@@ -117,8 +120,13 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
             converterSetups.addAll(Arrays.stream(fimg).map(src -> SourceAndConverterServices.getSourceAndConverterDisplayService().getConverterSetup(src)).collect(Collectors.toList()));
 
             // Launch BigWarp
+            System.out.println("BigWarpLauncher will be created");
             bwl = new BigWarpLauncher(movingSacs, fixedSacs, "Big Warp", converterSetups);
+
+            System.out.println("BigWarpLauncher will run");
             bwl.run();
+
+            System.out.println("Done");
 
             // Output bdvh handles -> will be put in the object service
             BdvHandle bdvhQ = bwl.getBdvHandleQ();

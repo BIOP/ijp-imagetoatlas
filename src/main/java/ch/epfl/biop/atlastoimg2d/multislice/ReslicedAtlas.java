@@ -1,9 +1,11 @@
 package ch.epfl.biop.atlastoimg2d.multislice;
 
 import bdv.tools.transformation.TransformedSource;
+import bdv.util.ZSlicedSource;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.BiopAtlas;
 import ch.epfl.biop.atlastoimg2d.commands.sourceandconverter.multislices.SacMultiSacsPositionerCommand;
+import ch.epfl.biop.registration.sourceandconverter.AffineTransformedSourceWrapperRegistration;
 import ch.epfl.biop.sourceandconverter.transform.SourceMosaicZSlicer;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealPoint;
@@ -32,6 +34,12 @@ public class ReslicedAtlas {
     SourceAndConverter slicingModel;
 
     SourceAndConverter[] extendedSlicedSources;
+
+    SourceAndConverter[] nonExtendedSlicedSources;
+
+    AffineTransform3D centerTransform;
+
+    AffineTransformedSourceWrapperRegistration nonExtendedAffineTransform = new AffineTransformedSourceWrapperRegistration();
 
     private int zStep = 1;
     private double rx;
@@ -174,15 +182,20 @@ public class ReslicedAtlas {
         // 1 -
 
         extendedSlicedSources = new SourceAndConverter[ba.map.getStructuralImages().length];
+        SourceAndConverter[] tempNonExtendedSlicedSources = new SourceAndConverter[ba.map.getStructuralImages().length];
 
         SourceMosaicZSlicer mosaic = new SourceMosaicZSlicer(null, slicingModel, true, false, false,
                 () -> getStep());
 
-        AffineTransform3D centerTransform = null;
+        SourceResampler resampler = new SourceResampler(null, slicingModel, true, false, true);
+
+        centerTransform = null;
         for (int index = 0; index<ba.map.getStructuralImages().length;index++) {
             SourceAndConverter sac = ba.map.getStructuralImages()[index];
 
             SourceAndConverter reslicedSac = mosaic.apply(sac);
+            tempNonExtendedSlicedSources[index] = resampler.apply(sac);
+
             if (centerTransform == null) {
                 centerTransform = new AffineTransform3D();
                 reslicedSac.getSpimSource().getSourceTransform(0,0,centerTransform);
@@ -207,6 +220,8 @@ public class ReslicedAtlas {
                     .register(reslicedSac);
             extendedSlicedSources[index] = reslicedSac;
         }
+
+        nonExtendedSlicedSources = nonExtendedAffineTransform.getTransformedImageMovingToFixed(tempNonExtendedSlicedSources);
 
     }
 
@@ -299,81 +314,39 @@ public class ReslicedAtlas {
 
         ((TransformedSource) (slicingModel.getSpimSource())).setFixedTransform(slicingTransfom);
 
-        // Get BdvHandle where modelSlicing is shown
-        // Set<BdvHandle> bdvhs = SourceAndConverterServices.getSourceAndConverterDisplayService().getDisplaysOf(slicedSources);
+        AffineTransform3D at3d = new AffineTransform3D();
+        //at3d.scale(3);
 
-        /*
-        if (previouszSampingStep!=-1) {
-            if (previouszSampingStep!=zSamplingSteps) {
-                // sampling has been moved : need to update the position of looking in the BdvHandle
-                // For each bdvhandle
-                for (BdvHandle bdv : bdvhs) {
-                    // Where were we ?
+        AffineTransform3D atToInvert = new AffineTransform3D();
 
-                    double cur_wcx = bdv.getViewerPanel().getWidth()/2.0; // Current Window Center X
-                    double cur_wcy = bdv.getViewerPanel().getHeight()/2.0; // Current Window Center Y
+        this.slicingModel.getSpimSource().getSourceTransform(0,0,atToInvert);
 
-                    RealPoint centerScreenCurrentBdv = new RealPoint(new double[]{cur_wcx, cur_wcy, 0});
-                    RealPoint centerScreenGlobalCoord = new RealPoint(3);
+        this.slicingModel.getSpimSource().getSourceTransform(0,0,at3d);
+        at3d.set(0,0,3);
+        at3d.set(0,1,3);
+        at3d.set(0,2,3);
+        double xScale = getNormTransform(0, at3d);
+        double yScale = getNormTransform(1, at3d);
+        double zScale = getNormTransform(2, at3d);
+        at3d.identity();
+        at3d.scale(xScale, yScale, zScale);
 
-                    AffineTransform3D at3D = new AffineTransform3D();
-                    bdv.getBdvHandle().getViewerPanel().state().getViewerTransform(at3D);
+        at3d = at3d.preConcatenate(centerTransform);
 
-                    at3D.inverse().apply(centerScreenCurrentBdv, centerScreenGlobalCoord);
-
-                    // New target
-                    centerScreenGlobalCoord.setPosition( centerScreenGlobalCoord.getDoublePosition(0)*(double)previouszSampingStep/(double) zSamplingSteps, 0);
-
-                    // How should we translate at3D, such as the screen center is the new one
-
-                    // Now compute what should be the matrix in the next bdv frame:
-                    AffineTransform3D nextAffineTransform = new AffineTransform3D();
-
-                    // It should have the same scaling and rotation than the current view
-                    nextAffineTransform.set(at3D);
-
-                    // No Shift
-                    nextAffineTransform.set(0,0,3);
-                    nextAffineTransform.set(0,1,3);
-                    nextAffineTransform.set(0,2,3);
-
-                    // But the center of the window should be centerScreenGlobalCoord
-                    // Let's compute the shift
-                    double next_wcx = bdv.getViewerPanel().getWidth()/2.0; // Next Window Center X
-                    double next_wcy = bdv.getViewerPanel().getHeight()/2.0; // Next Window Center Y
-
-                    RealPoint centerScreenNextBdv = new RealPoint(new double[]{next_wcx, next_wcy, 0});
-                    RealPoint shiftNextBdv = new RealPoint(3);
-
-                    nextAffineTransform.inverse().apply(centerScreenNextBdv, shiftNextBdv);
-                    //System.out.println( "shiftNextBdv:"+shiftNextBdv);
-                    double sx = -centerScreenGlobalCoord.getDoublePosition(0)+shiftNextBdv.getDoublePosition(0);
-                    double sy = -centerScreenGlobalCoord.getDoublePosition(1)+shiftNextBdv.getDoublePosition(1);
-                    double sz = -centerScreenGlobalCoord.getDoublePosition(2)+shiftNextBdv.getDoublePosition(2);
-
-                    RealPoint shiftWindow = new RealPoint(new double[]{sx, sy, sz});
-                    RealPoint shiftMatrix = new RealPoint(3);
-                    nextAffineTransform.apply(shiftWindow, shiftMatrix);
-
-                    //System.out.println("shiftMatrix:"+shiftMatrix);
-
-                    nextAffineTransform.set(shiftMatrix.getDoublePosition(0),0,3);
-                    nextAffineTransform.set(shiftMatrix.getDoublePosition(1),1,3);
-                    nextAffineTransform.set(shiftMatrix.getDoublePosition(2),2,3);
-
-                    bdv.getBdvHandle().getViewerPanel().setCurrentViewerTransform(nextAffineTransform);
-
-                }
-            }
-        }*/
-
-        /*SourceAndConverterServices.getSourceAndConverterDisplayService().getDisplaysOf(slicingModel)
-                .forEach(bdv -> bdv.getViewerPanel().requestRepaint());
-
-        bdvhs.forEach(bdv -> bdv.getViewerPanel().requestRepaint());
-
-        previouszSampingStep = zSamplingSteps;*/
+        nonExtendedAffineTransform.setAffineTransform(atToInvert.inverse().preConcatenate(at3d));
     }
 
+    /**
+     * Returns the norm of an axis after an affinetransform is applied
+     * @param axis
+     * @param t
+     * @return
+     */
+    static public double getNormTransform(int axis, AffineTransform3D t) {
+        double f0 = t.get(0,axis);
+        double f1 = t.get(1,axis);
+        double f2 = t.get(2,axis);
+        return Math.sqrt(f0 * f0 + f1 * f1 + f2 * f2);
+    }
 
 }
