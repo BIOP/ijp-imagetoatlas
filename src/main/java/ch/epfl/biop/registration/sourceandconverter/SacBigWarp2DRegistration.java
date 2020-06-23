@@ -23,85 +23,30 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
 
     SourceAndConverter[] fimg, mimg;
 
-    AffineTransform3D at3Dmoving, at3Dfixed;
+    //AffineTransform3D at3Dmoving, at3Dfixed;
+
+    Runnable waitForUser = () -> {
+        WaitForUserDialog dialog = new WaitForUserDialog("Choose slice","Please perform carefully your registration then press ok.");
+        dialog.show();
+    };
 
     @Override
     public void setFixedImage(SourceAndConverter[] fimg) {
-        at3Dfixed = new AffineTransform3D();
+        SourceAffineTransformer sat = new SourceAffineTransformer(null, new AffineTransform3D());
 
-        fimg[0].getSpimSource().getSourceTransform(0,0, at3Dfixed);
-
-        // We do not want to touch the scaling...
-        double[] m = at3Dfixed.getRowPackedCopy();
-
-        double sx = Math.sqrt(m[0]*m[0]+m[4]*m[4]+m[8]*m[8]);
-        double sy = Math.sqrt(m[1]*m[1]+m[5]*m[5]+m[9]*m[9]);
-        double sz = Math.sqrt(m[2]*m[2]+m[6]*m[6]+m[10]*m[10]);
-
-        m[0] /= sx;
-        m[4] /= sx;
-        m[8] /= sx;
-
-        m[1] /= sy;
-        m[5] /= sy;
-        m[9] /= sy;
-
-        m[2] /= sz;
-        m[6] /= sz;
-        m[10] /= sz;
-
-        at3Dfixed.set(m);
-
-        SourceAffineTransformer sat =
-                new SourceAffineTransformer(null, at3Dfixed.inverse().copy());
-
-        this.fimg = new SourceAndConverter[fimg.length];
-
-        for (int i=0;i<fimg.length;i++) {
-            this.fimg[i] = sat.apply(fimg[i]);
-        }
+        this.fimg = fimg; // Arrays.asList(fimg).stream().map(sat).collect(Collectors.toList()).toArray(new SourceAndConverter[0]);
     }
 
     @Override
     public void setMovingImage(SourceAndConverter[] mimg) {
-        at3Dmoving = new AffineTransform3D();
-        if (mimg[0] == null) {
-            System.err.println("No moving source defined (index 0)");
-            return;
-        }
-        mimg[0]
-                .getSpimSource()
-                .getSourceTransform(0,0, at3Dmoving);
+        SourceAffineTransformer sat = new SourceAffineTransformer(null, new AffineTransform3D());
+        //this.mimg = mimg;
+        this.mimg = mimg; //Arrays.asList(mimg).stream().map(sat).collect(Collectors.toList()).toArray(new SourceAndConverter[0]);
 
-        // We do not want to touch the scaling...
-        double[] m = at3Dmoving.getRowPackedCopy();
+    }
 
-        double sx = Math.sqrt(m[0]*m[0]+m[4]*m[4]+m[8]*m[8]);
-        double sy = Math.sqrt(m[1]*m[1]+m[5]*m[5]+m[9]*m[9]);
-        double sz = Math.sqrt(m[2]*m[2]+m[6]*m[6]+m[10]*m[10]);
-
-        m[0] /= sx;
-        m[4] /= sx;
-        m[8] /= sx;
-
-        m[1] /= sy;
-        m[5] /= sy;
-        m[9] /= sy;
-
-        m[2] /= sz;
-        m[6] /= sz;
-        m[10] /= sz;
-
-        at3Dmoving.set(m);
-
-        SourceAffineTransformer sat =
-                new SourceAffineTransformer(null, at3Dmoving.inverse().copy());
-
-        this.mimg = new SourceAndConverter[mimg.length];
-
-        for (int i=0;i<mimg.length;i++) {
-            this.mimg[i] = sat.apply(mimg[i]);
-        }
+    public void setWaitForUserMethod(Runnable r) {
+        waitForUser = r;
     }
 
     BigWarpLauncher bwl;
@@ -110,9 +55,6 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
     @Override
     public boolean register() {
         {
-
-            System.out.println("Register started");
-
             List<SourceAndConverter> movingSacs = Arrays.stream(mimg).collect(Collectors.toList());
             List<SourceAndConverter> fixedSacs = Arrays.stream(fimg).collect(Collectors.toList());
 
@@ -120,13 +62,9 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
             converterSetups.addAll(Arrays.stream(fimg).map(src -> SourceAndConverterServices.getSourceAndConverterDisplayService().getConverterSetup(src)).collect(Collectors.toList()));
 
             // Launch BigWarp
-            System.out.println("BigWarpLauncher will be created");
             bwl = new BigWarpLauncher(movingSacs, fixedSacs, "Big Warp", converterSetups);
 
-            System.out.println("BigWarpLauncher will run");
             bwl.run();
-
-            System.out.println("Done");
 
             // Output bdvh handles -> will be put in the object service
             BdvHandle bdvhQ = bwl.getBdvHandleQ();
@@ -134,20 +72,17 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
 
             SourceAndConverterServices.getSourceAndConverterDisplayService().pairClosing(bdvhQ,bdvhP);
 
-            bdvhP.getViewerPanel().state().setViewerTransform(at3Dfixed.copy());
-            bdvhP.getViewerPanel().state().setViewerTransform(at3Dmoving.copy());
+            /*bdvhP.getViewerPanel().state().setViewerTransform(at3Dfixed.copy());
+            bdvhP.getViewerPanel().state().setViewerTransform(at3Dmoving.copy());*/
 
             bdvhP.getViewerPanel().requestRepaint();
             bdvhQ.getViewerPanel().requestRepaint();
 
             bwl.getBigWarp().getLandmarkFrame().repaint();
 
-            WaitForUserDialog dialog = new WaitForUserDialog("Choose slice","Please perform carefully your registration then press ok.");
-            dialog.show();
+            waitForUser.run();
 
-            bwl.getBigWarp().getViewerFrameP().setVisible(false);
-            bwl.getBigWarp().getViewerFrameQ().setVisible(false);
-            bwl.getBigWarp().getLandmarkFrame().setVisible(false);
+            bwl.getBigWarp().closeAll();
 
             return true;
 
@@ -159,13 +94,13 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
 
         if (bwl.getBigWarp().getTransformType().equals(TransformTypeSelectDialog.TPS)) {
             // Thin Plate Spline
-            SourceAffineTransformer satm = new SourceAffineTransformer(null, at3Dmoving.inverse().copy());
+            SourceAffineTransformer satm = new SourceAffineTransformer(null, new AffineTransform3D().inverse().copy());
             SourceRealTransformer srt = new SourceRealTransformer(null, bwl.getBigWarp().getTransformation());// rts);
-            SourceAffineTransformer satf = new SourceAffineTransformer(null, at3Dfixed.copy());
+            SourceAffineTransformer satf = new SourceAffineTransformer(null, new AffineTransform3D());
             irts = new InvertibleRealTransformSequence();
-            irts.add(at3Dmoving.inverse());
+            //irts.add(at3Dmoving.inverse());
             irts.add(bwl.getBigWarp().getTransformation());
-            irts.add(at3Dfixed);
+            //irts.add(at3Dfixed);
 
             SourceAndConverter[] out = new SourceAndConverter[sacs.length];
             for (int i = 0; i<sacs.length; i++) {
@@ -174,14 +109,14 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
             return out;
         } else {
             // Just an affine transform
-            SourceAffineTransformer satm = new SourceAffineTransformer(null, at3Dmoving.inverse().copy());
+            SourceAffineTransformer satm = new SourceAffineTransformer(null, new AffineTransform3D().copy());
             SourceAffineTransformer srt = new SourceAffineTransformer(null, bwl.getBigWarp().affine3d().inverse());// rts);
-            SourceAffineTransformer satf = new SourceAffineTransformer(null, at3Dfixed.copy());
+            SourceAffineTransformer satf = new SourceAffineTransformer(null, new AffineTransform3D().copy());
 
             irts = new InvertibleRealTransformSequence();
-            irts.add(at3Dmoving.inverse());
+            //irts.add(at3Dmoving.inverse());
             irts.add(bwl.getBigWarp().affine3d().inverse());
-            irts.add(at3Dfixed);
+            //irts.add(at3Dfixed);
 
             SourceAndConverter[] out = new SourceAndConverter[sacs.length];
             for (int i = 0; i<sacs.length; i++) {
@@ -203,7 +138,7 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
 
             RealPoint pf0 = new RealPoint(3);
 
-            at3Dfixed.inverse().apply(pi,pf0);
+            new AffineTransform3D().inverse().apply(pi,pf0);
 
 
             RealPoint pf1 = new RealPoint(3);
@@ -211,7 +146,7 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
             //bwl.getBigWarp().getTransformation().inverse().apply(pf0,pf1);
 
             RealPoint pf2 = new RealPoint(3);
-            at3Dmoving.apply(pf1,pf2);
+            new AffineTransform3D().apply(pf1,pf2);
 
             //irts.apply(pi, pf);
 

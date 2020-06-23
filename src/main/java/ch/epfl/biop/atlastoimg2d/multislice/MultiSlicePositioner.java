@@ -17,28 +17,39 @@ import mpicbg.spim.data.generic.sequence.AbstractSequenceDescription;
 import mpicbg.spim.data.generic.sequence.BasicViewSetup;
 import mpicbg.spim.data.sequence.Tile;
 import net.imglib2.RealPoint;
+import net.imglib2.cache.img.DiskCachedCellImgFactory;
+import net.imglib2.cache.img.DiskCachedCellImgOptions;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.ARGBType;
+import net.imglib2.type.numeric.integer.UnsignedShortType;
 import org.scijava.Context;
 import org.scijava.ui.behaviour.*;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
+import sc.fiji.bdvpg.bdv.navigate.ViewerTransformSyncStopper;
 import sc.fiji.bdvpg.behaviour.EditorBehaviourUnInstaller;
 import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
 import sc.fiji.bdvpg.scijava.services.ui.swingdnd.BdvTransferHandler;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
+import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterAndTimeRange;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterUtils;
+import sc.fiji.bdvpg.sourceandconverter.importer.EmptySourceAndConverterCreator;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceResampler;
+import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static net.imglib2.cache.img.DiskCachedCellImgOptions.options;
 import static sc.fiji.bdvpg.scijava.services.SourceAndConverterService.SPIM_DATA_INFO;
 
 /**
@@ -597,17 +608,54 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             if (slice.isSelected) {
                 SacBigWarp2DRegistration registration = new SacBigWarp2DRegistration();
 
+                // Dummy ImageFactory
+                final int[] cellDimensions = new int[] { 32, 32, 1 };
+
+                // Cached Image Factory Options
+                final DiskCachedCellImgOptions factoryOptions = options()
+                        .cellDimensions( cellDimensions )
+                        .cacheType( DiskCachedCellImgOptions.CacheType.BOUNDED )
+                        .maxCacheSize( 1 );
+
+                // Creates cached image factory of Type UnsignedShort
+                final DiskCachedCellImgFactory<UnsignedShortType> factory = new DiskCachedCellImgFactory<>( new UnsignedShortType(), factoryOptions );
+
+                AffineTransform3D at3D = new AffineTransform3D();
+                at3D.translate(-this.nPixX/2.0, -this.nPixY/2.0,0);
+                at3D.scale(this.sizePixX, this.sizePixY,this.sizePixZ);
+                at3D.translate(0,0,slice.slicingAxisPosition);
+
+                // 0 - slicing model : empty source but properly defined in space and resolution
+                SourceAndConverter singleSliceModel = new EmptySourceAndConverterCreator("SlicingModel",at3D,
+                        nPixX,
+                        nPixY,
+                        1,
+                        factory
+                ).get();
+
                 SourceResampler resampler = new SourceResampler(null,
-                            slice.registered_sacs[0],true, false, false
+                        singleSliceModel,false, false, false
                         );
 
-                new RegisterSlice(slice, registration,(sacs) ->
-                        Arrays.asList(sacs).stream().map(resampler).collect(Collectors.toList()).toArray(new SourceAndConverter[0]),
-                        Function.identity()).run();
+                AffineTransform3D translateZ = new AffineTransform3D();
+                translateZ.translate(0,0,-slice.slicingAxisPosition);
+
+                new RegisterSlice(slice, registration,(fixedSacs) ->
+                        Arrays.asList(fixedSacs)
+                                .stream()
+                                .map(resampler)
+                                .map(sac -> SourceTransformHelper.createNewTransformedSourceAndConverter(translateZ, new SourceAndConverterAndTimeRange(sac,0)))
+                                .collect(Collectors.toList())
+                                .toArray(new SourceAndConverter[0]),
+                (movingSacs) ->
+                        Arrays.asList(movingSacs)
+                                .stream()
+                                .map(sac -> SourceTransformHelper.createNewTransformedSourceAndConverter(translateZ, new SourceAndConverterAndTimeRange(sac,0)))
+                                .collect(Collectors.toList())
+                                .toArray(new SourceAndConverter[0])).run();
             }
         }
     }
-
 
     @Override
     protected synchronized void draw(Graphics2D g) {
