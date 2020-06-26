@@ -85,21 +85,4 @@ public class SacMultiSacsPositionerCommand implements Command {
 
     }
 
-    public static  void adjustShiftSlicingTransform(AffineTransform3D slicingTransfom, long nX, long nY, long nZ) {
-        AffineTransform3D notShifted = new AffineTransform3D();
-        notShifted.set(slicingTransfom);
-        notShifted.set(0,0,3);
-        notShifted.set(0,1,3);
-        notShifted.set(0,2,3);
-
-        RealPoint pt = new RealPoint(nX, nY, nZ);
-
-        RealPoint ptRealSpace = new RealPoint(3);
-
-        notShifted.apply(pt, ptRealSpace);
-
-        slicingTransfom.set(-ptRealSpace.getDoublePosition(0)/2.0, 0,3);
-        slicingTransfom.set(-ptRealSpace.getDoublePosition(1)/2.0, 1,3);
-        slicingTransfom.set(-ptRealSpace.getDoublePosition(2)/2.0, 2,3);
-    }
 }

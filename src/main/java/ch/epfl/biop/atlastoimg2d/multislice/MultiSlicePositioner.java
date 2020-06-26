@@ -26,23 +26,18 @@ import org.scijava.Context;
 import org.scijava.ui.behaviour.*;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
-import sc.fiji.bdvpg.bdv.navigate.ViewerTransformSyncStopper;
 import sc.fiji.bdvpg.behaviour.EditorBehaviourUnInstaller;
 import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
 import sc.fiji.bdvpg.scijava.services.ui.swingdnd.BdvTransferHandler;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterAndTimeRange;
-import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterUtils;
 import sc.fiji.bdvpg.sourceandconverter.importer.EmptySourceAndConverterCreator;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceResampler;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
 
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.List;
@@ -97,8 +92,9 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
      */
     int iSliceNoStep;
 
-
     Context scijavaCtx;
+
+    final MultiSliceObserver mso;
 
     /**
      * Shift in Y : control overlay or not of sources
@@ -236,6 +232,11 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         bdvh.getCardPanel().addCard("Slicing Adjustement",
                 new SlicingAdjusterPanel(this,scijavaCtx).getPanel("reslicedAtlas", reslicedAtlas),
                 true);
+
+        mso = new MultiSliceObserver(this);
+
+        bdvh.getCardPanel().addCard("Tasks Info", mso.getJPanel(),true);
+
 
     }
 
@@ -881,6 +882,8 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
     public abstract class CancelableAction {
 
+        abstract public SliceSources getSliceSources();
+
         public void run() {
             userActions.add(this);
             if (redoableUserActions.size()>0) {
@@ -891,6 +894,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                     redoableUserActions.clear();
                 }
             }
+            mso.sendInfo(this);
         }
 
         public void cancel() {
@@ -901,6 +905,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 System.err.println("Error : cancel not called on the last action");
                 return;
             }
+            mso.cancelInfo(this);
         }
 
     }
@@ -921,12 +926,21 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             this.newSlicingAxisPosition = slicingAxisPosition;
         }
 
+        @Override
+        public SliceSources getSliceSources() {
+            return sliceSource;
+        }
+
         public void run() {
             sliceSource.slicingAxisPosition = newSlicingAxisPosition;
             sliceSource.updatePosition();
             bdvh.getViewerPanel().showMessage("Moving slice to position "+new DecimalFormat("###.##").format(sliceSource.slicingAxisPosition));
             updateDisplay();
             super.run();
+        }
+
+        public String toString() {
+            return "Axis Position = "+new DecimalFormat("###.##").format(newSlicingAxisPosition);
         }
 
         public void cancel() {
@@ -993,6 +1007,11 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         public CreateSlice(List<SourceAndConverter<?>> sacs, double slicingAxisPosition) {
             this.sacs = sacs;
             this.slicingAxisPosition = slicingAxisPosition;
+        }
+
+        @Override
+        public SliceSources getSliceSources() {
+            return sliceSource;
         }
 
         @Override
@@ -1063,6 +1082,10 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             return sliceSource;
         }
 
+        public String toString() {
+            return "Slice Created "+new DecimalFormat("###.##").format(this.slicingAxisPosition);
+        }
+
         @Override
         public void cancel() {
             slices.remove(sliceSource);
@@ -1081,6 +1104,11 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         final Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixed;
         final Function<SourceAndConverter[], SourceAndConverter[]> preprocessMoving;
 
+        @Override
+        public SliceSources getSliceSources() {
+            return slice;
+        }
+
         public RegisterSlice(SliceSources slice,
                              Registration<SourceAndConverter[]> registration,
                              Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixed,
@@ -1096,6 +1124,10 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
             slice.addRegistration(registration, preprocessFixed, preprocessMoving);
             super.run();
+        }
+
+        public String toString() {
+            return "Registration ["+registration.getClass().getSimpleName()+"] "+slice.getRegistrationState(registration);
         }
 
         @Override
@@ -1114,7 +1146,10 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     }
 
     public class MarkActionSequenceBatch extends CancelableAction {
-
+        @Override
+        public SliceSources getSliceSources() {
+            return null;
+        }
     }
 
     class SelectedSliceSourcesDrag implements DragBehaviour {

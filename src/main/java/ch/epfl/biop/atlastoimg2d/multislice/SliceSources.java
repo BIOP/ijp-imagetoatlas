@@ -64,17 +64,9 @@ public class SliceSources {
         centerPositioner = new CenterZeroRegistration();
         centerPositioner.setMovingImage(registered_sacs);
 
-        this.addRegistration(centerPositioner, Function.identity(), Function.identity());
-
         zPositioner = new AffineTransformedSourceWrapperRegistration();
 
-        this.addRegistration(zPositioner, Function.identity(), Function.identity());
-        this.waitForEndOfRegistrations();
-
-        updatePosition();
-
         behavioursHandleSlice = new Behaviours(new InputTriggerConfig());
-
         behavioursHandleSlice.behaviour(mp.getSelectedSourceDragBehaviour(this), "dragSelectedSources"+this.toString(), "button1");
         behavioursHandleSlice.behaviour((ClickBehaviour) (x,y) -> isSelected = false, "deselectedSources"+this.toString(), "button3", "ctrl button1");
 
@@ -87,7 +79,14 @@ public class SliceSources {
                     this::getBdvHandleColor
                 );
         ghs.add(gh);
+        iniPosition();
+    }
 
+    void iniPosition() {
+        addRegistration(centerPositioner, Function.identity(), Function.identity());
+        addRegistration(zPositioner, Function.identity(), Function.identity());
+        waitForEndOfRegistrations();
+        updatePosition();
     }
 
     public Integer[] getBdvHandleCoords() {
@@ -108,6 +107,15 @@ public class SliceSources {
         return new Integer[]{(int)sliceCenter.getDoublePosition(0), (int)sliceCenter.getDoublePosition(1)};
     }
 
+    public String getRegistrationState(Registration registration) {
+        if (registrations.contains(registration)) {
+            return "(done)";
+        }
+        if (pendingRegistrations.contains(registration)) {
+            return "(pending)";
+        }
+        return "(!)";
+    }
 
     public Integer[] getBdvHandleColor() {
         if (isSelected) {
@@ -172,12 +180,14 @@ public class SliceSources {
     }
 
     public void waitForEndOfRegistrations() {
-        try {
-            CompletableFuture.allOf(registrationTasks).get();
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.err.println("Some registration were cancelled");
-        }
+        //if (registrationTasks!=null) {
+            try {
+                CompletableFuture.allOf(registrationTasks).get();
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.err.println("Some registration were cancelled");
+            }
+        //}
     }
 
     protected void updatePosition() {
@@ -199,6 +209,15 @@ public class SliceSources {
 
         slicingModePositioner.setAffineTransform(slicingModePositionAffineTransform);
 
+    }
+
+    public RealPoint getCenterPositionPMode() {
+        RealPoint center = new RealPoint(3);
+        return new RealPoint(3);
+    }
+    public RealPoint getCenterPositionRMode() {
+        RealPoint center = new RealPoint(3);
+        return new RealPoint(3);
     }
 
     boolean processInProgress = false; // flag : true if a registration process is in progress
@@ -273,8 +292,7 @@ public class SliceSources {
 
                     registered_sacs = reg.getTransformedImageMovingToFixed(registered_sacs);
 
-                    SourceAndConverterServices.getSourceAndConverterDisplayService()
-                            .show(mp.bdvh, registered_sacs);
+
 
                     slicingModePositioner = new AffineTransformedSourceWrapperRegistration();
 
@@ -283,6 +301,14 @@ public class SliceSources {
 
                     relocated_sacs_positioning_mode = slicingModePositioner.getTransformedImageMovingToFixed(registered_sacs);
                     updatePosition();
+
+                    if (mp.currentMode.equals(MultiSlicePositioner.POSITIONING_MODE)) {
+                        SourceAndConverterServices.getSourceAndConverterDisplayService()
+                                .show(mp.bdvh, relocated_sacs_positioning_mode);
+                    } else if (mp.currentMode.equals(MultiSlicePositioner.REGISTRATION_MODE)) {
+                        SourceAndConverterServices.getSourceAndConverterDisplayService()
+                                .show(mp.bdvh, registered_sacs);
+                    }
 
                     registered_sacs_sequence.put(reg, registered_sacs);
                 }
@@ -293,6 +319,7 @@ public class SliceSources {
 
             }
             processInProgress = false;
+            mp.mso.updateInfoPanel(this);
             return out;
         });
 
@@ -304,6 +331,7 @@ public class SliceSources {
             pendingRegistrations.remove(reg);
             System.out.println("Remaining registrations : "+pendingRegistrations.size());
             System.out.println("exception = "+exception);
+            mp.mso.updateInfoPanel(this);
             return exception;
         });
     }
