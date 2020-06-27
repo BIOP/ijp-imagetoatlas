@@ -65,7 +65,6 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     //
     static public Object manualActionLock = new Object();
 
-
     /**
      * BdvHandle displaying everything
      */

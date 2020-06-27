@@ -32,7 +32,7 @@ public class DummyCommand {
 
         SourceAndConverter[] sacs = ij.convert().convert("SpimData 0>Channel>1", SourceAndConverter[].class);
 
-        mp.createSlice(sacs,0, 0.500, Tile.class, new Tile(-1));
+        mp.createSlice(sacs,8, 0.182, Tile.class, new Tile(-1));
 
 
         /*mp.getSortedSlices().stream().forEach(slice -> {

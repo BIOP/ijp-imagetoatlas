@@ -313,7 +313,6 @@ public class ReslicedAtlas {
         ((TransformedSource) (slicingModel.getSpimSource())).setFixedTransform(slicingTransfom);
 
         AffineTransform3D at3d = new AffineTransform3D();
-        //at3d.scale(3);
 
         AffineTransform3D atToInvert = new AffineTransform3D();
 
@@ -329,7 +328,10 @@ public class ReslicedAtlas {
         at3d.identity();
         at3d.scale(xScale, yScale, zScale);
 
-        at3d = at3d.preConcatenate(centerTransform);
+        AffineTransform3D centerTr = centerTransform.copy();
+        centerTr.translate(-centerTransform.get(0,3)/2,0,0);
+
+        at3d = at3d.preConcatenate(centerTr);
 
         nonExtendedAffineTransform.setAffineTransform(atToInvert.inverse().preConcatenate(at3d));
     }
