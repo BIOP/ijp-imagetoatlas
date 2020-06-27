@@ -35,8 +35,6 @@ public class SliceSources {
 
     boolean isSelected = false;
 
-    boolean isLocked = false;
-
     double yShift_slicing_mode = 0;
 
     final MultiSlicePositioner mp;
@@ -58,7 +56,6 @@ public class SliceSources {
         this.mp = mp;
         this.original_sacs = sacs;
         this.slicingAxisPosition = slicingAxisPosition;
-
         this.registered_sacs = this.original_sacs;
 
         centerPositioner = new CenterZeroRegistration();
@@ -90,20 +87,15 @@ public class SliceSources {
     }
 
     public Integer[] getBdvHandleCoords() {
-
         AffineTransform3D bdvAt3D = new AffineTransform3D();
-
         mp.bdvh.getViewerPanel().state().getViewerTransform(bdvAt3D);
-
-        double slicingAxisSnapped = (((int)(slicingAxisPosition/mp.sizePixX))*mp.sizePixX);
-
-        double posX = ((slicingAxisSnapped/mp.sizePixX/mp.reslicedAtlas.getStep())) * mp.sX;
-        double posY = mp.sY * yShift_slicing_mode;
-
-        RealPoint sliceCenter = new RealPoint(posX, posY, 0);
-
+        RealPoint sliceCenter = new RealPoint(3);
+        if (mp.currentMode==MultiSlicePositioner.POSITIONING_MODE) {
+            sliceCenter = getCenterPositionPMode();
+        } else if (mp.currentMode==MultiSlicePositioner.REGISTRATION_MODE) {
+            sliceCenter = getCenterPositionRMode();
+        }
         bdvAt3D.apply(sliceCenter, sliceCenter);
-
         return new Integer[]{(int)sliceCenter.getDoublePosition(0), (int)sliceCenter.getDoublePosition(1)};
     }
 
@@ -191,33 +183,24 @@ public class SliceSources {
     }
 
     protected void updatePosition() {
-
         AffineTransform3D zShiftAffineTransform = new AffineTransform3D();
-
         zShiftAffineTransform.translate(0,0,slicingAxisPosition);
-
         zPositioner.setAffineTransform(zShiftAffineTransform); // Moves the registered slices to the correct position
-
         AffineTransform3D slicingModePositionAffineTransform = new AffineTransform3D();
-
-        double slicingAxisSnapped = (((int)(slicingAxisPosition/mp.sizePixX))*mp.sizePixX);
-
-        double posX = ((slicingAxisSnapped/mp.sizePixX/mp.reslicedAtlas.getStep())) * mp.sX;
-        double posY = mp.sY * yShift_slicing_mode;
-
-        slicingModePositionAffineTransform.translate(posX, posY, -slicingAxisPosition );
-
+        RealPoint center = getCenterPositionPMode();
+        slicingModePositionAffineTransform.translate(center.getDoublePosition(0), center.getDoublePosition(1), -slicingAxisPosition );
         slicingModePositioner.setAffineTransform(slicingModePositionAffineTransform);
-
     }
 
     public RealPoint getCenterPositionPMode() {
-        RealPoint center = new RealPoint(3);
-        return new RealPoint(3);
+        double slicingAxisSnapped = (((int)((slicingAxisPosition)/mp.sizePixX))*mp.sizePixX);
+        double posX = (slicingAxisSnapped/mp.sizePixX * mp.sX/mp.reslicedAtlas.getStep())+0.5*(mp.sX);
+        double posY = mp.sY * yShift_slicing_mode;
+        return new RealPoint(posX, posY, 0);
     }
+
     public RealPoint getCenterPositionRMode() {
-        RealPoint center = new RealPoint(3);
-        return new RealPoint(3);
+        return new RealPoint(0, 0, slicingAxisPosition);
     }
 
     boolean processInProgress = false; // flag : true if a registration process is in progress

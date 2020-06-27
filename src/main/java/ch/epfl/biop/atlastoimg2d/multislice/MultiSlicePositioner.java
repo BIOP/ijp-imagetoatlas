@@ -255,7 +255,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         at3D.inverse().apply(centerScreenCurrentBdv, centerScreenGlobalCoord);
 
         // New target
-        centerScreenGlobalCoord.setPosition( centerScreenGlobalCoord.getDoublePosition(0)*(double)previouszStep/(double) reslicedAtlas.getStep(), 0);
+        centerScreenGlobalCoord.setPosition((centerScreenGlobalCoord.getDoublePosition(0)-sX/2.0)*(double)previouszStep/(double) reslicedAtlas.getStep()+sX/2.0 , 0);
 
         // How should we translate at3D, such as the screen center is the new one
 
@@ -470,24 +470,10 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
         RealPoint centerSlice = new RealPoint(3);
 
-        switch (currentMode) {
-            case POSITIONING_MODE:
-                AffineTransform3D bdvAt3D = new AffineTransform3D();
-                bdvh.getViewerPanel().state().getViewerTransform(bdvAt3D);
-                double slicingAxisSnapped = (((int)(slice.slicingAxisPosition/sizePixX))*sizePixX);
-                double posX = ((slicingAxisSnapped/sizePixX/reslicedAtlas.getStep())) * sX;
-                double posY = sY * slice.yShift_slicing_mode;
-                centerSlice = new RealPoint(posX, posY, 0);
-                break;
-
-            case REGISTRATION_MODE:
-                centerSlice.setPosition(0,0);
-                centerSlice.setPosition(0,1);
-                centerSlice.setPosition(slice.slicingAxisPosition,2);
-                break;
-            default:
-                System.err.println("Invalid multislicer mode");
-                return;
+        if (currentMode==MultiSlicePositioner.POSITIONING_MODE) {
+            centerSlice = slice.getCenterPositionPMode();
+        } else if (currentMode==MultiSlicePositioner.REGISTRATION_MODE) {
+            centerSlice = slice.getCenterPositionRMode();
         }
 
         AffineTransform3D nextAffineTransform = new AffineTransform3D();
@@ -538,10 +524,8 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
             int stairIndex = 0;
 
-            int zStep = (int) reslicedAtlas.getStep();
-
             for (SliceSources slice : getSortedSlices()) {
-                double posX = ((slice.slicingAxisPosition/sizePixX/zStep)+0) * sX;
+                double posX = slice.getCenterPositionPMode().getDoublePosition(0);
                 if (posX>=(lastPositionAlongX+sX)) {
                     stairIndex = 0;
                     lastPositionAlongX = posX;
@@ -720,29 +704,17 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                     bdvAt3D.apply(sliceCenter, sliceCenter);
 
                     if (i ==0) {
-                        double slicingAxisSnapped = (((int)(slice.slicingAxisPosition/sizePixX))*sizePixX);
-
-                        double posX = ((slicingAxisSnapped/sizePixX/reslicedAtlas.getStep())) * sX;
-                        double posY = sY * -1;
-
-                        RealPoint handleLeftPoint = new RealPoint(posX, posY, 0);
-
+                        RealPoint handleLeftPoint = slice.getCenterPositionPMode();
+                        handleLeftPoint.setPosition(-sY, 1);
                         bdvAt3D.apply(handleLeftPoint, handleLeftPoint);
-
 
                         leftPosition[0] = (int) handleLeftPoint.getDoublePosition(0);
                         leftPosition[1] = (int) handleLeftPoint.getDoublePosition(1);
                     }
 
                     if (i == sortedSelected.size()-1) {
-
-                        double slicingAxisSnapped = (((int)(slice.slicingAxisPosition/sizePixX))*sizePixX);
-
-                        double posX = ((slicingAxisSnapped/sizePixX/reslicedAtlas.getStep())) * sX;
-                        double posY = sY * -1;
-
-                        RealPoint handleRightPoint = new RealPoint(posX, posY, 0);
-
+                        RealPoint handleRightPoint = slice.getCenterPositionPMode();
+                        handleRightPoint.setPosition(-sY, 1);
                         bdvAt3D.apply(handleRightPoint, handleRightPoint);
 
                         rightPosition[0] = (int) handleRightPoint.getDoublePosition(0);
@@ -1121,7 +1093,6 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
         @Override
         public void run() { //
-
             slice.addRegistration(registration, preprocessFixed, preprocessMoving);
             super.run();
         }

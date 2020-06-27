@@ -39,7 +39,7 @@ public class ReslicedAtlas {
 
     AffineTransformedSourceWrapperRegistration nonExtendedAffineTransform = new AffineTransformedSourceWrapperRegistration();
 
-    private int zStep = 1;
+    private volatile int zStep = 1;
     private double rx;
     private double ry;
 
@@ -202,7 +202,7 @@ public class ReslicedAtlas {
                 long[] dims = new long[3];
                 reslicedSac.getSpimSource().getSource(0,0).dimensions(dims);
                 dims[0] = dims[0]/dims[2];
-                RealPoint ptCenterPixel = new RealPoint((dims[0]-1.0)/2.0,(dims[1]-1.0)/2.0, 0);//(dims[2]-1.0)/2.0);
+                RealPoint ptCenterPixel = new RealPoint((dims[0]-1.0),(dims[1]-1.0)/2.0, 0);//(dims[2]-1.0)/2.0);
 
                 centerTransform.apply(ptCenterPixel, ptCenterGlobal);
                 centerTransform.identity();

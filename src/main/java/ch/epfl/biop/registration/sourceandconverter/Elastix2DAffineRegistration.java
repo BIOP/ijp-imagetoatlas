@@ -24,6 +24,8 @@ public class Elastix2DAffineRegistration implements Registration<SourceAndConver
 
     Map<String, Object> scijavaParameters = new HashMap<>();
 
+    AffineTransform3D at3d;
+
     public void setScijavaContext(Context ctx) {
         this.ctx = ctx;
     }
@@ -45,8 +47,6 @@ public class Elastix2DAffineRegistration implements Registration<SourceAndConver
         assert mimg.length==1;
         scijavaParameters.put("sac_moving", mimg[0]);
     }
-
-    AffineTransform3D at3d;
 
     @Override
     public boolean register() {
