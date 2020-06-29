@@ -57,7 +57,7 @@ public class CircleGraphicalHandle extends GraphicalHandle{
         if (!this.mouseAbove) {
             r=(int) (r*0.75);
         }
-        g.fillOval(pos[0] - r / 2, pos[1] - r / 2, r, r);
+        g.fillOval(pos[0] - r, pos[1] - r, 2*r, 2*r);
     }
 
     @Override
@@ -69,6 +69,6 @@ public class CircleGraphicalHandle extends GraphicalHandle{
     synchronized boolean isPresentAt(int x, int y) {
         if ((pos == null) || (pos[0] == null) || (pos[1] == null)) return false;
         double d = (pos[0]-x)*(pos[0]-x)+(pos[1]-y)*(pos[1]-y);
-        return d*d<10*r*r;
+        return d*d<4*r*r;
     }
 }

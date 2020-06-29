@@ -33,7 +33,7 @@ public class SliceSources {
     // Where are they ?
     double slicingAxisPosition;
 
-    boolean isSelected = false;
+    private boolean isSelected = false;
 
     double yShift_slicing_mode = 0;
 
@@ -65,7 +65,10 @@ public class SliceSources {
 
         behavioursHandleSlice = new Behaviours(new InputTriggerConfig());
         behavioursHandleSlice.behaviour(mp.getSelectedSourceDragBehaviour(this), "dragSelectedSources"+this.toString(), "button1");
-        behavioursHandleSlice.behaviour((ClickBehaviour) (x,y) -> isSelected = false, "deselectedSources"+this.toString(), "button3", "ctrl button1");
+        behavioursHandleSlice.behaviour((ClickBehaviour) (x,y) -> {
+            deSelect();
+            mp.bdvh.getViewerPanel().requestRepaint();
+        }, "deselectedSources"+this.toString(), "button3", "ctrl button1");
 
         GraphicalHandle gh = new CircleGraphicalHandle(mp,
                     behavioursHandleSlice,
@@ -86,17 +89,44 @@ public class SliceSources {
         updatePosition();
     }
 
+    public synchronized void select() {
+        this.isSelected = true;
+    }
+
+    public synchronized void deSelect() {
+        this.isSelected = false;
+    }
+
+    public synchronized boolean isSelected() {
+        return this.isSelected;
+    }
+
+    private int currentSliceIndex = -1;
+
+    public int getIndex() {
+        return currentSliceIndex;
+    }
+
+    public void setIndex(int idx) {
+        currentSliceIndex = idx;
+    }
+
     public Integer[] getBdvHandleCoords() {
         AffineTransform3D bdvAt3D = new AffineTransform3D();
         mp.bdvh.getViewerPanel().state().getViewerTransform(bdvAt3D);
         RealPoint sliceCenter = new RealPoint(3);
         if (mp.currentMode==MultiSlicePositioner.POSITIONING_MODE) {
             sliceCenter = getCenterPositionPMode();
+            bdvAt3D.apply(sliceCenter, sliceCenter);
+            return new Integer[]{(int)sliceCenter.getDoublePosition(0), (int)sliceCenter.getDoublePosition(1), (int)sliceCenter.getDoublePosition(2)};
         } else if (mp.currentMode==MultiSlicePositioner.REGISTRATION_MODE) {
-            sliceCenter = getCenterPositionRMode();
+            RealPoint zero = new RealPoint(3);
+            zero.setPosition(-mp.sX/2.0,0);
+            bdvAt3D.apply(zero,zero);
+            return new Integer[]{20 * (currentSliceIndex + 1)+(int) zero.getDoublePosition(0), 20, 0};
+        } else {
+            return new Integer[]{0, 0, 0};
         }
-        bdvAt3D.apply(sliceCenter, sliceCenter);
-        return new Integer[]{(int)sliceCenter.getDoublePosition(0), (int)sliceCenter.getDoublePosition(1)};
     }
 
     public String getRegistrationState(Registration registration) {
@@ -119,7 +149,7 @@ public class SliceSources {
     }
 
     public Integer getBdvHandleRadius() {
-        return 25;
+        return 12;
     }
 
     public void drawGraphicalHandles(Graphics2D g) {
