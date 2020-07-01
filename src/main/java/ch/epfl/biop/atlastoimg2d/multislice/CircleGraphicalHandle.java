@@ -45,17 +45,14 @@ public class CircleGraphicalHandle extends GraphicalHandle{
         return behaviours;
     }
 
-    Integer[] pos;
-    Integer r;
-
     @Override
     public synchronized void enabledDraw(Graphics2D g) {
-        r = radius.get();
-        pos = coords.get();
+        Integer r = radius.get();
+        Integer[] pos = coords.get();
         Integer[] c = color.get();
         g.setColor(new Color(c[0], c[1], c[2], c[3]));
-        if (!this.mouseAbove) {
-            r=(int) (r*0.75);
+        if (this.mouseAbove) {
+            r=(int) (r*1.2);
         }
         g.fillOval(pos[0] - r, pos[1] - r, 2*r, 2*r);
     }
@@ -67,8 +64,10 @@ public class CircleGraphicalHandle extends GraphicalHandle{
 
     @Override
     synchronized boolean isPresentAt(int x, int y) {
+        Integer[] pos = coords.get();
+        double r = (double)(radius.get());
         if ((pos == null) || (pos[0] == null) || (pos[1] == null)) return false;
         double d = (pos[0]-x)*(pos[0]-x)+(pos[1]-y)*(pos[1]-y);
-        return d*d<4*r*r;
+        return d<(r*r);
     }
 }

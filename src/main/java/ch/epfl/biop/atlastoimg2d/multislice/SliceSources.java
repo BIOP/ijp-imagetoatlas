@@ -65,7 +65,7 @@ public class SliceSources {
 
         behavioursHandleSlice = new Behaviours(new InputTriggerConfig());
         behavioursHandleSlice.behaviour(mp.getSelectedSourceDragBehaviour(this), "dragSelectedSources"+this.toString(), "button1");
-        behavioursHandleSlice.behaviour((ClickBehaviour) (x,y) -> {
+        behavioursHandleSlice.behaviour((ClickBehaviour) (x, y) -> {
             deSelect();
             mp.bdvh.getViewerPanel().requestRepaint();
         }, "deselectedSources"+this.toString(), "button3", "ctrl button1");
@@ -121,9 +121,9 @@ public class SliceSources {
             return new Integer[]{(int)sliceCenter.getDoublePosition(0), (int)sliceCenter.getDoublePosition(1), (int)sliceCenter.getDoublePosition(2)};
         } else if (mp.currentMode==MultiSlicePositioner.REGISTRATION_MODE) {
             RealPoint zero = new RealPoint(3);
-            zero.setPosition(-mp.sX/2.0,0);
+            zero.setPosition(0,0);
             bdvAt3D.apply(zero,zero);
-            return new Integer[]{20 * (currentSliceIndex + 1)+(int) zero.getDoublePosition(0), 20, 0};
+            return new Integer[]{20 * (currentSliceIndex - mp.slices.size()/2)+(int) zero.getDoublePosition(0), 20, 0};
         } else {
             return new Integer[]{0, 0, 0};
         }
