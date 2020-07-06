@@ -57,7 +57,6 @@ import static sc.fiji.bdvpg.scijava.services.SourceAndConverterService.SPIM_DATA
  * - a registration mode
  * - a 3d view mode
  * - an export mode
- * In the registration mode, all slices are displayed, and z step equals 1, and source are overlayed
  *
  */
 
@@ -98,6 +97,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
     /**
      * Shift in Y : control overlay or not of sources
+     *
      * @param bdvh
      * @param slicingModel
      */
@@ -105,29 +105,29 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     public String currentMode = "";
 
     final static String POSITIONING_MODE = "positioning-mode";
-    final static String POSITIONING_BEHAVIOURS_KEY = POSITIONING_MODE+"-behaviours";
+    final static String POSITIONING_BEHAVIOURS_KEY = POSITIONING_MODE + "-behaviours";
     Behaviours positioning_behaviours = new Behaviours(new InputTriggerConfig(), POSITIONING_MODE);
 
     final static String REGISTRATION_MODE = "Registration";
-    final static String REGISTRATION_BEHAVIOURS_KEY = REGISTRATION_MODE+"-behaviours";
+    final static String REGISTRATION_BEHAVIOURS_KEY = REGISTRATION_MODE + "-behaviours";
     Behaviours registration_behaviours = new Behaviours(new InputTriggerConfig(), REGISTRATION_MODE);
 
     final static String COMMON_BEHAVIOURS_KEY = "multipositioner-behaviours";
-    Behaviours common_behaviours = new Behaviours(new InputTriggerConfig(), "multipositioner" );
+    Behaviours common_behaviours = new Behaviours(new InputTriggerConfig(), "multipositioner");
 
     private static final String BLOCKING_MAP = "multipositioner-blocking";
 
     int iCurrentSlice = 0;
 
-    Integer[] rightPosition = new Integer[]{0,0,0};
+    Integer[] rightPosition = new Integer[]{0, 0, 0};
 
-    Integer[] leftPosition = new Integer[]{0,0,0};
+    Integer[] leftPosition = new Integer[]{0, 0, 0};
 
     ReslicedAtlas reslicedAtlas;
 
     BiopAtlas biopAtlas;
 
-    SelectionLayer layer;
+    SelectionLayer selectionLayer;
 
     public MultiSlicePositioner(BdvHandle bdvh, BiopAtlas biopAtlas, ReslicedAtlas reslicedAtlas, Context ctx) {
         this.reslicedAtlas = reslicedAtlas;
@@ -139,24 +139,24 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
         this.bdvh.getViewerPanel().setTransferHandler(new MultiSlicePositioner.TransferHandler());
 
-        nPixX = (int) reslicedAtlas.slicingModel.getSpimSource().getSource(0,0).dimension(0);
-        nPixY = (int) reslicedAtlas.slicingModel.getSpimSource().getSource(0,0).dimension(1);
-        nPixZ = (int) reslicedAtlas.slicingModel.getSpimSource().getSource(0,0).dimension(2);
+        nPixX = (int) reslicedAtlas.slicingModel.getSpimSource().getSource(0, 0).dimension(0);
+        nPixY = (int) reslicedAtlas.slicingModel.getSpimSource().getSource(0, 0).dimension(1);
+        nPixZ = (int) reslicedAtlas.slicingModel.getSpimSource().getSource(0, 0).dimension(2);
 
         AffineTransform3D at3D = new AffineTransform3D();
-        reslicedAtlas.slicingModel.getSpimSource().getSourceTransform(0,0,at3D);
+        reslicedAtlas.slicingModel.getSpimSource().getSourceTransform(0, 0, at3D);
 
         double[] m = at3D.getRowPackedCopy();
 
-        sizePixX = Math.sqrt(m[0]*m[0]+m[4]*m[4]+m[8]*m[8]);
-        sizePixY = Math.sqrt(m[1]*m[1]+m[5]*m[5]+m[9]*m[9]);
-        sizePixZ = Math.sqrt(m[2]*m[2]+m[6]*m[6]+m[10]*m[10]);
+        sizePixX = Math.sqrt(m[0] * m[0] + m[4] * m[4] + m[8] * m[8]);
+        sizePixY = Math.sqrt(m[1] * m[1] + m[5] * m[5] + m[9] * m[9]);
+        sizePixZ = Math.sqrt(m[2] * m[2] + m[6] * m[6] + m[10] * m[10]);
 
-        sX = nPixX*sizePixX;
-        sY = nPixY*sizePixY;
-        sZ = nPixZ*sizePixZ;
+        sX = nPixX * sizePixX;
+        sY = nPixY * sizePixY;
+        sZ = nPixZ * sizePixZ;
 
-        BdvFunctions.showOverlay( this, "MultiSlice Overlay", BdvOptions.options().addTo( bdvh ) );
+        BdvFunctions.showOverlay(this, "MultiSlice Overlay", BdvOptions.options().addTo(bdvh));
 
         ssb = (SourceSelectorBehaviour) SourceAndConverterServices.getSourceAndConverterDisplayService().getDisplayMetadata(
                 bdvh, SourceSelectorBehaviour.class.getSimpleName());
@@ -167,12 +167,12 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
         setPositioningMode();
 
-        common_behaviours.behaviour((ClickBehaviour)(x, y) -> this.cancelLastAction(), "cancel_last_action", "ctrl Z");
-        common_behaviours.behaviour((ClickBehaviour)(x, y) -> this.redoAction(), "redo_last_action", "ctrl Y", "ctrl shift Z");
-        common_behaviours.behaviour((ClickBehaviour)(x,y) -> this.navigateNextSlice(), "navigate_next_slice", "N");
-        common_behaviours.behaviour((ClickBehaviour)(x,y) -> this.navigatePreviousSlice(), "navigate_previous_slice", "P"); // P taken for panel
-        common_behaviours.behaviour((ClickBehaviour)(x,y) -> this.navigateCurrentSlice(), "navigate_current_slice", "C");
-        common_behaviours.behaviour((ClickBehaviour)(x,y) -> this.nextMode(), "change_mode", "Q");
+        common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.cancelLastAction(), "cancel_last_action", "ctrl Z");
+        common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.redoAction(), "redo_last_action", "ctrl Y", "ctrl shift Z");
+        common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.navigateNextSlice(), "navigate_next_slice", "N");
+        common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.navigatePreviousSlice(), "navigate_previous_slice", "P"); // P taken for panel
+        common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.navigateCurrentSlice(), "navigate_current_slice", "C");
+        common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.nextMode(), "change_mode", "Q");
 
         bdvh.getTriggerbindings().addBehaviourMap(COMMON_BEHAVIOURS_KEY, common_behaviours.getBehaviourMap());
         bdvh.getTriggerbindings().addInputTriggerMap(COMMON_BEHAVIOURS_KEY, common_behaviours.getInputTriggerMap()); // "transform", "bdv"
@@ -180,26 +180,27 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
         overrideStandardNavigation();
 
-        positioning_behaviours.behaviour((ClickBehaviour)(x,y) ->  this.toggleOverlap(), "toggle_superimpose", "O");
-        positioning_behaviours.behaviour((ClickBehaviour)(x,y) ->  {if (ssb.isEnabled()) {
-            ssb.disable();
-            refreshBlockMap();
-        } else {
-            ssb.enable();
-            refreshBlockMap();
-        }}, "toggle_editormode", "E");
-        positioning_behaviours.behaviour((ClickBehaviour)(x,y) ->  this.equalSpacingSelectedSlices(), "equalSpacingSelectedSlices", "A");
-        positioning_behaviours.behaviour((ClickBehaviour)(x,y) ->  slices.forEach(slice -> slice.select()), "selectAllSlices", "ctrl A");
-        positioning_behaviours.behaviour((ClickBehaviour)(x,y) ->  slices.forEach(slice -> slice.deSelect()), "deselectAllSlices", "ctrl shift A");
+        positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.toggleOverlap(), "toggle_superimpose", "O");
+        positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> {
+            if (ssb.isEnabled()) {
+                ssb.disable();
+                refreshBlockMap();
+            } else {
+                ssb.enable();
+                refreshBlockMap();
+            }
+        }, "toggle_editormode", "E");
+        positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.equalSpacingSelectedSlices(), "equalSpacingSelectedSlices", "A");
+        positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> slices.forEach(slice -> slice.select()), "selectAllSlices", "ctrl A");
+        positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> slices.forEach(slice -> slice.deSelect()), "deselectAllSlices", "ctrl shift A");
 
         ssb.addSelectedSourcesListener(this);
 
-        registration_behaviours.behaviour((ClickBehaviour)(x,y) ->  this.elastixRegister(), "register_elastix", "R");
-        registration_behaviours.behaviour((ClickBehaviour)(x,y) ->  this.bigwarpRegister(), "register_test", "W");
-
+        registration_behaviours.behaviour((ClickBehaviour) (x, y) -> this.elastixRegister(), "register_elastix", "R");
+        registration_behaviours.behaviour((ClickBehaviour) (x, y) -> this.bigwarpRegister(), "register_test", "W");
 
         List<SourceAndConverter<?>> sacsToAppend = new ArrayList<>();
-        for (int i=0;i<biopAtlas.map.getStructuralImages().length;i++) {
+        for (int i = 0; i < biopAtlas.map.getStructuralImages().length; i++) {
             sacsToAppend.add(reslicedAtlas.nonExtendedSlicedSources[i]);
             sacsToAppend.add(reslicedAtlas.extendedSlicedSources[i]);
         }
@@ -210,16 +211,19 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         setPositioningMode();
         bdvh.getViewerPanel().getDisplay().addHandler(this);
 
-        GraphicalHandle ghRight = new CircleGraphicalHandle(this,  new DragRight(), "drag_right", "button1",bdvh.getTriggerbindings(),
-                () -> rightPosition, () -> 50, () -> new Integer[]{255,0,255, 200});
-        GraphicalHandle ghLeft = new CircleGraphicalHandle(this,  new DragLeft(), "drag_right", "button1",bdvh.getTriggerbindings(),
-                () -> leftPosition, () -> 50, () -> new Integer[]{255,0,255,200});
+        GraphicalHandle ghRight = new SquareGraphicalHandle(this, new DragRight(), "drag_right", "button1", bdvh.getTriggerbindings(),
+                () -> rightPosition, () -> 25, () -> new Integer[]{255, 0, 255, 200});
+        GraphicalHandle ghCenter = new CircleGraphicalHandle(this, new SelectedSliceSourcesDrag(), "translate_selected", "button1", bdvh.getTriggerbindings(),
+                () -> new Integer[]{(leftPosition[0]+rightPosition[0])/2,(leftPosition[1]+rightPosition[1])/2}, () -> 25, () -> new Integer[]{255, 0, 255, 200});
+        GraphicalHandle ghLeft = new SquareGraphicalHandle(this, new DragLeft(), "drag_right", "button1", bdvh.getTriggerbindings(),
+                () -> leftPosition, () -> 25, () -> new Integer[]{255, 0, 255, 200});
 
         ghs.add(ghRight);
+        ghs.add(ghCenter);
         ghs.add(ghLeft);
 
-        if (this.bdvh.getCardPanel()!=null) {
-            this.bdvh.getCardPanel().addCard( "Registration Options", new RegistrationPanel(this).getPanel(), true);
+        if (this.bdvh.getCardPanel() != null) {
+            this.bdvh.getCardPanel().addCard("Registration Options", new RegistrationPanel(this).getPanel(), true);
             this.bdvh.getCardPanel().setCardExpanded("Sources", false);
             this.bdvh.getCardPanel().setCardExpanded("Groups", false);
         } else {
@@ -234,12 +238,12 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         previouszStep = (int) reslicedAtlas.getStep();
 
         bdvh.getCardPanel().addCard("Slicing Adjustement",
-                new SlicingAdjusterPanel(this,scijavaCtx).getPanel("reslicedAtlas", reslicedAtlas),
+                new SlicingAdjusterPanel(this, scijavaCtx).getPanel("reslicedAtlas", reslicedAtlas),
                 true);
 
         mso = new MultiSliceObserver(this);
 
-        bdvh.getCardPanel().addCard("Tasks Info", mso.getJPanel(),true);
+        bdvh.getCardPanel().addCard("Tasks Info", mso.getJPanel(), true);
 
     }
 
@@ -256,8 +260,8 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         itm.put(InputTrigger.getFromString("shift DOWN"), "zoom out fast");
         itm.put(InputTrigger.getFromString("ctrl DOWN"), "zoom out slow");
 
-        layer = new SelectionLayer(this);
-        layer.addSelectionBehaviours(common_behaviours);
+        selectionLayer = new SelectionLayer(this);
+        selectionLayer.addSelectionBehaviours(common_behaviours);
         refreshBlockMap();
 
         bdvh.getTriggerbindings().addInputTriggerMap("default_navigation", itm, "transform");
@@ -266,8 +270,8 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     int previouszStep;
 
     public void recenterBdvh() {
-        double cur_wcx = bdvh.getViewerPanel().getWidth()/2.0; // Current Window Center X
-        double cur_wcy = bdvh.getViewerPanel().getHeight()/2.0; // Current Window Center Y
+        double cur_wcx = bdvh.getViewerPanel().getWidth() / 2.0; // Current Window Center X
+        double cur_wcy = bdvh.getViewerPanel().getHeight() / 2.0; // Current Window Center Y
 
         RealPoint centerScreenCurrentBdv = new RealPoint(new double[]{cur_wcx, cur_wcy, 0});
         RealPoint centerScreenGlobalCoord = new RealPoint(3);
@@ -278,7 +282,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         at3D.inverse().apply(centerScreenCurrentBdv, centerScreenGlobalCoord);
 
         // New target
-        centerScreenGlobalCoord.setPosition((centerScreenGlobalCoord.getDoublePosition(0)-sX/2.0)*(double)previouszStep/(double) reslicedAtlas.getStep()+sX/2.0 , 0);
+        centerScreenGlobalCoord.setPosition((centerScreenGlobalCoord.getDoublePosition(0) - sX / 2.0) * (double) previouszStep / (double) reslicedAtlas.getStep() + sX / 2.0, 0);
 
         // How should we translate at3D, such as the screen center is the new one
 
@@ -289,31 +293,31 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         nextAffineTransform.set(at3D);
 
         // No Shift
-        nextAffineTransform.set(0,0,3);
-        nextAffineTransform.set(0,1,3);
-        nextAffineTransform.set(0,2,3);
+        nextAffineTransform.set(0, 0, 3);
+        nextAffineTransform.set(0, 1, 3);
+        nextAffineTransform.set(0, 2, 3);
 
         // But the center of the window should be centerScreenGlobalCoord
         // Let's compute the shift
-        double next_wcx = bdvh.getViewerPanel().getWidth()/2.0; // Next Window Center X
-        double next_wcy = bdvh.getViewerPanel().getHeight()/2.0; // Next Window Center Y
+        double next_wcx = bdvh.getViewerPanel().getWidth() / 2.0; // Next Window Center X
+        double next_wcy = bdvh.getViewerPanel().getHeight() / 2.0; // Next Window Center Y
 
         RealPoint centerScreenNextBdv = new RealPoint(new double[]{next_wcx, next_wcy, 0});
         RealPoint shiftNextBdv = new RealPoint(3);
 
         nextAffineTransform.inverse().apply(centerScreenNextBdv, shiftNextBdv);
 
-        double sx = -centerScreenGlobalCoord.getDoublePosition(0)+shiftNextBdv.getDoublePosition(0);
-        double sy = -centerScreenGlobalCoord.getDoublePosition(1)+shiftNextBdv.getDoublePosition(1);
-        double sz = -centerScreenGlobalCoord.getDoublePosition(2)+shiftNextBdv.getDoublePosition(2);
+        double sx = -centerScreenGlobalCoord.getDoublePosition(0) + shiftNextBdv.getDoublePosition(0);
+        double sy = -centerScreenGlobalCoord.getDoublePosition(1) + shiftNextBdv.getDoublePosition(1);
+        double sz = -centerScreenGlobalCoord.getDoublePosition(2) + shiftNextBdv.getDoublePosition(2);
 
         RealPoint shiftWindow = new RealPoint(new double[]{sx, sy, sz});
         RealPoint shiftMatrix = new RealPoint(3);
         nextAffineTransform.apply(shiftWindow, shiftMatrix);
 
-        nextAffineTransform.set(shiftMatrix.getDoublePosition(0),0,3);
-        nextAffineTransform.set(shiftMatrix.getDoublePosition(1),1,3);
-        nextAffineTransform.set(shiftMatrix.getDoublePosition(2),2,3);
+        nextAffineTransform.set(shiftMatrix.getDoublePosition(0), 0, 3);
+        nextAffineTransform.set(shiftMatrix.getDoublePosition(1), 1, 3);
+        nextAffineTransform.set(shiftMatrix.getDoublePosition(2), 2, 3);
 
         bdvh.getBdvHandle().getViewerPanel().setCurrentViewerTransform(nextAffineTransform);
         previouszStep = (int) reslicedAtlas.getStep();
@@ -321,13 +325,14 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
     /**
      * Gets all slices sorted along the slicing axis
+     *
      * @return
      */
     public List<SliceSources> getSortedSlices() {
         List<SliceSources> sortedSlices = new ArrayList<>(slices);
         Collections.sort(sortedSlices, Comparator.comparingDouble(s -> s.slicingAxisPosition));
         // Sending index info to slices each time this function is called
-        for (int i = 0 ; i < sortedSlices.size() ; i++) {
+        for (int i = 0; i < sortedSlices.size(); i++) {
             sortedSlices.get(i).setIndex(i);
         }
         return sortedSlices;
@@ -376,7 +381,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                             .show(bdvh, sacsToAdd.toArray(new SourceAndConverter[0]));
                 }
 
-                for (int i = 0;i<reslicedAtlas.nonExtendedSlicedSources.length;i++) {
+                for (int i = 0; i < reslicedAtlas.nonExtendedSlicedSources.length; i++) {
                     if (SourceAndConverterServices.getSourceAndConverterDisplayService()
                             .isVisible(reslicedAtlas.nonExtendedSlicedSources[i], bdvh)) {
                         bdvh.getViewerPanel().state().setSourceActive(reslicedAtlas.nonExtendedSlicedSources[i], false);
@@ -429,7 +434,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 }
             }
 
-            for (int i = 0;i<reslicedAtlas.nonExtendedSlicedSources.length;i++) {
+            for (int i = 0; i < reslicedAtlas.nonExtendedSlicedSources.length; i++) {
                 if (SourceAndConverterServices.getSourceAndConverterDisplayService()
                         .isVisible(reslicedAtlas.extendedSlicedSources[i], bdvh)) {
                     bdvh.getViewerPanel().state().setSourceActive(reslicedAtlas.extendedSlicedSources[i], false);
@@ -441,23 +446,24 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
             bdvh.getTriggerbindings().removeInputTriggerMap(POSITIONING_BEHAVIOURS_KEY);
             bdvh.getTriggerbindings().removeBehaviourMap(POSITIONING_BEHAVIOURS_KEY);
-            registration_behaviours.install(bdvh.getTriggerbindings(), REGISTRATION_BEHAVIOURS_KEY );
+            registration_behaviours.install(bdvh.getTriggerbindings(), REGISTRATION_BEHAVIOURS_KEY);
             navigateCurrentSlice();
         }
         refreshBlockMap();
     }
 
     // -------------------------------------------------------- NAVIGATION ( BOTH MODES )
+
     /**
      * Center bdv on next slice (iCurrentSlice + 1)
      */
     public void navigateNextSlice() {
         iCurrentSlice++;
         List<SliceSources> sortedSlices = getSortedSlices();
-        if (iCurrentSlice>= sortedSlices.size()) {
+        if (iCurrentSlice >= sortedSlices.size()) {
             iCurrentSlice = 0;
         }
-        if (sortedSlices.size()>0) {
+        if (sortedSlices.size() > 0) {
             centerBdvViewOn(sortedSlices.get(iCurrentSlice));
         }
     }
@@ -468,11 +474,11 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     public void navigateCurrentSlice() {
         List<SliceSources> sortedSlices = getSortedSlices();
 
-        if (iCurrentSlice>= sortedSlices.size()) {
+        if (iCurrentSlice >= sortedSlices.size()) {
             iCurrentSlice = 0;
         }
 
-        if (sortedSlices.size()>0) {
+        if (sortedSlices.size() > 0) {
             centerBdvViewOn(sortedSlices.get(iCurrentSlice));
         }
     }
@@ -484,26 +490,27 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         iCurrentSlice--;
         List<SliceSources> sortedSlices = getSortedSlices();
 
-        if (iCurrentSlice< 0) {
-            iCurrentSlice = sortedSlices.size()-1;
+        if (iCurrentSlice < 0) {
+            iCurrentSlice = sortedSlices.size() - 1;
         }
 
-        if (sortedSlices.size()>0) {
+        if (sortedSlices.size() > 0) {
             centerBdvViewOn(sortedSlices.get(iCurrentSlice));
         }
     }
 
     /**
      * Center bdv on a slice
+     *
      * @param slice
      */
     public void centerBdvViewOn(SliceSources slice) {
 
         RealPoint centerSlice = new RealPoint(3);
 
-        if (currentMode==MultiSlicePositioner.POSITIONING_MODE) {
+        if (currentMode == MultiSlicePositioner.POSITIONING_MODE) {
             centerSlice = slice.getCenterPositionPMode();
-        } else if (currentMode==MultiSlicePositioner.REGISTRATION_MODE) {
+        } else if (currentMode == MultiSlicePositioner.REGISTRATION_MODE) {
             centerSlice = slice.getCenterPositionRMode();
         }
 
@@ -547,9 +554,9 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     private void updateDisplay() {
         // Sort slices along slicing axis
 
-        if (cycleToggle==0) {
+        if (cycleToggle == 0) {
             slices.forEach(slice -> slice.yShift_slicing_mode = 1);
-        } else if (cycleToggle==2) {
+        } else if (cycleToggle == 2) {
 
             double lastPositionAlongX = -Double.MAX_VALUE;
 
@@ -557,16 +564,16 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
             for (SliceSources slice : getSortedSlices()) {
                 double posX = slice.getCenterPositionPMode().getDoublePosition(0);
-                if (posX>=(lastPositionAlongX+sX)) {
+                if (posX >= (lastPositionAlongX + sX)) {
                     stairIndex = 0;
                     lastPositionAlongX = posX;
                     slice.yShift_slicing_mode = 1;
                 } else {
                     stairIndex++;
-                    slice.yShift_slicing_mode = 1+stairIndex;
+                    slice.yShift_slicing_mode = 1 + stairIndex;
                 }
             }
-        } else if (cycleToggle==1) {
+        } else if (cycleToggle == 1) {
             slices.forEach(slice -> slice.yShift_slicing_mode = 0);
         }
 
@@ -584,7 +591,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
      */
     public void toggleOverlap() {
         cycleToggle++;
-        if (cycleToggle==3) cycleToggle = 0;
+        if (cycleToggle == 3) cycleToggle = 0;
         updateDisplay();
         navigateCurrentSlice();
     }
@@ -595,26 +602,26 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 Elastix2DAffineRegistration elastixAffineReg = new Elastix2DAffineRegistration();
                 elastixAffineReg.setScijavaContext(scijavaCtx);
                 RealPoint rpt = new RealPoint(3);
-                double posX = -sX/2;
-                double posY = -sY/2;
-                rpt.setPosition(posX,0);
-                rpt.setPosition(posY,1);
+                double posX = -sX / 2;
+                double posY = -sY / 2;
+                rpt.setPosition(posX, 0);
+                rpt.setPosition(posY, 1);
                 rpt.setPosition(slice.slicingAxisPosition, 2);
                 Map<String, Object> params = new HashMap<>();
                 params.put("tpFixed", 0);
                 params.put("levelFixedSource", 2);
                 params.put("tpMoving", 0);
-                params.put("levelMovingSource", slice.registered_sacs[0].getSpimSource().getNumMipmapLevels()-1);
+                params.put("levelMovingSource", slice.registered_sacs[0].getSpimSource().getNumMipmapLevels() - 1);
                 params.put("pxSizeInCurrentUnit", 0.04);
                 params.put("interpolate", false);
                 params.put("showImagePlusRegistrationResult", false);//true);
-                params.put("px",rpt.getDoublePosition(0));
-                params.put("py",rpt.getDoublePosition(1));
-                params.put("pz",rpt.getDoublePosition(2));
-                params.put("sx",sX);
-                params.put("sy",sY);
+                params.put("px", rpt.getDoublePosition(0));
+                params.put("py", rpt.getDoublePosition(1));
+                params.put("pz", rpt.getDoublePosition(2));
+                params.put("sx", sX);
+                params.put("sy", sY);
                 elastixAffineReg.setScijavaParameters(params);
-                new RegisterSlice(slice, elastixAffineReg,(sacs) -> new SourceAndConverter[] {sacs[1]}, (sacs) -> new SourceAndConverter[] {sacs[0]}).run();
+                new RegisterSlice(slice, elastixAffineReg, (sacs) -> new SourceAndConverter[]{sacs[1]}, (sacs) -> new SourceAndConverter[]{sacs[0]}).run();
             }
         }
     }
@@ -625,24 +632,24 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 SacBigWarp2DRegistration registration = new SacBigWarp2DRegistration();
 
                 // Dummy ImageFactory
-                final int[] cellDimensions = new int[] { 32, 32, 1 };
+                final int[] cellDimensions = new int[]{32, 32, 1};
 
                 // Cached Image Factory Options
                 final DiskCachedCellImgOptions factoryOptions = options()
-                        .cellDimensions( cellDimensions )
-                        .cacheType( DiskCachedCellImgOptions.CacheType.BOUNDED )
-                        .maxCacheSize( 1 );
+                        .cellDimensions(cellDimensions)
+                        .cacheType(DiskCachedCellImgOptions.CacheType.BOUNDED)
+                        .maxCacheSize(1);
 
                 // Creates cached image factory of Type UnsignedShort
-                final DiskCachedCellImgFactory<UnsignedShortType> factory = new DiskCachedCellImgFactory<>( new UnsignedShortType(), factoryOptions );
+                final DiskCachedCellImgFactory<UnsignedShortType> factory = new DiskCachedCellImgFactory<>(new UnsignedShortType(), factoryOptions);
 
                 AffineTransform3D at3D = new AffineTransform3D();
-                at3D.translate(-this.nPixX/2.0, -this.nPixY/2.0,0);
-                at3D.scale(this.sizePixX, this.sizePixY,this.sizePixZ);
-                at3D.translate(0,0,slice.slicingAxisPosition);
+                at3D.translate(-this.nPixX / 2.0, -this.nPixY / 2.0, 0);
+                at3D.scale(this.sizePixX, this.sizePixY, this.sizePixZ);
+                at3D.translate(0, 0, slice.slicingAxisPosition);
 
                 // 0 - slicing model : empty source but properly defined in space and resolution
-                SourceAndConverter singleSliceModel = new EmptySourceAndConverterCreator("SlicingModel",at3D,
+                SourceAndConverter singleSliceModel = new EmptySourceAndConverterCreator("SlicingModel", at3D,
                         nPixX,
                         nPixY,
                         1,
@@ -650,25 +657,25 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 ).get();
 
                 SourceResampler resampler = new SourceResampler(null,
-                        singleSliceModel,false, false, false
-                        );
+                        singleSliceModel, false, false, false
+                );
 
                 AffineTransform3D translateZ = new AffineTransform3D();
-                translateZ.translate(0,0,-slice.slicingAxisPosition);
+                translateZ.translate(0, 0, -slice.slicingAxisPosition);
 
-                new RegisterSlice(slice, registration,(fixedSacs) ->
+                new RegisterSlice(slice, registration, (fixedSacs) ->
                         Arrays.asList(fixedSacs)
                                 .stream()
                                 .map(resampler)
-                                .map(sac -> SourceTransformHelper.createNewTransformedSourceAndConverter(translateZ, new SourceAndConverterAndTimeRange(sac,0)))
+                                .map(sac -> SourceTransformHelper.createNewTransformedSourceAndConverter(translateZ, new SourceAndConverterAndTimeRange(sac, 0)))
                                 .collect(Collectors.toList())
                                 .toArray(new SourceAndConverter[0]),
-                (movingSacs) ->
-                        Arrays.asList(movingSacs)
-                                .stream()
-                                .map(sac -> SourceTransformHelper.createNewTransformedSourceAndConverter(translateZ, new SourceAndConverterAndTimeRange(sac,0)))
-                                .collect(Collectors.toList())
-                                .toArray(new SourceAndConverter[0])).run();
+                        (movingSacs) ->
+                                Arrays.asList(movingSacs)
+                                        .stream()
+                                        .map(sac -> SourceTransformHelper.createNewTransformedSourceAndConverter(translateZ, new SourceAndConverterAndTimeRange(sac, 0)))
+                                        .collect(Collectors.toList())
+                                        .toArray(new SourceAndConverter[0])).run();
             }
         }
     }
@@ -677,10 +684,10 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     protected synchronized void draw(Graphics2D g) {
         {
             int colorCode = this.info.getColor().get();
-            Color color = new Color(ARGBType.red(colorCode) , ARGBType.green(colorCode), ARGBType.blue(colorCode), ARGBType.alpha(colorCode) );
+            Color color = new Color(ARGBType.red(colorCode), ARGBType.green(colorCode), ARGBType.blue(colorCode), ARGBType.alpha(colorCode));
             g.setColor(color);
 
-            g.drawString(currentMode,10,10);
+            g.drawString(currentMode, 10, 10);
 
             RealPoint[][] ptRectWorld = new RealPoint[2][2];
             Point[][] ptRectScreen = new Point[2][2];
@@ -712,80 +719,84 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
             g.setColor(color);
 
-            if (iCurrentSlice!=-1 && slices.size()>iCurrentSlice) {
+            if (iCurrentSlice != -1 && slices.size() > iCurrentSlice) {
                 SliceSources slice = slices.get(iCurrentSlice);
                 g.setColor(new Color(255, 255, 255, 128));
                 Integer[] coords = slice.getBdvHandleCoords();
                 RealPoint sliceCenter = new RealPoint(coords[0], coords[1], 0);
-                g.drawOval((int)sliceCenter.getDoublePosition(0) - 12, (int)sliceCenter.getDoublePosition(1) - 12, 24, 24);
+                g.drawOval((int) sliceCenter.getDoublePosition(0) - 15, (int) sliceCenter.getDoublePosition(1) - 15, 30, 30);
             }
 
             if (currentMode.equals(POSITIONING_MODE) && slices.stream().anyMatch(slice -> slice.isSelected())) {
                 List<SliceSources> sortedSelected = getSortedSlices().stream().filter(slice -> slice.isSelected()).collect(Collectors.toList());
                 RealPoint precedentPoint = null;
 
-                for (int i=0;i<sortedSelected.size();i++) {
+                for (int i = 0; i < sortedSelected.size(); i++) {
                     SliceSources slice = sortedSelected.get(i);
 
                     Integer[] coords = slice.getBdvHandleCoords();
                     RealPoint sliceCenter = new RealPoint(coords[0], coords[1], 0);
 
-                    if (precedentPoint!=null) {
-                        g.drawLine((int)precedentPoint.getDoublePosition(0),(int)precedentPoint.getDoublePosition(1),
-                                   (int)sliceCenter.getDoublePosition(0),(int)sliceCenter.getDoublePosition(1));
+                    if (precedentPoint != null) {
+                        g.drawLine((int) precedentPoint.getDoublePosition(0), (int) precedentPoint.getDoublePosition(1),
+                                (int) sliceCenter.getDoublePosition(0), (int) sliceCenter.getDoublePosition(1));
                     } else {
                         precedentPoint = new RealPoint(2);
                     }
 
-                    precedentPoint.setPosition(sliceCenter.getDoublePosition(0),0);
-                    precedentPoint.setPosition(sliceCenter.getDoublePosition(1),1);
+                    precedentPoint.setPosition(sliceCenter.getDoublePosition(0), 0);
+                    precedentPoint.setPosition(sliceCenter.getDoublePosition(1), 1);
 
                     bdvAt3D.apply(sliceCenter, sliceCenter);
 
-                    if (i ==0) {
+                    if (i == 0) {
                         RealPoint handleLeftPoint = slice.getCenterPositionPMode();
                         handleLeftPoint.setPosition(-sY, 1);
                         bdvAt3D.apply(handleLeftPoint, handleLeftPoint);
 
                         leftPosition[0] = (int) handleLeftPoint.getDoublePosition(0);
-                        leftPosition[1] = (int) handleLeftPoint.getDoublePosition(1);
+                        leftPosition[1] = (int) handleLeftPoint.getDoublePosition(1) - 50;
                     }
 
-                    if (i == sortedSelected.size()-1) {
+                    if (i == sortedSelected.size() - 1) {
                         RealPoint handleRightPoint = slice.getCenterPositionPMode();
                         handleRightPoint.setPosition(-sY, 1);
                         bdvAt3D.apply(handleRightPoint, handleRightPoint);
 
                         rightPosition[0] = (int) handleRightPoint.getDoublePosition(0);
-                        rightPosition[1] = (int) handleRightPoint.getDoublePosition(1);
+                        rightPosition[1] = (int) handleRightPoint.getDoublePosition(1) - 50;
                     }
                 }
 
-                if (sortedSelected.size()>2) {
+                if (sortedSelected.size() > 1) {
                     ghs.forEach(gh -> gh.enable());
-                    g.setColor(new Color(255,0,255,200));
-                    g.drawLine(leftPosition[0],leftPosition[1],rightPosition[0],rightPosition[1]);
+                    g.setColor(new Color(255, 0, 255, 200));
+                    g.drawLine(leftPosition[0], leftPosition[1], rightPosition[0], rightPosition[1]);
                 } else {
                     ghs.forEach(gh -> gh.disable());
                 }
                 ghs.forEach(gh -> gh.draw(g));
             }
-            if (layer!=null) {
-                layer.draw(g);
+            if (selectionLayer != null) {
+                selectionLayer.draw(g);
+            }
+
+            if (mso != null) {
+                mso.draw(g);
             }
         }
     }
 
     public void equalSpacingSelectedSlices() {
         List<SliceSources> sortedSelected = getSortedSlices().stream().filter(slice -> slice.isSelected()).collect(Collectors.toList());
-        if (sortedSelected.size()>2) {
+        if (sortedSelected.size() > 2) {
             SliceSources first = sortedSelected.get(0);
-            SliceSources last = sortedSelected.get(sortedSelected.size()-1);
-            double totalSpacing = last.slicingAxisPosition-first.slicingAxisPosition;
-            double delta = totalSpacing / (sortedSelected.size()-1);
+            SliceSources last = sortedSelected.get(sortedSelected.size() - 1);
+            double totalSpacing = last.slicingAxisPosition - first.slicingAxisPosition;
+            double delta = totalSpacing / (sortedSelected.size() - 1);
             new MarkActionSequenceBatch().run();
-            for (int idx = 1;idx<sortedSelected.size()-1;idx++) {
-                moveSlice(sortedSelected.get(idx), first.slicingAxisPosition+((double)idx)*delta);
+            for (int idx = 1; idx < sortedSelected.size() - 1; idx++) {
+                moveSlice(sortedSelected.get(idx), first.slicingAxisPosition + ((double) idx) * delta);
             }
             new MarkActionSequenceBatch().run();
         }
@@ -794,7 +805,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     @Override
     public void selectedSourcesUpdated(Collection<SourceAndConverter<?>> selectedSources, String triggerMode) {
         boolean changed = false;
-        for (SliceSources slice:slices) {
+        for (SliceSources slice : slices) {
             if (slice.isContainingAny(selectedSources)) {
                 if (!slice.isSelected()) {
                     changed = true;
@@ -807,7 +818,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 slice.deSelect();
             }
         }
-        if (changed) bdvh.getViewerPanel().requestRepaint();
+        if (changed) bdvh.getViewerPanel().getDisplay().repaint();//.requestRepaint();
     }
 
     @Override
@@ -829,22 +840,23 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             bdvh.getViewerPanel().displayToGlobalCoordinates(dl.getDropPoint().x, dl.getDropPoint().y, pt3d);
 
             // Computes which slice it corresponds to (useful for overlay redraw)
-            iSliceNoStep = (int) (pt3d.getDoublePosition(0)/sX);
+            iSliceNoStep = (int) (pt3d.getDoublePosition(0) / sX);
 
             //Repaint the overlay only
-            bdvh.getViewerPanel().paint();
+            bdvh.getViewerPanel().getDisplay().repaint();
         }
 
         /**
          * When the user drops the data -> import the slices
+         *
          * @param support
          * @param sacs
          */
         @Override
         public void importSourcesAndConverters(TransferSupport support, List<SourceAndConverter<?>> sacs) {
-            Optional<BdvHandle> bdvh = getBdvHandleFromViewerPanel(((bdv.viewer.ViewerPanel)support.getComponent()));
+            Optional<BdvHandle> bdvh = getBdvHandleFromViewerPanel(((bdv.viewer.ViewerPanel) support.getComponent()));
             if (bdvh.isPresent()) {
-                double slicingAxisPosition = iSliceNoStep*sizePixX*(int) reslicedAtlas.getStep();
+                double slicingAxisPosition = iSliceNoStep * sizePixX * (int) reslicedAtlas.getStep();
                 createSlice(sacs.toArray(new SourceAndConverter[0]), slicingAxisPosition, 0.01, Tile.class, new Tile(-1));
             }
         }
@@ -852,18 +864,17 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
     /**
      * Inner class which contains the information necessary for the viewing of the slices:
-     *
      */
 
     public void cancelLastAction() {
-        if (userActions.size()>0) {
-            CancelableAction action = userActions.get(userActions.size()-1);
+        if (userActions.size() > 0) {
+            CancelableAction action = userActions.get(userActions.size() - 1);
             if (action instanceof MarkActionSequenceBatch) {
                 action.cancel();
-                action = userActions.get(userActions.size()-1);
+                action = userActions.get(userActions.size() - 1);
                 while (!(action instanceof MarkActionSequenceBatch)) {
                     action.cancel();
-                    action = userActions.get(userActions.size()-1);
+                    action = userActions.get(userActions.size() - 1);
                 }
                 action.cancel();
             } else {
@@ -875,14 +886,14 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     }
 
     public void redoAction() {
-        if (redoableUserActions.size()>0) {
-            CancelableAction action = redoableUserActions.get(redoableUserActions.size()-1);
+        if (redoableUserActions.size() > 0) {
+            CancelableAction action = redoableUserActions.get(redoableUserActions.size() - 1);
             if (action instanceof MarkActionSequenceBatch) {
                 action.run();
-                action = redoableUserActions.get(redoableUserActions.size()-1);
+                action = redoableUserActions.get(redoableUserActions.size() - 1);
                 while (!(action instanceof MarkActionSequenceBatch)) {
                     action.run();
-                    action = redoableUserActions.get(redoableUserActions.size()-1);
+                    action = redoableUserActions.get(redoableUserActions.size() - 1);
                 }
                 action.run();
             } else {
@@ -894,15 +905,17 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         }
     }
 
+    volatile boolean drawActions = true;
+
     public abstract class CancelableAction {
 
         abstract public SliceSources getSliceSources();
 
         public void run() {
             userActions.add(this);
-            if (redoableUserActions.size()>0) {
-                if (redoableUserActions.get(redoableUserActions.size()-1).equals(this)) {
-                    redoableUserActions.remove(redoableUserActions.size()-1);
+            if (redoableUserActions.size() > 0) {
+                if (redoableUserActions.get(redoableUserActions.size() - 1).equals(this)) {
+                    redoableUserActions.remove(redoableUserActions.size() - 1);
                 } else {
                     // different branch : clear redoable actions
                     redoableUserActions.clear();
@@ -912,14 +925,24 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         }
 
         public void cancel() {
-            if (userActions.get(userActions.size()-1).equals(this)) {
-                userActions.remove(userActions.size()-1);
+            if (userActions.get(userActions.size() - 1).equals(this)) {
+                userActions.remove(userActions.size() - 1);
                 redoableUserActions.add(this);
             } else {
                 System.err.println("Error : cancel not called on the last action");
                 return;
             }
             mso.cancelInfo(this);
+        }
+
+        public void draw(Graphics2D g, double px, double py, double scale) {
+            if (drawActions) {
+                drawAction(g, px, py, scale);
+            }
+        }
+
+        public void drawAction(Graphics2D g, double px, double py, double scale) {
+            g.drawString(toString(), (int) px, (int) py);
         }
 
     }
@@ -934,7 +957,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         private double oldSlicingAxisPosition;
         private double newSlicingAxisPosition;
 
-        public MoveSlice(SliceSources sliceSource, double slicingAxisPosition ) {
+        public MoveSlice(SliceSources sliceSource, double slicingAxisPosition) {
             this.sliceSource = sliceSource;
             this.oldSlicingAxisPosition = sliceSource.slicingAxisPosition;
             this.newSlicingAxisPosition = slicingAxisPosition;
@@ -948,36 +971,41 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         public void run() {
             sliceSource.slicingAxisPosition = newSlicingAxisPosition;
             sliceSource.updatePosition();
-            bdvh.getViewerPanel().showMessage("Moving slice to position "+new DecimalFormat("###.##").format(sliceSource.slicingAxisPosition));
+            bdvh.getViewerPanel().showMessage("Moving slice to position " + new DecimalFormat("###.##").format(sliceSource.slicingAxisPosition));
             updateDisplay();
             super.run();
         }
 
         public String toString() {
-            return "Axis Position = "+new DecimalFormat("###.##").format(newSlicingAxisPosition);
+            return "Axis Position = " + new DecimalFormat("###.##").format(newSlicingAxisPosition);
         }
 
         public void cancel() {
             sliceSource.slicingAxisPosition = oldSlicingAxisPosition;
             sliceSource.updatePosition();
-            bdvh.getViewerPanel().showMessage("Moving slice to position "+new DecimalFormat("###.##").format(sliceSource.slicingAxisPosition));
+            bdvh.getViewerPanel().showMessage("Moving slice to position " + new DecimalFormat("###.##").format(sliceSource.slicingAxisPosition));
             updateDisplay();
             super.cancel();
         }
+
+        public void drawAction(Graphics2D g, double px, double py, double scale) {
+            g.drawString("M", (int) px - 5, (int) py + 5);//+new DecimalFormat("###.##").format(newSlicingAxisPosition), (int) px-5, (int) py+5);
+        }
+
     }
 
-    public <T extends Entity> List<SliceSources> createSlice(SourceAndConverter[] sacsArray, double slicingAxisPosition, double axisIncrement, final Class< T > attributeClass, T defaultEntity) {
+    public <T extends Entity> List<SliceSources> createSlice(SourceAndConverter[] sacsArray, double slicingAxisPosition, double axisIncrement, final Class<T> attributeClass, T defaultEntity) {
         List<SliceSources> out = new ArrayList<>();
         List<SourceAndConverter<?>> sacs = Arrays.asList(sacsArray);
-        if ((sacs.size()>1)&&(attributeClass!=null)) {
+        if ((sacs.size() > 1) && (attributeClass != null)) {
             // Check whether the source can be splitted, maybe based
             // Split based on Tile ?
 
             Map<T, List<SourceAndConverter<?>>> sacsGroups =
                     sacs.stream().collect(Collectors.groupingBy(sac -> {
-                        if (SourceAndConverterServices.getSourceAndConverterService().getMetadata(sac, SPIM_DATA_INFO)!=null) {
+                        if (SourceAndConverterServices.getSourceAndConverterService().getMetadata(sac, SPIM_DATA_INFO) != null) {
                             SourceAndConverterService.SpimDataInfo sdi = (SourceAndConverterService.SpimDataInfo) SourceAndConverterServices.getSourceAndConverterService().getMetadata(sac, SPIM_DATA_INFO);
-                            AbstractSpimData<AbstractSequenceDescription<BasicViewSetup,?,?>> asd = ( AbstractSpimData<AbstractSequenceDescription<BasicViewSetup,?,?>>)sdi.asd;
+                            AbstractSpimData<AbstractSequenceDescription<BasicViewSetup, ?, ?>> asd = (AbstractSpimData<AbstractSequenceDescription<BasicViewSetup, ?, ?>>) sdi.asd;
                             BasicViewSetup bvs = asd.getSequenceDescription().getViewSetups().get(sdi.setupId);
                             return (T) bvs.getAttribute(attributeClass);
                         } else {
@@ -992,11 +1020,11 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             sortedTiles.sort(Comparator.comparingInt(T::getId));
 
             new MarkActionSequenceBatch().run();
-            for (int i = 0; i<sortedTiles.size();i++) {
+            for (int i = 0; i < sortedTiles.size(); i++) {
                 T group = sortedTiles.get(i);
                 CreateSlice cs = new CreateSlice(sacsGroups.get(group), slicingAxisPosition + i * axisIncrement);
                 cs.run();
-                if (cs.getSlice()!=null) {
+                if (cs.getSlice() != null) {
                     out.add(cs.getSlice());
                 }
             }
@@ -1005,7 +1033,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         } else {
             CreateSlice cs = new CreateSlice(sacs, slicingAxisPosition);
             cs.run();
-            if (cs.getSlice()!=null) {
+            if (cs.getSlice() != null) {
                 out.add(cs.getSlice());
             }
         }
@@ -1033,11 +1061,11 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             boolean sacAlreadyPresent = false;
             for (SourceAndConverter sac : sacs) {
                 for (SliceSources slice : slices) {
-                   for (SourceAndConverter test : slice.original_sacs) {
-                       if (test.equals(sac)) {
-                           sacAlreadyPresent = true;
-                       }
-                   }
+                    for (SourceAndConverter test : slice.original_sacs) {
+                        if (test.equals(sac)) {
+                            sacAlreadyPresent = true;
+                        }
+                    }
                 }
             }
 
@@ -1067,10 +1095,10 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 }
             }
 
-            if (sliceSource==null) // for proper redo function
-            sliceSource = new SliceSources(sacs.toArray(new SourceAndConverter[sacs.size()]),
-                    slicingAxisPosition,
-                    MultiSlicePositioner.this);
+            if (sliceSource == null) // for proper redo function
+                sliceSource = new SliceSources(sacs.toArray(new SourceAndConverter[sacs.size()]),
+                        slicingAxisPosition,
+                        MultiSlicePositioner.this);
 
             slices.add(sliceSource);
 
@@ -1097,7 +1125,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         }
 
         public String toString() {
-            return "Slice Created "+new DecimalFormat("###.##").format(this.slicingAxisPosition);
+            return "Slice Created " + new DecimalFormat("###.##").format(this.slicingAxisPosition);
         }
 
         @Override
@@ -1109,6 +1137,10 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                     .remove(bdvh, sliceSource.registered_sacs);
             bdvh.getViewerPanel().showMessage("Slice removed");
             super.cancel();
+        }
+
+        public void drawAction(Graphics2D g, double px, double py, double scale) {
+            g.drawString("C", (int) px - 5, (int) py + 5);
         }
     }
 
@@ -1140,7 +1172,25 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         }
 
         public String toString() {
-            return "Registration ["+registration.getClass().getSimpleName()+"] "+slice.getRegistrationState(registration);
+            return "Registration [" + registration.getClass().getSimpleName() + "] " + slice.getRegistrationState(registration);
+        }
+
+        public void drawAction(Graphics2D g, double px, double py, double scale) {
+            System.out.println(slice.getRegistrationState(registration));
+            switch (slice.getRegistrationState(registration)) {
+                case "(done)":
+                    g.setColor(new Color(0, 255, 0, 200));
+                    break;
+                case "(locked)":
+                    g.setColor(new Color(255, 0, 0, 200));
+                    break;
+                case "(pending)":
+                    g.setColor(new Color(255, 255, 0, 200));
+                    break;
+            }
+            g.fillOval((int) (px - 7), (int) (py - 7), 14, 14);
+            g.setColor(new Color(255, 255, 255, 200));
+            g.drawString("R", (int) px - 4, (int) py + 5);
         }
 
         @Override
@@ -1155,7 +1205,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     }
 
     public DragBehaviour getSelectedSourceDragBehaviour(SliceSources slice) {
-        return new SelectedSliceSourcesDrag(slice);
+        return new SliceSourcesDrag(slice);
     }
 
     public class MarkActionSequenceBatch extends CancelableAction {
@@ -1167,7 +1217,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
     class SelectedSliceSourcesDrag implements DragBehaviour {
 
-        Map<SliceSources,Double> initialAxisPositions = new HashMap<>();
+        Map<SliceSources, Double> initialAxisPositions = new HashMap<>();
 
         List<SliceSources> selectedSources = new ArrayList<>();
 
@@ -1177,10 +1227,10 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         double deltaOrigin;
         boolean perform = false;
 
-        final SliceSources sliceOrigin;
+        //final SliceSources sliceOrigin;
 
-        public SelectedSliceSourcesDrag(SliceSources slice) {
-            this.sliceOrigin = slice;
+        public SelectedSliceSourcesDrag(){//SliceSources slice) {
+            //this.sliceOrigin = slice;
         }
 
         int iniX, iniY;
@@ -1190,27 +1240,29 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             bdvh.getViewerPanel().getGlobalMouseCoordinates(iniPointBdv);
 
             // Computes which slice it corresponds to (useful for overlay redraw)
-            iniSlicePointing = iniPointBdv.getDoublePosition(0)/sX+0.5;
-            iniSlicingAxisPosition = ((int) iniSlicePointing)*sizePixX*(int) reslicedAtlas.getStep();
+            iniSlicePointing = iniPointBdv.getDoublePosition(0) / sX + 0.5;
+            iniSlicingAxisPosition = ((int) iniSlicePointing) * sizePixX * (int) reslicedAtlas.getStep();
 
-            selectedSources =  getSortedSlices().stream().filter(slice -> slice.isSelected()).collect(Collectors.toList());
-            if ((selectedSources.size()>0)&&(sliceOrigin.isSelected())) {
+            selectedSources = getSortedSlices().stream().filter(slice -> slice.isSelected()).collect(Collectors.toList());
+            if ((selectedSources.size() > 0)) {// && (sliceOrigin.isSelected())) {
                 perform = true;
                 selectedSources.stream().forEach(slice -> {
-                    initialAxisPositions.put(slice,slice.slicingAxisPosition);
+                    initialAxisPositions.put(slice, slice.slicingAxisPosition);
                 });
-            } else {
+            } /*else {
                 if (!sliceOrigin.isSelected()) {
                     sliceOrigin.select();
                     perform = false;
                 }
-            }
+            }*/
 
-            if (currentMode != POSITIONING_MODE) {perform = false;}
+            if (currentMode != POSITIONING_MODE) {
+                perform = false;
+            }
 
             // Initialize the delta on a step of the zStepper
             if (perform) {
-                deltaOrigin = iniSlicingAxisPosition - sliceOrigin.slicingAxisPosition;
+                deltaOrigin = 0;//iniSlicingAxisPosition - sliceOrigin.slicingAxisPosition;
                 for (SliceSources slice : selectedSources) {
                     if (initialAxisPositions.containsKey(slice)) {
                         slice.slicingAxisPosition = initialAxisPositions.get(slice) + deltaOrigin;
@@ -1248,18 +1300,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         @Override
         public void end(int x, int y) {
             if (perform) {
-                /*if ((x==iniX)&&(y==iniY)) {
-                    // cancel action
-                    for (SliceSources slice : selectedSources) {
-                        if (initialAxisPositions.containsKey(slice)) {
-                            slice.slicingAxisPosition = initialAxisPositions.get(slice);
-                        }
-                    }
-                    if (sliceOrigin.isSelected()) {
-                        sliceOrigin.deSelect();
-                        perform = false;
-                    }
-                } else*/ {
+                {
 
                     RealPoint currentMousePosition = new RealPoint(3);
                     bdvh.getViewerPanel().getGlobalMouseCoordinates(currentMousePosition);
@@ -1284,20 +1325,127 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         }
     }
 
+
+    class SliceSourcesDrag implements DragBehaviour {
+
+        Map<SliceSources, Double> initialAxisPositions = new HashMap<>();
+
+        List<SliceSources> selectedSources = new ArrayList<>();
+
+        RealPoint iniPointBdv = new RealPoint(3);
+        double iniSlicePointing;
+        double iniSlicingAxisPosition;
+        double deltaOrigin;
+        boolean perform = false;
+
+        final SliceSources sliceOrigin;
+
+        public SliceSourcesDrag(SliceSources slice) {
+            this.sliceOrigin = slice;
+        }
+
+        int iniX, iniY;
+
+        @Override
+        public void init(int x, int y) {
+            bdvh.getViewerPanel().getGlobalMouseCoordinates(iniPointBdv);
+
+            // Computes which slice it corresponds to (useful for overlay redraw)
+            iniSlicePointing = iniPointBdv.getDoublePosition(0) / sX + 0.5;
+            iniSlicingAxisPosition = ((int) iniSlicePointing) * sizePixX * (int) reslicedAtlas.getStep();
+
+            //selectedSources = getSortedSlices().stream().filter(slice -> slice.isSelected()).collect(Collectors.toList());
+            if ((sliceOrigin.isSelected())) {
+                perform = true;
+                initialAxisPositions.put(sliceOrigin, sliceOrigin.slicingAxisPosition);
+            } else {
+                if (!sliceOrigin.isSelected()) {
+                    sliceOrigin.select();
+                    perform = false;
+                }
+            }
+
+            if (currentMode != POSITIONING_MODE) {
+                perform = false;
+            }
+
+            // Initialize the delta on a step of the zStepper
+            if (perform) {
+                deltaOrigin = iniSlicingAxisPosition - sliceOrigin.slicingAxisPosition;
+                    if (initialAxisPositions.containsKey(sliceOrigin)) {
+                        sliceOrigin.slicingAxisPosition = initialAxisPositions.get(sliceOrigin) + deltaOrigin;
+                        sliceOrigin.updatePosition();
+                    }
+            }
+
+            updateDisplay();
+
+        }
+
+        @Override
+        public void drag(int x, int y) {
+
+            if (perform) {
+                RealPoint currentMousePosition = new RealPoint(3);
+                bdvh.getViewerPanel().getGlobalMouseCoordinates(currentMousePosition);
+
+                double currentSlicePointing = currentMousePosition.getDoublePosition(0) / sX;
+                double currentSlicingAxisPosition = ((int) currentSlicePointing) * sizePixX * (int) reslicedAtlas.getStep();
+                double deltaAxis = currentSlicingAxisPosition - iniSlicingAxisPosition;
+
+                //for (SliceSources slice : selectedSources) {
+                    if (initialAxisPositions.containsKey(sliceOrigin)) {
+                        sliceOrigin.slicingAxisPosition = initialAxisPositions.get(sliceOrigin) + deltaAxis + deltaOrigin;
+                        sliceOrigin.updatePosition();
+                    }
+                //}
+
+                updateDisplay();
+            }
+        }
+
+        @Override
+        public void end(int x, int y) {
+            if (perform) {
+                {
+
+                    RealPoint currentMousePosition = new RealPoint(3);
+                    bdvh.getViewerPanel().getGlobalMouseCoordinates(currentMousePosition);
+
+                    double currentSlicePointing = currentMousePosition.getDoublePosition(0) / sX;
+                    double currentSlicingAxisPosition = ((int) currentSlicePointing) * sizePixX * (int) reslicedAtlas.getStep();
+                    double deltaAxis = currentSlicingAxisPosition - iniSlicingAxisPosition;
+
+                    //new MarkActionSequenceBatch().run();
+                    //for (SliceSources slice : selectedSources) {
+                        if (initialAxisPositions.containsKey(sliceOrigin)) {
+                            sliceOrigin.slicingAxisPosition = initialAxisPositions.get(sliceOrigin);
+                            moveSlice(sliceOrigin, initialAxisPositions.get(sliceOrigin) + deltaAxis + deltaOrigin);
+                        }
+                    //}
+                    //new MarkActionSequenceBatch().run();
+
+                    updateDisplay();
+                }
+
+            }
+        }
+    }
+
+
+
     /*
      * Create BehaviourMap to block behaviours interfering with
      * DraBehaviour. The block map is only active while TODO determine conditions
      */
     private final BehaviourMap blockMap = new BehaviourMap();
 
-    private void block()
-    {
-        bdvh.getTriggerbindings().addBehaviourMap( BLOCKING_MAP, blockMap );
+    private void block() {
+        bdvh.getTriggerbindings().addBehaviourMap(BLOCKING_MAP, blockMap);
     }
 
-    private void unblock()
-    {
-        bdvh.getTriggerbindings().removeBehaviourMap( BLOCKING_MAP );
+    private void unblock() {
+        bdvh.getTriggerbindings().removeBehaviourMap(BLOCKING_MAP);
     }
 
     Set<GraphicalHandle> ghs = new HashSet<>();
@@ -1307,7 +1455,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     @Override
     public synchronized void hover_in(GraphicalHandle gh) {
         gh_below_mouse.add(gh);
-        if (gh_below_mouse.size()==1) {
+        if (gh_below_mouse.size() == 1) {
             block();
         }
     }
@@ -1315,7 +1463,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     @Override
     public synchronized void hover_out(GraphicalHandle gh) {
         gh_below_mouse.remove(gh);
-        if (gh_below_mouse.size()==0) {
+        if (gh_below_mouse.size() == 0) {
             unblock();
         }
     }
@@ -1341,35 +1489,36 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     public synchronized void removed(GraphicalHandle gh) {
         if (gh_below_mouse.contains(gh)) {
             gh_below_mouse.remove(gh);
-            if (gh_below_mouse.size()==0) unblock();
+            if (gh_below_mouse.size() == 0) unblock();
         }
         ghs.remove(gh);
     }
 
-    private static final String[] DRAG_TOGGLE_EDITOR_KEYS = new String[] { "button1" };
+    private static final String[] DRAG_TOGGLE_EDITOR_KEYS = new String[]{"button1"};
 
     private void refreshBlockMap() {
-        bdvh.getTriggerbindings().removeBehaviourMap( BLOCKING_MAP );
+        bdvh.getTriggerbindings().removeBehaviourMap(BLOCKING_MAP);
 
         final Set<InputTrigger> moveCornerTriggers = new HashSet<>();
-        for ( final String s : DRAG_TOGGLE_EDITOR_KEYS )
-            moveCornerTriggers.add( InputTrigger.getFromString( s ) );
+        for (final String s : DRAG_TOGGLE_EDITOR_KEYS)
+            moveCornerTriggers.add(InputTrigger.getFromString(s));
 
-        final Map< InputTrigger, Set< String > > bindings = bdvh.getTriggerbindings().getConcatenatedInputTriggerMap().getAllBindings();
-        final Set< String > behavioursToBlock = new HashSet<>();
-        for ( final InputTrigger t : moveCornerTriggers )
-            behavioursToBlock.addAll( bindings.get( t ) );
+        final Map<InputTrigger, Set<String>> bindings = bdvh.getTriggerbindings().getConcatenatedInputTriggerMap().getAllBindings();
+        final Set<String> behavioursToBlock = new HashSet<>();
+        for (final InputTrigger t : moveCornerTriggers)
+            behavioursToBlock.addAll(bindings.get(t));
 
         blockMap.clear();
-        final Behaviour block = new Behaviour() {};
-        for ( final String key : behavioursToBlock )
-            blockMap.put( key, block );
+        final Behaviour block = new Behaviour() {
+        };
+        for (final String key : behavioursToBlock)
+            blockMap.put(key, block);
     }
 
     class DragLeft implements DragBehaviour {
 
         List<SliceSources> slicesDragged;
-        Map<SliceSources,Double> initialAxisPositions = new HashMap<>();
+        Map<SliceSources, Double> initialAxisPositions = new HashMap<>();
         double range;
         double lastAxisPos;
         RealPoint iniPointBdv = new RealPoint(3);
@@ -1381,16 +1530,16 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             slicesDragged = getSortedSlices().stream().filter(slice -> slice.isSelected()).collect(Collectors.toList());
 
             slicesDragged.stream().forEach(slice -> {
-                initialAxisPositions.put(slice,slice.slicingAxisPosition);
+                initialAxisPositions.put(slice, slice.slicingAxisPosition);
             });
 
-            range = initialAxisPositions.get(slicesDragged.get(initialAxisPositions.size()-1))-initialAxisPositions.get(slicesDragged.get(0));
-            lastAxisPos = initialAxisPositions.get(slicesDragged.get(initialAxisPositions.size()-1));
+            range = initialAxisPositions.get(slicesDragged.get(slicesDragged.size() - 1)) - initialAxisPositions.get(slicesDragged.get(0));
+            lastAxisPos = initialAxisPositions.get(slicesDragged.get(slicesDragged.size() - 1));
 
             // Computes which slice it corresponds to (useful for overlay redraw)
             bdvh.getViewerPanel().getGlobalMouseCoordinates(iniPointBdv);
-            iniSlicePointing = iniPointBdv.getDoublePosition(0)/sX;
-            iniSlicingAxisPosition = (iniSlicePointing)*sizePixX*(int) reslicedAtlas.getStep();
+            iniSlicePointing = iniPointBdv.getDoublePosition(0) / sX;
+            iniSlicingAxisPosition = (iniSlicePointing) * sizePixX * (int) reslicedAtlas.getStep();
         }
 
         @Override
@@ -1398,13 +1547,13 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             RealPoint currentMousePosition = new RealPoint(3);
             bdvh.getViewerPanel().getGlobalMouseCoordinates(currentMousePosition);
 
-            int currentSlicePointing = (int) ( currentMousePosition.getDoublePosition(0) / sX);
+            int currentSlicePointing = (int) (currentMousePosition.getDoublePosition(0) / sX);
             double currentSlicingAxisPosition = (currentSlicePointing) * sizePixX * (int) reslicedAtlas.getStep();
 
-            double ratio = (lastAxisPos-currentSlicingAxisPosition)/range;
+            double ratio = (lastAxisPos - currentSlicingAxisPosition) / range;
 
             for (SliceSources slice : slicesDragged) {
-                slice.slicingAxisPosition = lastAxisPos + (initialAxisPositions.get(slice)-lastAxisPos) * ratio;
+                slice.slicingAxisPosition = lastAxisPos + (initialAxisPositions.get(slice) - lastAxisPos) * ratio;
                 slice.updatePosition();
             }
 
@@ -1416,15 +1565,15 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             RealPoint currentMousePosition = new RealPoint(3);
             bdvh.getViewerPanel().getGlobalMouseCoordinates(currentMousePosition);
 
-            int currentSlicePointing = (int) ( currentMousePosition.getDoublePosition(0) / sX);
+            int currentSlicePointing = (int) (currentMousePosition.getDoublePosition(0) / sX);
             double currentSlicingAxisPosition = (currentSlicePointing) * sizePixX * (int) reslicedAtlas.getStep();
 
-            double ratio = (lastAxisPos-currentSlicingAxisPosition)/range;
+            double ratio = (lastAxisPos - currentSlicingAxisPosition) / range;
 
             new MarkActionSequenceBatch().run();
             for (SliceSources slice : slicesDragged) {
                 slice.slicingAxisPosition = initialAxisPositions.get(slice);
-                moveSlice(slice, lastAxisPos + (initialAxisPositions.get(slice)-lastAxisPos) * ratio);
+                moveSlice(slice, lastAxisPos + (initialAxisPositions.get(slice) - lastAxisPos) * ratio);
             }
             new MarkActionSequenceBatch().run();
             updateDisplay();
@@ -1434,7 +1583,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     class DragRight implements DragBehaviour {
 
         List<SliceSources> slicesDragged;
-        Map<SliceSources,Double> initialAxisPositions = new HashMap<>();
+        Map<SliceSources, Double> initialAxisPositions = new HashMap<>();
         double range;
         double lastAxisPos;
         RealPoint iniPointBdv = new RealPoint(3);
@@ -1446,16 +1595,16 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             slicesDragged = getSortedSlices().stream().filter(slice -> slice.isSelected()).collect(Collectors.toList());
 
             slicesDragged.stream().forEach(slice -> {
-                initialAxisPositions.put(slice,slice.slicingAxisPosition);
+                initialAxisPositions.put(slice, slice.slicingAxisPosition);
             });
 
-            range = initialAxisPositions.get(slicesDragged.get(initialAxisPositions.size()-1))-initialAxisPositions.get(slicesDragged.get(0));
+            range = initialAxisPositions.get(slicesDragged.get(slicesDragged.size() - 1)) - initialAxisPositions.get(slicesDragged.get(0));
             lastAxisPos = initialAxisPositions.get(slicesDragged.get(0));
 
             // Computes which slice it corresponds to (useful for overlay redraw)
             bdvh.getViewerPanel().getGlobalMouseCoordinates(iniPointBdv);
-            iniSlicePointing = iniPointBdv.getDoublePosition(0)/sX;
-            iniSlicingAxisPosition = (iniSlicePointing)*sizePixX*(int) reslicedAtlas.getStep();
+            iniSlicePointing = iniPointBdv.getDoublePosition(0) / sX;
+            iniSlicingAxisPosition = (iniSlicePointing) * sizePixX * (int) reslicedAtlas.getStep();
         }
 
         @Override
@@ -1463,13 +1612,13 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             RealPoint currentMousePosition = new RealPoint(3);
             bdvh.getViewerPanel().getGlobalMouseCoordinates(currentMousePosition);
 
-            int currentSlicePointing = (int) ( currentMousePosition.getDoublePosition(0) / sX);
+            int currentSlicePointing = (int) (currentMousePosition.getDoublePosition(0) / sX);
             double currentSlicingAxisPosition = (currentSlicePointing) * sizePixX * (int) reslicedAtlas.getStep();
 
-            double ratio = (lastAxisPos-currentSlicingAxisPosition)/range;
+            double ratio = (lastAxisPos - currentSlicingAxisPosition) / range;
 
             for (SliceSources slice : slicesDragged) {
-                slice.slicingAxisPosition = lastAxisPos - (initialAxisPositions.get(slice)-lastAxisPos) * ratio;
+                slice.slicingAxisPosition = lastAxisPos - (initialAxisPositions.get(slice) - lastAxisPos) * ratio;
                 slice.updatePosition();
             }
 
@@ -1481,15 +1630,15 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             RealPoint currentMousePosition = new RealPoint(3);
             bdvh.getViewerPanel().getGlobalMouseCoordinates(currentMousePosition);
 
-            int currentSlicePointing = (int) ( currentMousePosition.getDoublePosition(0) / sX);
+            int currentSlicePointing = (int) (currentMousePosition.getDoublePosition(0) / sX);
             double currentSlicingAxisPosition = (currentSlicePointing) * sizePixX * (int) reslicedAtlas.getStep();
 
-            double ratio = (lastAxisPos-currentSlicingAxisPosition)/range;
+            double ratio = (lastAxisPos - currentSlicingAxisPosition) / range;
 
             new MarkActionSequenceBatch().run();
             for (SliceSources slice : slicesDragged) {
                 slice.slicingAxisPosition = initialAxisPositions.get(slice);
-                moveSlice(slice, lastAxisPos - (initialAxisPositions.get(slice)-lastAxisPos) * ratio);
+                moveSlice(slice, lastAxisPos - (initialAxisPositions.get(slice) - lastAxisPos) * ratio);
             }
             new MarkActionSequenceBatch().run();
             updateDisplay();

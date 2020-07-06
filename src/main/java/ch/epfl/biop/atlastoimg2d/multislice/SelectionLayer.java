@@ -105,7 +105,7 @@ public class SelectionLayer {
                     System.err.println("Unhandled "+mode+" selected source modification event");
                     break;
             }
-            viewer.requestRepaint();
+            viewer.getDisplay().repaint();
         }
     }
 

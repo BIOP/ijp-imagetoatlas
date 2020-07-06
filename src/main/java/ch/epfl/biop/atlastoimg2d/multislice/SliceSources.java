@@ -4,6 +4,7 @@ import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.registration.Registration;
 import ch.epfl.biop.registration.sourceandconverter.AffineTransformedSourceWrapperRegistration;
 import ch.epfl.biop.registration.sourceandconverter.CenterZeroRegistration;
+import ch.qos.logback.core.util.ExecutorServiceUtil;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
 import org.scijava.ui.behaviour.ClickBehaviour;
@@ -15,6 +16,7 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
 
 public class SliceSources {
@@ -51,6 +53,8 @@ public class SliceSources {
 
     Set<Registration> pendingRegistrations = new HashSet<>();
 
+    Set<Registration> lockedRegistrations = new HashSet<>();
+
     // For fast display : Icon TODO : see https://github.com/bigdataviewer/bigdataviewer-core/blob/17d2f55d46213d1e2369ad7ef4464e3efecbd70a/src/main/java/bdv/tools/RecordMovieDialog.java#L256-L318
     protected SliceSources(SourceAndConverter[] sacs, double slicingAxisPosition, MultiSlicePositioner mp) {
         this.mp = mp;
@@ -64,20 +68,20 @@ public class SliceSources {
         zPositioner = new AffineTransformedSourceWrapperRegistration();
 
         behavioursHandleSlice = new Behaviours(new InputTriggerConfig());
-        behavioursHandleSlice.behaviour(mp.getSelectedSourceDragBehaviour(this), "dragSelectedSources"+this.toString(), "button1");
+        behavioursHandleSlice.behaviour(mp.getSelectedSourceDragBehaviour(this), "dragSelectedSources" + this.toString(), "button1");
         behavioursHandleSlice.behaviour((ClickBehaviour) (x, y) -> {
             deSelect();
             mp.bdvh.getViewerPanel().requestRepaint();
-        }, "deselectedSources"+this.toString(), "button3", "ctrl button1");
+        }, "deselectedSources" + this.toString(), "button3", "ctrl button1");
 
         GraphicalHandle gh = new CircleGraphicalHandle(mp,
-                    behavioursHandleSlice,
-                    mp.bdvh.getTriggerbindings(),
-                    this.toString(), // pray for unicity ? TODO : do better than thoughts and prayers
-                    this::getBdvHandleCoords,
-                    this::getBdvHandleRadius,
-                    this::getBdvHandleColor
-                );
+                behavioursHandleSlice,
+                mp.bdvh.getTriggerbindings(),
+                this.toString(), // pray for unicity ? TODO : do better than thoughts and prayers
+                this::getBdvHandleCoords,
+                this::getBdvHandleRadius,
+                this::getBdvHandleColor
+        );
         ghs.add(gh);
         iniPosition();
     }
@@ -115,21 +119,24 @@ public class SliceSources {
         AffineTransform3D bdvAt3D = new AffineTransform3D();
         mp.bdvh.getViewerPanel().state().getViewerTransform(bdvAt3D);
         RealPoint sliceCenter = new RealPoint(3);
-        if (mp.currentMode==MultiSlicePositioner.POSITIONING_MODE) {
+        if (mp.currentMode == MultiSlicePositioner.POSITIONING_MODE) {
             sliceCenter = getCenterPositionPMode();
             bdvAt3D.apply(sliceCenter, sliceCenter);
-            return new Integer[]{(int)sliceCenter.getDoublePosition(0), (int)sliceCenter.getDoublePosition(1), (int)sliceCenter.getDoublePosition(2)};
-        } else if (mp.currentMode==MultiSlicePositioner.REGISTRATION_MODE) {
+            return new Integer[]{(int) sliceCenter.getDoublePosition(0), (int) sliceCenter.getDoublePosition(1), (int) sliceCenter.getDoublePosition(2)};
+        } else if (mp.currentMode == MultiSlicePositioner.REGISTRATION_MODE) {
             RealPoint zero = new RealPoint(3);
-            zero.setPosition(0,0);
-            bdvAt3D.apply(zero,zero);
-            return new Integer[]{20 * (currentSliceIndex - mp.slices.size()/2)+(int) zero.getDoublePosition(0), 20, 0};
+            zero.setPosition(0, 0);
+            bdvAt3D.apply(zero, zero);
+            return new Integer[]{35 * (currentSliceIndex - mp.slices.size() / 2) + (int) zero.getDoublePosition(0), 20, 0};
         } else {
             return new Integer[]{0, 0, 0};
         }
     }
 
     public String getRegistrationState(Registration registration) {
+        if (lockedRegistrations.contains(registration)) {
+            return "(locked)";
+        }
         if (registrations.contains(registration)) {
             return "(done)";
         }
@@ -141,10 +148,10 @@ public class SliceSources {
 
     public Integer[] getBdvHandleColor() {
         if (isSelected) {
-            return new Integer[]{0,255,0,200};
+            return new Integer[]{0, 255, 0, 200};
 
         } else {
-            return new Integer[]{255,255,0,64};
+            return new Integer[]{255, 255, 0, 64};
         }
     }
 
@@ -203,28 +210,28 @@ public class SliceSources {
 
     public void waitForEndOfRegistrations() {
         //if (registrationTasks!=null) {
-            try {
-                CompletableFuture.allOf(registrationTasks).get();
-            } catch (Exception e) {
-                e.printStackTrace();
-                System.err.println("Some registration were cancelled");
-            }
+        try {
+            CompletableFuture.allOf(registrationTasks).get();
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("Some registration were cancelled");
+        }
         //}
     }
 
     protected void updatePosition() {
         AffineTransform3D zShiftAffineTransform = new AffineTransform3D();
-        zShiftAffineTransform.translate(0,0,slicingAxisPosition);
+        zShiftAffineTransform.translate(0, 0, slicingAxisPosition);
         zPositioner.setAffineTransform(zShiftAffineTransform); // Moves the registered slices to the correct position
         AffineTransform3D slicingModePositionAffineTransform = new AffineTransform3D();
         RealPoint center = getCenterPositionPMode();
-        slicingModePositionAffineTransform.translate(center.getDoublePosition(0), center.getDoublePosition(1), -slicingAxisPosition );
+        slicingModePositionAffineTransform.translate(center.getDoublePosition(0), center.getDoublePosition(1), -slicingAxisPosition);
         slicingModePositioner.setAffineTransform(slicingModePositionAffineTransform);
     }
 
     public RealPoint getCenterPositionPMode() {
-        double slicingAxisSnapped = (((int)((slicingAxisPosition)/mp.sizePixX))*mp.sizePixX);
-        double posX = (slicingAxisSnapped/mp.sizePixX * mp.sX/mp.reslicedAtlas.getStep())+0.5*(mp.sX);
+        double slicingAxisSnapped = (((int) ((slicingAxisPosition) / mp.sizePixX)) * mp.sizePixX);
+        double posX = (slicingAxisSnapped / mp.sizePixX * mp.sX / mp.reslicedAtlas.getStep()) + 0.5 * (mp.sX);
         double posY = mp.sY * yShift_slicing_mode;
         return new RealPoint(posX, posY, 0);
     }
@@ -241,6 +248,7 @@ public class SliceSources {
 
     /**
      * Asynchronous handling of registrations + combining with manual sequential registration if necessary
+     *
      * @param reg
      */
 
@@ -249,6 +257,7 @@ public class SliceSources {
                                    Function<SourceAndConverter[], SourceAndConverter[]> preprocessMoving) {
 
         pendingRegistrations.add(reg);
+        lockedRegistrations.add(reg);
 
         if (registrationTasks == null || registrationTasks.isDone()) {
             registrationTasks = CompletableFuture.supplyAsync(() -> true); // Starts async computation, maybe there's a better way
@@ -256,15 +265,18 @@ public class SliceSources {
 
         registrationTasks = registrationTasks.thenApplyAsync((flag) -> {
             processInProgress = true;
-            if (flag==false) {
+            if (flag == false) {
                 System.out.println("Downstream registration failed");
                 return false;
             }
             boolean out;
+
             if (reg.isManual()) {
                 System.out.println("Waiting for manual lock...");
                 //current.setText("Lock (Manual)");
                 synchronized (MultiSlicePositioner.manualActionLock) {
+                    // locked = false;
+                    lockedRegistrations.remove(reg);
                     System.out.println("Manual lock released...");
                     //current.setText("Current");
                     reg.setFixedImage(preprocessFixed.apply(mp.reslicedAtlas.nonExtendedSlicedSources));
@@ -296,6 +308,8 @@ public class SliceSources {
             } else {
                 reg.setFixedImage(preprocessFixed.apply(mp.reslicedAtlas.nonExtendedSlicedSources));
                 reg.setMovingImage(preprocessMoving.apply(registered_sacs));
+                // locked = false;
+                lockedRegistrations.remove(reg);
                 out = reg.register();
                 if (!out) {
                     // Registration did not went well ...
@@ -304,7 +318,6 @@ public class SliceSources {
                             .remove(mp.bdvh, registered_sacs);
 
                     registered_sacs = reg.getTransformedImageMovingToFixed(registered_sacs);
-
 
 
                     slicingModePositioner = new AffineTransformedSourceWrapperRegistration();
@@ -342,8 +355,8 @@ public class SliceSources {
             }
             processInProgress = false;
             pendingRegistrations.remove(reg);
-            System.out.println("Remaining registrations : "+pendingRegistrations.size());
-            System.out.println("exception = "+exception);
+            System.out.println("Remaining registrations : " + pendingRegistrations.size());
+            System.out.println("exception = " + exception);
             mp.mso.updateInfoPanel(this);
             return exception;
         });
@@ -363,12 +376,12 @@ public class SliceSources {
         }
         if (registrations.contains(reg)) {
             int idx = registrations.indexOf(reg);
-            if (idx == registrations.size()-1) {
+            if (idx == registrations.size() - 1) {
 
                 registrations.remove(reg);
                 registered_sacs_sequence.remove(reg);
 
-                Registration last = registrations.get(registrations.size()-1);
+                Registration last = registrations.get(registrations.size() - 1);
 
                 SourceAndConverterServices.getSourceAndConverterService()
                         .remove(registered_sacs);
@@ -403,5 +416,4 @@ public class SliceSources {
             return false;
         }
     }
-
 }
