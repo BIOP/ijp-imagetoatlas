@@ -105,7 +105,7 @@ public class SelectionLayer {
                     System.err.println("Unhandled "+mode+" selected source modification event");
                     break;
             }
-            viewer.getDisplay().repaint();
+            //viewer.getDisplay().repaint();
         }
     }
 
@@ -186,13 +186,14 @@ public class SelectionLayer {
         @Override
         public void drag(int x, int y) {
             updateCurrentSelection(x,y);
-            //viewer.paint(); // TODO : understand how to remove it from here ?
+            viewer.getDisplay().repaint();
         }
 
         @Override
         public void end(int x, int y) {
             endCurrentSelection(x,y,mode);
             viewer.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+            viewer.getDisplay().repaint();
         }
     }
 

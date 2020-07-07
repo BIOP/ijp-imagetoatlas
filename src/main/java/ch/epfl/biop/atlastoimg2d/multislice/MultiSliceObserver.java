@@ -33,7 +33,6 @@ public class MultiSliceObserver {
 
                 if (repaintNeeded) {
                     mp.bdvh.getViewerPanel().getDisplay().repaint();
-                    System.out.println("Repaint Called");
                 }
                 repaintNeeded = false;
                 try {
