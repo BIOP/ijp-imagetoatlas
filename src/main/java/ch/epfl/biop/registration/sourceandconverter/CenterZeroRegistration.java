@@ -53,6 +53,16 @@ public class CenterZeroRegistration implements Registration<SourceAndConverter[]
     }
 
     @Override
+    public boolean edit() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean isEditable() {
+        return false;
+    }
+
+    @Override
     public SourceAndConverter[] getTransformedImageMovingToFixed(SourceAndConverter[] img) {
         SourceAndConverter[] out = new SourceAndConverter[img.length];
 
@@ -77,4 +87,5 @@ public class CenterZeroRegistration implements Registration<SourceAndConverter[]
     public boolean isManual() {
         return false;
     }
+
 }

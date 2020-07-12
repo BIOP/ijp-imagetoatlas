@@ -3,16 +3,12 @@ package ch.epfl.biop.registration.sourceandconverter;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import ch.epfl.biop.registration.Registration;
-import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterAndTimeRange;
-import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterUtils;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 public class AffineTransformedSourceWrapperRegistration implements Registration<SourceAndConverter[]> {
 
@@ -81,6 +77,16 @@ public class AffineTransformedSourceWrapperRegistration implements Registration<
 
     @Override
     public boolean isManual() {
+        return false;
+    }
+
+    @Override
+    public boolean edit() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean isEditable() {
         return false;
     }
 }

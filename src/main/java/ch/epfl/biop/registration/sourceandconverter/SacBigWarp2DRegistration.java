@@ -23,8 +23,6 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
 
     SourceAndConverter[] fimg, mimg;
 
-    //AffineTransform3D at3Dmoving, at3Dfixed;
-
     Runnable waitForUser = () -> {
         WaitForUserDialog dialog = new WaitForUserDialog("Choose slice","Please perform carefully your registration then press ok.");
         dialog.show();
@@ -32,17 +30,12 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
 
     @Override
     public void setFixedImage(SourceAndConverter[] fimg) {
-        SourceAffineTransformer sat = new SourceAffineTransformer(null, new AffineTransform3D());
-
-        this.fimg = fimg; // Arrays.asList(fimg).stream().map(sat).collect(Collectors.toList()).toArray(new SourceAndConverter[0]);
+        this.fimg = fimg;
     }
 
     @Override
     public void setMovingImage(SourceAndConverter[] mimg) {
-        SourceAffineTransformer sat = new SourceAffineTransformer(null, new AffineTransform3D());
-        //this.mimg = mimg;
-        this.mimg = mimg; //Arrays.asList(mimg).stream().map(sat).collect(Collectors.toList()).toArray(new SourceAndConverter[0]);
-
+        this.mimg = mimg;
     }
 
     public void setWaitForUserMethod(Runnable r) {
@@ -71,9 +64,6 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
             BdvHandle bdvhP = bwl.getBdvHandleP();
 
             SourceAndConverterServices.getSourceAndConverterDisplayService().pairClosing(bdvhQ,bdvhP);
-
-            /*bdvhP.getViewerPanel().state().setViewerTransform(at3Dfixed.copy());
-            bdvhP.getViewerPanel().state().setViewerTransform(at3Dmoving.copy());*/
 
             bdvhP.getViewerPanel().requestRepaint();
             bdvhQ.getViewerPanel().requestRepaint();
@@ -167,6 +157,16 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
     @Override
     public boolean isManual() {
         return true;
+    }
+
+    @Override
+    public boolean edit() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean isEditable() {
+        return false;
     }
 
 }

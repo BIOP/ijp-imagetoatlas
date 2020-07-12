@@ -93,4 +93,14 @@ public class Elastix2DAffineRegistration implements Registration<SourceAndConver
     public boolean isManual() {
         return false;
     }
+
+    @Override
+    public boolean edit() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean isEditable() {
+        return false;
+    }
 }

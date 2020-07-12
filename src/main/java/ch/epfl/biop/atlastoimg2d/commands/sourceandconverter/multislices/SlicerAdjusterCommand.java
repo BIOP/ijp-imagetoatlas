@@ -8,22 +8,23 @@ import org.scijava.plugin.Plugin;
 @Plugin(type = InteractiveCommand.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Adjust Slicing")
 public class SlicerAdjusterCommand extends InteractiveCommand {
 
-    @Parameter(min = "1", max = "50", stepSize = "1", style = "slider")
-    int zSamplingSteps = 1;
+    @Parameter(min = "10", max = "500", stepSize = "10", style = "slider", label = "microns")
+    int zSamplingSteps = 10;
 
-    @Parameter(min = "-20", max = "+20", stepSize = "1", style = "slider")
+    @Parameter(min = "-20", max = "+20", stepSize = "1", style = "slider", label = "half degrees (X)" )
     int rotateX = 0;
 
-    @Parameter(min = "-20", max = "+20", stepSize = "1", style = "slider")
+    @Parameter(min = "-20", max = "+20", stepSize = "1", style = "slider", label = "half degrees (Y)")
     int rotateY = 0;
 
     @Parameter
     ReslicedAtlas reslicedAtlas;
 
     public void run() {
+        zSamplingSteps/=10;
         reslicedAtlas.setStep(zSamplingSteps);
-        reslicedAtlas.setRotateX(rotateX/180.0*Math.PI);
-        reslicedAtlas.setRotateY(rotateY/180.0*Math.PI);
+        reslicedAtlas.setRotateX(rotateX/360.0*Math.PI);
+        reslicedAtlas.setRotateY(rotateY/360.0*Math.PI);
     }
 
 }
