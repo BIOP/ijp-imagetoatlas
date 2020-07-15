@@ -3,10 +3,12 @@ package ch.epfl.biop.registration.sourceandconverter;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import ch.epfl.biop.registration.Registration;
+import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterAndTimeRange;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -67,7 +69,17 @@ public class AffineTransformedSourceWrapperRegistration implements Registration<
 
     @Override
     public RealPointList getTransformedPtsFixedToMoving(RealPointList pts) {
-        return null;
+        ArrayList<RealPoint> cvtList = new ArrayList<>();
+        for (RealPoint p : pts.ptList) {
+            RealPoint pt3d = new RealPoint(3);
+            pt3d.setPosition(new double[]{p.getDoublePosition(0), p.getDoublePosition(1),0});
+            //float npx = p.getFloatPosition(0)/scale+roi.getBounds().x;
+            //float npy = p.getFloatPosition(1)/scale+roi.getBounds().y;
+            at3d.inverse().apply(pt3d, pt3d);
+            RealPoint cpt = new RealPoint(pt3d.getDoublePosition(0), pt3d.getDoublePosition(1));
+            cvtList.add(cpt);
+        }
+        return new RealPointList(cvtList);
     }
 
     @Override

@@ -1,8 +1,6 @@
 package ch.epfl.biop.viewer.swing;
 
 import ch.epfl.biop.atlas.BiopAtlas;
-import org.scijava.Context;
-import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.ui.swing.viewer.EasySwingDisplayViewer;
 import org.scijava.ui.viewer.DisplayViewer;
@@ -13,13 +11,13 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
+
 
 @Plugin(type = DisplayViewer.class)
 public class SwingAtlasViewer extends
         EasySwingDisplayViewer<BiopAtlas> implements TreeSelectionListener {
-
-    @Parameter
-    Context ctx;
 
     private JTree tree;
 
@@ -51,7 +49,7 @@ public class SwingAtlasViewer extends
     }
 
     @Override
-    protected JPanel createDisplayPanel(BiopAtlas atlas) {
+    public JPanel createDisplayPanel(BiopAtlas atlas) {
         this.atlas=atlas;
         final JPanel panel = new JPanel();
         panel.setLayout( new GridLayout(2,1));
@@ -65,7 +63,6 @@ public class SwingAtlasViewer extends
         tree.getSelectionModel().setSelectionMode
                 (TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
 
-
         //Listen for when the selection changes.
         tree.addTreeSelectionListener(this);
 
@@ -76,7 +73,6 @@ public class SwingAtlasViewer extends
     }
 
     private void addNodes(DefaultMutableTreeNode basenode, int index) {
-        //String name = index+":"+((AllenOntology) atlas.ontology).ontologyIdToOriginalId.get(index);
         final DefaultMutableTreeNode node = new DefaultMutableTreeNode(
                 atlas.ontology.getProperties(index).get(atlas.ontology.getNamingDisplayProperty())
             );
@@ -84,7 +80,6 @@ public class SwingAtlasViewer extends
         atlas.ontology.getChildren(index).forEach( i -> {
             addNodes(node,i);
         });
-
     }
 
     private void createNodes(DefaultMutableTreeNode top) {
@@ -92,8 +87,16 @@ public class SwingAtlasViewer extends
         addNodes(top, rootIndex);
     }
 
+
+    List<TreeSelectionListener> listeners = new ArrayList<>();
+
+    public synchronized void addTreeSelectionListener(TreeSelectionListener tsl) {
+        listeners.add(tsl);
+    }
+
     @Override
-    public void valueChanged(TreeSelectionEvent treeSelectionEvent) {
+    public synchronized void valueChanged(TreeSelectionEvent treeSelectionEvent) {
+        listeners.forEach(tsl -> tsl.valueChanged(treeSelectionEvent));
     }
 
 }

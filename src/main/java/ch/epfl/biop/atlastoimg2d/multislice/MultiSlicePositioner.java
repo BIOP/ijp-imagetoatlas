@@ -6,6 +6,7 @@ import bdv.util.BdvOptions;
 import bdv.util.BdvOverlay;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.BiopAtlas;
+import ch.epfl.biop.atlastoimg2d.commands.sourceandconverter.multislices.ExportRegionsCommand;
 import ch.epfl.biop.atlastoimg2d.commands.sourceandconverter.multislices.RegistrationOptionCommand;
 import ch.epfl.biop.atlastoimg2d.commands.sourceandconverter.multislices.SlicerAdjusterCommand;
 import ch.epfl.biop.atlastoimg2d.multislice.scijava.ScijavaSwingUI;
@@ -14,6 +15,7 @@ import ch.epfl.biop.bdv.select.SourceSelectorBehaviour;
 import ch.epfl.biop.registration.Registration;
 import ch.epfl.biop.registration.sourceandconverter.Elastix2DAffineRegistration;
 import ch.epfl.biop.registration.sourceandconverter.SacBigWarp2DRegistration;
+import ch.epfl.biop.viewer.swing.SwingAtlasViewer;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import mpicbg.spim.data.generic.base.Entity;
 import mpicbg.spim.data.generic.sequence.AbstractSequenceDescription;
@@ -135,8 +137,9 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
     Consumer<String> log = (message) -> {
         getBdvh().getViewerPanel().showMessage(message);
-        System.out.println(message);
     };
+
+    SwingAtlasViewer sav = new SwingAtlasViewer();
 
     public MultiSlicePositioner(BdvHandle bdvh, BiopAtlas biopAtlas, ReslicedAtlas reslicedAtlas, Context ctx) {
         this.reslicedAtlas = reslicedAtlas;
@@ -182,6 +185,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.navigatePreviousSlice(), "navigate_previous_slice", "P"); // P taken for panel
         common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.navigateCurrentSlice(), "navigate_current_slice", "C");
         common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.nextMode(), "change_mode", "Q");
+        common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.exportSelectedSlices(), "exportSlices", "E");
 
         bdvh.getTriggerbindings().addBehaviourMap(COMMON_BEHAVIOURS_KEY, common_behaviours.getBehaviourMap());
         bdvh.getTriggerbindings().addInputTriggerMap(COMMON_BEHAVIOURS_KEY, common_behaviours.getInputTriggerMap()); // "transform", "bdv"
@@ -253,10 +257,18 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 ScijavaSwingUI.getPanel(scijavaCtx, RegistrationOptionCommand.class, "mp", this),
                 true);
 
-
         mso = new MultiSliceObserver(this);
 
         bdvh.getCardPanel().addCard("Tasks Info", mso.getJPanel(), true);
+
+        JPanel panelExport = new JPanel(new BorderLayout());
+        panelExport.add(sav.createDisplayPanel(biopAtlas), BorderLayout.CENTER);
+        panelExport.add(ScijavaSwingUI.getPanel(scijavaCtx, ExportRegionsCommand.class,
+                "sav", sav,
+                "atlas", biopAtlas,
+                "mp", this), BorderLayout.SOUTH);
+
+        bdvh.getCardPanel().addCard("Region export options",panelExport , true);
 
     }
 
@@ -827,6 +839,19 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         new MoveSlice(slice, axisPosition).run();
     }
 
+    public void exportSelectedSlices() {
+        List<SliceSources> sortedSelected = getSortedSlices().stream().filter(slice -> slice.isSelected()).collect(Collectors.toList());
+        new MarkActionSequenceBatch().run();
+        for (int idx = 0; idx < sortedSelected.size(); idx++) {
+            exportSlice(sortedSelected.get(idx));
+        }
+        new MarkActionSequenceBatch().run();
+    }
+
+    public void exportSlice(SliceSources slice) {
+        new ExportSlice(slice).run();
+    }
+
     /**
      * Equal spacing between selected slices
      */
@@ -967,10 +992,6 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                                     .toArray(new SourceAndConverter[0])).run();
             }
         }
-    }
-
-    public void bigwarpRegister() {
-        bigwarpRegister(Function.identity(), Function.identity());
     }
 
     // --------------------------------- ACTION CLASSES
@@ -1226,6 +1247,8 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         final Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixed;
         final Function<SourceAndConverter[], SourceAndConverter[]> preprocessMoving;
 
+        boolean alreadyRun = false;
+
         @Override
         public SliceSources getSliceSources() {
             return slice;
@@ -1277,6 +1300,45 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             log.accept("Registration cancelled");
             super.cancel();
         }
+    }
+
+    public class ExportSlice extends CancelableAction {
+
+        final SliceSources slice;
+
+        public ExportSlice(SliceSources slice) {
+            this.slice = slice;
+        }
+
+        @Override
+        public void run() { //
+            System.out.println("Exporting slice registration");
+            //super.run(); // not saved
+            slice.export();
+        }
+
+        public String toString() {
+            return "Export";
+        }
+
+        public void drawAction(Graphics2D g, double px, double py, double scale) {
+            g.setColor(new Color(255, 0, 0, 200));
+            g.fillOval((int) (px - 7), (int) (py - 7), 14, 14);
+            g.setColor(new Color(255, 255, 255, 200));
+            g.drawString("E", (int) px - 4, (int) py + 5);
+        }
+
+        @Override
+        public void cancel() {
+            log.accept("Export cancel : no action");
+            //super.cancel();
+        }
+
+        @Override
+        public SliceSources getSliceSources() {
+            return slice;
+        }
+
     }
 
     /**

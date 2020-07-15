@@ -1,23 +1,37 @@
 package ch.epfl.biop.atlastoimg2d.multislice;
 
 import bdv.viewer.SourceAndConverter;
+import ch.epfl.biop.atlas.commands.ConstructROIsFromImgLabel;
+import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
+import ch.epfl.biop.java.utilities.roi.types.IJShapeRoiArray;
+import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import ch.epfl.biop.registration.Registration;
 import ch.epfl.biop.registration.sourceandconverter.AffineTransformedSourceWrapperRegistration;
 import ch.epfl.biop.registration.sourceandconverter.CenterZeroRegistration;
-import ch.qos.logback.core.util.ExecutorServiceUtil;
+import ch.epfl.biop.scijava.command.ExportToImagePlusCommand;
+import ij.ImagePlus;
+import ij.plugin.frame.RoiManager;
 import net.imglib2.RealPoint;
+import net.imglib2.cache.img.DiskCachedCellImgFactory;
+import net.imglib2.cache.img.DiskCachedCellImgOptions;
 import net.imglib2.realtransform.AffineTransform3D;
+import net.imglib2.type.numeric.integer.UnsignedShortType;
 import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
+import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterAndTimeRange;
+import sc.fiji.bdvpg.sourceandconverter.importer.EmptySourceAndConverterCreator;
+import sc.fiji.bdvpg.sourceandconverter.transform.SourceResampler;
+import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
 
 import java.awt.*;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
+
+import static net.imglib2.cache.img.DiskCachedCellImgOptions.options;
 
 public class SliceSources {
 
@@ -246,6 +260,37 @@ public class SliceSources {
 
     private List<Registration> registrations = new ArrayList<>();
 
+    protected boolean performRegistration(Registration<SourceAndConverter[]> reg,
+                                       Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixed,
+                                       Function<SourceAndConverter[], SourceAndConverter[]> preprocessMoving) {
+
+        reg.setFixedImage(preprocessFixed.apply(mp.reslicedAtlas.nonExtendedSlicedSources));
+        reg.setMovingImage(preprocessMoving.apply(registered_sacs));
+        boolean out = reg.register();
+        if (!out) {
+
+        } else {
+            SourceAndConverterServices.getSourceAndConverterDisplayService()
+                    .remove(mp.bdvh, registered_sacs);
+
+            registered_sacs = reg.getTransformedImageMovingToFixed(registered_sacs);
+
+            SourceAndConverterServices.getSourceAndConverterDisplayService()
+                    .show(mp.bdvh, registered_sacs);
+
+            slicingModePositioner = new AffineTransformedSourceWrapperRegistration();
+
+            slicingModePositioner.setMovingImage(registered_sacs);
+            SourceAndConverterServices.getSourceAndConverterService().remove(relocated_sacs_positioning_mode);
+
+            relocated_sacs_positioning_mode = slicingModePositioner.getTransformedImageMovingToFixed(registered_sacs);
+            updatePosition();
+
+            registered_sacs_sequence.put(reg, registered_sacs);
+        }
+        return out;
+    }
+
     /**
      * Asynchronous handling of registrations + combining with manual sequential registration if necessary
      *
@@ -266,11 +311,10 @@ public class SliceSources {
         registrationTasks = registrationTasks.thenApplyAsync((flag) -> {
             processInProgress = true;
             if (flag == false) {
-                System.out.println("Downstream registration failed");
+                System.out.println("Upstream registration failed");
                 return false;
             }
             boolean out;
-
             if (reg.isManual()) {
                 System.out.println("Waiting for manual lock...");
                 //current.setText("Lock (Manual)");
@@ -279,65 +323,10 @@ public class SliceSources {
                     lockedRegistrations.remove(reg);
                     System.out.println("Manual lock released...");
                     //current.setText("Current");
-                    reg.setFixedImage(preprocessFixed.apply(mp.reslicedAtlas.nonExtendedSlicedSources));
-                    reg.setMovingImage(preprocessMoving.apply(registered_sacs));
-                    System.out.println("Registration will start");
-                    out = reg.register();
-                    if (!out) {
-
-                    } else {
-                        SourceAndConverterServices.getSourceAndConverterDisplayService()
-                                .remove(mp.bdvh, registered_sacs);
-
-                        registered_sacs = reg.getTransformedImageMovingToFixed(registered_sacs);
-
-                        SourceAndConverterServices.getSourceAndConverterDisplayService()
-                                .show(mp.bdvh, registered_sacs);
-
-                        slicingModePositioner = new AffineTransformedSourceWrapperRegistration();
-
-                        slicingModePositioner.setMovingImage(registered_sacs);
-                        SourceAndConverterServices.getSourceAndConverterService().remove(relocated_sacs_positioning_mode);
-
-                        relocated_sacs_positioning_mode = slicingModePositioner.getTransformedImageMovingToFixed(registered_sacs);
-                        updatePosition();
-
-                        registered_sacs_sequence.put(reg, registered_sacs);
-                    }
+                    out = performRegistration(reg,preprocessFixed, preprocessMoving);
                 }
             } else {
-                reg.setFixedImage(preprocessFixed.apply(mp.reslicedAtlas.nonExtendedSlicedSources));
-                reg.setMovingImage(preprocessMoving.apply(registered_sacs));
-                // locked = false;
-                lockedRegistrations.remove(reg);
-                out = reg.register();
-                if (!out) {
-                    // Registration did not went well ...
-                } else {
-                    SourceAndConverterServices.getSourceAndConverterDisplayService()
-                            .remove(mp.bdvh, registered_sacs);
-
-                    registered_sacs = reg.getTransformedImageMovingToFixed(registered_sacs);
-
-
-                    slicingModePositioner = new AffineTransformedSourceWrapperRegistration();
-
-                    slicingModePositioner.setMovingImage(registered_sacs);
-                    SourceAndConverterServices.getSourceAndConverterService().remove(relocated_sacs_positioning_mode);
-
-                    relocated_sacs_positioning_mode = slicingModePositioner.getTransformedImageMovingToFixed(registered_sacs);
-                    updatePosition();
-
-                    if (mp.currentMode.equals(MultiSlicePositioner.POSITIONING_MODE)) {
-                        SourceAndConverterServices.getSourceAndConverterDisplayService()
-                                .show(mp.bdvh, relocated_sacs_positioning_mode);
-                    } else if (mp.currentMode.equals(MultiSlicePositioner.REGISTRATION_MODE)) {
-                        SourceAndConverterServices.getSourceAndConverterDisplayService()
-                                .show(mp.bdvh, registered_sacs);
-                    }
-
-                    registered_sacs_sequence.put(reg, registered_sacs);
-                }
+                out = performRegistration(reg,preprocessFixed, preprocessMoving);
             }
             if (out) {
                 registrations.add(reg);
@@ -415,5 +404,168 @@ public class SliceSources {
         } else {
             return false;
         }
+    }
+
+    volatile ImagePlus impLabelImage = null;
+
+    volatile AffineTransform3D at3DLastLabelImage = null;
+
+    volatile boolean labelImageBeingComputed = false;
+
+    volatile ConvertibleRois cvtRoisOrigin = null;
+
+    volatile ConvertibleRois cvtRoisTransformed = null;
+
+    void computeLabelImage(AffineTransform3D at3D) {
+        labelImageBeingComputed = true;
+
+        System.out.println("Compute Label Image");
+
+        final int[] cellDimensions = new int[]{32, 32, 1};
+
+        // Cached Image Factory Options
+        final DiskCachedCellImgOptions factoryOptions = options()
+                .cellDimensions(cellDimensions)
+                .cacheType(DiskCachedCellImgOptions.CacheType.BOUNDED)
+                .maxCacheSize(1);
+
+        // Creates cached image factory of Type UnsignedShort
+        final DiskCachedCellImgFactory<UnsignedShortType> factory = new DiskCachedCellImgFactory<>(new UnsignedShortType(), factoryOptions);
+
+        // 0 - slicing model : empty source but properly defined in space and resolution
+        SourceAndConverter singleSliceModel = new EmptySourceAndConverterCreator("SlicingModel", at3D,
+                mp.nPixX,
+                mp.nPixY,
+                1,
+                factory
+        ).get();
+
+        SourceResampler resampler = new SourceResampler(null,
+                singleSliceModel, false, false, false
+        );
+
+        AffineTransform3D translateZ = new AffineTransform3D();
+        translateZ.translate(0, 0, -slicingAxisPosition);
+
+        SourceAndConverter sac =
+                mp.reslicedAtlas.nonExtendedSlicedSources[mp.reslicedAtlas.nonExtendedSlicedSources.length-1]; // By convention the label image is the last one
+
+        sac = resampler.apply(sac);
+        sac = SourceTransformHelper.createNewTransformedSourceAndConverter(translateZ, new SourceAndConverterAndTimeRange(sac, 0));
+
+        /*SourceAndConverterServices
+                .getSourceAndConverterDisplayService().show(sac);*/
+        ExportToImagePlusCommand export = new ExportToImagePlusCommand();
+
+        export.level=0;
+        export.timepointBegin=0;
+        export.timepointEnd=0;
+        export.sacs = new SourceAndConverter[1];
+        export.sacs[0] = sac;
+        export.run();
+
+        impLabelImage = export.imp_out;
+        impLabelImage.show();
+
+        ConstructROIsFromImgLabel labelToROIs = new ConstructROIsFromImgLabel();
+        labelToROIs.atlas = mp.biopAtlas;
+        labelToROIs.labelImg = impLabelImage;
+        labelToROIs.smoothen = false;
+        labelToROIs.run();
+        cvtRoisOrigin = labelToROIs.cr_out;
+
+        at3DLastLabelImage = at3D;
+
+        labelImageBeingComputed = false;
+    }
+
+    public synchronized void export() {
+        System.out.println("Export slice");
+        // Need to raster the label image
+
+        AffineTransform3D at3D = new AffineTransform3D();
+        at3D.translate(-mp.nPixX / 2.0, -mp.nPixY / 2.0, 0);
+        at3D.scale(mp.sizePixX, mp.sizePixY, mp.sizePixZ);
+        at3D.translate(0, 0, slicingAxisPosition);
+
+        boolean computeLabelImageNecessary = true;
+
+        if (!labelImageBeingComputed) {
+            if (at3DLastLabelImage != null) {
+                if (Arrays.equals(at3D.getRowPackedCopy(), at3DLastLabelImage.getRowPackedCopy())) {
+                    computeLabelImageNecessary = false;
+                }
+            }
+        }
+
+        if (computeLabelImageNecessary) {
+            computeLabelImage(at3D);
+        } else {
+            while (labelImageBeingComputed) {
+                try {
+                    Thread.sleep(100);
+                } catch (Exception e) {
+
+                }
+            }
+        }
+
+        //cvtRois.to(RoiManager.class);
+
+        computeTransformedRois();
+
+    }
+
+    public void computeTransformedRois() {
+        while (!registrationTasks.isDone()) {
+            System.out.println("Waiting for registration to finish...");
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        System.out.println("All registrations done ...");
+
+        cvtRoisTransformed = new ConvertibleRois();
+
+        IJShapeRoiArray arrayIni = (IJShapeRoiArray) cvtRoisOrigin.to(IJShapeRoiArray.class);
+        cvtRoisTransformed.set(arrayIni);
+        RealPointList list = ((RealPointList) cvtRoisTransformed.to(RealPointList.class));
+        // Perform reverse transformation, in the reverse order:
+        //  - From atlas coordinates -> image coordinates
+
+        AffineTransform3D at3D = new AffineTransform3D();
+        at3D.translate(-mp.nPixX / 2.0, -mp.nPixY / 2.0, 0);
+        at3D.scale(mp.sizePixX, mp.sizePixY, mp.sizePixZ);
+        at3D.translate(0, 0, slicingAxisPosition);
+        list = getTransformedPtsFixedToMoving(list, at3D.inverse());
+
+        Collections.reverse(this.registrations);
+        for (Registration reg : this.registrations) {
+            list = reg.getTransformedPtsFixedToMoving(list);
+        }
+        Collections.reverse(this.registrations);
+
+        this.original_sacs[0].getSpimSource().getSourceTransform(0,2,at3D);
+        list = getTransformedPtsFixedToMoving(list, at3D);
+
+        cvtRoisTransformed.clear();
+        list.shapeRoiList = new IJShapeRoiArray(arrayIni);
+        cvtRoisTransformed.set(list);
+        cvtRoisTransformed.to(RoiManager.class);
+    }
+
+    public RealPointList getTransformedPtsFixedToMoving(RealPointList pts, AffineTransform3D at3d) {
+
+        ArrayList<RealPoint> cvtList = new ArrayList<>();
+        for (RealPoint p : pts.ptList) {
+            RealPoint pt3d = new RealPoint(3);
+            pt3d.setPosition(new double[]{p.getDoublePosition(0), p.getDoublePosition(1),0});
+            at3d.inverse().apply(pt3d, pt3d);
+            RealPoint cpt = new RealPoint(pt3d.getDoublePosition(0), pt3d.getDoublePosition(1));
+            cvtList.add(cpt);
+        }
+        return new RealPointList(cvtList);
     }
 }

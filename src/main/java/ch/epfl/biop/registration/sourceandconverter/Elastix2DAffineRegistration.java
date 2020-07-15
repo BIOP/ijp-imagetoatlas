@@ -12,6 +12,7 @@ import org.scijava.command.CommandService;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterAndTimeRange;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Future;
@@ -77,11 +78,17 @@ public class Elastix2DAffineRegistration implements Registration<SourceAndConver
     @Override
     public RealPointList getTransformedPtsFixedToMoving(RealPointList pts) {
 
-        for (RealPoint pt : pts.ptList) {
-            at3d.inverse().apply(pt,pt);
+        ArrayList<RealPoint> cvtList = new ArrayList<>();
+        for (RealPoint p : pts.ptList) {
+            RealPoint pt3d = new RealPoint(3);
+            pt3d.setPosition(new double[]{p.getDoublePosition(0), p.getDoublePosition(1),0});
+            //float npx = p.getFloatPosition(0)/scale+roi.getBounds().x;
+            //float npy = p.getFloatPosition(1)/scale+roi.getBounds().y;
+            at3d.inverse().apply(pt3d, pt3d);
+            RealPoint cpt = new RealPoint(pt3d.getDoublePosition(0), pt3d.getDoublePosition(1));
+            cvtList.add(cpt);
         }
-
-        return pts;
+        return new RealPointList(cvtList);
     }
 
     @Override

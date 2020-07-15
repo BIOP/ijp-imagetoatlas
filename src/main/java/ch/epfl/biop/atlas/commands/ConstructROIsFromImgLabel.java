@@ -89,7 +89,7 @@ public class ConstructROIsFromImgLabel implements Command {
 		FloatProcessor fp = new FloatProcessor(ip.getWidth(), ip.getHeight());	
 		fp.setFloatArray(pixels);
 		ImagePlus imgFloatCopy = new ImagePlus("FloatLabel",fp);
-		
+
 		boolean[][] movablePx = new boolean[ip.getWidth()+1][ip.getHeight()+1];
 		for (int x=1;x<ip.getWidth();x++) {
 			for (int y=1;y<ip.getHeight();y++) {
@@ -189,8 +189,8 @@ public class ConstructROIsFromImgLabel implements Command {
 		cr_out = new ConvertibleRois();
 
 		IJShapeRoiArray output = new IJShapeRoiArray(roiArray);
-		output.smoothenWithConstrains(movablePx);
-		output.smoothenWithConstrains(movablePx);
+		//output.smoothenWithConstrains(movablePx);
+		//output.smoothenWithConstrains(movablePx);
 
 		cr_out.set(output);
 		if (os!=null) {

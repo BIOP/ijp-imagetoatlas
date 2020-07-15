@@ -179,17 +179,22 @@ public class ReslicedAtlas {
 
         // 1 -
 
-        extendedSlicedSources = new SourceAndConverter[ba.map.getStructuralImages().length];
-        SourceAndConverter[] tempNonExtendedSlicedSources = new SourceAndConverter[ba.map.getStructuralImages().length];
+        extendedSlicedSources = new SourceAndConverter[ba.map.getStructuralImages().length+1];
+        SourceAndConverter[] tempNonExtendedSlicedSources = new SourceAndConverter[ba.map.getStructuralImages().length+1];
 
         SourceMosaicZSlicer mosaic = new SourceMosaicZSlicer(null, slicingModel, true, false, false,
                 () -> getStep());
 
-        SourceResampler resampler = new SourceResampler(null, slicingModel, true, false, true);
+        SourceResampler resampler = new SourceResampler(null, slicingModel, true, false, false);
 
         centerTransform = null;
-        for (int index = 0; index<ba.map.getStructuralImages().length;index++) {
-            SourceAndConverter sac = ba.map.getStructuralImages()[index];
+        for (int index = 0; index<ba.map.getStructuralImages().length+1;index++) {
+            SourceAndConverter sac;
+            if (index<ba.map.getStructuralImages().length) {
+                sac = ba.map.getStructuralImages()[index];
+            } else {
+                sac = ba.map.getLabelImage();
+            }
 
             SourceAndConverter reslicedSac = mosaic.apply(sac);
             tempNonExtendedSlicedSources[index] = resampler.apply(sac);
