@@ -172,7 +172,7 @@
     <orderEntry type="library" name="Maven: com.github.sbridges.object-inspector:object-inspector:0.1" level="project" />
     <orderEntry type="library" name="Maven: com.miglayout:miglayout:swing:3.7.4" level="project" />
     <orderEntry type="library" name="Maven: net.sourceforge.jdatepicker:jdatepicker:1.3.2" level="project" />
-    <orderEntry type="library" name="Maven: sc.fiji:bigwarp_fiji:5.1.1-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: sc.fiji:bigwarp_fiji:6.0.1-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: com.googlecode.efficient-java-matrix-library:ejml:0.24" level="project" />
     <orderEntry type="library" name="Maven: jitk:jitk-tps:3.0.1" level="project" />
     <orderEntry type="library" name="Maven: log4j:log4j:1.2.17" level="project" />
@@ -198,12 +198,12 @@
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.26" level="project" />
     <orderEntry type="library" name="Maven: ch.qos.logback:logback-core:1.2.3" level="project" />
     <orderEntry type="library" name="Maven: ch.qos.logback:logback-classic:1.2.3" level="project" />
+    <orderEntry type="library" name="Maven: org.scijava:ui-behaviour:2.0.1" level="project" />
+    <orderEntry type="library" name="Maven: org.yaml:snakeyaml:1.24" level="project" />
     <orderEntry type="library" name="Maven: sc.fiji:bigdataviewer-vistools:1.0.0-beta-20-SNAPSHOT-CARD" level="project" />
     <orderEntry type="library" name="Maven: net.imglib2:imglib2-cache:1.0.0-beta-11" level="project" />
     <orderEntry type="library" name="Maven: com.github.ben-manes.caffeine:caffeine:2.4.0" level="project" />
     <orderEntry type="library" name="Maven: net.imglib2:imglib2-ui:2.0.0" level="project" />
-    <orderEntry type="library" name="Maven: org.scijava:ui-behaviour:2.0.1" level="project" />
-    <orderEntry type="library" name="Maven: org.yaml:snakeyaml:1.24" level="project" />
     <orderEntry type="library" name="Maven: sc.fiji:bigdataviewer-core:9.0.1" level="project" />
     <orderEntry type="library" name="Maven: net.imglib2:imglib2-algorithm:0.11.1" level="project" />
     <orderEntry type="library" name="Maven: sc.fiji:spim_data:2.2.4" level="project" />

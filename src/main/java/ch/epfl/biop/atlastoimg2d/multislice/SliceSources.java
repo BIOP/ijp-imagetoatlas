@@ -316,18 +316,16 @@ public class SliceSources {
             }
             boolean out;
             if (reg.isManual()) {
-                System.out.println("Waiting for manual lock...");
-                //current.setText("Lock (Manual)");
+                System.out.println("Waiting for manual lock release...");
                 synchronized (MultiSlicePositioner.manualActionLock) {
-                    // locked = false;
+                    System.out.println("Manual lock released.");
                     lockedRegistrations.remove(reg);
-                    System.out.println("Manual lock released...");
-                    //current.setText("Current");
                     out = performRegistration(reg,preprocessFixed, preprocessMoving);
                 }
             } else {
                 out = performRegistration(reg,preprocessFixed, preprocessMoving);
             }
+
             if (out) {
                 registrations.add(reg);
             } else {
@@ -453,8 +451,6 @@ public class SliceSources {
         sac = resampler.apply(sac);
         sac = SourceTransformHelper.createNewTransformedSourceAndConverter(translateZ, new SourceAndConverterAndTimeRange(sac, 0));
 
-        /*SourceAndConverterServices
-                .getSourceAndConverterDisplayService().show(sac);*/
         ExportToImagePlusCommand export = new ExportToImagePlusCommand();
 
         export.level=0;
@@ -510,8 +506,6 @@ public class SliceSources {
             }
         }
 
-        //cvtRois.to(RoiManager.class);
-
         computeTransformedRois();
 
     }
@@ -547,7 +541,7 @@ public class SliceSources {
         }
         Collections.reverse(this.registrations);
 
-        this.original_sacs[0].getSpimSource().getSourceTransform(0,2,at3D);
+        this.original_sacs[0].getSpimSource().getSourceTransform(0,6,at3D);
         list = getTransformedPtsFixedToMoving(list, at3D);
 
         cvtRoisTransformed.clear();

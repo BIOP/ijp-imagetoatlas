@@ -189,8 +189,8 @@ public class ConstructROIsFromImgLabel implements Command {
 		cr_out = new ConvertibleRois();
 
 		IJShapeRoiArray output = new IJShapeRoiArray(roiArray);
-		//output.smoothenWithConstrains(movablePx);
-		//output.smoothenWithConstrains(movablePx);
+		output.smoothenWithConstrains(movablePx);
+		output.smoothenWithConstrains(movablePx);
 
 		cr_out.set(output);
 		if (os!=null) {

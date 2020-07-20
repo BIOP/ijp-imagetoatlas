@@ -121,6 +121,12 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
         // Transform 2D in 3D
         for
         (RealPoint pt : pts.ptList) {
+            double[] tr = bwl.getBigWarp().getTransform().apply( new double[] {
+                    pt.getDoublePosition(0), pt.getDoublePosition(1)
+            });
+            pt.setPosition(tr);
+
+/*            bwl.getBigWarp().getTransform().apply()
             RealPoint pi = new RealPoint(3);
             pi.setPosition(pt.getDoublePosition(0),0);
             pi.setPosition(pt.getDoublePosition(1),1);
@@ -129,7 +135,6 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
             RealPoint pf0 = new RealPoint(3);
 
             new AffineTransform3D().inverse().apply(pi,pf0);
-
 
             RealPoint pf1 = new RealPoint(3);
             bwl.getBigWarp().unwrap2d(bwl.getBigWarp().getTransformation()).inverse().apply(pf0,pf1);
@@ -144,7 +149,7 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
             pt.setPosition(pf2.getDoublePosition(1),1);
             if (Math.random()>0.99) {
                 System.out.println(pf2.getDoublePosition(0)+":"+pf2.getDoublePosition(1));
-            }
+            }*/
         }
         return pts;
     }
