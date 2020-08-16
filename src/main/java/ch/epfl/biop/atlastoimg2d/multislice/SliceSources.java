@@ -115,7 +115,7 @@ public class SliceSources {
         this.isSelected = false;
     }
 
-    public synchronized boolean isSelected() {
+    public boolean isSelected() {
         return this.isSelected;
     }
 
@@ -149,12 +149,15 @@ public class SliceSources {
 
     public String getRegistrationState(Registration registration) {
         if (lockedRegistrations.contains(registration)) {
+            System.out.println("State asked - locked");
             return "(locked)";
         }
         if (registrations.contains(registration)) {
+            System.out.println("State asked - done");
             return "(done)";
         }
         if (pendingRegistrations.contains(registration)) {
+            System.out.println("State asked - pending");
             return "(pending)";
         }
         return "(!)";
@@ -323,6 +326,7 @@ public class SliceSources {
                     out = performRegistration(reg,preprocessFixed, preprocessMoving);
                 }
             } else {
+                lockedRegistrations.remove(reg);
                 out = performRegistration(reg,preprocessFixed, preprocessMoving);
             }
 
@@ -430,6 +434,7 @@ public class SliceSources {
         // Creates cached image factory of Type UnsignedShort
         final DiskCachedCellImgFactory<UnsignedShortType> factory = new DiskCachedCellImgFactory<>(new UnsignedShortType(), factoryOptions);
 
+        System.out.println("0");
         // 0 - slicing model : empty source but properly defined in space and resolution
         SourceAndConverter singleSliceModel = new EmptySourceAndConverterCreator("SlicingModel", at3D,
                 mp.nPixX,
@@ -444,6 +449,7 @@ public class SliceSources {
 
         AffineTransform3D translateZ = new AffineTransform3D();
         translateZ.translate(0, 0, -slicingAxisPosition);
+
 
         SourceAndConverter sac =
                 mp.reslicedAtlas.nonExtendedSlicedSources[mp.reslicedAtlas.nonExtendedSlicedSources.length-1]; // By convention the label image is the last one
@@ -471,7 +477,6 @@ public class SliceSources {
         cvtRoisOrigin = labelToROIs.cr_out;
 
         at3DLastLabelImage = at3D;
-
         labelImageBeingComputed = false;
     }
 
@@ -518,8 +523,8 @@ public class SliceSources {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+            System.out.println("All registrations done ...");
         }
-        System.out.println("All registrations done ...");
 
         cvtRoisTransformed = new ConvertibleRois();
 
@@ -535,8 +540,11 @@ public class SliceSources {
         at3D.translate(0, 0, slicingAxisPosition);
         list = getTransformedPtsFixedToMoving(list, at3D.inverse());
 
+
         Collections.reverse(this.registrations);
+
         for (Registration reg : this.registrations) {
+            System.out.println("Registration class "+reg.getClass().getSimpleName());
             list = reg.getTransformedPtsFixedToMoving(list);
         }
         Collections.reverse(this.registrations);

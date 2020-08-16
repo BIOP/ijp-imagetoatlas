@@ -66,10 +66,22 @@ public class CenterZeroRegistration implements Registration<SourceAndConverter[]
 
     @Override
     public SourceAndConverter[] getTransformedImageMovingToFixed(SourceAndConverter[] img) {
-        SourceAndConverter[] out = new SourceAndConverter[img.length];
+        /*SourceAndConverter[] out = new SourceAndConverter[img.length];
 
         for (int idx = 0;idx<img.length;idx++) {
             out[idx] = SourceTransformHelper.append(at3d, new SourceAndConverterAndTimeRange(img[idx],timePoint));
+        }*/
+
+        SourceAndConverter[] out = new SourceAndConverter[img.length];
+
+        for (int idx = 0;idx<img.length;idx++) {
+            /*if (alreadyTransformedSources.keySet().contains(img[idx])) {
+                out[idx] = alreadyTransformedSources.get(img[idx]);
+                SourceTransformHelper.set(at3d, new SourceAndConverterAndTimeRange(out[idx], timePoint));
+            } else {*/
+                out[idx] = SourceTransformHelper.createNewTransformedSourceAndConverter(at3d, new SourceAndConverterAndTimeRange(img[idx], timePoint));
+            /*    alreadyTransformedSources.put(img[idx], out[idx]);
+            }*/
         }
 
         return out;

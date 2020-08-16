@@ -21,8 +21,7 @@ public class SlicerAdjusterCommand extends InteractiveCommand {
     ReslicedAtlas reslicedAtlas;
 
     public void run() {
-        zSamplingSteps/=10;
-        reslicedAtlas.setStep(zSamplingSteps);
+        reslicedAtlas.setStep(zSamplingSteps/10);
         reslicedAtlas.setRotateX(rotateX/360.0*Math.PI);
         reslicedAtlas.setRotateY(rotateY/360.0*Math.PI);
     }

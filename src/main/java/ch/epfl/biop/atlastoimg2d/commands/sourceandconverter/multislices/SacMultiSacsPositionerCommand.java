@@ -75,6 +75,10 @@ public class SacMultiSacsPositionerCommand implements Command {
                     "projector", Projection.SUM_PROJECTOR)
                     .get().getOutput("bdvh");
 
+            if (bdvMultiSlicer==null) {System.out.println("bdv multislicer null");}
+
+            if (bdvMultiSlicer.getCardPanel()==null) {System.out.println("bdv multislicer card panel null");}
+
             mp = new MultiSlicePositioner(bdvMultiSlicer, ba, ra, context);
 
             os.addObject(mp);

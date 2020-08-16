@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.scijava</groupId>
 		<artifactId>pom-scijava</artifactId>
-		<version>28.0.0</version>
+		<version>29.2.1</version>
 		<relativePath />
 	</parent>
 
@@ -134,22 +134,18 @@
 		<license.licenseName>N/A</license.licenseName>
 		<license.copyrightOwners>N/A</license.copyrightOwners>
 		<scijava.app.directory>C:\Users\chiarutt\Desktop\bdv-allen\fiji-win64\Fiji.app</scijava.app.directory>
-		<scijava-maven-plugin.version>1.1.0</scijava-maven-plugin.version>
 
-		<imglib2.version>5.9.0</imglib2.version>
-		<imglib2-ij.version>2.0.0-beta-46</imglib2-ij.version>
-		<bigdataviewer-core.version>9.0.1</bigdataviewer-core.version>
-		<bigdataviewer-vistools.version>1.0.0-beta-20-SNAPSHOT-CARD</bigdataviewer-vistools.version>
-		<spim_data.version>2.2.4</spim_data.version>
-		<ui-behaviour.version>2.0.1</ui-behaviour.version>
+		<bigdataviewer-biop-tools.version>0.1.8-SNAPSHOT</bigdataviewer-biop-tools.version>
+		<bigdataviewer-playground.version>0.2.3-SNAPSHOT</bigdataviewer-playground.version>
+		<bigdataviewer-bioformats.version>0.2.7-SNAPSHOT</bigdataviewer-bioformats.version>
+
+		<bigdataviewer-vistools.version>1.0.0-beta-21-SNAPSHOT-NICO</bigdataviewer-vistools.version> <!-- problem with cardpanel -->
+
+		<ijl-utilities-wrappers.version>0.3.15</ijl-utilities-wrappers.version>
+		<json.version>20180813</json.version>
+
 		<bigwarp_fiji.version>6.0.1-SNAPSHOT</bigwarp_fiji.version>
-
-		<scijava-ui-swing.version>0.13.0</scijava-ui-swing.version>
-		<bigdataviewer-biop-tools.version>0.1.7-SNAPSHOT</bigdataviewer-biop-tools.version>
-		<bigdataviewer-playground.version>0.2.2-SNAPSHOT</bigdataviewer-playground.version>
-		<bigdataviewer-bioformats.version>0.2.5</bigdataviewer-bioformats.version>
-
-		<bigdataviewer-selector.version>0.1.1-SNAPSHOT</bigdataviewer-selector.version>
+		<bigdataviewer-selector.version>0.1.4</bigdataviewer-selector.version>
 
 	</properties>
 
@@ -168,13 +164,13 @@
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
-			<version>20180813</version>
+			<version>${json.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>ch.epfl.biop</groupId>
 			<artifactId>ijl-utilities-wrappers</artifactId>
-			<version>0.3.15</version>
+			<version>${ijl-utilities-wrappers.version}</version>
 		</dependency>
 
 		<dependency>
@@ -190,11 +186,6 @@
 		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>bigdataviewer-vistools</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>sc.fiji</groupId>
-			<artifactId>bigdataviewer-core</artifactId>
 		</dependency>
 
 		<dependency>

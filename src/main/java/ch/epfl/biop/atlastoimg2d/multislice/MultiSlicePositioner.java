@@ -21,6 +21,7 @@ import mpicbg.spim.data.generic.base.Entity;
 import mpicbg.spim.data.generic.sequence.AbstractSequenceDescription;
 import mpicbg.spim.data.generic.sequence.BasicViewSetup;
 import mpicbg.spim.data.sequence.Tile;
+import net.imagej.ops.Ops;
 import net.imglib2.RealPoint;
 import net.imglib2.cache.img.DiskCachedCellImgFactory;
 import net.imglib2.cache.img.DiskCachedCellImgOptions;
@@ -528,6 +529,32 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         }
     }
 
+    public void selectSlice(SliceSources... slices) {
+        for (SliceSources slice : slices) {
+            slice.select();
+        }
+    }
+
+    public void selectSlice(List<SliceSources> slices) {
+        selectSlice(slices.toArray(new SliceSources[slices.size()]));
+    }
+
+    public void deselectSlice(SliceSources... slices) {
+        for (SliceSources slice : slices) {
+            slice.deSelect();
+        }
+    }
+
+    public void deselectSlice(List<SliceSources> slices) {
+        deselectSlice(slices.toArray(new SliceSources[slices.size()]));
+    }
+
+    public void waitForTasks() {
+        slices.forEach(slice -> {
+            slice.waitForEndOfRegistrations();
+        });
+    }
+
     /**
      * Center bdv on a slice
      *
@@ -647,9 +674,10 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             g.drawLine(ptRectScreen[1][0].x, ptRectScreen[1][0].y, ptRectScreen[1][1].x, ptRectScreen[1][1].y);
             g.drawLine(ptRectScreen[1][1].x, ptRectScreen[1][1].y, ptRectScreen[0][1].x, ptRectScreen[0][1].y);
             g.drawLine(ptRectScreen[0][1].x, ptRectScreen[0][1].y, ptRectScreen[0][0].x, ptRectScreen[0][0].y);
-
-            for (SliceSources slice : slices) {
-                slice.drawGraphicalHandles(g);
+            synchronized (slices) {
+                for (SliceSources slice : slices) {
+                    slice.drawGraphicalHandles(g);
+                }
             }
 
             g.setColor(color);
@@ -880,7 +908,8 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         navigateCurrentSlice();
     }
 
-    public void elastixRegister(Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixed,
+
+    public void registerElastix(Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixed,
                                 Function<SourceAndConverter[], SourceAndConverter[]> preprocessMoving) {
         for (SliceSources slice : slices) {
             if (slice.isSelected()) {
@@ -912,6 +941,32 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     }
 
     public void enqueueRegistration(String registrationType,
+                                                int channelFixed,
+                                                int channelMoving) {
+        enqueueRegistration(registrationType, new int[]{channelFixed}, new int[]{channelMoving});
+    }
+
+    public void enqueueRegistration(String registrationType,
+                                    final int[] channelsFixed,
+                                    final int[] channelsMoving) {
+        enqueueRegistration(registrationType,
+                (sacs) -> {
+                    SourceAndConverter[] selected = new SourceAndConverter[channelsFixed.length];
+                    for (int idx = 0;idx<channelsFixed.length;idx++) {
+                        selected[idx] = sacs[channelsFixed[idx]];
+                    }
+                    return selected;
+                },
+                (sacs) -> {
+                    SourceAndConverter[] selected = new SourceAndConverter[channelsFixed.length];
+                    for (int idx = 0;idx<channelsMoving.length;idx++) {
+                        selected[idx] = sacs[channelsMoving[idx]];
+                    }
+                    return selected;
+                });
+    }
+
+    public void enqueueRegistration(String registrationType,
                                     Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixed,
                                     Function<SourceAndConverter[], SourceAndConverter[]> preprocessMoving) {
         boolean atLeastOneSliceSelected = false;
@@ -928,19 +983,18 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         } else {
             switch (registrationType) {
                 case "Manual BigWarp":
-                    bigwarpRegister(preprocessFixed, preprocessMoving);
+                    registerBigWarp(preprocessFixed, preprocessMoving);
                     break;
                 case "Auto Elastix Affine":
-                    elastixRegister(preprocessFixed, preprocessMoving);
+                    registerElastix(preprocessFixed, preprocessMoving);
                 default:
                     log.accept("Unrecognized registration : "+registrationType);
             }
         }
-
     }
 
-    public void bigwarpRegister( Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixed,
-                                 Function<SourceAndConverter[], SourceAndConverter[]> preprocessMoving) {
+    public void registerBigWarp(Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixed,
+                                Function<SourceAndConverter[], SourceAndConverter[]> preprocessMoving) {
         for (SliceSources slice : slices) {
             if (slice.isSelected()) {
                 SacBigWarp2DRegistration registration = new SacBigWarp2DRegistration();
