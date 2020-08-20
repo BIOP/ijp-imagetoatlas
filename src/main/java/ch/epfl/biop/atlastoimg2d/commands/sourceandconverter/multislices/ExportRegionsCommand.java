@@ -5,32 +5,32 @@ import org.scijava.command.Command;
 import org.scijava.command.InteractiveCommand;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
+import org.scijava.widget.Button;
 
-@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export Options")
+import java.io.File;
+
+@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export ROIs")
 public class ExportRegionsCommand extends InteractiveCommand {
 
     @Parameter
     MultiSlicePositioner mp;
 
-    @Parameter
-    Boolean addDescendants=false;
-
-    @Parameter
-    Boolean addAncestors=false;
-
-    @Parameter
-    Boolean clearRoiManager=false;
-
     @Parameter(label="Roi Naming",choices={"name","acronym","id","Roi Manager Index (no suffix)"})
     String namingChoice;
 
-    @Parameter
-    String roiPrefix="";
+    @Parameter(label="Directory for ROI Saving", style = "directory")
+    File dirOutput;
 
-    @Parameter
-    boolean outputLabelImage;
+    @Parameter(callback = "clicked")
+    Button run;
 
+    @Override
     public void run() {
+        // Cannot be accessed
+        clicked();
+    }
 
+    public void clicked() {
+        mp.exportSelectedSlices(namingChoice, dirOutput);
     }
 }

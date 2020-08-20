@@ -45,6 +45,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
+import java.io.File;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.List;
@@ -186,7 +187,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.navigatePreviousSlice(), "navigate_previous_slice", "P"); // P taken for panel
         common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.navigateCurrentSlice(), "navigate_current_slice", "C");
         common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.nextMode(), "change_mode", "Q");
-        common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.exportSelectedSlices(), "exportSlices", "E");
+        //common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.exportSelectedSlices(), "exportSlices", "E");
 
         bdvh.getTriggerbindings().addBehaviourMap(COMMON_BEHAVIOURS_KEY, common_behaviours.getBehaviourMap());
         bdvh.getTriggerbindings().addInputTriggerMap(COMMON_BEHAVIOURS_KEY, common_behaviours.getInputTriggerMap()); // "transform", "bdv"
@@ -262,14 +263,19 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
         bdvh.getCardPanel().addCard("Tasks Info", mso.getJPanel(), true);
 
-        JPanel panelExport = new JPanel(new BorderLayout());
+        /*JPanel panelExport = new JPanel(new BorderLayout());
         panelExport.add(sav.createDisplayPanel(biopAtlas), BorderLayout.CENTER);
         panelExport.add(ScijavaSwingUI.getPanel(scijavaCtx, ExportRegionsCommand.class,
                 "sav", sav,
                 "atlas", biopAtlas,
-                "mp", this), BorderLayout.SOUTH);
+                "mp", this), BorderLayout.SOUTH);*/
 
-        bdvh.getCardPanel().addCard("Region export options",panelExport , true);
+        bdvh.getCardPanel().addCard("Region export options", //panelExport
+                ScijavaSwingUI.getPanel(scijavaCtx, ExportRegionsCommand.class,
+                        //"sav", sav,
+                        //"atlas", biopAtlas,
+                        "mp", this),
+                true);
 
     }
 
@@ -802,11 +808,14 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
          */
         @Override
         public void importSourcesAndConverters(TransferSupport support, List<SourceAndConverter<?>> sacs) {
-            Optional<BdvHandle> bdvh = getBdvHandleFromViewerPanel(((bdv.viewer.ViewerPanel) support.getComponent()));
-            if (bdvh.isPresent()) {
-                double slicingAxisPosition = iSliceNoStep * sizePixX * (int) reslicedAtlas.getStep();
-                createSlice(sacs.toArray(new SourceAndConverter[0]), slicingAxisPosition, 0.01, Tile.class, new Tile(-1));
-            }
+
+            //SwingUtilities.invokeLater(() -> {
+                Optional<BdvHandle> bdvh = getBdvHandleFromViewerPanel(((bdv.viewer.ViewerPanel) support.getComponent()));
+                if (bdvh.isPresent()) {
+                    double slicingAxisPosition = iSliceNoStep * sizePixX * (int) reslicedAtlas.getStep();
+                    createSlice(sacs.toArray(new SourceAndConverter[0]), slicingAxisPosition, 0.01, Tile.class, new Tile(-1));
+                }
+            //});
         }
     }
 
@@ -867,17 +876,29 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         new MoveSlice(slice, axisPosition).run();
     }
 
-    public void exportSelectedSlices() {
+    public void exportSelectedSlices(String namingChoice, File dirOutput) {
         List<SliceSources> sortedSelected = getSortedSlices().stream().filter(slice -> slice.isSelected()).collect(Collectors.toList());
         new MarkActionSequenceBatch().run();
-        for (int idx = 0; idx < sortedSelected.size(); idx++) {
-            exportSlice(sortedSelected.get(idx));
+
+        List<Thread> threads = new ArrayList<>();
+        for (SliceSources slice : sortedSelected) {
+            threads.add(new Thread(() -> exportSlice(slice, namingChoice, dirOutput)));
         }
+
+        threads.forEach(t -> t.start());
+        /*threads.forEach(t -> {
+            try {
+                t.join();
+            } catch (Exception e) {
+                System.err.println(e);
+            }
+        });*/
+
         new MarkActionSequenceBatch().run();
     }
 
-    public void exportSlice(SliceSources slice) {
-        new ExportSlice(slice).run();
+    public void exportSlice(SliceSources slice, String namingChoice, File dirOutput) {
+        new ExportSlice(slice, namingChoice, dirOutput).run();
     }
 
     /**
@@ -1359,16 +1380,20 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     public class ExportSlice extends CancelableAction {
 
         final SliceSources slice;
+        String namingChoice;
+        File dirOutput;
 
-        public ExportSlice(SliceSources slice) {
+        public ExportSlice(SliceSources slice, String namingChoice, File dirOutput) {
             this.slice = slice;
+            this.namingChoice = namingChoice;
+            this.dirOutput = dirOutput;
         }
 
         @Override
         public void run() { //
             System.out.println("Exporting slice registration");
             //super.run(); // not saved
-            slice.export();
+            slice.export(namingChoice, dirOutput);
         }
 
         public String toString() {

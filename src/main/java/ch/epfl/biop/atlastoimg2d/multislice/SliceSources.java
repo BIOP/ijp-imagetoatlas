@@ -2,8 +2,11 @@ package ch.epfl.biop.atlastoimg2d.multislice;
 
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.commands.ConstructROIsFromImgLabel;
+import ch.epfl.biop.atlas.commands.PutAtlasStructureToImage;
+import ch.epfl.biop.atlastoimg2d.commands.sourceandconverter.multislices.PutAtlasStructureToImageNoRoiManager;
 import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
 import ch.epfl.biop.java.utilities.roi.types.IJShapeRoiArray;
+import ch.epfl.biop.java.utilities.roi.types.ImageJRoisFile;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import ch.epfl.biop.registration.Registration;
 import ch.epfl.biop.registration.sourceandconverter.AffineTransformedSourceWrapperRegistration;
@@ -16,6 +19,7 @@ import net.imglib2.cache.img.DiskCachedCellImgFactory;
 import net.imglib2.cache.img.DiskCachedCellImgOptions;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
+import org.apache.commons.io.FileUtils;
 import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
@@ -26,6 +30,10 @@ import sc.fiji.bdvpg.sourceandconverter.transform.SourceResampler;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
 
 import java.awt.*;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -68,6 +76,16 @@ public class SliceSources {
     Set<Registration> pendingRegistrations = new HashSet<>();
 
     Set<Registration> lockedRegistrations = new HashSet<>();
+
+    volatile ImagePlus impLabelImage = null;
+
+    volatile AffineTransform3D at3DLastLabelImage = null;
+
+    volatile boolean labelImageBeingComputed = false;
+
+    volatile ConvertibleRois cvtRoisOrigin = null;
+
+    volatile ConvertibleRois cvtRoisTransformed = null;
 
     // For fast display : Icon TODO : see https://github.com/bigdataviewer/bigdataviewer-core/blob/17d2f55d46213d1e2369ad7ef4464e3efecbd70a/src/main/java/bdv/tools/RecordMovieDialog.java#L256-L318
     protected SliceSources(SourceAndConverter[] sacs, double slicingAxisPosition, MultiSlicePositioner mp) {
@@ -408,17 +426,7 @@ public class SliceSources {
         }
     }
 
-    volatile ImagePlus impLabelImage = null;
-
-    volatile AffineTransform3D at3DLastLabelImage = null;
-
-    volatile boolean labelImageBeingComputed = false;
-
-    volatile ConvertibleRois cvtRoisOrigin = null;
-
-    volatile ConvertibleRois cvtRoisTransformed = null;
-
-    void computeLabelImage(AffineTransform3D at3D) {
+    void computeLabelImage(AffineTransform3D at3D, String naming) {
         labelImageBeingComputed = true;
 
         System.out.println("Compute Label Image");
@@ -467,7 +475,7 @@ public class SliceSources {
         export.run();
 
         impLabelImage = export.imp_out;
-        impLabelImage.show();
+        //impLabelImage.show();
 
         ConstructROIsFromImgLabel labelToROIs = new ConstructROIsFromImgLabel();
         labelToROIs.atlas = mp.biopAtlas;
@@ -480,15 +488,16 @@ public class SliceSources {
         labelImageBeingComputed = false;
     }
 
-    public synchronized void export() {
+    public synchronized void export(String namingChoice, File dirOutput) {
         System.out.println("Export slice");
         // Need to raster the label image
-
+        System.out.println("0");
         AffineTransform3D at3D = new AffineTransform3D();
         at3D.translate(-mp.nPixX / 2.0, -mp.nPixY / 2.0, 0);
         at3D.scale(mp.sizePixX, mp.sizePixY, mp.sizePixZ);
         at3D.translate(0, 0, slicingAxisPosition);
 
+        System.out.println("0");
         boolean computeLabelImageNecessary = true;
 
         if (!labelImageBeingComputed) {
@@ -499,8 +508,9 @@ public class SliceSources {
             }
         }
 
+        System.out.println("1");
         if (computeLabelImageNecessary) {
-            computeLabelImage(at3D);
+            computeLabelImage(at3D, namingChoice);
         } else {
             while (labelImageBeingComputed) {
                 try {
@@ -511,8 +521,34 @@ public class SliceSources {
             }
         }
 
+        System.out.println("2");
         computeTransformedRois();
 
+        PutAtlasStructureToImageNoRoiManager roiRenamer = new PutAtlasStructureToImageNoRoiManager();
+        roiRenamer.addAncestors=false;
+        roiRenamer.addDescendants = true;
+        roiRenamer.atlas = mp.biopAtlas;
+        roiRenamer.structure_list = "997";
+        roiRenamer.cr = cvtRoisOrigin;
+        roiRenamer.namingChoice = namingChoice;
+        roiRenamer.run();
+        ConvertibleRois roiOutput = new ConvertibleRois();
+        roiOutput.set(roiRenamer.output);
+
+        System.out.println("3");
+        ImageJRoisFile ijroisfile = (ImageJRoisFile) roiOutput.to(ImageJRoisFile.class);
+
+        File f = new File(dirOutput, toString()+".zip");
+        try {
+            Files.move(Paths.get(ijroisfile.f.getAbsolutePath()),Paths.get(f.getAbsolutePath()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public String toString() {
+        int index = mp.getSortedSlices().indexOf(this);
+        return "Slice_"+index;
     }
 
     public void computeTransformedRois() {
@@ -540,22 +576,20 @@ public class SliceSources {
         at3D.translate(0, 0, slicingAxisPosition);
         list = getTransformedPtsFixedToMoving(list, at3D.inverse());
 
-
         Collections.reverse(this.registrations);
 
         for (Registration reg : this.registrations) {
-            System.out.println("Registration class "+reg.getClass().getSimpleName());
+            //System.out.println("Registration class "+reg.getClass().getSimpleName());
             list = reg.getTransformedPtsFixedToMoving(list);
         }
         Collections.reverse(this.registrations);
 
-        this.original_sacs[0].getSpimSource().getSourceTransform(0,6,at3D);
+        this.original_sacs[0].getSpimSource().getSourceTransform(0,0,at3D);
         list = getTransformedPtsFixedToMoving(list, at3D);
 
         cvtRoisTransformed.clear();
         list.shapeRoiList = new IJShapeRoiArray(arrayIni);
         cvtRoisTransformed.set(list);
-        cvtRoisTransformed.to(RoiManager.class);
     }
 
     public RealPointList getTransformedPtsFixedToMoving(RealPointList pts, AffineTransform3D at3d) {
