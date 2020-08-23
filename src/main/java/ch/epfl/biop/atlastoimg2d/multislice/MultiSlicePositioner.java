@@ -449,9 +449,10 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             // slices.forEach(slice -> slice.disableGraphicalHandles());
             // Do stuff
             synchronized (slices) {
-                if (slices.stream().anyMatch(slice -> slice.processInProgress)) {
+                /*if (slices.stream().anyMatch(slice -> slice.processInProgress)) {
                     System.err.println("Mode cannot be changed if a task is in process");
-                } else {
+                } else*/
+                {
                     List<SourceAndConverter> sacsToRemove = new ArrayList<>();
                     List<SourceAndConverter> sacsToAdd = new ArrayList<>();
                     getSortedSlices().forEach(ss -> {
@@ -555,7 +556,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
     public void waitForTasks() {
         slices.forEach(slice -> {
-            slice.waitForEndOfRegistrations();
+            slice.waitForEndOfTasks();
         });
     }
 

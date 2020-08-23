@@ -70,10 +70,6 @@ public class SliceSources {
 
     CenterZeroRegistration centerPositioner;
 
-    /*Set<Registration> pendingRegistrations = new HashSet<>();
-
-    Set<Registration> lockedRegistrations = new HashSet<>();*/
-
     volatile ImagePlus impLabelImage = null;
 
     volatile AffineTransform3D at3DLastLabelImage = null;
@@ -83,6 +79,12 @@ public class SliceSources {
     volatile ConvertibleRois cvtRoisOrigin = null;
 
     volatile ConvertibleRois cvtRoisTransformed = null;
+
+    List<Registration> registrations = new ArrayList<>();
+
+    List<CompletableFuture<Boolean>> tasks = new ArrayList<>();
+
+    Map<CancelableAction, CompletableFuture> mapActionTask = new HashMap<>();
 
     // For fast display : Icon TODO : see https://github.com/bigdataviewer/bigdataviewer-core/blob/17d2f55d46213d1e2369ad7ef4464e3efecbd70a/src/main/java/bdv/tools/RecordMovieDialog.java#L256-L318
     protected SliceSources(SourceAndConverter[] sacs, double slicingAxisPosition, MultiSlicePositioner mp) {
@@ -126,7 +128,7 @@ public class SliceSources {
     void iniPosition() {
         runRegistration(centerPositioner, Function.identity(), Function.identity());
         runRegistration(zPositioner, Function.identity(), Function.identity());
-        waitForEndOfRegistrations();
+        waitForEndOfTasks();
         updatePosition();
     }
 
@@ -169,22 +171,6 @@ public class SliceSources {
             return new Integer[]{0, 0, 0};
         }
     }
-
-    /*protected String getRegistrationState(Registration registration) {
-        if (lockedRegistrations.contains(registration)) {
-            System.out.println("State asked - locked");
-            return "(locked)";
-        }
-        if (registrations.contains(registration)) {
-            System.out.println("State asked - done");
-            return "(done)";
-        }
-        if (pendingRegistrations.contains(registration)) {
-            System.out.println("State asked - pending");
-            return "(pending)";
-        }
-        return "(!)";
-    }*/
 
     protected String getActionState(CancelableAction action) {
         if (mapActionTask.containsKey(action)) {
@@ -267,15 +253,14 @@ public class SliceSources {
         return false;
     }
 
-    public void waitForEndOfRegistrations() {
-        //if (registrationTasks!=null) {
+    public void waitForEndOfTasks() {
         try {
-            CompletableFuture.allOf(taskQueue).get();
+            CompletableFuture lastTask = tasks.get(tasks.size()-1);
+            lastTask.get();
         } catch (Exception e) {
             e.printStackTrace();
             System.err.println("Some registration were cancelled");
         }
-        //}
     }
 
     protected void updatePosition() {
@@ -298,12 +283,6 @@ public class SliceSources {
     public RealPoint getCenterPositionRMode() {
         return new RealPoint(0, 0, slicingAxisPosition);
     }
-
-    boolean processInProgress = false; // flag : true if a registration process is in progress
-
-    private CompletableFuture<Boolean> taskQueue = CompletableFuture.completedFuture(true);
-
-    private List<Registration> registrations = new ArrayList<>();
 
     // public : enqueueRegistration
     private boolean performRegistration(Registration<SourceAndConverter[]> reg,
@@ -346,42 +325,27 @@ public class SliceSources {
     protected void runRegistration(Registration<SourceAndConverter[]> reg,
                                 Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixed,
                                 Function<SourceAndConverter[], SourceAndConverter[]> preprocessMoving) {
-        //pendingRegistrations.add(reg);
-        //lockedRegistrations.add(reg);
+
+        boolean jobDone = false;
 
         if (reg.isManual()) {
-            System.out.println("Waiting for manual lock release...");
+            //Waiting for manual lock release...
             synchronized (MultiSlicePositioner.manualActionLock) {
-                System.out.println("Manual lock released.");
-                //lockedRegistrations.remove(reg);
-                //out =
-                        performRegistration(reg,preprocessFixed, preprocessMoving);
+                //Manual lock released
+                jobDone = performRegistration(reg,preprocessFixed, preprocessMoving);
             }
         } else {
-            //lockedRegistrations.remove(reg);
-            //out =
-                    performRegistration(reg,preprocessFixed, preprocessMoving);
+            jobDone = performRegistration(reg,preprocessFixed, preprocessMoving);
         }
 
-        registrations.add(reg);
+        if (jobDone) {
+            registrations.add(reg);
+        }
 
-        processInProgress = false;
         mp.mso.updateInfoPanel(this);
-
     }
 
-    // TODO
-    protected void cancelCurrentRegistrations() {
-        taskQueue.cancel(true);
-    }
-
-    public synchronized boolean removeRegistration(Registration reg) {
-        if (false){//pendingRegistrations.contains(reg)) {
-            System.out.println("Attempt to cancel current registrations...");
-            cancelCurrentRegistrations();
-            System.out.println("Attempt to cancel current registrations...");
-            return true;
-        }
+    private synchronized boolean removeRegistration(Registration reg) {
         if (registrations.contains(reg)) {
             int idx = registrations.indexOf(reg);
             if (idx == registrations.size() - 1) {
@@ -424,9 +388,6 @@ public class SliceSources {
             return false;
         }
     }
-
-    List<CompletableFuture<Boolean>> tasks = new ArrayList<>();
-    Map<CancelableAction, CompletableFuture> mapActionTask = new HashMap<>();
 
     protected void enqueueRunAction(CancelableAction action) {
         synchronized(tasks) {
@@ -578,17 +539,7 @@ public class SliceSources {
         return "Slice_"+index;
     }
 
-    public void computeTransformedRois() {
-        while (!taskQueue.isDone()) {
-            System.out.println("Waiting for registration to finish...");
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            System.out.println("All registrations done ...");
-        }
-
+    private void computeTransformedRois() {
         cvtRoisTransformed = new ConvertibleRois();
 
         IJShapeRoiArray arrayIni = (IJShapeRoiArray) cvtRoisOrigin.to(IJShapeRoiArray.class);
