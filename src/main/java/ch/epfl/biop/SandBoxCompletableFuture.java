@@ -9,6 +9,9 @@ import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * Proof of principle : combining automated registration tasks and manual ones
@@ -23,7 +26,63 @@ public class SandBoxCompletableFuture {
 
     static JPanel demoReportingPanel;
 
+    List<CompletableFuture> taskSlice1;
+
+    public static Integer mult2(int number) {
+        return number*2;
+    }
+
+    public static Integer add5(int number) {
+        return number+5;
+    }
+
+
     public static void main(String[] args) throws Exception {
+
+        ExecutorService executor = Executors.newFixedThreadPool(10);
+
+
+        CompletableFuture<Integer> stage1 = CompletableFuture.supplyAsync(() -> {
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return        5;
+        });
+        CompletableFuture<Integer> stage2 =  stage1.thenApply(n -> {
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return        mult2(n);
+        });
+        stage2.handle((a,b)-> {
+            System.out.println("a = "+a);
+            System.out.println("b = "+b);
+            return a;
+        });
+
+        CompletableFuture<Integer> stage3 =  stage2.thenApply(n -> add5(n));
+        stage3.handle((a,b)-> {
+            System.out.println("a = "+a);
+            System.out.println("b = "+b);
+            return a;
+        });
+
+        //stage2.cancel(true);
+        Future<String> myFuture;
+
+        System.out.println("stage3 done = "+stage3.isDone());
+        System.out.println("stage3 dependent = "+stage3.getNumberOfDependents());
+        System.out.println("stage3 res = "+stage3.get());
+        System.out.println("stage3 dependent = "+stage3.getNumberOfDependents());
+
+        System.out.println("stage3 done = "+stage3.isDone());
+
+
+        /*
         demoFrame.setSize(600,200);
 
         //http://www.migcalendar.com/miglayout/mavensite/docs/cheatsheet.html
@@ -58,7 +117,7 @@ public class SandBoxCompletableFuture {
 
         Thread.sleep(4000);
         //srcs1.registrationTasks.getNumberOfDependents().cancel(true);
-        System.out.println("srcs1.registrationTasks.getNumberOfDependents() = "+srcs1.registrationTasks.getNumberOfDependents());
+       /* System.out.println("srcs1.registrationTasks.getNumberOfDependents() = "+srcs1.registrationTasks.getNumberOfDependents());
         System.out.println("srcs1.registrationTasks.getNumberOfDependents() = "+srcs2.registrationTasks.getNumberOfDependents());
         try {
             CompletableFuture.allOf(srcs1.registrationTasks, srcs2.registrationTasks).get();
@@ -68,9 +127,9 @@ public class SandBoxCompletableFuture {
 
         System.out.println("srcs1.registrationTasks.getNumberOfDependents() = "+srcs1.registrationTasks.getNumberOfDependents());
         System.out.println("srcs1.registrationTasks.getNumberOfDependents() = "+srcs2.registrationTasks.getNumberOfDependents());
-
-        System.out.println("# registrations 1 = "+srcs1.registrations.size());
-        System.out.println("# registrations 2 = "+srcs2.registrations.size());
+*/
+        //System.out.println("# registrations 1 = "+srcs1.registrations.size());
+        //System.out.println("# registrations 2 = "+srcs2.registrations.size());
 
     }
 
@@ -129,17 +188,21 @@ public class SandBoxCompletableFuture {
         public Sources(String name, int location) {
             this.name = name;
             this.location = location;
+            tasks.add(CompletableFuture.supplyAsync(() -> true));
         }
 
-        public CompletableFuture<Boolean> registrationTasks = CompletableFuture.completedFuture(true);
+        //public CompletableFuture<Boolean> registrationTasks = CompletableFuture.supplyAsync(() -> true);
+
+        public List<CompletableFuture<Boolean>> tasks = new ArrayList<>();
+        //CompletableFuture.supplyAsync(() -> true);
 
         public void addRegistration(Reg reg) {
-
-            if (registrationTasks == null || registrationTasks.isDone()) {
+            /*if (registrationTasks == null || registrationTasks.isDone()) {
                 registrationTasks = CompletableFuture.supplyAsync(() -> true); // Starts async computation, maybe there's a better way
-            }
-
-            registrationTasks = registrationTasks.thenApplyAsync((flag) -> {
+            }*/
+            tasks.add(tasks.get(tasks.size()-1)
+            //registrationTasks = registrationTasks
+                    .thenApply((flag) -> {
                 JLabel current = new JLabel();
                 components.add(current);
                 demoReportingPanel.add(components.get(components.size()-1), "cell "+location+" "+registrations.size());
@@ -175,16 +238,17 @@ public class SandBoxCompletableFuture {
                 System.out.println("Reg : "+name+" done");
                 demoFrame.repaint();
                 return out;
-            });
+            }));
 
-            registrationTasks.handle((result, exception) -> {
+            /*registrationTasks.handle((result, exception) -> {
                 System.out.println(result);
                 if (result == false) {
                     System.out.println("Registration task failed");
+                    System.out.println("reg "+reg + " failed");
                 }
                 System.out.println(exception);
                 return exception;
-            });
+            });*/
         }
 
     }

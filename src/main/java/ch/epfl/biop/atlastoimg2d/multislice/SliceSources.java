@@ -2,7 +2,6 @@ package ch.epfl.biop.atlastoimg2d.multislice;
 
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.commands.ConstructROIsFromImgLabel;
-import ch.epfl.biop.atlas.commands.PutAtlasStructureToImage;
 import ch.epfl.biop.atlastoimg2d.commands.sourceandconverter.multislices.PutAtlasStructureToImageNoRoiManager;
 import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
 import ch.epfl.biop.java.utilities.roi.types.IJShapeRoiArray;
@@ -13,13 +12,11 @@ import ch.epfl.biop.registration.sourceandconverter.AffineTransformedSourceWrapp
 import ch.epfl.biop.registration.sourceandconverter.CenterZeroRegistration;
 import ch.epfl.biop.scijava.command.ExportToImagePlusCommand;
 import ij.ImagePlus;
-import ij.plugin.frame.RoiManager;
 import net.imglib2.RealPoint;
 import net.imglib2.cache.img.DiskCachedCellImgFactory;
 import net.imglib2.cache.img.DiskCachedCellImgOptions;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
-import org.apache.commons.io.FileUtils;
 import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
@@ -119,8 +116,8 @@ public class SliceSources {
     }
 
     void iniPosition() {
-        addRegistration(centerPositioner, Function.identity(), Function.identity());
-        addRegistration(zPositioner, Function.identity(), Function.identity());
+        enqueueRegistration(centerPositioner, Function.identity(), Function.identity());
+        enqueueRegistration(zPositioner, Function.identity(), Function.identity());
         waitForEndOfRegistrations();
         updatePosition();
     }
@@ -246,7 +243,7 @@ public class SliceSources {
     public void waitForEndOfRegistrations() {
         //if (registrationTasks!=null) {
         try {
-            CompletableFuture.allOf(registrationTasks).get();
+            CompletableFuture.allOf(taskQueue).get();
         } catch (Exception e) {
             e.printStackTrace();
             System.err.println("Some registration were cancelled");
@@ -277,11 +274,12 @@ public class SliceSources {
 
     boolean processInProgress = false; // flag : true if a registration process is in progress
 
-    public CompletableFuture<Boolean> registrationTasks = CompletableFuture.completedFuture(true);
+    private CompletableFuture<Boolean> taskQueue = CompletableFuture.completedFuture(true);
 
     private List<Registration> registrations = new ArrayList<>();
 
-    protected boolean performRegistration(Registration<SourceAndConverter[]> reg,
+    // public : enqueueRegistration
+    private boolean performRegistration(Registration<SourceAndConverter[]> reg,
                                        Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixed,
                                        Function<SourceAndConverter[], SourceAndConverter[]> preprocessMoving) {
 
@@ -318,18 +316,18 @@ public class SliceSources {
      * @param reg
      */
 
-    protected void addRegistration(Registration<SourceAndConverter[]> reg,
-                                   Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixed,
-                                   Function<SourceAndConverter[], SourceAndConverter[]> preprocessMoving) {
+    public void enqueueRegistration(Registration<SourceAndConverter[]> reg,
+                                       Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixed,
+                                       Function<SourceAndConverter[], SourceAndConverter[]> preprocessMoving) {
 
         pendingRegistrations.add(reg);
         lockedRegistrations.add(reg);
 
-        if (registrationTasks == null || registrationTasks.isDone()) {
-            registrationTasks = CompletableFuture.supplyAsync(() -> true); // Starts async computation, maybe there's a better way
+        if (taskQueue == null || taskQueue.isDone()) {
+            taskQueue = CompletableFuture.supplyAsync(() -> true); // Starts async computation, maybe there's a better way
         }
 
-        registrationTasks = registrationTasks.thenApplyAsync((flag) -> {
+        taskQueue = taskQueue.thenApplyAsync((flag) -> {
             processInProgress = true;
             if (flag == false) {
                 System.out.println("Upstream registration failed");
@@ -358,7 +356,7 @@ public class SliceSources {
             return out;
         });
 
-        registrationTasks.handle((result, exception) -> {
+        taskQueue.handle((result, exception) -> {
             if (result == false) {
                 System.out.println("Registration task failed");
             }
@@ -373,7 +371,7 @@ public class SliceSources {
 
     // TODO
     protected void cancelCurrentRegistrations() {
-        registrationTasks.cancel(true);
+        taskQueue.cancel(true);
     }
 
     public synchronized boolean removeRegistration(Registration reg) {
@@ -552,7 +550,7 @@ public class SliceSources {
     }
 
     public void computeTransformedRois() {
-        while (!registrationTasks.isDone()) {
+        while (!taskQueue.isDone()) {
             System.out.println("Waiting for registration to finish...");
             try {
                 Thread.sleep(100);

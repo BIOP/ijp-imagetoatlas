@@ -21,7 +21,6 @@ import mpicbg.spim.data.generic.base.Entity;
 import mpicbg.spim.data.generic.sequence.AbstractSequenceDescription;
 import mpicbg.spim.data.generic.sequence.BasicViewSetup;
 import mpicbg.spim.data.sequence.Tile;
-import net.imagej.ops.Ops;
 import net.imglib2.RealPoint;
 import net.imglib2.cache.img.DiskCachedCellImgFactory;
 import net.imglib2.cache.img.DiskCachedCellImgOptions;
@@ -1341,7 +1340,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
         @Override
         public void run() { //
-            slice.addRegistration(registration, preprocessFixed, preprocessMoving);
+            slice.enqueueRegistration(registration, preprocessFixed, preprocessMoving);
             super.run();
         }
 
