@@ -1,7 +1,5 @@
 package ch.epfl.biop.atlastoimg2d.multislice.scijava;
 
-import ch.epfl.biop.atlastoimg2d.commands.sourceandconverter.multislices.SlicerAdjusterCommand;
-import ch.epfl.biop.atlastoimg2d.multislice.MultiSlicePositioner;
 import org.scijava.Context;
 import org.scijava.command.Command;
 import org.scijava.command.CommandService;
@@ -10,7 +8,6 @@ import org.scijava.module.ModuleException;
 import org.scijava.module.ModuleRunner;
 import org.scijava.module.process.PreprocessorPlugin;
 import org.scijava.plugin.PluginService;
-import org.scijava.plugin.SciJavaPlugin;
 import org.scijava.ui.swing.widget.SwingInputHarvester;
 import org.scijava.ui.swing.widget.SwingInputPanel;
 import org.scijava.widget.InputHarvester;
@@ -19,6 +16,10 @@ import org.scijava.widget.InputPanel;
 import javax.swing.*;
 import java.util.Collections;
 import java.util.List;
+
+/**
+ * Thanks to @frauzufall, helper class which build Swing UI of Scijava Commands
+ */
 
 public class ScijavaSwingUI {
 

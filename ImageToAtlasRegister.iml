@@ -250,7 +250,7 @@
     <orderEntry type="library" name="Maven: ch.qos.logback:logback-classic:1.2.3" level="project" />
     <orderEntry type="library" name="Maven: org.scijava:ui-behaviour:2.0.1" level="project" />
     <orderEntry type="library" name="Maven: org.yaml:snakeyaml:1.26" level="project" />
-    <orderEntry type="library" name="Maven: sc.fiji:bigdataviewer-vistools:1.0.0-beta-20" level="project" />
+    <orderEntry type="library" name="Maven: sc.fiji:bigdataviewer-vistools:1.0.0-beta-21-SNAPSHOT-NICO" level="project" />
     <orderEntry type="library" name="Maven: net.imglib2:imglib2-cache:1.0.0-beta-13" level="project" />
     <orderEntry type="library" name="Maven: com.github.ben-manes.caffeine:caffeine:2.4.0" level="project" />
     <orderEntry type="library" name="Maven: net.imglib2:imglib2-ui:2.0.1" level="project" />

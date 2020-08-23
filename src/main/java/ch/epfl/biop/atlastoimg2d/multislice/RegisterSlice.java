@@ -42,13 +42,16 @@ public class RegisterSlice extends CancelableAction {
     }
 
     public String toString() {
-        return "Registration [" + registration.getClass().getSimpleName() + "] " + slice.getActionState(this);
+        return "Registration [" + registration.getClass().getSimpleName() + "] " + slice.getActionState(this);//getRegistrationState(registration);
     }
 
     public void drawAction(Graphics2D g, double px, double py, double scale) {
-        switch (slice.getActionState(this)){
+        switch (slice.getActionState(this)){//.getRegistrationState(registration)) {
             case "(done)":
                 g.setColor(new Color(0, 255, 0, 200));
+                break;
+            case "(locked)":
+                g.setColor(new Color(255, 0, 0, 200));
                 break;
             case "(pending)":
                 g.setColor(new Color(255, 255, 0, 200));
@@ -61,7 +64,6 @@ public class RegisterSlice extends CancelableAction {
 
     @Override
     public boolean cancel() {
-        mp.log.accept("Registration cancelation failed...");
-        return false;
+        return slice.removeRegistration(registration);
     }
 }

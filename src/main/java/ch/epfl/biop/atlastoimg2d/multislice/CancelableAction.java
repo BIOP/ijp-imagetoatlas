@@ -1,26 +1,48 @@
 package ch.epfl.biop.atlastoimg2d.multislice;
 
 import java.awt.*;
+import java.util.function.Consumer;
 
 /**
- * Backbone of a cancelable action
+ * Backbone of a cancelable action used for Bdv Slice Positioner
+ * This is used in order to:
+ * - store the sequence of actions (-> for cancellation)
+ * - executes actions asynchronously (-> for long computations)
+ * - keep track of which action is executed on which SliceSources
+ *
+ * Convention : an action acts on a single SliceSources object.
+ * If multiple SliceSources should be acted on, create as many actions as SliceSources involved
+ * (and mark the sequence with @see MarkActionSequenceBatch)
+ *
  */
+
 public abstract class CancelableAction {
 
     final MultiSlicePositioner mp;
 
+    public static Consumer<String> errlog = (str) ->  System.err.println(str);
+
+    /**
+     * Provides the reference to the MultiSlicePositioner
+     * @param mp
+     */
     public CancelableAction(MultiSlicePositioner mp) {
         this.mp = mp;
     }
 
+    /**
+     * Returns the SliceSources involved in this action
+     * @return
+     */
     abstract public SliceSources getSliceSources();
 
     final public void runRequest() {
         if (getSliceSources()!=null) {
-            getSliceSources().enqueueRunAction(this);
+            getSliceSources().enqueueRunAction(this, () -> {} );
         } else {
             // Not asynchronous
             run();
+            mp.mso.sendInfo(this);
         }
         mp.userActions.add(this);
         if (mp.redoableUserActions.size() > 0) {
@@ -35,20 +57,21 @@ public abstract class CancelableAction {
     }
 
     final public void cancelRequest() {
-        if (getSliceSources()!=null) {
+        if (getSliceSources()==null) {
             // Not asynchronous
-            getSliceSources().enqueueCancelAction(this);
-        } else {
             cancel();
+            mp.mso.cancelInfo(this);
+        } else {
+            getSliceSources().enqueueCancelAction(this, () ->
+                    mp.mso.cancelInfo(this));
         }
         if (mp.userActions.get(mp.userActions.size() - 1).equals(this)) {
             mp.userActions.remove(mp.userActions.size() - 1);
             mp.redoableUserActions.add(this);
         } else {
-            System.err.println("Error : cancel not called on the last action");
+            errlog.accept("Error : cancel not called on the last action");
             return;
         }
-        mp.mso.cancelInfo(this);
     }
 
     abstract protected boolean run();

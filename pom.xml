@@ -139,6 +139,8 @@
 		<bigdataviewer-playground.version>0.2.3-SNAPSHOT</bigdataviewer-playground.version>
 		<bigdataviewer-bioformats.version>0.2.7-SNAPSHOT</bigdataviewer-bioformats.version>
 
+		<bigdataviewer-vistools.version>1.0.0-beta-21-SNAPSHOT-NICO</bigdataviewer-vistools.version>
+		<!-- problem with cardpanel -->
 		<ijl-utilities-wrappers.version>0.3.15</ijl-utilities-wrappers.version>
 		<json.version>20180813</json.version>
 
@@ -203,6 +205,7 @@
 			<artifactId>bigdataviewer-biop-tools</artifactId>
 			<version>${bigdataviewer-biop-tools.version}</version>
 		</dependency>
+
 
 		<dependency>
 			<groupId>ch.epfl.biop</groupId>

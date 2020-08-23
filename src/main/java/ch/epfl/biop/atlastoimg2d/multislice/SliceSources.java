@@ -86,6 +86,8 @@ public class SliceSources {
 
     Map<CancelableAction, CompletableFuture> mapActionTask = new HashMap<>();
 
+    volatile CancelableAction actionInProgress = null;
+
     // For fast display : Icon TODO : see https://github.com/bigdataviewer/bigdataviewer-core/blob/17d2f55d46213d1e2369ad7ef4464e3efecbd70a/src/main/java/bdv/tools/RecordMovieDialog.java#L256-L318
     protected SliceSources(SourceAndConverter[] sacs, double slicingAxisPosition, MultiSlicePositioner mp) {
         this.mp = mp;
@@ -173,6 +175,9 @@ public class SliceSources {
     }
 
     protected String getActionState(CancelableAction action) {
+        if ((action!=null)&&(action == actionInProgress)) {
+            return "(pending)";
+        }
         if (mapActionTask.containsKey(action)) {
             if (tasks.contains(mapActionTask.get(action))) {
                 CompletableFuture future = tasks.get(tasks.indexOf(mapActionTask.get(action)));
@@ -181,7 +186,7 @@ public class SliceSources {
                 } else if (future.isCancelled()) {
                     return "(cancelled)";
                 } else {
-                    return "(pending)";
+                    return "(locked)";
                 }
             } else {
                 return "future not found";
@@ -254,12 +259,14 @@ public class SliceSources {
     }
 
     public void waitForEndOfTasks() {
-        try {
-            CompletableFuture lastTask = tasks.get(tasks.size()-1);
-            lastTask.get();
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.err.println("Some registration were cancelled");
+        if (tasks.size()>0) {
+            try {
+                CompletableFuture lastTask = tasks.get(tasks.size()-1);
+                lastTask.get();
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.err.println("Some registration were cancelled");
+            }
         }
     }
 
@@ -345,7 +352,7 @@ public class SliceSources {
         mp.mso.updateInfoPanel(this);
     }
 
-    private synchronized boolean removeRegistration(Registration reg) {
+    protected synchronized boolean removeRegistration(Registration reg) {
         if (registrations.contains(reg)) {
             int idx = registrations.indexOf(reg);
             if (idx == registrations.size() - 1) {
@@ -389,7 +396,7 @@ public class SliceSources {
         }
     }
 
-    protected void enqueueRunAction(CancelableAction action) {
+    protected void enqueueRunAction(CancelableAction action, Runnable postRun) {
         synchronized(tasks) {
             CompletableFuture<Boolean> startingPoint;
             if (tasks.size() == 0) {
@@ -399,7 +406,11 @@ public class SliceSources {
             }
             tasks.add(startingPoint.thenApplyAsync((out) -> {
                 if (out == true) {
-                    return action.run();
+                    actionInProgress = action;
+                    boolean result = action.run();
+                    actionInProgress = null;
+                    postRun.run();
+                    return result;
                 } else {
                     return false;
                 }
@@ -408,9 +419,34 @@ public class SliceSources {
         }
     }
 
-    protected synchronized void enqueueCancelAction(CancelableAction action) {
+    protected synchronized void enqueueCancelAction(CancelableAction action, Runnable postRun) {
         synchronized(tasks) {
-            action.cancel();
+            // Has the action started ?
+            if (mapActionTask.containsKey(action)) {
+                if (mapActionTask.get(action).isDone() || ((action!=null)&&(action == this.actionInProgress))) {
+                    CompletableFuture<Boolean> startingPoint;
+                    if (tasks.size() == 0) {
+                        startingPoint = CompletableFuture.supplyAsync(() -> true);
+                    } else {
+                        startingPoint = tasks.get(tasks.size() - 1);
+                    }
+                    tasks.add(startingPoint.thenApplyAsync((out) -> {
+                        if (out == true) {
+                            boolean result = action.cancel();
+                            postRun.run();
+                            return result;
+                        } else {
+                            return false;
+                        }
+                    }));
+                } else {
+                    // Not done yet! - let's remove right now from the task list
+                    mapActionTask.get(action).cancel(true);
+                    tasks.remove(mapActionTask.get(action));
+                    mapActionTask.remove(action);
+                    postRun.run();
+                }
+            }
         }
     }
 

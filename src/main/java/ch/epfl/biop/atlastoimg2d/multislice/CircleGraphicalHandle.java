@@ -8,6 +8,10 @@ import org.scijava.ui.behaviour.util.TriggerBehaviourBindings;
 import java.awt.*;
 import java.util.function.Supplier;
 
+/**
+ * Circular Graphical Handle
+ */
+
 public class CircleGraphicalHandle extends GraphicalHandle{
 
     Supplier<Integer[]> coords;
