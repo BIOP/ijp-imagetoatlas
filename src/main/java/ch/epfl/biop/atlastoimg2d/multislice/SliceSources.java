@@ -418,7 +418,7 @@ public class SliceSources {
                 startingPoint = tasks.get(tasks.size() - 1);
             }
             tasks.add(startingPoint.thenApplyAsync((out) -> {
-                if (out == false) {
+                if (out == true) {
                     return action.run();
                 } else {
                     return false;

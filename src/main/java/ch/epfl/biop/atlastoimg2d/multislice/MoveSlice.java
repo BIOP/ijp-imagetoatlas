@@ -25,6 +25,7 @@ public class MoveSlice extends CancelableAction {
     }
 
     public boolean run() {
+        System.out.println("MoveSlice called");
         sliceSource.setSlicingAxisPosition(newSlicingAxisPosition);
         sliceSource.updatePosition();
         mp.log.accept("Moving slice to position " + new DecimalFormat("###.##").format(sliceSource.slicingAxisPosition));

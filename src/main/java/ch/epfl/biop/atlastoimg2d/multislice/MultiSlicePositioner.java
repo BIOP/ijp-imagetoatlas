@@ -871,6 +871,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
      * @param axisPosition
      */
     public void moveSlice(SliceSources slice, double axisPosition) {
+        System.out.println("MoveSlice called!!");
         new MoveSlice(this, slice, axisPosition).runRequest();
     }
 
