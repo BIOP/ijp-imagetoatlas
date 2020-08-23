@@ -12,7 +12,6 @@ import ch.epfl.biop.atlastoimg2d.commands.sourceandconverter.multislices.SlicerA
 import ch.epfl.biop.atlastoimg2d.multislice.scijava.ScijavaSwingUI;
 import ch.epfl.biop.bdv.select.SelectedSourcesListener;
 import ch.epfl.biop.bdv.select.SourceSelectorBehaviour;
-import ch.epfl.biop.registration.Registration;
 import ch.epfl.biop.registration.sourceandconverter.Elastix2DAffineRegistration;
 import ch.epfl.biop.registration.sourceandconverter.SacBigWarp2DRegistration;
 import ch.epfl.biop.viewer.swing.SwingAtlasViewer;
@@ -45,7 +44,6 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.io.File;
-import java.text.DecimalFormat;
 import java.util.*;
 import java.util.List;
 import java.util.function.Consumer;
@@ -89,9 +87,10 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     List<SliceSources> slices = new ArrayList<>();
 
     int totalNumberOfActionsRecorded = 30; // TODO : Implement
-    List<CancelableAction> userActions = new ArrayList<>();
 
-    List<CancelableAction> redoableUserActions = new ArrayList<>();
+    protected List<CancelableAction> userActions = new ArrayList<>();
+
+    protected List<CancelableAction> redoableUserActions = new ArrayList<>();
 
     /**
      * Current coordinate where Sources are dragged
@@ -100,7 +99,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
     Context scijavaCtx;
 
-    final MultiSliceObserver mso;
+    final public MultiSliceObserver mso;
 
     /**
      * Shift in Y : control overlay or not of sources
@@ -612,7 +611,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
     }
 
-    private void updateDisplay() {
+    protected void updateDisplay() {
         // Sort slices along slicing axis
 
         if (cycleToggle == 0) {
@@ -845,20 +844,20 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
             sortedTiles.sort(Comparator.comparingInt(T::getId));
 
-            new MarkActionSequenceBatch().run();
+            new MarkActionSequenceBatch(this).runRequest();
             for (int i = 0; i < sortedTiles.size(); i++) {
                 T group = sortedTiles.get(i);
-                CreateSlice cs = new CreateSlice(sacsGroups.get(group), slicingAxisPosition + i * axisIncrement);
-                cs.run();
+                CreateSlice cs = new CreateSlice(this, sacsGroups.get(group), slicingAxisPosition + i * axisIncrement);
+                cs.runRequest();
                 if (cs.getSlice() != null) {
                     out.add(cs.getSlice());
                 }
             }
-            new MarkActionSequenceBatch().run();
+            new MarkActionSequenceBatch(this).runRequest();
 
         } else {
-            CreateSlice cs = new CreateSlice(sacs, slicingAxisPosition);
-            cs.run();
+            CreateSlice cs = new CreateSlice(this, sacs, slicingAxisPosition);
+            cs.runRequest();
             if (cs.getSlice() != null) {
                 out.add(cs.getSlice());
             }
@@ -872,12 +871,12 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
      * @param axisPosition
      */
     public void moveSlice(SliceSources slice, double axisPosition) {
-        new MoveSlice(slice, axisPosition).run();
+        new MoveSlice(this, slice, axisPosition).runRequest();
     }
 
     public void exportSelectedSlices(String namingChoice, File dirOutput) {
         List<SliceSources> sortedSelected = getSortedSlices().stream().filter(slice -> slice.isSelected()).collect(Collectors.toList());
-        new MarkActionSequenceBatch().run();
+        new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
 
         List<Thread> threads = new ArrayList<>();
         for (SliceSources slice : sortedSelected) {
@@ -893,11 +892,11 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             }
         });*/
 
-        new MarkActionSequenceBatch().run();
+        new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
     }
 
     public void exportSlice(SliceSources slice, String namingChoice, File dirOutput) {
-        new ExportSlice(slice, namingChoice, dirOutput).run();
+        new ExportSlice(this, slice, namingChoice, dirOutput).runRequest();
     }
 
     /**
@@ -910,11 +909,11 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             SliceSources last = sortedSelected.get(sortedSelected.size() - 1);
             double totalSpacing = last.slicingAxisPosition - first.slicingAxisPosition;
             double delta = totalSpacing / (sortedSelected.size() - 1);
-            new MarkActionSequenceBatch().run();
+            new MarkActionSequenceBatch(this).runRequest();
             for (int idx = 1; idx < sortedSelected.size() - 1; idx++) {
                 moveSlice(sortedSelected.get(idx), first.slicingAxisPosition + ((double) idx) * delta);
             }
-            new MarkActionSequenceBatch().run();
+            new MarkActionSequenceBatch(this).runRequest();
         }
     }
 
@@ -955,7 +954,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 params.put("sx", sX);
                 params.put("sy", sY);
                 elastixAffineReg.setScijavaParameters(params);
-                new RegisterSlice(slice, elastixAffineReg, preprocessFixed, preprocessMoving).run();
+                new RegisterSlice(this, slice, elastixAffineReg, preprocessFixed, preprocessMoving).runRequest();
             }
         }
     }
@@ -1051,7 +1050,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 AffineTransform3D translateZ = new AffineTransform3D();
                 translateZ.translate(0, 0, -slice.slicingAxisPosition);
 
-                new RegisterSlice(slice, registration, (fixedSacs) ->
+                new RegisterSlice(this, slice, registration, (fixedSacs) ->
                         Arrays.asList(preprocessFixed.apply(fixedSacs))
                                 .stream()
                                 .map(resampler)
@@ -1063,7 +1062,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                                     .stream()
                                     .map(sac -> SourceTransformHelper.createNewTransformedSourceAndConverter(translateZ, new SourceAndConverterAndTimeRange(sac, 0)))
                                     .collect(Collectors.toList())
-                                    .toArray(new SourceAndConverter[0])).run();
+                                    .toArray(new SourceAndConverter[0])).runRequest();
             }
         }
     }
@@ -1077,15 +1076,15 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         if (userActions.size() > 0) {
             CancelableAction action = userActions.get(userActions.size() - 1);
             if (action instanceof MarkActionSequenceBatch) {
-                action.cancel();
+                action.cancelRequest();
                 action = userActions.get(userActions.size() - 1);
                 while (!(action instanceof MarkActionSequenceBatch)) {
-                    action.cancel();
+                    action.cancelRequest();
                     action = userActions.get(userActions.size() - 1);
                 }
-                action.cancel();
+                action.cancelRequest();
             } else {
-                userActions.get(userActions.size() - 1).cancel();
+                userActions.get(userActions.size() - 1).cancelRequest();
             }
         } else {
             log.accept("No action can be cancelled.");
@@ -1099,15 +1098,15 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         if (redoableUserActions.size() > 0) {
             CancelableAction action = redoableUserActions.get(redoableUserActions.size() - 1);
             if (action instanceof MarkActionSequenceBatch) {
-                action.run();
+                action.runRequest();
                 action = redoableUserActions.get(redoableUserActions.size() - 1);
                 while (!(action instanceof MarkActionSequenceBatch)) {
-                    action.run();
+                    action.runRequest();
                     action = redoableUserActions.get(redoableUserActions.size() - 1);
                 }
-                action.run();
+                action.runRequest();
             } else {
-                redoableUserActions.get(redoableUserActions.size() - 1).run();
+                redoableUserActions.get(redoableUserActions.size() - 1).runRequest();
             }
 
         } else {
@@ -1115,320 +1114,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         }
     }
 
-    volatile boolean drawActions = true;
-    /**
-     * Backbone of a cancelable action
-     */
-    public abstract class CancelableAction {
-
-        abstract public SliceSources getSliceSources();
-
-        public void run() {
-            userActions.add(this);
-            if (redoableUserActions.size() > 0) {
-                if (redoableUserActions.get(redoableUserActions.size() - 1).equals(this)) {
-                    redoableUserActions.remove(redoableUserActions.size() - 1);
-                } else {
-                    // different branch : clear redoable actions
-                    redoableUserActions.clear();
-                }
-            }
-            mso.sendInfo(this);
-        }
-
-        public void cancel() {
-            if (userActions.get(userActions.size() - 1).equals(this)) {
-                userActions.remove(userActions.size() - 1);
-                redoableUserActions.add(this);
-            } else {
-                System.err.println("Error : cancel not called on the last action");
-                return;
-            }
-            mso.cancelInfo(this);
-        }
-
-        public void draw(Graphics2D g, double px, double py, double scale) {
-            if (drawActions) {
-                drawAction(g, px, py, scale);
-            }
-        }
-
-        public void drawAction(Graphics2D g, double px, double py, double scale) {
-            g.drawString(toString(), (int) px, (int) py);
-        }
-
-    }
-
-    /**
-     * Moves a slice to a new position along the slicing axis
-     */
-    public class MoveSlice extends CancelableAction {
-
-        private SliceSources sliceSource;
-        private double oldSlicingAxisPosition;
-        private double newSlicingAxisPosition;
-
-        public MoveSlice(SliceSources sliceSource, double slicingAxisPosition) {
-            this.sliceSource = sliceSource;
-            this.oldSlicingAxisPosition = sliceSource.slicingAxisPosition;
-            this.newSlicingAxisPosition = slicingAxisPosition;
-        }
-
-        @Override
-        public SliceSources getSliceSources() {
-            return sliceSource;
-        }
-
-        public void run() {
-            sliceSource.slicingAxisPosition = newSlicingAxisPosition;
-            sliceSource.updatePosition();
-            log.accept("Moving slice to position " + new DecimalFormat("###.##").format(sliceSource.slicingAxisPosition));
-            updateDisplay();
-            super.run();
-        }
-
-        public String toString() {
-            return "Axis Position = " + new DecimalFormat("###.##").format(newSlicingAxisPosition);
-        }
-
-        public void cancel() {
-            sliceSource.slicingAxisPosition = oldSlicingAxisPosition;
-            sliceSource.updatePosition();
-            log.accept("Moving slice to position " + new DecimalFormat("###.##").format(sliceSource.slicingAxisPosition));
-            updateDisplay();
-            super.cancel();
-        }
-
-        public void drawAction(Graphics2D g, double px, double py, double scale) {
-            g.drawString("M", (int) px - 5, (int) py + 5);//+new DecimalFormat("###.##").format(newSlicingAxisPosition), (int) px-5, (int) py+5);
-        }
-
-    }
-
-    /**
-     * Creates a new Slice source
-     */
-    public class CreateSlice extends CancelableAction {
-
-        private List<SourceAndConverter<?>> sacs;
-        private SliceSources sliceSource;
-        private double slicingAxisPosition;
-
-        public CreateSlice(List<SourceAndConverter<?>> sacs, double slicingAxisPosition) {
-            this.sacs = sacs;
-            this.slicingAxisPosition = slicingAxisPosition;
-        }
-
-        @Override
-        public SliceSources getSliceSources() {
-            return sliceSource;
-        }
-
-        @Override
-        public void run() {
-            boolean sacAlreadyPresent = false;
-            for (SourceAndConverter sac : sacs) {
-                for (SliceSources slice : slices) {
-                    for (SourceAndConverter test : slice.original_sacs) {
-                        if (test.equals(sac)) {
-                            sacAlreadyPresent = true;
-                        }
-                    }
-                }
-            }
-
-            if (sacAlreadyPresent) {
-                SliceSources zeSlice = null;
-
-                // A source is already included :
-                // If all sources match exactly what's in a single SliceSources -> that's a move operation
-
-                boolean exactMatch = false;
-                for (SliceSources ss : slices) {
-                    if (ss.exactMatch(sacs)) {
-                        exactMatch = true;
-                        zeSlice = ss;
-                    }
-                }
-
-                if (!exactMatch) {
-                    System.err.println("A source is already used in the positioner : slice not created.");
-                    log.accept("A source is already used in the positioner : slice not created.");
-                    return;
-                } else {
-                    // Move action:
-                    new MoveSlice(zeSlice, slicingAxisPosition).run();
-                    return;
-                }
-            }
-
-            if (sliceSource == null) // for proper redo function
-                sliceSource = new SliceSources(sacs.toArray(new SourceAndConverter[sacs.size()]),
-                        slicingAxisPosition,
-                        MultiSlicePositioner.this);
-
-            slices.add(sliceSource);
-
-            updateDisplay();
-
-            if (currentMode.equals(POSITIONING_MODE)) {
-                SourceAndConverterServices.getSourceAndConverterDisplayService()
-                        .show(bdvh, sliceSource.relocated_sacs_positioning_mode);
-                sliceSource.enableGraphicalHandles();
-            } else if (currentMode.equals(REGISTRATION_MODE)) {
-                SourceAndConverterServices.getSourceAndConverterDisplayService()
-                        .show(bdvh, sliceSource.registered_sacs);
-                sliceSource.disableGraphicalHandles();
-            }
-
-            log.accept("Slice added");
-
-            // The line below should be executed only if the action succeeded ... (if it's executed, calling cancel should have the same effect)
-            super.run();
-        }
-
-        public SliceSources getSlice() {
-            return sliceSource;
-        }
-
-        public String toString() {
-            return "Slice Created " + new DecimalFormat("###.##").format(this.slicingAxisPosition);
-        }
-
-        @Override
-        public void cancel() {
-            slices.remove(sliceSource);
-            SourceAndConverterServices.getSourceAndConverterDisplayService()
-                    .remove(bdvh, sliceSource.relocated_sacs_positioning_mode);
-            SourceAndConverterServices.getSourceAndConverterDisplayService()
-                    .remove(bdvh, sliceSource.registered_sacs);
-            log.accept("Slice removed");
-            super.cancel();
-        }
-
-        public void drawAction(Graphics2D g, double px, double py, double scale) {
-            g.drawString("C", (int) px - 5, (int) py + 5);
-        }
-    }
-
-    /**
-     * Performs registration set in registration tab to
-     * a slice
-     */
-    public class RegisterSlice extends CancelableAction {
-        final SliceSources slice;
-        final Registration<SourceAndConverter[]> registration;
-        final Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixed;
-        final Function<SourceAndConverter[], SourceAndConverter[]> preprocessMoving;
-
-        boolean alreadyRun = false;
-
-        @Override
-        public SliceSources getSliceSources() {
-            return slice;
-        }
-
-        public RegisterSlice(SliceSources slice,
-                             Registration<SourceAndConverter[]> registration,
-                             Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixed,
-                             Function<SourceAndConverter[], SourceAndConverter[]> preprocessMoving) {
-            this.slice = slice;
-            this.registration = registration;
-            this.preprocessFixed = preprocessFixed;
-            this.preprocessMoving = preprocessMoving;
-        }
-
-        @Override
-        public void run() { //
-            slice.enqueueRegistration(registration, preprocessFixed, preprocessMoving);
-            super.run();
-        }
-
-        public String toString() {
-            return "Registration [" + registration.getClass().getSimpleName() + "] " + slice.getRegistrationState(registration);
-        }
-
-        public void drawAction(Graphics2D g, double px, double py, double scale) {
-            switch (slice.getRegistrationState(registration)) {
-                case "(done)":
-                    g.setColor(new Color(0, 255, 0, 200));
-                    break;
-                case "(locked)":
-                    g.setColor(new Color(255, 0, 0, 200));
-                    break;
-                case "(pending)":
-                    g.setColor(new Color(255, 255, 0, 200));
-                    break;
-            }
-            g.fillOval((int) (px - 7), (int) (py - 7), 14, 14);
-            g.setColor(new Color(255, 255, 255, 200));
-            g.drawString("R", (int) px - 4, (int) py + 5);
-        }
-
-        @Override
-        public void cancel() {
-            if (slice.removeRegistration(registration)) {
-            } else {
-                System.err.println("Error during registration cancelling");
-            }
-            log.accept("Registration cancelled");
-            super.cancel();
-        }
-    }
-
-    public class ExportSlice extends CancelableAction {
-
-        final SliceSources slice;
-        String namingChoice;
-        File dirOutput;
-
-        public ExportSlice(SliceSources slice, String namingChoice, File dirOutput) {
-            this.slice = slice;
-            this.namingChoice = namingChoice;
-            this.dirOutput = dirOutput;
-        }
-
-        @Override
-        public void run() { //
-            System.out.println("Exporting slice registration");
-            //super.run(); // not saved
-            slice.export(namingChoice, dirOutput);
-        }
-
-        public String toString() {
-            return "Export";
-        }
-
-        public void drawAction(Graphics2D g, double px, double py, double scale) {
-            g.setColor(new Color(255, 0, 0, 200));
-            g.fillOval((int) (px - 7), (int) (py - 7), 14, 14);
-            g.setColor(new Color(255, 255, 255, 200));
-            g.drawString("E", (int) px - 4, (int) py + 5);
-        }
-
-        @Override
-        public void cancel() {
-            log.accept("Export cancel : no action");
-            //super.cancel();
-        }
-
-        @Override
-        public SliceSources getSliceSources() {
-            return slice;
-        }
-
-    }
-
-    /**
-     * Action Class : Marks begin and end of a series of actions
-     * that should be cancelled together.
-     */
-    public class MarkActionSequenceBatch extends CancelableAction {
-        @Override
-        public SliceSources getSliceSources() {
-            return null;
-        }
-    }
+    public volatile boolean drawActions = true;
 
     //------------------------------ Multipositioner Graphical handles
 
@@ -1536,12 +1222,12 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
             double ratio = (lastAxisPos - currentSlicingAxisPosition) / range;
 
-            new MarkActionSequenceBatch().run();
+            new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
             for (SliceSources slice : slicesDragged) {
                 slice.slicingAxisPosition = initialAxisPositions.get(slice);
                 moveSlice(slice, lastAxisPos + (initialAxisPositions.get(slice) - lastAxisPos) * ratio);
             }
-            new MarkActionSequenceBatch().run();
+            new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
             updateDisplay();
         }
     }
@@ -1604,12 +1290,12 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
             double ratio = (lastAxisPos - currentSlicingAxisPosition) / range;
 
-            new MarkActionSequenceBatch().run();
+            new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
             for (SliceSources slice : slicesDragged) {
                 slice.slicingAxisPosition = initialAxisPositions.get(slice);
                 moveSlice(slice, lastAxisPos - (initialAxisPositions.get(slice) - lastAxisPos) * ratio);
             }
-            new MarkActionSequenceBatch().run();
+            new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
             updateDisplay();
         }
     }
@@ -1799,14 +1485,14 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                     double currentSlicingAxisPosition = ((int) currentSlicePointing) * sizePixX * (int) reslicedAtlas.getStep();
                     double deltaAxis = currentSlicingAxisPosition - iniSlicingAxisPosition;
 
-                    new MarkActionSequenceBatch().run();
+                    new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
                     for (SliceSources slice : selectedSources) {
                         if (initialAxisPositions.containsKey(slice)) {
                             slice.slicingAxisPosition = initialAxisPositions.get(slice);
                             moveSlice(slice, initialAxisPositions.get(slice) + deltaAxis + deltaOrigin);
                         }
                     }
-                    new MarkActionSequenceBatch().run();
+                    new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
 
                     updateDisplay();
                 }

@@ -11,7 +11,7 @@ public class MultiSliceObserver {
 
     final MultiSlicePositioner mp;
 
-    Map<SliceSources, List<MultiSlicePositioner.CancelableAction>> sliceSortedActions = new ConcurrentHashMap<>();
+    Map<SliceSources, List<CancelableAction>> sliceSortedActions = new ConcurrentHashMap<>();
 
     Map<SliceSources, JTextArea> actionPerSlice = new ConcurrentHashMap<>();
 
@@ -58,8 +58,8 @@ public class MultiSliceObserver {
                 int yP0 = yP;
 
                 for (int indexAction = 0; indexAction<actions.size();indexAction++) {
-                    MultiSlicePositioner.CancelableAction action = sliceSortedActions.get(slice).get(indexAction);
-                    if (action instanceof MultiSlicePositioner.MoveSlice) {
+                    CancelableAction action = sliceSortedActions.get(slice).get(indexAction);
+                    if (action instanceof MoveSlice) {
                         if (indexAction == sliceSortedActions.get(slice).size()-1) {
 
                            action.draw(g,xP,yP,1);
@@ -70,7 +70,7 @@ public class MultiSliceObserver {
                                     action.draw(g,50,yP-yP0+50,1);
                                 }
                         } else {
-                            if (sliceSortedActions.get(slice).get(indexAction+1) instanceof MultiSlicePositioner.MoveSlice) {
+                            if (sliceSortedActions.get(slice).get(indexAction+1) instanceof MoveSlice) {
                                 // ignored action
                             } else {
                                 action.draw(g,xP,yP,1);
@@ -115,12 +115,12 @@ public class MultiSliceObserver {
         log+= mp.getSortedSlices().indexOf(slice)+"\n";
 
         for (int indexAction = 0; indexAction<sliceSortedActions.get(slice).size();indexAction++) {
-            MultiSlicePositioner.CancelableAction action = sliceSortedActions.get(slice).get(indexAction);
-            if (action instanceof MultiSlicePositioner.MoveSlice) {
+            CancelableAction action = sliceSortedActions.get(slice).get(indexAction);
+            if (action instanceof MoveSlice) {
                 if (indexAction == sliceSortedActions.get(slice).size()-1) {
                     log += action.toString() + "\n";
                 } else {
-                    if (sliceSortedActions.get(slice).get(indexAction+1) instanceof MultiSlicePositioner.MoveSlice) {
+                    if (sliceSortedActions.get(slice).get(indexAction+1) instanceof MoveSlice) {
                         // ignored action
                     } else {
                         log += action.toString() + "\n";
@@ -159,7 +159,7 @@ public class MultiSliceObserver {
         repaintNeeded = true;
     }
 
-    public synchronized void sendInfo(MultiSlicePositioner.CancelableAction action) {
+    public synchronized void sendInfo(CancelableAction action) {
         if (action.getSliceSources()!=null) {
             if (!sliceSortedActions.containsKey(action.getSliceSources())) {
                 sliceSortedActions.put(action.getSliceSources(), new ArrayList<>());
@@ -171,7 +171,7 @@ public class MultiSliceObserver {
         repaintNeeded = true;
     }
 
-    public synchronized void cancelInfo(MultiSlicePositioner.CancelableAction action) {
+    public synchronized void cancelInfo(CancelableAction action) {
         if (action.getSliceSources()!=null) {
             sliceSortedActions.get(action.getSliceSources()).remove(action);
             updateInfoPanel(action.getSliceSources());

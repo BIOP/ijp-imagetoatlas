@@ -9,7 +9,7 @@ import net.imagej.ImageJ;
 import org.apache.groovy.util.Arrays;
 
 
-public class DummyCommand {
+public class DemoRegistration {
 
 	public static void main(String[] args) throws Exception {
         final ImageJ ij = new ImageJ();

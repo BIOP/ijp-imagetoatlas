@@ -115,9 +115,17 @@ public class SliceSources {
         iniPosition();
     }
 
+    protected double getSlicingAxisPosition() {
+        return slicingAxisPosition;
+    }
+
+    protected void setSlicingAxisPosition(double newSlicingAxisPosition) {
+        slicingAxisPosition = newSlicingAxisPosition;
+    }
+
     void iniPosition() {
-        enqueueRegistration(centerPositioner, Function.identity(), Function.identity());
-        enqueueRegistration(zPositioner, Function.identity(), Function.identity());
+        runRegistration(centerPositioner, Function.identity(), Function.identity());
+        runRegistration(zPositioner, Function.identity(), Function.identity());
         waitForEndOfRegistrations();
         updatePosition();
     }
@@ -140,11 +148,11 @@ public class SliceSources {
         return currentSliceIndex;
     }
 
-    public void setIndex(int idx) {
+    protected void setIndex(int idx) {
         currentSliceIndex = idx;
     }
 
-    public Integer[] getBdvHandleCoords() {
+    protected Integer[] getBdvHandleCoords() {
         AffineTransform3D bdvAt3D = new AffineTransform3D();
         mp.bdvh.getViewerPanel().state().getViewerTransform(bdvAt3D);
         RealPoint sliceCenter = new RealPoint(3);
@@ -162,7 +170,7 @@ public class SliceSources {
         }
     }
 
-    public String getRegistrationState(Registration registration) {
+    protected String getRegistrationState(Registration registration) {
         if (lockedRegistrations.contains(registration)) {
             System.out.println("State asked - locked");
             return "(locked)";
@@ -316,57 +324,31 @@ public class SliceSources {
      * @param reg
      */
 
-    public void enqueueRegistration(Registration<SourceAndConverter[]> reg,
-                                       Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixed,
-                                       Function<SourceAndConverter[], SourceAndConverter[]> preprocessMoving) {
-
+    protected void runRegistration(Registration<SourceAndConverter[]> reg,
+                                Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixed,
+                                Function<SourceAndConverter[], SourceAndConverter[]> preprocessMoving) {
         pendingRegistrations.add(reg);
         lockedRegistrations.add(reg);
 
-        if (taskQueue == null || taskQueue.isDone()) {
-            taskQueue = CompletableFuture.supplyAsync(() -> true); // Starts async computation, maybe there's a better way
+        if (reg.isManual()) {
+            System.out.println("Waiting for manual lock release...");
+            synchronized (MultiSlicePositioner.manualActionLock) {
+                System.out.println("Manual lock released.");
+                lockedRegistrations.remove(reg);
+                //out =
+                        performRegistration(reg,preprocessFixed, preprocessMoving);
+            }
+        } else {
+            lockedRegistrations.remove(reg);
+            //out =
+                    performRegistration(reg,preprocessFixed, preprocessMoving);
         }
 
-        taskQueue = taskQueue.thenApplyAsync((flag) -> {
-            processInProgress = true;
-            if (flag == false) {
-                System.out.println("Upstream registration failed");
-                return false;
-            }
-            boolean out;
-            if (reg.isManual()) {
-                System.out.println("Waiting for manual lock release...");
-                synchronized (MultiSlicePositioner.manualActionLock) {
-                    System.out.println("Manual lock released.");
-                    lockedRegistrations.remove(reg);
-                    out = performRegistration(reg,preprocessFixed, preprocessMoving);
-                }
-            } else {
-                lockedRegistrations.remove(reg);
-                out = performRegistration(reg,preprocessFixed, preprocessMoving);
-            }
+        registrations.add(reg);
 
-            if (out) {
-                registrations.add(reg);
-            } else {
+        processInProgress = false;
+        mp.mso.updateInfoPanel(this);
 
-            }
-            processInProgress = false;
-            mp.mso.updateInfoPanel(this);
-            return out;
-        });
-
-        taskQueue.handle((result, exception) -> {
-            if (result == false) {
-                System.out.println("Registration task failed");
-            }
-            processInProgress = false;
-            pendingRegistrations.remove(reg);
-            System.out.println("Remaining registrations : " + pendingRegistrations.size());
-            System.out.println("exception = " + exception);
-            mp.mso.updateInfoPanel(this);
-            return exception;
-        });
     }
 
     // TODO
@@ -421,6 +403,38 @@ public class SliceSources {
             }
         } else {
             return false;
+        }
+    }
+
+    List<CompletableFuture<Boolean>> tasks = new ArrayList<>();
+    Map<CancelableAction, CompletableFuture> mapActionTask = new HashMap<>();
+
+    protected void enqueueRunAction(CancelableAction action) {
+        synchronized(tasks) {
+            CompletableFuture<Boolean> startingPoint;
+            if (tasks.size() == 0) {
+                startingPoint = CompletableFuture.supplyAsync(() -> true);
+            } else {
+                startingPoint = tasks.get(tasks.size() - 1);
+            }
+            tasks.add(startingPoint.thenApplyAsync((out) -> {
+                if (out == false) {
+                    return action.run();
+                } else {
+                    return false;
+                }
+            }));
+            mapActionTask.put(action, tasks.get(tasks.size() - 1));
+        }
+    }
+
+    public String getActionState(CancelableAction action) {
+        return "";
+    }
+
+    protected synchronized void enqueueCancelAction(CancelableAction action) {
+        synchronized(tasks) {
+            action.cancel();
         }
     }
 
