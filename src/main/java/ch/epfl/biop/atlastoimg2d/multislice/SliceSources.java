@@ -70,9 +70,9 @@ public class SliceSources {
 
     CenterZeroRegistration centerPositioner;
 
-    Set<Registration> pendingRegistrations = new HashSet<>();
+    /*Set<Registration> pendingRegistrations = new HashSet<>();
 
-    Set<Registration> lockedRegistrations = new HashSet<>();
+    Set<Registration> lockedRegistrations = new HashSet<>();*/
 
     volatile ImagePlus impLabelImage = null;
 
@@ -170,7 +170,7 @@ public class SliceSources {
         }
     }
 
-    protected String getRegistrationState(Registration registration) {
+    /*protected String getRegistrationState(Registration registration) {
         if (lockedRegistrations.contains(registration)) {
             System.out.println("State asked - locked");
             return "(locked)";
@@ -184,6 +184,25 @@ public class SliceSources {
             return "(pending)";
         }
         return "(!)";
+    }*/
+
+    protected String getActionState(CancelableAction action) {
+        if (mapActionTask.containsKey(action)) {
+            if (tasks.contains(mapActionTask.get(action))) {
+                CompletableFuture future = tasks.get(tasks.indexOf(mapActionTask.get(action)));
+                if (future.isDone()) {
+                    return "(done)";
+                } else if (future.isCancelled()) {
+                    return "(cancelled)";
+                } else {
+                    return "(pending)";
+                }
+            } else {
+                return "future not found";
+            }
+        } else {
+            return "unknown action";
+        }
     }
 
     public Integer[] getBdvHandleColor() {
@@ -327,19 +346,19 @@ public class SliceSources {
     protected void runRegistration(Registration<SourceAndConverter[]> reg,
                                 Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixed,
                                 Function<SourceAndConverter[], SourceAndConverter[]> preprocessMoving) {
-        pendingRegistrations.add(reg);
-        lockedRegistrations.add(reg);
+        //pendingRegistrations.add(reg);
+        //lockedRegistrations.add(reg);
 
         if (reg.isManual()) {
             System.out.println("Waiting for manual lock release...");
             synchronized (MultiSlicePositioner.manualActionLock) {
                 System.out.println("Manual lock released.");
-                lockedRegistrations.remove(reg);
+                //lockedRegistrations.remove(reg);
                 //out =
                         performRegistration(reg,preprocessFixed, preprocessMoving);
             }
         } else {
-            lockedRegistrations.remove(reg);
+            //lockedRegistrations.remove(reg);
             //out =
                     performRegistration(reg,preprocessFixed, preprocessMoving);
         }
@@ -357,7 +376,7 @@ public class SliceSources {
     }
 
     public synchronized boolean removeRegistration(Registration reg) {
-        if (pendingRegistrations.contains(reg)) {
+        if (false){//pendingRegistrations.contains(reg)) {
             System.out.println("Attempt to cancel current registrations...");
             cancelCurrentRegistrations();
             System.out.println("Attempt to cancel current registrations...");
@@ -426,10 +445,6 @@ public class SliceSources {
             }));
             mapActionTask.put(action, tasks.get(tasks.size() - 1));
         }
-    }
-
-    public String getActionState(CancelableAction action) {
-        return "";
     }
 
     protected synchronized void enqueueCancelAction(CancelableAction action) {

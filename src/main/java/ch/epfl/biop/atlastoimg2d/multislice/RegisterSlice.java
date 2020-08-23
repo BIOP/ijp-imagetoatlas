@@ -42,11 +42,11 @@ public class RegisterSlice extends CancelableAction {
     }
 
     public String toString() {
-        return "Registration [" + registration.getClass().getSimpleName() + "] " + slice.getRegistrationState(registration);
+        return "Registration [" + registration.getClass().getSimpleName() + "] " + slice.getActionState(this);//getRegistrationState(registration);
     }
 
     public void drawAction(Graphics2D g, double px, double py, double scale) {
-        switch (slice.getRegistrationState(registration)) {
+        switch (slice.getActionState(this)){//.getRegistrationState(registration)) {
             case "(done)":
                 g.setColor(new Color(0, 255, 0, 200));
                 break;
