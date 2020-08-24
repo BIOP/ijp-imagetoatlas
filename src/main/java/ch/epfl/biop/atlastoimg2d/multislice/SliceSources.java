@@ -52,7 +52,7 @@ public class SliceSources {
     Map<Registration, SourceAndConverter[]> registered_sacs_sequence = new HashMap<>();
 
     // Where are they ?
-    double slicingAxisPosition;
+    volatile double slicingAxisPosition;
 
     private boolean isSelected = false;
 
@@ -433,6 +433,8 @@ public class SliceSources {
                     tasks.add(startingPoint.thenApplyAsync((out) -> {
                         if (out == true) {
                             boolean result = action.cancel();
+                            tasks.remove(mapActionTask.get(action));
+                            mapActionTask.remove(action);
                             postRun.run();
                             return result;
                         } else {
@@ -446,6 +448,11 @@ public class SliceSources {
                     mapActionTask.remove(action);
                     postRun.run();
                 }
+            } else if (action instanceof CreateSlice) {
+                waitForEndOfTasks();
+                action.cancel();
+            } else {
+                System.err.println("Unregistered action");
             }
         }
     }

@@ -28,7 +28,7 @@ public class MoveSlice extends CancelableAction {
         System.out.println("MoveSlice called");
         sliceSource.setSlicingAxisPosition(newSlicingAxisPosition);
         sliceSource.updatePosition();
-        mp.log.accept("Moving slice to position " + new DecimalFormat("###.##").format(sliceSource.slicingAxisPosition));
+        mp.log.accept("Moving slice to position " + new DecimalFormat("###.##").format(sliceSource.getSlicingAxisPosition()));
         mp.updateDisplay();
         return true;
     }
@@ -38,9 +38,9 @@ public class MoveSlice extends CancelableAction {
     }
 
     public boolean cancel() {
-        sliceSource.slicingAxisPosition = oldSlicingAxisPosition;
+        sliceSource.setSlicingAxisPosition(oldSlicingAxisPosition);
         sliceSource.updatePosition();
-        mp.log.accept("Moving slice to position " + new DecimalFormat("###.##").format(sliceSource.slicingAxisPosition));
+        mp.log.accept("Moving slice to position " + new DecimalFormat("###.##").format(sliceSource.getSlicingAxisPosition()));
         mp.updateDisplay();
         return true;
     }

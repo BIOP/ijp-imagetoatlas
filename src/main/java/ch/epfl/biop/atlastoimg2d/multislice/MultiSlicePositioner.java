@@ -364,7 +364,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
      */
     public List<SliceSources> getSortedSlices() {
         List<SliceSources> sortedSlices = new ArrayList<>(slices);
-        Collections.sort(sortedSlices, Comparator.comparingDouble(s -> s.slicingAxisPosition));
+        Collections.sort(sortedSlices, Comparator.comparingDouble(s -> s.getSlicingAxisPosition()));
         // Sending index info to slices each time this function is called
         for (int i = 0; i < sortedSlices.size(); i++) {
             sortedSlices.get(i).setIndex(i);
@@ -668,7 +668,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                     ptRectWorld[xp][yp] = new RealPoint(3);
                     RealPoint pt = ptRectWorld[xp][yp];
                     pt.setPosition(sX * (iSliceNoStep + xp), 0);
-                    pt.setPosition(sY * (1 + yp), 1);
+                    pt.setPosition(sY * (0.5 + yp), 1);
                     pt.setPosition(0, 2);
                     bdvAt3D.apply(pt, pt);
                     ptRectScreen[xp][yp] = new Point((int) pt.getDoublePosition(0), (int) pt.getDoublePosition(1));
@@ -679,6 +679,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             g.drawLine(ptRectScreen[1][0].x, ptRectScreen[1][0].y, ptRectScreen[1][1].x, ptRectScreen[1][1].y);
             g.drawLine(ptRectScreen[1][1].x, ptRectScreen[1][1].y, ptRectScreen[0][1].x, ptRectScreen[0][1].y);
             g.drawLine(ptRectScreen[0][1].x, ptRectScreen[0][1].y, ptRectScreen[0][0].x, ptRectScreen[0][0].y);
+
             synchronized (slices) {
                 for (SliceSources slice : slices) {
                     slice.drawGraphicalHandles(g);
@@ -688,7 +689,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             g.setColor(color);
 
             if (iCurrentSlice != -1 && slices.size() > iCurrentSlice) {
-                SliceSources slice = slices.get(iCurrentSlice);
+                SliceSources slice = getSortedSlices().get(iCurrentSlice);
                 g.setColor(new Color(255, 255, 255, 128));
                 Integer[] coords = slice.getBdvHandleCoords();
                 RealPoint sliceCenter = new RealPoint(coords[0], coords[1], 0);
@@ -909,11 +910,11 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         if (sortedSelected.size() > 2) {
             SliceSources first = sortedSelected.get(0);
             SliceSources last = sortedSelected.get(sortedSelected.size() - 1);
-            double totalSpacing = last.slicingAxisPosition - first.slicingAxisPosition;
+            double totalSpacing = last.getSlicingAxisPosition() - first.getSlicingAxisPosition();
             double delta = totalSpacing / (sortedSelected.size() - 1);
             new MarkActionSequenceBatch(this).runRequest();
             for (int idx = 1; idx < sortedSelected.size() - 1; idx++) {
-                moveSlice(sortedSelected.get(idx), first.slicingAxisPosition + ((double) idx) * delta);
+                moveSlice(sortedSelected.get(idx), first.getSlicingAxisPosition() + ((double) idx) * delta);
             }
             new MarkActionSequenceBatch(this).runRequest();
         }
@@ -941,7 +942,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 double posY = -sY / 2;
                 rpt.setPosition(posX, 0);
                 rpt.setPosition(posY, 1);
-                rpt.setPosition(slice.slicingAxisPosition, 2);
+                rpt.setPosition(slice.getSlicingAxisPosition(), 2);
                 Map<String, Object> params = new HashMap<>();
                 params.put("tpFixed", 0);
                 params.put("levelFixedSource", 2);
@@ -1035,7 +1036,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 AffineTransform3D at3D = new AffineTransform3D();
                 at3D.translate(-this.nPixX / 2.0, -this.nPixY / 2.0, 0);
                 at3D.scale(this.sizePixX, this.sizePixY, this.sizePixZ);
-                at3D.translate(0, 0, slice.slicingAxisPosition);
+                at3D.translate(0, 0, slice.getSlicingAxisPosition());
 
                 // 0 - slicing model : empty source but properly defined in space and resolution
                 SourceAndConverter singleSliceModel = new EmptySourceAndConverterCreator("SlicingModel", at3D,
@@ -1050,7 +1051,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 );
 
                 AffineTransform3D translateZ = new AffineTransform3D();
-                translateZ.translate(0, 0, -slice.slicingAxisPosition);
+                translateZ.translate(0, 0, -slice.getSlicingAxisPosition());
 
                 new RegisterSlice(this, slice, registration, (fixedSacs) ->
                         Arrays.asList(preprocessFixed.apply(fixedSacs))
@@ -1331,7 +1332,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
             if ((sliceOrigin.isSelected())) {
                 perform = true;
-                initialAxisPositions.put(sliceOrigin, sliceOrigin.slicingAxisPosition);
+                initialAxisPositions.put(sliceOrigin, sliceOrigin.getSlicingAxisPosition());
             } else {
                 if (!sliceOrigin.isSelected()) {
                     sliceOrigin.select();
@@ -1345,7 +1346,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
             // Initialize the delta on a step of the zStepper
             if (perform) {
-                deltaOrigin = iniSlicingAxisPosition - sliceOrigin.slicingAxisPosition;
+                deltaOrigin = iniSlicingAxisPosition - sliceOrigin.getSlicingAxisPosition();
                 if (initialAxisPositions.containsKey(sliceOrigin)) {
                     sliceOrigin.slicingAxisPosition = initialAxisPositions.get(sliceOrigin) + deltaOrigin;
                     sliceOrigin.updatePosition();

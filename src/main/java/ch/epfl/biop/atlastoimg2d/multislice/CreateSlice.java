@@ -101,6 +101,7 @@ public class CreateSlice extends CancelableAction {
 
     @Override
     public boolean cancel() {
+        System.out.println("Cancelling source creation");
         mp.slices.remove(sliceSource);
         SourceAndConverterServices.getSourceAndConverterDisplayService()
                 .remove(mp.bdvh, sliceSource.relocated_sacs_positioning_mode);

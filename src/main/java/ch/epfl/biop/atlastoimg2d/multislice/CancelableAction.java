@@ -37,12 +37,13 @@ public abstract class CancelableAction {
     abstract public SliceSources getSliceSources();
 
     final public void runRequest() {
-        if (getSliceSources()!=null) {
-            getSliceSources().enqueueRunAction(this, () -> {} );
+        if ((getSliceSources()!=null)) {
+            getSliceSources().enqueueRunAction(this, () -> {
+                mp.mso.updateInfoPanel(getSliceSources());
+            } );
         } else {
             // Not asynchronous
             run();
-            mp.mso.sendInfo(this);
         }
         mp.userActions.add(this);
         if (mp.redoableUserActions.size() > 0) {
@@ -57,13 +58,13 @@ public abstract class CancelableAction {
     }
 
     final public void cancelRequest() {
-        if (getSliceSources()==null) {
+        if ((getSliceSources()==null)) {
             // Not asynchronous
+            System.out.println("Non Async cancel call : "+this.toString());
             cancel();
-            mp.mso.cancelInfo(this);
         } else {
-            getSliceSources().enqueueCancelAction(this, () ->
-                    mp.mso.cancelInfo(this));
+            System.out.println("Async cancel call : "+this.toString());
+            getSliceSources().enqueueCancelAction(this, () -> {});
         }
         if (mp.userActions.get(mp.userActions.size() - 1).equals(this)) {
             mp.userActions.remove(mp.userActions.size() - 1);
@@ -72,6 +73,7 @@ public abstract class CancelableAction {
             errlog.accept("Error : cancel not called on the last action");
             return;
         }
+        mp.mso.cancelInfo(this);
     }
 
     abstract protected boolean run();

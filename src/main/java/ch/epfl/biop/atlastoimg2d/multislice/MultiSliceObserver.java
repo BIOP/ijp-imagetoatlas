@@ -41,7 +41,7 @@ public class MultiSliceObserver {
                     e.printStackTrace();
                 }
             }
-            System.out.println("Animator thread stopped");
+            //System.out.println("Animator thread stopped");
         });
         animatorThread.start();
 
@@ -135,7 +135,7 @@ public class MultiSliceObserver {
     }
 
     public synchronized void updateInfoPanel(SliceSources slice) {
-        System.out.println("updateInfoPanel called");
+        //System.out.println("updateInfoPanel called");
         if (sliceSortedActions.containsKey(slice)&&sliceSortedActions.get(slice).size()!=0) {
 
             if (!actionPerSlice.containsKey(slice)) {
