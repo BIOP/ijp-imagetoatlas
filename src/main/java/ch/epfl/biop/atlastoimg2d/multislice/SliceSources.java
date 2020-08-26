@@ -160,11 +160,11 @@ public class SliceSources {
         AffineTransform3D bdvAt3D = new AffineTransform3D();
         mp.bdvh.getViewerPanel().state().getViewerTransform(bdvAt3D);
         RealPoint sliceCenter = new RealPoint(3);
-        if (mp.currentMode == MultiSlicePositioner.POSITIONING_MODE) {
+        if (mp.currentMode == MultiSlicePositioner.POSITIONING_MODE_INT) {
             sliceCenter = getCenterPositionPMode();
             bdvAt3D.apply(sliceCenter, sliceCenter);
             return new Integer[]{(int) sliceCenter.getDoublePosition(0), (int) sliceCenter.getDoublePosition(1), (int) sliceCenter.getDoublePosition(2)};
-        } else if (mp.currentMode == MultiSlicePositioner.REGISTRATION_MODE) {
+        } else if (mp.currentMode == MultiSlicePositioner.REGISTRATION_MODE_INT) {
             RealPoint zero = new RealPoint(3);
             zero.setPosition(0, 0);
             bdvAt3D.apply(zero, zero);
@@ -377,11 +377,11 @@ public class SliceSources {
                 relocated_sacs_positioning_mode = slicingModePositioner.getTransformedImageMovingToFixed(registered_sacs);
                 updatePosition();
 
-                if (mp.currentMode.equals(MultiSlicePositioner.REGISTRATION_MODE)) {
+                if (mp.currentMode == MultiSlicePositioner.REGISTRATION_MODE_INT) {
                     SourceAndConverterServices.getSourceAndConverterDisplayService()
                             .show(mp.bdvh, registered_sacs);
                 }
-                if (mp.currentMode.equals(MultiSlicePositioner.POSITIONING_MODE)) {
+                if (mp.currentMode == MultiSlicePositioner.POSITIONING_MODE_INT) {
                     SourceAndConverterServices.getSourceAndConverterDisplayService()
                             .show(mp.bdvh, relocated_sacs_positioning_mode);
                     enableGraphicalHandles();

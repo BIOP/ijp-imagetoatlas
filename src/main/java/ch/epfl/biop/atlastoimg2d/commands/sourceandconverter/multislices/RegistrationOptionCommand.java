@@ -25,6 +25,9 @@ public class RegistrationOptionCommand implements Command {
     @Parameter(label = "Slices channels")
     int sliceImageChannel;
 
+    @Parameter(label = "Show registration results")
+    boolean showImageRegistrationResults;
+
     @Parameter(callback = "clicked")
     Button exebutton;
 
@@ -34,10 +37,11 @@ public class RegistrationOptionCommand implements Command {
     }
 
     public void clicked() {
-        mp.enqueueRegistration(registrationType,
+        mp.requestRegistration(registrationType,
                getFixedFilter(),
                getMovingFilter()
         );
+        mp.showRegistrationResults(showImageRegistrationResults);
     }
 
     public Function<SourceAndConverter[], SourceAndConverter[]> getFixedFilter() {

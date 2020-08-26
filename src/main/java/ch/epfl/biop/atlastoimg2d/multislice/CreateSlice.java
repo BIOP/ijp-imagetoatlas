@@ -7,8 +7,7 @@ import java.awt.*;
 import java.text.DecimalFormat;
 import java.util.List;
 
-import static ch.epfl.biop.atlastoimg2d.multislice.MultiSlicePositioner.POSITIONING_MODE;
-import static ch.epfl.biop.atlastoimg2d.multislice.MultiSlicePositioner.REGISTRATION_MODE;
+import static ch.epfl.biop.atlastoimg2d.multislice.MultiSlicePositioner.*;
 
 /**
  * Creates a new Slice source
@@ -76,11 +75,11 @@ public class CreateSlice extends CancelableAction {
 
         mp.updateDisplay();
 
-        if (mp.currentMode.equals(POSITIONING_MODE)) {
+        if (mp.currentMode == POSITIONING_MODE_INT) {
             SourceAndConverterServices.getSourceAndConverterDisplayService()
                     .show(mp.bdvh, sliceSource.relocated_sacs_positioning_mode);
             sliceSource.enableGraphicalHandles();
-        } else if (mp.currentMode.equals(REGISTRATION_MODE)) {
+        } else if (mp.currentMode == REGISTRATION_MODE_INT) {
             SourceAndConverterServices.getSourceAndConverterDisplayService()
                     .show(mp.bdvh, sliceSource.registered_sacs);
             sliceSource.disableGraphicalHandles();

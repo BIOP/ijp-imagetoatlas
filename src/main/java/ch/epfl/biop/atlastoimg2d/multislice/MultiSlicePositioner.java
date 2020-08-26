@@ -1,12 +1,10 @@
 package ch.epfl.biop.atlastoimg2d.multislice;
 
-import bdv.util.BdvFunctions;
-import bdv.util.BdvHandle;
-import bdv.util.BdvOptions;
-import bdv.util.BdvOverlay;
+import bdv.util.*;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.BiopAtlas;
 import ch.epfl.biop.atlastoimg2d.commands.sourceandconverter.multislices.ExportRegionsCommand;
+import ch.epfl.biop.atlastoimg2d.commands.sourceandconverter.multislices.RectangleROIDefineCommand;
 import ch.epfl.biop.atlastoimg2d.commands.sourceandconverter.multislices.RegistrationOptionCommand;
 import ch.epfl.biop.atlastoimg2d.commands.sourceandconverter.multislices.SlicerAdjusterCommand;
 import ch.epfl.biop.atlastoimg2d.multislice.scijava.ScijavaSwingUI;
@@ -20,9 +18,12 @@ import mpicbg.spim.data.generic.base.Entity;
 import mpicbg.spim.data.generic.sequence.AbstractSequenceDescription;
 import mpicbg.spim.data.generic.sequence.BasicViewSetup;
 import mpicbg.spim.data.sequence.Tile;
+import net.imglib2.FinalInterval;
+import net.imglib2.RealLocalizable;
 import net.imglib2.RealPoint;
 import net.imglib2.cache.img.DiskCachedCellImgFactory;
 import net.imglib2.cache.img.DiskCachedCellImgOptions;
+import net.imglib2.position.FunctionRealRandomAccessible;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
@@ -46,6 +47,7 @@ import java.awt.event.MouseMotionListener;
 import java.io.File;
 import java.util.*;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -81,7 +83,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
      * Slicing Model Properties
      */
     int nPixX, nPixY, nPixZ;
-    double sX, sY, sZ;
+    final public double sX, sY, sZ;
     double sizePixX, sizePixY, sizePixZ;
 
     List<SliceSources> slices = new ArrayList<>();
@@ -108,12 +110,14 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
      * @param slicingModel
      */
 
-    public String currentMode = "";
+    public int currentMode = POSITIONING_MODE_INT;
 
+    public final static int POSITIONING_MODE_INT = 0;
     final static String POSITIONING_MODE = "positioning-mode";
     final static String POSITIONING_BEHAVIOURS_KEY = POSITIONING_MODE + "-behaviours";
     Behaviours positioning_behaviours = new Behaviours(new InputTriggerConfig(), POSITIONING_MODE);
 
+    public final static int REGISTRATION_MODE_INT = 1;
     final static String REGISTRATION_MODE = "Registration";
     final static String REGISTRATION_BEHAVIOURS_KEY = REGISTRATION_MODE + "-behaviours";
     Behaviours registration_behaviours = new Behaviours(new InputTriggerConfig(), REGISTRATION_MODE);
@@ -257,24 +261,55 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 ScijavaSwingUI.getPanel(scijavaCtx, RegistrationOptionCommand.class, "mp", this),
                 true);
 
+        bdvh.getCardPanel().addCard("Rectangle of Interest",
+                ScijavaSwingUI.getPanel(scijavaCtx, RectangleROIDefineCommand.class, "mp", this),
+                true);
+
         mso = new MultiSliceObserver(this);
 
         bdvh.getCardPanel().addCard("Tasks Info", mso.getJPanel(), true);
 
-        /*JPanel panelExport = new JPanel(new BorderLayout());
-        panelExport.add(sav.createDisplayPanel(biopAtlas), BorderLayout.CENTER);
-        panelExport.add(ScijavaSwingUI.getPanel(scijavaCtx, ExportRegionsCommand.class,
-                "sav", sav,
-                "atlas", biopAtlas,
-                "mp", this), BorderLayout.SOUTH);*/
-
         bdvh.getCardPanel().addCard("Region export options", //panelExport
-                ScijavaSwingUI.getPanel(scijavaCtx, ExportRegionsCommand.class,
-                        //"sav", sav,
-                        //"atlas", biopAtlas,
-                        "mp", this),
+                ScijavaSwingUI.getPanel(scijavaCtx, ExportRegionsCommand.class,               "mp", this),
                 true);
 
+        // Default registration region = full atlas size
+        roiPX = -sX / 2.0;
+        roiPY = -sY / 2.0;
+        roiSX = sX;
+        roiSY = sY;
+
+        BiConsumer<RealLocalizable, UnsignedShortType> fun = (loc,val) -> {
+            double px = loc.getFloatPosition(0);
+            double py = loc.getFloatPosition(1);
+
+            if (py<-sY/1.9) {val.set(0); return;}
+            if (py>sY/1.9) {val.set(0); return;}
+
+            if (currentMode == POSITIONING_MODE_INT) {
+                if (Math.IEEEremainder(px+sX*0.5, sX) < roiPX) {val.set(255); return;}
+                if (Math.IEEEremainder(px+sX*0.5, sX) > roiPX+roiSX) {val.set(255); return;}
+                if (py<roiPY) {val.set(255); return;}
+                if (py>roiPY+roiSY) {val.set(255); return;}
+                val.set(0);
+            }
+
+            if (currentMode == REGISTRATION_MODE_INT) {
+                if (loc.getFloatPosition(0) < roiPX) {val.set(255); return;}
+                if (loc.getFloatPosition(0) > roiPX+roiSX) {val.set(255); return;}
+                if (loc.getFloatPosition(1)<roiPY) {val.set(255); return;}
+                if (loc.getFloatPosition(1)>roiPY+roiSY) {val.set(255); return;}
+                val.set(0);
+            }
+
+        };
+
+        FunctionRealRandomAccessible<UnsignedShortType> roiOverlay = new FunctionRealRandomAccessible(3, fun, () -> new UnsignedShortType());
+
+        BdvStackSource bss = BdvFunctions.show(roiOverlay,
+                new FinalInterval(new long[]{0, 0, 0}, new long[]{10, 10, 10}),"ROI", BdvOptions.options().addTo(bdvh));
+
+        bss.setDisplayRangeBounds(0,1600);
     }
 
     public BdvHandle getBdvh() {
@@ -379,10 +414,10 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
      */
     public void nextMode() {
         switch (currentMode) {
-            case POSITIONING_MODE:
+            case POSITIONING_MODE_INT:
                 setRegistrationMode();
                 break;
-            case REGISTRATION_MODE:
+            case REGISTRATION_MODE_INT:
                 setPositioningMode();
                 break;
         }
@@ -393,14 +428,14 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
      */
     public void setPositioningMode() {
         //if (slices.stream().noneMatch(slice -> slice.processInProgress)) {
-            if (!currentMode.equals(POSITIONING_MODE)) {
+            if (!(currentMode == POSITIONING_MODE_INT)) {
 
                 List<SourceAndConverter> sacsToRemove = new ArrayList<>();
                 List<SourceAndConverter> sacsToAdd = new ArrayList<>();
 
                 synchronized (slices) {
                     reslicedAtlas.unlock();
-                    currentMode = POSITIONING_MODE;
+                    currentMode = POSITIONING_MODE_INT;
                     ghs.forEach(gh -> gh.enable());
                     slices.forEach(slice -> slice.enableGraphicalHandles());
                     getSortedSlices().forEach(ss -> {
@@ -440,10 +475,10 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
      * Set the registration mode
      */
     public void setRegistrationMode() {
-        if (!currentMode.equals(REGISTRATION_MODE)) {
-            currentMode = POSITIONING_MODE;
+        if (!(currentMode == REGISTRATION_MODE_INT)) {
+            currentMode = POSITIONING_MODE_INT;
             reslicedAtlas.lock();
-            currentMode = REGISTRATION_MODE;
+            currentMode = REGISTRATION_MODE_INT;
             ghs.forEach(gh -> gh.disable());
             getSortedSlices(); // Reindexing just in case
             // slices.forEach(slice -> slice.disableGraphicalHandles());
@@ -501,6 +536,54 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         if (sortedSlices.size() > 0) {
             centerBdvViewOn(sortedSlices.get(iCurrentSlice));
         }
+    }
+
+    double roiPX, roiPY, roiSX, roiSY;
+
+    /*
+     // Default registration region = full atlas size
+        roiPX = -sX / 2.0;
+        roiPY = -sY / 2.0;
+        roiSX = sX;
+        roiSY = sY;
+     */
+
+    /**
+     * Defines, in physical units, the region that will be used to perform the automated registration
+     * @param px
+     * @param py
+     * @param sx
+     * @param sy
+     */
+    public void setROI(double px, double py, double sx, double sy) {
+        if (px<-sX / 2.0) {
+            double delta = -(px+sX/2.0);
+            px = -sX / 2.0;
+            sx = sx-delta;
+        }
+        if (px > sX/2.0) {px = sX/2.0;}
+
+        if (px+sx>sX / 2.0) {
+            sx = sX / 2.0 -px;
+        }
+
+        if (py<-sY / 2.0) {
+            double delta = -(py+sY/2.0);
+            py = -sY / 2.0;
+            sy = sy-delta;
+        }
+        if (py > sY/2.0) {py = sY/2.0;}
+
+        if (py+sy>sY/2.0) {
+            sy = sY/2.0-py;
+        }
+
+        roiPX = px;
+        roiPY = py;
+        roiSX = sx;
+        roiSY = sy;
+
+
     }
 
     /**
@@ -569,9 +652,9 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
         RealPoint centerSlice = new RealPoint(3);
 
-        if (currentMode == MultiSlicePositioner.POSITIONING_MODE) {
+        if (currentMode == MultiSlicePositioner.POSITIONING_MODE_INT) {
             centerSlice = slice.getCenterPositionPMode();
-        } else if (currentMode == MultiSlicePositioner.REGISTRATION_MODE) {
+        } else if (currentMode == MultiSlicePositioner.REGISTRATION_MODE_INT) {
             centerSlice = slice.getCenterPositionRMode();
         }
 
@@ -654,7 +737,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             Color color = new Color(ARGBType.red(colorCode), ARGBType.green(colorCode), ARGBType.blue(colorCode), ARGBType.alpha(colorCode));
             g.setColor(color);
 
-            g.drawString(currentMode, 10, 10);
+            //g.drawString(currentMode, 10, 10);
 
             RealPoint[][] ptRectWorld = new RealPoint[2][2];
             Point[][] ptRectScreen = new Point[2][2];
@@ -696,7 +779,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 g.drawOval((int) sliceCenter.getDoublePosition(0) - 15, (int) sliceCenter.getDoublePosition(1) - 15, 30, 30);
             }
 
-            if (currentMode.equals(POSITIONING_MODE) && slices.stream().anyMatch(slice -> slice.isSelected())) {
+            if ((currentMode == POSITIONING_MODE_INT) && slices.stream().anyMatch(slice -> slice.isSelected())) {
                 List<SliceSources> sortedSelected = getSortedSlices().stream().filter(slice -> slice.isSelected()).collect(Collectors.toList());
                 RealPoint precedentPoint = null;
 
@@ -930,6 +1013,11 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         navigateCurrentSlice();
     }
 
+    boolean showRegistrationResults = false;
+
+    public void showRegistrationResults(boolean flag) {
+        showRegistrationResults = flag;
+    }
 
     public void registerElastix(Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixed,
                                 Function<SourceAndConverter[], SourceAndConverter[]> preprocessMoving) {
@@ -937,12 +1025,6 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             if (slice.isSelected()) {
                 Elastix2DAffineRegistration elastixAffineReg = new Elastix2DAffineRegistration();
                 elastixAffineReg.setScijavaContext(scijavaCtx);
-                RealPoint rpt = new RealPoint(3);
-                double posX = -sX / 2;
-                double posY = -sY / 2;
-                rpt.setPosition(posX, 0);
-                rpt.setPosition(posY, 1);
-                rpt.setPosition(slice.getSlicingAxisPosition(), 2);
                 Map<String, Object> params = new HashMap<>();
                 params.put("tpFixed", 0);
                 params.put("levelFixedSource", 2);
@@ -950,28 +1032,28 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 params.put("levelMovingSource", slice.registered_sacs[0].getSpimSource().getNumMipmapLevels() - 1);
                 params.put("pxSizeInCurrentUnit", 0.04);
                 params.put("interpolate", false);
-                params.put("showImagePlusRegistrationResult", false);//true);
-                params.put("px", rpt.getDoublePosition(0));
-                params.put("py", rpt.getDoublePosition(1));
-                params.put("pz", rpt.getDoublePosition(2));
-                params.put("sx", sX);
-                params.put("sy", sY);
+                params.put("showImagePlusRegistrationResult", showRegistrationResults);//true);
+                params.put("px", roiPX);//rpt.getDoublePosition(0));
+                params.put("py", roiPY);//rpt.getDoublePosition(1));
+                params.put("pz", slice.getSlicingAxisPosition());//rpt.getDoublePosition(2));
+                params.put("sx", roiSX);
+                params.put("sy", roiSY);
                 elastixAffineReg.setScijavaParameters(params);
                 new RegisterSlice(this, slice, elastixAffineReg, preprocessFixed, preprocessMoving).runRequest();
             }
         }
     }
 
-    public void enqueueRegistration(String registrationType,
-                                                int channelFixed,
-                                                int channelMoving) {
-        enqueueRegistration(registrationType, new int[]{channelFixed}, new int[]{channelMoving});
+    public void requestRegistration(String registrationType,
+                                    int channelFixed,
+                                    int channelMoving) {
+        requestRegistration(registrationType, new int[]{channelFixed}, new int[]{channelMoving});
     }
 
-    public void enqueueRegistration(String registrationType,
+    public void requestRegistration(String registrationType,
                                     final int[] channelsFixed,
                                     final int[] channelsMoving) {
-        enqueueRegistration(registrationType,
+        requestRegistration(registrationType,
                 (sacs) -> {
                     SourceAndConverter[] selected = new SourceAndConverter[channelsFixed.length];
                     for (int idx = 0;idx<channelsFixed.length;idx++) {
@@ -988,7 +1070,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 });
     }
 
-    public void enqueueRegistration(String registrationType,
+    public void requestRegistration(String registrationType,
                                     Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixed,
                                     Function<SourceAndConverter[], SourceAndConverter[]> preprocessMoving) {
         boolean atLeastOneSliceSelected = false;
@@ -1340,7 +1422,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 }
             }
 
-            if (currentMode != POSITIONING_MODE) {
+            if (currentMode != POSITIONING_MODE_INT) {
                 perform = false;
             }
 
@@ -1435,7 +1517,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 });
             }
 
-            if (currentMode != POSITIONING_MODE) {
+            if (currentMode != POSITIONING_MODE_INT) {
                 perform = false;
             }
 
