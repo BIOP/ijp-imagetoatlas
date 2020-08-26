@@ -94,6 +94,9 @@ public class RectangleROIDefineCommand extends InteractiveCommand {
             fullSizeClicked();
         }});
         t.start();
+
+        // TODO : uncomment and avoid deadlock below ...
+
         /*try {
             t.join();
         } catch (InterruptedException e) {

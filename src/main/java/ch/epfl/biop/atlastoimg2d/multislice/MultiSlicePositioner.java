@@ -218,14 +218,28 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
         List<SourceAndConverter<?>> sacsToAppend = new ArrayList<>();
         for (int i = 0; i < biopAtlas.map.getStructuralImages().length; i++) {
-            sacsToAppend.add(reslicedAtlas.nonExtendedSlicedSources[i]);
             sacsToAppend.add(reslicedAtlas.extendedSlicedSources[i]);
+            sacsToAppend.add(reslicedAtlas.nonExtendedSlicedSources[i]);
+
         }
 
         SourceAndConverterServices.getSourceAndConverterDisplayService()
                 .show(bdvh, sacsToAppend.toArray(new SourceAndConverter[0]));
 
-        setPositioningMode();
+        /*sacsToAppend = new ArrayList<>();
+
+        for (int i = 0; i < biopAtlas.map.getStructuralImages().length; i++) {
+
+        }
+
+        SourceAndConverterServices.getSourceAndConverterDisplayService()
+                .show(bdvh, sacsToAppend.toArray(new SourceAndConverter[0]));
+
+        sacsToAppend.forEach(sac -> {
+            SourceAndConverterServices.getSourceAndConverterDisplayService()
+                    .makeInvisible(sac);
+        });*/
+
         bdvh.getViewerPanel().getDisplay().addHandler(this);
 
         GraphicalHandle ghRight = new SquareGraphicalHandle(this, new DragRight(), "drag_right", "button1", bdvh.getTriggerbindings(),
@@ -310,6 +324,9 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 new FinalInterval(new long[]{0, 0, 0}, new long[]{10, 10, 10}),"ROI", BdvOptions.options().addTo(bdvh));
 
         bss.setDisplayRangeBounds(0,1600);
+        currentMode = REGISTRATION_MODE_INT; // For correct toggling
+        setPositioningMode();
+
     }
 
     public BdvHandle getBdvh() {
@@ -466,9 +483,6 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 navigateCurrentSlice();
                 refreshBlockMap();
             }
-        /*} else {
-            log.accept("Registration in progress : cannot switch to positioning mode.");
-        }*/
     }
 
     /**

@@ -307,9 +307,6 @@ public class SliceSources {
 
             registered_sacs = reg.getTransformedImageMovingToFixed(registered_sacs);
 
-            SourceAndConverterServices.getSourceAndConverterDisplayService()
-                    .show(mp.bdvh, registered_sacs);
-
             slicingModePositioner = new AffineTransformedSourceWrapperRegistration();
 
             slicingModePositioner.setMovingImage(registered_sacs);
@@ -319,6 +316,18 @@ public class SliceSources {
             updatePosition();
 
             registered_sacs_sequence.put(reg, registered_sacs);
+
+            if (mp.currentMode == MultiSlicePositioner.REGISTRATION_MODE_INT) {
+                SourceAndConverterServices.getSourceAndConverterDisplayService()
+                        .show(mp.bdvh, registered_sacs);
+            }
+
+            if (mp.currentMode == MultiSlicePositioner.POSITIONING_MODE_INT) {
+                SourceAndConverterServices.getSourceAndConverterDisplayService()
+                        .show(mp.bdvh, relocated_sacs_positioning_mode);
+                enableGraphicalHandles();
+            }
+
         }
         return out;
     }
@@ -381,6 +390,7 @@ public class SliceSources {
                     SourceAndConverterServices.getSourceAndConverterDisplayService()
                             .show(mp.bdvh, registered_sacs);
                 }
+
                 if (mp.currentMode == MultiSlicePositioner.POSITIONING_MODE_INT) {
                     SourceAndConverterServices.getSourceAndConverterDisplayService()
                             .show(mp.bdvh, relocated_sacs_positioning_mode);
