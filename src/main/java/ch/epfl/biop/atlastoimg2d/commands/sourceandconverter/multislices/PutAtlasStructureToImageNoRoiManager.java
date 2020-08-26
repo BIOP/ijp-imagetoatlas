@@ -70,9 +70,6 @@ public class PutAtlasStructureToImageNoRoiManager implements Command {
 		// Convert  regions of interest to roi ArrayList
         IJShapeRoiArray rois = (IJShapeRoiArray) cr.to(IJShapeRoiArray.class);
 
-        /*rois.rois.forEach( roi -> {
-            roi.setName(roi.getName().replaceAll("(\\d+)(-)(\\d+)","$1")); // changes "123-5" to "123"
-        });*/
         // Gets the Roi Manager
         List<Roi> listOut = new ArrayList<>();
         

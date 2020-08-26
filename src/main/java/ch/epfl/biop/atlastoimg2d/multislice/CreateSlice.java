@@ -29,6 +29,10 @@ public class CreateSlice extends CancelableAction {
         return sliceSource;
     }
 
+    protected void setSliceSource(SliceSources slice) {
+        this.sliceSource = slice;
+    }
+
     @Override
     public boolean run() {
         boolean sacAlreadyPresent = false;

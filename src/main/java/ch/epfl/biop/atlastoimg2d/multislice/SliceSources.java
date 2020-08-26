@@ -11,6 +11,7 @@ import ch.epfl.biop.registration.Registration;
 import ch.epfl.biop.registration.sourceandconverter.AffineTransformedSourceWrapperRegistration;
 import ch.epfl.biop.registration.sourceandconverter.CenterZeroRegistration;
 import ch.epfl.biop.scijava.command.ExportToImagePlusCommand;
+import com.google.common.collect.Lists;
 import ij.ImagePlus;
 import net.imglib2.RealPoint;
 import net.imglib2.cache.img.DiskCachedCellImgFactory;
@@ -44,10 +45,10 @@ public class SliceSources {
     SourceAndConverter[] original_sacs;
 
     // Visible to the user in slicing mode
-    SourceAndConverter[] relocated_sacs_positioning_mode;
+    SourceAndConverter<?>[] relocated_sacs_positioning_mode;
 
     // Used for registration : like 3D, but tilt and roll ignored because it is handled on the fixed source side
-    SourceAndConverter[] registered_sacs;
+    SourceAndConverter<?>[] registered_sacs;
 
     Map<Registration, SourceAndConverter[]> registered_sacs_sequence = new HashMap<>();
 
@@ -530,15 +531,12 @@ public class SliceSources {
     }
 
     public synchronized void export(String namingChoice, File dirOutput) {
-        System.out.println("Export slice");
         // Need to raster the label image
-        System.out.println("0");
         AffineTransform3D at3D = new AffineTransform3D();
         at3D.translate(-mp.nPixX / 2.0, -mp.nPixY / 2.0, 0);
         at3D.scale(mp.sizePixX, mp.sizePixY, mp.sizePixZ);
         at3D.translate(0, 0, slicingAxisPosition);
 
-        System.out.println("0");
         boolean computeLabelImageNecessary = true;
 
         if (!labelImageBeingComputed) {
@@ -549,7 +547,6 @@ public class SliceSources {
             }
         }
 
-        System.out.println("1");
         if (computeLabelImageNecessary) {
             computeLabelImage(at3D, namingChoice);
         } else {
@@ -562,7 +559,6 @@ public class SliceSources {
             }
         }
 
-        System.out.println("2");
         computeTransformedRois();
 
         PutAtlasStructureToImageNoRoiManager roiRenamer = new PutAtlasStructureToImageNoRoiManager();
@@ -570,7 +566,7 @@ public class SliceSources {
         roiRenamer.addDescendants = true;
         roiRenamer.atlas = mp.biopAtlas;
         roiRenamer.structure_list = "997";
-        roiRenamer.cr = cvtRoisOrigin;
+        roiRenamer.cr = cvtRoisTransformed;
         roiRenamer.namingChoice = namingChoice;
         roiRenamer.run();
         ConvertibleRois roiOutput = new ConvertibleRois();
@@ -610,7 +606,7 @@ public class SliceSources {
         Collections.reverse(this.registrations);
 
         for (Registration reg : this.registrations) {
-            //System.out.println("Registration class "+reg.getClass().getSimpleName());
+            System.out.println("Registration class "+reg.getClass().getSimpleName());
             list = reg.getTransformedPtsFixedToMoving(list);
         }
         Collections.reverse(this.registrations);
@@ -624,7 +620,6 @@ public class SliceSources {
     }
 
     public RealPointList getTransformedPtsFixedToMoving(RealPointList pts, AffineTransform3D at3d) {
-
         ArrayList<RealPoint> cvtList = new ArrayList<>();
         for (RealPoint p : pts.ptList) {
             RealPoint pt3d = new RealPoint(3);
@@ -634,5 +629,18 @@ public class SliceSources {
             cvtList.add(cpt);
         }
         return new RealPointList(cvtList);
+    }
+
+    public void hide() {
+        this.deSelect();
+        if (mp.currentMode == MultiSlicePositioner.REGISTRATION_MODE_INT) {
+            mp.getBdvh().getViewerPanel().state()
+                    .setSourcesActive(Arrays.asList(registered_sacs), false);
+        }
+
+        if (mp.currentMode == MultiSlicePositioner.POSITIONING_MODE_INT) {
+            mp.getBdvh().getViewerPanel().state()
+                    .setSourcesActive(Arrays.asList(relocated_sacs_positioning_mode), false);
+        }
     }
 }

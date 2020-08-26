@@ -32,6 +32,7 @@ import org.scijava.ui.behaviour.*;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
 import sc.fiji.bdvpg.behaviour.EditorBehaviourUnInstaller;
+import sc.fiji.bdvpg.behaviour.SourceAndConverterContextMenuClickBehaviour;
 import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
 import sc.fiji.bdvpg.scijava.services.ui.swingdnd.BdvTransferHandler;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
@@ -191,6 +192,9 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.nextMode(), "change_mode", "Q");
         //common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.exportSelectedSlices(), "exportSlices", "E");
 
+
+
+
         bdvh.getTriggerbindings().addBehaviourMap(COMMON_BEHAVIOURS_KEY, common_behaviours.getBehaviourMap());
         bdvh.getTriggerbindings().addInputTriggerMap(COMMON_BEHAVIOURS_KEY, common_behaviours.getInputTriggerMap()); // "transform", "bdv"
         //common_behaviours.install(bdvh.getTriggerbindings(), COMMON_BEHAVIOURS_KEY);
@@ -226,20 +230,6 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         SourceAndConverterServices.getSourceAndConverterDisplayService()
                 .show(bdvh, sacsToAppend.toArray(new SourceAndConverter[0]));
 
-        /*sacsToAppend = new ArrayList<>();
-
-        for (int i = 0; i < biopAtlas.map.getStructuralImages().length; i++) {
-
-        }
-
-        SourceAndConverterServices.getSourceAndConverterDisplayService()
-                .show(bdvh, sacsToAppend.toArray(new SourceAndConverter[0]));
-
-        sacsToAppend.forEach(sac -> {
-            SourceAndConverterServices.getSourceAndConverterDisplayService()
-                    .makeInvisible(sac);
-        });*/
-
         bdvh.getViewerPanel().getDisplay().addHandler(this);
 
         GraphicalHandle ghRight = new SquareGraphicalHandle(this, new DragRight(), "drag_right", "button1", bdvh.getTriggerbindings(),
@@ -253,12 +243,10 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         ghs.add(ghCenter);
         ghs.add(ghLeft);
 
-        if (this.bdvh.getCardPanel() != null) {
-            this.bdvh.getCardPanel().setCardExpanded("Sources", false);
-            this.bdvh.getCardPanel().setCardExpanded("Groups", false);
-        } else {
-            System.err.println("this.bdvh.getCardPanel() is null!");
-        }
+        assert  this.bdvh.getCardPanel() != null;
+
+        this.bdvh.getCardPanel().setCardExpanded("Sources", false);
+        this.bdvh.getCardPanel().setCardExpanded("Groups", false);
 
         reslicedAtlas.addListener(() -> {
             recenterBdvh();
@@ -327,6 +315,18 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         currentMode = REGISTRATION_MODE_INT; // For correct toggling
         setPositioningMode();
 
+        addRightClickActions();
+
+    }
+
+    void addRightClickActions() {
+
+        common_behaviours.behaviour(new MultiSliceContextMenuClickBehaviour( this, this::getSelectedSources ), "Slices Context Menu", "button3");
+
+    }
+
+    public List<SliceSources> getSelectedSources() {
+        return getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
     }
 
     public BdvHandle getBdvh() {
@@ -553,14 +553,6 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     }
 
     double roiPX, roiPY, roiSX, roiSY;
-
-    /*
-     // Default registration region = full atlas size
-        roiPX = -sX / 2.0;
-        roiPY = -sY / 2.0;
-        roiSX = sX;
-        roiSY = sY;
-     */
 
     /**
      * Defines, in physical units, the region that will be used to perform the automated registration
@@ -970,7 +962,6 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
      * @param axisPosition
      */
     public void moveSlice(SliceSources slice, double axisPosition) {
-        System.out.println("MoveSlice called!!");
         new MoveSlice(this, slice, axisPosition).runRequest();
     }
 
