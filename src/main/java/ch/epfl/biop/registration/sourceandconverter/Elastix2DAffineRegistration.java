@@ -57,6 +57,7 @@ public class Elastix2DAffineRegistration implements Registration<SourceAndConver
                     .run(Elastix2DAffineRegisterCommand.class, true, scijavaParameters );
 
              at3d = (AffineTransform3D) task.get().getOutput("at3D");
+             isDone = true;
              return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -109,5 +110,17 @@ public class Elastix2DAffineRegistration implements Registration<SourceAndConver
     @Override
     public boolean isEditable() {
         return false;
+    }
+
+    private boolean isDone = false;
+
+    @Override
+    public boolean isRegistrationDone() {
+        return isDone;
+    }
+
+    @Override
+    public void resetRegistration() {
+        isDone = false;
     }
 }

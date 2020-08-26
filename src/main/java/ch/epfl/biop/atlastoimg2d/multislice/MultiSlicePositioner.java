@@ -87,7 +87,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     final public double sX, sY, sZ;
     double sizePixX, sizePixY, sizePixZ;
 
-    List<SliceSources> slices = new ArrayList<>();
+    List<SliceSources> slices = new ArrayList<>();//Collections.synchronizedList(); // Thread safety ?
 
     int totalNumberOfActionsRecorded = 30; // TODO : Implement
 
@@ -1237,7 +1237,8 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     @Override
     public synchronized void mouseMoved(MouseEvent e) {
         this.ghs.forEach(gh -> gh.mouseMoved(e));
-        this.slices.forEach(slice -> slice.ghs.forEach(gh -> gh.mouseMoved(e)));
+        for (SliceSources slice : slices)
+            slice.ghs.forEach(gh -> gh.mouseMoved(e));
     }
 
     @Override

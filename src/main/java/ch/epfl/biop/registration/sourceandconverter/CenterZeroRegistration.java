@@ -51,6 +51,8 @@ public class CenterZeroRegistration implements Registration<SourceAndConverter[]
                 -center.getDoublePosition(1),
                 -center.getDoublePosition(2));
 
+        isDone = true;
+
         return true;
     }
 
@@ -110,6 +112,18 @@ public class CenterZeroRegistration implements Registration<SourceAndConverter[]
     @Override
     public boolean isManual() {
         return false;
+    }
+
+    private boolean isDone = false;
+
+    @Override
+    public boolean isRegistrationDone() {
+        return isDone;
+    }
+
+    @Override
+    public void resetRegistration() {
+        isDone = false;
     }
 
 }

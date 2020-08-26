@@ -39,6 +39,7 @@ public class AffineTransformedSourceWrapperRegistration implements Registration<
 
     @Override
     public boolean register() {
+        isDone = true;
         return true;
     }
 
@@ -95,6 +96,18 @@ public class AffineTransformedSourceWrapperRegistration implements Registration<
     @Override
     public boolean edit() {
         throw new UnsupportedOperationException();
+    }
+
+    private boolean isDone = false;
+
+    @Override
+    public boolean isRegistrationDone() {
+        return isDone;
+    }
+
+    @Override
+    public void resetRegistration() {
+        isDone = false;
     }
 
     @Override

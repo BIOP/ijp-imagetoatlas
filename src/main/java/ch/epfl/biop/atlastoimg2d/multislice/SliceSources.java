@@ -292,6 +292,39 @@ public class SliceSources {
         return new RealPoint(0, 0, slicingAxisPosition);
     }
 
+    public void appendRegistration(Registration<SourceAndConverter[]> reg) {
+        SourceAndConverterServices.getSourceAndConverterDisplayService()
+                .remove(mp.bdvh, registered_sacs);
+
+        registered_sacs = reg.getTransformedImageMovingToFixed(registered_sacs);
+
+        slicingModePositioner = new AffineTransformedSourceWrapperRegistration();
+
+        slicingModePositioner.setMovingImage(registered_sacs);
+        SourceAndConverterServices.getSourceAndConverterService().remove(relocated_sacs_positioning_mode);
+
+        relocated_sacs_positioning_mode = slicingModePositioner.getTransformedImageMovingToFixed(registered_sacs);
+        updatePosition();
+
+        registered_sacs_sequence.put(reg, registered_sacs);
+
+        if (mp.currentMode == MultiSlicePositioner.REGISTRATION_MODE_INT) {
+            SourceAndConverterServices.getSourceAndConverterDisplayService()
+                    .show(mp.bdvh, registered_sacs);
+        }
+
+        if (mp.currentMode == MultiSlicePositioner.POSITIONING_MODE_INT) {
+            SourceAndConverterServices.getSourceAndConverterDisplayService()
+                    .show(mp.bdvh, relocated_sacs_positioning_mode);
+            enableGraphicalHandles();
+        }
+
+        registrations.add(reg);
+
+        mp.mso.updateInfoPanel(this);
+
+    }
+
     // public : enqueueRegistration
     private boolean performRegistration(Registration<SourceAndConverter[]> reg,
                                        Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixed,
@@ -303,32 +336,7 @@ public class SliceSources {
         if (!out) {
 
         } else {
-            SourceAndConverterServices.getSourceAndConverterDisplayService()
-                    .remove(mp.bdvh, registered_sacs);
-
-            registered_sacs = reg.getTransformedImageMovingToFixed(registered_sacs);
-
-            slicingModePositioner = new AffineTransformedSourceWrapperRegistration();
-
-            slicingModePositioner.setMovingImage(registered_sacs);
-            SourceAndConverterServices.getSourceAndConverterService().remove(relocated_sacs_positioning_mode);
-
-            relocated_sacs_positioning_mode = slicingModePositioner.getTransformedImageMovingToFixed(registered_sacs);
-            updatePosition();
-
-            registered_sacs_sequence.put(reg, registered_sacs);
-
-            if (mp.currentMode == MultiSlicePositioner.REGISTRATION_MODE_INT) {
-                SourceAndConverterServices.getSourceAndConverterDisplayService()
-                        .show(mp.bdvh, registered_sacs);
-            }
-
-            if (mp.currentMode == MultiSlicePositioner.POSITIONING_MODE_INT) {
-                SourceAndConverterServices.getSourceAndConverterDisplayService()
-                        .show(mp.bdvh, relocated_sacs_positioning_mode);
-                enableGraphicalHandles();
-            }
-
+            appendRegistration(reg);
         }
         return out;
     }
@@ -343,23 +351,16 @@ public class SliceSources {
                                 Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixed,
                                 Function<SourceAndConverter[], SourceAndConverter[]> preprocessMoving) {
 
-        boolean jobDone = false;
-
         if (reg.isManual()) {
             //Waiting for manual lock release...
             synchronized (MultiSlicePositioner.manualActionLock) {
                 //Manual lock released
-                jobDone = performRegistration(reg,preprocessFixed, preprocessMoving);
+                performRegistration(reg,preprocessFixed, preprocessMoving);
             }
         } else {
-            jobDone = performRegistration(reg,preprocessFixed, preprocessMoving);
+            performRegistration(reg,preprocessFixed, preprocessMoving);
         }
 
-        if (jobDone) {
-            registrations.add(reg);
-        }
-
-        mp.mso.updateInfoPanel(this);
     }
 
     protected synchronized boolean removeRegistration(Registration reg) {

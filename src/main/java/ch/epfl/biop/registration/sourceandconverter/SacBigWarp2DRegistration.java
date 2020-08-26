@@ -74,6 +74,8 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
 
             bwl.getBigWarp().closeAll();
 
+            isDone = true;
+
             return true;
 
         }
@@ -172,6 +174,18 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
     @Override
     public boolean isEditable() {
         return false;
+    }
+
+    private boolean isDone = false;
+
+    @Override
+    public boolean isRegistrationDone() {
+        return isDone;
+    }
+
+    @Override
+    public void resetRegistration() {
+        isDone = false;
     }
 
 }

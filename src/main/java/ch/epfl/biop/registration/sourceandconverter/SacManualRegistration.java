@@ -20,6 +20,7 @@ public class SacManualRegistration implements Registration<SourceAndConverter[]>
 
     @Override
     public boolean register() {
+        isDone = false;
         return false;
     }
 
@@ -51,5 +52,17 @@ public class SacManualRegistration implements Registration<SourceAndConverter[]>
     @Override
     public boolean isEditable() {
         return false;
+    }
+
+    private boolean isDone = false;
+
+    @Override
+    public boolean isRegistrationDone() {
+        return isDone;
+    }
+
+    @Override
+    public void resetRegistration() {
+        isDone = false;
     }
 }
