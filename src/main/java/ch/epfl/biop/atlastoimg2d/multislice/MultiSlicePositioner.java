@@ -32,7 +32,6 @@ import org.scijava.ui.behaviour.*;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
 import sc.fiji.bdvpg.behaviour.EditorBehaviourUnInstaller;
-import sc.fiji.bdvpg.behaviour.SourceAndConverterContextMenuClickBehaviour;
 import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
 import sc.fiji.bdvpg.scijava.services.ui.swingdnd.BdvTransferHandler;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
@@ -87,7 +86,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     final public double sX, sY, sZ;
     double sizePixX, sizePixY, sizePixZ;
 
-    List<SliceSources> slices = new ArrayList<>();//Collections.synchronizedList(); // Thread safety ?
+    List<SliceSources> slices = Collections.synchronizedList(new ArrayList<>());//Collections.synchronizedList(); // Thread safety ?
 
     int totalNumberOfActionsRecorded = 30; // TODO : Implement
 

@@ -30,7 +30,6 @@ public class DeleteSlice extends CancelableAction {
 
     @Override
     protected boolean run() {
-        System.out.println("Delete slice");
         return cs.cancel();
     }
 

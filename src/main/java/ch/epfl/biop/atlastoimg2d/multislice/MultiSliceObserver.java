@@ -5,6 +5,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MultiSliceObserver {
@@ -14,6 +15,8 @@ public class MultiSliceObserver {
     Map<SliceSources, List<CancelableAction>> sliceSortedActions = new ConcurrentHashMap<>();
 
     Map<SliceSources, JTextArea> actionPerSlice = new ConcurrentHashMap<>();
+
+    Set<CancelableAction> hiddenActions = ConcurrentHashMap.newKeySet(); // For cancelled actions
 
     JPanel innerPanel = new JPanel();
 
@@ -47,6 +50,14 @@ public class MultiSliceObserver {
 
     }
 
+    public void hide(CancelableAction action) {
+        hiddenActions.add(action);
+    }
+
+    public void unhide(CancelableAction action) {
+        hiddenActions.remove(action);
+    }
+
     public void draw(Graphics2D g) {
         int yInc = 20;
         g.setColor(new Color(255,255,255,200));
@@ -60,6 +71,12 @@ public class MultiSliceObserver {
 
                     for (int indexAction = 0; indexAction < actions.size(); indexAction++) {
                         CancelableAction action = sliceSortedActions.get(slice).get(indexAction);
+
+                        if (hiddenActions.contains(action)) {
+                            indexAction++;
+                            continue;
+                        }
+
                         if (action instanceof MoveSlice) {
                             if (indexAction == sliceSortedActions.get(slice).size() - 1) {
 
@@ -118,6 +135,12 @@ public class MultiSliceObserver {
 
         for (int indexAction = 0; indexAction<sliceSortedActions.get(slice).size();indexAction++) {
             CancelableAction action = sliceSortedActions.get(slice).get(indexAction);
+
+            if (hiddenActions.contains(action)) {
+                indexAction++;
+                continue;
+            }
+
             if (action instanceof MoveSlice) {
                 if (indexAction == sliceSortedActions.get(slice).size()-1) {
                     log += action.toString() + "\n";

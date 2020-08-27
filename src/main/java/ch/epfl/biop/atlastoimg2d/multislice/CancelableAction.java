@@ -45,35 +45,41 @@ public abstract class CancelableAction {
             // Not asynchronous
             run();
         }
-        mp.userActions.add(this);
-        if (mp.redoableUserActions.size() > 0) {
-            if (mp.redoableUserActions.get(mp.redoableUserActions.size() - 1).equals(this)) {
-                mp.redoableUserActions.remove(mp.redoableUserActions.size() - 1);
-            } else {
-                // different branch : clear redoable actions
-                mp.redoableUserActions.clear();
+        if (isValid()) {
+
+            mp.userActions.add(this);
+            if (mp.redoableUserActions.size() > 0) {
+                if (mp.redoableUserActions.get(mp.redoableUserActions.size() - 1).equals(this)) {
+                    mp.redoableUserActions.remove(mp.redoableUserActions.size() - 1);
+                } else {
+                    // different branch : clear redoable actions
+                    mp.redoableUserActions.clear();
+                }
             }
+            mp.mso.sendInfo(this);
         }
-        mp.mso.sendInfo(this);
     }
 
     final public void cancelRequest() {
-        if ((getSliceSources()==null)) {
-            // Not asynchronous
-            System.out.println("Non Async cancel call : "+this.toString());
-            cancel();
-        } else {
-            System.out.println("Async cancel call : "+this.toString());
-            getSliceSources().enqueueCancelAction(this, () -> {});
+        if (isValid()) {
+            if ((getSliceSources() == null)) {
+                // Not asynchronous
+                System.out.println("Non Async cancel call : " + this.toString());
+                cancel();
+            } else {
+                System.out.println("Async cancel call : " + this.toString());
+                getSliceSources().enqueueCancelAction(this, () -> {
+                });
+            }
+            if (mp.userActions.get(mp.userActions.size() - 1).equals(this)) {
+                mp.userActions.remove(mp.userActions.size() - 1);
+                mp.redoableUserActions.add(this);
+            } else {
+                errlog.accept("Error : cancel not called on the last action");
+                return;
+            }
+            mp.mso.cancelInfo(this);
         }
-        if (mp.userActions.get(mp.userActions.size() - 1).equals(this)) {
-            mp.userActions.remove(mp.userActions.size() - 1);
-            mp.redoableUserActions.add(this);
-        } else {
-            errlog.accept("Error : cancel not called on the last action");
-            return;
-        }
-        mp.mso.cancelInfo(this);
     }
 
     abstract protected boolean run();
@@ -88,6 +94,10 @@ public abstract class CancelableAction {
 
     public void drawAction(Graphics2D g, double px, double py, double scale) {
         g.drawString(toString(), (int) px, (int) py);
+    }
+
+    protected boolean isValid() {
+        return true;
     }
 
 }
