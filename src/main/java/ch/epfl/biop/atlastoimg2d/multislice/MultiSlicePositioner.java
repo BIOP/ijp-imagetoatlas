@@ -3,10 +3,7 @@ package ch.epfl.biop.atlastoimg2d.multislice;
 import bdv.util.*;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.BiopAtlas;
-import ch.epfl.biop.atlastoimg2d.commands.sourceandconverter.multislices.ExportRegionsCommand;
-import ch.epfl.biop.atlastoimg2d.commands.sourceandconverter.multislices.RectangleROIDefineCommand;
-import ch.epfl.biop.atlastoimg2d.commands.sourceandconverter.multislices.RegistrationOptionCommand;
-import ch.epfl.biop.atlastoimg2d.commands.sourceandconverter.multislices.SlicerAdjusterCommand;
+import ch.epfl.biop.atlastoimg2d.commands.sourceandconverter.multislices.*;
 import ch.epfl.biop.atlastoimg2d.multislice.scijava.ScijavaSwingUI;
 import ch.epfl.biop.bdv.select.SelectedSourcesListener;
 import ch.epfl.biop.bdv.select.SourceSelectorBehaviour;
@@ -143,8 +140,6 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         getBdvh().getViewerPanel().showMessage(message);
     };
 
-    SwingAtlasViewer sav = new SwingAtlasViewer();
-
     public MultiSlicePositioner(BdvHandle bdvh, BiopAtlas biopAtlas, ReslicedAtlas reslicedAtlas, Context ctx) {
         this.reslicedAtlas = reslicedAtlas;
         this.biopAtlas = biopAtlas;
@@ -189,10 +184,6 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.navigatePreviousSlice(), "navigate_previous_slice", "P"); // P taken for panel
         common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.navigateCurrentSlice(), "navigate_current_slice", "C");
         common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.nextMode(), "change_mode", "Q");
-        //common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.exportSelectedSlices(), "exportSlices", "E");
-
-
-
 
         bdvh.getTriggerbindings().addBehaviourMap(COMMON_BEHAVIOURS_KEY, common_behaviours.getBehaviourMap());
         bdvh.getTriggerbindings().addInputTriggerMap(COMMON_BEHAVIOURS_KEY, common_behaviours.getInputTriggerMap()); // "transform", "bdv"
@@ -201,6 +192,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         overrideStandardNavigation();
 
         positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.toggleOverlap(), "toggle_superimpose", "O");
+
         positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> {
             if (ssb.isEnabled()) {
                 ssb.disable();
@@ -210,14 +202,12 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 refreshBlockMap();
             }
         }, "toggle_editormode", "E");
+
         positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.equalSpacingSelectedSlices(), "equalSpacingSelectedSlices", "A");
         positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> slices.forEach(slice -> slice.select()), "selectAllSlices", "ctrl A");
         positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> slices.forEach(slice -> slice.deSelect()), "deselectAllSlices", "ctrl shift A");
 
         ssb.addSelectedSourcesListener(this);
-
-        //registration_behaviours.behaviour((ClickBehaviour) (x, y) -> this.elastixRegister(), "register_elastix", "R");
-        //registration_behaviours.behaviour((ClickBehaviour) (x, y) -> this.bigwarpRegister(), "register_test", "W");
 
         List<SourceAndConverter<?>> sacsToAppend = new ArrayList<>();
         for (int i = 0; i < biopAtlas.map.getStructuralImages().length; i++) {
@@ -254,25 +244,29 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
         previouszStep = (int) reslicedAtlas.getStep();
 
-        bdvh.getCardPanel().addCard("Slicing Adjustement",
+        mso = new MultiSliceObserver(this);
+
+        bdvh.getCardPanel().addCard("Atlas Slicing",
                 ScijavaSwingUI.getPanel(scijavaCtx, SlicerAdjusterCommand.class, "reslicedAtlas", reslicedAtlas),
                 true);
 
-        bdvh.getCardPanel().addCard("Registration Options",
-                ScijavaSwingUI.getPanel(scijavaCtx, RegistrationOptionCommand.class, "mp", this),
-                true);
-
-        bdvh.getCardPanel().addCard("Rectangle of Interest",
+        bdvh.getCardPanel().addCard("Rectangle of interest",
                 ScijavaSwingUI.getPanel(scijavaCtx, RectangleROIDefineCommand.class, "mp", this),
                 true);
 
-        mso = new MultiSliceObserver(this);
+        bdvh.getCardPanel().addCard("Elastix Registration",
+                ScijavaSwingUI.getPanel(scijavaCtx, ElastixRegistrationOptionCommand.class, "mp", this),
+                true);
 
-        bdvh.getCardPanel().addCard("Tasks Info", mso.getJPanel(), true);
+        bdvh.getCardPanel().addCard("BigWarp Registration",
+                ScijavaSwingUI.getPanel(scijavaCtx, BigWarpRegistrationOptionCommand.class, "mp", this),
+                true);
 
-        bdvh.getCardPanel().addCard("Region export options", //panelExport
+        bdvh.getCardPanel().addCard("Export", //panelExport
                 ScijavaSwingUI.getPanel(scijavaCtx, ExportRegionsCommand.class,               "mp", this),
                 true);
+
+        bdvh.getCardPanel().addCard("Tasks Info", mso.getJPanel(), true);
 
         // Default registration region = full atlas size
         roiPX = -sX / 2.0;
@@ -1017,11 +1011,11 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         navigateCurrentSlice();
     }
 
-    boolean showRegistrationResults = false;
+    /*boolean showRegistrationResults = false;
 
     public void showRegistrationResults(boolean flag) {
         showRegistrationResults = flag;
-    }
+    }*/
 
     public void registerElastix(Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixed,
                                 Function<SourceAndConverter[], SourceAndConverter[]> preprocessMoving) {
@@ -1036,7 +1030,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 params.put("levelMovingSource", slice.registered_sacs[0].getSpimSource().getNumMipmapLevels() - 1);
                 params.put("pxSizeInCurrentUnit", 0.04);
                 params.put("interpolate", false);
-                params.put("showImagePlusRegistrationResult", showRegistrationResults);//true);
+                params.put("showImagePlusRegistrationResult", false);//true);
                 params.put("px", roiPX);//rpt.getDoublePosition(0));
                 params.put("py", roiPY);//rpt.getDoublePosition(1));
                 params.put("pz", slice.getSlicingAxisPosition());//rpt.getDoublePosition(2));
@@ -1048,6 +1042,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         }
     }
 
+    /*
     public void requestRegistration(String registrationType,
                                     int channelFixed,
                                     int channelMoving) {
@@ -1099,7 +1094,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                     log.accept("Unrecognized registration : "+registrationType);
             }
         }
-    }
+    }*/
 
     public void registerBigWarp(Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixed,
                                 Function<SourceAndConverter[], SourceAndConverter[]> preprocessMoving) {

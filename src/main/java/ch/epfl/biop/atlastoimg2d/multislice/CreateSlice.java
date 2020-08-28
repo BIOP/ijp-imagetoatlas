@@ -35,62 +35,63 @@ public class CreateSlice extends CancelableAction {
 
     @Override
     public boolean run() {
-        boolean sacAlreadyPresent = false;
-        for (SourceAndConverter sac : sacs) {
-            for (SliceSources slice : mp.slices) {
-                for (SourceAndConverter test : slice.original_sacs) {
-                    if (test.equals(sac)) {
-                        sacAlreadyPresent = true;
+        synchronized (CreateSlice.class) { // only one slice addition at a time
+            boolean sacAlreadyPresent = false;
+            for (SourceAndConverter sac : sacs) {
+                for (SliceSources slice : mp.slices) {
+                    for (SourceAndConverter test : slice.original_sacs) {
+                        if (test.equals(sac)) {
+                            sacAlreadyPresent = true;
+                        }
                     }
                 }
             }
-        }
 
-        if (sacAlreadyPresent) {
-            SliceSources zeSlice = null;
+            if (sacAlreadyPresent) {
+                SliceSources zeSlice = null;
 
-            // A source is already included :
-            // If all sources match exactly what's in a single SliceSources -> that's a move operation
+                // A source is already included :
+                // If all sources match exactly what's in a single SliceSources -> that's a move operation
 
-            boolean exactMatch = false;
-            for (SliceSources ss : mp.slices) {
-                if (ss.exactMatch(sacs)) {
-                    exactMatch = true;
-                    zeSlice = ss;
+                boolean exactMatch = false;
+                for (SliceSources ss : mp.slices) {
+                    if (ss.exactMatch(sacs)) {
+                        exactMatch = true;
+                        zeSlice = ss;
+                    }
+                }
+
+                if (!exactMatch) {
+                    System.err.println("A source is already used in the positioner : slice not created.");
+                    mp.log.accept("A source is already used in the positioner : slice not created.");
+                    return false;
+                } else {
+                    // Move action:
+                    new MoveSlice(mp, zeSlice, slicingAxisPosition).runRequest();
+                    return false;
                 }
             }
 
-            if (!exactMatch) {
-                System.err.println("A source is already used in the positioner : slice not created.");
-                mp.log.accept("A source is already used in the positioner : slice not created.");
-                return false;
-            } else {
-                // Move action:
-                new MoveSlice(mp, zeSlice, slicingAxisPosition).runRequest();
-                return false;
+            if (sliceSource == null) // for proper redo function
+                sliceSource = new SliceSources(sacs.toArray(new SourceAndConverter[sacs.size()]),
+                        slicingAxisPosition, mp);
+
+            mp.slices.add(sliceSource);
+
+            mp.updateDisplay();
+
+            if (mp.currentMode == POSITIONING_MODE_INT) {
+                SourceAndConverterServices.getSourceAndConverterDisplayService()
+                        .show(mp.bdvh, sliceSource.relocated_sacs_positioning_mode);
+                sliceSource.enableGraphicalHandles();
+            } else if (mp.currentMode == REGISTRATION_MODE_INT) {
+                SourceAndConverterServices.getSourceAndConverterDisplayService()
+                        .show(mp.bdvh, sliceSource.registered_sacs);
+                sliceSource.disableGraphicalHandles();
             }
+
+            mp.log.accept("Slice added");
         }
-
-        if (sliceSource == null) // for proper redo function
-            sliceSource = new SliceSources(sacs.toArray(new SourceAndConverter[sacs.size()]),
-                    slicingAxisPosition,mp);
-
-        mp.slices.add(sliceSource);
-
-        mp.updateDisplay();
-
-        if (mp.currentMode == POSITIONING_MODE_INT) {
-            SourceAndConverterServices.getSourceAndConverterDisplayService()
-                    .show(mp.bdvh, sliceSource.relocated_sacs_positioning_mode);
-            sliceSource.enableGraphicalHandles();
-        } else if (mp.currentMode == REGISTRATION_MODE_INT) {
-            SourceAndConverterServices.getSourceAndConverterDisplayService()
-                    .show(mp.bdvh, sliceSource.registered_sacs);
-            sliceSource.disableGraphicalHandles();
-        }
-
-        mp.log.accept("Slice added");
-
         return true;
     }
 

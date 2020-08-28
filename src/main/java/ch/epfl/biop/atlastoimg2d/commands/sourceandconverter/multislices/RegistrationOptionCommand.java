@@ -9,15 +9,11 @@ import org.scijava.widget.Button;
 
 import java.util.function.Function;
 
-@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Registration Options")
-public class RegistrationOptionCommand implements Command {
+//@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Registration Options")
+abstract public class RegistrationOptionCommand implements Command {
 
     @Parameter
     MultiSlicePositioner mp;
-
-    @Parameter(choices = {"Manual Affine", "Auto Elastix Affine", "Manual BigWarp", "Auto Elastix BigWarp"},
-    callback = "registrationChanged")
-    String registrationType;
 
     @Parameter(label = "Atlas channels")
     int atlasImageChannel;
@@ -28,21 +24,16 @@ public class RegistrationOptionCommand implements Command {
     @Parameter(label = "Show registration results")
     boolean showImageRegistrationResults;
 
-    @Parameter(callback = "clicked")
-    Button exebutton;
+    @Parameter(label = "Start", callback = "start")
+    Button start;
 
     @Override
     public void run() {
         // Cannot be accessed
+        start();
     }
 
-    public void clicked() {
-        mp.requestRegistration(registrationType,
-               getFixedFilter(),
-               getMovingFilter()
-        );
-        mp.showRegistrationResults(showImageRegistrationResults);
-    }
+    abstract public void start();
 
     public Function<SourceAndConverter[], SourceAndConverter[]> getFixedFilter() {
         final int atlasChannel = atlasImageChannel;
@@ -54,7 +45,4 @@ public class RegistrationOptionCommand implements Command {
         return (sacs) -> new SourceAndConverter[]{sacs[sliceChannel]};
     }
 
-    public void registrationChanged() {
-        System.out.println("Registration changed");
-    }
 }

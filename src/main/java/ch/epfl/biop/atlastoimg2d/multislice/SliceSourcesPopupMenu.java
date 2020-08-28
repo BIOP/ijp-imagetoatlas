@@ -49,9 +49,10 @@ public class SliceSourcesPopupMenu {
             }
         });
 
-        addPopupLine();
 
         if (slices.length>0) {
+
+            addPopupLine();
 
             addPopupAction("Hide Slices", (slices) -> {
                 for (SliceSources slice : slices) {
@@ -75,6 +76,36 @@ public class SliceSourcesPopupMenu {
                 new MarkActionSequenceBatch(mp).runRequest();
             });
         }
+
+        addPopupLine();
+
+        if (mp.userActions.size()>0) {
+            addPopupAction("Cancel last action", (slices) -> {
+                mp.cancelLastAction();
+            });
+        }
+
+        if (mp.redoableUserActions.size()>0) {
+            addPopupAction("Redo action", (slices) -> {
+                mp.redoAction();
+            });
+        }
+
+        if (mp.currentMode != MultiSlicePositioner.POSITIONING_MODE_INT) {
+            addPopupAction("Positioning mode", (slices) -> {
+                mp.setPositioningMode();
+            });
+        }
+
+        if (mp.currentMode != MultiSlicePositioner.REGISTRATION_MODE_INT) {
+            addPopupAction("Registration mode", (slices) -> {
+                mp.setRegistrationMode();
+            });
+        }
+
+        addPopupAction("Change overlap mode", (slices) -> {
+            mp.toggleOverlap();
+        });
 
         return popup;
     }
