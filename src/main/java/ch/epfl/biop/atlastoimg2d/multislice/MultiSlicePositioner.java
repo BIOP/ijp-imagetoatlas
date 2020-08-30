@@ -1017,6 +1017,24 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         showRegistrationResults = flag;
     }*/
 
+    public static Function<SourceAndConverter[], SourceAndConverter[]> getChannel(int... channels) {
+        return (sacs) -> {
+            SourceAndConverter[] sacs_out = new SourceAndConverter[channels.length];
+            for (int iChannel = 0 ; iChannel<channels.length ; iChannel++) {
+                sacs_out[iChannel] = sacs[channels[iChannel]];
+            }
+            return sacs_out;
+        };
+    }
+
+    public void registerElastix(int iChannelFixed, int iChannelMoving) {
+        registerElastix(getChannel(iChannelFixed), getChannel(iChannelMoving));
+    }
+
+    public void registerBigWarp(int iChannelFixed, int iChannelMoving) {
+        registerBigWarp(getChannel(iChannelFixed), getChannel(iChannelMoving));
+    }
+
     public void registerElastix(Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixed,
                                 Function<SourceAndConverter[], SourceAndConverter[]> preprocessMoving) {
         for (SliceSources slice : slices) {

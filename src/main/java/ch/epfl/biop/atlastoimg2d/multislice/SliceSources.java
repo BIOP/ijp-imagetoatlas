@@ -7,12 +7,16 @@ import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
 import ch.epfl.biop.java.utilities.roi.types.IJShapeRoiArray;
 import ch.epfl.biop.java.utilities.roi.types.ImageJRoisFile;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
+import ch.epfl.biop.qupathfiji.MinimalQuPathProject;
+import ch.epfl.biop.qupathfiji.QuPathEntryEntity;
 import ch.epfl.biop.registration.Registration;
 import ch.epfl.biop.registration.sourceandconverter.AffineTransformedSourceWrapperRegistration;
 import ch.epfl.biop.registration.sourceandconverter.CenterZeroRegistration;
 import ch.epfl.biop.scijava.command.ExportToImagePlusCommand;
 import com.google.common.collect.Lists;
 import ij.ImagePlus;
+import mpicbg.spim.data.generic.AbstractSpimData;
+import mpicbg.spim.data.generic.sequence.BasicViewSetup;
 import net.imglib2.RealPoint;
 import net.imglib2.cache.img.DiskCachedCellImgFactory;
 import net.imglib2.cache.img.DiskCachedCellImgOptions;
@@ -21,6 +25,8 @@ import net.imglib2.type.numeric.integer.UnsignedShortType;
 import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
+import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
+import sc.fiji.bdvpg.scijava.services.ui.SourceAndConverterInspector;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterAndTimeRange;
 import sc.fiji.bdvpg.sourceandconverter.importer.EmptySourceAndConverterCreator;
@@ -37,6 +43,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
+import static ch.epfl.biop.scijava.command.QuPathProjectToBDVDatasetCommand.QUPATH_LINKED_PROJECT;
 import static net.imglib2.cache.img.DiskCachedCellImgOptions.options;
 
 public class SliceSources {
@@ -573,14 +580,90 @@ public class SliceSources {
         ConvertibleRois roiOutput = new ConvertibleRois();
         roiOutput.set(roiRenamer.output);
 
-        System.out.println("3");
         ImageJRoisFile ijroisfile = (ImageJRoisFile) roiOutput.to(ImageJRoisFile.class);
+
+        //--------------------
 
         File f = new File(dirOutput, toString()+".zip");
         try {
+            // Save in user specified folder
             Files.move(Paths.get(ijroisfile.f.getAbsolutePath()),Paths.get(f.getAbsolutePath()));
+
         } catch (IOException e) {
             e.printStackTrace();
+        }
+
+        storeInQuPathProjectIfExists(ijroisfile);
+
+    }
+
+    void storeInQuPathProjectIfExists(ImageJRoisFile ijroisfile) {
+        //-------------------- Experimental : finding where to save the ROIS
+        SourceAndConverter rootSac = SourceAndConverterInspector.getRootSourceAndConverter(original_sacs[0]);
+
+        if (SourceAndConverterServices.getSourceAndConverterService()
+                .getMetadata(rootSac, SourceAndConverterService.SPIM_DATA_INFO)==null) {
+
+            System.out.println("Slice not associated to any dataset");
+
+        } else {
+            AbstractSpimData asd =
+                    ((SourceAndConverterService.SpimDataInfo)SourceAndConverterServices.getSourceAndConverterService()
+                            .getMetadata(rootSac, SourceAndConverterService.SPIM_DATA_INFO)).asd;
+
+            System.out.println("BDV Datasets found associated with the slice!");
+
+
+            if (SourceAndConverterServices
+                    .getSourceAndConverterService()
+                    .containsMetadata(asd, QUPATH_LINKED_PROJECT)) {
+                System.out.println("Linked QuPath Project found!");
+
+                int viewSetupId = ((SourceAndConverterService.SpimDataInfo)SourceAndConverterServices.getSourceAndConverterService()
+                        .getMetadata(rootSac, SourceAndConverterService.SPIM_DATA_INFO)).setupId;
+
+                BasicViewSetup bvs = (BasicViewSetup) asd.getSequenceDescription().getViewSetups().get(viewSetupId);
+
+                if (bvs.getAttribute(QuPathEntryEntity.class)!=null) {
+                    QuPathEntryEntity qpent = bvs.getAttribute(QuPathEntryEntity.class);
+
+                    MinimalQuPathProject qpProj = (MinimalQuPathProject) SourceAndConverterServices
+                            .getSourceAndConverterService()
+                            .getMetadata(asd, QUPATH_LINKED_PROJECT);
+
+
+
+                    String filePath = Paths.get(qpProj.uri).getParent().toString();
+
+                    // under filePath, there should be a folder data/#entryID
+
+                    File dataEntryFolder = new File(filePath, "data"+File.separator+Integer.toString(qpent.getId()) );
+
+                    // TODO : check if the file already exists...
+                    if (dataEntryFolder.exists()) {
+
+                        File f = new File(dataEntryFolder, "ABBA-RoiSet.zip");
+                        System.out.println("attempt save QuPath" + f.getAbsolutePath());
+                        try {
+                            // Save in user specified folder
+                            Files.move(Paths.get(ijroisfile.f.getAbsolutePath()),Paths.get(f.getAbsolutePath()));
+
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+                    } else {
+                        System.err.println("QuPath Entry data folder ["+dataEntryFolder.toString() +"] not found! : ");
+                    }
+
+                } else {
+                    System.out.println("QuPathEntryEntity not found");
+                }
+
+
+            } else {
+                System.out.println("No QuPath project found");
+            }
         }
     }
 

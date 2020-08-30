@@ -20,7 +20,6 @@ public class ExportSlice extends CancelableAction {
     @Override
     public boolean run() { //
         System.out.println("Exporting slice registration");
-        //super.run(); // not saved
         slice.export(namingChoice, dirOutput);
         return true;
     }
