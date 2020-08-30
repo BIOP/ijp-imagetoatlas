@@ -17,7 +17,6 @@ public class AllenOntology implements AtlasOntology {
 
 	static File cachedJSONFile;
 
-
     public Integer getRootIndex() {
         return new Integer(997); // 997 -1 ou 1 ou 8
     }
@@ -25,6 +24,11 @@ public class AllenOntology implements AtlasOntology {
     @Override
     public String getNamingDisplayProperty() {
         return "acronym";
+    }
+
+    @Override
+    public Integer getOriginalId(int id) {
+        return ontologyIdToOriginalId.get(id);
     }
 
     @Override

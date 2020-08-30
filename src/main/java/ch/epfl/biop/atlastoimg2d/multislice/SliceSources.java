@@ -15,6 +15,7 @@ import ch.epfl.biop.registration.sourceandconverter.CenterZeroRegistration;
 import ch.epfl.biop.scijava.command.ExportToImagePlusCommand;
 import com.google.common.collect.Lists;
 import ij.ImagePlus;
+import ij.gui.Roi;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import mpicbg.spim.data.generic.sequence.BasicViewSetup;
 import net.imglib2.RealPoint;
@@ -569,7 +570,7 @@ public class SliceSources {
 
         computeTransformedRois();
 
-        PutAtlasStructureToImageNoRoiManager roiRenamer = new PutAtlasStructureToImageNoRoiManager();
+        /*PutAtlasStructureToImageNoRoiManager roiRenamer = new PutAtlasStructureToImageNoRoiManager();
         roiRenamer.addAncestors=false;
         roiRenamer.addDescendants = true;
         roiRenamer.atlas = mp.biopAtlas;
@@ -578,9 +579,10 @@ public class SliceSources {
         roiRenamer.namingChoice = namingChoice;
         roiRenamer.run();
         ConvertibleRois roiOutput = new ConvertibleRois();
-        roiOutput.set(roiRenamer.output);
+        roiOutput.set(roiRenamer.output);*/
 
-        ImageJRoisFile ijroisfile = (ImageJRoisFile) roiOutput.to(ImageJRoisFile.class);
+        ImageJRoisFile ijroisfile = (ImageJRoisFile) cvtRoisTransformed.to(ImageJRoisFile.class);
+
 
         //--------------------
 
@@ -595,6 +597,18 @@ public class SliceSources {
 
         storeInQuPathProjectIfExists(ijroisfile);
 
+    }
+
+    void addHierarchyInDescription(Roi roi, String idNumber) {
+        int idRoi = Integer.valueOf(idNumber);
+        String hierarchy = idNumber;
+        while (mp.biopAtlas.ontology.getParent(idRoi)!=null) {
+            hierarchy+=">"+mp.biopAtlas.ontology.getParent(idRoi);
+            idRoi = mp.biopAtlas.ontology.getParent(idRoi);
+        }
+        roi.setProperty("hierarchy", hierarchy);
+        /*System.out.println("roi = "+idNumber);
+        System.out.println("hierarchy = "+hierarchy);*/
     }
 
     void storeInQuPathProjectIfExists(ImageJRoisFile ijroisfile) {
@@ -700,6 +714,15 @@ public class SliceSources {
 
         cvtRoisTransformed.clear();
         list.shapeRoiList = new IJShapeRoiArray(arrayIni);
+
+        /*for (int i = 0;i<arrayIni.rois.size();i++) {
+            list.shapeRoiList.rois.get(i).getRoi().setProperty("hierarchy", arrayIni.rois.get(i).getRoi().getProperty("hierarchy"));
+
+            System.out.println("------------");
+            System.out.println(arrayIni.rois.get(i).getRoi().getProperty("hierarchy"));
+
+        }*/
+
         cvtRoisTransformed.set(list);
     }
 

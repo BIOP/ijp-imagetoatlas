@@ -91,6 +91,12 @@ public class PutAtlasStructureToImageNoRoiManager implements Command {
         }
 
         output = new IJShapeRoiArray(listOut);
+
+        for (int i=0;i<output.rois.size();i++) {
+            System.out.println("rename");
+            System.out.println(rois.rois.get(i).getRoi().getProperty("hierarchy"));
+            output.rois.get(i).getRoi().setProperty("hierarchy", rois.rois.get(i).getRoi().getProperty("hierarchy"));
+        }
 	}
 
     public boolean isInteger( String input ) {

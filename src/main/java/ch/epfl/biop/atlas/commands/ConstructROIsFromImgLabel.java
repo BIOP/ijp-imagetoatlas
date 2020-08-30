@@ -123,7 +123,7 @@ public class ConstructROIsFromImgLabel implements Command {
 			}
 		}
 		boolean containsLeaf=true;
-		HashSet<Float> monitored = new HashSet<Float>();
+		HashSet<Float> monitored = new HashSet<>();
 		/*monitored.add(945f);
 		monitored.add(369f);
 		monitored.add(322f);*/
@@ -188,7 +188,10 @@ public class ConstructROIsFromImgLabel implements Command {
 
 		cr_out = new ConvertibleRois();
 
+		roiArray.forEach(roi -> addHierarchyInName(roi, roi.getName()));
+
 		IJShapeRoiArray output = new IJShapeRoiArray(roiArray);
+
 		output.smoothenWithConstrains(movablePx);
 		output.smoothenWithConstrains(movablePx);
 
@@ -198,6 +201,18 @@ public class ConstructROIsFromImgLabel implements Command {
 		} else {
 			System.err.println("Object Service not set");
 		}
+	}
+
+	void addHierarchyInName(Roi roi, String idNumber) {
+		int idRoi = Integer.valueOf(idNumber);
+		String hierarchy = Integer.toString(atlas.ontology.getOriginalId(idRoi));
+		while (atlas.ontology.getParent(idRoi)!=null) {
+			hierarchy+=">"+atlas.ontology.getOriginalId(atlas.ontology.getParent(idRoi));
+			idRoi = atlas.ontology.getParent(idRoi);
+		}
+		roi.setName(hierarchy);
+		/*System.out.println("roi = "+idNumber);
+		System.out.println("hierarchy = "+hierarchy);*/
 	}
 
 }

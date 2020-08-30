@@ -24,4 +24,6 @@ public interface AtlasOntology {
 
 	String getNamingDisplayProperty();
 
+	Integer getOriginalId(int id); // Used because of modulo... the 65535 story with the allen brain atlas
+
 }
