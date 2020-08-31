@@ -210,7 +210,7 @@ public class ConstructROIsFromImgLabel implements Command {
 			hierarchy+=">"+atlas.ontology.getOriginalId(atlas.ontology.getParent(idRoi));
 			idRoi = atlas.ontology.getParent(idRoi);
 		}
-		roi.setName(hierarchy);
+		// roi.setName(hierarchy);
 		/*System.out.println("roi = "+idNumber);
 		System.out.println("hierarchy = "+hierarchy);*/
 	}
