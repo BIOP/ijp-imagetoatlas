@@ -958,16 +958,17 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         new MoveSlice(this, slice, axisPosition).runRequest();
     }
 
-    public void exportSelectedSlices(String namingChoice, File dirOutput) {
+    public void exportSelectedSlices(String namingChoice, File dirOutput, boolean erasePreviousFile) {
         List<SliceSources> sortedSelected = getSortedSlices().stream().filter(slice -> slice.isSelected()).collect(Collectors.toList());
         new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
 
         List<Thread> threads = new ArrayList<>();
         for (SliceSources slice : sortedSelected) {
-            threads.add(new Thread(() -> exportSlice(slice, namingChoice, dirOutput)));
+            threads.add(new Thread(() -> exportSlice(slice, namingChoice, dirOutput, erasePreviousFile)));
         }
 
         threads.forEach(t -> t.start());
+        // TODO : understand why it hangs ? but is
         /*threads.forEach(t -> {
             try {
                 t.join();
@@ -979,8 +980,8 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
     }
 
-    public void exportSlice(SliceSources slice, String namingChoice, File dirOutput) {
-        new ExportSlice(this, slice, namingChoice, dirOutput).runRequest();
+    public void exportSlice(SliceSources slice, String namingChoice, File dirOutput, boolean erasePreviousFile) {
+        new ExportSlice(this, slice, namingChoice, dirOutput, erasePreviousFile).runRequest();
     }
 
     /**

@@ -1,6 +1,7 @@
 package ch.epfl.biop.atlastoimg2d.multislice;
 
 import bdv.viewer.SourceAndConverter;
+import ch.epfl.biop.atlas.allen.AllenOntologyJson;
 import ch.epfl.biop.atlas.commands.ConstructROIsFromImgLabel;
 import ch.epfl.biop.atlastoimg2d.commands.sourceandconverter.multislices.PutAtlasStructureToImageNoRoiManager;
 import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
@@ -14,6 +15,7 @@ import ch.epfl.biop.registration.sourceandconverter.AffineTransformedSourceWrapp
 import ch.epfl.biop.registration.sourceandconverter.CenterZeroRegistration;
 import ch.epfl.biop.scijava.command.ExportToImagePlusCommand;
 import com.google.common.collect.Lists;
+import com.google.gson.Gson;
 import ij.ImagePlus;
 import ij.gui.Roi;
 import mpicbg.spim.data.generic.AbstractSpimData;
@@ -36,6 +38,7 @@ import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
 
 import java.awt.*;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -539,7 +542,7 @@ public class SliceSources {
         labelImageBeingComputed = false;
     }
 
-    public synchronized void export(String namingChoice, File dirOutput) {
+    public synchronized void export(String namingChoice, File dirOutput, boolean erasePreviousFile) {
         // Need to raster the label image
         AffineTransform3D at3D = new AffineTransform3D();
         at3D.translate(-mp.nPixX / 2.0, -mp.nPixY / 2.0, 0);
@@ -588,18 +591,30 @@ public class SliceSources {
 
         File f = new File(dirOutput, toString()+".zip");
         try {
-            // Save in user specified folder
-            Files.move(Paths.get(ijroisfile.f.getAbsolutePath()),Paths.get(f.getAbsolutePath()));
+
+            if (f.exists()) {
+                if (erasePreviousFile) {
+                    Files.delete(Paths.get(f.getAbsolutePath()));
+
+                    // Save in user specified folder
+                    Files.copy(Paths.get(ijroisfile.f.getAbsolutePath()),Paths.get(f.getAbsolutePath()));
+                } else {
+                    System.err.println("ROI File already exists!");
+                }
+            } else {
+                // Save in user specified folder
+                Files.copy(Paths.get(ijroisfile.f.getAbsolutePath()),Paths.get(f.getAbsolutePath()));
+            }
 
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        storeInQuPathProjectIfExists(ijroisfile);
+        storeInQuPathProjectIfExists(ijroisfile, erasePreviousFile);
 
     }
 
-    void addHierarchyInDescription(Roi roi, String idNumber) {
+    /*void addHierarchyInDescription(Roi roi, String idNumber) {
         int idRoi = Integer.valueOf(idNumber);
         String hierarchy = idNumber;
         while (mp.biopAtlas.ontology.getParent(idRoi)!=null) {
@@ -607,11 +622,11 @@ public class SliceSources {
             idRoi = mp.biopAtlas.ontology.getParent(idRoi);
         }
         roi.setProperty("hierarchy", hierarchy);
-        /*System.out.println("roi = "+idNumber);
-        System.out.println("hierarchy = "+hierarchy);*/
-    }
+        //System.out.println("roi = "+idNumber);
+        //System.out.println("hierarchy = "+hierarchy);/
+    }*/
 
-    void storeInQuPathProjectIfExists(ImageJRoisFile ijroisfile) {
+    void storeInQuPathProjectIfExists(ImageJRoisFile ijroisfile, boolean erasePreviousFile) {
         //-------------------- Experimental : finding where to save the ROIS
         SourceAndConverter rootSac = SourceAndConverterInspector.getRootSourceAndConverter(original_sacs[0]);
 
@@ -645,8 +660,6 @@ public class SliceSources {
                             .getSourceAndConverterService()
                             .getMetadata(asd, QUPATH_LINKED_PROJECT);
 
-
-
                     String filePath = Paths.get(qpProj.uri).getParent().toString();
 
                     // under filePath, there should be a folder data/#entryID
@@ -659,9 +672,21 @@ public class SliceSources {
                         File f = new File(dataEntryFolder, "ABBA-RoiSet.zip");
                         System.out.println("attempt save QuPath" + f.getAbsolutePath());
                         try {
-                            // Save in user specified folder
-                            Files.move(Paths.get(ijroisfile.f.getAbsolutePath()),Paths.get(f.getAbsolutePath()));
 
+                            if (f.exists()) {
+                                if (erasePreviousFile) {
+                                    Files.delete(Paths.get(f.getAbsolutePath()));
+                                    // Save in user specified folder
+                                    Files.copy(Paths.get(ijroisfile.f.getAbsolutePath()),Paths.get(f.getAbsolutePath()));
+                                    writeOntotogyIfNotPresent(filePath);
+                                } else {
+                                    System.err.println("Error : QuPath ROI file already exists");
+                                }
+                            } else {
+                                // Save in user specified folder
+                                Files.copy(Paths.get(ijroisfile.f.getAbsolutePath()),Paths.get(f.getAbsolutePath()));
+                                writeOntotogyIfNotPresent(filePath);
+                            }
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -678,6 +703,21 @@ public class SliceSources {
             } else {
                 System.out.println("No QuPath project found");
             }
+        }
+    }
+
+    static public synchronized void writeOntotogyIfNotPresent(String quPathFilePath) {
+        File ontology = new File(quPathFilePath, "AllenMouseBrainOntology.json");
+        if (!ontology.exists()) {
+            // Write ontology once
+            Gson gson = new Gson();
+            AllenOntologyJson onto = AllenOntologyJson.getOntologyFromFile(new File("src/main/resources/AllenBrainData/1.json"));
+            try {
+                gson.toJson(onto, new FileWriter(quPathFilePath));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
         }
     }
 

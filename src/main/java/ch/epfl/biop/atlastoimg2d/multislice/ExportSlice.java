@@ -9,18 +9,20 @@ public class ExportSlice extends CancelableAction {
     final SliceSources slice;
     String namingChoice;
     File dirOutput;
+    boolean erasePreviousFile;
 
-    public ExportSlice(MultiSlicePositioner mp, SliceSources slice, String namingChoice, File dirOutput) {
+    public ExportSlice(MultiSlicePositioner mp, SliceSources slice, String namingChoice, File dirOutput, boolean erasePreviousFile) {
         super(mp);
         this.slice = slice;
         this.namingChoice = namingChoice;
         this.dirOutput = dirOutput;
+        this.erasePreviousFile = erasePreviousFile;
     }
 
     @Override
     public boolean run() { //
         System.out.println("Exporting slice registration");
-        slice.export(namingChoice, dirOutput);
+        slice.export(namingChoice, dirOutput, erasePreviousFile);
         return true;
     }
 

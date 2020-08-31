@@ -10,7 +10,7 @@ import org.scijava.widget.Button;
 import java.io.File;
 
 @Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export ROIs")
-public class ExportRegionsCommand extends InteractiveCommand {
+public class ExportRegionsCommand implements Command {
 
     @Parameter
     MultiSlicePositioner mp;
@@ -20,6 +20,9 @@ public class ExportRegionsCommand extends InteractiveCommand {
 
     @Parameter(label="Directory for ROI Saving", style = "directory")
     File dirOutput;
+
+    @Parameter(label="Erase Previous ROIs")
+    boolean erasePreviousFile;
 
     @Parameter(callback = "clicked")
     Button run;
@@ -31,6 +34,6 @@ public class ExportRegionsCommand extends InteractiveCommand {
     }
 
     public void clicked() {
-        mp.exportSelectedSlices(namingChoice, dirOutput);
+        mp.exportSelectedSlices(namingChoice, dirOutput, erasePreviousFile);
     }
 }
