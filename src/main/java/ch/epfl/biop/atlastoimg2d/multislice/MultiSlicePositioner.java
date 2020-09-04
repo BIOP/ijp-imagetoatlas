@@ -964,10 +964,12 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
         List<Thread> threads = new ArrayList<>();
         for (SliceSources slice : sortedSelected) {
-            threads.add(new Thread(() -> exportSlice(slice, namingChoice, dirOutput, erasePreviousFile)));
+
+            //threads.add(new Thread(() -> exportSlice(slice, namingChoice, dirOutput, erasePreviousFile)));
+            exportSlice(slice, namingChoice, dirOutput, erasePreviousFile);
         }
 
-        threads.forEach(t -> t.start());
+        // threads.forEach(t -> t.start());
         // TODO : understand why it hangs ? but is
         /*threads.forEach(t -> {
             try {

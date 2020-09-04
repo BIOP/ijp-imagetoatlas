@@ -188,7 +188,7 @@ public class ConstructROIsFromImgLabel implements Command {
 
 		cr_out = new ConvertibleRois();
 
-		roiArray.forEach(roi -> addHierarchyInName(roi, roi.getName()));
+		roiArray.forEach(roi -> putOriginalId(roi, roi.getName()));
 
 		IJShapeRoiArray output = new IJShapeRoiArray(roiArray);
 
@@ -203,7 +203,12 @@ public class ConstructROIsFromImgLabel implements Command {
 		}
 	}
 
-	void addHierarchyInName(Roi roi, String idNumber) {
+	private void putOriginalId(Roi roi, String name) {
+		int idRoi = Integer.valueOf(name);
+		roi.setName(Integer.toString(atlas.ontology.getOriginalId(idRoi)));
+	}
+
+	/*void addHierarchyInName(Roi roi, String idNumber) {
 		int idRoi = Integer.valueOf(idNumber);
 		String hierarchy = Integer.toString(atlas.ontology.getOriginalId(idRoi));
 		while (atlas.ontology.getParent(idRoi)!=null) {
@@ -213,6 +218,6 @@ public class ConstructROIsFromImgLabel implements Command {
 		// roi.setName(hierarchy);
 		/*System.out.println("roi = "+idNumber);
 		System.out.println("hierarchy = "+hierarchy);*/
-	}
+	//}
 
 }

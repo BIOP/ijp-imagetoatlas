@@ -438,6 +438,11 @@ public class SliceSources {
                     return false;
                 }
             }));
+            tasks.add(tasks.get(tasks.size() - 1).thenApplyAsync(
+                (out) -> {
+                    mp.mso.updateInfoPanel(this);
+                    return out;}
+                ));
             mapActionTask.put(action, tasks.get(tasks.size() - 1));
         }
     }
@@ -708,7 +713,7 @@ public class SliceSources {
 
     static public synchronized void writeOntotogyIfNotPresent(String quPathFilePath) {
         File ontology = new File(quPathFilePath, "AllenMouseBrainOntology.json");
-        if (!ontology.exists()) {
+       /* if (!ontology.exists()) {
             // Write ontology once
             Gson gson = new Gson();
             AllenOntologyJson onto = AllenOntologyJson.getOntologyFromFile(new File("src/main/resources/AllenBrainData/1.json"));
@@ -718,7 +723,7 @@ public class SliceSources {
                 e.printStackTrace();
             }
 
-        }
+        }*/
     }
 
     public String toString() {
