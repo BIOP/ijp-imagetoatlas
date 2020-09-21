@@ -25,10 +25,13 @@ import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import org.scijava.Context;
+import org.scijava.cache.CacheService;
+import org.scijava.object.ObjectService;
 import org.scijava.ui.behaviour.*;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
 import sc.fiji.bdvpg.behaviour.EditorBehaviourUnInstaller;
+import sc.fiji.bdvpg.scijava.BdvHandleHelper;
 import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
 import sc.fiji.bdvpg.scijava.services.ui.swingdnd.BdvTransferHandler;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
@@ -72,9 +75,9 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     /**
      * BdvHandle displaying everything
      */
-    final BdvHandle bdvh;
+    BdvHandle bdvh;
 
-    final SourceSelectorBehaviour ssb;
+    SourceSelectorBehaviour ssb;
 
     /**
      * Slicing Model Properties
@@ -98,7 +101,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
     Context scijavaCtx;
 
-    final public MultiSliceObserver mso;
+    public MultiSliceObserver mso;
 
     /**
      * Shift in Y : control overlay or not of sources
@@ -135,6 +138,10 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     BiopAtlas biopAtlas;
 
     SelectionLayer selectionLayer;
+
+    int previouszStep;
+
+    double roiPX, roiPY, roiSX, roiSY;
 
     Consumer<String> log = (message) -> {
         getBdvh().getViewerPanel().showMessage(message);
@@ -213,7 +220,6 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         for (int i = 0; i < biopAtlas.map.getStructuralImages().length; i++) {
             sacsToAppend.add(reslicedAtlas.extendedSlicedSources[i]);
             sacsToAppend.add(reslicedAtlas.nonExtendedSlicedSources[i]);
-
         }
 
         SourceAndConverterServices.getSourceAndConverterDisplayService()
@@ -310,12 +316,32 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
         addRightClickActions();
 
+        BdvHandleHelper.setBdvHandleCloseOperation(bdvh, ctx.getService(CacheService.class),
+                SourceAndConverterServices.getSourceAndConverterDisplayService(), false,
+                    () -> {
+                        this.mso.clear();
+                        this.userActions.clear();
+                        this.slices.clear();
+                        this.biopAtlas = null;
+                        this.slices = null;
+                        this.userActions = null;
+                        ctx.getService(ObjectService.class).removeObject(this);
+                        this.bdvh = null;
+                        this.mso = null;
+                        this.selectionLayer = null;
+                        this.common_behaviours = null;
+                        this.positioning_behaviours = null;
+                        this.registration_behaviours = null;
+                        this.ssb = null;
+                        this.reslicedAtlas = null;
+                        this.info = null;
+                    }
+                );
+
     }
 
     void addRightClickActions() {
-
         common_behaviours.behaviour(new MultiSliceContextMenuClickBehaviour( this, this::getSelectedSources ), "Slices Context Menu", "button3");
-
     }
 
     public List<SliceSources> getSelectedSources() {
@@ -345,8 +371,6 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
         bdvh.getTriggerbindings().addInputTriggerMap("default_navigation", itm, "transform");
     }
-
-    int previouszStep;
 
     public void recenterBdvh() {
         double cur_wcx = bdvh.getViewerPanel().getWidth() / 2.0; // Current Window Center X
@@ -544,8 +568,6 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             centerBdvViewOn(sortedSlices.get(iCurrentSlice));
         }
     }
-
-    double roiPX, roiPY, roiSX, roiSY;
 
     /**
      * Defines, in physical units, the region that will be used to perform the automated registration

@@ -135,17 +135,20 @@
 		<license.copyrightOwners>N/A</license.copyrightOwners>
 		<scijava.app.directory>C:\Users\chiarutt\Desktop\bdv-allen\fiji-win64\Fiji.app</scijava.app.directory>
 
-		<bigdataviewer-biop-tools.version>0.1.8-SNAPSHOT</bigdataviewer-biop-tools.version>
-		<bigdataviewer-playground.version>0.2.3-SNAPSHOT</bigdataviewer-playground.version>
+		<bigdataviewer-biop-tools.version>0.1.9-SNAPSHOT</bigdataviewer-biop-tools.version>
 		<bigdataviewer-bioformats.version>0.2.7-SNAPSHOT</bigdataviewer-bioformats.version>
+		<bigdataviewer-playground.version>0.2.4-SNAPSHOT</bigdataviewer-playground.version>
+		<bigdataviewer-selector.version>0.1.5-SNAPSHOT</bigdataviewer-selector.version>
 
-		<bigdataviewer-vistools.version>1.0.0-beta-21-SNAPSHOT-NICO</bigdataviewer-vistools.version>
+		<bigdataviewer-core.version>10.0.0</bigdataviewer-core.version>
+		<bigdataviewer-vistools.version>1.0.0-beta-22</bigdataviewer-vistools.version>
+		<imglib2-cache.version>1.0.0-beta-15</imglib2-cache.version>
+
 		<!-- problem with cardpanel -->
 		<ijl-utilities-wrappers.version>0.3.15</ijl-utilities-wrappers.version>
 		<json.version>20180813</json.version>
 
-		<bigwarp_fiji.version>6.0.2</bigwarp_fiji.version>
-		<bigdataviewer-selector.version>0.1.4</bigdataviewer-selector.version>
+		<bigwarp_fiji.version>6.0.3-SNAPSHOT-BDVCORE10</bigwarp_fiji.version>
 
 	</properties>
 

@@ -60,6 +60,7 @@ public class DemoRegistrationQuPath {
         mp.waitForTasks();
 
         mp.exportSlice(mp.getSortedSlices().get(0));*/
+            System.out.println("Import done.");
 
 	}
 

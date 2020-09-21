@@ -297,7 +297,7 @@ public class AllenMap implements AtlasMap {
 		// TODO Auto-generated method stub
 
 		AffineTransform3D at3D = (AffineTransform3D) location;
-		bdvh.getViewerPanel().transformChanged(at3D);
+		bdvh.getViewerPanel().state().setViewerTransform(at3D);
 	}
 
 	@Override

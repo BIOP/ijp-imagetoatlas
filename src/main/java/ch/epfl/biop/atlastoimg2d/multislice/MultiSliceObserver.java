@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class MultiSliceObserver {
 
-    final MultiSlicePositioner mp;
+    MultiSlicePositioner mp;
 
     Map<SliceSources, List<CancelableAction>> sliceSortedActions = new ConcurrentHashMap<>();
 
@@ -25,6 +25,18 @@ public class MultiSliceObserver {
     volatile boolean animate = true;
 
     boolean repaintNeeded = false;
+
+    public void clear() {
+        animate = false;
+        this.mp = null;
+        sliceSortedActions.clear();
+        sliceSortedActions = null;
+        actionPerSlice.clear();
+        actionPerSlice = null;
+        hiddenActions.clear();
+        hiddenActions = null;
+        innerPanel = null;
+    }
 
     public MultiSliceObserver(MultiSlicePositioner mp) {
         this.mp = mp;
@@ -41,7 +53,7 @@ public class MultiSliceObserver {
                 try {
                     Thread.sleep(300);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    //e.printStackTrace();
                 }
             }
             //System.out.println("Animator thread stopped");
