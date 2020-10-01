@@ -6,7 +6,8 @@ import ch.epfl.biop.atlastoimg2d.commands.sourceandconverter.multislices.SacMult
 import ch.epfl.biop.atlastoimg2d.multislice.MultiSlicePositioner;
 import mpicbg.spim.data.sequence.Tile;
 import net.imagej.ImageJ;
-import org.apache.groovy.util.Arrays;
+
+import java.util.Arrays;
 
 
 public class DemoRegistration {
@@ -28,12 +29,13 @@ public class DemoRegistration {
         MultiSlicePositioner mp = (MultiSlicePositioner) (ij.command().run(SacMultiSacsPositionerCommand.class, true).get().getOutput("mp"));
 
         SourceAndConverter[] sacs =
-                Arrays.concat(
+                //Arrays.concat(
                 ij.convert().convert("SpimData 0>Channel>1", SourceAndConverter[].class)
 
                 //ij.convert().convert("SpimData 0>Channel>2", SourceAndConverter[].class),
                 //ij.convert().convert("SpimData 0>Channel>3", SourceAndConverter[].class)
-                );
+                //)
+            ;
 
         mp.createSlice(sacs,8, 0.182, Tile.class, new Tile(-1));
         mp.deselectSlice(mp.getSortedSlices());

@@ -319,9 +319,9 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         BdvHandleHelper.setBdvHandleCloseOperation(bdvh, ctx.getService(CacheService.class),
                 SourceAndConverterServices.getSourceAndConverterDisplayService(), false,
                     () -> {
-                        this.mso.clear();
-                        this.userActions.clear();
-                        this.slices.clear();
+                        if (mso!=null) this.mso.clear();
+                        if (userActions!=null) this.userActions.clear();
+                        if (slices!=null) this.slices.clear();
                         this.biopAtlas = null;
                         this.slices = null;
                         this.userActions = null;
@@ -337,7 +337,6 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                         this.info = null;
                     }
                 );
-
     }
 
     void addRightClickActions() {
