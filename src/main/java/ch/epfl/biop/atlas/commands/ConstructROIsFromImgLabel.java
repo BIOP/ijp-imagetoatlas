@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import ch.epfl.biop.java.utilities.roi.types.IJShapeRoiArray;
-import ij.IJ;
 import org.scijava.ItemIO;
 import org.scijava.command.Command;
 import org.scijava.object.ObjectService;
@@ -18,11 +17,9 @@ import java.util.List;
 
 import ch.epfl.biop.atlas.BiopAtlas;
 import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
-import ch.epfl.biop.java.utilities.roi.ROIReShape;
 import ch.epfl.biop.java.utilities.roi.SelectToROIKeepLines;
 import ij.ImagePlus;
 import ij.gui.Roi;
-import ij.plugin.frame.RoiManager;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 
@@ -72,7 +69,7 @@ public class ConstructROIsFromImgLabel implements Command {
 		// Goes opposite
 		// List all the values of the children that will be encountered for each label
 		// For instance some children node will never be met because they are not part of the slice
-		Map<Integer, ArrayList<Integer>> childrenContained = new HashMap<>();
+		Map<Integer, List<Integer>> childrenContained = new HashMap<>();
 		atlas.ontology.getParentToChildrenMap().forEach((k,v) -> {
 			ArrayList<Integer> filtered = new ArrayList<>();
 			filtered.addAll(v.stream().filter(id -> possibleValues.contains(id)).collect(Collectors.toList()));

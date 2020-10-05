@@ -592,6 +592,7 @@ public class SliceSources {
             }
             String name = mp.biopAtlas.ontology.getProperties(atlasId).get(namingChoice);
             roi.name = name;
+            roi.color = mp.biopAtlas.ontology.getColor(atlasId);
         }
 
     }

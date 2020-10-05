@@ -1,5 +1,6 @@
 package ch.epfl.biop.atlas.allen;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,11 +8,20 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.*;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import ch.epfl.biop.atlas.AtlasOntology;
+
+/**
+ * What a terrible mess, but {@link ConstructROIsFromImgLabel} has to be fixed
+ * before we can simplify this and the {@link AtlasOntology} interface
+ *
+ * @author ashamed of this mess, not putting his name
+ */
 
 public class AllenOntology implements AtlasOntology {
 
@@ -19,6 +29,11 @@ public class AllenOntology implements AtlasOntology {
 
     public Integer getRootIndex() {
         return new Integer(997); // 997 -1 ou 1 ou 8
+    }
+
+    @Override
+    public Color getColor(int id) {
+        return ontologyIdToColor.get(id);
     }
 
     @Override
@@ -51,9 +66,10 @@ public class AllenOntology implements AtlasOntology {
 	    properties.add("name");
 	    properties.add("acronym");
 	    properties.add("id");
-	    fetchOntologyJSON();	
+	    //properties.add("color_hex_triplet");
+	    fetchOntologyJSON();
 	}
-	
+
     public void fetchOntologyJSON() {
         // Could be in resources
        if (ontologyJSON==null) {
@@ -104,6 +120,7 @@ public class AllenOntology implements AtlasOntology {
     public Map<Integer, String> ontologyIdToName;
     public Map<Integer, String> ontologyIdToAcronym;
 
+    public Map<Integer, Color> ontologyIdToColor;
     public Map<Integer, Integer> ontologyIdToParentId;
     public Map<Integer, List<Integer>> ontologyIdToChildrenIds;
     
@@ -120,6 +137,8 @@ public class AllenOntology implements AtlasOntology {
         ontologyIdToChildrenIds = new HashMap<>();
         ontologyIdentifierToStructureId = new HashMap<>();
         ontologyIdToOriginalId = new HashMap();
+        ontologyIdToColor = new HashMap<>();
+
         JSONObject root = (JSONObject) ontologyJSON.getJSONArray("msg").get(0);
 
         // ------ fix root node
@@ -161,11 +180,14 @@ public class AllenOntology implements AtlasOntology {
         ontologyIdToParentId = mutateMapKeysModulo(ontologyIdToParentId, keyModulo, new Integer(0));
         ontologyIdToOriginalId = mutateMapKeysModulo(ontologyIdToOriginalId, keyModulo, new Integer(0));
         ontologyIdToChildrenIds = mutateMapKeysModulo(ontologyIdToChildrenIds, keyModulo, new ArrayList<Integer>(){});
+        ontologyIdToColor = mutateMapKeysModulo(ontologyIdToColor, keyModulo, new Color(255,255,255));
+
 
         ontologyIdToParentId = mutateMapValuesModulo(ontologyIdToParentId, keyModulo, new Integer(0));
         ontologyNameToId = mutateMapValuesModulo(ontologyNameToId, keyModulo, new String());
         ontologyAcronymToId = mutateMapValuesModulo(ontologyAcronymToId, keyModulo, new String());
         ontologyIdentifierToStructureId = mutateMapValuesModulo(ontologyIdentifierToStructureId, keyModulo, new String());
+
 
         // Case ontologyIdToChildrenIds to be handled separately
         Map<Integer, List<Integer>> map_out = new HashMap<>();
@@ -208,19 +230,33 @@ public class AllenOntology implements AtlasOntology {
         return map_out;
     }
 
+    /**
+     * https://stackoverflow.com/questions/4129666/how-to-convert-hex-to-rgb-using-java
+     * @param colorStr e.g. "#FFFFFF"
+     * @return
+     */
+    public static Color hex2Rgb(String colorStr) {
+        return new Color(
+                Integer.valueOf( colorStr.substring( 0, 2 ), 16 ),
+                Integer.valueOf( colorStr.substring( 2, 4 ), 16 ),
+                Integer.valueOf( colorStr.substring( 4, 6 ), 16 ) );
+    }
+
     void registerOntologyObject(JSONObject obj, int idOrigin) {
         JSONArray structures = (JSONArray) obj.get("children");
         ArrayList<Integer> childrenIds = new ArrayList<>();
         int id;
-        String name, acronym;
+        String name, acronym, colorhex;
         for (int i=0;i<structures.length();i++) {
             JSONObject jsonObject = (JSONObject) structures.get(i);
             id = jsonObject.getInt("id");
             childrenIds.add(id);
             name = jsonObject.getString("name");
             acronym = jsonObject.getString("acronym");
+            colorhex = jsonObject.getString("color_hex_triplet");
             ontologyIdToAcronym.put(id, acronym);
             ontologyIdToOriginalId.put(id,id);
+            ontologyIdToColor.put(id, hex2Rgb(colorhex));
             ontologyAcronymToId.put(acronym.trim().toUpperCase(), id);
             ontologyIdToName.put(id, name);
             ontologyIdentifierToStructureId.put(name.trim().toUpperCase(), id);
@@ -326,7 +362,12 @@ public class AllenOntology implements AtlasOntology {
 		return this.ontologyIdToParentId;
 	}
 
-	@Override
+    @Override
+    public List<Integer> getAllIds() {
+        return ontologyIdToChildrenIds.keySet().stream().collect(Collectors.toList());
+    }
+
+    @Override
 	public List<Integer> getChildren(int id) {
 		return this.ontologyIdToChildrenIds.get(id);
 	}
