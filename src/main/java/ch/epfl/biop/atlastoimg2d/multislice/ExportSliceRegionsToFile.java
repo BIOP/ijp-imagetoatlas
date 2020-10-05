@@ -1,17 +1,16 @@
 package ch.epfl.biop.atlastoimg2d.multislice;
 
-
 import java.awt.*;
 import java.io.File;
 
-public class ExportSlice extends CancelableAction {
+public class ExportSliceRegionsToFile extends CancelableAction {
 
     final SliceSources slice;
     String namingChoice;
     File dirOutput;
     boolean erasePreviousFile;
 
-    public ExportSlice(MultiSlicePositioner mp, SliceSources slice, String namingChoice, File dirOutput, boolean erasePreviousFile) {
+    public ExportSliceRegionsToFile(MultiSlicePositioner mp, SliceSources slice, String namingChoice, File dirOutput, boolean erasePreviousFile) {
         super(mp);
         this.slice = slice;
         this.namingChoice = namingChoice;
@@ -22,7 +21,7 @@ public class ExportSlice extends CancelableAction {
     @Override
     public boolean run() { //
         System.out.println("Exporting slice registration");
-        slice.export(namingChoice, dirOutput, erasePreviousFile);
+        slice.exportRegionsToFile(namingChoice, dirOutput, erasePreviousFile);
         return true;
     }
 

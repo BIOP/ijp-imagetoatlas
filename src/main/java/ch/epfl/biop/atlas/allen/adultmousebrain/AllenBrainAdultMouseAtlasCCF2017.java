@@ -6,7 +6,6 @@ import ch.epfl.biop.atlas.allen.AllenOntology;
 import ij.Prefs;
 import org.scijava.ItemIO;
 import org.scijava.command.Command;
-import org.scijava.object.ObjectService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
@@ -36,57 +35,13 @@ public class AllenBrainAdultMouseAtlasCCF2017 extends AllenAtlas implements Comm
 	@Parameter(type= ItemIO.OUTPUT)
 	BiopAtlas ba;
 
-	@Parameter
-	ObjectService os;
-
-	final static public int CHANNEL_AVERAGE = 0;
-
-	final static public int CHANNEL_NISSL = 1;
-
-	final static public int CHANNEL_LABELMOD65000 = 2;
-
-	int previousId ;
 	@Override
 	public void run() {
         try {
 			this.initialize(new URL(mapUrl), new URL(ontologyUrl));
-			/*
-			List<Integer> idList = ((AllenOntology)this.ontology).ontologyIdToParentId.keySet().stream().collect(Collectors.toList());
-			Collections.sort(idList);
-
-			previousId = 0;
-
-			idList.stream().forEach(id -> {
-				boolean identical = ((float)id==((float)previousId));
-				if (identical) {
-					System.out.println(((AllenOntology) this.ontology).ontologyIdToAcronym.get(id) + "\t" + id + "\t:\t" + (float) (id) + "\t ISSUE!!");
-				} else {
-					System.out.println(((AllenOntology) this.ontology).ontologyIdToAcronym.get(id) + "\t" + id + "\t:\t" + (float) (id) + "\t ok. ");
-
-				}
-				previousId = id;
-			});*/
 
 			((AllenOntology)this.ontology).mutateToModulo(65000); // Solves issue of very big indexes in allen brain ontology. The map has also been moduloed.
-			//((AllenMap)this.map).LabelChannel=2;
-			this.map.show();
-
-			//BigDataViewer bdv = ((AllenMap) this.map).bdv;
-
-			//os.addObject(bdv);
-
-			/*bdv.getViewer().getState().setDisplayMode(DisplayMode.FUSEDGROUP);
-			bdv.getViewer().getVisibilityAndGrouping().setFusedEnabled(true);
-
-			List<ConverterSetup> setups = bdv.getSetupAssignments().getConverterSetups();
-
-			setups.get(CHANNEL_AVERAGE).setDisplayRange(0,255);
-			setups.get(CHANNEL_NISSL).setDisplayRange(0,25000);
-			setups.get(CHANNEL_LABELMOD65000).setDisplayRange(0,2000);
-
-			setups.get(CHANNEL_AVERAGE).setColor(new ARGBType(ARGBType.rgba(255f,0f,0f,0f)));
-			setups.get(CHANNEL_NISSL).setColor(new ARGBType(ARGBType.rgba(0f,255f,0f,0f)));
-			setups.get(CHANNEL_LABELMOD65000).setColor(new ARGBType(ARGBType.rgba(0f,0f,255f,0f)));*/
+			//this.map.show();
 			
 	        Prefs.set(keyPrefix + "mapUrl", mapUrl);
 	        Prefs.set(keyPrefix + "ontologyUrl", ontologyUrl);

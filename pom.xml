@@ -144,11 +144,10 @@
 		<bigdataviewer-vistools.version>1.0.0-beta-23</bigdataviewer-vistools.version>
 		<imglib2-cache.version>1.0.0-beta-15</imglib2-cache.version>
 
-		<!-- problem with cardpanel -->
 		<ijl-utilities-wrappers.version>0.3.15</ijl-utilities-wrappers.version>
 		<json.version>20180813</json.version>
-
-		<bigwarp_fiji.version>6.0.3-SNAPSHOT</bigwarp_fiji.version>
+		<!-- temp build because of culling wrongly handled with warped source -->
+		<bigwarp_fiji.version>6.0.3-SNAPSHOT-NOCULLING</bigwarp_fiji.version>
 
 	</properties>
 

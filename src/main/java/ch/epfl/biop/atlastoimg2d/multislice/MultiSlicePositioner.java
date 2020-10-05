@@ -9,7 +9,6 @@ import ch.epfl.biop.bdv.select.SelectedSourcesListener;
 import ch.epfl.biop.bdv.select.SourceSelectorBehaviour;
 import ch.epfl.biop.registration.sourceandconverter.Elastix2DAffineRegistration;
 import ch.epfl.biop.registration.sourceandconverter.SacBigWarp2DRegistration;
-import ch.epfl.biop.viewer.swing.SwingAtlasViewer;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import mpicbg.spim.data.generic.base.Entity;
 import mpicbg.spim.data.generic.sequence.AbstractSequenceDescription;
@@ -268,8 +267,16 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 ScijavaSwingUI.getPanel(scijavaCtx, BigWarpRegistrationOptionCommand.class, "mp", this),
                 true);
 
-        bdvh.getCardPanel().addCard("Export", //panelExport
-                ScijavaSwingUI.getPanel(scijavaCtx, ExportRegionsCommand.class,               "mp", this),
+        bdvh.getCardPanel().addCard("Export Regions To File", //panelExport
+                ScijavaSwingUI.getPanel(scijavaCtx, ExportRegionsToFileCommand.class,"mp", this),
+                true);
+
+        bdvh.getCardPanel().addCard("Export Regions To RoiManager", //panelExport
+                ScijavaSwingUI.getPanel(scijavaCtx, ExportRegionsToRoiManagerCommand.class,"mp", this),
+                true);
+
+        bdvh.getCardPanel().addCard("Export Regions To QuPath Project", //panelExport
+                ScijavaSwingUI.getPanel(scijavaCtx, ExportRegionsToQuPathCommand.class,"mp", this),
                 true);
 
         bdvh.getCardPanel().addCard("Tasks Info", mso.getJPanel(), true);
@@ -326,7 +333,6 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                         this.slices = null;
                         this.userActions = null;
                         ctx.getService(ObjectService.class).removeObject(this);
-                        this.bdvh = null;
                         this.mso = null;
                         this.selectionLayer = null;
                         this.common_behaviours = null;
@@ -339,8 +345,10 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 );
     }
 
+
+
     void addRightClickActions() {
-        common_behaviours.behaviour(new MultiSliceContextMenuClickBehaviour( this, this::getSelectedSources ), "Slices Context Menu", "button3");
+       common_behaviours.behaviour(new MultiSliceContextMenuClickBehaviour( this, this::getSelectedSources ), "Slices Context Menu", "button3");
     }
 
     public List<SliceSources> getSelectedSources() {
@@ -979,32 +987,49 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         new MoveSlice(this, slice, axisPosition).runRequest();
     }
 
-    public void exportSelectedSlices(String namingChoice, File dirOutput, boolean erasePreviousFile) {
+    public void exportSelectedSlicesRegionsToRoiManager(String namingChoice) {
         List<SliceSources> sortedSelected = getSortedSlices().stream().filter(slice -> slice.isSelected()).collect(Collectors.toList());
         new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
 
-        List<Thread> threads = new ArrayList<>();
         for (SliceSources slice : sortedSelected) {
-
-            //threads.add(new Thread(() -> exportSlice(slice, namingChoice, dirOutput, erasePreviousFile)));
-            exportSlice(slice, namingChoice, dirOutput, erasePreviousFile);
+            exportSliceRegionsToRoiManager(slice, namingChoice);
         }
-
-        // threads.forEach(t -> t.start());
-        // TODO : understand why it hangs ? but is
-        /*threads.forEach(t -> {
-            try {
-                t.join();
-            } catch (Exception e) {
-                System.err.println(e);
-            }
-        });*/
 
         new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
     }
 
-    public void exportSlice(SliceSources slice, String namingChoice, File dirOutput, boolean erasePreviousFile) {
-        new ExportSlice(this, slice, namingChoice, dirOutput, erasePreviousFile).runRequest();
+    public void exportSelectedSlicesRegionsToQuPathProject(boolean erasePreviousFile) {
+        List<SliceSources> sortedSelected = getSortedSlices().stream().filter(slice -> slice.isSelected()).collect(Collectors.toList());
+        new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
+
+        for (SliceSources slice : sortedSelected) {
+            exportSliceRegionsToQuPathProject(slice, erasePreviousFile);
+        }
+
+        new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
+    }
+
+    public void exportSelectedSlicesRegionsToFile(String namingChoice, File dirOutput, boolean erasePreviousFile) {
+        List<SliceSources> sortedSelected = getSortedSlices().stream().filter(slice -> slice.isSelected()).collect(Collectors.toList());
+        new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
+
+        for (SliceSources slice : sortedSelected) {
+            exportSliceRegionsToFile(slice, namingChoice, dirOutput, erasePreviousFile);
+        }
+
+        new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
+    }
+
+    public void exportSliceRegionsToFile(SliceSources slice, String namingChoice, File dirOutput, boolean erasePreviousFile) {
+        new ExportSliceRegionsToFile(this, slice, namingChoice, dirOutput, erasePreviousFile).runRequest();
+    }
+
+    public void exportSliceRegionsToRoiManager(SliceSources slice, String namingChoice) {
+        new ExportSliceRegionsToRoiManager(this, slice, namingChoice).runRequest();
+    }
+
+    public void exportSliceRegionsToQuPathProject(SliceSources slice, boolean erasePreviousFile) {
+        new ExportSliceRegionsToQuPathProject(this, slice, erasePreviousFile).runRequest();
     }
 
     /**

@@ -1,10 +1,12 @@
 package ch.epfl.biop.atlastoimg2d.multislice;
 
 import bdv.viewer.SourceAndConverter;
+import ch.epfl.biop.atlas.allen.AllenOntology;
 import ch.epfl.biop.atlas.allen.AllenOntologyJson;
 import ch.epfl.biop.atlas.commands.ConstructROIsFromImgLabel;
 import ch.epfl.biop.atlastoimg2d.commands.sourceandconverter.multislices.PutAtlasStructureToImageNoRoiManager;
 import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
+import ch.epfl.biop.java.utilities.roi.types.CompositeFloatPoly;
 import ch.epfl.biop.java.utilities.roi.types.IJShapeRoiArray;
 import ch.epfl.biop.java.utilities.roi.types.ImageJRoisFile;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
@@ -18,6 +20,7 @@ import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import ij.ImagePlus;
 import ij.gui.Roi;
+import ij.plugin.frame.RoiManager;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import mpicbg.spim.data.generic.sequence.BasicViewSetup;
 import net.imglib2.RealPoint;
@@ -547,7 +550,7 @@ public class SliceSources {
         labelImageBeingComputed = false;
     }
 
-    public synchronized void export(String namingChoice, File dirOutput, boolean erasePreviousFile) {
+    void prepareExport(String namingChoice) {
         // Need to raster the label image
         AffineTransform3D at3D = new AffineTransform3D();
         at3D.translate(-mp.nPixX / 2.0, -mp.nPixY / 2.0, 0);
@@ -578,19 +581,39 @@ public class SliceSources {
 
         computeTransformedRois();
 
-        /*PutAtlasStructureToImageNoRoiManager roiRenamer = new PutAtlasStructureToImageNoRoiManager();
-        roiRenamer.addAncestors=false;
-        roiRenamer.addDescendants = true;
-        roiRenamer.atlas = mp.biopAtlas;
-        roiRenamer.structure_list = "997";
-        roiRenamer.cr = cvtRoisTransformed;
-        roiRenamer.namingChoice = namingChoice;
-        roiRenamer.run();
-        ConvertibleRois roiOutput = new ConvertibleRois();
-        roiOutput.set(roiRenamer.output);*/
+        // Renaming
+        IJShapeRoiArray roiList = (IJShapeRoiArray) cvtRoisTransformed.to(IJShapeRoiArray.class);
+        for (int i=0;i<roiList.rois.size();i++) {
+            CompositeFloatPoly roi = roiList.rois.get(i);
+            int atlasId = Integer.valueOf(roi.name );
+            // Issue with modulo 65000!!
+            if (mp.biopAtlas.ontology instanceof AllenOntology) {
+                atlasId = atlasId % 65000;
+            }
+            String name = mp.biopAtlas.ontology.getProperties(atlasId).get(namingChoice);
+            roi.name = name;
+        }
+
+    }
+
+    public synchronized void exportRegionsToROIManager(String namingChoice) {
+        prepareExport(namingChoice);
+        cvtRoisTransformed.to(RoiManager.class);
+    }
+
+    public synchronized void exportToQuPathProject(boolean erasePreviousFile) {
+        prepareExport("id");
 
         ImageJRoisFile ijroisfile = (ImageJRoisFile) cvtRoisTransformed.to(ImageJRoisFile.class);
 
+        storeInQuPathProjectIfExists(ijroisfile, erasePreviousFile);
+    }
+
+    public synchronized void exportRegionsToFile(String namingChoice, File dirOutput, boolean erasePreviousFile) {
+
+        prepareExport(namingChoice);
+
+        ImageJRoisFile ijroisfile = (ImageJRoisFile) cvtRoisTransformed.to(ImageJRoisFile.class);
 
         //--------------------
 
@@ -615,21 +638,7 @@ public class SliceSources {
             e.printStackTrace();
         }
 
-        storeInQuPathProjectIfExists(ijroisfile, erasePreviousFile);
-
     }
-
-    /*void addHierarchyInDescription(Roi roi, String idNumber) {
-        int idRoi = Integer.valueOf(idNumber);
-        String hierarchy = idNumber;
-        while (mp.biopAtlas.ontology.getParent(idRoi)!=null) {
-            hierarchy+=">"+mp.biopAtlas.ontology.getParent(idRoi);
-            idRoi = mp.biopAtlas.ontology.getParent(idRoi);
-        }
-        roi.setProperty("hierarchy", hierarchy);
-        //System.out.println("roi = "+idNumber);
-        //System.out.println("hierarchy = "+hierarchy);/
-    }*/
 
     void storeInQuPathProjectIfExists(ImageJRoisFile ijroisfile, boolean erasePreviousFile) {
         //-------------------- Experimental : finding where to save the ROIS
@@ -646,7 +655,6 @@ public class SliceSources {
                             .getMetadata(rootSac, SourceAndConverterService.SPIM_DATA_INFO)).asd;
 
             System.out.println("BDV Datasets found associated with the slice!");
-
 
             if (SourceAndConverterServices
                     .getSourceAndConverterService()
@@ -701,12 +709,12 @@ public class SliceSources {
                     }
 
                 } else {
-                    System.out.println("QuPathEntryEntity not found");
+                    System.err.println("QuPathEntryEntity not found");
                 }
 
 
             } else {
-                System.out.println("No QuPath project found");
+                System.err.println("No QuPath project found");
             }
         }
     }

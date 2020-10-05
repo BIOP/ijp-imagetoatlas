@@ -8,6 +8,7 @@ import mpicbg.spim.data.sequence.Tile;
 import net.imagej.ImageJ;
 //import org.apache.groovy.util.Arrays;
 
+import javax.swing.*;
 import java.io.File;
 
 public class DemoRegistrationQuPath {
@@ -16,7 +17,7 @@ public class DemoRegistrationQuPath {
         final ImageJ ij = new ImageJ();
         ij.ui().showUI();
 
-        System.out.println("BigWarp hash:"+org.scijava.util.VersionUtils.getVersion(BigWarp.class));
+        //System.out.println("BigWarp hash:"+org.scijava.util.VersionUtils.getVersion(BigWarp.class));
 
         String scriptTest =
                 "run(\"Open [QuPath Project]\", \"unit=MILLIMETER " +
@@ -31,12 +32,14 @@ public class DemoRegistrationQuPath {
                         "refframesizeinunitlocation=1.0 refframesizeinunitvoxsize=0.01 " +
                         //"qupathproject=[C:\\\\Users\\\\nicol\\\\Dropbox\\\\BIOP\\\\19-05-24 VSI Samples\\\\align\\\\QP0.2.1\\\\project.qpproj]\"
                         "\");\n" +
-               // "run(\"Open [BioFormats Bdv Bridge]\", \"unit=MILLIMETER splitrgbchannels=false positioniscenter=AUTO switchzandc=AUTO flippositionx=AUTO flippositiony=AUTO flippositionz=AUTO usebioformatscacheblocksize=true cachesizex=512 cachesizey=512 cachesizez=1 refframesizeinunitlocation=0.05 refframesizeinunitvoxsize=0.05 \");\n" +
+                //"run(\"Open [BioFormats Bdv Bridge]\", \"unit=MILLIMETER splitrgbchannels=false positioniscenter=AUTO switchzandc=AUTO flippositionx=AUTO flippositiony=AUTO flippositionz=AUTO usebioformatscacheblocksize=true cachesizex=512 cachesizey=512 cachesizez=1 refframesizeinunitlocation=0.05 refframesizeinunitvoxsize=0.05 \");\n" +
                 "run(\"Basic Transformation\", \"sources_in=[SpimData 0] type=Rot180 axis=Z timepoint=0 globalchange=true\");\n" +
-                "run(\"Show Sources\", \"sacs=[SpimData 0] autocontrast=true adjustviewonsource=true\");\n" +
+                "run(\"BDV - Show Sources\", \"sacs=[SpimData 0] autocontrast=true adjustviewonsource=true\");\n" +
                 "run(\"Allen Brain Adult Mouse Brain CCF 2017\", \"\");\n";
 
-        ij.script().run("test.ijm",scriptTest,true).get();
+                            ij.script().run("test.ijm", scriptTest, true).get();
+                            System.out.println("Import done.");
+
 
         MultiSlicePositioner mp = (MultiSlicePositioner) (ij.command().run(SacMultiSacsPositionerCommand.class, true).get().getOutput("mp"));
 
@@ -60,7 +63,7 @@ public class DemoRegistrationQuPath {
         mp.waitForTasks();
 
         mp.exportSlice(mp.getSortedSlices().get(0));*/
-            System.out.println("Import done.");
+
 
 	}
 
