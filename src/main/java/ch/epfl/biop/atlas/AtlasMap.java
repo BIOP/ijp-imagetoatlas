@@ -49,6 +49,9 @@ public interface AtlasMap {
 	SourceAndConverter[] getStructuralImages();
 	SourceAndConverter getLabelImage();
 
+	int getLabelImageSacIndex();
+	int getLeftRightImageSacIndex();
+
 	Object getCurrentLocation();
 	void setCurrentLocation(Object location);
 	

@@ -2,7 +2,10 @@ package ch.epfl.biop.atlas.allen;
 
 import java.net.URL;
 import java.util.List;
+import java.util.function.BiConsumer;
+
 import bdv.util.*;
+import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
 import bdv.viewer.SynchronizedViewerState;
 import ch.epfl.biop.atlas.AtlasMap;
@@ -10,11 +13,15 @@ import ch.epfl.biop.scijava.command.ExportToImagePlusCommand;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;
+import net.imglib2.FinalInterval;
+import net.imglib2.RealLocalizable;
 import net.imglib2.cache.img.DiskCachedCellImgFactory;
 import net.imglib2.cache.img.DiskCachedCellImgOptions;
+import net.imglib2.position.FunctionRealRandomAccessible;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
+import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterUtils;
 import sc.fiji.bdvpg.sourceandconverter.importer.EmptySourceAndConverterCreator;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceResampler;
 import sc.fiji.bdvpg.spimdata.importer.SpimDataFromXmlImporter;
@@ -36,13 +43,15 @@ public class AllenMap implements AtlasMap {
 	final static private int LabelBorberSetupId = 1;
 	final static private int NisslSetupId = 2;
 	final static private int LabelSetupId = 3;
+	final static private int LeftRightSetupId = 4;
 
 	// Re ordered channel
 	final static public int AraChannel = 0;
 	final static public int NisslChannel = 1;
 	final static public int LabelBorderChannel = 2;
 	final static public int LabelChannel = 3;
-	
+	final static public int LabelLeftRight = 4;
+
 	@Override
 	public void initialize(String atlasName) {
 		this.name = atlasName;
@@ -59,6 +68,28 @@ public class AllenMap implements AtlasMap {
 		sacs = SourceAndConverterServices
 			.getSourceAndConverterService()
 			.getSourceAndConverterFromSpimdata(importer.get());
+
+		BiConsumer<RealLocalizable, UnsignedShortType > leftRightIndicator = (l, t ) -> {
+			if (l.getFloatPosition(0)>0) {
+				t.set(255);
+			} else {
+				t.set(0);
+			}
+		};
+
+		FunctionRealRandomAccessible leftRightSource = new FunctionRealRandomAccessible(3,
+				leftRightIndicator,	UnsignedShortType::new);
+
+
+		final Source< UnsignedShortType > s = new RealRandomAccessibleIntervalSource<>( leftRightSource,
+				FinalInterval.createMinMax( 0, 0, 0, 1000, 1000, 0),
+				new UnsignedShortType(), new AffineTransform3D(), "Left_Right" );
+
+		SourceAndConverter leftRight = SourceAndConverterUtils.createSourceAndConverter(s);
+
+		sacs.add(leftRight);
+
+		SourceAndConverterServices.getSourceAndConverterService().register(leftRight);
 
 		bdvh = SourceAndConverterServices
 				.getSourceAndConverterDisplayService()
@@ -256,11 +287,12 @@ public class AllenMap implements AtlasMap {
 
 	@Override
 	public SourceAndConverter[] getCurrentStructuralImageSliceAsSacs() {
-		SourceAndConverter[] out = new SourceAndConverter[4];
+		SourceAndConverter[] out = new SourceAndConverter[5];
 		out[AraChannel] = getSacChannel(AraSetupId);
 		out[NisslChannel] = getSacChannel(NisslSetupId);
 		out[LabelBorderChannel] = getSacChannel(LabelBorberSetupId);
 		out[LabelChannel] = getSacChannel(LabelSetupId);
+		out[LabelLeftRight] = getSacChannel(LeftRightSetupId);
 		return out;
 	}
 
@@ -271,16 +303,27 @@ public class AllenMap implements AtlasMap {
 
 	@Override
 	public SourceAndConverter[] getStructuralImages() {
-		SourceAndConverter[] out = new SourceAndConverter[3];
+		SourceAndConverter[] out = new SourceAndConverter[4];
 		out[AraChannel] = sacs.get(AraSetupId);
 		out[NisslChannel] = sacs.get(NisslSetupId);
 		out[LabelBorderChannel] = sacs.get(LabelBorberSetupId);
+		out[LabelLeftRight-1] = sacs.get(LeftRightSetupId); // beurk
 		return out;
 	}
 
 	@Override
 	public SourceAndConverter getLabelImage() {
 		return sacs.get(LabelSetupId);
+	}
+
+	@Override
+	public int getLabelImageSacIndex() {
+		return LabelChannel;
+	}
+
+	@Override
+	public int getLeftRightImageSacIndex() {
+		return LabelLeftRight;
 	}
 
 	@Override

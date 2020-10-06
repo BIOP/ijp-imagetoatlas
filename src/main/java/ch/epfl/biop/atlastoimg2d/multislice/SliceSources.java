@@ -95,6 +95,8 @@ public class SliceSources {
 
     volatile ConvertibleRois cvtRoisTransformed = null;
 
+    volatile ConvertibleRois leftRightTranformed = null;
+
     List<Registration> registrations = new ArrayList<>();
 
     List<CompletableFuture<Boolean>> tasks = new ArrayList<>();
@@ -520,7 +522,6 @@ public class SliceSources {
         AffineTransform3D translateZ = new AffineTransform3D();
         translateZ.translate(0, 0, -slicingAxisPosition);
 
-
         SourceAndConverter sac =
                 mp.reslicedAtlas.nonExtendedSlicedSources[mp.reslicedAtlas.nonExtendedSlicedSources.length-1]; // By convention the label image is the last one
 
@@ -548,7 +549,30 @@ public class SliceSources {
 
         at3DLastLabelImage = at3D;
         labelImageBeingComputed = false;
+
+        // Now Left Right:
+        sac = mp.reslicedAtlas.nonExtendedSlicedSources[mp.reslicedAtlas.nonExtendedSlicedSources.length-2]; // Don't know why this is working
+
+        sac = resampler.apply(sac);
+        sac = SourceTransformHelper.createNewTransformedSourceAndConverter(translateZ, new SourceAndConverterAndTimeRange(sac, 0));
+
+        export = new ExportToImagePlusCommand();
+
+        export.level=0;
+        export.timepointBegin=0;
+        export.timepointEnd=0;
+        export.sacs = new SourceAndConverter[1];
+        export.sacs[0] = sac;
+        export.run();
+
+        ImagePlus leftRightImage = export.imp_out;
+        //leftRight.show();
+
+        leftRightOrigin.set(leftRightImage);
+
     }
+
+    ConvertibleRois leftRightOrigin = new ConvertibleRois();
 
     void prepareExport(String namingChoice) {
         // Need to raster the label image
@@ -594,6 +618,18 @@ public class SliceSources {
             roi.name = name;
             roi.color = mp.biopAtlas.ontology.getColor(atlasId);
         }
+
+        IJShapeRoiArray roiArray = (IJShapeRoiArray) leftRightTranformed.to(IJShapeRoiArray.class);
+
+        Roi left = roiArray.rois.get(0).getRoi();
+        left.setStrokeColor(new Color(0,255,0));
+        left.setName("Left");
+        roiList.rois.add(new CompositeFloatPoly(left));
+
+        Roi right = roiArray.rois.get(1).getRoi();
+        right.setStrokeColor(new Color(255,0,255));
+        right.setName("Right");
+        roiList.rois.add(new CompositeFloatPoly(right));
 
     }
 
@@ -743,9 +779,16 @@ public class SliceSources {
     private void computeTransformedRois() {
         cvtRoisTransformed = new ConvertibleRois();
 
-        IJShapeRoiArray arrayIni = (IJShapeRoiArray) cvtRoisOrigin.to(IJShapeRoiArray.class);
-        cvtRoisTransformed.set(arrayIni);
-        RealPointList list = ((RealPointList) cvtRoisTransformed.to(RealPointList.class));
+        leftRightTranformed = new ConvertibleRois();
+
+        IJShapeRoiArray arrayIniRegions = (IJShapeRoiArray) cvtRoisOrigin.to(IJShapeRoiArray.class);
+        cvtRoisTransformed.set(arrayIniRegions);
+        RealPointList listRegions = ((RealPointList) cvtRoisTransformed.to(RealPointList.class));
+
+        IJShapeRoiArray arrayIniLeftRight = (IJShapeRoiArray) leftRightOrigin.to(IJShapeRoiArray.class);
+        leftRightTranformed.set(arrayIniLeftRight);
+        RealPointList listLeftRight = ((RealPointList) leftRightOrigin.to(RealPointList.class));
+
         // Perform reverse transformation, in the reverse order:
         //  - From atlas coordinates -> image coordinates
 
@@ -753,21 +796,30 @@ public class SliceSources {
         at3D.translate(-mp.nPixX / 2.0, -mp.nPixY / 2.0, 0);
         at3D.scale(mp.sizePixX, mp.sizePixY, mp.sizePixZ);
         at3D.translate(0, 0, slicingAxisPosition);
-        list = getTransformedPtsFixedToMoving(list, at3D.inverse());
+        listRegions = getTransformedPtsFixedToMoving(listRegions, at3D.inverse());
+
+        listLeftRight = getTransformedPtsFixedToMoving(listLeftRight, at3D.inverse());
 
         Collections.reverse(this.registrations);
 
         for (Registration reg : this.registrations) {
-            System.out.println("Registration class "+reg.getClass().getSimpleName());
-            list = reg.getTransformedPtsFixedToMoving(list);
+            //System.out.println("Registration class "+reg.getClass().getSimpleName());
+            listRegions = reg.getTransformedPtsFixedToMoving(listRegions);
+            listLeftRight = reg.getTransformedPtsFixedToMoving(listLeftRight);
         }
         Collections.reverse(this.registrations);
 
         this.original_sacs[0].getSpimSource().getSourceTransform(0,0,at3D);
-        list = getTransformedPtsFixedToMoving(list, at3D);
+        listRegions = getTransformedPtsFixedToMoving(listRegions, at3D);
+
+        listLeftRight = getTransformedPtsFixedToMoving(listLeftRight, at3D);
 
         cvtRoisTransformed.clear();
-        list.shapeRoiList = new IJShapeRoiArray(arrayIni);
+        listRegions.shapeRoiList = new IJShapeRoiArray(arrayIniRegions);
+
+        leftRightTranformed.clear();
+        listLeftRight.shapeRoiList = new IJShapeRoiArray(arrayIniLeftRight);
+
 
         /*for (int i = 0;i<arrayIni.rois.size();i++) {
             list.shapeRoiList.rois.get(i).getRoi().setProperty("hierarchy", arrayIni.rois.get(i).getRoi().getProperty("hierarchy"));
@@ -777,7 +829,10 @@ public class SliceSources {
 
         }*/
 
-        cvtRoisTransformed.set(list);
+        cvtRoisTransformed.set(listRegions);
+
+
+        leftRightTranformed.set(listLeftRight);
     }
 
     public RealPointList getTransformedPtsFixedToMoving(RealPointList pts, AffineTransform3D at3d) {
