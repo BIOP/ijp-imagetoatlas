@@ -8,7 +8,7 @@ import org.scijava.widget.Button;
 
 import java.io.File;
 
-@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export ROIs To File")
+@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export ROIs To QuPath project")
 public class ExportRegionsToQuPathCommand implements Command {
 
     @Parameter

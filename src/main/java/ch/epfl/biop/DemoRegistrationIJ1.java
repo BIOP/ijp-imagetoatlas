@@ -26,7 +26,7 @@ public class DemoRegistrationIJ1 {
 
         MultiSlicePositioner mp = (MultiSlicePositioner) (ij.command().run(SacMultiSacsPositionerCommand.class, true).get().getOutput("mp"));
 
-        SourceAndConverter[] sac = ij.convert().convert("SpimData 1", SourceAndConverter[].class);
+        SourceAndConverter[] sac = ij.convert().convert(demoSlice.getTitle(), SourceAndConverter[].class);
 
         mp.createSlice(sac,4.5, 2, Tile.class, new Tile(-1));
 
@@ -35,31 +35,10 @@ public class DemoRegistrationIJ1 {
         mp.centerBdvViewOn(slice);
         mp.selectSlice(slice);
 
-        mp.registerElastix(0,0);
+        mp.registerElastixAffine(1,0);
+        mp.registerElastixSpline(0,0);
 
         mp.exportSelectedSlicesRegionsToRoiManager("name");
-
-        /*SourceAndConverter[] sacs =
-                //Arrays.concat(
-                ij.convert().convert("SpimData 0>Channel>1", SourceAndConverter[].class);
-
-                //ij.convert().convert("SpimData 0>Channel>2", SourceAndConverter[].class),
-                //ij.convert().convert("SpimData 0>Channel>3", SourceAndConverter[].class)
-                //);*/
-
-        //mp.createSlice(sacs,8, 0.182, Tile.class, new Tile(-1));
-        /*mp.deselectSlice(mp.getSortedSlices());
-        mp.selectSlice(mp.getSortedSlices().get(0));
-        mp.registerElastix(0,0);
-        mp.exportSlice(mp.getSortedSlices().get(0), "acronym", new File("C:\\Users\\nicol\\Desktop\\ExportROIs"), true );
-        */
-
-
-        /*mp.enqueueRegistration("Auto Elastix Affine", 0,0);
-        mp.waitForTasks();
-
-        mp.exportSlice(mp.getSortedSlices().get(0));*/
-
 
 	}
 

@@ -8,6 +8,7 @@ import ch.epfl.biop.atlastoimg2d.multislice.scijava.ScijavaSwingUI;
 import ch.epfl.biop.bdv.select.SelectedSourcesListener;
 import ch.epfl.biop.bdv.select.SourceSelectorBehaviour;
 import ch.epfl.biop.registration.sourceandconverter.Elastix2DAffineRegistration;
+import ch.epfl.biop.registration.sourceandconverter.Elastix2DSplineRegistration;
 import ch.epfl.biop.registration.sourceandconverter.SacBigWarp2DRegistration;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import mpicbg.spim.data.generic.base.Entity;
@@ -121,6 +122,8 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     final static String REGISTRATION_BEHAVIOURS_KEY = REGISTRATION_MODE + "-behaviours";
     Behaviours registration_behaviours = new Behaviours(new InputTriggerConfig(), REGISTRATION_MODE);
 
+    boolean single_slide_display_mode = false;
+
     final static String COMMON_BEHAVIOURS_KEY = "multipositioner-behaviours";
     Behaviours common_behaviours = new Behaviours(new InputTriggerConfig(), "multipositioner");
 
@@ -184,6 +187,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
         setPositioningMode();
 
+        common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.toggle_display_mode(), "toggle_single_source_mode", "S");
         common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.cancelLastAction(), "cancel_last_action", "ctrl Z");
         common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.redoAction(), "redo_last_action", "ctrl Y", "ctrl shift Z");
         common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.navigateNextSlice(), "navigate_next_slice", "N");
@@ -237,8 +241,6 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         ghs.add(ghCenter);
         ghs.add(ghLeft);
 
-        assert  this.bdvh.getCardPanel() != null;
-
         this.bdvh.getCardPanel().setCardExpanded("Sources", false);
         this.bdvh.getCardPanel().setCardExpanded("Groups", false);
 
@@ -259,11 +261,15 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 ScijavaSwingUI.getPanel(scijavaCtx, RectangleROIDefineCommand.class, "mp", this),
                 true);
 
-        bdvh.getCardPanel().addCard("Elastix Registration",
-                ScijavaSwingUI.getPanel(scijavaCtx, ElastixRegistrationOptionCommand.class, "mp", this),
+        bdvh.getCardPanel().addCard("Elastix Registration (Auto, Affine)",
+                ScijavaSwingUI.getPanel(scijavaCtx, ElastixAffineRegistrationOptionCommand.class, "mp", this),
                 true);
 
-        bdvh.getCardPanel().addCard("BigWarp Registration",
+        bdvh.getCardPanel().addCard("Elastix Registration (Auto, Spline)",
+                ScijavaSwingUI.getPanel(scijavaCtx, ElastixSplineRegistrationOptionCommand.class, "mp", this),
+                true);
+
+        bdvh.getCardPanel().addCard("BigWarp Registration (Manual, Spline)",
                 ScijavaSwingUI.getPanel(scijavaCtx, BigWarpRegistrationOptionCommand.class, "mp", this),
                 true);
 
@@ -345,10 +351,27 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 );
     }
 
-
-
     void addRightClickActions() {
        common_behaviours.behaviour(new MultiSliceContextMenuClickBehaviour( this, this::getSelectedSources ), "Slices Context Menu", "button3");
+    }
+
+    public void setSingleSliceDisplayMode() {
+        if (!single_slide_display_mode) {
+            toggle_display_mode();
+        }
+    }
+
+    public void setAllSliceDisplayMode() {
+        if (single_slide_display_mode) {
+            toggle_display_mode();
+        }
+    }
+
+    void toggle_display_mode() {
+        single_slide_display_mode = !single_slide_display_mode;
+        synchronized (slices) {
+            slices.forEach(this::updateSliceDisplay);
+        }
     }
 
     public List<SliceSources> getSelectedSources() {
@@ -429,7 +452,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         nextAffineTransform.set(shiftMatrix.getDoublePosition(1), 1, 3);
         nextAffineTransform.set(shiftMatrix.getDoublePosition(2), 2, 3);
 
-        bdvh.getBdvHandle().getViewerPanel().setCurrentViewerTransform(nextAffineTransform);
+        bdvh.getBdvHandle().getViewerPanel().state().setViewerTransform(nextAffineTransform);
         previouszStep = (int) reslicedAtlas.getStep();
     }
 
@@ -468,45 +491,78 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
      * Set the positioning mode
      */
     public void setPositioningMode() {
-        //if (slices.stream().noneMatch(slice -> slice.processInProgress)) {
-            if (!(currentMode == POSITIONING_MODE_INT)) {
+        if (!(currentMode == POSITIONING_MODE_INT)) {
 
-                List<SourceAndConverter> sacsToRemove = new ArrayList<>();
-                List<SourceAndConverter> sacsToAdd = new ArrayList<>();
-
-                synchronized (slices) {
-                    reslicedAtlas.unlock();
-                    currentMode = POSITIONING_MODE_INT;
-                    ghs.forEach(gh -> gh.enable());
-                    slices.forEach(slice -> slice.enableGraphicalHandles());
-                    getSortedSlices().forEach(ss -> {
-                        sacsToRemove.addAll(Arrays.asList(ss.registered_sacs));
-                        sacsToAdd.addAll(Arrays.asList(ss.relocated_sacs_positioning_mode));
-                    });
-                    SourceAndConverterServices
-                            .getSourceAndConverterDisplayService()
-                            .remove(bdvh, sacsToRemove.toArray(new SourceAndConverter[0]));
-                    SourceAndConverterServices
-                            .getSourceAndConverterDisplayService()
-                            .show(bdvh, sacsToAdd.toArray(new SourceAndConverter[0]));
-                }
-
-                for (int i = 0; i < reslicedAtlas.nonExtendedSlicedSources.length; i++) {
-                    if (SourceAndConverterServices.getSourceAndConverterDisplayService()
-                            .isVisible(reslicedAtlas.nonExtendedSlicedSources[i], bdvh)) {
-                        bdvh.getViewerPanel().state().setSourceActive(reslicedAtlas.nonExtendedSlicedSources[i], false);
-                        bdvh.getViewerPanel().state().setSourceActive(reslicedAtlas.extendedSlicedSources[i], true);
-                    } else {
-                        bdvh.getViewerPanel().state().setSourceActive(reslicedAtlas.extendedSlicedSources[i], false);
-                    }
-                }
-
-                bdvh.getTriggerbindings().removeInputTriggerMap(REGISTRATION_BEHAVIOURS_KEY);
-                bdvh.getTriggerbindings().removeBehaviourMap(REGISTRATION_BEHAVIOURS_KEY);
-                positioning_behaviours.install(bdvh.getTriggerbindings(), POSITIONING_BEHAVIOURS_KEY);
-                navigateCurrentSlice();
-                refreshBlockMap();
+            synchronized (slices) {
+                reslicedAtlas.unlock();
+                currentMode = POSITIONING_MODE_INT;
+                ghs.forEach(gh -> gh.enable());
+                slices.forEach(slice -> slice.enableGraphicalHandles());
+                getSortedSlices().forEach(ss -> {
+                    updateSliceDisplay(ss);
+                });
             }
+
+            for (int i = 0; i < reslicedAtlas.nonExtendedSlicedSources.length; i++) {
+                if (SourceAndConverterServices.getSourceAndConverterDisplayService()
+                        .isVisible(reslicedAtlas.nonExtendedSlicedSources[i], bdvh)) {
+                    bdvh.getViewerPanel().state().setSourceActive(reslicedAtlas.nonExtendedSlicedSources[i], false);
+                    bdvh.getViewerPanel().state().setSourceActive(reslicedAtlas.extendedSlicedSources[i], true);
+                } else {
+                    bdvh.getViewerPanel().state().setSourceActive(reslicedAtlas.extendedSlicedSources[i], false);
+                }
+            }
+
+            bdvh.getTriggerbindings().removeInputTriggerMap(REGISTRATION_BEHAVIOURS_KEY);
+            bdvh.getTriggerbindings().removeBehaviourMap(REGISTRATION_BEHAVIOURS_KEY);
+            positioning_behaviours.install(bdvh.getTriggerbindings(), POSITIONING_BEHAVIOURS_KEY);
+            navigateCurrentSlice();
+            refreshBlockMap();
+        }
+    }
+
+    void hide(SliceSources slice) {
+        SourceAndConverterServices
+                .getSourceAndConverterDisplayService()
+                .remove(bdvh, slice.registered_sacs);
+        SourceAndConverterServices
+                .getSourceAndConverterDisplayService()
+                .remove(bdvh, slice.relocated_sacs_positioning_mode);
+    }
+
+    void showPositioning(SliceSources slice) {
+        SourceAndConverterServices
+                .getSourceAndConverterDisplayService()
+                .remove(bdvh, slice.registered_sacs);
+        SourceAndConverterServices
+                .getSourceAndConverterDisplayService()
+                .show(bdvh, slice.relocated_sacs_positioning_mode);
+    }
+
+    void showRegistration(SliceSources slice) {
+        SourceAndConverterServices
+                .getSourceAndConverterDisplayService()
+                .remove(bdvh, slice.relocated_sacs_positioning_mode);
+        SourceAndConverterServices
+                .getSourceAndConverterDisplayService()
+                .show(bdvh, slice.registered_sacs);
+    }
+
+    void updateSliceDisplay(SliceSources slice) {
+        if (single_slide_display_mode) {
+            if ((iCurrentSlice>=0)&&(iCurrentSlice<slices.size())){
+                if (getSortedSlices().get(iCurrentSlice) != slice){
+                    hide(slice);
+                    return;
+                }
+            }
+        }
+        if (currentMode == POSITIONING_MODE_INT) { // TODO : fix potential issue if user switches fast between modes ?
+            showPositioning(slice);
+        }
+        if (currentMode == REGISTRATION_MODE_INT) { // TODO : fix potential issue if user switches fast between modes ?
+            showRegistration(slice);
+        }
     }
 
     /**
@@ -518,28 +574,10 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             reslicedAtlas.lock();
             currentMode = REGISTRATION_MODE_INT;
             ghs.forEach(gh -> gh.disable());
-            getSortedSlices(); // Reindexing just in case
-            // slices.forEach(slice -> slice.disableGraphicalHandles());
-            // Do stuff
             synchronized (slices) {
-                /*if (slices.stream().anyMatch(slice -> slice.processInProgress)) {
-                    System.err.println("Mode cannot be changed if a task is in process");
-                } else*/
-                {
-                    List<SourceAndConverter> sacsToRemove = new ArrayList<>();
-                    List<SourceAndConverter> sacsToAdd = new ArrayList<>();
-                    getSortedSlices().forEach(ss -> {
-                        sacsToRemove.addAll(Arrays.asList(ss.relocated_sacs_positioning_mode));
-                        sacsToAdd.addAll(Arrays.asList(ss.registered_sacs));
-                    });
-                    SourceAndConverterServices
-                            .getSourceAndConverterDisplayService()
-                            .remove(bdvh, sacsToRemove.toArray(new SourceAndConverter[0]));
-                    SourceAndConverterServices
-                            .getSourceAndConverterDisplayService()
-                            .show(bdvh, sacsToAdd.toArray(new SourceAndConverter[0]));
-                    ;
-                }
+                getSortedSlices().forEach(ss -> {
+                    updateSliceDisplay(ss);
+                });
             }
 
             for (int i = 0; i < reslicedAtlas.nonExtendedSlicedSources.length; i++) {
@@ -566,14 +604,17 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
      * Center bdv on next slice (iCurrentSlice + 1)
      */
     public void navigateNextSlice() {
-        iCurrentSlice++;
         List<SliceSources> sortedSlices = getSortedSlices();
+        int previousSliceIndex = iCurrentSlice;
+        iCurrentSlice++;
         if (iCurrentSlice >= sortedSlices.size()) {
             iCurrentSlice = 0;
         }
         if (sortedSlices.size() > 0) {
             centerBdvViewOn(sortedSlices.get(iCurrentSlice));
         }
+        updateSliceDisplay(sortedSlices.get(previousSliceIndex));
+        updateSliceDisplay(sortedSlices.get(iCurrentSlice));
     }
 
     /**
@@ -611,7 +652,6 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         roiSX = sx;
         roiSY = sy;
 
-
     }
 
     /**
@@ -633,6 +673,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
      * Center bdv on previous slice (iCurrentSlice - 1)
      */
     public void navigatePreviousSlice() {
+        int previousSliceIndex = iCurrentSlice;
         iCurrentSlice--;
         List<SliceSources> sortedSlices = getSortedSlices();
 
@@ -643,6 +684,9 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         if (sortedSlices.size() > 0) {
             centerBdvViewOn(sortedSlices.get(iCurrentSlice));
         }
+
+        updateSliceDisplay(sortedSlices.get(previousSliceIndex));
+        updateSliceDisplay(sortedSlices.get(iCurrentSlice));
     }
 
     public void selectSlice(SliceSources... slices) {
@@ -718,7 +762,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         nextAffineTransform.set(shiftMatrix.getDoublePosition(1), 1, 3);
         nextAffineTransform.set(shiftMatrix.getDoublePosition(2), 2, 3);
 
-        bdvh.getViewerPanel().setCurrentViewerTransform(nextAffineTransform);
+        bdvh.getViewerPanel().state().setViewerTransform(nextAffineTransform);
         bdvh.getViewerPanel().requestRepaint();
 
     }
@@ -1060,12 +1104,6 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         navigateCurrentSlice();
     }
 
-    /*boolean showRegistrationResults = false;
-
-    public void showRegistrationResults(boolean flag) {
-        showRegistrationResults = flag;
-    }*/
-
     public static Function<SourceAndConverter[], SourceAndConverter[]> getChannel(int... channels) {
         return (sacs) -> {
             SourceAndConverter[] sacs_out = new SourceAndConverter[channels.length];
@@ -1076,16 +1114,19 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         };
     }
 
-    public void registerElastix(int iChannelFixed, int iChannelMoving) {
-        registerElastix(getChannel(iChannelFixed), getChannel(iChannelMoving));
+    public void registerElastixAffine(int iChannelFixed, int iChannelMoving) {
+        registerElastixAffine(getChannel(iChannelFixed), getChannel(iChannelMoving));
     }
 
     public void registerBigWarp(int iChannelFixed, int iChannelMoving) {
         registerBigWarp(getChannel(iChannelFixed), getChannel(iChannelMoving));
     }
 
-    public void registerElastix(Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixed,
-                                Function<SourceAndConverter[], SourceAndConverter[]> preprocessMoving) {
+    public void registerElastixAffine(Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixed,
+                                      Function<SourceAndConverter[], SourceAndConverter[]> preprocessMoving) {
+        if (getSelectedSources().size()==0) {
+            log.accept("Registration ignored : no slice selected");
+        }
         for (SliceSources slice : slices) {
             if (slice.isSelected()) {
                 Elastix2DAffineRegistration elastixAffineReg = new Elastix2DAffineRegistration();
@@ -1097,7 +1138,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 params.put("levelMovingSource", slice.registered_sacs[0].getSpimSource().getNumMipmapLevels() - 1);
                 params.put("pxSizeInCurrentUnit", 0.04);
                 params.put("interpolate", false);
-                params.put("showImagePlusRegistrationResult", false);//true);
+                params.put("showImagePlusRegistrationResult", false);// true);
                 params.put("px", roiPX);//rpt.getDoublePosition(0));
                 params.put("py", roiPY);//rpt.getDoublePosition(1));
                 params.put("pz", slice.getSlicingAxisPosition());//rpt.getDoublePosition(2));
@@ -1109,62 +1150,43 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         }
     }
 
-    /*
-    public void requestRegistration(String registrationType,
-                                    int channelFixed,
-                                    int channelMoving) {
-        requestRegistration(registrationType, new int[]{channelFixed}, new int[]{channelMoving});
+    public void registerElastixSpline(int iChannelFixed, int iChannelMoving) {
+        registerElastixSpline(getChannel(iChannelFixed), getChannel(iChannelMoving));
     }
 
-    public void requestRegistration(String registrationType,
-                                    final int[] channelsFixed,
-                                    final int[] channelsMoving) {
-        requestRegistration(registrationType,
-                (sacs) -> {
-                    SourceAndConverter[] selected = new SourceAndConverter[channelsFixed.length];
-                    for (int idx = 0;idx<channelsFixed.length;idx++) {
-                        selected[idx] = sacs[channelsFixed[idx]];
-                    }
-                    return selected;
-                },
-                (sacs) -> {
-                    SourceAndConverter[] selected = new SourceAndConverter[channelsFixed.length];
-                    for (int idx = 0;idx<channelsMoving.length;idx++) {
-                        selected[idx] = sacs[channelsMoving[idx]];
-                    }
-                    return selected;
-                });
-    }
-
-    public void requestRegistration(String registrationType,
-                                    Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixed,
-                                    Function<SourceAndConverter[], SourceAndConverter[]> preprocessMoving) {
-        boolean atLeastOneSliceSelected = false;
-        if (slices.size()==0) {
-            log.accept("No slice... Registration not performed.");
+    public void registerElastixSpline(Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixed,
+                                      Function<SourceAndConverter[], SourceAndConverter[]> preprocessMoving) {
+        if (getSelectedSources().size()==0) {
+            log.accept("Registration ignored : no slice selected");
         }
         for (SliceSources slice : slices) {
-                if (slice.isSelected()) {
-                    atLeastOneSliceSelected = true;
-                }
-        }
-        if (!atLeastOneSliceSelected) {
-            log.accept("No slice selected... Registration not performed.");
-        } else {
-            switch (registrationType) {
-                case "Manual BigWarp":
-                    registerBigWarp(preprocessFixed, preprocessMoving);
-                    break;
-                case "Auto Elastix Affine":
-                    registerElastix(preprocessFixed, preprocessMoving);
-                default:
-                    log.accept("Unrecognized registration : "+registrationType);
+            if (slice.isSelected()) {
+                Elastix2DSplineRegistration elastixSplineReg = new Elastix2DSplineRegistration();
+                elastixSplineReg.setScijavaContext(scijavaCtx);
+                Map<String, Object> params = new HashMap<>();
+                params.put("tpFixed", 0);
+                params.put("levelFixedSource", 1);
+                params.put("tpMoving", 0);
+                params.put("levelMovingSource", slice.registered_sacs[0].getSpimSource().getNumMipmapLevels() - 1);
+                params.put("pxSizeInCurrentUnit", 0.02);
+                params.put("interpolate", true);
+                params.put("showImagePlusRegistrationResult", false);//true);
+                params.put("px", roiPX);
+                params.put("py", roiPY);
+                params.put("pz", slice.getSlicingAxisPosition());
+                params.put("sx", roiSX);
+                params.put("sy", roiSY);
+                elastixSplineReg.setScijavaParameters(params);
+                new RegisterSlice(this, slice, elastixSplineReg, preprocessFixed, preprocessMoving).runRequest();
             }
         }
-    }*/
+    }
 
     public void registerBigWarp(Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixed,
                                 Function<SourceAndConverter[], SourceAndConverter[]> preprocessMoving) {
+        if (getSelectedSources().size()==0) {
+            log.accept("Registration ignored : no slice selected");
+        }
         for (SliceSources slice : slices) {
             if (slice.isSelected()) {
                 SacBigWarp2DRegistration registration = new SacBigWarp2DRegistration();

@@ -168,6 +168,7 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
 
     @Override
     public boolean edit() {
+
         throw new UnsupportedOperationException();
     }
 

@@ -157,7 +157,7 @@ public class SliceSources {
 
     public synchronized void deSelect() {
         this.isSelected = false;
-    }
+    } // TODO : thread lock!
 
     public boolean isSelected() {
         return this.isSelected;
@@ -176,7 +176,7 @@ public class SliceSources {
     protected Integer[] getBdvHandleCoords() {
         AffineTransform3D bdvAt3D = new AffineTransform3D();
         mp.bdvh.getViewerPanel().state().getViewerTransform(bdvAt3D);
-        RealPoint sliceCenter = new RealPoint(3);
+        RealPoint sliceCenter;
         if (mp.currentMode == MultiSlicePositioner.POSITIONING_MODE_INT) {
             sliceCenter = getCenterPositionPMode();
             bdvAt3D.apply(sliceCenter, sliceCenter);
@@ -309,31 +309,24 @@ public class SliceSources {
     }
 
     public void appendRegistration(Registration<SourceAndConverter[]> reg) {
-        SourceAndConverterServices.getSourceAndConverterDisplayService()
-                .remove(mp.bdvh, registered_sacs);
+        // Removes previous registration state (could be not necessary)
+        SourceAndConverterServices.getSourceAndConverterService()
+                .remove(registered_sacs);
+        SourceAndConverterServices.getSourceAndConverterService()
+                .remove(relocated_sacs_positioning_mode);
 
         registered_sacs = reg.getTransformedImageMovingToFixed(registered_sacs);
 
         slicingModePositioner = new AffineTransformedSourceWrapperRegistration();
 
         slicingModePositioner.setMovingImage(registered_sacs);
-        SourceAndConverterServices.getSourceAndConverterService().remove(relocated_sacs_positioning_mode);
 
         relocated_sacs_positioning_mode = slicingModePositioner.getTransformedImageMovingToFixed(registered_sacs);
         updatePosition();
 
         registered_sacs_sequence.put(reg, registered_sacs);
 
-        if (mp.currentMode == MultiSlicePositioner.REGISTRATION_MODE_INT) {
-            SourceAndConverterServices.getSourceAndConverterDisplayService()
-                    .show(mp.bdvh, registered_sacs);
-        }
-
-        if (mp.currentMode == MultiSlicePositioner.POSITIONING_MODE_INT) {
-            SourceAndConverterServices.getSourceAndConverterDisplayService()
-                    .show(mp.bdvh, relocated_sacs_positioning_mode);
-            enableGraphicalHandles();
-        }
+        mp.updateSliceDisplay(this);
 
         registrations.add(reg);
 
@@ -389,6 +382,7 @@ public class SliceSources {
 
                 Registration last = registrations.get(registrations.size() - 1);
 
+                // Removes previous registration state (could be not necessary)
                 SourceAndConverterServices.getSourceAndConverterService()
                         .remove(registered_sacs);
                 SourceAndConverterServices.getSourceAndConverterService()
@@ -399,21 +393,11 @@ public class SliceSources {
                 slicingModePositioner = new AffineTransformedSourceWrapperRegistration();
 
                 slicingModePositioner.setMovingImage(registered_sacs);
-                SourceAndConverterServices.getSourceAndConverterService().remove(relocated_sacs_positioning_mode);
 
                 relocated_sacs_positioning_mode = slicingModePositioner.getTransformedImageMovingToFixed(registered_sacs);
                 updatePosition();
 
-                if (mp.currentMode == MultiSlicePositioner.REGISTRATION_MODE_INT) {
-                    SourceAndConverterServices.getSourceAndConverterDisplayService()
-                            .show(mp.bdvh, registered_sacs);
-                }
-
-                if (mp.currentMode == MultiSlicePositioner.POSITIONING_MODE_INT) {
-                    SourceAndConverterServices.getSourceAndConverterDisplayService()
-                            .show(mp.bdvh, relocated_sacs_positioning_mode);
-                    enableGraphicalHandles();
-                }
+                mp.updateSliceDisplay(this);
 
                 return true;
             } else {

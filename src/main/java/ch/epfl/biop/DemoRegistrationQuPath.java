@@ -51,7 +51,11 @@ public class DemoRegistrationQuPath {
                 //ij.convert().convert("SpimData 0>Channel>3", SourceAndConverter[].class)
                 //);
 
-        mp.createSlice(sacs,8, 0.182, Tile.class, new Tile(-1));
+        mp.setSingleSliceDisplayMode();
+        mp.createSlice(sacs,8.32, 0.08, Tile.class, new Tile(-1));
+        mp.selectSlice(mp.getSortedSlices());
+        mp.registerElastixAffine(0,0);
+
         /*mp.deselectSlice(mp.getSortedSlices());
         mp.selectSlice(mp.getSortedSlices().get(0));
         mp.registerElastix(0,0);
