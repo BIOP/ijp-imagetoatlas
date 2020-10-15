@@ -253,6 +253,10 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
         mso = new MultiSliceObserver(this);
 
+        bdvh.getCardPanel().addCard("Import IJ Image",
+                ScijavaSwingUI.getPanel(scijavaCtx, ImportImagePlusCommand.class, "mp", this ),
+                true);
+
         bdvh.getCardPanel().addCard("Atlas Slicing",
                 ScijavaSwingUI.getPanel(scijavaCtx, SlicerAdjusterCommand.class, "reslicedAtlas", reslicedAtlas),
                 true);
@@ -390,6 +394,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         itm.put(InputTrigger.getFromString("UP"), "zoom in");
         itm.put(InputTrigger.getFromString("shift UP"), "zoom in fast");
         itm.put(InputTrigger.getFromString("ctrl UP"), "zoom in slow");
+        itm.put(InputTrigger.getFromString("scroll"), "scroll zoom");
 
         itm.put(InputTrigger.getFromString("DOWN"), "zoom out");
         itm.put(InputTrigger.getFromString("shift DOWN"), "zoom out fast");
@@ -401,6 +406,13 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
         bdvh.getTriggerbindings().addInputTriggerMap("default_navigation", itm, "transform");
     }
+
+    ScrollBehaviour zoomWheel = new ScrollBehaviour() {
+        @Override
+        public void scroll(double v, boolean b, int i, int i1) {
+
+        }
+    };
 
     public void recenterBdvh() {
         double cur_wcx = bdvh.getViewerPanel().getWidth() / 2.0; // Current Window Center X
@@ -612,9 +624,9 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         }
         if (sortedSlices.size() > 0) {
             centerBdvViewOn(sortedSlices.get(iCurrentSlice));
+            updateSliceDisplay(sortedSlices.get(previousSliceIndex));
+            updateSliceDisplay(sortedSlices.get(iCurrentSlice));
         }
-        updateSliceDisplay(sortedSlices.get(previousSliceIndex));
-        updateSliceDisplay(sortedSlices.get(iCurrentSlice));
     }
 
     /**
@@ -683,10 +695,10 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
         if (sortedSlices.size() > 0) {
             centerBdvViewOn(sortedSlices.get(iCurrentSlice));
+            updateSliceDisplay(sortedSlices.get(previousSliceIndex));
+            updateSliceDisplay(sortedSlices.get(iCurrentSlice));
         }
 
-        updateSliceDisplay(sortedSlices.get(previousSliceIndex));
-        updateSliceDisplay(sortedSlices.get(iCurrentSlice));
     }
 
     public void selectSlice(SliceSources... slices) {
@@ -975,6 +987,12 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     }
 
     //-----------------------------------------
+
+    public SliceSources createSlice(SourceAndConverter[] sacsArray, double slicingAxisPosition) {
+        CreateSlice cs = new CreateSlice(this, Arrays.asList(sacsArray), slicingAxisPosition);
+        cs.runRequest();
+        return cs.getSlice();
+    }
 
     public <T extends Entity> List<SliceSources> createSlice(SourceAndConverter[] sacsArray, double slicingAxisPosition, double axisIncrement, final Class<T> attributeClass, T defaultEntity) {
         List<SliceSources> out = new ArrayList<>();

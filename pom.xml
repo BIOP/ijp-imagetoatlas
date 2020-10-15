@@ -136,9 +136,9 @@
 		<scijava.app.directory>C:\Users\chiarutt\Desktop\bdv-allen\fiji-win64\Fiji.app</scijava.app.directory>
 
 		<bigdataviewer-biop-tools.version>0.2.0-SNAPSHOT</bigdataviewer-biop-tools.version>
-		<bigdataviewer-bioformats.version>0.2.7-SNAPSHOT</bigdataviewer-bioformats.version>
-		<bigdataviewer-playground.version>0.2.5-SNAPSHOT</bigdataviewer-playground.version>
-		<bigdataviewer-selector.version>0.1.5-SNAPSHOT</bigdataviewer-selector.version>
+		<bigdataviewer-bioformats.version>0.2.9</bigdataviewer-bioformats.version>
+		<bigdataviewer-playground.version>0.2.5</bigdataviewer-playground.version>
+		<bigdataviewer-selector.version>0.1.5</bigdataviewer-selector.version>
 
 		<bigdataviewer-core.version>10.0.2</bigdataviewer-core.version>
 		<bigdataviewer-vistools.version>1.0.0-beta-23</bigdataviewer-vistools.version>
