@@ -72,9 +72,10 @@ public class CreateSlice extends CancelableAction {
                 }
             }
 
-            if (sliceSource == null) // for proper redo function
+            if (sliceSource == null) {// for proper redo function
                 sliceSource = new SliceSources(sacs.toArray(new SourceAndConverter[sacs.size()]),
                         slicingAxisPosition, mp);
+            }
 
             mp.slices.add(sliceSource);
 

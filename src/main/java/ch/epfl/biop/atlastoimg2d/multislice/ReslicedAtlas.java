@@ -7,10 +7,7 @@ import ch.epfl.biop.registration.sourceandconverter.AffineTransformedSourceWrapp
 import ch.epfl.biop.sourceandconverter.transform.SourceMosaicZSlicer;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealPoint;
-import net.imglib2.cache.img.DiskCachedCellImgFactory;
-import net.imglib2.cache.img.DiskCachedCellImgOptions;
 import net.imglib2.realtransform.AffineTransform3D;
-import net.imglib2.type.numeric.integer.UnsignedShortType;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import sc.fiji.bdvpg.sourceandconverter.importer.EmptySourceAndConverterCreator;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceAffineTransformer;
@@ -18,8 +15,6 @@ import sc.fiji.bdvpg.sourceandconverter.transform.SourceResampler;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static net.imglib2.cache.img.DiskCachedCellImgOptions.options;
 
 public class ReslicedAtlas {
 
@@ -137,19 +132,6 @@ public class ReslicedAtlas {
         // Gets slicing resolution
         // TODO : check null pointer exception if getvoxel not present
         double slicingResolution = 0.01;
-        //sacForBoundsTesting.getSpimSource().getVoxelDimensions().dimension(0);
-
-        // Dummy ImageFactory
-        final int[] cellDimensions = new int[] { 32, 32, 32 };
-
-        // Cached Image Factory Options
-        final DiskCachedCellImgOptions factoryOptions = options()
-                .cellDimensions( cellDimensions )
-                .cacheType( DiskCachedCellImgOptions.CacheType.BOUNDED )
-                .maxCacheSize( 1 );
-
-        // Creates cached image factory of Type UnsignedShort
-        final DiskCachedCellImgFactory<UnsignedShortType> factory = new DiskCachedCellImgFactory<>( new UnsignedShortType(), factoryOptions );
 
         slicingTransfom.scale(slicingResolution);
 
@@ -164,8 +146,7 @@ public class ReslicedAtlas {
         SourceAndConverter nonWrappedSlicingModel = new EmptySourceAndConverterCreator("SlicingModel",new AffineTransform3D(),
                 nPixX,
                 nPixY,
-                nPixZ,
-                factory
+                nPixZ
         ).get();
 
         if (slicingModel!=null) {

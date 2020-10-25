@@ -133,15 +133,15 @@
 		<main-class>ch.epfl.biop.aba.DummyCommand</main-class>
 		<license.licenseName>N/A</license.licenseName>
 		<license.copyrightOwners>N/A</license.copyrightOwners>
-		<scijava.app.directory>C:\Users\chiarutt\Desktop\bdv-allen\fiji-win64\Fiji.app</scijava.app.directory>
+		<scijava.app.directory>C:\Users\nicol\Desktop\fiji-win64-ABBA\Fiji.app</scijava.app.directory>
 
 		<bigdataviewer-biop-tools.version>0.2.0-SNAPSHOT</bigdataviewer-biop-tools.version>
 		<bigdataviewer-bioformats.version>0.2.9</bigdataviewer-bioformats.version>
-		<bigdataviewer-playground.version>0.2.5</bigdataviewer-playground.version>
+		<bigdataviewer-playground.version>0.2.6-SNAPSHOT</bigdataviewer-playground.version>
 		<bigdataviewer-selector.version>0.1.5</bigdataviewer-selector.version>
 
 		<bigdataviewer-core.version>10.0.2</bigdataviewer-core.version>
-		<bigdataviewer-vistools.version>1.0.0-beta-23</bigdataviewer-vistools.version>
+		<bigdataviewer-vistools.version>1.0.0-beta-24-SNAPSHOT</bigdataviewer-vistools.version>
 		<imglib2-cache.version>1.0.0-beta-15</imglib2-cache.version>
 
 		<ijl-utilities-wrappers.version>0.3.16-SNAPSHOT</ijl-utilities-wrappers.version>
@@ -208,12 +208,17 @@
 			<version>${bigdataviewer-biop-tools.version}</version>
 		</dependency>
 
-
 		<dependency>
 			<groupId>ch.epfl.biop</groupId>
 			<artifactId>bigdataviewer-selector</artifactId>
 			<version>${bigdataviewer-selector.version}</version>
 		</dependency>
+
+		<!--
+    compile 'com.google.api-client:google-api-client:1.23.0'
+    compile 'com.google.oauth-client:google-oauth-client-jetty:1.23.0'
+    compile 'com.google.apis:google-api-services-drive:v3-rev110-1.23.0'
+		-->
 
 	</dependencies>
 </project>

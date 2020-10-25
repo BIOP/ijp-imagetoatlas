@@ -333,6 +333,19 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
         addRightClickActions();
 
+        AffineTransform3D iniView = new AffineTransform3D();
+
+        iniView.translate(-500,5,0);
+        iniView.scale(20);
+        bdvh.getViewerPanel().state().setViewerTransform(iniView);
+
+        reslicedAtlas.setStep(50);
+        reslicedAtlas.setRotateX(0);
+        reslicedAtlas.setRotateY(0);
+
+        bdvh.getSplitPanel().setCollapsed(false);
+        bdvh.getSplitPanel().setDividerLocation(400);
+
         BdvHandleHelper.setBdvHandleCloseOperation(bdvh, ctx.getService(CacheService.class),
                 SourceAndConverterServices.getSourceAndConverterDisplayService(), false,
                     () -> {
@@ -376,6 +389,10 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         synchronized (slices) {
             slices.forEach(this::updateSliceDisplay);
         }
+    }
+
+    public ReslicedAtlas getReslicedAtlas() {
+        return reslicedAtlas;
     }
 
     public List<SliceSources> getSelectedSources() {
@@ -1209,18 +1226,6 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             if (slice.isSelected()) {
                 SacBigWarp2DRegistration registration = new SacBigWarp2DRegistration();
 
-                // Dummy ImageFactory
-                final int[] cellDimensions = new int[]{32, 32, 1};
-
-                // Cached Image Factory Options
-                final DiskCachedCellImgOptions factoryOptions = options()
-                        .cellDimensions(cellDimensions)
-                        .cacheType(DiskCachedCellImgOptions.CacheType.BOUNDED)
-                        .maxCacheSize(1);
-
-                // Creates cached image factory of Type UnsignedShort
-                final DiskCachedCellImgFactory<UnsignedShortType> factory = new DiskCachedCellImgFactory<>(new UnsignedShortType(), factoryOptions);
-
                 AffineTransform3D at3D = new AffineTransform3D();
                 at3D.translate(-this.nPixX / 2.0, -this.nPixY / 2.0, 0);
                 at3D.scale(this.sizePixX, this.sizePixY, this.sizePixZ);
@@ -1230,8 +1235,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 SourceAndConverter singleSliceModel = new EmptySourceAndConverterCreator("SlicingModel", at3D,
                         nPixX,
                         nPixY,
-                        1,
-                        factory
+                        1
                 ).get();
 
                 SourceResampler resampler = new SourceResampler(null,

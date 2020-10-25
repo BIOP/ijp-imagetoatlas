@@ -2,32 +2,24 @@ package ch.epfl.biop.atlastoimg2d.multislice;
 
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.allen.AllenOntology;
-import ch.epfl.biop.atlas.allen.AllenOntologyJson;
 import ch.epfl.biop.atlas.commands.ConstructROIsFromImgLabel;
-import ch.epfl.biop.atlastoimg2d.commands.sourceandconverter.multislices.PutAtlasStructureToImageNoRoiManager;
 import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
 import ch.epfl.biop.java.utilities.roi.types.CompositeFloatPoly;
 import ch.epfl.biop.java.utilities.roi.types.IJShapeRoiArray;
 import ch.epfl.biop.java.utilities.roi.types.ImageJRoisFile;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
-import ch.epfl.biop.qupathfiji.MinimalQuPathProject;
-import ch.epfl.biop.qupathfiji.QuPathEntryEntity;
+import ch.epfl.biop.spimdata.qupath.QuPathEntryEntity;
 import ch.epfl.biop.registration.Registration;
 import ch.epfl.biop.registration.sourceandconverter.AffineTransformedSourceWrapperRegistration;
 import ch.epfl.biop.registration.sourceandconverter.CenterZeroRegistration;
 import ch.epfl.biop.scijava.command.ExportToImagePlusCommand;
-import com.google.common.collect.Lists;
-import com.google.gson.Gson;
 import ij.ImagePlus;
 import ij.gui.Roi;
 import ij.plugin.frame.RoiManager;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import mpicbg.spim.data.generic.sequence.BasicViewSetup;
 import net.imglib2.RealPoint;
-import net.imglib2.cache.img.DiskCachedCellImgFactory;
-import net.imglib2.cache.img.DiskCachedCellImgOptions;
 import net.imglib2.realtransform.AffineTransform3D;
-import net.imglib2.type.numeric.integer.UnsignedShortType;
 import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
@@ -41,7 +33,6 @@ import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
 
 import java.awt.*;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -49,9 +40,6 @@ import java.util.*;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
-
-import static ch.epfl.biop.scijava.command.QuPathProjectToBDVDatasetCommand.QUPATH_LINKED_PROJECT;
-import static net.imglib2.cache.img.DiskCachedCellImgOptions.options;
 
 public class SliceSources {
 
@@ -310,8 +298,9 @@ public class SliceSources {
 
     public void appendRegistration(Registration<SourceAndConverter[]> reg) {
         // Removes previous registration state (could be not necessary)
-        SourceAndConverterServices.getSourceAndConverterService()
-                .remove(registered_sacs);
+        //SourceAndConverterServices.getSourceAndConverterService()
+        //        .remove(registered_sacs); // PROBLEM : NOT THE FIRST ONES
+
         SourceAndConverterServices.getSourceAndConverterService()
                 .remove(relocated_sacs_positioning_mode);
 
@@ -479,24 +468,12 @@ public class SliceSources {
 
         System.out.println("Compute Label Image");
 
-        final int[] cellDimensions = new int[]{32, 32, 1};
-
-        // Cached Image Factory Options
-        final DiskCachedCellImgOptions factoryOptions = options()
-                .cellDimensions(cellDimensions)
-                .cacheType(DiskCachedCellImgOptions.CacheType.BOUNDED)
-                .maxCacheSize(1);
-
-        // Creates cached image factory of Type UnsignedShort
-        final DiskCachedCellImgFactory<UnsignedShortType> factory = new DiskCachedCellImgFactory<>(new UnsignedShortType(), factoryOptions);
-
         System.out.println("0");
         // 0 - slicing model : empty source but properly defined in space and resolution
         SourceAndConverter singleSliceModel = new EmptySourceAndConverterCreator("SlicingModel", at3D,
                 mp.nPixX,
                 mp.nPixY,
-                1,
-                factory
+                1
         ).get();
 
         SourceResampler resampler = new SourceResampler(null,
@@ -677,10 +654,12 @@ public class SliceSources {
 
             System.out.println("BDV Datasets found associated with the slice!");
 
-            if (SourceAndConverterServices
-                    .getSourceAndConverterService()
-                    .containsMetadata(asd, QUPATH_LINKED_PROJECT)) {
-                System.out.println("Linked QuPath Project found!");
+            if (
+                  //  SourceAndConverterServices
+                  //  .getSourceAndConverterService()
+                  //  .containsMetadata(asd, QUPATH_LINKED_PROJECT)
+                true) {
+                //System.out.println("Linked QuPath Project found!");
 
                 int viewSetupId = ((SourceAndConverterService.SpimDataInfo)SourceAndConverterServices.getSourceAndConverterService()
                         .getMetadata(rootSac, SourceAndConverterService.SPIM_DATA_INFO)).setupId;
@@ -690,15 +669,11 @@ public class SliceSources {
                 if (bvs.getAttribute(QuPathEntryEntity.class)!=null) {
                     QuPathEntryEntity qpent = bvs.getAttribute(QuPathEntryEntity.class);
 
-                    MinimalQuPathProject qpProj = (MinimalQuPathProject) SourceAndConverterServices
-                            .getSourceAndConverterService()
-                            .getMetadata(asd, QUPATH_LINKED_PROJECT);
-
-                    String filePath = Paths.get(qpProj.uri).getParent().toString();
+                    String filePath = qpent.getQuPathProjectionLocation();
 
                     // under filePath, there should be a folder data/#entryID
 
-                    File dataEntryFolder = new File(filePath, "data"+File.separator+Integer.toString(qpent.getId()) );
+                    File dataEntryFolder = new File(filePath, "data"+File.separator+qpent.getId());
 
                     // TODO : check if the file already exists...
                     if (dataEntryFolder.exists()) {
@@ -787,10 +762,10 @@ public class SliceSources {
         Collections.reverse(this.registrations);
 
         for (Registration reg : this.registrations) {
-            //System.out.println("Registration class "+reg.getClass().getSimpleName());
             listRegions = reg.getTransformedPtsFixedToMoving(listRegions);
             listLeftRight = reg.getTransformedPtsFixedToMoving(listLeftRight);
         }
+        
         Collections.reverse(this.registrations);
 
         this.original_sacs[0].getSpimSource().getSourceTransform(0,0,at3D);
@@ -803,15 +778,6 @@ public class SliceSources {
 
         leftRightTranformed.clear();
         listLeftRight.shapeRoiList = new IJShapeRoiArray(arrayIniLeftRight);
-
-
-        /*for (int i = 0;i<arrayIni.rois.size();i++) {
-            list.shapeRoiList.rois.get(i).getRoi().setProperty("hierarchy", arrayIni.rois.get(i).getRoi().getProperty("hierarchy"));
-
-            System.out.println("------------");
-            System.out.println(arrayIni.rois.get(i).getRoi().getProperty("hierarchy"));
-
-        }*/
 
         cvtRoisTransformed.set(listRegions);
 
