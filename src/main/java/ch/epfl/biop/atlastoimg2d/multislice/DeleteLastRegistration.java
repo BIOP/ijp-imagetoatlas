@@ -46,5 +46,4 @@ public class DeleteLastRegistration extends CancelableAction {
         mp.mso.unhide(rs);
         return rs.run();
     }
-
 }

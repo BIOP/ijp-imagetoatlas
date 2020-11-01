@@ -52,7 +52,7 @@ public class SliceSources {
     // Used for registration : like 3D, but tilt and roll ignored because it is handled on the fixed source side
     SourceAndConverter<?>[] registered_sacs;
 
-    Map<Registration, SourceAndConverter[]> registered_sacs_sequence = new HashMap<>();
+    List<RegistrationAndSources> registered_sacs_sequence = new ArrayList<>();
 
     // Where are they ?
     volatile double slicingAxisPosition;
@@ -122,6 +122,10 @@ public class SliceSources {
         );
         ghs.add(gh);
         iniPosition();
+    }
+
+    public List<RegistrationAndSources> getRegistrationSequence() {
+        return registered_sacs_sequence;
     }
 
     protected double getSlicingAxisPosition() {
@@ -313,7 +317,7 @@ public class SliceSources {
         relocated_sacs_positioning_mode = slicingModePositioner.getTransformedImageMovingToFixed(registered_sacs);
         updatePosition();
 
-        registered_sacs_sequence.put(reg, registered_sacs);
+        registered_sacs_sequence.add(new RegistrationAndSources(reg, registered_sacs));
 
         mp.updateSliceDisplay(this);
 
@@ -367,7 +371,7 @@ public class SliceSources {
             if (idx == registrations.size() - 1) {
 
                 registrations.remove(reg);
-                registered_sacs_sequence.remove(reg);
+                registered_sacs_sequence.remove(registered_sacs_sequence.get(registered_sacs_sequence.size()-1));
 
                 Registration last = registrations.get(registrations.size() - 1);
 
@@ -377,7 +381,7 @@ public class SliceSources {
                 SourceAndConverterServices.getSourceAndConverterService()
                         .remove(relocated_sacs_positioning_mode);
 
-                registered_sacs = registered_sacs_sequence.get(last);
+                registered_sacs = registered_sacs_sequence.get(registered_sacs_sequence.size()-1).sacs;
 
                 slicingModePositioner = new AffineTransformedSourceWrapperRegistration();
 
@@ -807,6 +811,17 @@ public class SliceSources {
         if (mp.currentMode == MultiSlicePositioner.POSITIONING_MODE_INT) {
             mp.getBdvh().getViewerPanel().state()
                     .setSourcesActive(Arrays.asList(relocated_sacs_positioning_mode), false);
+        }
+    }
+
+    public static class RegistrationAndSources {
+
+        public final Registration reg;
+        public final SourceAndConverter[] sacs;
+
+        public RegistrationAndSources(Registration reg, SourceAndConverter[] sacs) {
+            this.reg = reg;
+            this.sacs = sacs;
         }
     }
 }

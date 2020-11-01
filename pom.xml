@@ -149,6 +149,8 @@
 		<!-- temp build because of culling wrongly handled with warped source -->
 		<bigwarp_fiji.version>6.0.3-SNAPSHOT-NOCULLING</bigwarp_fiji.version>
 
+		<bigdataviewer-spimdata-extras.version>0.1.0</bigdataviewer-spimdata-extras.version>
+
 	</properties>
 
 	<dependencies>
@@ -212,6 +214,12 @@
 			<groupId>ch.epfl.biop</groupId>
 			<artifactId>bigdataviewer-selector</artifactId>
 			<version>${bigdataviewer-selector.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>ch.epfl.biop</groupId>
+			<artifactId>bigdataviewer-spimdata-extras</artifactId>
+			<version>${bigdataviewer-spimdata-extras.version}</version>
 		</dependency>
 
 		<!--

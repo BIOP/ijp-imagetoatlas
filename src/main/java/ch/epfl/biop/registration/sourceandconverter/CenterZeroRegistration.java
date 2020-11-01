@@ -36,9 +36,6 @@ public class CenterZeroRegistration implements Registration<SourceAndConverter[]
 
     @Override
     public boolean register() {
-        /*if (mimg.length>0) {
-            System.out.println("Warning : center registration works with the first source.");
-        }*/
 
         SourceAndConverter sac = mimg[0];
 
@@ -68,22 +65,11 @@ public class CenterZeroRegistration implements Registration<SourceAndConverter[]
 
     @Override
     public SourceAndConverter[] getTransformedImageMovingToFixed(SourceAndConverter[] img) {
-        /*SourceAndConverter[] out = new SourceAndConverter[img.length];
-
-        for (int idx = 0;idx<img.length;idx++) {
-            out[idx] = SourceTransformHelper.append(at3d, new SourceAndConverterAndTimeRange(img[idx],timePoint));
-        }*/
 
         SourceAndConverter[] out = new SourceAndConverter[img.length];
 
         for (int idx = 0;idx<img.length;idx++) {
-            /*if (alreadyTransformedSources.keySet().contains(img[idx])) {
-                out[idx] = alreadyTransformedSources.get(img[idx]);
-                SourceTransformHelper.set(at3d, new SourceAndConverterAndTimeRange(out[idx], timePoint));
-            } else {*/
-                out[idx] = SourceTransformHelper.createNewTransformedSourceAndConverter(at3d, new SourceAndConverterAndTimeRange(img[idx], timePoint));
-            /*    alreadyTransformedSources.put(img[idx], out[idx]);
-            }*/
+            out[idx] = SourceTransformHelper.createNewTransformedSourceAndConverter(at3d, new SourceAndConverterAndTimeRange(img[idx], timePoint));
         }
 
         return out;
@@ -95,8 +81,6 @@ public class CenterZeroRegistration implements Registration<SourceAndConverter[]
         for (RealPoint p : pts.ptList) {
             RealPoint pt3d = new RealPoint(3);
             pt3d.setPosition(new double[]{p.getDoublePosition(0), p.getDoublePosition(1),0});
-            //float npx = p.getFloatPosition(0)/scale+roi.getBounds().x;
-            //float npy = p.getFloatPosition(1)/scale+roi.getBounds().y;
             at3d.inverse().apply(pt3d, pt3d);
             RealPoint cpt = new RealPoint(pt3d.getDoublePosition(0), pt3d.getDoublePosition(1));
             cvtList.add(cpt);

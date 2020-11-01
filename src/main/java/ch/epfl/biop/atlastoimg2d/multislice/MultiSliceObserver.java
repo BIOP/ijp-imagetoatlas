@@ -209,6 +209,10 @@ public class MultiSliceObserver {
         repaintNeeded = true;
     }
 
+    public synchronized List<CancelableAction> getActionsFromSlice(SliceSources slice) {
+        return sliceSortedActions.get(slice);
+    }
+
     public synchronized void cancelInfo(CancelableAction action) {
         if ((action.getSliceSources()!=null)&&(sliceSortedActions.get(action.getSliceSources())!=null)) {
             sliceSortedActions.get(action.getSliceSources()).remove(action);

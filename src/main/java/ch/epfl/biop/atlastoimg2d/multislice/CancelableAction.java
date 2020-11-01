@@ -9,6 +9,7 @@ import java.util.function.Consumer;
  * - store the sequence of actions (-> for cancellation)
  * - executes actions asynchronously (-> for long computations)
  * - keep track of which action is executed on which SliceSources
+ * - serialization
  *
  * Convention : an action acts on a single SliceSources object.
  * If multiple SliceSources should be acted on, create as many actions as SliceSources involved
@@ -99,5 +100,6 @@ public abstract class CancelableAction {
     protected boolean isValid() {
         return true;
     }
+
 
 }

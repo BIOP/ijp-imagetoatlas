@@ -8,7 +8,6 @@ import ch.epfl.biop.atlastoimg2d.multislice.SliceSources;
 import ch.epfl.biop.scijava.command.SourceFromImagePlusCommand;
 import ij.IJ;
 import ij.ImagePlus;
-import mpicbg.spim.data.sequence.Tile;
 import net.imagej.ImageJ;
 
 public class DemoRegistrationIJ1 {
