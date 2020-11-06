@@ -1,6 +1,7 @@
 package ch.epfl.biop.atlastoimg2d.commands.sourceandconverter.multislices;
 
 import bdv.viewer.SourceAndConverter;
+import ch.epfl.biop.atlastoimg2d.multislice.CancelableAction;
 import ch.epfl.biop.atlastoimg2d.multislice.MultiSlicePositioner;
 import org.apache.commons.io.FilenameUtils;
 import org.scijava.Context;
@@ -15,7 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>MP Save State")
+@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>MP Save State [WIP]")
 public class SaveStateCommand implements Command {
 
     @Parameter
@@ -53,7 +54,18 @@ public class SaveStateCommand implements Command {
 
         SourceAndConverterServiceSaver sacss = new SourceAndConverterServiceSaver(sacsFile,ctx,allSacs);
         sacss.run();
-        Map<SourceAndConverter, Integer> sacToId = sacss.getSacToId();
+        Map<SourceAndConverter, Integer> sacMap = sacss.getSacToId();
+
+        synchronized (mp) {
+            mp.getSortedSlices().forEach(sliceSource -> {
+                sliceSource.getRegistrationSequence().forEach(regAndSacs -> {
+                    List<CancelableAction> slice_actions = mp.mso.getActionsFromSlice(sliceSource);
+
+                });
+            });
+        }
+
+
 
         //sacss.getGson()
 

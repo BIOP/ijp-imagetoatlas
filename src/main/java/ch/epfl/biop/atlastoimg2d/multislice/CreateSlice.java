@@ -14,9 +14,9 @@ import static ch.epfl.biop.atlastoimg2d.multislice.MultiSlicePositioner.*;
  */
 public class CreateSlice extends CancelableAction {
 
-    private List<SourceAndConverter<?>> sacs;
+    final private List<SourceAndConverter<?>> sacs;
     private SliceSources sliceSource;
-    private double slicingAxisPosition;
+    final private double slicingAxisPosition;
 
     public CreateSlice(MultiSlicePositioner mp, List<SourceAndConverter<?>> sacs, double slicingAxisPosition) {
         super(mp);

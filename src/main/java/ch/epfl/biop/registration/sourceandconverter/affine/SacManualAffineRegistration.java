@@ -1,4 +1,4 @@
-package ch.epfl.biop.registration.sourceandconverter;
+package ch.epfl.biop.registration.sourceandconverter.affine;
 
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
@@ -6,7 +6,7 @@ import ch.epfl.biop.registration.Registration;
 
 import java.util.function.Function;
 
-public class SacManualRegistration implements Registration<SourceAndConverter[]> {
+public class SacManualAffineRegistration implements Registration<SourceAndConverter[]> {
 
     SourceAndConverter[] fimg, mimg;
 
@@ -64,5 +64,10 @@ public class SacManualRegistration implements Registration<SourceAndConverter[]>
     @Override
     public void resetRegistration() {
         isDone = false;
+    }
+
+    @Override
+    public void setTimePoint(int timePoint) {
+        // TODO
     }
 }

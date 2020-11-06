@@ -1,11 +1,17 @@
 package ch.epfl.biop.registration;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 
+/**
+ *
+ * @param <T>
+ */
+
 public interface Registration<T> {
 
     void setFixedImage(T fimg);
     void setMovingImage(T mimg);
     void resetRegistration();
+    void setTimePoint(int timePoint);
 
     boolean register();
     boolean edit();

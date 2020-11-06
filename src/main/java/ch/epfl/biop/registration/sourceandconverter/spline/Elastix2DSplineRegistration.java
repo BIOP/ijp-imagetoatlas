@@ -1,8 +1,8 @@
-package ch.epfl.biop.registration.sourceandconverter;
+package ch.epfl.biop.registration.sourceandconverter.spline;
 
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
-import ch.epfl.biop.registration.Registration;
+import ch.epfl.biop.registration.sourceandconverter.SourceAndConverterRegistration;
 import ch.epfl.biop.scijava.command.Elastix2DSplineRegisterCommand;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.RealTransform;
@@ -16,9 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Future;
 
-public class Elastix2DSplineRegistration implements Registration<SourceAndConverter[]> {
-
-    SourceAndConverter[] fimg, mimg;
+public class Elastix2DSplineRegistration extends SourceAndConverterRegistration {
 
     Context ctx;
 
@@ -38,14 +36,14 @@ public class Elastix2DSplineRegistration implements Registration<SourceAndConver
 
     @Override
     public void setFixedImage(SourceAndConverter[] fimg) {
-        this.fimg = fimg;
+        super.setFixedImage(fimg);
         assert fimg.length==1;
         scijavaParameters.put("sac_fixed", fimg[0]);
     }
 
     @Override
     public void setMovingImage(SourceAndConverter[] mimg) {
-        this.mimg = mimg;
+        super.setMovingImage(mimg);
         assert mimg.length==1;
         scijavaParameters.put("sac_moving", mimg[0]);
     }
@@ -126,5 +124,10 @@ public class Elastix2DSplineRegistration implements Registration<SourceAndConver
     @Override
     public void resetRegistration() {
         isDone = false;
+    }
+
+    @Override
+    public void setTimePoint(int timePoint) {
+        // TODO
     }
 }

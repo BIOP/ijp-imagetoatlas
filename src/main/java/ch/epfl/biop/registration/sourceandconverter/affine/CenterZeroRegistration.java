@@ -1,4 +1,4 @@
-package ch.epfl.biop.registration.sourceandconverter;
+package ch.epfl.biop.registration.sourceandconverter.affine;
 
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
@@ -11,14 +11,14 @@ import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
 
 import java.util.ArrayList;
 
-public class CenterZeroRegistration implements Registration<SourceAndConverter[]> {
+public class CenterZeroRegistration extends AffineTransformSourceAndConverterRegistration {//implements Registration<SourceAndConverter[]> {
 
-    SourceAndConverter[] fimg;
-    SourceAndConverter[] mimg;
+    //SourceAndConverter[] fimg;
+    //SourceAndConverter[] mimg;
 
     AffineTransform3D at3d;
 
-    int timePoint = 0;
+    /*int timePoint = 0;
 
     @Override
     public void setFixedImage(SourceAndConverter[] fimg) {
@@ -28,11 +28,9 @@ public class CenterZeroRegistration implements Registration<SourceAndConverter[]
     @Override
     public void setMovingImage(SourceAndConverter[] mimg) {
         this.mimg = mimg;
-    }
+    }*/
 
-    void setTimePoint(int timePoint) {
-        this.timePoint = timePoint;
-    }
+
 
     @Override
     public boolean register() {

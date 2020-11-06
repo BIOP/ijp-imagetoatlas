@@ -1,8 +1,9 @@
-package ch.epfl.biop.registration.sourceandconverter;
+package ch.epfl.biop.registration.sourceandconverter.affine;
 
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import ch.epfl.biop.registration.Registration;
+import ch.epfl.biop.registration.sourceandconverter.SourceAndConverterRegistration;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterAndTimeRange;
@@ -12,30 +13,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class AffineTransformedSourceWrapperRegistration implements Registration<SourceAndConverter[]> {
-
-    SourceAndConverter[] fimg;
-    SourceAndConverter[] mimg;
-
-    int timePoint = 0;
+public class AffineTransformedSourceWrapperRegistration extends SourceAndConverterRegistration {
 
     AffineTransform3D at3d = new AffineTransform3D();
 
     Map<SourceAndConverter, SourceAndConverter> alreadyTransformedSources = new HashMap<>();
-
-    @Override
-    public void setFixedImage(SourceAndConverter[] fimg) {
-        this.fimg = fimg;
-    }
-
-    @Override
-    public void setMovingImage(SourceAndConverter[] mimg) {
-        this.mimg = mimg;
-    }
-
-    void setTimePoint(int timePoint) {
-        this.timePoint = timePoint;
-    }
 
     @Override
     public boolean register() {

@@ -1,4 +1,4 @@
-package ch.epfl.biop.registration.sourceandconverter;
+package ch.epfl.biop.registration.sourceandconverter.affine;
 
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
@@ -17,15 +17,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Future;
 
-public class Elastix2DAffineRegistration implements Registration<SourceAndConverter[]> {
+public class Elastix2DAffineRegistration extends AffineTransformSourceAndConverterRegistration{//implements Registration<SourceAndConverter[]> {
 
-    SourceAndConverter[] fimg, mimg;
+    //SourceAndConverter[] fimg, mimg;
 
     Context ctx;
 
     Map<String, Object> scijavaParameters = new HashMap<>();
 
-    AffineTransform3D at3d;
+    //AffineTransform3D at3d;
 
     public void setScijavaContext(Context ctx) {
         this.ctx = ctx;
@@ -37,14 +37,14 @@ public class Elastix2DAffineRegistration implements Registration<SourceAndConver
 
     @Override
     public void setFixedImage(SourceAndConverter[] fimg) {
-        this.fimg = fimg;
+        super.setFixedImage(this.fimg);
         assert fimg.length==1;
         scijavaParameters.put("sac_fixed", fimg[0]);
     }
 
     @Override
     public void setMovingImage(SourceAndConverter[] mimg) {
-        this.mimg = mimg;
+        super.setMovingImage(mimg);
         assert mimg.length==1;
         scijavaParameters.put("sac_moving", mimg[0]);
     }
@@ -64,7 +64,7 @@ public class Elastix2DAffineRegistration implements Registration<SourceAndConver
             return false;
         }
     }
-
+    /*
     @Override
     public SourceAndConverter[] getTransformedImageMovingToFixed(SourceAndConverter[] img) {
         SourceAndConverter[] out = new SourceAndConverter[img.length];
@@ -90,7 +90,7 @@ public class Elastix2DAffineRegistration implements Registration<SourceAndConver
             cvtList.add(cpt);
         }
         return new RealPointList(cvtList);
-    }
+    }*/
 
     @Override
     public boolean parallelSupported() {
@@ -99,16 +99,6 @@ public class Elastix2DAffineRegistration implements Registration<SourceAndConver
 
     @Override
     public boolean isManual() {
-        return false;
-    }
-
-    @Override
-    public boolean edit() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean isEditable() {
         return false;
     }
 
@@ -121,6 +111,8 @@ public class Elastix2DAffineRegistration implements Registration<SourceAndConver
 
     @Override
     public void resetRegistration() {
+        super.resetRegistration();
         isDone = false;
     }
+
 }

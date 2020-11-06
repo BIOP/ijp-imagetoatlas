@@ -3,7 +3,7 @@ package ch.epfl.biop.atlastoimg2d.multislice;
 import bdv.tools.transformation.TransformedSource;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.BiopAtlas;
-import ch.epfl.biop.registration.sourceandconverter.AffineTransformedSourceWrapperRegistration;
+import ch.epfl.biop.registration.sourceandconverter.affine.AffineTransformedSourceWrapperRegistration;
 import ch.epfl.biop.sourceandconverter.transform.SourceMosaicZSlicer;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealPoint;

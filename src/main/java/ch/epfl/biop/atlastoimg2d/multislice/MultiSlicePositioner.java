@@ -7,9 +7,9 @@ import ch.epfl.biop.atlastoimg2d.commands.sourceandconverter.multislices.*;
 import ch.epfl.biop.atlastoimg2d.multislice.scijava.ScijavaSwingUI;
 import ch.epfl.biop.bdv.select.SelectedSourcesListener;
 import ch.epfl.biop.bdv.select.SourceSelectorBehaviour;
-import ch.epfl.biop.registration.sourceandconverter.Elastix2DAffineRegistration;
-import ch.epfl.biop.registration.sourceandconverter.Elastix2DSplineRegistration;
-import ch.epfl.biop.registration.sourceandconverter.SacBigWarp2DRegistration;
+import ch.epfl.biop.registration.sourceandconverter.affine.Elastix2DAffineRegistration;
+import ch.epfl.biop.registration.sourceandconverter.spline.Elastix2DSplineRegistration;
+import ch.epfl.biop.registration.sourceandconverter.spline.SacBigWarp2DRegistration;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import mpicbg.spim.data.generic.base.Entity;
 import mpicbg.spim.data.generic.sequence.AbstractSequenceDescription;
@@ -18,8 +18,6 @@ import mpicbg.spim.data.sequence.Tile;
 import net.imglib2.FinalInterval;
 import net.imglib2.RealLocalizable;
 import net.imglib2.RealPoint;
-import net.imglib2.cache.img.DiskCachedCellImgFactory;
-import net.imglib2.cache.img.DiskCachedCellImgOptions;
 import net.imglib2.position.FunctionRealRandomAccessible;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.ARGBType;
@@ -52,7 +50,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static net.imglib2.cache.img.DiskCachedCellImgOptions.options;
 import static sc.fiji.bdvpg.scijava.services.SourceAndConverterService.SPIM_DATA_INFO;
 
 /**

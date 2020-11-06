@@ -27,7 +27,10 @@ public class SliceSourcesAdapter implements JsonSerializer<SliceSources>,
 
     @Override
     public JsonElement serialize(SliceSources sliceSources, Type type, JsonSerializationContext jsonSerializationContext) {
-        List<CancelableAction> actions = mp.mso.getActionsFromSlice(sliceSources);
+
+
+
+        /*List<CancelableAction> actions = mp.mso.getActionsFromSlice(sliceSources);
         actions = actions.stream().filter(action ->
                         ((action instanceof RegisterSlice)||
                          (action instanceof MoveSlice)||
@@ -48,7 +51,7 @@ public class SliceSourcesAdapter implements JsonSerializer<SliceSources>,
             } else {
                 actionsToSave.add(a);
             }
-        }
+        }*/
 
 
 

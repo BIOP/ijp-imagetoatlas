@@ -1,4 +1,4 @@
-package ch.epfl.biop.registration.sourceandconverter;
+package ch.epfl.biop.registration.sourceandconverter.spline;
 
 import bdv.gui.TransformTypeSelectDialog;
 import bdv.tools.brightness.ConverterSetup;
@@ -127,31 +127,6 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
                     pt.getDoublePosition(0), pt.getDoublePosition(1)
             });
             pt.setPosition(tr);
-
-/*            bwl.getBigWarp().getTransform().apply()
-            RealPoint pi = new RealPoint(3);
-            pi.setPosition(pt.getDoublePosition(0),0);
-            pi.setPosition(pt.getDoublePosition(1),1);
-            pi.setPosition(0,2);
-
-            RealPoint pf0 = new RealPoint(3);
-
-            new AffineTransform3D().inverse().apply(pi,pf0);
-
-            RealPoint pf1 = new RealPoint(3);
-            bwl.getBigWarp().unwrap2d(bwl.getBigWarp().getTransformation()).inverse().apply(pf0,pf1);
-            //bwl.getBigWarp().getTransformation().inverse().apply(pf0,pf1);
-
-            RealPoint pf2 = new RealPoint(3);
-            new AffineTransform3D().apply(pf1,pf2);
-
-            //irts.apply(pi, pf);
-
-            pt.setPosition(pf2.getDoublePosition(0),0);
-            pt.setPosition(pf2.getDoublePosition(1),1);
-            if (Math.random()>0.99) {
-                System.out.println(pf2.getDoublePosition(0)+":"+pf2.getDoublePosition(1));
-            }*/
         }
         return pts;
     }
@@ -168,7 +143,6 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
 
     @Override
     public boolean edit() {
-
         throw new UnsupportedOperationException();
     }
 
@@ -187,6 +161,11 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
     @Override
     public void resetRegistration() {
         isDone = false;
+    }
+
+    @Override
+    public void setTimePoint(int timePoint) {
+        // TODO
     }
 
 }

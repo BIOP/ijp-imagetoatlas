@@ -6,6 +6,7 @@ import ch.epfl.biop.atlastoimg2d.commands.sourceandconverter.multislices.SacMult
 import ch.epfl.biop.atlastoimg2d.multislice.MultiSlicePositioner;
 import mpicbg.spim.data.sequence.Tile;
 import net.imagej.ImageJ;
+import org.apache.commons.io.FilenameUtils;
 //import org.apache.groovy.util.Arrays;
 
 import javax.swing.*;
@@ -14,6 +15,7 @@ import java.io.File;
 public class DemoRegistrationQuPath {
 
 	public static void main(String[] args) throws Exception {
+
         final ImageJ ij = new ImageJ();
         ij.ui().showUI();
 
@@ -51,7 +53,7 @@ public class DemoRegistrationQuPath {
                 //ij.convert().convert("SpimData 0>Channel>3", SourceAndConverter[].class)
                 //);
 
-        mp.setSingleSliceDisplayMode();
+        //mp.setSingleSliceDisplayMode();
         mp.createSlice(sacs,8.32, 0.08, Tile.class, new Tile(-1));
         mp.selectSlice(mp.getSortedSlices());
         mp.registerElastixAffine(0,0);

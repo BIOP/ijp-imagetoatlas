@@ -71,7 +71,7 @@ public class SliceSourcesPopupMenu {
             addPopupAction("Remove Last Registration", (slices) -> {
                 new MarkActionSequenceBatch(mp).runRequest();
                 for (SliceSources slice : slices) {
-                    //new DeleteLastRegistration(mp, slice).runRequest();
+                    new DeleteLastRegistration(mp, slice).runRequest();
                 }
                 new MarkActionSequenceBatch(mp).runRequest();
             });
