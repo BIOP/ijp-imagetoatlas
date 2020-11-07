@@ -38,8 +38,9 @@ public class DemoSerialization {
         mp.selectSlice(slice);
         mp.registerElastixAffine(1,0);
         mp.registerElastixSpline(0,0);
+        mp.registerBigWarp(0,0);
 
-        mp.saveState(new File("src/main/resources/ij1registration.json"), true);
+        mp.saveState(new File("src/main/resources/ij1registration-bw.json"), true);
 
 
         /*SliceSources slice = mp.getSortedSlices().get(0);

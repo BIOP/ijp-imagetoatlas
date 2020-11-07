@@ -9,7 +9,7 @@ import ch.epfl.biop.registration.Registration;
 import ij.gui.WaitForUserDialog;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
-import net.imglib2.realtransform.InvertibleRealTransformSequence;
+import net.imglib2.realtransform.RealTransform;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import sc.fiji.bdvpg.sourceandconverter.register.BigWarpLauncher;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceAffineTransformer;
@@ -43,7 +43,7 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
     }
 
     BigWarpLauncher bwl;
-    InvertibleRealTransformSequence irts;
+    RealTransform rt;
 
     @Override
     public boolean register() {
@@ -72,6 +72,8 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
 
             waitForUser.run();
 
+            rt = bwl.getBigWarp().getTransformation();
+
             bwl.getBigWarp().closeAll();
 
             isDone = true;
@@ -84,14 +86,12 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
     @Override
     public SourceAndConverter[] getTransformedImageMovingToFixed( SourceAndConverter[] sacs) {
 
-        if (bwl.getBigWarp().getTransformType().equals(TransformTypeSelectDialog.TPS)) {
+        //if (bwl.getBigWarp().getTransformType().equals(TransformTypeSelectDialog.TPS)) {
             // Thin Plate Spline
             SourceAffineTransformer satm = new SourceAffineTransformer(null, new AffineTransform3D().inverse().copy());
-            SourceRealTransformer srt = new SourceRealTransformer(null, bwl.getBigWarp().getTransformation());// rts);
+            SourceRealTransformer srt = new SourceRealTransformer(null, rt);//bwl.getBigWarp().getTransformation());// rts);
             SourceAffineTransformer satf = new SourceAffineTransformer(null, new AffineTransform3D());
-            irts = new InvertibleRealTransformSequence();
-            //irts.add(at3Dmoving.inverse());
-            irts.add(bwl.getBigWarp().getTransformation());
+
             //irts.add(at3Dfixed);
 
             SourceAndConverter[] out = new SourceAndConverter[sacs.length];
@@ -99,15 +99,13 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
                 out[i] = satf.apply(srt.apply(satm.apply(sacs[i])));
             }
             return out;
-        } else {
+        /*} else {
             // Just an affine transform
             SourceAffineTransformer satm = new SourceAffineTransformer(null, new AffineTransform3D().copy());
             SourceAffineTransformer srt = new SourceAffineTransformer(null, bwl.getBigWarp().affine3d().inverse());// rts);
             SourceAffineTransformer satf = new SourceAffineTransformer(null, new AffineTransform3D().copy());
 
-            irts = new InvertibleRealTransformSequence();
-            //irts.add(at3Dmoving.inverse());
-            irts.add(bwl.getBigWarp().affine3d().inverse());
+            rt = bwl.getBigWarp().affine3d().inverse();
             //irts.add(at3Dfixed);
 
             SourceAndConverter[] out = new SourceAndConverter[sacs.length];
@@ -115,7 +113,7 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
                 out[i] = satf.apply(srt.apply(satm.apply(sacs[i])));
             }
             return out;
-        }
+        }*/
     }
 
     @Override
@@ -123,9 +121,10 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
         // Transform 2D in 3D
         for
         (RealPoint pt : pts.ptList) {
-            double[] tr = bwl.getBigWarp().getTransform().apply( new double[] {
-                    pt.getDoublePosition(0), pt.getDoublePosition(1)
-            });
+            double[] tr = new double[3];
+            rt.apply( new double[] {
+                    pt.getDoublePosition(0), pt.getDoublePosition(1),0
+            }, tr);
             pt.setPosition(tr);
         }
         return pts;
@@ -152,6 +151,18 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
     }
 
     private boolean isDone = false;
+
+    public void setDone() {
+        isDone = true;
+    }
+
+    public RealTransform getRealTransform() {
+        return rt;
+    }
+
+    public void setRealTransform(RealTransform rt) {
+        this.rt = rt;
+    }
 
     @Override
     public boolean isRegistrationDone() {

@@ -1830,10 +1830,12 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
         factoryRegistrations.registerSubtype(Elastix2DAffineRegistration.class);
         factoryRegistrations.registerSubtype(Elastix2DSplineRegistration.class);
+        factoryRegistrations.registerSubtype(SacBigWarp2DRegistration.class);
 
         gsonbuider.registerTypeAdapterFactory(factoryRegistrations);
         gsonbuider.registerTypeHierarchyAdapter(Elastix2DAffineRegistration.class, new Elastix2DAffineRegistrationAdapter());
         gsonbuider.registerTypeHierarchyAdapter(Elastix2DSplineRegistration.class, new Elastix2DSplineRegistrationAdapter());
+        gsonbuider.registerTypeHierarchyAdapter(SacBigWarp2DRegistration.class, new SacBigWarp2DRegistrationAdapter());
 
         return gsonbuider.create();
     }
@@ -1939,8 +1941,6 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             index++;
             actionsFile = new File(fileNoExt+"_slice_"+index+".json");
         }
-
-
 
     }
 

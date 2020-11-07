@@ -1,0 +1,17 @@
+[
+  {
+    "source_name": "demoSlice.tif channel 1",
+    "source_class": "bdv.SpimSource",
+    "converter_class": "class sc.fiji.bdvpg.converter.RealARGBColorConverter$Imp1",
+    "source_id": 0,
+    "color": -1,
+    "converter_setup_min": 0.0,
+    "converter_setup_max": 255.0,
+    "sac": {
+      "spimdata": {
+        "datalocation": "C:\\Users\\nicol\\Dropbox\\BIOP\\ImageToAtlasRegister\\src\\main\\resources\\_bdvdataset_0.xml"
+      },
+      "viewsetup": 0
+    }
+  }
+]

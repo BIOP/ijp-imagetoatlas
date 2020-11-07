@@ -17,7 +17,7 @@ public class DemoDeSerialization {
 
         MultiSlicePositioner mp = (MultiSlicePositioner) (ij.command().run(SacMultiSacsPositionerCommand.class, true).get().getOutput("mp"));
 
-        mp.loadState(new File("src/main/resources/ij1registration.json"));
+        mp.loadState(new File("src/main/resources/ij1registration-bw.json"));
 	}
 
 }
