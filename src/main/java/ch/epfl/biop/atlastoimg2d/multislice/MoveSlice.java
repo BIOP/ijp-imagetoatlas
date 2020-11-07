@@ -24,6 +24,11 @@ public class MoveSlice extends CancelableAction {
         return sliceSource;
     }
 
+    // For serialization
+    public double getSlicingAxisPosition() {
+        return newSlicingAxisPosition;
+    }
+
     public boolean run() {
         sliceSource.setSlicingAxisPosition(newSlicingAxisPosition);
         sliceSource.updatePosition();

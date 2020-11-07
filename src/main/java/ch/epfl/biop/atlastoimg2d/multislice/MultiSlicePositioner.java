@@ -8,6 +8,7 @@ import ch.epfl.biop.atlastoimg2d.multislice.scijava.ScijavaSwingUI;
 import ch.epfl.biop.atlastoimg2d.multislice.serializer.CreateSliceAdapter;
 import ch.epfl.biop.atlastoimg2d.multislice.serializer.IndexedSourceAndConverterAdapter;
 import ch.epfl.biop.atlastoimg2d.multislice.serializer.IndexedSourceAndConverterArrayAdapter;
+import ch.epfl.biop.atlastoimg2d.multislice.serializer.MoveSliceAdapter;
 import ch.epfl.biop.bdv.select.SelectedSourcesListener;
 import ch.epfl.biop.bdv.select.SourceSelectorBehaviour;
 import ch.epfl.biop.registration.sourceandconverter.affine.Elastix2DAffineRegistration;
@@ -1755,7 +1756,9 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         factoryActions.registerSubtype(MoveSlice.class);
 
         gsonbuider.registerTypeAdapterFactory(factoryActions);
-        gsonbuider.registerTypeHierarchyAdapter(CancelableAction.class, new CreateSliceAdapter(this));
+        gsonbuider.registerTypeHierarchyAdapter(CreateSlice.class, new CreateSliceAdapter(this));
+        gsonbuider.registerTypeHierarchyAdapter(MoveSlice.class, new MoveSliceAdapter(this, this::currentSliceGetter));
+
 
         return gsonbuider.create();
     }
@@ -1812,6 +1815,12 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         }
     }
 
+    volatile private SliceSources currentSerializedSlice = null;
+
+    SliceSources currentSliceGetter() {
+        return currentSerializedSlice;
+    }
+
     public void loadState(File stateFile) {
         // Should we destroy everything ?... not sure probably not
 
@@ -1845,6 +1854,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                     System.out.println(jsonElement);
                     CancelableAction action = gson.fromJson(jsonElement, CancelableAction.class);
                     action.runRequest();
+                    this.currentSerializedSlice = action.getSliceSources();
                     actions.add(action);
                 });
 

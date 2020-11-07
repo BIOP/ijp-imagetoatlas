@@ -32,6 +32,9 @@ public class DemoSerialization {
 
         mp.createSlice(sac,4.5);//, 2, Tile.class, new Tile(-1));
 
+        SliceSources slice = mp.getSortedSlices().get(0);
+        mp.moveSlice(slice, 4.25);
+
         mp.saveState(new File("src/main/resources/ij1registration.json"), true);
 
 
