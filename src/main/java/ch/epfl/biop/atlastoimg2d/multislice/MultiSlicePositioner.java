@@ -5,11 +5,17 @@ import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.BiopAtlas;
 import ch.epfl.biop.atlastoimg2d.commands.sourceandconverter.multislices.*;
 import ch.epfl.biop.atlastoimg2d.multislice.scijava.ScijavaSwingUI;
+import ch.epfl.biop.atlastoimg2d.multislice.serializer.CreateSliceAdapter;
+import ch.epfl.biop.atlastoimg2d.multislice.serializer.IndexedSourceAndConverterAdapter;
+import ch.epfl.biop.atlastoimg2d.multislice.serializer.IndexedSourceAndConverterArrayAdapter;
 import ch.epfl.biop.bdv.select.SelectedSourcesListener;
 import ch.epfl.biop.bdv.select.SourceSelectorBehaviour;
 import ch.epfl.biop.registration.sourceandconverter.affine.Elastix2DAffineRegistration;
 import ch.epfl.biop.registration.sourceandconverter.spline.Elastix2DSplineRegistration;
 import ch.epfl.biop.registration.sourceandconverter.spline.SacBigWarp2DRegistration;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import mpicbg.spim.data.generic.base.Entity;
 import mpicbg.spim.data.generic.sequence.AbstractSequenceDescription;
@@ -22,6 +28,7 @@ import net.imglib2.position.FunctionRealRandomAccessible;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
+import org.apache.commons.io.FilenameUtils;
 import org.scijava.Context;
 import org.scijava.cache.CacheService;
 import org.scijava.object.ObjectService;
@@ -32,7 +39,10 @@ import sc.fiji.bdvpg.behaviour.EditorBehaviourUnInstaller;
 import sc.fiji.bdvpg.scijava.BdvHandleHelper;
 import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
 import sc.fiji.bdvpg.scijava.services.ui.swingdnd.BdvTransferHandler;
+import sc.fiji.bdvpg.services.SourceAndConverterServiceLoader;
+import sc.fiji.bdvpg.services.SourceAndConverterServiceSaver;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
+import sc.fiji.bdvpg.services.serializers.RuntimeTypeAdapterFactory;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterAndTimeRange;
 import sc.fiji.bdvpg.sourceandconverter.importer.EmptySourceAndConverterCreator;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceResampler;
@@ -42,7 +52,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
-import java.io.File;
+import java.io.*;
 import java.util.*;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -1730,4 +1740,123 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         for (final String key : behavioursToBlock)
             blockMap.put(key, block);
     }
+
+    // Serialization / Deserialization
+
+    Gson getGsonStateSerializer(List<SourceAndConverter> serialized_sources) {
+        GsonBuilder gsonbuider = new GsonBuilder()
+                .setPrettyPrinting()
+                .registerTypeAdapter(SourceAndConverter.class, new IndexedSourceAndConverterAdapter(serialized_sources))
+                .registerTypeAdapter(SourceAndConverter[].class, new IndexedSourceAndConverterArrayAdapter(serialized_sources));
+
+        RuntimeTypeAdapterFactory factoryActions = RuntimeTypeAdapterFactory.of(CancelableAction.class);
+
+        factoryActions.registerSubtype(CreateSlice.class);
+        factoryActions.registerSubtype(MoveSlice.class);
+
+        gsonbuider.registerTypeAdapterFactory(factoryActions);
+        gsonbuider.registerTypeHierarchyAdapter(CancelableAction.class, new CreateSliceAdapter(this));
+
+        return gsonbuider.create();
+    }
+
+    public void saveState(File stateFile, boolean overwrite) {
+
+        // Wait patiently for all tasks to be performed
+        this.getSortedSlices().forEach(slice -> {
+            slice.waitForEndOfTasks();
+        });
+
+        synchronized (this) {
+
+            // First save all sources required in the state
+            List<SourceAndConverter> allSacs = new ArrayList<>();
+
+            this.getSortedSlices().forEach(sliceSource -> {
+                allSacs.addAll(Arrays.asList(sliceSource.getOriginalSources()));
+            });
+
+            String fileNoExt = FilenameUtils.removeExtension(stateFile.getAbsolutePath());
+            File sacsFile = new File(fileNoExt+"_sources.json");
+
+            if (sacsFile.exists()&&(!overwrite)) {
+                System.err.println("File "+sacsFile.getAbsolutePath()+" already exists. Abort command");
+                return;
+            }
+
+            SourceAndConverterServiceSaver sacss = new SourceAndConverterServiceSaver(sacsFile,this.scijavaCtx,allSacs);
+            sacss.run();
+            List<SourceAndConverter> serialized_sources = new ArrayList<>();
+
+            sacss.getSacToId().values().stream().sorted().forEach(i -> {
+                System.out.println(i);
+                serialized_sources.add(sacss.getIdToSac().get(i));
+            });
+
+            Gson gson = getGsonStateSerializer(serialized_sources);
+
+            this.getSortedSlices().forEach(sliceSource -> {
+                try {
+                    int index = sliceSource.getIndex();
+                    System.out.println("Slice : "+index);
+                    List<CancelableAction> slice_actions = this.mso.getActionsFromSlice(sliceSource);
+                    File actionsFile = new File(fileNoExt+"_slice_"+index+".json");
+                    FileWriter writer = new FileWriter(actionsFile.getAbsolutePath());
+                    gson.toJson(slice_actions, writer);
+                    writer.flush();
+                    writer.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+    }
+
+    public void loadState(File stateFile) {
+        // Should we destroy everything ?... not sure probably not
+
+        String fileNoExt = FilenameUtils.removeExtension(stateFile.getAbsolutePath());
+        File sacsFile = new File(fileNoExt+"_sources.json");
+
+        SourceAndConverterServiceLoader sacsl = new SourceAndConverterServiceLoader(sacsFile.getAbsolutePath(), sacsFile.getParent(), this.scijavaCtx, false);
+        sacsl.run();
+        List<SourceAndConverter> serialized_sources = new ArrayList<>();
+
+        sacsl.getSacToId().values().stream().sorted().forEach(i -> {
+            System.out.println(i);
+            serialized_sources.add(sacsl.getIdToSac().get(i));
+        });
+
+        Gson gson = getGsonStateSerializer(serialized_sources);
+
+        int index = 0;
+
+        File actionsFile = new File(fileNoExt+"_slice_"+index+".json");
+        while (actionsFile.exists()) {
+            try {
+
+                FileReader fileReader = new FileReader(actionsFile);
+
+                Gson gsonRaw = new Gson();
+                JsonArray rawSacsArray = gsonRaw.fromJson(fileReader, JsonArray.class);
+
+                List<CancelableAction> actions = new ArrayList<>();
+                rawSacsArray.forEach(jsonElement -> {
+                    System.out.println(jsonElement);
+                    CancelableAction action = gson.fromJson(jsonElement, CancelableAction.class);
+                    action.runRequest();
+                    actions.add(action);
+                });
+
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            index++;
+            actionsFile = new File(fileNoExt+"_slice_"+index+".json");
+        }
+
+
+
+    }
+
 }

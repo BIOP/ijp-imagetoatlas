@@ -16,7 +16,7 @@ public class CreateSlice extends CancelableAction {
 
     final private List<SourceAndConverter<?>> sacs;
     private SliceSources sliceSource;
-    final private double slicingAxisPosition;
+    final public double slicingAxisPosition;
 
     public CreateSlice(MultiSlicePositioner mp, List<SourceAndConverter<?>> sacs, double slicingAxisPosition) {
         super(mp);

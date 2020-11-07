@@ -44,7 +44,7 @@ import java.util.function.Function;
 public class SliceSources {
 
     // What are they ?
-    SourceAndConverter[] original_sacs;
+    final SourceAndConverter[] original_sacs;
 
     // Visible to the user in slicing mode
     SourceAndConverter<?>[] relocated_sacs_positioning_mode;
@@ -134,6 +134,10 @@ public class SliceSources {
 
     protected void setSlicingAxisPosition(double newSlicingAxisPosition) {
         slicingAxisPosition = newSlicingAxisPosition;
+    }
+
+    public SourceAndConverter[] getOriginalSources() {
+        return original_sacs;
     }
 
     void iniPosition() {

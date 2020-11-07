@@ -28,42 +28,14 @@ public class SaveStateCommand implements Command {
     @Parameter
     Context ctx;
 
+    @Parameter
+    Boolean overwrite;
+
     @Override
     public void run() {
-        List<SourceAndConverter> allSacs = new ArrayList<>();
 
-        mp.getSortedSlices().forEach(slice -> {
-            slice.waitForEndOfTasks();
-        });
+        mp.saveState(stateFile, overwrite);
 
-        synchronized (mp) {
-            mp.getSortedSlices().forEach(sliceSource -> {
-                sliceSource.getRegistrationSequence().forEach(regAndSacs -> {
-                    allSacs.addAll(Arrays.asList(regAndSacs.sacs));
-                });
-            });
-        }
-
-        String fileNoExt = FilenameUtils.removeExtension(stateFile.getAbsolutePath());
-        File sacsFile = new File(fileNoExt+"_sources.json");
-
-        if (sacsFile.exists()) {
-            System.err.println("File "+sacsFile.getAbsolutePath()+" already exists. Abort command");
-            return;
-        }
-
-        SourceAndConverterServiceSaver sacss = new SourceAndConverterServiceSaver(sacsFile,ctx,allSacs);
-        sacss.run();
-        Map<SourceAndConverter, Integer> sacMap = sacss.getSacToId();
-
-        synchronized (mp) {
-            mp.getSortedSlices().forEach(sliceSource -> {
-                sliceSource.getRegistrationSequence().forEach(regAndSacs -> {
-                    List<CancelableAction> slice_actions = mp.mso.getActionsFromSlice(sliceSource);
-
-                });
-            });
-        }
 
 
 
