@@ -21,6 +21,14 @@ abstract public class AffineTransformSourceAndConverterRegistration extends Sour
         at3d = new AffineTransform3D();
     }
 
+    public AffineTransform3D getAffineTransform() {
+        return at3d;
+    }
+
+    public void setAffineTransform(AffineTransform3D at3d) {
+        this.at3d = at3d;
+    }
+
     @Override
     public boolean edit() {
         throw new UnsupportedOperationException();

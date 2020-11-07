@@ -12,7 +12,7 @@ import java.util.function.Function;
  */
 public class RegisterSlice extends CancelableAction {
     final SliceSources slice;
-    final Registration<SourceAndConverter[]> registration;
+    Registration<SourceAndConverter[]> registration;
     final Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixed;
     final Function<SourceAndConverter[], SourceAndConverter[]> preprocessMoving;
 
@@ -21,6 +21,14 @@ public class RegisterSlice extends CancelableAction {
     @Override
     public SliceSources getSliceSources() {
         return slice;
+    }
+
+    public Registration<SourceAndConverter[]>  getRegistration() {
+        return registration;
+    }
+
+    public void  setRegistration(Registration<SourceAndConverter[]> registration) {
+        this.registration = registration;
     }
 
     public RegisterSlice(MultiSlicePositioner mp,

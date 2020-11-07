@@ -6,10 +6,32 @@
         0
       ]
     },
-    "original_location": 4.5
+    "original_location": 4.2
   },
   {
     "type": "MoveSlice",
-    "location": 4.25
+    "location": 4.5
+  },
+  {
+    "type": "RegisterSlice",
+    "registration": {
+      "type": "Elastix2DAffineRegistration",
+      "affine_transform": {
+        "affinetransform3d": [
+          0.927685371967528,
+          -0.08925904827834734,
+          0.0,
+          -0.036562844847066955,
+          0.10832397166857663,
+          1.1609120292496644,
+          0.0,
+          0.09079338374314805,
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ]
+      }
+    }
   }
 ]

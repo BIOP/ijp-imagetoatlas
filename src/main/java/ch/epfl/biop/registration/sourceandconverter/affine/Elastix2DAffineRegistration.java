@@ -1,31 +1,21 @@
 package ch.epfl.biop.registration.sourceandconverter.affine;
 
 import bdv.viewer.SourceAndConverter;
-import ch.epfl.biop.java.utilities.roi.types.RealPointList;
-import ch.epfl.biop.registration.Registration;
 import ch.epfl.biop.scijava.command.Elastix2DAffineRegisterCommand;
-import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
 import org.scijava.Context;
 import org.scijava.command.CommandModule;
 import org.scijava.command.CommandService;
-import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterAndTimeRange;
-import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Future;
 
-public class Elastix2DAffineRegistration extends AffineTransformSourceAndConverterRegistration{//implements Registration<SourceAndConverter[]> {
-
-    //SourceAndConverter[] fimg, mimg;
+public class Elastix2DAffineRegistration extends AffineTransformSourceAndConverterRegistration{
 
     Context ctx;
 
     Map<String, Object> scijavaParameters = new HashMap<>();
-
-    //AffineTransform3D at3d;
 
     public void setScijavaContext(Context ctx) {
         this.ctx = ctx;
@@ -64,33 +54,6 @@ public class Elastix2DAffineRegistration extends AffineTransformSourceAndConvert
             return false;
         }
     }
-    /*
-    @Override
-    public SourceAndConverter[] getTransformedImageMovingToFixed(SourceAndConverter[] img) {
-        SourceAndConverter[] out = new SourceAndConverter[img.length];
-
-        for (int idx = 0;idx<img.length;idx++) {
-            out[idx] = SourceTransformHelper.append(at3d, new SourceAndConverterAndTimeRange(img[idx],(int) scijavaParameters.get("tpMoving")));
-        }
-
-        return out;
-    }
-
-    @Override
-    public RealPointList getTransformedPtsFixedToMoving(RealPointList pts) {
-
-        ArrayList<RealPoint> cvtList = new ArrayList<>();
-        for (RealPoint p : pts.ptList) {
-            RealPoint pt3d = new RealPoint(3);
-            pt3d.setPosition(new double[]{p.getDoublePosition(0), p.getDoublePosition(1),0});
-            //float npx = p.getFloatPosition(0)/scale+roi.getBounds().x;
-            //float npy = p.getFloatPosition(1)/scale+roi.getBounds().y;
-            at3d.inverse().apply(pt3d, pt3d);
-            RealPoint cpt = new RealPoint(pt3d.getDoublePosition(0), pt3d.getDoublePosition(1));
-            cvtList.add(cpt);
-        }
-        return new RealPointList(cvtList);
-    }*/
 
     @Override
     public boolean parallelSupported() {
@@ -107,6 +70,10 @@ public class Elastix2DAffineRegistration extends AffineTransformSourceAndConvert
     @Override
     public boolean isRegistrationDone() {
         return isDone;
+    }
+
+    public void setDone() {
+        this.isDone = true;
     }
 
     @Override

@@ -30,10 +30,13 @@ public class DemoSerialization {
 
         SourceAndConverter[] sac = ij.convert().convert(demoSlice.getTitle(), SourceAndConverter[].class);
 
-        mp.createSlice(sac,4.5);//, 2, Tile.class, new Tile(-1));
+        mp.createSlice(sac,4.2);//, 2, Tile.class, new Tile(-1));
 
         SliceSources slice = mp.getSortedSlices().get(0);
-        mp.moveSlice(slice, 4.25);
+        mp.moveSlice(slice, 4.5);
+        mp.centerBdvViewOn(slice);
+        mp.selectSlice(slice);
+        mp.registerElastixAffine(1,0);
 
         mp.saveState(new File("src/main/resources/ij1registration.json"), true);
 

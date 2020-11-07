@@ -5,12 +5,10 @@ import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.BiopAtlas;
 import ch.epfl.biop.atlastoimg2d.commands.sourceandconverter.multislices.*;
 import ch.epfl.biop.atlastoimg2d.multislice.scijava.ScijavaSwingUI;
-import ch.epfl.biop.atlastoimg2d.multislice.serializer.CreateSliceAdapter;
-import ch.epfl.biop.atlastoimg2d.multislice.serializer.IndexedSourceAndConverterAdapter;
-import ch.epfl.biop.atlastoimg2d.multislice.serializer.IndexedSourceAndConverterArrayAdapter;
-import ch.epfl.biop.atlastoimg2d.multislice.serializer.MoveSliceAdapter;
+import ch.epfl.biop.atlastoimg2d.multislice.serializer.*;
 import ch.epfl.biop.bdv.select.SelectedSourcesListener;
 import ch.epfl.biop.bdv.select.SourceSelectorBehaviour;
+import ch.epfl.biop.registration.Registration;
 import ch.epfl.biop.registration.sourceandconverter.affine.Elastix2DAffineRegistration;
 import ch.epfl.biop.registration.sourceandconverter.spline.Elastix2DSplineRegistration;
 import ch.epfl.biop.registration.sourceandconverter.spline.SacBigWarp2DRegistration;
@@ -43,6 +41,7 @@ import sc.fiji.bdvpg.scijava.services.ui.swingdnd.BdvTransferHandler;
 import sc.fiji.bdvpg.services.SourceAndConverterServiceLoader;
 import sc.fiji.bdvpg.services.SourceAndConverterServiceSaver;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
+import sc.fiji.bdvpg.services.serializers.AffineTransform3DAdapter;
 import sc.fiji.bdvpg.services.serializers.RuntimeTypeAdapterFactory;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterAndTimeRange;
 import sc.fiji.bdvpg.sourceandconverter.importer.EmptySourceAndConverterCreator;
@@ -1748,16 +1747,29 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         GsonBuilder gsonbuider = new GsonBuilder()
                 .setPrettyPrinting()
                 .registerTypeAdapter(SourceAndConverter.class, new IndexedSourceAndConverterAdapter(serialized_sources))
-                .registerTypeAdapter(SourceAndConverter[].class, new IndexedSourceAndConverterArrayAdapter(serialized_sources));
+                .registerTypeAdapter(SourceAndConverter[].class, new IndexedSourceAndConverterArrayAdapter(serialized_sources))
+                .registerTypeAdapter(AffineTransform3D.class, new AffineTransform3DAdapter());
 
+        // For actions serialization
         RuntimeTypeAdapterFactory factoryActions = RuntimeTypeAdapterFactory.of(CancelableAction.class);
 
         factoryActions.registerSubtype(CreateSlice.class);
         factoryActions.registerSubtype(MoveSlice.class);
+        factoryActions.registerSubtype(RegisterSlice.class);
 
         gsonbuider.registerTypeAdapterFactory(factoryActions);
         gsonbuider.registerTypeHierarchyAdapter(CreateSlice.class, new CreateSliceAdapter(this));
         gsonbuider.registerTypeHierarchyAdapter(MoveSlice.class, new MoveSliceAdapter(this, this::currentSliceGetter));
+        gsonbuider.registerTypeHierarchyAdapter(RegisterSlice.class, new RegisterSliceAdapter(this, this::currentSliceGetter));
+
+        // For registration registration
+        RuntimeTypeAdapterFactory factoryRegistrations = RuntimeTypeAdapterFactory.of(Registration.class);
+
+        factoryRegistrations.registerSubtype(Elastix2DAffineRegistration.class);
+
+        gsonbuider.registerTypeAdapterFactory(factoryRegistrations);
+        gsonbuider.registerTypeHierarchyAdapter(Elastix2DAffineRegistration.class, new Elastix2DAffineRegistrationAdapter());
+
 
 
         return gsonbuider.create();
