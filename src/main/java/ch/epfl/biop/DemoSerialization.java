@@ -37,6 +37,7 @@ public class DemoSerialization {
         mp.centerBdvViewOn(slice);
         mp.selectSlice(slice);
         mp.registerElastixAffine(1,0);
+        mp.registerElastixSpline(0,0);
 
         mp.saveState(new File("src/main/resources/ij1registration.json"), true);
 

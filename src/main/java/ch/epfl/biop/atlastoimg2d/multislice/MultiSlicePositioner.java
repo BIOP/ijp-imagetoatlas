@@ -23,12 +23,15 @@ import mpicbg.spim.data.sequence.Tile;
 import net.imglib2.FinalInterval;
 import net.imglib2.RealLocalizable;
 import net.imglib2.RealPoint;
+import net.imglib2.ops.parse.token.Real;
 import net.imglib2.position.FunctionRealRandomAccessible;
 import net.imglib2.realtransform.AffineTransform3D;
+import net.imglib2.realtransform.RealTransform;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import org.apache.commons.io.FilenameUtils;
 import org.scijava.Context;
+import org.scijava.InstantiableException;
 import org.scijava.cache.CacheService;
 import org.scijava.object.ObjectService;
 import org.scijava.ui.behaviour.*;
@@ -43,6 +46,8 @@ import sc.fiji.bdvpg.services.SourceAndConverterServiceSaver;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import sc.fiji.bdvpg.services.serializers.AffineTransform3DAdapter;
 import sc.fiji.bdvpg.services.serializers.RuntimeTypeAdapterFactory;
+import sc.fiji.bdvpg.services.serializers.plugins.BdvPlaygroundObjectAdapterService;
+import sc.fiji.bdvpg.services.serializers.plugins.IClassRuntimeAdapter;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterAndTimeRange;
 import sc.fiji.bdvpg.sourceandconverter.importer.EmptySourceAndConverterCreator;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceResampler;
@@ -1742,13 +1747,71 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     }
 
     // Serialization / Deserialization
+    /*
+        Register the RealTransformAdapters from Bdv-playground
+     */
+    void registerTransformAdapters(final GsonBuilder gsonbuilder) {
+        // AffineTransform3D seroalization
+        gsonbuilder.registerTypeAdapter(AffineTransform3D.class, new AffineTransform3DAdapter());
+
+        // Realtransforms see package sc.fiji.bdvpg.services.serializers.plugins;
+        Map<Class, List<Class>> runTimeAdapters = new HashMap<>();
+        scijavaCtx.getService(BdvPlaygroundObjectAdapterService.class)
+                .getAdapters(IClassRuntimeAdapter.class)
+                .forEach(pi -> {
+                            try {
+                                IClassRuntimeAdapter adapter = pi.createInstance();
+                                if (runTimeAdapters.containsKey(adapter.getBaseClass())) {
+                                    runTimeAdapters.get(adapter.getBaseClass()).add(adapter.getRunTimeClass());
+                                } else {
+                                    List<Class> subClasses = new ArrayList<>();
+                                    subClasses.add(adapter.getRunTimeClass());
+                                    runTimeAdapters.put(adapter.getBaseClass(), subClasses);
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                );
+
+        scijavaCtx.getService(BdvPlaygroundObjectAdapterService.class)
+                .getAdapters(IClassRuntimeAdapter.class)
+                .forEach(pi -> {
+                    try {
+                        IClassRuntimeAdapter adapter = pi.createInstance();
+                        if (adapter.getBaseClass().equals(RealTransform.class)) {
+                            gsonbuilder.registerTypeHierarchyAdapter(adapter.getRunTimeClass(), adapter);
+                        }
+                    } catch (InstantiableException e) {
+                        e.printStackTrace();
+                    }
+                });
+
+
+        log.accept("IRunTimeClassAdapters : ");
+        runTimeAdapters.keySet().forEach(baseClass -> {
+            if (baseClass.equals(RealTransform.class)) {
+                log.accept("\t " + baseClass);
+                RuntimeTypeAdapterFactory factory = RuntimeTypeAdapterFactory.of(baseClass);
+                runTimeAdapters.get(baseClass).forEach(subClass -> {
+                    factory.registerSubtype(subClass);
+                    log.accept("\t \t " + subClass);
+                });
+                gsonbuilder.registerTypeAdapterFactory(factory);
+            }
+        });
+    }
 
     Gson getGsonStateSerializer(List<SourceAndConverter> serialized_sources) {
         GsonBuilder gsonbuider = new GsonBuilder()
                 .setPrettyPrinting()
                 .registerTypeAdapter(SourceAndConverter.class, new IndexedSourceAndConverterAdapter(serialized_sources))
-                .registerTypeAdapter(SourceAndConverter[].class, new IndexedSourceAndConverterArrayAdapter(serialized_sources))
-                .registerTypeAdapter(AffineTransform3D.class, new AffineTransform3DAdapter());
+                .registerTypeAdapter(SourceAndConverter[].class, new IndexedSourceAndConverterArrayAdapter(serialized_sources));
+
+        // Now gets all custom serializers for RealTransform.class, using Scijava extensibility plugin
+        // Most of the adapters comes from Bdv-Playground
+
+        registerTransformAdapters(gsonbuider);
 
         // For actions serialization
         RuntimeTypeAdapterFactory factoryActions = RuntimeTypeAdapterFactory.of(CancelableAction.class);
@@ -1766,11 +1829,11 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         RuntimeTypeAdapterFactory factoryRegistrations = RuntimeTypeAdapterFactory.of(Registration.class);
 
         factoryRegistrations.registerSubtype(Elastix2DAffineRegistration.class);
+        factoryRegistrations.registerSubtype(Elastix2DSplineRegistration.class);
 
         gsonbuider.registerTypeAdapterFactory(factoryRegistrations);
         gsonbuider.registerTypeHierarchyAdapter(Elastix2DAffineRegistration.class, new Elastix2DAffineRegistrationAdapter());
-
-
+        gsonbuider.registerTypeHierarchyAdapter(Elastix2DSplineRegistration.class, new Elastix2DSplineRegistrationAdapter());
 
         return gsonbuider.create();
     }

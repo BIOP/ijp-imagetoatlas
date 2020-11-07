@@ -24,7 +24,7 @@ public class Elastix2DSplineRegistration extends SourceAndConverterRegistration 
 
     RealTransform rt;
 
-    RealTransform rt_inverse;
+    //RealTransform rt_inverse;
 
     public void setScijavaContext(Context ctx) {
         this.ctx = ctx;
@@ -32,6 +32,14 @@ public class Elastix2DSplineRegistration extends SourceAndConverterRegistration 
 
     public void setScijavaParameters(Map<String, Object> scijavaParameters) {
         this.scijavaParameters.putAll(scijavaParameters);
+    }
+
+    public RealTransform getRealTransform() {
+        return rt;
+    }
+
+    public void setRealTransform(RealTransform rt) {
+        this.rt = rt;
     }
 
     @Override
@@ -56,7 +64,7 @@ public class Elastix2DSplineRegistration extends SourceAndConverterRegistration 
                     .run(Elastix2DSplineRegisterCommand.class, true, scijavaParameters );
 
              rt = (RealTransform) task.get().getOutput("rt");
-             rt_inverse = (RealTransform) task.get().getOutput("rt_inverse");
+             //rt_inverse = (RealTransform) task.get().getOutput("rt_inverse");
              isDone = true;
              return true;
         } catch (Exception e) {
@@ -119,6 +127,10 @@ public class Elastix2DSplineRegistration extends SourceAndConverterRegistration 
     @Override
     public boolean isRegistrationDone() {
         return isDone;
+    }
+
+    public void setDone() {
+        isDone = true;
     }
 
     @Override
