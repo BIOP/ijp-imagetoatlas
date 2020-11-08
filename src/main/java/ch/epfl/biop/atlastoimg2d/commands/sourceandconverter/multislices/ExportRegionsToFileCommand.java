@@ -8,7 +8,7 @@ import org.scijava.widget.Button;
 
 import java.io.File;
 
-@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export ROIs To File")
+@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>Export Regions To File")
 public class ExportRegionsToFileCommand implements Command {
 
     @Parameter
@@ -23,16 +23,10 @@ public class ExportRegionsToFileCommand implements Command {
     @Parameter(label="Erase Previous ROIs")
     boolean erasePreviousFile;
 
-    @Parameter(callback = "clicked")
-    Button run;
-
     @Override
     public void run() {
         // Cannot be accessed
-        clicked();
-    }
-
-    public void clicked() {
         mp.exportSelectedSlicesRegionsToFile(namingChoice, dirOutput, erasePreviousFile);
     }
+
 }

@@ -4,7 +4,6 @@ import bdv.util.*;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.BiopAtlas;
 import ch.epfl.biop.atlastoimg2d.commands.sourceandconverter.multislices.*;
-import ch.epfl.biop.atlastoimg2d.multislice.scijava.ScijavaSwingUI;
 import ch.epfl.biop.atlastoimg2d.multislice.serializer.*;
 import ch.epfl.biop.bdv.select.SelectedSourcesListener;
 import ch.epfl.biop.bdv.select.SourceSelectorBehaviour;
@@ -12,6 +11,8 @@ import ch.epfl.biop.registration.Registration;
 import ch.epfl.biop.registration.sourceandconverter.affine.Elastix2DAffineRegistration;
 import ch.epfl.biop.registration.sourceandconverter.spline.Elastix2DSplineRegistration;
 import ch.epfl.biop.registration.sourceandconverter.spline.SacBigWarp2DRegistration;
+import ch.epfl.biop.scijava.ui.bdv.BdvScijavaHelper;
+import ch.epfl.biop.scijava.ui.swing.ScijavaSwingUI;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -23,7 +24,6 @@ import mpicbg.spim.data.sequence.Tile;
 import net.imglib2.FinalInterval;
 import net.imglib2.RealLocalizable;
 import net.imglib2.RealPoint;
-import net.imglib2.ops.parse.token.Real;
 import net.imglib2.position.FunctionRealRandomAccessible;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.realtransform.RealTransform;
@@ -76,7 +76,6 @@ import static sc.fiji.bdvpg.scijava.services.SourceAndConverterService.errlog;
  * - a positioning mode
  * - a registration mode
  * - a 3d view mode
- * - an export mode
  *
  */
 
@@ -266,40 +265,45 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
         mso = new MultiSliceObserver(this);
 
-        bdvh.getCardPanel().addCard("Import IJ Image",
-                ScijavaSwingUI.getPanel(scijavaCtx, ImportImagePlusCommand.class, "mp", this ),
-                true);
+        BdvScijavaHelper.clearBdvHandleMenuBar(bdvh);
+
+        int hierarchyLevelsSkipped = 4;
+
+
+
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Undo [Ctrl+Z]",0,() -> this.cancelLastAction());
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Redo [Ctrl+Shift+Z]",0,() -> this.redoAction());
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Select all slices [Ctrl+A]",0,() -> slices.forEach(slice -> slice.select()));
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Deselect all slices [Ctrl+Shift+A]",0,() -> slices.forEach(slice -> slice.deSelect()));
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Distribute spacing [A]",0,() -> {
+            if (this.currentMode == POSITIONING_MODE_INT) this.equalSpacingSelectedSlices();
+        });
+
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Positioning Mode",0,() -> this.setPositioningMode());
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Registration Mode",0,() -> this.setRegistrationMode());
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Change Display Mode [Q]",0,() -> this.toggle_display_mode());
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Change Overlap Mode [O]",0,() -> this.toggleOverlap());
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Navigate>Next Slice [N]",0,() -> this.navigateNextSlice());
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Navigate>Previous Slice [P]",0,() -> this.navigatePreviousSlice());
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Navigate>Center On Current Slice [C]",0,() -> this.navigateCurrentSlice());
+
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ImportImagePlusCommand.class, hierarchyLevelsSkipped,"mp", this );
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ElastixAffineRegistrationCommand.class, hierarchyLevelsSkipped,"mp", this);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ElastixSplineRegistrationCommand.class, hierarchyLevelsSkipped,"mp", this);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, BigWarpRegistrationCommand.class, hierarchyLevelsSkipped,"mp", this);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx,ExportRegionsToFileCommand.class, hierarchyLevelsSkipped,"mp", this);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx,ExportRegionsToRoiManagerCommand.class, hierarchyLevelsSkipped,"mp", this);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx,ExportRegionsToQuPathCommand.class, hierarchyLevelsSkipped,"mp", this);
+
+        // TODO BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Registration>Remove Last Registration",0,() -> );
+
 
         bdvh.getCardPanel().addCard("Atlas Slicing",
                 ScijavaSwingUI.getPanel(scijavaCtx, SlicerAdjusterCommand.class, "reslicedAtlas", reslicedAtlas),
                 true);
 
-        bdvh.getCardPanel().addCard("Rectangle of interest",
+        bdvh.getCardPanel().addCard("Define region of interest",
                 ScijavaSwingUI.getPanel(scijavaCtx, RectangleROIDefineCommand.class, "mp", this),
-                true);
-
-        bdvh.getCardPanel().addCard("Elastix Registration (Auto, Affine)",
-                ScijavaSwingUI.getPanel(scijavaCtx, ElastixAffineRegistrationOptionCommand.class, "mp", this),
-                true);
-
-        bdvh.getCardPanel().addCard("Elastix Registration (Auto, Spline)",
-                ScijavaSwingUI.getPanel(scijavaCtx, ElastixSplineRegistrationOptionCommand.class, "mp", this),
-                true);
-
-        bdvh.getCardPanel().addCard("BigWarp Registration (Manual, Spline)",
-                ScijavaSwingUI.getPanel(scijavaCtx, BigWarpRegistrationOptionCommand.class, "mp", this),
-                true);
-
-        bdvh.getCardPanel().addCard("Export Regions To File", //panelExport
-                ScijavaSwingUI.getPanel(scijavaCtx, ExportRegionsToFileCommand.class,"mp", this),
-                true);
-
-        bdvh.getCardPanel().addCard("Export Regions To RoiManager", //panelExport
-                ScijavaSwingUI.getPanel(scijavaCtx, ExportRegionsToRoiManagerCommand.class,"mp", this),
-                true);
-
-        bdvh.getCardPanel().addCard("Export Regions To QuPath Project", //panelExport
-                ScijavaSwingUI.getPanel(scijavaCtx, ExportRegionsToQuPathCommand.class,"mp", this),
                 true);
 
         bdvh.getCardPanel().addCard("Tasks Info", mso.getJPanel(), true);

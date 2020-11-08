@@ -8,7 +8,7 @@ import org.scijava.widget.Button;
 
 import java.io.File;
 
-@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export ROIs To QuPath project")
+@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>Export Regions To QuPath project")
 public class ExportRegionsToQuPathCommand implements Command {
 
     @Parameter
@@ -17,16 +17,9 @@ public class ExportRegionsToQuPathCommand implements Command {
     @Parameter(label="Erase Previous ROIs")
     boolean erasePreviousFile;
 
-    @Parameter(callback = "clicked")
-    Button run;
-
     @Override
     public void run() {
-        // Cannot be accessed
-        clicked();
-    }
-
-    public void clicked() {
         mp.exportSelectedSlicesRegionsToQuPathProject(erasePreviousFile);
     }
+
 }

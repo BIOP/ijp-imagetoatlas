@@ -2,7 +2,6 @@ package ch.epfl.biop.atlastoimg2d.multislice;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class DeleteLastRegistration extends CancelableAction {
 

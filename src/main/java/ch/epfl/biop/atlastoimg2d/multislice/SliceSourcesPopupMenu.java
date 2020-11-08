@@ -80,13 +80,13 @@ public class SliceSourcesPopupMenu {
         addPopupLine();
 
         if (mp.userActions.size()>0) {
-            addPopupAction("Cancel last action", (slices) -> {
+            addPopupAction("Undo", (slices) -> {
                 mp.cancelLastAction();
             });
         }
 
         if (mp.redoableUserActions.size()>0) {
-            addPopupAction("Redo action", (slices) -> {
+            addPopupAction("Redo", (slices) -> {
                 mp.redoAction();
             });
         }
