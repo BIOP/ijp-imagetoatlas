@@ -1,4 +1,4 @@
-package ch.epfl.biop.atlastoimg2d.commands.sourceandconverter.multislices;
+package ch.epfl.biop.atlastoimg2d.multislice.commands;
 
 import ch.epfl.biop.atlas.BiopAtlas;
 import ch.epfl.biop.java.utilities.roi.ConvertibleRois;

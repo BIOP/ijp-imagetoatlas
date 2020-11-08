@@ -1,6 +1,6 @@
 package ch.epfl.biop.atlastoimg2d.multislice;
 
-import ch.epfl.biop.atlastoimg2d.commands.sourceandconverter.multislices.SlicerAdjusterCommand;
+import ch.epfl.biop.atlastoimg2d.multislice.commands.SlicerAdjusterInteractiveCommand;
 import org.scijava.Context;
 import org.scijava.command.CommandService;
 import org.scijava.module.Module;
@@ -33,7 +33,7 @@ public class SlicingAdjusterPanel {
         Module module = null;
         JPanel panel = null;
         try {
-            module = createModule(SlicerAdjusterCommand.class, args);
+            module = createModule(SlicerAdjusterInteractiveCommand.class, args);
             panel = createModulePanel(module);
 
         } catch (ModuleException e) {

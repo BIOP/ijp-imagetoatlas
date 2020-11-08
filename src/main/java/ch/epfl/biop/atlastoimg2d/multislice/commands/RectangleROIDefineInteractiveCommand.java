@@ -1,4 +1,4 @@
-package ch.epfl.biop.atlastoimg2d.commands.sourceandconverter.multislices;
+package ch.epfl.biop.atlastoimg2d.multislice.commands;
 
 import ch.epfl.biop.atlastoimg2d.multislice.MultiSlicePositioner;
 import ch.epfl.biop.scijava.command.bdv.userdefinedregion.GetUserRectangleCommand;
@@ -13,7 +13,7 @@ import org.scijava.widget.Button;
 import java.util.List;
 
 @Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Define Rectangle")
-public class RectangleROIDefineCommand extends InteractiveCommand {
+public class RectangleROIDefineInteractiveCommand extends InteractiveCommand {
 
     @Parameter
     MultiSlicePositioner mp;
@@ -32,7 +32,6 @@ public class RectangleROIDefineCommand extends InteractiveCommand {
 
     @Parameter(label = "Define Interactively", callback = "defineClicked")
     Button defineRegionInteractively;
-
 
     @Parameter(label = "Full Size", callback = "fullSizeClicked")
     Button setRegionFullSize;

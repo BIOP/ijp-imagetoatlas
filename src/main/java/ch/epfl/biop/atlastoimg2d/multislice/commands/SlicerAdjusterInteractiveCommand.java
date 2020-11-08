@@ -1,4 +1,4 @@
-package ch.epfl.biop.atlastoimg2d.commands.sourceandconverter.multislices;
+package ch.epfl.biop.atlastoimg2d.multislice.commands;
 
 import ch.epfl.biop.atlastoimg2d.multislice.ReslicedAtlas;
 import org.scijava.command.InteractiveCommand;
@@ -6,7 +6,7 @@ import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
 @Plugin(type = InteractiveCommand.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Adjust Slicing")
-public class SlicerAdjusterCommand extends InteractiveCommand {
+public class SlicerAdjusterInteractiveCommand extends InteractiveCommand {
 
     @Parameter(min = "10", max = "500", stepSize = "10", style = "slider", label = "microns")
     int zSamplingSteps = 10;

@@ -3,8 +3,8 @@ package ch.epfl.biop.atlastoimg2d.multislice;
 import bdv.util.*;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.BiopAtlas;
-import ch.epfl.biop.atlastoimg2d.commands.sourceandconverter.multislices.*;
-import ch.epfl.biop.atlastoimg2d.multislice.serializer.*;
+import ch.epfl.biop.atlastoimg2d.multislice.commands.*;
+import ch.epfl.biop.atlastoimg2d.multislice.serializers.*;
 import ch.epfl.biop.bdv.select.SelectedSourcesListener;
 import ch.epfl.biop.bdv.select.SourceSelectorBehaviour;
 import ch.epfl.biop.registration.Registration;
@@ -65,6 +65,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static bdv.ui.BdvDefaultCards.DEFAULT_SOURCEGROUPS_CARD;
+import static bdv.ui.BdvDefaultCards.DEFAULT_VIEWERMODES_CARD;
 import static sc.fiji.bdvpg.scijava.services.SourceAndConverterService.SPIM_DATA_INFO;
 import static sc.fiji.bdvpg.scijava.services.SourceAndConverterService.errlog;
 
@@ -226,8 +228,8 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         }, "toggle_editormode", "E");
 
         positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.equalSpacingSelectedSlices(), "equalSpacingSelectedSlices", "A");
-        positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> slices.forEach(slice -> slice.select()), "selectAllSlices", "ctrl A");
-        positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> slices.forEach(slice -> slice.deSelect()), "deselectAllSlices", "ctrl shift A");
+        positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> {slices.forEach(slice -> slice.select());bdvh.getViewerPanel().getDisplay().repaint();}, "selectAllSlices", "ctrl A");
+        positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> {slices.forEach(slice -> slice.deSelect());bdvh.getViewerPanel().getDisplay().repaint();}, "deselectAllSlices", "ctrl shift A");
 
         ssb.addSelectedSourcesListener(this);
 
@@ -265,11 +267,15 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
         mso = new MultiSliceObserver(this);
 
+        bdvh.getCardPanel().removeCard(DEFAULT_SOURCEGROUPS_CARD);
+        bdvh.getCardPanel().removeCard(DEFAULT_VIEWERMODES_CARD);
+
         BdvScijavaHelper.clearBdvHandleMenuBar(bdvh);
 
         int hierarchyLevelsSkipped = 4;
 
-
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, MSPStateLoadCommand.class, hierarchyLevelsSkipped,"mp", this );
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, MSPStateSaveCommand.class, hierarchyLevelsSkipped,"mp", this);
 
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Undo [Ctrl+Z]",0,() -> this.cancelLastAction());
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Redo [Ctrl+Shift+Z]",0,() -> this.redoAction());
@@ -287,23 +293,24 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Navigate>Previous Slice [P]",0,() -> this.navigatePreviousSlice());
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Navigate>Center On Current Slice [C]",0,() -> this.navigateCurrentSlice());
 
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ImportQuPathProjectCommand.class, hierarchyLevelsSkipped,"mp", this );
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ImportImagePlusCommand.class, hierarchyLevelsSkipped,"mp", this );
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ElastixAffineRegistrationCommand.class, hierarchyLevelsSkipped,"mp", this);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ElastixSplineRegistrationCommand.class, hierarchyLevelsSkipped,"mp", this);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, BigWarpRegistrationCommand.class, hierarchyLevelsSkipped,"mp", this);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx,ExportRegionsToFileCommand.class, hierarchyLevelsSkipped,"mp", this);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx,ExportRegionsToRoiManagerCommand.class, hierarchyLevelsSkipped,"mp", this);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx,ExportRegionsToQuPathCommand.class, hierarchyLevelsSkipped,"mp", this);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, RegistrationElastixAffineCommand.class, hierarchyLevelsSkipped,"mp", this);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, RegistrationElastixSplineCommand.class, hierarchyLevelsSkipped,"mp", this);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, RegistrationBigWarpCommand.class, hierarchyLevelsSkipped,"mp", this);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportRegionsToFileCommand.class, hierarchyLevelsSkipped,"mp", this);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportRegionsToRoiManagerCommand.class, hierarchyLevelsSkipped,"mp", this);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportRegionsToQuPathCommand.class, hierarchyLevelsSkipped,"mp", this);
 
         // TODO BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Registration>Remove Last Registration",0,() -> );
 
 
         bdvh.getCardPanel().addCard("Atlas Slicing",
-                ScijavaSwingUI.getPanel(scijavaCtx, SlicerAdjusterCommand.class, "reslicedAtlas", reslicedAtlas),
+                ScijavaSwingUI.getPanel(scijavaCtx, SlicerAdjusterInteractiveCommand.class, "reslicedAtlas", reslicedAtlas),
                 true);
 
         bdvh.getCardPanel().addCard("Define region of interest",
-                ScijavaSwingUI.getPanel(scijavaCtx, RectangleROIDefineCommand.class, "mp", this),
+                ScijavaSwingUI.getPanel(scijavaCtx, RectangleROIDefineInteractiveCommand.class, "mp", this),
                 true);
 
         bdvh.getCardPanel().addCard("Tasks Info", mso.getJPanel(), true);
@@ -1855,6 +1862,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     List<CancelableAction> filterSerializedActions(List<CancelableAction> ini_actions) {
         Set<Class<? extends CancelableAction>> serializableActions = new HashSet<>();
         serializableActions.add(CreateSlice.class);
+        serializableActions.add(MoveSlice.class);
         serializableActions.add(RegisterSlice.class);
 
         Set<Class<? extends CancelableAction>> skipableActions = new HashSet<>();
@@ -1893,6 +1901,9 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                             errlog.accept("Error : issue with filtering serializable actions");
                             idxIniActions++;
                         }
+                    } else {
+                        errlog.accept("Error : issue with filtering serializable actions. Action class = "+nextAction.getClass());
+                        idxIniActions++;
                     }
                 }
             }

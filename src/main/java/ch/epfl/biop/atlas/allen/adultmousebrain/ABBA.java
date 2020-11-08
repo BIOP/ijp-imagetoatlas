@@ -1,14 +1,12 @@
 package ch.epfl.biop.atlas.allen.adultmousebrain;
 
 import ch.epfl.biop.atlas.BiopAtlas;
-import ch.epfl.biop.atlastoimg2d.commands.sourceandconverter.multislices.SacMultiSacsPositionerCommand;
-import ch.epfl.biop.atlastoimg2d.commands.sourceandconverter.multislices.SlicerAdjusterCommand;
+import ch.epfl.biop.atlastoimg2d.multislice.commands.SacMultiSacsPositionerCommand;
+import ch.epfl.biop.atlastoimg2d.multislice.commands.SlicerAdjusterInteractiveCommand;
 import ch.epfl.biop.atlastoimg2d.multislice.MultiSlicePositioner;
 import ch.epfl.biop.wrappers.BiopWrappersCheck;
 import ch.epfl.biop.wrappers.elastix.Elastix;
-import ch.epfl.biop.wrappers.ij2command.BiopWrappersSet;
 import ch.epfl.biop.wrappers.transformix.Transformix;
-import net.imglib2.realtransform.AffineTransform3D;
 import org.scijava.command.Command;
 import org.scijava.command.CommandModule;
 import org.scijava.command.CommandService;
@@ -17,9 +15,6 @@ import org.scijava.plugin.Plugin;
 
 import java.io.File;
 import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -62,7 +57,7 @@ public class ABBA implements Command {
 
             MultiSlicePositioner mp = (MultiSlicePositioner) (cm.getOutput("mp"));
 
-            cs.run(SlicerAdjusterCommand.class, true,
+            cs.run(SlicerAdjusterInteractiveCommand.class, true,
                     "zSamplingSteps", 200,
                     "rotateX",0,
                     "rotateY",0,

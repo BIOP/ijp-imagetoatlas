@@ -1,4 +1,4 @@
-package ch.epfl.biop.atlastoimg2d.multislice.serializer;
+package ch.epfl.biop.atlastoimg2d.multislice.serializers;
 
 import ch.epfl.biop.registration.sourceandconverter.spline.Elastix2DSplineRegistration;
 import com.google.gson.*;

@@ -1,4 +1,4 @@
-package ch.epfl.biop.atlastoimg2d.multislice.serializer;
+package ch.epfl.biop.atlastoimg2d.multislice.serializers;
 
 import bdv.viewer.SourceAndConverter;
 import com.google.gson.*;

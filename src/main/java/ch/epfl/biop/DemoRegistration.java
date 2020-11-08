@@ -2,12 +2,10 @@ package ch.epfl.biop;
 
 import bdv.viewer.SourceAndConverter;
 import bigwarp.BigWarp;
-import ch.epfl.biop.atlastoimg2d.commands.sourceandconverter.multislices.SacMultiSacsPositionerCommand;
+import ch.epfl.biop.atlastoimg2d.multislice.commands.SacMultiSacsPositionerCommand;
 import ch.epfl.biop.atlastoimg2d.multislice.MultiSlicePositioner;
 import mpicbg.spim.data.sequence.Tile;
 import net.imagej.ImageJ;
-
-import java.util.Arrays;
 
 
 public class DemoRegistration {

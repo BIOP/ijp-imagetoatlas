@@ -306,13 +306,14 @@ public class SliceSources {
 
     public void appendRegistration(Registration<SourceAndConverter[]> reg) {
         // Removes previous registration state (could be not necessary)
-        //SourceAndConverterServices.getSourceAndConverterService()
-        //        .remove(registered_sacs); // PROBLEM : NOT THE FIRST ONES
+        SourceAndConverterServices.getSourceAndConverterDisplayService()
+                .remove(mp.bdvh,registered_sacs); // remove from sac service causes an issue PROBLEM : NOT THE FIRST ONES
 
         SourceAndConverterServices.getSourceAndConverterService()
                 .remove(relocated_sacs_positioning_mode);
 
         registered_sacs = reg.getTransformedImageMovingToFixed(registered_sacs);
+
 
         slicingModePositioner = new AffineTransformedSourceWrapperRegistration();
 

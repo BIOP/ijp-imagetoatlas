@@ -1,4 +1,4 @@
-package ch.epfl.biop.atlastoimg2d.commands.sourceandconverter.multislices;
+package ch.epfl.biop.atlastoimg2d.multislice.commands;
 
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlastoimg2d.multislice.MultiSlicePositioner;

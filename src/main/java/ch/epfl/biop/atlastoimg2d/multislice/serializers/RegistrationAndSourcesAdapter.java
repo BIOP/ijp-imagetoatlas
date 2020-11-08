@@ -1,4 +1,4 @@
-package ch.epfl.biop.atlastoimg2d.multislice.serializer;
+package ch.epfl.biop.atlastoimg2d.multislice.serializers;
 
 import ch.epfl.biop.atlastoimg2d.multislice.SliceSources;
 import com.google.gson.*;

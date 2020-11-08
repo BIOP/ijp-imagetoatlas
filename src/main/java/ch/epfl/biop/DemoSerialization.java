@@ -2,7 +2,7 @@ package ch.epfl.biop;
 
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.allen.adultmousebrain.AllenBrainAdultMouseAtlasCCF2017;
-import ch.epfl.biop.atlastoimg2d.commands.sourceandconverter.multislices.SacMultiSacsPositionerCommand;
+import ch.epfl.biop.atlastoimg2d.multislice.commands.SacMultiSacsPositionerCommand;
 import ch.epfl.biop.atlastoimg2d.multislice.MultiSlicePositioner;
 import ch.epfl.biop.atlastoimg2d.multislice.SliceSources;
 import ch.epfl.biop.scijava.command.SourceFromImagePlusCommand;

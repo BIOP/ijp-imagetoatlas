@@ -1,4 +1,4 @@
-package ch.epfl.biop.atlastoimg2d.commands.sourceandconverter.multislices;
+package ch.epfl.biop.atlastoimg2d.multislice.commands;
 
 import ch.epfl.biop.atlastoimg2d.multislice.MultiSlicePositioner;
 import org.scijava.command.Command;

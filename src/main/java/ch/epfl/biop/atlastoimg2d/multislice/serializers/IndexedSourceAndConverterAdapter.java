@@ -1,9 +1,7 @@
-package ch.epfl.biop.atlastoimg2d.multislice.serializer;
+package ch.epfl.biop.atlastoimg2d.multislice.serializers;
 
 import bdv.viewer.SourceAndConverter;
-import ch.epfl.biop.atlastoimg2d.multislice.SliceSources;
 import com.google.gson.*;
-import org.json.JSONObject;
 
 import java.lang.reflect.Type;
 import java.util.List;
