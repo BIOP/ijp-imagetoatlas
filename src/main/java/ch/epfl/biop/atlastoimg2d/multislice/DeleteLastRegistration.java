@@ -1,5 +1,6 @@
 package ch.epfl.biop.atlastoimg2d.multislice;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -12,15 +13,22 @@ public class DeleteLastRegistration extends CancelableAction {
     public DeleteLastRegistration(MultiSlicePositioner mp, SliceSources slice) {
         super(mp);
         this.sliceSource = slice;
-        List<CancelableAction> actions = mp.userActions.stream()
-                .filter(action -> action.getSliceSources() == slice)
-                .filter(action -> action instanceof RegisterSlice)
-                .collect(Collectors.toList());
+        List<CancelableAction> registrationActionsCompiled = new ArrayList<>();
+        // One need to get the list of still active registrations i.e.
+        // All registrations minus the one already cancelled by a DeleteLastRegistration action
+        for (CancelableAction action : mp.mso.getActionsFromSlice(slice)) {
+            if (action instanceof RegisterSlice) {
+                registrationActionsCompiled.add(action);
+            }
+            if (action instanceof DeleteLastRegistration) {
+                registrationActionsCompiled.remove(registrationActionsCompiled.size()-1);
+            }
+        }
 
-        if (actions.size() == 0) {
+        if (registrationActionsCompiled.size() == 0) {
             rs = null;
         } else {
-            rs = (RegisterSlice) actions.get(actions.size()-1);
+            rs = (RegisterSlice) registrationActionsCompiled.get(registrationActionsCompiled.size()-1);
         }
 
         mp.mso.hide(this);

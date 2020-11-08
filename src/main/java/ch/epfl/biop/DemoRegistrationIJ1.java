@@ -25,7 +25,6 @@ public class DemoRegistrationIJ1 {
 
         MultiSlicePositioner mp = (MultiSlicePositioner) (ij.command().run(SacMultiSacsPositionerCommand.class, true).get().getOutput("mp"));
 
-
         SourceAndConverter[] sac = ij.convert().convert(demoSlice.getTitle(), SourceAndConverter[].class);
 
         mp.createSlice(sac,4.5);//, 2, Tile.class, new Tile(-1));

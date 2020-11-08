@@ -4,7 +4,6 @@ import ch.epfl.biop.atlas.allen.adultmousebrain.AllenBrainAdultMouseAtlasCCF2017
 import ch.epfl.biop.atlastoimg2d.commands.sourceandconverter.multislices.SacMultiSacsPositionerCommand;
 import ch.epfl.biop.atlastoimg2d.multislice.MultiSlicePositioner;
 import net.imagej.ImageJ;
-
 import java.io.File;
 
 public class DemoDeSerialization {
@@ -18,6 +17,7 @@ public class DemoDeSerialization {
         MultiSlicePositioner mp = (MultiSlicePositioner) (ij.command().run(SacMultiSacsPositionerCommand.class, true).get().getOutput("mp"));
 
         mp.loadState(new File("src/main/resources/ij1registration-bw.json"));
+        //mp.loadState(new File("C:\\Users\\nicol\\Desktop\\sliceregsave\\qpathprojtest.json"));
 	}
 
 }

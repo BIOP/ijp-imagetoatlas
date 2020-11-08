@@ -1,6 +1,7 @@
 package ch.epfl.biop.atlastoimg2d.commands.sourceandconverter.multislices;
 
 import bdv.util.BdvHandle;
+import ch.epfl.biop.ABBA;
 import ch.epfl.biop.atlas.BiopAtlas;
 import ch.epfl.biop.atlastoimg2d.multislice.MultiSlicePositioner;
 import ch.epfl.biop.atlastoimg2d.multislice.ReslicedAtlas;
@@ -44,6 +45,8 @@ public class SacMultiSacsPositionerCommand implements Command {
 
     @Override
     public void run() {
+
+        ABBA.displayABBALogo(1500);
 
         slicingTransfom = new AffineTransform3D();
 
