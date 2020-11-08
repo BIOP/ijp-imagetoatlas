@@ -28,9 +28,9 @@ abstract public class BiopAtlas implements Closeable {
     
     abstract public void runOnClose(Runnable onClose);
     
-    public void browse() {
+    /*public void browse() {
     	map.show();
-    }
+    }*/
     
     boolean isInteger( String input ) {
         try {

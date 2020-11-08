@@ -2,7 +2,6 @@ package ch.epfl.biop.registration.sourceandconverter.affine;
 
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
-import ch.epfl.biop.registration.Registration;
 import ch.epfl.biop.registration.sourceandconverter.SourceAndConverterRegistration;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;

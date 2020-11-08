@@ -53,7 +53,6 @@ public class AllenBrainAdultMouseAtlasCCF2017 extends AllenAtlas implements Comm
 			this.initialize(mapURL, ontologyURL);
 
 			((AllenOntology)this.ontology).mutateToModulo(65000); // Solves issue of very big indexes in allen brain ontology. The map has also been moduloed.
-			this.map.show();
 
 	        Prefs.set(keyPrefix + "mapUrl", mapURL.toString());
 	        Prefs.set(keyPrefix + "ontologyUrl", ontologyURL.toString());

@@ -37,8 +37,8 @@ public interface AtlasMap {
 	 */
 	URL getDataSource();
 	
-	void show();
-	void hide();
+	//void show();
+	//void hide();
 
 	ImagePlus getCurrentStructuralImageAsImagePlus();
 	ImagePlus getCurrentLabelImageAsImagePlus();
@@ -49,10 +49,10 @@ public interface AtlasMap {
 	SourceAndConverter[] getStructuralImages();
 	SourceAndConverter getLabelImage();
 
-	int getLabelImageSacIndex();
+	/*int getLabelImageSacIndex();
 	int getLeftRightImageSacIndex();
 
 	Object getCurrentLocation();
-	void setCurrentLocation(Object location);
+	void setCurrentLocation(Object location);*/
 	
 }

@@ -95,6 +95,8 @@ public class AllenMap implements AtlasMap {
 				.getSourceAndConverterDisplayService()
 				.getNewBdv();
 
+		((BdvHandleFrame)bdvh).getBigDataViewer().getViewerFrame().setVisible(false);
+
 	}
 
 	@Override
@@ -107,7 +109,7 @@ public class AllenMap implements AtlasMap {
 		return dataSource;
 	}
 
-	@Override
+	/*@Override
 	public void show() {
 		SourceAndConverterServices
 				.getSourceAndConverterDisplayService()
@@ -128,7 +130,7 @@ public class AllenMap implements AtlasMap {
 		SourceAndConverterServices
 				.getSourceAndConverterDisplayService()
 				.remove(bdvh, sacs.toArray(new SourceAndConverter[sacs.size()]));
-	}
+	}*/
 
     public ImagePlus getSacChannelAsImagePlus(int channel) {
 
@@ -304,17 +306,17 @@ public class AllenMap implements AtlasMap {
 		return sacs.get(LabelSetupId);
 	}
 
-	@Override
+	//@Override
 	public int getLabelImageSacIndex() {
 		return LabelChannel;
 	}
 
-	@Override
+	//@Override
 	public int getLeftRightImageSacIndex() {
 		return LabelLeftRight;
 	}
 
-	@Override
+	//@Override
 	public Object getCurrentLocation() {
         SynchronizedViewerState viewerState = bdvh.getViewerPanel().state();
         AffineTransform3D transformedSourceToViewer = new AffineTransform3D(); // Empty Transform
@@ -323,13 +325,14 @@ public class AllenMap implements AtlasMap {
 		return transformedSourceToViewer.copy();
 	}
 
+	/*
 	@Override
 	public void setCurrentLocation(Object location) {
 		// TODO Auto-generated method stub
 
 		AffineTransform3D at3D = (AffineTransform3D) location;
 		bdvh.getViewerPanel().state().setViewerTransform(at3D);
-	}
+	}*/
 
 	@Override
 	public String toString() {
