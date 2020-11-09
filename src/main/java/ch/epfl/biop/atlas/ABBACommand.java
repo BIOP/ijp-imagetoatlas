@@ -10,6 +10,7 @@ import ch.epfl.biop.wrappers.BiopWrappersCheck;
 import ch.epfl.biop.wrappers.elastix.Elastix;
 import ch.epfl.biop.wrappers.transformix.Transformix;
 import ij.Prefs;
+import org.scijava.ItemIO;
 import org.scijava.command.Command;
 import org.scijava.command.CommandModule;
 import org.scijava.command.CommandService;
@@ -46,6 +47,9 @@ public class ABBACommand implements Command {
     @Parameter(label = "Select the executable file 'transformix.exe' or 'transformix.sh'",required = false)
     File transformixExeFile;
 
+    @Parameter(type = ItemIO.OUTPUT)
+    MultiSlicePositioner mp;
+
     @Override
     public void run() {
         try {
@@ -66,7 +70,7 @@ public class ABBACommand implements Command {
 
             CommandModule cm = cs.run(SacMultiSacsPositionerCommand.class, true, "ba", ba).get();
 
-            MultiSlicePositioner mp = (MultiSlicePositioner) (cm.getOutput("mp"));
+            mp = (MultiSlicePositioner) (cm.getOutput("mp"));
 
             cs.run(SlicerAdjusterInteractiveCommand.class, true,
                     "zSamplingSteps", 200,

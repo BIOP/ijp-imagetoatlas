@@ -3,7 +3,7 @@
   <BasePath type="relative">_bdvdataset_0.xml</BasePath>
   <SequenceDescription>
     <ImageLoader format="spimreconstruction.biop_virtualstackimageplusimageloader">
-      <imageplus_filepath>src/main/resources/demoSlice.tif</imageplus_filepath>
+      <imageplus_filepath>src/test/resources/demoSlice.tif</imageplus_filepath>
       <imageplus_time_origin>0</imageplus_time_origin>
     </ImageLoader>
     <ViewSetups>

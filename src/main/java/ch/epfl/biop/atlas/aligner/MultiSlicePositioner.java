@@ -1758,7 +1758,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             blockMap.put(key, block);
     }
 
-    // Serialization / Deserialization
+    // ------------------------------------------------ Serialization / Deserialization
     /*
         Register the RealTransformAdapters from Bdv-playground
      */
@@ -1848,68 +1848,9 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         gsonbuider.registerTypeHierarchyAdapter(Elastix2DAffineRegistration.class, new Elastix2DAffineRegistrationAdapter());
         gsonbuider.registerTypeHierarchyAdapter(Elastix2DSplineRegistration.class, new Elastix2DSplineRegistrationAdapter());
         gsonbuider.registerTypeHierarchyAdapter(SacBigWarp2DRegistration.class, new SacBigWarp2DRegistrationAdapter());
+        gsonbuider.registerTypeHierarchyAdapter(AlignerState.ActionList.class, new ActionListDeserializer((slice) -> currentSerializedSlice = slice));
 
         return gsonbuider.create();
-    }
-
-    /*
-    Some actions will not be serialized like the export actions and we
-    need to somehow 'compile' actions to get rid of some actions which are there
-    for user convenience but that we do not want to keep.
-    For instance a series of attempted registration then deleted will not be saved.
-     */
-
-    List<CancelableAction> filterSerializedActions(List<CancelableAction> ini_actions) {
-        Set<Class<? extends CancelableAction>> serializableActions = new HashSet<>();
-        serializableActions.add(CreateSlice.class);
-        serializableActions.add(MoveSlice.class);
-        serializableActions.add(RegisterSlice.class);
-
-        Set<Class<? extends CancelableAction>> skipableActions = new HashSet<>();
-        skipableActions.add(ExportSliceRegionsToFile.class);
-        skipableActions.add(ExportSliceRegionsToQuPathProject.class);
-        skipableActions.add(ExportSliceRegionsToRoiManager.class);
-
-        if ((ini_actions == null)||(ini_actions.size()==0)) {
-            errlog.accept("Wrong number of actions to be serialized");
-            return null;
-        }
-        if (!(ini_actions.get(0) instanceof CreateSlice)) {
-            errlog.accept("Error : the first action is not a CreateSlice action");
-            return null;
-        }
-        List<CancelableAction> compiledActions = new ArrayList<>();
-        int idxCompiledActions = 0;
-        int idxIniActions = 0;
-        while (ini_actions.size()>idxIniActions) {
-            CancelableAction nextAction = ini_actions.get(idxIniActions);
-            if (serializableActions.contains(nextAction.getClass())) {
-                idxCompiledActions++;
-                idxIniActions++;
-                compiledActions.add(nextAction);
-            } else {
-                if (skipableActions.contains(nextAction.getClass())) {
-                    idxIniActions++;
-                } else {
-                    if (nextAction instanceof DeleteLastRegistration) {
-                        // For now...
-                        if (compiledActions.get(idxCompiledActions-1) instanceof RegisterSlice) {
-                            compiledActions.remove(idxCompiledActions-1);
-                            idxCompiledActions--;
-                            idxIniActions++;
-                        } else {
-                            errlog.accept("Error : issue with filtering serializable actions");
-                            idxIniActions++;
-                        }
-                    } else {
-                        errlog.accept("Error : issue with filtering serializable actions. Action class = "+nextAction.getClass());
-                        idxIniActions++;
-                    }
-                }
-            }
-        }
-
-        return compiledActions;
     }
 
     public void saveState(File stateFile, boolean overwrite) {
@@ -1945,22 +1886,14 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 serialized_sources.add(sacss.getIdToSac().get(i));
             });
 
-            Gson gson = getGsonStateSerializer(serialized_sources);
-
-            this.getSortedSlices().forEach(sliceSource -> {
-                try {
-                    int index = sliceSource.getIndex();
-                    System.out.println("Slice : "+index);
-                    List<CancelableAction> slice_actions = filterSerializedActions(this.mso.getActionsFromSlice(sliceSource));
-                    File actionsFile = new File(fileNoExt+"_slice_"+index+".json");
-                    FileWriter writer = new FileWriter(actionsFile.getAbsolutePath());
-                    gson.toJson(slice_actions, writer);
-                    writer.flush();
-                    writer.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
+            try {
+                FileWriter writer = new FileWriter(stateFile.getAbsolutePath());
+                getGsonStateSerializer(serialized_sources).toJson(new AlignerState(this), writer);
+                writer.flush();
+                writer.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -1971,47 +1904,41 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     }
 
     public void loadState(File stateFile) {
-        // Should we destroy everything ?... not sure probably not
+        this.getSortedSlices().forEach(slice -> {
+            slice.waitForEndOfTasks();
+        });
 
         String fileNoExt = FilenameUtils.removeExtension(stateFile.getAbsolutePath());
         File sacsFile = new File(fileNoExt+"_sources.json");
+
+        if (!sacsFile.exists()) {
+            errlog.accept("File "+sacsFile.getAbsolutePath()+" not found!");
+            return;
+        }
 
         SourceAndConverterServiceLoader sacsl = new SourceAndConverterServiceLoader(sacsFile.getAbsolutePath(), sacsFile.getParent(), this.scijavaCtx, false);
         sacsl.run();
         List<SourceAndConverter> serialized_sources = new ArrayList<>();
 
         sacsl.getSacToId().values().stream().sorted().forEach(i -> {
-            System.out.println(i);
             serialized_sources.add(sacsl.getIdToSac().get(i));
         });
 
         Gson gson = getGsonStateSerializer(serialized_sources);
 
-        int index = 0;
-
-        File actionsFile = new File(fileNoExt+"_slice_"+index+".json");
-        while (actionsFile.exists()) {
+        if (stateFile.exists()) {
             try {
 
-                FileReader fileReader = new FileReader(actionsFile);
+                FileReader fileReader = new FileReader(stateFile);
 
-                Gson gsonRaw = new Gson();
-                JsonArray rawSacsArray = gsonRaw.fromJson(fileReader, JsonArray.class);
+                gson.fromJson(fileReader, AlignerState.class); // actions are executed during deserialization
+                fileReader.close();
 
-                List<CancelableAction> actions = new ArrayList<>();
-                rawSacsArray.forEach(jsonElement -> {
-                    System.out.println(jsonElement);
-                    CancelableAction action = gson.fromJson(jsonElement, CancelableAction.class);
-                    action.runRequest();
-                    this.currentSerializedSlice = action.getSliceSources();
-                    actions.add(action);
-                });
-
-            } catch (FileNotFoundException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
-            index++;
-            actionsFile = new File(fileNoExt+"_slice_"+index+".json");
+        } else {
+            errlog.accept("Error : file "+stateFile.getAbsolutePath()+" not found!");
         }
 
     }

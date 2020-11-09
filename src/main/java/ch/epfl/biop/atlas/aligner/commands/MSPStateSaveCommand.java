@@ -16,11 +16,8 @@ public class MSPStateSaveCommand implements Command {
     @Parameter
     File stateFile;
 
-    @Parameter
-    Boolean overwrite;
-
     @Override
     public void run() {
-        mp.saveState(stateFile, overwrite);
+        mp.saveState(stateFile, true);
     }
 }
