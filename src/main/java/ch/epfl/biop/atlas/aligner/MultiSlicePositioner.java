@@ -15,7 +15,6 @@ import ch.epfl.biop.scijava.ui.bdv.BdvScijavaHelper;
 import ch.epfl.biop.scijava.ui.swing.ScijavaSwingUI;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import mpicbg.spim.data.generic.base.Entity;
 import mpicbg.spim.data.generic.sequence.AbstractSequenceDescription;
@@ -49,6 +48,7 @@ import sc.fiji.bdvpg.services.serializers.RuntimeTypeAdapterFactory;
 import sc.fiji.bdvpg.services.serializers.plugins.BdvPlaygroundObjectAdapterService;
 import sc.fiji.bdvpg.services.serializers.plugins.IClassRuntimeAdapter;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterAndTimeRange;
+import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterUtils;
 import sc.fiji.bdvpg.sourceandconverter.importer.EmptySourceAndConverterCreator;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceResampler;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
@@ -552,10 +552,12 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 ghs.forEach(gh -> gh.enable());
                 slices.forEach(slice -> slice.enableGraphicalHandles());
                 getSortedSlices().forEach(ss -> {
+                    SourceAndConverterUtils.transferColorConverters(ss.registered_sacs, ss.relocated_sacs_positioning_mode);
                     updateSliceDisplay(ss);
                 });
             }
 
+            SourceAndConverterUtils.transferColorConverters(reslicedAtlas.nonExtendedSlicedSources, reslicedAtlas.extendedSlicedSources);
             for (int i = 0; i < reslicedAtlas.nonExtendedSlicedSources.length; i++) {
                 if (SourceAndConverterServices.getSourceAndConverterDisplayService()
                         .isVisible(reslicedAtlas.nonExtendedSlicedSources[i], bdvh)) {
@@ -629,10 +631,12 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             ghs.forEach(gh -> gh.disable());
             synchronized (slices) {
                 getSortedSlices().forEach(ss -> {
+                    SourceAndConverterUtils.transferColorConverters(ss.relocated_sacs_positioning_mode, ss.registered_sacs);
                     updateSliceDisplay(ss);
                 });
             }
 
+            SourceAndConverterUtils.transferColorConverters(reslicedAtlas.extendedSlicedSources, reslicedAtlas.nonExtendedSlicedSources);
             for (int i = 0; i < reslicedAtlas.nonExtendedSlicedSources.length; i++) {
                 if (SourceAndConverterServices.getSourceAndConverterDisplayService()
                         .isVisible(reslicedAtlas.extendedSlicedSources[i], bdvh)) {
@@ -1848,7 +1852,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         gsonbuider.registerTypeHierarchyAdapter(Elastix2DAffineRegistration.class, new Elastix2DAffineRegistrationAdapter());
         gsonbuider.registerTypeHierarchyAdapter(Elastix2DSplineRegistration.class, new Elastix2DSplineRegistrationAdapter());
         gsonbuider.registerTypeHierarchyAdapter(SacBigWarp2DRegistration.class, new SacBigWarp2DRegistrationAdapter());
-        gsonbuider.registerTypeHierarchyAdapter(AlignerState.ActionList.class, new ActionListDeserializer((slice) -> currentSerializedSlice = slice));
+        gsonbuider.registerTypeHierarchyAdapter(AlignerState.SliceSourcesState.class, new SliceSourcesStateDeserializer((slice) -> currentSerializedSlice = slice));
 
         return gsonbuider.create();
     }
@@ -1904,6 +1908,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     }
 
     public void loadState(File stateFile) {
+        // TODO : add a clock as an overlay
         this.getSortedSlices().forEach(slice -> {
             slice.waitForEndOfTasks();
         });
@@ -1931,8 +1936,14 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
                 FileReader fileReader = new FileReader(stateFile);
 
-                gson.fromJson(fileReader, AlignerState.class); // actions are executed during deserialization
+                AlignerState state = gson.fromJson(fileReader, AlignerState.class); // actions are executed during deserialization
                 fileReader.close();
+
+                state.slices_state_list.forEach(sliceState -> {
+                    sliceState.slice.waitForEndOfTasks();
+                    sliceState.slice.setVisible(sliceState.isVisible);
+                    sliceState.slice.setDisplaysettings(sliceState.settings_per_channel);
+                });
 
             } catch (Exception e) {
                 e.printStackTrace();

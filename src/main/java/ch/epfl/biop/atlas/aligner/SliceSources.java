@@ -1,6 +1,7 @@
 package ch.epfl.biop.atlas.aligner;
 
 import bdv.viewer.SourceAndConverter;
+import bdv.viewer.ViewerState;
 import ch.epfl.biop.atlas.allen.AllenOntology;
 import ch.epfl.biop.atlas.commands.ConstructROIsFromImgLabel;
 import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
@@ -19,6 +20,7 @@ import ij.plugin.frame.RoiManager;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import mpicbg.spim.data.generic.sequence.BasicViewSetup;
 import net.imglib2.RealPoint;
+import net.imglib2.display.ColorConverter;
 import net.imglib2.realtransform.AffineTransform3D;
 import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
@@ -27,9 +29,12 @@ import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
 import sc.fiji.bdvpg.scijava.services.ui.SourceAndConverterInspector;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterAndTimeRange;
+import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterUtils;
 import sc.fiji.bdvpg.sourceandconverter.importer.EmptySourceAndConverterCreator;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceResampler;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
+import spimdata.util.Displaysettings;
+import spimdata.util.DisplaysettingsHelper;
 
 import java.awt.*;
 import java.io.File;
@@ -309,11 +314,14 @@ public class SliceSources {
         SourceAndConverterServices.getSourceAndConverterDisplayService()
                 .remove(mp.bdvh,registered_sacs); // remove from sac service causes an issue PROBLEM : NOT THE FIRST ONES
 
+        SourceAndConverter[] temp = relocated_sacs_positioning_mode;
+
         SourceAndConverterServices.getSourceAndConverterService()
                 .remove(relocated_sacs_positioning_mode);
 
         registered_sacs = reg.getTransformedImageMovingToFixed(registered_sacs);
 
+        SourceAndConverterUtils.transferColorConverters(temp, registered_sacs);
 
         slicingModePositioner = new AffineTransformedSourceWrapperRegistration();
 
@@ -383,10 +391,15 @@ public class SliceSources {
                 // Removes previous registration state (could be not necessary)
                 SourceAndConverterServices.getSourceAndConverterService()
                         .remove(registered_sacs);
+
+                SourceAndConverter[] temp = relocated_sacs_positioning_mode;
+
                 SourceAndConverterServices.getSourceAndConverterService()
                         .remove(relocated_sacs_positioning_mode);
 
                 registered_sacs = registered_sacs_sequence.get(registered_sacs_sequence.size()-1).sacs;
+
+                SourceAndConverterUtils.transferColorConverters(temp, registered_sacs);
 
                 slicingModePositioner = new AffineTransformedSourceWrapperRegistration();
 
@@ -816,6 +829,68 @@ public class SliceSources {
         if (mp.currentMode == MultiSlicePositioner.POSITIONING_MODE_INT) {
             mp.getBdvh().getViewerPanel().state()
                     .setSourcesActive(Arrays.asList(relocated_sacs_positioning_mode), false);
+        }
+    }
+
+    public boolean[] isVisible() {
+        boolean[] visibleFlag = new boolean[registered_sacs.length];
+
+        ViewerState state =  mp.getBdvh().getViewerPanel().state();
+
+        if (mp.currentMode == MultiSlicePositioner.REGISTRATION_MODE_INT) {
+            for (int idx = 0; idx<registered_sacs.length;idx++) {
+                visibleFlag[idx] = state.isSourceActive(registered_sacs[idx]);
+            }
+        }
+
+        if (mp.currentMode == MultiSlicePositioner.POSITIONING_MODE_INT) {
+            for (int idx = 0; idx<registered_sacs.length;idx++) {
+                visibleFlag[idx] = state.isSourceActive(relocated_sacs_positioning_mode[idx]);
+            }
+        }
+
+        return visibleFlag;
+
+    }
+
+    public void setVisible(boolean[] visibleFlag) {
+        ViewerState state =  mp.getBdvh().getViewerPanel().state();
+
+        if (mp.currentMode == MultiSlicePositioner.REGISTRATION_MODE_INT) {
+            for (int idx = 0; idx<registered_sacs.length;idx++) {
+                state.setSourceActive(registered_sacs[idx], visibleFlag[idx]);
+            }
+        }
+
+        if (mp.currentMode == MultiSlicePositioner.POSITIONING_MODE_INT) {
+            for (int idx = 0; idx<registered_sacs.length;idx++) {
+                state.setSourceActive(relocated_sacs_positioning_mode[idx], visibleFlag[idx]);
+            }
+        }
+    }
+
+    public Displaysettings[] getDisplaysettings() {
+        Displaysettings[] ds = new Displaysettings[registered_sacs.length];
+        for (int idx = 0; idx<registered_sacs.length;idx++) {
+            ds[idx] = new Displaysettings(-1); // we don't care about the number
+            if (mp.currentMode == MultiSlicePositioner.REGISTRATION_MODE_INT) {
+                DisplaysettingsHelper.GetDisplaySettingsFromCurrentConverter(registered_sacs[idx], ds[idx]);
+            }
+            if (mp.currentMode == MultiSlicePositioner.POSITIONING_MODE_INT) {
+                DisplaysettingsHelper.GetDisplaySettingsFromCurrentConverter(relocated_sacs_positioning_mode[idx], ds[idx]);
+            }
+        }
+        return ds;
+    }
+
+    public void setDisplaysettings(Displaysettings[] ds) {
+        for (int idx = 0; idx<registered_sacs.length;idx++) {
+            if (mp.currentMode == MultiSlicePositioner.REGISTRATION_MODE_INT) {
+                DisplaysettingsHelper.applyDisplaysettings(registered_sacs[idx], ds[idx]);
+            }
+            if (mp.currentMode == MultiSlicePositioner.POSITIONING_MODE_INT) {
+                DisplaysettingsHelper.applyDisplaysettings(relocated_sacs_positioning_mode[idx], ds[idx]);
+            }
         }
     }
 

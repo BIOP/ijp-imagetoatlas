@@ -1,6 +1,7 @@
 package ch.epfl.biop.atlas.aligner.serializers;
 
 import ch.epfl.biop.atlas.aligner.*;
+import spimdata.util.Displaysettings;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -13,13 +14,25 @@ public class AlignerState {
 
     public AlignerState(MultiSlicePositioner mp) {
         mp.getSortedSlices().forEach(sliceSource -> {
-            AlignerState.ActionList action_list = new AlignerState.ActionList();
+            SliceSourcesState slice_state = new SliceSourcesState();
             filterSerializedActions(mp.mso.getActionsFromSlice(sliceSource))
-                    .forEach(action -> action_list.actions.add(action));
-            slicesActions.add(action_list);
+                    .forEach(action -> slice_state.actions.add(action));
+
+            slice_state.isVisible = sliceSource.isVisible();
+            slice_state.settings_per_channel = sliceSource.getDisplaysettings();
+
+            slices_state_list.add(slice_state);
         });
     }
 
+    public List<SliceSourcesState> slices_state_list = new ArrayList<>();
+
+    public static class SliceSourcesState {
+        transient public SliceSources slice;
+        public List<CancelableAction> actions = new ArrayList<>();
+        public Displaysettings[] settings_per_channel;
+        public boolean[] isVisible;
+    }
 
     /*
     Some actions will not be serialized like the export actions and we
@@ -28,7 +41,7 @@ public class AlignerState {
     For instance a series of attempted registration then deleted will not be saved.
      */
 
-    List<CancelableAction> filterSerializedActions(List<CancelableAction> ini_actions) {
+    static List<CancelableAction> filterSerializedActions(List<CancelableAction> ini_actions) {
         Set<Class<? extends CancelableAction>> serializableActions = new HashSet<>();
         serializableActions.add(CreateSlice.class);
         serializableActions.add(MoveSlice.class);
@@ -81,10 +94,5 @@ public class AlignerState {
         return compiledActions;
     }
 
-    public List<ActionList> slicesActions = new ArrayList<>();
-
-    public static class ActionList {
-        public List<CancelableAction> actions = new ArrayList<>();
-    }
 
 }
