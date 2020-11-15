@@ -3,11 +3,12 @@ package ch.epfl.biop.atlas.aligner.serializers;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.RegisterSlice;
 import ch.epfl.biop.atlas.aligner.SliceSources;
+import ch.epfl.biop.atlas.aligner.sourcepreprocessors.SourcesIdentity;
+import ch.epfl.biop.atlas.aligner.sourcepreprocessors.SourcesProcessor;
 import ch.epfl.biop.registration.Registration;
 import com.google.gson.*;
 
 import java.lang.reflect.Type;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -29,8 +30,13 @@ public class RegisterSliceAdapter implements JsonSerializer<RegisterSlice>,
     @Override
     public RegisterSlice deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
         JsonObject obj = jsonElement.getAsJsonObject();
-        RegisterSlice registerSlice = new RegisterSlice(mp, currentSliceGetter.get(), null, Function.identity(), Function.identity());
         Registration reg = jsonDeserializationContext.deserialize(obj.get("registration"), Registration.class); // isDone should be true when deserialized
+
+        SourcesProcessor fixed_sources_preprocess = jsonDeserializationContext.deserialize(obj.get("fixed_sources_preprocess"), SourcesProcessor.class);
+        SourcesProcessor moving_souces_preprocess = jsonDeserializationContext.deserialize(obj.get("moving_sources_preprocess"), SourcesProcessor.class);
+
+        RegisterSlice registerSlice = new RegisterSlice(mp, currentSliceGetter.get(), reg, fixed_sources_preprocess, moving_souces_preprocess);
+
         registerSlice.setRegistration(reg);
         return registerSlice;
     }
@@ -40,6 +46,8 @@ public class RegisterSliceAdapter implements JsonSerializer<RegisterSlice>,
         JsonObject obj = new JsonObject();
         obj.addProperty("type", RegisterSlice.class.getSimpleName());
         obj.add("registration", jsonSerializationContext.serialize(regSlice.getRegistration()));
+        obj.add("fixed_sources_preprocess", jsonSerializationContext.serialize(regSlice.getFixedSourcesProcessor()));
+        obj.add("moving_sources_preprocess", jsonSerializationContext.serialize(regSlice.getMovingSourcesProcessor()));
         return obj;
     }
 }

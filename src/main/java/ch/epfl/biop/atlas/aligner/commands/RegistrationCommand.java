@@ -1,11 +1,10 @@
 package ch.epfl.biop.atlas.aligner.commands;
 
-import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
+import ch.epfl.biop.atlas.aligner.sourcepreprocessors.SourcesChannelsSelect;
+import ch.epfl.biop.atlas.aligner.sourcepreprocessors.SourcesProcessor;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
-
-import java.util.function.Function;
 
 abstract public class RegistrationCommand implements Command {
 
@@ -21,14 +20,12 @@ abstract public class RegistrationCommand implements Command {
     @Override
     abstract public void run();
 
-    public Function<SourceAndConverter[], SourceAndConverter[]> getFixedFilter() {
-        final int atlasChannel = atlasImageChannel;
-        return (sacs) -> new SourceAndConverter[]{sacs[atlasChannel]};
+    public SourcesProcessor getFixedFilter() {
+        return new SourcesChannelsSelect(atlasImageChannel);
     }
 
-    public Function<SourceAndConverter[], SourceAndConverter[]> getMovingFilter() {
-        final int sliceChannel = sliceImageChannel;
-        return (sacs) -> new SourceAndConverter[]{sacs[sliceChannel]};
+    public SourcesProcessor getMovingFilter() {
+        return new SourcesChannelsSelect(sliceImageChannel);
     }
 
 }

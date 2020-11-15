@@ -114,6 +114,7 @@ public class Elastix2DSplineRegistration extends SourceAndConverterRegistration 
 
     @Override
     public boolean edit() {
+        System.out.println("On y est! Dans l'edition de ElastixSpline");
         throw new UnsupportedOperationException();
     }
 

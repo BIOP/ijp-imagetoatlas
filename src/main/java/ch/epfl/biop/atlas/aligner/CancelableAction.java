@@ -47,7 +47,6 @@ public abstract class CancelableAction {
             run();
         }
         if (isValid()) {
-
             mp.userActions.add(this);
             if (mp.redoableUserActions.size() > 0) {
                 if (mp.redoableUserActions.get(mp.redoableUserActions.size() - 1).equals(this)) {
@@ -58,6 +57,8 @@ public abstract class CancelableAction {
                 }
             }
             mp.mso.sendInfo(this);
+        } else {
+            errlog.accept("Invalid action "+this);
         }
     }
 

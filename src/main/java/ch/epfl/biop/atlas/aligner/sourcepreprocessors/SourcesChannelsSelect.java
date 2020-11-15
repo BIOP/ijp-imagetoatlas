@@ -1,0 +1,43 @@
+package ch.epfl.biop.atlas.aligner.sourcepreprocessors;
+
+import bdv.viewer.SourceAndConverter;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+public class SourcesChannelsSelect implements SourcesProcessor {
+
+    final public List<Integer> channels_indices;
+
+    public SourcesChannelsSelect(List<Integer> channels_indices) {
+        this.channels_indices = channels_indices;
+    }
+
+    public SourcesChannelsSelect(Integer... channels_indices) {
+        this.channels_indices = Arrays.asList(channels_indices);
+    }
+
+    public SourcesChannelsSelect(int... channels_indices) {
+        this.channels_indices = new ArrayList<>(channels_indices.length);
+        for (int i=0;i<channels_indices.length;i++) {
+            this.channels_indices.add(new Integer(channels_indices[i]));
+        }
+    }
+
+    public SourcesChannelsSelect(int channel) {
+        this.channels_indices = new ArrayList<>(1);
+        this.channels_indices.add(new Integer(channel));
+    }
+
+    @Override
+    public SourceAndConverter[] apply(SourceAndConverter[] sourceAndConverters) {
+        SourceAndConverter[] sourcesSelected = new SourceAndConverter[channels_indices.size()];
+        int idx = 0;
+        for (Integer index : channels_indices) {
+            sourcesSelected[idx] = sourceAndConverters[index];
+            idx++;
+        }
+        return sourcesSelected;
+    }
+}

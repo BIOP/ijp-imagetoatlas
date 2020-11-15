@@ -1,10 +1,10 @@
 package ch.epfl.biop.atlas.aligner;
 
 import bdv.viewer.SourceAndConverter;
+import ch.epfl.biop.atlas.aligner.sourcepreprocessors.SourcesProcessor;
 import ch.epfl.biop.registration.Registration;
 
 import java.awt.*;
-import java.util.function.Function;
 
 /**
  * Performs registration set in registration tab to
@@ -13,10 +13,8 @@ import java.util.function.Function;
 public class RegisterSlice extends CancelableAction {
     final SliceSources slice;
     Registration<SourceAndConverter[]> registration;
-    final Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixed;
-    final Function<SourceAndConverter[], SourceAndConverter[]> preprocessMoving;
-
-    boolean alreadyRun = false;
+    final SourcesProcessor preprocessFixed;
+    final SourcesProcessor preprocessMoving;
 
     @Override
     public SliceSources getSliceSources() {
@@ -27,20 +25,28 @@ public class RegisterSlice extends CancelableAction {
         return registration;
     }
 
-    public void  setRegistration(Registration<SourceAndConverter[]> registration) {
+    public void setRegistration(Registration<SourceAndConverter[]> registration) {
         this.registration = registration;
     }
 
     public RegisterSlice(MultiSlicePositioner mp,
                          SliceSources slice,
                          Registration<SourceAndConverter[]> registration,
-                         Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixed,
-                         Function<SourceAndConverter[], SourceAndConverter[]> preprocessMoving) {
+                         SourcesProcessor preprocessFixed,
+                         SourcesProcessor preprocessMoving) {
         super(mp);
         this.slice = slice;
         this.registration = registration;
         this.preprocessFixed = preprocessFixed;
         this.preprocessMoving = preprocessMoving;
+    }
+
+    public SourcesProcessor getFixedSourcesProcessor() {
+        return preprocessFixed;
+    }
+
+    public SourcesProcessor getMovingSourcesProcessor() {
+        return preprocessMoving;
     }
 
     @Override

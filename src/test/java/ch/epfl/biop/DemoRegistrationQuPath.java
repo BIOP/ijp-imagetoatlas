@@ -51,7 +51,7 @@ public class DemoRegistrationQuPath {
         //mp.setSingleSliceDisplayMode();
         mp.createSlice(sacs,8.32, 0.08, Tile.class, new Tile(-1));
         mp.selectSlice(mp.getSortedSlices());
-        mp.registerElastixAffine(0,0);
+        //mp.registerElastixAffine(0,0);
 
         /*mp.deselectSlice(mp.getSortedSlices());
         mp.selectSlice(mp.getSortedSlices().get(0));

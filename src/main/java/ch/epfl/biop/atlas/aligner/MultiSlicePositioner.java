@@ -5,6 +5,7 @@ import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.BiopAtlas;
 import ch.epfl.biop.atlas.aligner.commands.*;
 import ch.epfl.biop.atlas.aligner.serializers.*;
+import ch.epfl.biop.atlas.aligner.sourcepreprocessors.*;
 import ch.epfl.biop.bdv.select.SelectedSourcesListener;
 import ch.epfl.biop.bdv.select.SourceSelectorBehaviour;
 import ch.epfl.biop.registration.Registration;
@@ -160,6 +161,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     double roiPX, roiPY, roiSX, roiSY;
 
     Consumer<String> log = (message) -> {
+        System.out.println("Multipositioner : "+message);
         getBdvh().getViewerPanel().showMessage(message);
     };
 
@@ -298,6 +300,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, RegistrationElastixAffineCommand.class, hierarchyLevelsSkipped,"mp", this);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, RegistrationElastixSplineCommand.class, hierarchyLevelsSkipped,"mp", this);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, RegistrationBigWarpCommand.class, hierarchyLevelsSkipped,"mp", this);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, EditLastRegistrationCommand.class, hierarchyLevelsSkipped,"mp", this);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportRegionsToFileCommand.class, hierarchyLevelsSkipped,"mp", this);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportRegionsToRoiManagerCommand.class, hierarchyLevelsSkipped,"mp", this);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportRegionsToQuPathCommand.class, hierarchyLevelsSkipped,"mp", this);
@@ -1167,14 +1170,8 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         navigateCurrentSlice();
     }
 
-    public static Function<SourceAndConverter[], SourceAndConverter[]> getChannel(int... channels) {
-        return (sacs) -> {
-            SourceAndConverter[] sacs_out = new SourceAndConverter[channels.length];
-            for (int iChannel = 0 ; iChannel<channels.length ; iChannel++) {
-                sacs_out[iChannel] = sacs[channels[iChannel]];
-            }
-            return sacs_out;
-        };
+    public static SourcesProcessor getChannel(int... channels) {
+        return new SourcesChannelsSelect(channels);
     }
 
     public void registerElastixAffine(int iChannelFixed, int iChannelMoving) {
@@ -1185,8 +1182,20 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         registerBigWarp(getChannel(iChannelFixed), getChannel(iChannelMoving));
     }
 
-    public void registerElastixAffine(Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixed,
-                                      Function<SourceAndConverter[], SourceAndConverter[]> preprocessMoving) {
+    public void editLastRegistration() {
+        if (getSelectedSources().size()==0) {
+            log.accept("Edit registration ignored : no slice selected");
+        } else {
+            for (SliceSources slice : slices) {
+                if (slice.isSelected()) {
+                    new EditLastRegistration(this, slice).runRequest();
+                }
+            }
+        }
+    }
+
+    public void registerElastixAffine(SourcesProcessor preprocessFixed,
+                                      SourcesProcessor preprocessMoving) {
         if (getSelectedSources().size()==0) {
             log.accept("Registration ignored : no slice selected");
         }
@@ -1217,8 +1226,8 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         registerElastixSpline(getChannel(iChannelFixed), getChannel(iChannelMoving));
     }
 
-    public void registerElastixSpline(Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixed,
-                                      Function<SourceAndConverter[], SourceAndConverter[]> preprocessMoving) {
+    public void registerElastixSpline(SourcesProcessor preprocessFixed,
+                                      SourcesProcessor preprocessMoving) {
         if (getSelectedSources().size()==0) {
             log.accept("Registration ignored : no slice selected");
         }
@@ -1245,8 +1254,8 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         }
     }
 
-    public void registerBigWarp(Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixed,
-                                Function<SourceAndConverter[], SourceAndConverter[]> preprocessMoving) {
+    public void registerBigWarp(SourcesProcessor preprocessFixed,
+                                SourcesProcessor preprocessMoving) {
         if (getSelectedSources().size()==0) {
             log.accept("Registration ignored : no slice selected");
         }
@@ -1273,19 +1282,19 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 AffineTransform3D translateZ = new AffineTransform3D();
                 translateZ.translate(0, 0, -slice.getSlicingAxisPosition());
 
-                new RegisterSlice(this, slice, registration, (fixedSacs) ->
-                        Arrays.asList(preprocessFixed.apply(fixedSacs))
-                                .stream()
-                                .map(resampler)
-                                .map(sac -> SourceTransformHelper.createNewTransformedSourceAndConverter(translateZ, new SourceAndConverterAndTimeRange(sac, 0)))
-                                .collect(Collectors.toList())
-                                .toArray(new SourceAndConverter[0]),
-                        (movingSacs) ->
-                            Arrays.asList(preprocessMoving.apply(movingSacs))
-                                    .stream()
-                                    .map(sac -> SourceTransformHelper.createNewTransformedSourceAndConverter(translateZ, new SourceAndConverterAndTimeRange(sac, 0)))
-                                    .collect(Collectors.toList())
-                                    .toArray(new SourceAndConverter[0])).runRequest();
+                SourcesProcessor fixedProcess = SourcesProcessorHelper.compose(
+                                new SourcesAffineTransformer(translateZ),
+                                new SourcesResampler(singleSliceModel),
+                                preprocessFixed
+                        );
+
+                SourcesProcessor movingProcess = SourcesProcessorHelper.compose(
+                                new SourcesAffineTransformer(translateZ),
+                                preprocessMoving
+                        );
+
+                new RegisterSlice(this, slice, registration, fixedProcess, movingProcess)
+                        .runRequest();
             }
         }
     }
@@ -1853,6 +1862,22 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         gsonbuider.registerTypeHierarchyAdapter(Elastix2DSplineRegistration.class, new Elastix2DSplineRegistrationAdapter());
         gsonbuider.registerTypeHierarchyAdapter(SacBigWarp2DRegistration.class, new SacBigWarp2DRegistrationAdapter());
         gsonbuider.registerTypeHierarchyAdapter(AlignerState.SliceSourcesState.class, new SliceSourcesStateDeserializer((slice) -> currentSerializedSlice = slice));
+
+        // For sources processor
+
+        RuntimeTypeAdapterFactory factorySourcesProcessor = RuntimeTypeAdapterFactory.of(SourcesProcessor.class);
+
+        factorySourcesProcessor.registerSubtype(SourcesAffineTransformer.class);
+        factorySourcesProcessor.registerSubtype(SourcesChannelsSelect.class);
+        factorySourcesProcessor.registerSubtype(SourcesProcessComposer.class);
+        factorySourcesProcessor.registerSubtype(SourcesResampler.class);
+        factorySourcesProcessor.registerSubtype(SourcesIdentity.class);
+
+        gsonbuider.registerTypeAdapterFactory(factorySourcesProcessor);
+        gsonbuider.registerTypeHierarchyAdapter(SourcesChannelsSelect.class, new SourcesChannelSelectAdapter());
+        gsonbuider.registerTypeHierarchyAdapter(SourcesAffineTransformer.class, new SourcesAffineTransformerAdapter());
+        gsonbuider.registerTypeHierarchyAdapter(SourcesResampler.class, new SourcesResamplerAdapter());
+        gsonbuider.registerTypeHierarchyAdapter(SourcesProcessComposer.class, new SourcesComposerAdapter());
 
         return gsonbuider.create();
     }

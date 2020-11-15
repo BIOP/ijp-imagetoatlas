@@ -9,7 +9,7 @@
     "converter_setup_max": 255.0,
     "sac": {
       "spimdata": {
-        "datalocation": "src\\test\\resources\\_bdvdataset_0.xml"
+        "datalocation": "C:\\Users\\nicol\\Dropbox\\BIOP\\ImageToAtlasRegister\\src\\test\\resources\\_bdvdataset_0.xml"
       },
       "viewsetup": 0
     }

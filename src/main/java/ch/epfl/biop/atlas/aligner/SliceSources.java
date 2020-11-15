@@ -46,6 +46,8 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
+import static ch.epfl.biop.atlas.aligner.CancelableAction.errlog;
+
 public class SliceSources {
 
     // What are they ?
@@ -349,7 +351,7 @@ public class SliceSources {
         reg.setMovingImage(preprocessMoving.apply(registered_sacs));
         boolean out = reg.register();
         if (!out) {
-
+            errlog.accept("Issue during registration of class "+reg.getClass().getSimpleName());
         } else {
             appendRegistration(reg);
         }
@@ -891,6 +893,26 @@ public class SliceSources {
             if (mp.currentMode == MultiSlicePositioner.POSITIONING_MODE_INT) {
                 DisplaysettingsHelper.applyDisplaysettings(relocated_sacs_positioning_mode[idx], ds[idx]);
             }
+        }
+    }
+
+    public void editLastRegistration(
+            Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixed,
+            Function<SourceAndConverter[], SourceAndConverter[]> preprocessMoving) {
+        Registration reg = this.registrations.get(registrations.size() - 1);
+        if (reg.isEditable()) {
+            mp.log.accept("Edition will begin when the manual lock is acquired");
+            synchronized (MultiSlicePositioner.manualActionLock) { // edition is always manual
+                System.out.println("Here we go!");
+                this.removeRegistration(reg);
+                // preprocessFixed has an issue...
+                reg.setFixedImage(preprocessFixed.apply(mp.reslicedAtlas.nonExtendedSlicedSources)); // No filtering -> all channels
+                reg.setMovingImage(preprocessMoving.apply(registered_sacs)); // NO filtering -> all channels
+                reg.edit();
+                this.appendRegistration(reg);
+            }
+        } else {
+            mp.log.accept("The last registration of class "+reg.getClass().getSimpleName()+" is not editable.");
         }
     }
 
