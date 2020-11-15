@@ -1,6 +1,5 @@
 package ch.epfl.biop.atlas.aligner;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,7 +34,7 @@ public class EditLastRegistration extends CancelableAction {
     }
 
     public boolean isValid() {
-        return true; //rs.registration.isEditable(); //rs != null;
+        return ((rs!=null) && (rs.registration.isEditable()));
     }
 
     @Override
@@ -53,22 +52,5 @@ public class EditLastRegistration extends CancelableAction {
     protected boolean cancel() { // it cannot be canceled. maybe we could but I don't know
         return false;
     }
-
-    /*public void drawAction(Graphics2D g, double px, double py, double scale) {
-        switch (slice.getActionState(this)){//.getRegistrationState(registration)) {
-            case "(done)":
-                g.setColor(new Color(0, 255, 0, 200));
-                break;
-            case "(locked)":
-                g.setColor(new Color(255, 0, 0, 200));
-                break;
-            case "(pending)":
-                g.setColor(new Color(255, 255, 0, 200));
-                break;
-        }
-        g.fillOval((int) (px - 7), (int) (py - 7), 14, 14);
-        g.setColor(new Color(255, 255, 255, 200));
-        g.drawString("R", (int) px - 4, (int) py + 5);
-    }*/
 
 }

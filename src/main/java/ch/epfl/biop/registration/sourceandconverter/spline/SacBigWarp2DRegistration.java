@@ -14,6 +14,7 @@ import net.imglib2.realtransform.RealTransform;
 import net.imglib2.realtransform.ThinplateSplineTransform;
 import net.imglib2.realtransform.Wrapped2DTransformAs3D;
 import net.imglib2.realtransform.inverse.WrappedIterativeInvertibleRealTransform;
+import sc.fiji.bdvpg.bdv.BdvUtils;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import sc.fiji.bdvpg.services.serializers.plugins.ThinPlateSplineTransformAdapter;
 import sc.fiji.bdvpg.sourceandconverter.register.BigWarpLauncher;
@@ -67,12 +68,16 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
 
             // Launch BigWarp
             bwl = new BigWarpLauncher(movingSacs, fixedSacs, "Big Warp", converterSetups);
-
+            bwl.set2d();
             bwl.run();
 
             // Output bdvh handles -> will be put in the object service
             BdvHandle bdvhQ = bwl.getBdvHandleQ();
             BdvHandle bdvhP = bwl.getBdvHandleP();
+
+            bdvhP.getViewerPanel().state().setViewerTransform(BdvUtils.getViewerTransformWithNewCenter(bdvhP, new double[]{0,0,0}));
+            bdvhQ.getViewerPanel().state().setViewerTransform(BdvUtils.getViewerTransformWithNewCenter(bdvhQ, new double[]{0,0,0}));
+
 
             SourceAndConverterServices.getSourceAndConverterDisplayService().pairClosing(bdvhQ,bdvhP);
 
@@ -83,7 +88,10 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
 
             if (rt!=null) {
                 bwl.getBigWarp().loadLandmarks(BigWarpFileFromRealTransform(rt));
+                bwl.getBigWarp().setInLandmarkMode(true);
+                bwl.getBigWarp().setIsMovingDisplayTransformed(true);
             }
+
             waitForUser.run();
 
             rt = bwl.getBigWarp().getTransformation();

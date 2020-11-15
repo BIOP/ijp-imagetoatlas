@@ -14,7 +14,7 @@ public class SourcesChannelSelectAdapter implements JsonSerializer<SourcesChanne
 
     @Override
     public SourcesChannelsSelect deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-        List<Integer> channels_indices = context.deserialize(json.getAsJsonObject().get("channels_indices"), List.class);
+        Integer[] channels_indices = context.deserialize(json.getAsJsonObject().get("channels_indices"), Integer[].class);
         return new SourcesChannelsSelect(channels_indices);
     }
 
@@ -22,7 +22,7 @@ public class SourcesChannelSelectAdapter implements JsonSerializer<SourcesChanne
     public JsonElement serialize(SourcesChannelsSelect scs, Type typeOfSrc, JsonSerializationContext context) {
         JsonObject obj = new JsonObject();
         obj.addProperty("type", SourcesChannelsSelect.class.getSimpleName());
-        obj.add("channels_indices", context.serialize(scs.channels_indices));
+        obj.add("channels_indices", context.serialize(scs.channels_indices.toArray(new Integer[0]), Integer[].class));
         return obj;
     }
 }

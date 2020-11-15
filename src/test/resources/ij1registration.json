@@ -236,16 +236,60 @@
             }
           },
           "fixed_sources_preprocess": {
-            "type": "SourcesChannelsSelect",
-            "channels_indices": [
-              0
-            ]
+            "type": "SourcesProcessComposer",
+            "f1": {
+              "type": "SourcesChannelsSelect",
+              "channels_indices": [
+                0
+              ]
+            },
+            "f2": {
+              "type": "SourcesAffineTransformer",
+              "affine_transform": {
+                "affinetransform3d": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  -4.5
+                ]
+              }
+            }
           },
           "moving_sources_preprocess": {
-            "type": "SourcesChannelsSelect",
-            "channels_indices": [
-              0
-            ]
+            "type": "SourcesProcessComposer",
+            "f1": {
+              "type": "SourcesChannelsSelect",
+              "channels_indices": [
+                0
+              ]
+            },
+            "f2": {
+              "type": "SourcesAffineTransformer",
+              "affine_transform": {
+                "affinetransform3d": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  -4.5
+                ]
+              }
+            }
           }
         }
       ],

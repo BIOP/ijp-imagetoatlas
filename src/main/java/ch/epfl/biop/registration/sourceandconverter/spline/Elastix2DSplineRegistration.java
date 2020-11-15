@@ -1,20 +1,27 @@
 package ch.epfl.biop.registration.sourceandconverter.spline;
 
+import bdv.tools.brightness.ConverterSetup;
+import bdv.util.BdvHandle;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import ch.epfl.biop.registration.sourceandconverter.SourceAndConverterRegistration;
 import ch.epfl.biop.scijava.command.Elastix2DSplineRegisterCommand;
+import ij.gui.WaitForUserDialog;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.RealTransform;
 import org.scijava.Context;
 import org.scijava.command.CommandModule;
 import org.scijava.command.CommandService;
+import sc.fiji.bdvpg.bdv.BdvUtils;
+import sc.fiji.bdvpg.services.SourceAndConverterServices;
+import sc.fiji.bdvpg.sourceandconverter.register.BigWarpLauncher;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceRealTransformer;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
+
+import static ch.epfl.biop.registration.sourceandconverter.spline.SacBigWarp2DRegistration.BigWarpFileFromRealTransform;
 
 public class Elastix2DSplineRegistration extends SourceAndConverterRegistration {
 
@@ -64,7 +71,6 @@ public class Elastix2DSplineRegistration extends SourceAndConverterRegistration 
                     .run(Elastix2DSplineRegisterCommand.class, true, scijavaParameters );
 
              rt = (RealTransform) task.get().getOutput("rt");
-             //rt_inverse = (RealTransform) task.get().getOutput("rt_inverse");
              isDone = true;
              return true;
         } catch (Exception e) {
@@ -112,15 +118,63 @@ public class Elastix2DSplineRegistration extends SourceAndConverterRegistration 
         return false;
     }
 
+    Runnable waitForUser = () -> {
+        WaitForUserDialog dialog = new WaitForUserDialog("Choose slice","Please perform carefully your registration then press ok.");
+        dialog.show();
+    };
+
     @Override
     public boolean edit() {
         System.out.println("On y est! Dans l'edition de ElastixSpline");
-        throw new UnsupportedOperationException();
+
+        List<SourceAndConverter> movingSacs = Arrays.stream(mimg).collect(Collectors.toList());
+
+        List<SourceAndConverter> fixedSacs = Arrays.stream(fimg).collect(Collectors.toList());
+
+        List<ConverterSetup> converterSetups = Arrays.stream(mimg).map(src -> SourceAndConverterServices.getSourceAndConverterDisplayService().getConverterSetup(src)).collect(Collectors.toList());
+
+        converterSetups.addAll(Arrays.stream(fimg).map(src -> SourceAndConverterServices.getSourceAndConverterDisplayService().getConverterSetup(src)).collect(Collectors.toList()));
+
+        // Launch BigWarp
+        BigWarpLauncher bwl = new BigWarpLauncher(movingSacs, fixedSacs, "Big Warp", converterSetups);
+        bwl.set2d();
+        bwl.run();
+
+        // Output bdvh handles -> will be put in the object service
+        BdvHandle bdvhQ = bwl.getBdvHandleQ();
+        BdvHandle bdvhP = bwl.getBdvHandleP();
+
+        bdvhP.getViewerPanel().state().setViewerTransform(BdvUtils.getViewerTransformWithNewCenter(bdvhP, new double[]{0,0,0}));
+        bdvhQ.getViewerPanel().state().setViewerTransform(BdvUtils.getViewerTransformWithNewCenter(bdvhQ, new double[]{0,0,0}));
+
+        SourceAndConverterServices.getSourceAndConverterDisplayService().pairClosing(bdvhQ,bdvhP);
+
+        bdvhP.getViewerPanel().requestRepaint();
+        bdvhQ.getViewerPanel().requestRepaint();
+
+        bwl.getBigWarp().getLandmarkFrame().repaint();
+
+        if (rt!=null) {
+            bwl.getBigWarp().loadLandmarks(BigWarpFileFromRealTransform(rt));
+            bwl.getBigWarp().setInLandmarkMode(true);
+            bwl.getBigWarp().setIsMovingDisplayTransformed(true);
+        }
+
+        waitForUser.run();
+
+        rt = bwl.getBigWarp().getTransformation();
+
+        bwl.getBigWarp().closeAll();
+
+        isDone = true;
+
+        return true;
+
     }
 
     @Override
     public boolean isEditable() {
-        return false;
+        return true;
     }
 
     private boolean isDone = false;

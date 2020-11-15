@@ -1242,13 +1242,21 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 params.put("levelMovingSource", slice.registered_sacs[0].getSpimSource().getNumMipmapLevels() - 1);
                 params.put("pxSizeInCurrentUnit", 0.02);
                 params.put("interpolate", true);
-                params.put("showImagePlusRegistrationResult", false);//true);
+                params.put("showImagePlusRegistrationResult", true);//false);//true);
                 params.put("px", roiPX);
                 params.put("py", roiPY);
-                params.put("pz", slice.getSlicingAxisPosition());
+                params.put("pz", 0);//slice.getSlicingAxisPosition());
                 params.put("sx", roiSX);
                 params.put("sy", roiSY);
                 elastixSplineReg.setScijavaParameters(params);
+
+                AffineTransform3D at3d = new AffineTransform3D();
+                at3d.translate(0,0,-slice.getSlicingAxisPosition());
+                SourcesAffineTransformer z_zero = new SourcesAffineTransformer(at3d);
+
+                preprocessFixed = SourcesProcessorHelper.compose(z_zero, preprocessFixed);
+                preprocessMoving = SourcesProcessorHelper.compose(z_zero, preprocessMoving);
+
                 new RegisterSlice(this, slice, elastixSplineReg, preprocessFixed, preprocessMoving).runRequest();
             }
         }
@@ -1269,22 +1277,22 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 at3D.translate(0, 0, slice.getSlicingAxisPosition());
 
                 // 0 - slicing model : empty source but properly defined in space and resolution
-                SourceAndConverter singleSliceModel = new EmptySourceAndConverterCreator("SlicingModel", at3D,
+                /*SourceAndConverter singleSliceModel = new EmptySourceAndConverterCreator("SlicingModel", at3D,
                         nPixX,
                         nPixY,
                         1
-                ).get();
+                ).get();*/
 
-                SourceResampler resampler = new SourceResampler(null,
+                /*SourceResampler resampler = new SourceResampler(null,
                         singleSliceModel, false, false, false
-                );
+                );*/
 
                 AffineTransform3D translateZ = new AffineTransform3D();
                 translateZ.translate(0, 0, -slice.getSlicingAxisPosition());
 
                 SourcesProcessor fixedProcess = SourcesProcessorHelper.compose(
                                 new SourcesAffineTransformer(translateZ),
-                                new SourcesResampler(singleSliceModel),
+                      //          new SourcesResampler(singleSliceModel),
                                 preprocessFixed
                         );
 
