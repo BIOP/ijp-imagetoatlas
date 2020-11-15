@@ -11,19 +11,40 @@ public class SlicerAdjusterInteractiveCommand extends InteractiveCommand {
     @Parameter(min = "10", max = "500", stepSize = "10", style = "slider", label = "microns")
     int zSamplingSteps = 10;
 
-    @Parameter(min = "-20", max = "+20", stepSize = "1", style = "slider", label = "half degrees (X)" )
-    int rotateX = 0;
+    @Parameter(label = "Lock XY angles")
+    Boolean lockAngles = new Boolean(false);
 
-    @Parameter(min = "-20", max = "+20", stepSize = "1", style = "slider", label = "half degrees (Y)")
+    @Parameter(min = "-20", max = "+20", stepSize = "1", style = "slider", label = "half degrees (X)",
+            callback = "changeRotate")
+    int rotateX = 0;
+    int oldRotateX = 0;
+
+    @Parameter(min = "-20", max = "+20", stepSize = "1", style = "slider", label = "half degrees (Y)",
+    callback = "changeRotate")
     int rotateY = 0;
+    int oldRotateY = 0;
 
     @Parameter
     ReslicedAtlas reslicedAtlas;
 
     public void run() {
         reslicedAtlas.setStep(zSamplingSteps/10);
-        reslicedAtlas.setRotateX(rotateX/360.0*Math.PI);
-        reslicedAtlas.setRotateY(rotateY/360.0*Math.PI);
+        if (!lockAngles) {
+            reslicedAtlas.setRotateX(rotateX / 360.0 * Math.PI);
+            reslicedAtlas.setRotateY(rotateY / 360.0 * Math.PI);
+            oldRotateX = rotateX;
+            oldRotateY = rotateY;
+        } else {
+            rotateX = oldRotateX;
+            rotateY = oldRotateY;
+        }
+    }
+
+    public void changeRotate() {
+        if (lockAngles) {
+            rotateX = oldRotateX;
+            rotateY = oldRotateY;
+        }
     }
 
 }

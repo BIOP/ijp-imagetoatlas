@@ -76,7 +76,8 @@ public class ABBACommand implements Command {
                     "zSamplingSteps", 200,
                     "rotateX",0,
                     "rotateY",0,
-                    "reslicedAtlas", mp.getReslicedAtlas());
+                    "reslicedAtlas", mp.getReslicedAtlas(),
+                    "lockAngles", false);
 
         } /*catch (MalformedURLException e) {
             e.printStackTrace();

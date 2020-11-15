@@ -48,11 +48,7 @@ import sc.fiji.bdvpg.services.serializers.AffineTransform3DAdapter;
 import sc.fiji.bdvpg.services.serializers.RuntimeTypeAdapterFactory;
 import sc.fiji.bdvpg.services.serializers.plugins.BdvPlaygroundObjectAdapterService;
 import sc.fiji.bdvpg.services.serializers.plugins.IClassRuntimeAdapter;
-import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterAndTimeRange;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterUtils;
-import sc.fiji.bdvpg.sourceandconverter.importer.EmptySourceAndConverterCreator;
-import sc.fiji.bdvpg.sourceandconverter.transform.SourceResampler;
-import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
 
 import javax.swing.*;
 import java.awt.*;
@@ -993,6 +989,34 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     @Override
     public void lastSelectionEvent(Collection<SourceAndConverter<?>> lastSelectedSources, String mode, String triggerMode) {
         // Nothing
+    }
+
+    public String getUndoMessage() {
+        if (userActions.size()==0) {
+            return "(None)";
+        } else {
+            CancelableAction lastAction = userActions.get(userActions.size()-1);
+            if (lastAction instanceof MarkActionSequenceBatch) {
+                CancelableAction lastlastAction = userActions.get(userActions.size()-2);
+                return "("+lastlastAction.actionClassString()+" [batch])";
+            } else {
+                return "("+lastAction.actionClassString()+")";
+            }
+        }
+    }
+
+    public String getRedoMessage() {
+        if (redoableUserActions.size()==0) {
+            return "(None)";
+        } else {
+            CancelableAction lastAction = redoableUserActions.get(redoableUserActions.size()-1);
+            if (lastAction instanceof MarkActionSequenceBatch) {
+                CancelableAction lastlastAction = redoableUserActions.get(redoableUserActions.size()-2);
+                return "("+lastlastAction.actionClassString()+" [batch])";
+            } else {
+                return "("+lastAction.actionClassString()+")";
+            }
+        }
     }
 
     /**

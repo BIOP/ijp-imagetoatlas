@@ -102,5 +102,8 @@ public abstract class CancelableAction {
         return true;
     }
 
+    public String actionClassString() {
+        return this.getClass().getSimpleName();
+    }
 
 }

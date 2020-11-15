@@ -31,8 +31,6 @@ public class Elastix2DSplineRegistration extends SourceAndConverterRegistration 
 
     RealTransform rt;
 
-    //RealTransform rt_inverse;
-
     public void setScijavaContext(Context ctx) {
         this.ctx = ctx;
     }
@@ -125,7 +123,6 @@ public class Elastix2DSplineRegistration extends SourceAndConverterRegistration 
 
     @Override
     public boolean edit() {
-        System.out.println("On y est! Dans l'edition de ElastixSpline");
 
         List<SourceAndConverter> movingSacs = Arrays.stream(mimg).collect(Collectors.toList());
 
