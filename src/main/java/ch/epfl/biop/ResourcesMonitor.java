@@ -19,9 +19,9 @@ public class ResourcesMonitor extends JPanel {
     final JProgressBar memBar;
 
     final JButton gcButton;
-    final JButton clearActionStack;
+    //final JButton clearActionStack;
 
-    public ResourcesMonitor(MultiSlicePositioner mp) {
+    public ResourcesMonitor(){//MultiSlicePositioner mp) {
         this.setLayout(new GridLayout(8,1));
 
         cpuLabelSystem = new JLabel("CPU Usage - System (%)");
@@ -34,7 +34,7 @@ public class ResourcesMonitor extends JPanel {
         memBar = new JProgressBar();
 
         gcButton = new JButton("Trigger GC");
-        clearActionStack = new JButton("Clear Action Stack");
+        //clearActionStack = new JButton("Clear Action Stack");
 
         this.add(cpuLabelSystem);
         this.add(cpuBarSystem);
@@ -43,9 +43,9 @@ public class ResourcesMonitor extends JPanel {
         this.add(memLabel);
         this.add(memBar);
         this.add(gcButton);
-        this.add(clearActionStack);
+        //this.add(clearActionStack);
         gcButton.addActionListener(e -> System.gc());
-        clearActionStack.addActionListener(e -> mp.clearUserActions());
+        //clearActionStack.addActionListener(e -> mp.clearUserActions());
 
         OperatingSystemMXBean osBean = ManagementFactory.getPlatformMXBean(
                 OperatingSystemMXBean.class);
@@ -66,12 +66,11 @@ public class ResourcesMonitor extends JPanel {
                 cpuBarSystem.setValue(loadSystem);
                 cpuLabelSystem.setText("CPU Usage - System ("+loadSystem+"%)");
 
-                double memTotal = (double)Runtime.getRuntime().maxMemory();//Runtime.getRuntime().totalMemory();
-                double memFree = (double)Runtime.getRuntime().freeMemory();
-                int totalMemMb = (int)((memTotal)/(1024*1024));
-                int memFreeMb = (int)((memFree/(1024*1024)));
-                memLabel.setText("Mem ("+memFreeMb+" Mb / "+totalMemMb+" Mb)");
-                memBar.setValue((int)((((double)memFreeMb/(double)totalMemMb))*100));
+                double usedMemMb = ((double)Runtime.getRuntime().totalMemory() - (double)Runtime.getRuntime().freeMemory())/(1024*1024);
+                double memTotalMb = ((double)Runtime.getRuntime().totalMemory())/(1024*1024);
+
+                memLabel.setText("Mem ("+((int)usedMemMb)+" Mb / "+((int) memTotalMb)+" Mb)");
+                memBar.setValue((int)(usedMemMb/memTotalMb*100));
             }
         });
 

@@ -1,6 +1,7 @@
 package ch.epfl.biop.atlas.aligner.serializers;
 
 import ch.epfl.biop.atlas.aligner.*;
+import net.imglib2.realtransform.AffineTransform3D;
 import spimdata.util.Displaysettings;
 
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ public class AlignerState {
 
             slice_state.isVisible = sliceSource.isVisible();
             slice_state.settings_per_channel = sliceSource.getDisplaysettings();
+            slice_state.preTransform = sliceSource.getTransformSourceOrigin();
 
             slices_state_list.add(slice_state);
         });
@@ -29,6 +31,7 @@ public class AlignerState {
 
     public static class SliceSourcesState {
         transient public SliceSources slice;
+        public AffineTransform3D preTransform;
         public List<CancelableAction> actions = new ArrayList<>();
         public Displaysettings[] settings_per_channel;
         public boolean[] isVisible;

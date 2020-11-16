@@ -301,9 +301,12 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportRegionsToFileCommand.class, hierarchyLevelsSkipped,"mp", this);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportRegionsToRoiManagerCommand.class, hierarchyLevelsSkipped,"mp", this);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportRegionsToQuPathCommand.class, hierarchyLevelsSkipped,"mp", this);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, RotateSourcesCommand.class, hierarchyLevelsSkipped,"mp", this);
+
 
         // TODO BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Registration>Remove Last Registration",0,() -> );
 
+        bdvh.getCardPanel().addCard("Edit Slices", new EditPanel(this).getPanel(), true);
 
         bdvh.getCardPanel().addCard("Atlas Slicing",
                 ScijavaSwingUI.getPanel(scijavaCtx, SlicerAdjusterInteractiveCommand.class, "reslicedAtlas", reslicedAtlas),
@@ -315,8 +318,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
         bdvh.getCardPanel().addCard("Tasks Info", mso.getJPanel(), true);
 
-
-        bdvh.getCardPanel().addCard("Resources Monitor", new ResourcesMonitor(this), true);
+        bdvh.getCardPanel().addCard("Resources Monitor", new ResourcesMonitor(), true);
 
         // Default registration region = full atlas size
         roiPX = -sX / 2.0;
@@ -1029,6 +1031,18 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         }
     }
 
+    public void rotateSlices(int axis, double angle_rad) {
+        List<SliceSources> sortedSelected = getSortedSlices().stream().filter(slice -> slice.isSelected()).collect(Collectors.toList());
+        //new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
+
+        for (SliceSources slice : sortedSelected) {
+            slice.rotateSourceOrigin(axis, angle_rad);//slice, namingChoice);
+        }
+
+        //new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
+        bdvh.getViewerPanel().requestRepaint();
+    }
+
     /**
      * TransferHandler class :
      * Controls drag and drop actions in the multislice positioner
@@ -1421,8 +1435,10 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     @Override
     public synchronized void mouseMoved(MouseEvent e) {
         this.ghs.forEach(gh -> gh.mouseMoved(e));
-        for (SliceSources slice : slices)
-            slice.ghs.forEach(gh -> gh.mouseMoved(e));
+        synchronized (slices) {
+            for (SliceSources slice : slices)
+                slice.ghs.forEach(gh -> gh.mouseMoved(e));
+        }
     }
 
     @Override
@@ -2010,6 +2026,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                     sliceState.slice.waitForEndOfTasks();
                     sliceState.slice.setVisible(sliceState.isVisible);
                     sliceState.slice.setDisplaysettings(sliceState.settings_per_channel);
+                    sliceState.slice.transformSourceOrigin(sliceState.preTransform);
                 });
 
             } catch (Exception e) {

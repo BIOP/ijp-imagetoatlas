@@ -3,6 +3,7 @@ package ch.epfl.biop.atlas.aligner.serializers;
 import ch.epfl.biop.atlas.aligner.CancelableAction;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import com.google.gson.*;
+import net.imglib2.realtransform.AffineTransform3D;
 import spimdata.util.Displaysettings;
 
 import java.lang.reflect.Type;
@@ -27,7 +28,6 @@ public class SliceSourcesStateDeserializer implements JsonDeserializer<AlignerSt
 
         JsonObject obj = json.getAsJsonObject();
 
-
         obj.get("actions").getAsJsonArray().forEach(jsonElement -> {
             System.out.println(jsonElement);
             CancelableAction action = context.deserialize(jsonElement, CancelableAction.class);
@@ -40,12 +40,14 @@ public class SliceSourcesStateDeserializer implements JsonDeserializer<AlignerSt
 
         Displaysettings[] ds = context.deserialize(obj.get("settings_per_channel"), Displaysettings[].class);
         boolean[] visible = context.deserialize(obj.get("isVisible"), boolean[].class);
+        AffineTransform3D preTransform = context.deserialize(obj.get("preTransform"), AffineTransform3D.class);
 
         AlignerState.SliceSourcesState sliceState = new AlignerState.SliceSourcesState();
         sliceState.actions = actions;
         sliceState.isVisible = visible;
         sliceState.settings_per_channel = ds;
         sliceState.slice = slice;
+        sliceState.preTransform = preTransform;
 
         return sliceState;
     }

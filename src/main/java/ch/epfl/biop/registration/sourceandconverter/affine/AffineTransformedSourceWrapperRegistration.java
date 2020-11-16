@@ -31,6 +31,10 @@ public class AffineTransformedSourceWrapperRegistration extends SourceAndConvert
         });
     }
 
+    public AffineTransform3D getAffineTransform() {
+        return at3d.copy();
+    }
+
     @Override
     public SourceAndConverter[] getTransformedImageMovingToFixed(SourceAndConverter[] img) {
 

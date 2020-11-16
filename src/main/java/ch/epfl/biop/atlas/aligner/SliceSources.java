@@ -76,6 +76,8 @@ public class SliceSources {
 
     volatile AffineTransformedSourceWrapperRegistration zPositioner;
 
+    volatile AffineTransformedSourceWrapperRegistration preTransform;
+
     volatile AffineTransformedSourceWrapperRegistration slicingModePositioner;
 
     CenterZeroRegistration centerPositioner;
@@ -111,6 +113,8 @@ public class SliceSources {
         centerPositioner.setMovingImage(registered_sacs);
 
         zPositioner = new AffineTransformedSourceWrapperRegistration();
+
+        preTransform = new AffineTransformedSourceWrapperRegistration();
 
         behavioursHandleSlice = new Behaviours(new InputTriggerConfig());
         behavioursHandleSlice.behaviour(mp.getSelectedSourceDragBehaviour(this), "dragSelectedSources" + this.toString(), "button1");
@@ -149,6 +153,7 @@ public class SliceSources {
 
     void iniPosition() {
         runRegistration(centerPositioner, Function.identity(), Function.identity());
+        runRegistration(preTransform, Function.identity(), Function.identity());
         runRegistration(zPositioner, Function.identity(), Function.identity());
         waitForEndOfTasks();
         updatePosition();
@@ -309,6 +314,20 @@ public class SliceSources {
 
     public RealPoint getCenterPositionRMode() {
         return new RealPoint(0, 0, slicingAxisPosition);
+    }
+
+    public void transformSourceOrigin(AffineTransform3D at3D) {
+        preTransform.setAffineTransform(at3D);
+    }
+
+    public AffineTransform3D getTransformSourceOrigin() {
+        return preTransform.getAffineTransform();
+    }
+
+    public void rotateSourceOrigin(int axis, double angle) {
+        AffineTransform3D at3d = preTransform.getAffineTransform();
+        at3d.rotate(axis, angle);
+        preTransform.setAffineTransform(at3d);
     }
 
     public void appendRegistration(Registration<SourceAndConverter[]> reg) {
