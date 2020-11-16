@@ -222,11 +222,4 @@ public class MultiSliceObserver {
         repaintNeeded = true;
     }
 
-    //protected synchronized void removeActionsFromSlice(SliceSources slice) {
-    //    sliceSortedActions.remove(slice);
-    //}
-
-    //protected synchronized void restoreActions(List<CancelableAction> actions) {
-    //    actions.forEach(this::sendInfo);
-    //}
 }

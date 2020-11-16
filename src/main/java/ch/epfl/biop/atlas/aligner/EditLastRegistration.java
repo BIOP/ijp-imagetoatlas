@@ -44,6 +44,8 @@ public class EditLastRegistration extends CancelableAction {
 
     @Override
     protected boolean run() {
+        mp.userActions.remove(this);
+        mp.mso.cancelInfo(this);
         slice.editLastRegistration(rs.preprocessFixed, rs.preprocessMoving);
         return true;
     }

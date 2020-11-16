@@ -68,6 +68,8 @@ public class SliceSourcesPopupMenu {
                 if (slices.length>1) new MarkActionSequenceBatch(mp).runRequest();
             });
 
+            addPopupLine();
+
             addPopupAction("Edit Last Registration", (slices) -> {
                 if (slices.length>1) new MarkActionSequenceBatch(mp).runRequest();
                 for (SliceSources slice : slices) {
@@ -98,6 +100,8 @@ public class SliceSourcesPopupMenu {
                 mp.redoAction();
             });
         }
+
+        addPopupLine();
 
         if (mp.currentMode != MultiSlicePositioner.POSITIONING_MODE_INT) {
             addPopupAction("Positioning mode", (slices) -> {
