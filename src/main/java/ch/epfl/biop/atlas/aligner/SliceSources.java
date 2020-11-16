@@ -841,7 +841,7 @@ public class SliceSources {
     }
 
     public void hide() {
-        this.deSelect();
+        //this.deSelect();
         if (mp.currentMode == MultiSlicePositioner.REGISTRATION_MODE_INT) {
             mp.getBdvh().getViewerPanel().state()
                     .setSourcesActive(Arrays.asList(registered_sacs), false);
@@ -850,6 +850,18 @@ public class SliceSources {
         if (mp.currentMode == MultiSlicePositioner.POSITIONING_MODE_INT) {
             mp.getBdvh().getViewerPanel().state()
                     .setSourcesActive(Arrays.asList(relocated_sacs_positioning_mode), false);
+        }
+    }
+
+    public void show() {
+        if (mp.currentMode == MultiSlicePositioner.REGISTRATION_MODE_INT) {
+            mp.getBdvh().getViewerPanel().state()
+                    .setSourcesActive(Arrays.asList(registered_sacs), true);
+        }
+
+        if (mp.currentMode == MultiSlicePositioner.POSITIONING_MODE_INT) {
+            mp.getBdvh().getViewerPanel().state()
+                    .setSourcesActive(Arrays.asList(relocated_sacs_positioning_mode), true);
         }
     }
 
@@ -934,6 +946,8 @@ public class SliceSources {
             mp.log.accept("The last registration of class "+reg.getClass().getSimpleName()+" is not editable.");
         }
     }
+
+
 
     public static class RegistrationAndSources {
 

@@ -60,9 +60,16 @@ public class SliceSourcesPopupMenu {
                 }
             });
 
+            addPopupAction("Show Slices", (slices) -> {
+                for (SliceSources slice : slices) {
+                    slice.show();
+                }
+            });
+
             addPopupAction("Delete Slices", (slices) -> {
                 if (slices.length>1) new MarkActionSequenceBatch(mp).runRequest();
                 for (SliceSources slice : slices) {
+                    System.out.println("Slice delete +"+slice);
                     new DeleteSlice(mp, slice).runRequest();
                 }
                 if (slices.length>1) new MarkActionSequenceBatch(mp).runRequest();
