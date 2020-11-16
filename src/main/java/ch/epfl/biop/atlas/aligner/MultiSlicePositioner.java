@@ -447,13 +447,6 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         bdvh.getTriggerbindings().addInputTriggerMap("default_navigation", itm, "transform");
     }
 
-    ScrollBehaviour zoomWheel = new ScrollBehaviour() {
-        @Override
-        public void scroll(double v, boolean b, int i, int i1) {
-
-        }
-    };
-
     public void recenterBdvh() {
         double cur_wcx = bdvh.getViewerPanel().getWidth() / 2.0; // Current Window Center X
         double cur_wcy = bdvh.getViewerPanel().getHeight() / 2.0; // Current Window Center Y
@@ -545,6 +538,19 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     public void setPositioningMode() {
         if (!(currentMode == POSITIONING_MODE_INT)) {
 
+            SourceAndConverterUtils.transferColorConverters(reslicedAtlas.nonExtendedSlicedSources, reslicedAtlas.extendedSlicedSources);
+            for (int i = 0; i < reslicedAtlas.nonExtendedSlicedSources.length; i++) {
+                boolean wasVisible = bdvh.getViewerPanel().state().isSourceActive(reslicedAtlas.nonExtendedSlicedSources[i]);
+                bdvh.getViewerPanel().state().removeSource(reslicedAtlas.nonExtendedSlicedSources[i]);
+                SourceAndConverterServices.getSourceAndConverterDisplayService()
+                    .show(bdvh, reslicedAtlas.extendedSlicedSources[i]);//bdvh.getViewerPanel().state().addSource();
+                if (wasVisible) {
+                    bdvh.getViewerPanel().state().setSourceActive(reslicedAtlas.extendedSlicedSources[i], true);
+                } else {
+                    bdvh.getViewerPanel().state().setSourceActive(reslicedAtlas.extendedSlicedSources[i], false);
+                }
+            }
+
             synchronized (slices) {
                 reslicedAtlas.unlock();
                 currentMode = POSITIONING_MODE_INT;
@@ -554,17 +560,6 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                     SourceAndConverterUtils.transferColorConverters(ss.registered_sacs, ss.relocated_sacs_positioning_mode);
                     updateSliceDisplay(ss);
                 });
-            }
-
-            SourceAndConverterUtils.transferColorConverters(reslicedAtlas.nonExtendedSlicedSources, reslicedAtlas.extendedSlicedSources);
-            for (int i = 0; i < reslicedAtlas.nonExtendedSlicedSources.length; i++) {
-                if (SourceAndConverterServices.getSourceAndConverterDisplayService()
-                        .isVisible(reslicedAtlas.nonExtendedSlicedSources[i], bdvh)) {
-                    bdvh.getViewerPanel().state().setSourceActive(reslicedAtlas.nonExtendedSlicedSources[i], false);
-                    bdvh.getViewerPanel().state().setSourceActive(reslicedAtlas.extendedSlicedSources[i], true);
-                } else {
-                    bdvh.getViewerPanel().state().setSourceActive(reslicedAtlas.extendedSlicedSources[i], false);
-                }
             }
 
             bdvh.getTriggerbindings().removeInputTriggerMap(REGISTRATION_BEHAVIOURS_KEY);
@@ -627,23 +622,28 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             currentMode = POSITIONING_MODE_INT;
             reslicedAtlas.lock();
             currentMode = REGISTRATION_MODE_INT;
+
             ghs.forEach(gh -> gh.disable());
+
+            SourceAndConverterUtils.transferColorConverters(reslicedAtlas.extendedSlicedSources, reslicedAtlas.nonExtendedSlicedSources);
+
+            for (int i = 0; i < reslicedAtlas.nonExtendedSlicedSources.length; i++) {
+                boolean wasVisible = bdvh.getViewerPanel().state().isSourceActive(reslicedAtlas.extendedSlicedSources[i]);
+                bdvh.getViewerPanel().state().removeSource(reslicedAtlas.extendedSlicedSources[i]);
+                SourceAndConverterServices.getSourceAndConverterDisplayService()
+                        .show(bdvh, reslicedAtlas.nonExtendedSlicedSources[i]);
+                if (wasVisible) {
+                    bdvh.getViewerPanel().state().setSourceActive(reslicedAtlas.nonExtendedSlicedSources[i], true);
+                } else {
+                    bdvh.getViewerPanel().state().setSourceActive(reslicedAtlas.nonExtendedSlicedSources[i], false);
+                }
+            }
+
             synchronized (slices) {
                 getSortedSlices().forEach(ss -> {
                     SourceAndConverterUtils.transferColorConverters(ss.relocated_sacs_positioning_mode, ss.registered_sacs);
                     updateSliceDisplay(ss);
                 });
-            }
-
-            SourceAndConverterUtils.transferColorConverters(reslicedAtlas.extendedSlicedSources, reslicedAtlas.nonExtendedSlicedSources);
-            for (int i = 0; i < reslicedAtlas.nonExtendedSlicedSources.length; i++) {
-                if (SourceAndConverterServices.getSourceAndConverterDisplayService()
-                        .isVisible(reslicedAtlas.extendedSlicedSources[i], bdvh)) {
-                    bdvh.getViewerPanel().state().setSourceActive(reslicedAtlas.extendedSlicedSources[i], false);
-                    bdvh.getViewerPanel().state().setSourceActive(reslicedAtlas.nonExtendedSlicedSources[i], true);
-                } else {
-                    bdvh.getViewerPanel().state().setSourceActive(reslicedAtlas.nonExtendedSlicedSources[i], false);
-                }
             }
 
             bdvh.getTriggerbindings().removeInputTriggerMap(POSITIONING_BEHAVIOURS_KEY);

@@ -61,27 +61,27 @@ public class SliceSourcesPopupMenu {
             });
 
             addPopupAction("Delete Slices", (slices) -> {
-                new MarkActionSequenceBatch(mp).runRequest();
+                if (slices.length>1) new MarkActionSequenceBatch(mp).runRequest();
                 for (SliceSources slice : slices) {
                     new DeleteSlice(mp, slice).runRequest();
                 }
-                new MarkActionSequenceBatch(mp).runRequest();
+                if (slices.length>1) new MarkActionSequenceBatch(mp).runRequest();
             });
 
             addPopupAction("Edit Last Registration", (slices) -> {
-                new MarkActionSequenceBatch(mp).runRequest();
+                if (slices.length>1) new MarkActionSequenceBatch(mp).runRequest();
                 for (SliceSources slice : slices) {
                     new EditLastRegistration(mp, slice).runRequest();
                 }
-                new MarkActionSequenceBatch(mp).runRequest();
+                if (slices.length>1) new MarkActionSequenceBatch(mp).runRequest();
             });
 
             addPopupAction("Remove Last Registration", (slices) -> {
-                new MarkActionSequenceBatch(mp).runRequest();
+                if (slices.length>1) new MarkActionSequenceBatch(mp).runRequest();
                 for (SliceSources slice : slices) {
                     new DeleteLastRegistration(mp, slice).runRequest();
                 }
-                new MarkActionSequenceBatch(mp).runRequest();
+                if (slices.length>1) new MarkActionSequenceBatch(mp).runRequest();
             });
         }
 

@@ -2,24 +2,22 @@ package ch.epfl.biop.atlas.aligner;
 
 import bdv.viewer.SourceAndConverter;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class DeleteSlice extends CancelableAction {
 
     private final SliceSources sliceSource;
-    private final List<SourceAndConverter<?>> sacs;
+    //private final List<SourceAndConverter<?>> sacs;
 
-    final CreateSlice cs;
-    List<CancelableAction> savedActions = new ArrayList<>();
+    List<CancelableAction> savedActions;
 
     public DeleteSlice(MultiSlicePositioner mp, SliceSources slice) {
         super(mp);
         this.sliceSource = slice;
-        this.sacs = Arrays.asList(slice.original_sacs);
-        cs = new CreateSlice(mp, sacs, slice.slicingAxisPosition);
-        cs.setSliceSource(sliceSource);
+        //this.sacs = Arrays.asList(slice.original_sacs);
+        savedActions = mp.mso.getActionsFromSlice(slice);
     }
 
     @Override
@@ -29,12 +27,24 @@ public class DeleteSlice extends CancelableAction {
 
     @Override
     protected boolean run() {
-        return cs.cancel();
+        synchronized (DeleteSlice.class) { // avoid screw up with batch cancel ?
+            savedActions.remove(this);
+            Collections.reverse(savedActions);
+            savedActions.forEach(action ->  action.cancel());
+            Collections.reverse(savedActions);
+            return true;
+        }
     }
 
     @Override
     protected boolean cancel() {
-        return cs.run();
+        synchronized (DeleteSlice.class) { // Better ordering
+            savedActions.forEach(action -> {
+                action.run();
+                mp.mso.sendInfo(action);
+            });
+            return true;//cs.run();
+        }
     }
 
 }
