@@ -2,6 +2,7 @@ package ch.epfl.biop.atlas.aligner;
 
 import bdv.util.*;
 import bdv.viewer.SourceAndConverter;
+import ch.epfl.biop.ResourcesMonitor;
 import ch.epfl.biop.atlas.BiopAtlas;
 import ch.epfl.biop.atlas.aligner.commands.*;
 import ch.epfl.biop.atlas.aligner.serializers.*;
@@ -313,6 +314,9 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 true);
 
         bdvh.getCardPanel().addCard("Tasks Info", mso.getJPanel(), true);
+
+
+        bdvh.getCardPanel().addCard("Resources Monitor", new ResourcesMonitor(this), true);
 
         // Default registration region = full atlas size
         roiPX = -sX / 2.0;
@@ -1016,6 +1020,12 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
             } else {
                 return "("+lastAction.actionClassString()+")";
             }
+        }
+    }
+
+    public void clearUserActions() {
+        synchronized (slices) {
+            this.userActions.clear();
         }
     }
 
