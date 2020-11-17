@@ -153,7 +153,7 @@ public class Elastix2DSplineRegistration extends SourceAndConverterRegistration 
 
         if (rt!=null) {
             bwl.getBigWarp().loadLandmarks(BigWarpFileFromRealTransform(rt));
-            bwl.getBigWarp().setInLandmarkMode(true);
+            //bwl.getBigWarp().setInLandmarkMode(true);
             bwl.getBigWarp().setIsMovingDisplayTransformed(true);
         }
 

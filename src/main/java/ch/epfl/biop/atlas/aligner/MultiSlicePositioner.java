@@ -60,7 +60,6 @@ import java.util.*;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static bdv.ui.BdvDefaultCards.DEFAULT_SOURCEGROUPS_CARD;
@@ -305,6 +304,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
 
         // TODO BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Registration>Remove Last Registration",0,() -> );
+        bdvh.getCardPanel().addCard("Display Options", new DisplayPanel(this).getPanel(), true);
 
         bdvh.getCardPanel().addCard("Edit Slices", new EditPanel(this).getPanel(), true);
 
@@ -314,11 +314,11 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
 
         bdvh.getCardPanel().addCard("Define region of interest",
                 ScijavaSwingUI.getPanel(scijavaCtx, RectangleROIDefineInteractiveCommand.class, "mp", this),
-                true);
+                false);
 
-        bdvh.getCardPanel().addCard("Tasks Info", mso.getJPanel(), true);
+        bdvh.getCardPanel().addCard("Tasks Info", mso.getJPanel(), false);
 
-        bdvh.getCardPanel().addCard("Resources Monitor", new ResourcesMonitor(), true);
+        bdvh.getCardPanel().addCard("Resources Monitor", new ResourcesMonitor(), false);
 
         // Default registration region = full atlas size
         roiPX = -sX / 2.0;
@@ -1222,8 +1222,8 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         return new SourcesChannelsSelect(channels);
     }
 
-    public void registerElastixAffine(int iChannelFixed, int iChannelMoving) {
-        registerElastixAffine(getChannel(iChannelFixed), getChannel(iChannelMoving));
+    public void registerElastixAffine(int iChannelFixed, int iChannelMoving, boolean showIJ1Result) {
+        registerElastixAffine(getChannel(iChannelFixed), getChannel(iChannelMoving), showIJ1Result);
     }
 
     public void registerBigWarp(int iChannelFixed, int iChannelMoving) {
@@ -1243,7 +1243,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
     }
 
     public void registerElastixAffine(SourcesProcessor preprocessFixed,
-                                      SourcesProcessor preprocessMoving) {
+                                      SourcesProcessor preprocessMoving, boolean showIJ1Result) {
         if (getSelectedSources().size()==0) {
             log.accept("Registration ignored : no slice selected");
         }
@@ -1258,7 +1258,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 params.put("levelMovingSource", slice.registered_sacs[0].getSpimSource().getNumMipmapLevels() - 1);
                 params.put("pxSizeInCurrentUnit", 0.04);
                 params.put("interpolate", false);
-                params.put("showImagePlusRegistrationResult", false);// true);
+                params.put("showImagePlusRegistrationResult", showIJ1Result);// true);
                 params.put("px", roiPX);//rpt.getDoublePosition(0));
                 params.put("py", roiPY);//rpt.getDoublePosition(1));
                 params.put("pz", slice.getSlicingAxisPosition());//rpt.getDoublePosition(2));
@@ -1270,12 +1270,12 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
         }
     }
 
-    public void registerElastixSpline(int iChannelFixed, int iChannelMoving) {
-        registerElastixSpline(getChannel(iChannelFixed), getChannel(iChannelMoving));
+    public void registerElastixSpline(int iChannelFixed, int iChannelMoving, boolean showIJ1Result) {
+        registerElastixSpline(getChannel(iChannelFixed), getChannel(iChannelMoving), showIJ1Result);
     }
 
     public void registerElastixSpline(SourcesProcessor preprocessFixed,
-                                      SourcesProcessor preprocessMoving) {
+                                      SourcesProcessor preprocessMoving, boolean showIJ1Result) {
         if (getSelectedSources().size()==0) {
             log.accept("Registration ignored : no slice selected");
         }
@@ -1290,7 +1290,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 params.put("levelMovingSource", slice.registered_sacs[0].getSpimSource().getNumMipmapLevels() - 1);
                 params.put("pxSizeInCurrentUnit", 0.02);
                 params.put("interpolate", true);
-                params.put("showImagePlusRegistrationResult", true);//false);//true);
+                params.put("showImagePlusRegistrationResult", showIJ1Result);//false);//true);
                 params.put("px", roiPX);
                 params.put("py", roiPY);
                 params.put("pz", 0);//slice.getSlicingAxisPosition());
@@ -1302,10 +1302,7 @@ public class MultiSlicePositioner extends BdvOverlay implements SelectedSourcesL
                 at3d.translate(0,0,-slice.getSlicingAxisPosition());
                 SourcesAffineTransformer z_zero = new SourcesAffineTransformer(at3d);
 
-                preprocessFixed = SourcesProcessorHelper.compose(z_zero, preprocessFixed);
-                preprocessMoving = SourcesProcessorHelper.compose(z_zero, preprocessMoving);
-
-                new RegisterSlice(this, slice, elastixSplineReg, preprocessFixed, preprocessMoving).runRequest();
+                new RegisterSlice(this, slice, elastixSplineReg, SourcesProcessorHelper.compose(z_zero, preprocessFixed), SourcesProcessorHelper.compose(z_zero, preprocessMoving)).runRequest();
             }
         }
     }

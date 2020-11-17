@@ -331,11 +331,19 @@ public class SliceSources {
     }
 
     public void appendRegistration(Registration<SourceAndConverter[]> reg) {
+
+        SourceAndConverter[] temp;
+
+        if (mp.currentMode == MultiSlicePositioner.REGISTRATION_MODE_INT) {
+            temp = registered_sacs;
+        } else {
+            temp = relocated_sacs_positioning_mode;
+        }
+
         // Removes previous registration state (could be not necessary)
         SourceAndConverterServices.getSourceAndConverterDisplayService()
                 .remove(mp.bdvh,registered_sacs); // remove from sac service causes an issue PROBLEM : NOT THE FIRST ONES
 
-        SourceAndConverter[] temp = relocated_sacs_positioning_mode;
 
         SourceAndConverterServices.getSourceAndConverterService()
                 .remove(relocated_sacs_positioning_mode);

@@ -1,10 +1,20 @@
 package ch.epfl.biop;
 
+import bdv.util.BdvFunctions;
+import bdv.util.BdvHandle;
+import bdv.util.BdvOptions;
+import bdv.util.BdvStackSource;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.ABBACommand;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
+import ch.epfl.biop.atlas.aligner.projector.BoxProjectorARGB;
 import mpicbg.spim.data.sequence.Tile;
 import net.imagej.ImageJ;
+import net.imglib2.img.array.ArrayImg;
+import net.imglib2.img.array.ArrayImgs;
+import net.imglib2.realtransform.AffineTransform3D;
+
+import java.util.Set;
 
 public class DemoRegistrationQuPath {
 
@@ -51,7 +61,24 @@ public class DemoRegistrationQuPath {
         //mp.setSingleSliceDisplayMode();
         mp.createSlice(sacs,8.32, 0.08, Tile.class, new Tile(-1));
         mp.selectSlice(mp.getSortedSlices());
-        mp.registerElastixAffine(0,0);
+        //mp.registerElastixAffine(0,0);
+
+        /*mp.waitForTasks();
+
+        Set<SourceAndConverter<?>> sacs_set = mp.getBdvh().getViewerPanel().state().getVisibleSources();
+
+        ArrayImg dummyImg = ArrayImgs.bytes(2, 2, 2);
+
+        BdvOptions bdvOptions = BdvOptions.options().accumulateProjectorFactory(BoxProjectorARGB.factory);//.sourceTransform( new AffineTransform3D() );
+
+        BdvStackSource bss = BdvFunctions.show( dummyImg, "dummy", bdvOptions );
+
+        BdvHandle bdv = bss.getBdvHandle();
+
+        bdv.getViewerPanel().state().addSources(sacs_set);
+
+        bdv.getViewerPanel().state().setSourcesActive(sacs_set, true);
+        bdv.getViewerPanel().state().setViewerTransform(mp.getBdvh().getViewerPanel().state().getViewerTransform());*/
 
         /*mp.deselectSlice(mp.getSortedSlices());
         mp.selectSlice(mp.getSortedSlices().get(0));
