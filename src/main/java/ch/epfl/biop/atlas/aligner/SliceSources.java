@@ -45,6 +45,8 @@ import static ch.epfl.biop.atlas.aligner.CancelableAction.errlog;
  *
  * Each element of the array is a channel
  *
+ * This class should be UI independent (no show / bdvhandle, etc)
+ *
  */
 
 public class SliceSources {
@@ -145,12 +147,12 @@ public class SliceSources {
 
     public synchronized void select() {
         this.isSelected = true;
-        guiState.select();
+        //guiState.select();
     }
 
     public synchronized void deSelect() {
         this.isSelected = false;
-        guiState.deselect();
+        //guiState.deselect();
     } // TODO : thread lock!
 
     public boolean isSelected() {
@@ -217,17 +219,6 @@ public class SliceSources {
             }
         }
     }
-
-    /*public RealPoint getCenterPositionPMode() {
-        double slicingAxisSnapped = (((int) ((slicingAxisPosition) / mp.sizePixX)) * mp.sizePixX);
-        double posX = (slicingAxisSnapped / mp.sizePixX * mp.sX / mp.reslicedAtlas.getStep()) + 0.5 * (mp.sX);
-        double posY = mp.sY * yShift_slicing_mode;
-        return new RealPoint(posX, posY, 0);
-    }
-
-    public RealPoint getCenterPositionRMode() {
-        return new RealPoint(0, 0, slicingAxisPosition);
-    }*/
 
     public void transformSourceOrigin(AffineTransform3D at3D) {
         preTransform.setAffineTransform(at3D);

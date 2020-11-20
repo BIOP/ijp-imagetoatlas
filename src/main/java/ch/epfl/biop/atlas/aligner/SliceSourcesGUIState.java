@@ -46,6 +46,8 @@ public class SliceSourcesGUIState {
 
     AffineTransformedSourceWrapperRegistration slicingModePositioner;
 
+    double yShift_slicing_mode = 0;
+
     // Visible to the user in slicing mode
     //private SourceAndConverter<?>[] relocated_sacs_positioning_mode; // For Positioning mode
 
@@ -57,6 +59,7 @@ public class SliceSourcesGUIState {
         this.nChannels = slice.getRegisteredSources().length;
         this.slice = slice;
         channelVisible = new boolean[nChannels];
+        System.out.println("nChannels = "+nChannels);
         for (int i=0;i<nChannels;i++) {
             channelVisible[i] = true;
         }
@@ -146,7 +149,7 @@ public class SliceSourcesGUIState {
 
             SourceAndConverterServices
                     .getSourceAndConverterDisplayService()
-                    .show(mp.bdvh, sourcesToDisplay.toArray(new SourceAndConverter[0]));
+                    .show(mp.bdvh, sourcesToDisplay.toArray(new SourceAndConverter[sourcesToDisplay.size()]));
 
             mp.bdvh.getViewerPanel().requestRepaint();
         }
@@ -163,12 +166,14 @@ public class SliceSourcesGUIState {
                     case MultiSlicePositioner.POSITIONING_MODE_INT:
                         if (sources_displayed_or_readyfordisplay != relocated_sacs_positioning_mode) {
                             mp.bdvh.getViewerPanel().state().removeSources(Arrays.asList(sources_displayed_or_readyfordisplay));
+                            SourceAndConverterUtils.transferColorConverters(sources_displayed_or_readyfordisplay, relocated_sacs_positioning_mode);
                             sources_displayed_or_readyfordisplay = relocated_sacs_positioning_mode;
                         }
                         break;
                     case MultiSlicePositioner.REGISTRATION_MODE_INT:
                         if (sources_displayed_or_readyfordisplay != sacs_registration_mode) {
                             mp.bdvh.getViewerPanel().state().removeSources(Arrays.asList(sources_displayed_or_readyfordisplay));
+                            SourceAndConverterUtils.transferColorConverters(sources_displayed_or_readyfordisplay, sacs_registration_mode);
                             sources_displayed_or_readyfordisplay = sacs_registration_mode;
                         }
                         break;
@@ -180,22 +185,6 @@ public class SliceSourcesGUIState {
         }
     }
 
-    protected void sliceSourcesMoved() {
-        synchronized (slice) {
-            System.out.println("Slice GUI State moved triggered");
-        }
-    }
-
-    protected void select() {
-
-    }
-
-    protected void deselect() {
-
-    }
-
-    double yShift_slicing_mode = 0;
-
     public RealPoint getCenterPositionPMode() {
         double slicingAxisSnapped = (((int) ((slice.getSlicingAxisPosition()) / mp.sizePixX)) * mp.sizePixX);
         double posX = (slicingAxisSnapped / mp.sizePixX * mp.sX / mp.reslicedAtlas.getStep()) + 0.5 * (mp.sX);
@@ -206,14 +195,6 @@ public class SliceSourcesGUIState {
     public RealPoint getCenterPositionRMode() {
         return new RealPoint(0, 0, slice.getSlicingAxisPosition());
     }
-
-
-    /*public abstract static class SliceSourcesListener {
-        abstract void sliceSourcesChanged(SliceSources slice);
-        abstract void sliceSourcesMoved(SliceSources slice);
-        abstract void sliceSourcesDeleted(SliceSources slice);
-        abstract void sliceSourcesCreated(SliceSources slice);
-    }*/
 
     protected Integer[] getBdvHandleCoords() {
         AffineTransform3D bdvAt3D = new AffineTransform3D();
@@ -233,49 +214,6 @@ public class SliceSourcesGUIState {
         }
     }
 
-
-    /*
-    //slicingModePositioner = new AffineTransformedSourceWrapperRegistration();
-
-        slicingModePositioner.setMovingImage(registered_sacs);
-
-        //relocated_sacs_positioning_mode = slicingModePositioner.getTransformedImageMovingToFixed(registered_sacs);
-
-     */
-
-     /*SourceAndConverter[] temp;
-
-        if (mp.getDisplayMode() == MultiSlicePositioner.REGISTRATION_MODE_INT) {
-            temp = registered_sacs;
-        } else {
-            temp = relocated_sacs_positioning_mode;
-        }*/
-
-    // Removes previous registration state (could be not necessary)
-        /*SourceAndConverterServices.getSourceAndConverterDisplayService()
-                .remove(mp.bdvh,registered_sacs); // remove from sac service causes an issue PROBLEM : NOT THE FIRST ONES
-
-
-        SourceAndConverterServices.getSourceAndConverterService()
-                .remove(relocated_sacs_positioning_mode);*/
-
-    // Removes previous registration state (could be not necessary)
-                /*SourceAndConverterServices.getSourceAndConverterService()
-                        .remove(registered_sacs);
-
-                SourceAndConverter[] temp = relocated_sacs_positioning_mode;
-
-                SourceAndConverterServices.getSourceAndConverterService()
-                        .remove(relocated_sacs_positioning_mode);*/
-
-    /*
-    AffineTransform3D slicingModePositionAffineTransform = new AffineTransform3D();
-        RealPoint center = getCenterPositionPMode();
-        slicingModePositionAffineTransform.translate(center.getDoublePosition(0), center.getDoublePosition(1), -slicingAxisPosition);
-        slicingModePositioner.setAffineTransform(slicingModePositionAffineTransform);
-     */
-
-
     public void hide() {
         synchronized (lockChangeDisplay) {
             if (sliceIsVisible) {
@@ -284,16 +222,6 @@ public class SliceSourcesGUIState {
                         .removeSources(Arrays.asList(sources_displayed_or_readyfordisplay));
             }
         }
-        //this.deSelect();
-        /*if (mp.getDisplayMode() == MultiSlicePositioner.REGISTRATION_MODE_INT) {
-            mp.getBdvh().getViewerPanel().state()
-                    .setSourcesActive(Arrays.asList(registered_sacs), false);
-        }
-
-        if (mp.getDisplayMode() == MultiSlicePositioner.POSITIONING_MODE_INT) {
-            mp.getBdvh().getViewerPanel().state()
-                    .setSourcesActive(Arrays.asList(relocated_sacs_positioning_mode), false);
-        }*/
     }
 
     public void show() {
@@ -344,7 +272,7 @@ public class SliceSourcesGUIState {
 
     //}
 
-    public void setChannelsVisibility(Boolean[] visibleFlag) {
+    public void setChannelsVisibility(boolean[] visibleFlag) {
         // TODO
         /*synchronized (lockChangeDisplay) {
             if (sliceIsVisible) {
@@ -438,10 +366,12 @@ public class SliceSourcesGUIState {
     }
 
     public void sliceDeleted() {
-        hide();
-        // Release ?
+        synchronized (lockChangeDisplay) {
+            if (sliceIsVisible) {
+                mp.bdvh.getViewerPanel().state()
+                        .removeSources(Arrays.asList(sources_displayed_or_readyfordisplay));
+            }
+        }
     }
 
-    //
-    //mp.updateSliceDisplay(this);
 }
