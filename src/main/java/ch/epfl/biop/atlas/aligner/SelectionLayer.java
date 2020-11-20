@@ -140,7 +140,7 @@ public class SelectionLayer {
         Rectangle r = getCurrentSelectionRectangle();
         synchronized (mp.slices) {
             for (SliceSources slice : mp.slices) {
-                Integer[] coords = slice.getBdvHandleCoords();
+                Integer[] coords = slice.getGUIState().getBdvHandleCoords();
                 Point p = new Point(coords[0], coords[1]);
                 if (r.contains(p)) lastSelected.add(slice);
             }

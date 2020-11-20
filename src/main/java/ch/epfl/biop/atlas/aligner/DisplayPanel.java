@@ -13,7 +13,7 @@ public class DisplayPanel {
 
         JButton toggleDisplayMode = new JButton("Multi/Single Slice");
         toggleDisplayMode.addActionListener(e -> {
-            mp.toggle_display_mode();
+            mp.changeSliceDisplayMode();
         });
 
         paneDisplay.add(toggleDisplayMode);

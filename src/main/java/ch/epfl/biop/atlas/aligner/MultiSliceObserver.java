@@ -76,8 +76,8 @@ public class MultiSliceObserver {
         synchronized (sliceSortedActions) {
             sliceSortedActions.forEach(((slice, actions) -> {
                 if (mp.slices.contains(slice)) {
-                    int xP = slice.getBdvHandleCoords()[0];
-                    int yP = slice.getBdvHandleCoords()[1] + yInc;
+                    int xP = slice.getGUIState().getBdvHandleCoords()[0];
+                    int yP = slice.getGUIState().getBdvHandleCoords()[1] + yInc;
 
                     int yP0 = yP;
 

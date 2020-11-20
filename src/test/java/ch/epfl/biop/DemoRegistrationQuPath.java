@@ -7,14 +7,8 @@ import bdv.util.BdvStackSource;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.ABBACommand;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
-import ch.epfl.biop.atlas.aligner.projector.BoxProjectorARGB;
 import mpicbg.spim.data.sequence.Tile;
 import net.imagej.ImageJ;
-import net.imglib2.img.array.ArrayImg;
-import net.imglib2.img.array.ArrayImgs;
-import net.imglib2.realtransform.AffineTransform3D;
-
-import java.util.Set;
 
 public class DemoRegistrationQuPath {
 

@@ -1,11 +1,6 @@
 package ch.epfl.biop.atlas.aligner;
 
-import bdv.viewer.SourceAndConverter;
-
 import javax.swing.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.function.Consumer;
 
 public class SliceSourcesPopupMenu {
@@ -25,28 +20,11 @@ public class SliceSourcesPopupMenu {
         popup = new JPopupMenu();
 
         addPopupAction("Show all Slices", (slices) -> {
-            List<SourceAndConverter<?>> sacsToAppend = new ArrayList<>();
-            for (SliceSources slice : mp.getSortedSlices()) {
-                if (slice.mp.currentMode == MultiSlicePositioner.POSITIONING_MODE_INT) {
-                    sacsToAppend.addAll(Arrays.asList(slice.relocated_sacs_positioning_mode));
-                }
-                if (slice.mp.currentMode == MultiSlicePositioner.REGISTRATION_MODE_INT) {
-                    sacsToAppend.addAll(Arrays.asList(slice.registered_sacs));
-                }
-            }
-            mp.getBdvh().getViewerPanel().state().setSourcesActive(sacsToAppend, true);
+            mp.showAllSlices();
         });
 
         addPopupAction("Show current slice", (slices)-> {
-            SliceSources ss = mp.getSortedSlices().get(mp.iCurrentSlice);
-            for (SliceSources slice : mp.getSortedSlices()) {
-                if (slice.mp.currentMode == MultiSlicePositioner.POSITIONING_MODE_INT) {
-                    mp.getBdvh().getViewerPanel().state().setSourcesActive(Arrays.asList(ss.relocated_sacs_positioning_mode), true);
-                }
-                if (slice.mp.currentMode == MultiSlicePositioner.REGISTRATION_MODE_INT) {
-                    mp.getBdvh().getViewerPanel().state().setSourcesActive(Arrays.asList(ss.registered_sacs), true);
-                }
-            }
+            mp.showCurrentSlice();
         });
 
 
@@ -56,13 +34,13 @@ public class SliceSourcesPopupMenu {
 
             addPopupAction("Hide Slices", (slices) -> {
                 for (SliceSources slice : slices) {
-                    slice.hide();
+                    slice.getGUIState().hide();
                 }
             });
 
             addPopupAction("Show Slices", (slices) -> {
                 for (SliceSources slice : slices) {
-                    slice.show();
+                    slice.getGUIState().show();
                 }
             });
 
@@ -110,13 +88,13 @@ public class SliceSourcesPopupMenu {
 
         addPopupLine();
 
-        if (mp.currentMode != MultiSlicePositioner.POSITIONING_MODE_INT) {
+        if (mp.getDisplayMode() != MultiSlicePositioner.POSITIONING_MODE_INT) {
             addPopupAction("Positioning mode", (slices) -> {
                 mp.setPositioningMode();
             });
         }
 
-        if (mp.currentMode != MultiSlicePositioner.REGISTRATION_MODE_INT) {
+        if (mp.getDisplayMode() != MultiSlicePositioner.REGISTRATION_MODE_INT) {
             addPopupAction("Registration mode", (slices) -> {
                 mp.setRegistrationMode();
             });

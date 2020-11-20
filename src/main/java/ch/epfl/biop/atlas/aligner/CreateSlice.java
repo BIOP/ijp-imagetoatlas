@@ -79,15 +79,15 @@ public class CreateSlice extends CancelableAction {
 
             mp.updateDisplay();
 
-            if (mp.currentMode == MultiSlicePositioner.POSITIONING_MODE_INT) {
+            /*if (mp.getDisplayMode() == MultiSlicePositioner.POSITIONING_MODE_INT) {
                 SourceAndConverterServices.getSourceAndConverterDisplayService()
                         .show(mp.bdvh, sliceSource.relocated_sacs_positioning_mode);
                 sliceSource.enableGraphicalHandles();
-            } else if (mp.currentMode == MultiSlicePositioner.REGISTRATION_MODE_INT) {
+            } else if (mp.getDisplayMode() == MultiSlicePositioner.REGISTRATION_MODE_INT) {
                 SourceAndConverterServices.getSourceAndConverterDisplayService()
                         .show(mp.bdvh, sliceSource.registered_sacs);
                 sliceSource.disableGraphicalHandles();
-            }
+            }*/
 
             mp.log.accept("Slice added");
         }
@@ -105,13 +105,8 @@ public class CreateSlice extends CancelableAction {
     @Override
     public boolean cancel() {
         System.out.println("Cancelling source creation");
-        mp.slices.remove(sliceSource);
-        if (mp.bdvh == null) {System.out.println("bdvh null");}
-        if (sliceSource.relocated_sacs_positioning_mode == null) {System.out.println("slice null");}
-        SourceAndConverterServices.getSourceAndConverterDisplayService()
-                .remove(mp.bdvh, sliceSource.relocated_sacs_positioning_mode);
-        SourceAndConverterServices.getSourceAndConverterDisplayService()
-                .remove(mp.bdvh, sliceSource.registered_sacs);
+        mp.removeSlice(sliceSource);
+
         mp.log.accept("Slice removed");
         return true;
     }

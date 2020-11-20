@@ -3,7 +3,7 @@ package ch.epfl.biop.registration.sourceandconverter;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.registration.Registration;
 
-abstract public class SourceAndConverterRegistration implements Registration<SourceAndConverter[]> {
+abstract public class SourceAndConverterRegistration implements Registration<SourceAndConverter<?>[]> {
 
     protected SourceAndConverter[] fimg;
     protected SourceAndConverter[] mimg;

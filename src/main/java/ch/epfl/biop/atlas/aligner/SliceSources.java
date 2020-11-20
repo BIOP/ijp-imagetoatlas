@@ -1,7 +1,6 @@
 package ch.epfl.biop.atlas.aligner;
 
 import bdv.viewer.SourceAndConverter;
-import bdv.viewer.ViewerState;
 import ch.epfl.biop.atlas.allen.AllenOntology;
 import ch.epfl.biop.atlas.commands.ConstructROIsFromImgLabel;
 import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
@@ -20,21 +19,14 @@ import ij.plugin.frame.RoiManager;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import mpicbg.spim.data.generic.sequence.BasicViewSetup;
 import net.imglib2.RealPoint;
-import net.imglib2.display.ColorConverter;
 import net.imglib2.realtransform.AffineTransform3D;
-import org.scijava.ui.behaviour.ClickBehaviour;
-import org.scijava.ui.behaviour.io.InputTriggerConfig;
-import org.scijava.ui.behaviour.util.Behaviours;
 import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
 import sc.fiji.bdvpg.scijava.services.ui.SourceAndConverterInspector;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterAndTimeRange;
-import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterUtils;
 import sc.fiji.bdvpg.sourceandconverter.importer.EmptySourceAndConverterCreator;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceResampler;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
-import spimdata.util.Displaysettings;
-import spimdata.util.DisplaysettingsHelper;
 
 import java.awt.*;
 import java.io.File;
@@ -48,62 +40,66 @@ import java.util.function.Function;
 
 import static ch.epfl.biop.atlas.aligner.CancelableAction.errlog;
 
+/**
+ * Class which contains the current registered SourceAndConverter array
+ *
+ * Each element of the array is a channel
+ *
+ */
+
 public class SliceSources {
 
-    // What are they ?
-    final SourceAndConverter[] original_sacs;
+    final private SliceSourcesGUIState guiState; // in here ? GOod idea ?
 
-    // Visible to the user in slicing mode
-    SourceAndConverter<?>[] relocated_sacs_positioning_mode;
+    // What are they ?
+    final SourceAndConverter<?>[] original_sacs;
 
     // Used for registration : like 3D, but tilt and roll ignored because it is handled on the fixed source side
-    SourceAndConverter<?>[] registered_sacs;
+    private SourceAndConverter<?>[] registered_sacs;
 
-    List<RegistrationAndSources> registered_sacs_sequence = new ArrayList<>();
+    private List<RegistrationAndSources> registered_sacs_sequence = new ArrayList<>();
 
-    // Where are they ?
-    volatile double slicingAxisPosition;
+    // Where is the slice located along the slicing axis
+    private double slicingAxisPosition;
 
     private boolean isSelected = false;
 
-    double yShift_slicing_mode = 0;
+    //private double yShift_slicing_mode = 0;
 
-    final MultiSlicePositioner mp;
+    private final MultiSlicePositioner mp;
 
-    List<GraphicalHandle> ghs = new ArrayList<>();
+    private AffineTransformedSourceWrapperRegistration zPositioner;
 
-    Behaviours behavioursHandleSlice;
+    private AffineTransformedSourceWrapperRegistration preTransform;
 
-    volatile AffineTransformedSourceWrapperRegistration zPositioner;
+    private CenterZeroRegistration centerPositioner;
 
-    volatile AffineTransformedSourceWrapperRegistration preTransform;
+    private ImagePlus impLabelImage;
 
-    volatile AffineTransformedSourceWrapperRegistration slicingModePositioner;
+    private AffineTransform3D at3DLastLabelImage;
 
-    CenterZeroRegistration centerPositioner;
+    private boolean labelImageBeingComputed = false;
 
-    volatile ImagePlus impLabelImage = null;
+    private ConvertibleRois cvtRoisOrigin;
 
-    volatile AffineTransform3D at3DLastLabelImage = null;
+    private ConvertibleRois cvtRoisTransformed;
 
-    volatile boolean labelImageBeingComputed = false;
+    private ConvertibleRois leftRightTranformed;
 
-    volatile ConvertibleRois cvtRoisOrigin = null;
+    private List<Registration<SourceAndConverter<?>[]>> registrations = new ArrayList<>();
 
-    volatile ConvertibleRois cvtRoisTransformed = null;
+    private final List<CompletableFuture<Boolean>> tasks = new ArrayList<>();
 
-    volatile ConvertibleRois leftRightTranformed = null;
+    private Map<CancelableAction, CompletableFuture<Boolean>> mapActionTask = new HashMap<>();
 
-    List<Registration> registrations = new ArrayList<>();
+    private volatile CancelableAction actionInProgress = null;
 
-    List<CompletableFuture<Boolean>> tasks = new ArrayList<>();
+    private ConvertibleRois leftRightOrigin = new ConvertibleRois();
 
-    Map<CancelableAction, CompletableFuture> mapActionTask = new HashMap<>();
-
-    volatile CancelableAction actionInProgress = null;
+    private int currentSliceIndex = -1;
 
     // For fast display : Icon TODO : see https://github.com/bigdataviewer/bigdataviewer-core/blob/17d2f55d46213d1e2369ad7ef4464e3efecbd70a/src/main/java/bdv/tools/RecordMovieDialog.java#L256-L318
-    protected SliceSources(SourceAndConverter[] sacs, double slicingAxisPosition, MultiSlicePositioner mp) {
+    protected SliceSources(SourceAndConverter<?>[] sacs, double slicingAxisPosition, MultiSlicePositioner mp) {
         this.mp = mp;
         this.original_sacs = sacs;
         this.slicingAxisPosition = slicingAxisPosition;
@@ -113,30 +109,24 @@ public class SliceSources {
         centerPositioner.setMovingImage(registered_sacs);
 
         zPositioner = new AffineTransformedSourceWrapperRegistration();
-
         preTransform = new AffineTransformedSourceWrapperRegistration();
 
-        behavioursHandleSlice = new Behaviours(new InputTriggerConfig());
-        behavioursHandleSlice.behaviour(mp.getSelectedSourceDragBehaviour(this), "dragSelectedSources" + this.toString(), "button1");
-        behavioursHandleSlice.behaviour((ClickBehaviour) (x, y) -> {
-            deSelect();
-            mp.bdvh.getViewerPanel().requestRepaint();
-        }, "deselectedSources" + this.toString(), "button3", "ctrl button1");
+        guiState = new SliceSourcesGUIState(this, mp);
 
-        GraphicalHandle gh = new CircleGraphicalHandle(mp,
-                behavioursHandleSlice,
-                mp.bdvh.getTriggerbindings(),
-                this.toString(), // pray for unicity ? TODO : do better than thoughts and prayers
-                this::getBdvHandleCoords,
-                this::getBdvHandleRadius,
-                this::getBdvHandleColor
-        );
-        ghs.add(gh);
-        iniPosition();
+        runRegistration(centerPositioner, Function.identity(), Function.identity());
+        runRegistration(preTransform, Function.identity(), Function.identity());
+        runRegistration(zPositioner, Function.identity(), Function.identity());
+        waitForEndOfTasks();
+        updateZPosition();
+        guiState.positionChanged();
     }
 
-    public List<RegistrationAndSources> getRegistrationSequence() {
-        return registered_sacs_sequence;
+    public SliceSourcesGUIState getGUIState() {
+        return guiState;
+    }
+
+    public synchronized SourceAndConverter<?>[] getRegisteredSources() {
+        return registered_sacs;
     }
 
     protected double getSlicingAxisPosition() {
@@ -145,58 +135,40 @@ public class SliceSources {
 
     protected void setSlicingAxisPosition(double newSlicingAxisPosition) {
         slicingAxisPosition = newSlicingAxisPosition;
+        updateZPosition();
+        guiState.positionChanged();
     }
 
-    public SourceAndConverter[] getOriginalSources() {
+    public SourceAndConverter<?>[] getOriginalSources() {
         return original_sacs;
-    }
-
-    void iniPosition() {
-        runRegistration(centerPositioner, Function.identity(), Function.identity());
-        runRegistration(preTransform, Function.identity(), Function.identity());
-        runRegistration(zPositioner, Function.identity(), Function.identity());
-        waitForEndOfTasks();
-        updatePosition();
     }
 
     public synchronized void select() {
         this.isSelected = true;
+        guiState.select();
     }
 
     public synchronized void deSelect() {
         this.isSelected = false;
+        guiState.deselect();
     } // TODO : thread lock!
 
     public boolean isSelected() {
         return this.isSelected;
     }
 
-    private int currentSliceIndex = -1;
-
     public int getIndex() {
         return currentSliceIndex;
     }
 
-    protected void setIndex(int idx) {
-        currentSliceIndex = idx;
+    private void updateZPosition() {
+        AffineTransform3D zShiftAffineTransform = new AffineTransform3D();
+        zShiftAffineTransform.translate(0, 0, slicingAxisPosition);
+        zPositioner.setAffineTransform(zShiftAffineTransform); // Moves the registered slices to the correct position
     }
 
-    protected Integer[] getBdvHandleCoords() {
-        AffineTransform3D bdvAt3D = new AffineTransform3D();
-        mp.bdvh.getViewerPanel().state().getViewerTransform(bdvAt3D);
-        RealPoint sliceCenter;
-        if (mp.currentMode == MultiSlicePositioner.POSITIONING_MODE_INT) {
-            sliceCenter = getCenterPositionPMode();
-            bdvAt3D.apply(sliceCenter, sliceCenter);
-            return new Integer[]{(int) sliceCenter.getDoublePosition(0), (int) sliceCenter.getDoublePosition(1), (int) sliceCenter.getDoublePosition(2)};
-        } else if (mp.currentMode == MultiSlicePositioner.REGISTRATION_MODE_INT) {
-            RealPoint zero = new RealPoint(3);
-            zero.setPosition(0, 0);
-            bdvAt3D.apply(zero, zero);
-            return new Integer[]{35 * (currentSliceIndex - mp.slices.size() / 2) + (int) zero.getDoublePosition(0), 20, 0};
-        } else {
-            return new Integer[]{0, 0, 0};
-        }
+    protected void setIndex(int idx) {
+        currentSliceIndex = idx;
     }
 
     protected String getActionState(CancelableAction action) {
@@ -221,48 +193,9 @@ public class SliceSources {
         }
     }
 
-    public Integer[] getBdvHandleColor() {
-        if (isSelected) {
-            return new Integer[]{0, 255, 0, 200};
-
-        } else {
-            return new Integer[]{255, 255, 0, 64};
-        }
-    }
-
-    public Integer getBdvHandleRadius() {
-        return 12;
-    }
-
-    public void drawGraphicalHandles(Graphics2D g) {
-        ghs.forEach(gh -> gh.draw(g));
-    }
-
-    public void disableGraphicalHandles() {
-        ghs.forEach(gh -> gh.disable());
-    }
-
-    public void enableGraphicalHandles() {
-        ghs.forEach(gh -> gh.enable());
-    }
-
     protected boolean exactMatch(List<SourceAndConverter<?>> testSacs) {
-        Set originalSacsSet = new HashSet();
-        for (SourceAndConverter sac : original_sacs) {
-            originalSacsSet.add(sac);
-        }
-        if (originalSacsSet.containsAll(testSacs) && testSacs.containsAll(originalSacsSet)) {
-            return true;
-        }
-        Set transformedSacsSet = new HashSet();
-        for (SourceAndConverter sac : relocated_sacs_positioning_mode) {
-            transformedSacsSet.add(sac);
-        }
-        if (transformedSacsSet.containsAll(testSacs) && testSacs.containsAll(transformedSacsSet)) {
-            return true;
-        }
-
-        return false;
+        Set<SourceAndConverter<?>> originalSacsSet = new HashSet<>(Arrays.asList(original_sacs));
+        return (originalSacsSet.containsAll(testSacs) && testSacs.containsAll(originalSacsSet));
     }
 
     protected boolean isContainingAny(Collection<SourceAndConverter<?>> sacs) {
@@ -270,17 +203,7 @@ public class SliceSources {
         for (SourceAndConverter sac : original_sacs) {
             originalSacsSet.add(sac);
         }
-        if (sacs.stream().distinct().anyMatch(originalSacsSet::contains)) {
-            return true;
-        }
-        Set transformedSacsSet = new HashSet();
-        for (SourceAndConverter sac : relocated_sacs_positioning_mode) {
-            transformedSacsSet.add(sac);
-        }
-        if (sacs.stream().distinct().anyMatch(transformedSacsSet::contains)) {
-            return true;
-        }
-        return false;
+        return (sacs.stream().distinct().anyMatch(originalSacsSet::contains));
     }
 
     public void waitForEndOfTasks() {
@@ -295,17 +218,7 @@ public class SliceSources {
         }
     }
 
-    protected void updatePosition() {
-        AffineTransform3D zShiftAffineTransform = new AffineTransform3D();
-        zShiftAffineTransform.translate(0, 0, slicingAxisPosition);
-        zPositioner.setAffineTransform(zShiftAffineTransform); // Moves the registered slices to the correct position
-        AffineTransform3D slicingModePositionAffineTransform = new AffineTransform3D();
-        RealPoint center = getCenterPositionPMode();
-        slicingModePositionAffineTransform.translate(center.getDoublePosition(0), center.getDoublePosition(1), -slicingAxisPosition);
-        slicingModePositioner.setAffineTransform(slicingModePositionAffineTransform);
-    }
-
-    public RealPoint getCenterPositionPMode() {
+    /*public RealPoint getCenterPositionPMode() {
         double slicingAxisSnapped = (((int) ((slicingAxisPosition) / mp.sizePixX)) * mp.sizePixX);
         double posX = (slicingAxisSnapped / mp.sizePixX * mp.sX / mp.reslicedAtlas.getStep()) + 0.5 * (mp.sX);
         double posY = mp.sY * yShift_slicing_mode;
@@ -314,7 +227,7 @@ public class SliceSources {
 
     public RealPoint getCenterPositionRMode() {
         return new RealPoint(0, 0, slicingAxisPosition);
-    }
+    }*/
 
     public void transformSourceOrigin(AffineTransform3D at3D) {
         preTransform.setAffineTransform(at3D);
@@ -330,47 +243,22 @@ public class SliceSources {
         preTransform.setAffineTransform(at3d);
     }
 
-    public void appendRegistration(Registration<SourceAndConverter[]> reg) {
-
-        SourceAndConverter[] temp;
-
-        if (mp.currentMode == MultiSlicePositioner.REGISTRATION_MODE_INT) {
-            temp = registered_sacs;
-        } else {
-            temp = relocated_sacs_positioning_mode;
-        }
-
-        // Removes previous registration state (could be not necessary)
-        SourceAndConverterServices.getSourceAndConverterDisplayService()
-                .remove(mp.bdvh,registered_sacs); // remove from sac service causes an issue PROBLEM : NOT THE FIRST ONES
-
-
-        SourceAndConverterServices.getSourceAndConverterService()
-                .remove(relocated_sacs_positioning_mode);
+    public void appendRegistration(Registration<SourceAndConverter<?>[]> reg) {
 
         registered_sacs = reg.getTransformedImageMovingToFixed(registered_sacs);
 
-        SourceAndConverterUtils.transferColorConverters(temp, registered_sacs);
-
-        slicingModePositioner = new AffineTransformedSourceWrapperRegistration();
-
-        slicingModePositioner.setMovingImage(registered_sacs);
-
-        relocated_sacs_positioning_mode = slicingModePositioner.getTransformedImageMovingToFixed(registered_sacs);
-        updatePosition();
-
         registered_sacs_sequence.add(new RegistrationAndSources(reg, registered_sacs));
-
-        mp.updateSliceDisplay(this);
 
         registrations.add(reg);
 
         mp.mso.updateInfoPanel(this);
 
+        guiState.sourcesChanged();
+
     }
 
     // public : enqueueRegistration
-    private boolean performRegistration(Registration<SourceAndConverter[]> reg,
+    private boolean performRegistration(Registration<SourceAndConverter<?>[]> reg,
                                        Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixed,
                                        Function<SourceAndConverter[], SourceAndConverter[]> preprocessMoving) {
 
@@ -390,8 +278,7 @@ public class SliceSources {
      *
      * @param reg
      */
-
-    protected void runRegistration(Registration<SourceAndConverter[]> reg,
+    protected void runRegistration(Registration<SourceAndConverter<?>[]> reg,
                                 Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixed,
                                 Function<SourceAndConverter[], SourceAndConverter[]> preprocessMoving) {
 
@@ -413,31 +300,12 @@ public class SliceSources {
             if (idx == registrations.size() - 1) {
 
                 registrations.remove(reg);
+
                 registered_sacs_sequence.remove(registered_sacs_sequence.get(registered_sacs_sequence.size()-1));
-
-                Registration last = registrations.get(registrations.size() - 1);
-
-                // Removes previous registration state (could be not necessary)
-                SourceAndConverterServices.getSourceAndConverterService()
-                        .remove(registered_sacs);
-
-                SourceAndConverter[] temp = relocated_sacs_positioning_mode;
-
-                SourceAndConverterServices.getSourceAndConverterService()
-                        .remove(relocated_sacs_positioning_mode);
 
                 registered_sacs = registered_sacs_sequence.get(registered_sacs_sequence.size()-1).sacs;
 
-                SourceAndConverterUtils.transferColorConverters(temp, registered_sacs);
-
-                slicingModePositioner = new AffineTransformedSourceWrapperRegistration();
-
-                slicingModePositioner.setMovingImage(registered_sacs);
-
-                relocated_sacs_positioning_mode = slicingModePositioner.getTransformedImageMovingToFixed(registered_sacs);
-                updatePosition();
-
-                mp.updateSliceDisplay(this);
+                guiState.sourcesChanged();
 
                 return true;
             } else {
@@ -457,7 +325,7 @@ public class SliceSources {
                 startingPoint = tasks.get(tasks.size() - 1);
             }
             tasks.add(startingPoint.thenApplyAsync((out) -> {
-                if (out == true) {
+                if (out) {
                     actionInProgress = action;
                     boolean result = action.run();
                     actionInProgress = null;
@@ -488,7 +356,7 @@ public class SliceSources {
                         startingPoint = tasks.get(tasks.size() - 1);
                     }
                     tasks.add(startingPoint.thenApplyAsync((out) -> {
-                        if (out == true) {
+                        if (out) {
                             boolean result = action.cancel();
                             tasks.remove(mapActionTask.get(action));
                             mapActionTask.remove(action);
@@ -509,7 +377,7 @@ public class SliceSources {
                 waitForEndOfTasks();
                 action.cancel();
             } else {
-                System.err.println("Unregistered action");
+                mp.errlog.accept("Unregistered action");
             }
         }
     }
@@ -517,9 +385,6 @@ public class SliceSources {
     void computeLabelImage(AffineTransform3D at3D, String naming) {
         labelImageBeingComputed = true;
 
-        System.out.println("Compute Label Image");
-
-        System.out.println("0");
         // 0 - slicing model : empty source but properly defined in space and resolution
         SourceAndConverter singleSliceModel = new EmptySourceAndConverterCreator("SlicingModel", at3D,
                 mp.nPixX,
@@ -550,7 +415,6 @@ public class SliceSources {
         export.run();
 
         impLabelImage = export.imp_out;
-        //impLabelImage.show();
 
         ConstructROIsFromImgLabel labelToROIs = new ConstructROIsFromImgLabel();
         labelToROIs.atlas = mp.biopAtlas;
@@ -578,13 +442,10 @@ public class SliceSources {
         export.run();
 
         ImagePlus leftRightImage = export.imp_out;
-        //leftRight.show();
 
         leftRightOrigin.set(leftRightImage);
 
     }
-
-    ConvertibleRois leftRightOrigin = new ConvertibleRois();
 
     void prepareExport(String namingChoice) {
         // Need to raster the label image
@@ -645,12 +506,12 @@ public class SliceSources {
 
     }
 
-    public synchronized void exportRegionsToROIManager(String namingChoice) {
+    protected synchronized void exportRegionsToROIManager(String namingChoice) {
         prepareExport(namingChoice);
         cvtRoisTransformed.to(RoiManager.class);
     }
 
-    public synchronized void exportToQuPathProject(boolean erasePreviousFile) {
+    protected synchronized void exportToQuPathProject(boolean erasePreviousFile) {
         prepareExport("id");
 
         ImageJRoisFile ijroisfile = (ImageJRoisFile) cvtRoisTransformed.to(ImageJRoisFile.class);
@@ -658,7 +519,7 @@ public class SliceSources {
         storeInQuPathProjectIfExists(ijroisfile, erasePreviousFile);
     }
 
-    public synchronized void exportRegionsToFile(String namingChoice, File dirOutput, boolean erasePreviousFile) {
+    protected synchronized void exportRegionsToFile(String namingChoice, File dirOutput, boolean erasePreviousFile) {
 
         prepareExport(namingChoice);
 
@@ -689,7 +550,7 @@ public class SliceSources {
 
     }
 
-    void storeInQuPathProjectIfExists(ImageJRoisFile ijroisfile, boolean erasePreviousFile) {
+    private void storeInQuPathProjectIfExists(ImageJRoisFile ijroisfile, boolean erasePreviousFile) {
         //-------------------- Experimental : finding where to save the ROIS
         SourceAndConverter rootSac = SourceAndConverterInspector.getRootSourceAndConverter(original_sacs[0]);
 
@@ -703,69 +564,59 @@ public class SliceSources {
                     ((SourceAndConverterService.SpimDataInfo)SourceAndConverterServices.getSourceAndConverterService()
                             .getMetadata(rootSac, SourceAndConverterService.SPIM_DATA_INFO)).asd;
 
-            System.out.println("BDV Datasets found associated with the slice!");
+            mp.log.accept("BDV Datasets found associated with the slice!");
 
-            if (
-                  //  SourceAndConverterServices
-                  //  .getSourceAndConverterService()
-                  //  .containsMetadata(asd, QUPATH_LINKED_PROJECT)
-                true) {
-                //System.out.println("Linked QuPath Project found!");
 
-                int viewSetupId = ((SourceAndConverterService.SpimDataInfo)SourceAndConverterServices.getSourceAndConverterService()
-                        .getMetadata(rootSac, SourceAndConverterService.SPIM_DATA_INFO)).setupId;
+            int viewSetupId = ((SourceAndConverterService.SpimDataInfo)SourceAndConverterServices.getSourceAndConverterService()
+                    .getMetadata(rootSac, SourceAndConverterService.SPIM_DATA_INFO)).setupId;
 
-                BasicViewSetup bvs = (BasicViewSetup) asd.getSequenceDescription().getViewSetups().get(viewSetupId);
+            BasicViewSetup bvs = (BasicViewSetup) asd.getSequenceDescription().getViewSetups().get(viewSetupId);
 
-                if (bvs.getAttribute(QuPathEntryEntity.class)!=null) {
-                    QuPathEntryEntity qpent = bvs.getAttribute(QuPathEntryEntity.class);
+            if (bvs.getAttribute(QuPathEntryEntity.class)!=null) {
+                QuPathEntryEntity qpent = bvs.getAttribute(QuPathEntryEntity.class);
 
-                    String filePath = qpent.getQuPathProjectionLocation();
+                String filePath = qpent.getQuPathProjectionLocation();
 
-                    // under filePath, there should be a folder data/#entryID
+                // under filePath, there should be a folder data/#entryID
 
-                    File dataEntryFolder = new File(filePath, "data"+File.separator+qpent.getId());
+                File dataEntryFolder = new File(filePath, "data"+File.separator+qpent.getId());
 
-                    // TODO : check if the file already exists...
-                    if (dataEntryFolder.exists()) {
+                // TODO : check if the file already exists...
+                if (dataEntryFolder.exists()) {
 
-                        File f = new File(dataEntryFolder, "ABBA-RoiSet.zip");
-                        System.out.println("attempt save QuPath" + f.getAbsolutePath());
-                        try {
+                    File f = new File(dataEntryFolder, "ABBA-RoiSet.zip");
+                    System.out.println("attempt save QuPath" + f.getAbsolutePath());
+                    try {
 
-                            if (f.exists()) {
-                                if (erasePreviousFile) {
-                                    Files.delete(Paths.get(f.getAbsolutePath()));
-                                    // Save in user specified folder
-                                    Files.copy(Paths.get(ijroisfile.f.getAbsolutePath()),Paths.get(f.getAbsolutePath()));
-                                    writeOntotogyIfNotPresent(filePath);
-                                } else {
-                                    System.err.println("Error : QuPath ROI file already exists");
-                                }
-                            } else {
+                        if (f.exists()) {
+                            if (erasePreviousFile) {
+                                Files.delete(Paths.get(f.getAbsolutePath()));
                                 // Save in user specified folder
                                 Files.copy(Paths.get(ijroisfile.f.getAbsolutePath()),Paths.get(f.getAbsolutePath()));
                                 writeOntotogyIfNotPresent(filePath);
+                            } else {
+                                System.err.println("Error : QuPath ROI file already exists");
                             }
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                        } else {
+                            // Save in user specified folder
+                            Files.copy(Paths.get(ijroisfile.f.getAbsolutePath()),Paths.get(f.getAbsolutePath()));
+                            writeOntotogyIfNotPresent(filePath);
                         }
-
-                    } else {
-                        System.err.println("QuPath Entry data folder ["+dataEntryFolder.toString() +"] not found! : ");
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
 
                 } else {
-                    System.err.println("QuPathEntryEntity not found");
+                    mp.errlog.accept("QuPath Entry data folder ["+dataEntryFolder.toString() +"] not found! : ");
                 }
 
-
             } else {
-                System.err.println("No QuPath project found");
+                mp.errlog.accept("QuPathEntryEntity not found");
             }
         }
     }
 
+    // TODO
     static public synchronized void writeOntotogyIfNotPresent(String quPathFilePath) {
         File ontology = new File(quPathFilePath, "AllenMouseBrainOntology.json");
        /* if (!ontology.exists()) {
@@ -848,101 +699,13 @@ public class SliceSources {
         return new RealPointList(cvtList);
     }
 
-    public void hide() {
-        //this.deSelect();
-        if (mp.currentMode == MultiSlicePositioner.REGISTRATION_MODE_INT) {
-            mp.getBdvh().getViewerPanel().state()
-                    .setSourcesActive(Arrays.asList(registered_sacs), false);
-        }
-
-        if (mp.currentMode == MultiSlicePositioner.POSITIONING_MODE_INT) {
-            mp.getBdvh().getViewerPanel().state()
-                    .setSourcesActive(Arrays.asList(relocated_sacs_positioning_mode), false);
-        }
-    }
-
-    public void show() {
-        if (mp.currentMode == MultiSlicePositioner.REGISTRATION_MODE_INT) {
-            mp.getBdvh().getViewerPanel().state()
-                    .setSourcesActive(Arrays.asList(registered_sacs), true);
-        }
-
-        if (mp.currentMode == MultiSlicePositioner.POSITIONING_MODE_INT) {
-            mp.getBdvh().getViewerPanel().state()
-                    .setSourcesActive(Arrays.asList(relocated_sacs_positioning_mode), true);
-        }
-    }
-
-    public boolean[] isVisible() {
-        boolean[] visibleFlag = new boolean[registered_sacs.length];
-
-        ViewerState state =  mp.getBdvh().getViewerPanel().state();
-
-        if (mp.currentMode == MultiSlicePositioner.REGISTRATION_MODE_INT) {
-            for (int idx = 0; idx<registered_sacs.length;idx++) {
-                visibleFlag[idx] = state.isSourceActive(registered_sacs[idx]);
-            }
-        }
-
-        if (mp.currentMode == MultiSlicePositioner.POSITIONING_MODE_INT) {
-            for (int idx = 0; idx<registered_sacs.length;idx++) {
-                visibleFlag[idx] = state.isSourceActive(relocated_sacs_positioning_mode[idx]);
-            }
-        }
-
-        return visibleFlag;
-
-    }
-
-    public void setVisible(boolean[] visibleFlag) {
-        ViewerState state =  mp.getBdvh().getViewerPanel().state();
-
-        if (mp.currentMode == MultiSlicePositioner.REGISTRATION_MODE_INT) {
-            for (int idx = 0; idx<registered_sacs.length;idx++) {
-                state.setSourceActive(registered_sacs[idx], visibleFlag[idx]);
-            }
-        }
-
-        if (mp.currentMode == MultiSlicePositioner.POSITIONING_MODE_INT) {
-            for (int idx = 0; idx<registered_sacs.length;idx++) {
-                state.setSourceActive(relocated_sacs_positioning_mode[idx], visibleFlag[idx]);
-            }
-        }
-    }
-
-    public Displaysettings[] getDisplaysettings() {
-        Displaysettings[] ds = new Displaysettings[registered_sacs.length];
-        for (int idx = 0; idx<registered_sacs.length;idx++) {
-            ds[idx] = new Displaysettings(-1); // we don't care about the number
-            if (mp.currentMode == MultiSlicePositioner.REGISTRATION_MODE_INT) {
-                DisplaysettingsHelper.GetDisplaySettingsFromCurrentConverter(registered_sacs[idx], ds[idx]);
-            }
-            if (mp.currentMode == MultiSlicePositioner.POSITIONING_MODE_INT) {
-                DisplaysettingsHelper.GetDisplaySettingsFromCurrentConverter(relocated_sacs_positioning_mode[idx], ds[idx]);
-            }
-        }
-        return ds;
-    }
-
-    public void setDisplaysettings(Displaysettings[] ds) {
-        for (int idx = 0; idx<registered_sacs.length;idx++) {
-            if (mp.currentMode == MultiSlicePositioner.REGISTRATION_MODE_INT) {
-                DisplaysettingsHelper.applyDisplaysettings(registered_sacs[idx], ds[idx]);
-            }
-            if (mp.currentMode == MultiSlicePositioner.POSITIONING_MODE_INT) {
-                DisplaysettingsHelper.applyDisplaysettings(relocated_sacs_positioning_mode[idx], ds[idx]);
-            }
-        }
-    }
-
-    public void editLastRegistration(
-            Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixed,
-            Function<SourceAndConverter[], SourceAndConverter[]> preprocessMoving) {
+    protected void editLastRegistration(
+        Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixed,
+        Function<SourceAndConverter[], SourceAndConverter[]> preprocessMoving) {
         Registration reg = this.registrations.get(registrations.size() - 1);
         if (reg.isEditable()) {
             mp.log.accept("Edition will begin when the manual lock is acquired");
-            synchronized (MultiSlicePositioner.manualActionLock) { // edition is always manual
-                System.out.println("Here we go!");
+            synchronized (MultiSlicePositioner.manualActionLock) {
                 this.removeRegistration(reg);
                 // preprocessFixed has an issue...
                 reg.setFixedImage(preprocessFixed.apply(mp.reslicedAtlas.nonExtendedSlicedSources)); // No filtering -> all channels
@@ -955,12 +718,15 @@ public class SliceSources {
         }
     }
 
-
+    // TODO!!!!!!!!
+    public int getAdaptedMipMapLevel(double pxSizeInMm) {
+        return registered_sacs[0].getSpimSource().getNumMipmapLevels() - 1;
+    }
 
     public static class RegistrationAndSources {
 
-        public final Registration reg;
-        public final SourceAndConverter[] sacs;
+        final Registration reg;
+        final SourceAndConverter[] sacs;
 
         public RegistrationAndSources(Registration reg, SourceAndConverter[] sacs) {
             this.reg = reg;

@@ -34,7 +34,7 @@ public class SliceSourcesStateDeserializer implements JsonDeserializer<AlignerSt
             action.runRequest();
             sliceSourceConsumer.accept(action.getSliceSources());
             slice = action.getSliceSources();
-            if (slice!=null) slice.hide();
+            //if (slice!=null) slice.hide();
             actions.add(action);
         });
 

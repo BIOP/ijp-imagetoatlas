@@ -70,12 +70,12 @@ public class RectangleROIDefineInteractiveCommand extends InteractiveCommand {
                 double minx = Math.min(pts.get(0).getDoublePosition(0),pts.get(1).getDoublePosition(0));
                 double miny = Math.min(pts.get(0).getDoublePosition(1),pts.get(1).getDoublePosition(1));
 
-                if (mp.currentMode == MultiSlicePositioner.POSITIONING_MODE_INT) {
+                if (mp.getDisplayMode() == MultiSlicePositioner.POSITIONING_MODE_INT) {
                     px = Math.IEEEremainder(minx+mp.sX*0.5, mp.sX);
                     py = miny;
                 }
 
-                if (mp.currentMode == MultiSlicePositioner.REGISTRATION_MODE_INT) {
+                if (mp.getDisplayMode() == MultiSlicePositioner.REGISTRATION_MODE_INT) {
                     px = minx;
                     py = miny;
                 }

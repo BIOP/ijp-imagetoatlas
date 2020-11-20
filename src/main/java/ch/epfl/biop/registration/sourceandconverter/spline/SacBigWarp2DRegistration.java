@@ -28,7 +28,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class SacBigWarp2DRegistration implements Registration<SourceAndConverter[]> {
+public class SacBigWarp2DRegistration implements Registration<SourceAndConverter<?>[]> {
 
     SourceAndConverter[] fimg, mimg;
 

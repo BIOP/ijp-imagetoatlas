@@ -12,7 +12,7 @@ import java.awt.*;
  */
 public class RegisterSlice extends CancelableAction {
     final SliceSources slice;
-    Registration<SourceAndConverter[]> registration;
+    Registration<SourceAndConverter<?>[]> registration;
     final SourcesProcessor preprocessFixed;
     final SourcesProcessor preprocessMoving;
 
@@ -21,17 +21,17 @@ public class RegisterSlice extends CancelableAction {
         return slice;
     }
 
-    public Registration<SourceAndConverter[]>  getRegistration() {
+    public Registration<SourceAndConverter<?>[]>  getRegistration() {
         return registration;
     }
 
-    public void setRegistration(Registration<SourceAndConverter[]> registration) {
+    public void setRegistration(Registration<SourceAndConverter<?>[]> registration) {
         this.registration = registration;
     }
 
     public RegisterSlice(MultiSlicePositioner mp,
                          SliceSources slice,
-                         Registration<SourceAndConverter[]> registration,
+                         Registration<SourceAndConverter<?>[]> registration,
                          SourcesProcessor preprocessFixed,
                          SourcesProcessor preprocessMoving) {
         super(mp);

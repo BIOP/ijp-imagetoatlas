@@ -14,18 +14,29 @@ import static sc.fiji.bdvpg.scijava.services.SourceAndConverterService.errlog;
 public class AlignerState {
 
     public AlignerState(MultiSlicePositioner mp) {
+
+        displayMode = mp.getDisplayMode();
+        sliceDisplayMode = mp.getSliceDisplayMode();
+        bdvView = mp.getBdvh().getViewerPanel().state().getViewerTransform();
+
         mp.getSortedSlices().forEach(sliceSource -> {
             SliceSourcesState slice_state = new SliceSourcesState();
             filterSerializedActions(mp.mso.getActionsFromSlice(sliceSource))
                     .forEach(action -> slice_state.actions.add(action));
 
-            slice_state.isVisible = sliceSource.isVisible();
-            slice_state.settings_per_channel = sliceSource.getDisplaysettings();
+            slice_state.isVisible = sliceSource.getGUIState().getChannelsVisibility();
+            slice_state.settings_per_channel = sliceSource.getGUIState().getDisplaysettings();
             slice_state.preTransform = sliceSource.getTransformSourceOrigin();
 
             slices_state_list.add(slice_state);
         });
     }
+
+    public int displayMode;
+
+    public int sliceDisplayMode;
+
+    public AffineTransform3D bdvView;
 
     public List<SliceSourcesState> slices_state_list = new ArrayList<>();
 

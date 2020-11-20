@@ -124,10 +124,23 @@ public class ReslicedAtlas {
 
                 }
 
-        // Adds a margin of 10 % for tilt correction
+        // Adds a margin of 15 % for tilt correction
 
-        minZAxis*=1.1;
-        maxZAxis*=1.1;
+        minZAxis*=1.15;
+        maxZAxis*=1.15;
+
+        // Adds margin XY 15 % also for correct registration
+        double cX = (maxXAxis+minXAxis)/2.0;
+        double cY = (maxYAxis+minYAxis)/2.0;
+
+        double dX = (maxXAxis-minXAxis)/2.0;
+        double dY = (maxYAxis-minYAxis)/2.0;
+
+        maxXAxis = cX+dX*1.15;
+        maxYAxis = cY+dY*1.15;
+
+        minXAxis = cX-dX*1.15;
+        minYAxis = cY-dY*1.15;
 
         // Gets slicing resolution
         // TODO : check null pointer exception if getvoxel not present
