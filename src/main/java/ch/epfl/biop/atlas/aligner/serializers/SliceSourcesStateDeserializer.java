@@ -34,17 +34,22 @@ public class SliceSourcesStateDeserializer implements JsonDeserializer<AlignerSt
             action.runRequest();
             sliceSourceConsumer.accept(action.getSliceSources());
             slice = action.getSliceSources();
+            slice.getGUIState().sliceDisplayModeChanged();
+            slice.getGUIState().setSliceInvisible();
             //if (slice!=null) slice.hide();
             actions.add(action);
         });
 
         Displaysettings[] ds = context.deserialize(obj.get("settings_per_channel"), Displaysettings[].class);
-        boolean[] visible = context.deserialize(obj.get("isVisible"), boolean[].class);
+        boolean[] visible = context.deserialize(obj.get("channelsVisibility"), boolean[].class);
+        boolean visibleUser = context.deserialize(obj.get("sliceVisibleUser"), boolean.class);
         AffineTransform3D preTransform = context.deserialize(obj.get("preTransform"), AffineTransform3D.class);
 
         AlignerState.SliceSourcesState sliceState = new AlignerState.SliceSourcesState();
         sliceState.actions = actions;
-        sliceState.isVisible = visible;
+        sliceState.channelsVisibility = visible;
+        sliceState.sliceVisibleUser = visibleUser;
+        if (visibleUser) slice.getGUIState().setSliceVisible();
         sliceState.settings_per_channel = ds;
         sliceState.slice = slice;
         sliceState.preTransform = preTransform;

@@ -24,9 +24,10 @@ public class AlignerState {
             filterSerializedActions(mp.mso.getActionsFromSlice(sliceSource))
                     .forEach(action -> slice_state.actions.add(action));
 
-            slice_state.isVisible = sliceSource.getGUIState().getChannelsVisibility();
+            slice_state.channelsVisibility = sliceSource.getGUIState().getChannelsVisibility();
             slice_state.settings_per_channel = sliceSource.getGUIState().getDisplaysettings();
             slice_state.preTransform = sliceSource.getTransformSourceOrigin();
+            slice_state.sliceVisibleUser = sliceSource.getGUIState().isSliceVisible();
 
             slices_state_list.add(slice_state);
         });
@@ -45,7 +46,8 @@ public class AlignerState {
         public AffineTransform3D preTransform;
         public List<CancelableAction> actions = new ArrayList<>();
         public Displaysettings[] settings_per_channel;
-        public boolean[] isVisible;
+        public boolean sliceVisibleUser;
+        public boolean[] channelsVisibility;
     }
 
     /*

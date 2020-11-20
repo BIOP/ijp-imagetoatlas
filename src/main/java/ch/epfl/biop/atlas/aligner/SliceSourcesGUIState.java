@@ -124,22 +124,7 @@ public class SliceSourcesGUIState {
         }
     }
 
-    /*private void updateDisplayedChannels() {
-        if ((sliceIsVisibleUser)&&(sliceIsVisibleMode)) {
-            List<SourceAndConverter<?>> sourcesToDisplay = IntStream.of(nChannels-1)
-                    .filter(idx -> channelVisible[idx])
-                    .mapToObj(idx -> sources_displayed_or_readyfordisplay[idx])
-                    .collect(Collectors.toList());
-
-            SourceAndConverterServices
-                    .getSourceAndConverterDisplayService()
-                    .show(mp.bdvh, sourcesToDisplay.toArray(new SourceAndConverter[sourcesToDisplay.size()]));
-
-            mp.bdvh.getViewerPanel().requestRepaint();
-        }
-    }*/
-
-    protected void sliceDisplayModeChanged() {
+    public void sliceDisplayModeChanged() {
         switch (mp.getSliceDisplayMode()) {
             case MultiSlicePositioner.NO_SLICE_DISPLAY_MODE:
                 sliceIsVisibleMode = false;
@@ -303,6 +288,16 @@ public class SliceSourcesGUIState {
         return channelVisible;
     }
 
+    public void setChannelsVisibility(boolean[] channelsVisibility) {
+        for (int i=0;i<nChannels; i++) {
+            channelVisible[i] = channelsVisibility[i];
+        }
+        if (sliceIsVisibleUser) {
+            show();
+        }
+
+    }
+
     public void sliceDeleted() {
         hide();
     }
@@ -321,5 +316,7 @@ public class SliceSourcesGUIState {
         }
     }
 
-
+    public boolean isSliceVisible() {
+        return sliceIsVisibleUser;
+    }
 }

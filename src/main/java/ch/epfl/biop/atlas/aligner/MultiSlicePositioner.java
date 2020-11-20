@@ -405,6 +405,11 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
     public void changeSliceDisplayMode() {
         sliceDisplayMode = 1-sliceDisplayMode;
+        setSliceDisplayMode(sliceDisplayMode);
+    }
+
+    public void setSliceDisplayMode(int sliceDisplayMode) {
+        this.sliceDisplayMode = sliceDisplayMode;
         synchronized (slices) {
             slices.forEach(slice -> slice.getGUIState().sliceDisplayModeChanged());
         }
@@ -559,23 +564,6 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     void show(SliceSources slice) {
         slice.getGUIState().setSliceInvisible();
     }
-
-    /*void updateSliceDisplay(SliceSources slice) {
-        if (sliceDisplayMode==NO_SLICE_DISPLAY_MODE) {
-            slice.getGUIState().hideSilently();
-        } else {
-            if (sliceDisplayMode == CURRENT_SLICE_DISPLAY_MODE) {
-                if ((iCurrentSlice >= 0) && (iCurrentSlice < slices.size())) {
-                    if (getSortedSlices().get(iCurrentSlice) != slice) {
-                        slice.getGUIState().hideSilently();
-                        return;
-                    }
-                } else {
-                    slice.getGUIState().showSilently();
-                }
-            }
-        }
-    }*/
 
     /**
      * Set the registration mode
@@ -978,13 +966,6 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     public int getSliceDisplayMode() {
         return sliceDisplayMode;
     }
-
-    /*public void setSliceDisplayMode(int mode) {
-        sliceDisplayMode = mode;
-        synchronized (slices) {
-            slices.forEach(this::updateSliceDisplay);
-        }
-    }*/
 
     public void showAllSlices() {
         for (SliceSources slice : getSortedSlices()) {
@@ -1963,21 +1944,22 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
                 FileReader fileReader = new FileReader(stateFile);
 
+                setSliceDisplayMode(NO_SLICE_DISPLAY_MODE);
+
                 AlignerState state = gson.fromJson(fileReader, AlignerState.class); // actions are executed during deserialization
                 fileReader.close();
 
                 setDisplayMode(state.displayMode);
-                //setNoSliceDisplayMode();
+
                 bdvh.getViewerPanel().state().setViewerTransform(state.bdvView);
 
                 state.slices_state_list.forEach(sliceState -> {
                     sliceState.slice.waitForEndOfTasks();
-                    //sliceState.slice.setVisible(sliceState.isVisible); // TODO : restore
-                    //sliceState.slice.setDisplaysettings(sliceState.settings_per_channel);
+                    sliceState.slice.getGUIState().setChannelsVisibility(sliceState.channelsVisibility); // TODO : restore
+                    sliceState.slice.getGUIState().setDisplaysettings(sliceState.settings_per_channel);
                     sliceState.slice.transformSourceOrigin(sliceState.preTransform);
                 });
-                System.out.println("--------------------------- OK");
-                //setSliceDisplayMode(state.sliceDisplayMode);
+                setSliceDisplayMode(state.sliceDisplayMode);
 
             } catch (Exception e) {
                 e.printStackTrace();

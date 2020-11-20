@@ -79,16 +79,6 @@ public class CreateSlice extends CancelableAction {
 
             mp.updateDisplay();
 
-            /*if (mp.getDisplayMode() == MultiSlicePositioner.POSITIONING_MODE_INT) {
-                SourceAndConverterServices.getSourceAndConverterDisplayService()
-                        .show(mp.bdvh, sliceSource.relocated_sacs_positioning_mode);
-                sliceSource.enableGraphicalHandles();
-            } else if (mp.getDisplayMode() == MultiSlicePositioner.REGISTRATION_MODE_INT) {
-                SourceAndConverterServices.getSourceAndConverterDisplayService()
-                        .show(mp.bdvh, sliceSource.registered_sacs);
-                sliceSource.disableGraphicalHandles();
-            }*/
-
             mp.log.accept("Slice added");
         }
         return true;
