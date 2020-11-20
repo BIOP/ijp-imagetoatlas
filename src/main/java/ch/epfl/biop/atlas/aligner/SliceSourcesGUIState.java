@@ -32,37 +32,42 @@ public class SliceSourcesGUIState {
 
     final int nChannels;
 
-    List<GraphicalHandle> ghs = new ArrayList<>();
+    final List<GraphicalHandle> ghs = new ArrayList<>();
 
-    MultiSlicePositioner mp;
+    final MultiSlicePositioner mp;
 
     final Object lockChangeDisplay = new Object();
 
-    Behaviours behavioursHandleSlice;
+    final Behaviours behavioursHandleSlice;
 
-    boolean[] channelVisible;
+    final boolean[] channelVisible;
 
-    boolean sliceIsVisible = true; // Takes precedence over channelIsVisible
+    boolean sliceIsVisibleUser = true; // Takes precedence over channelIsVisible
 
-    AffineTransformedSourceWrapperRegistration slicingModePositioner;
+    private boolean sliceIsVisibleMode = true; // Equal precedence with sliceIsVisibleUser
+
+    private AffineTransformedSourceWrapperRegistration slicingModePositioner;
 
     double yShift_slicing_mode = 0;
 
     // Visible to the user in slicing mode
-    //private SourceAndConverter<?>[] relocated_sacs_positioning_mode; // For Positioning mode
+    private SourceAndConverter<?>[] sacs_registration_mode; // For Registration mode
 
+    // Visible to the user in slicing mode
+    private SourceAndConverter<?>[] relocated_sacs_positioning_mode; // For Positioning mode
 
-    //volatile AffineTransformedSourceWrapperRegistration slicingModePositioner;
+    // Visible to the user in slicing mode
+    private SourceAndConverter<?>[] sources_displayed_or_readyfordisplay; // For Positioning mode
 
     public SliceSourcesGUIState(SliceSources slice, MultiSlicePositioner mp) {
         this.mp = mp;
         this.nChannels = slice.getRegisteredSources().length;
         this.slice = slice;
         channelVisible = new boolean[nChannels];
-        System.out.println("nChannels = "+nChannels);
         for (int i=0;i<nChannels;i++) {
             channelVisible[i] = true;
         }
+
         sources_displayed_or_readyfordisplay = slice.original_sacs;
         SourceAndConverterUtils.transferColorConverters(slice.original_sacs, sources_displayed_or_readyfordisplay);
 
@@ -84,23 +89,6 @@ public class SliceSourcesGUIState {
 
         ghs.add(gh);
     }
-
-    // Visible to the user in slicing mode
-    private SourceAndConverter<?>[] sacs_registration_mode; // For Registration mode
-
-    // Visible to the user in slicing mode
-    private SourceAndConverter<?>[] relocated_sacs_positioning_mode; // For Positioning mode
-
-    // Visible to the user in slicing mode
-    private SourceAndConverter<?>[] sources_displayed_or_readyfordisplay; // For Positioning mode
-
-    /*public synchronized SourceAndConverter<?>[] getSourcesRegistrationMode() {
-        return sacs_registration_mode;
-    }
-
-    public synchronized SourceAndConverter<?>[] getSourcesPositioningMode() {
-        return relocated_sacs_positioning_mode;
-    }*/
 
     protected void sourcesChanged() {
         synchronized (slice) {
@@ -127,21 +115,17 @@ public class SliceSourcesGUIState {
                     case MultiSlicePositioner.REGISTRATION_MODE_INT:
                         sources_displayed_or_readyfordisplay = sacs_registration_mode;
                         break;
-                    default:
-                        sources_displayed_or_readyfordisplay = sacs_registration_mode;
-                        break;
                 }
 
-                updateDisplayedChannels();
+                if (sliceIsVisibleUser) show();
 
             }
 
         }
     }
 
-    private void updateDisplayedChannels() {
-
-        if ((sliceIsVisible)&&(mp.displayMode!=MultiSlicePositioner.NO_SLICE_DISPLAY_MODE)) {
+    /*private void updateDisplayedChannels() {
+        if ((sliceIsVisibleUser)&&(sliceIsVisibleMode)) {
             List<SourceAndConverter<?>> sourcesToDisplay = IntStream.of(nChannels-1)
                     .filter(idx -> channelVisible[idx])
                     .mapToObj(idx -> sources_displayed_or_readyfordisplay[idx])
@@ -153,16 +137,33 @@ public class SliceSourcesGUIState {
 
             mp.bdvh.getViewerPanel().requestRepaint();
         }
+    }*/
+
+    protected void sliceDisplayModeChanged() {
+        switch (mp.getSliceDisplayMode()) {
+            case MultiSlicePositioner.NO_SLICE_DISPLAY_MODE:
+                sliceIsVisibleMode = false;
+                hide();
+                break;
+            case MultiSlicePositioner.CURRENT_SLICE_DISPLAY_MODE:
+                sliceIsVisibleMode = mp.isCurrentSlice(slice);
+                if (sliceIsVisibleMode) {
+                    show();
+                } else {
+                    hide();
+                }
+                break;
+            case MultiSlicePositioner.ALL_SLICES_DISPLAY_MODE:
+                sliceIsVisibleMode = true;
+                if (sliceIsVisibleUser) show();
+                break;
+        }
     }
 
-    protected void modeChanged() {
-
+    protected void displayModeChanged() {
         synchronized (slice) {
             synchronized (lockChangeDisplay) {
                 switch (mp.displayMode) {
-                    case MultiSlicePositioner.NO_SLICE_DISPLAY_MODE:
-                        mp.bdvh.getViewerPanel().state().removeSources(Arrays.asList(sources_displayed_or_readyfordisplay));
-                        break;
                     case MultiSlicePositioner.POSITIONING_MODE_INT:
                         if (sources_displayed_or_readyfordisplay != relocated_sacs_positioning_mode) {
                             mp.bdvh.getViewerPanel().state().removeSources(Arrays.asList(sources_displayed_or_readyfordisplay));
@@ -178,9 +179,8 @@ public class SliceSourcesGUIState {
                         }
                         break;
                 }
-
-                updateDisplayedChannels();
-
+                //updateDisplayedChannels();
+                if (sliceIsVisibleUser) show();
             }
         }
     }
@@ -214,94 +214,38 @@ public class SliceSourcesGUIState {
         }
     }
 
-    public void hide() {
-        synchronized (lockChangeDisplay) {
-            if (sliceIsVisible) {
-                sliceIsVisible = false;
-                mp.bdvh.getViewerPanel().state()
-                        .removeSources(Arrays.asList(sources_displayed_or_readyfordisplay));
-            }
+    public void setSliceVisible() {
+        if (!sliceIsVisibleUser) {
+            sliceIsVisibleUser = true;
+            show();
         }
     }
 
-    public void show() {
+    public void setSliceInvisible() {
+        if (sliceIsVisibleUser) {
+            sliceIsVisibleUser = false;
+            hide();
+        }
+    }
+
+    private void hide() {
+        mp.bdvh.getViewerPanel().state()
+                .removeSources(Arrays.asList(sources_displayed_or_readyfordisplay));
+    }
+
+    private void show() {
         synchronized (lockChangeDisplay) {
-            if ((!sliceIsVisible)&&(mp.displayMode != MultiSlicePositioner.NO_SLICE_DISPLAY_MODE)) {
-                sliceIsVisible = true;
-                List<SourceAndConverter<?>> sourcesToDisplay = IntStream.of(nChannels-1)
+            if (sliceIsVisibleMode) {
+                List<SourceAndConverter<?>> sourcesToDisplay = IntStream.range(0,nChannels)
                         .filter(idx -> channelVisible[idx])
                         .mapToObj(idx -> sources_displayed_or_readyfordisplay[idx])
                         .collect(Collectors.toList());
 
                 SourceAndConverterServices
                         .getSourceAndConverterDisplayService()
-                        .show(mp.bdvh, sourcesToDisplay.toArray(new SourceAndConverter[0]));
+                        .show(mp.bdvh, sourcesToDisplay.toArray(new SourceAndConverter[sourcesToDisplay.size()]));
             }
         }
-        /*if (mp.getDisplayMode() == MultiSlicePositioner.REGISTRATION_MODE_INT) {
-            mp.getBdvh().getViewerPanel().state()
-                    .setSourcesActive(Arrays.asList(registered_sacs), true);
-        }
-
-        if (mp.getDisplayMode() == MultiSlicePositioner.POSITIONING_MODE_INT) {
-            mp.getBdvh().getViewerPanel().state()
-                    .setSourcesActive(Arrays.asList(relocated_sacs_positioning_mode), true);
-        }*/
-    }
-
-    /*public boolean[] isVisible() {
-
-        return channelsVisibilityFlag;
-        /*boolean[] visibleFlag = new boolean[registered_sacs.length];
-
-        ViewerState state =  mp.getBdvh().getViewerPanel().state();
-
-        if (mp.getDisplayMode() == MultiSlicePositioner.REGISTRATION_MODE_INT) {
-            for (int idx = 0; idx<registered_sacs.length;idx++) {
-                visibleFlag[idx] = state.isSourceActive(registered_sacs[idx]);
-            }
-        }
-
-        if (mp.getDisplayMode() == MultiSlicePositioner.POSITIONING_MODE_INT) {
-            for (int idx = 0; idx<registered_sacs.length;idx++) {
-                visibleFlag[idx] = state.isSourceActive(relocated_sacs_positioning_mode[idx]);
-            }
-        }
-
-        return visibleFlag;*/
-
-    //}
-
-    public void setChannelsVisibility(boolean[] visibleFlag) {
-        // TODO
-        /*synchronized (lockChangeDisplay) {
-            if (sliceIsVisible) {
-                sliceIsVisible = true;
-                List<SourceAndConverter<?>> sourcesToDisplay = IntStream.of(nChannels-1)
-                        .filter(idx -> channelIsVisible[idx])
-                        .mapToObj(idx -> sources_displayed_or_readyfordisplay[idx])
-                        .collect(Collectors.toList());
-
-                //mp.bdvh.getViewerPanel().state().addSources(sourcesToDisplay);
-
-                SourceAndConverterServices
-                        .getSourceAndConverterDisplayService()
-                        .show(mp.bdvh, sourcesToDisplay.toArray(new SourceAndConverter[0]));
-            }
-        }*/
-        /*ViewerState state =  mp.getBdvh().getViewerPanel().state();
-
-        if (mp.getDisplayMode() == MultiSlicePositioner.REGISTRATION_MODE_INT) {
-            for (int idx = 0; idx<registered_sacs.length;idx++) {
-                state.setSourceActive(registered_sacs[idx], visibleFlag[idx]);
-            }
-        }
-
-        if (mp.getDisplayMode() == MultiSlicePositioner.POSITIONING_MODE_INT) {
-            for (int idx = 0; idx<registered_sacs.length;idx++) {
-                state.setSourceActive(relocated_sacs_positioning_mode[idx], visibleFlag[idx]);
-            }
-        }*/
     }
 
     public Displaysettings[] getDisplaysettings() {
@@ -314,16 +258,10 @@ public class SliceSourcesGUIState {
     }
 
     public void setDisplaysettings(Displaysettings[] ds) {
-        /*for (int idx = 0; idx<registered_sacs.length;idx++) {
-            if (mp.getDisplayMode() == MultiSlicePositioner.REGISTRATION_MODE_INT) {
-                DisplaysettingsHelper.applyDisplaysettings(registered_sacs[idx], ds[idx]);
-            }
-            if (mp.getDisplayMode() == MultiSlicePositioner.POSITIONING_MODE_INT) {
-                DisplaysettingsHelper.applyDisplaysettings(relocated_sacs_positioning_mode[idx], ds[idx]);
-            }
-        }*/
+        for (int idx = 0; idx<nChannels;idx++) {
+           DisplaysettingsHelper.applyDisplaysettings(sources_displayed_or_readyfordisplay[idx], ds[idx]);
+        }
     }
-
 
     public Integer[] getBdvHandleColor() {
         if (slice.isSelected()) {
@@ -366,12 +304,22 @@ public class SliceSourcesGUIState {
     }
 
     public void sliceDeleted() {
-        synchronized (lockChangeDisplay) {
-            if (sliceIsVisible) {
-                mp.bdvh.getViewerPanel().state()
-                        .removeSources(Arrays.asList(sources_displayed_or_readyfordisplay));
-            }
+        hide();
+    }
+
+    public void isNotCurrent() {
+        if (mp.getSliceDisplayMode() == MultiSlicePositioner.CURRENT_SLICE_DISPLAY_MODE) {
+            sliceIsVisibleMode = false;
+            hide();
         }
     }
+
+    public void isCurrent() {
+        if (mp.getSliceDisplayMode() == MultiSlicePositioner.CURRENT_SLICE_DISPLAY_MODE) {
+            sliceIsVisibleMode = true;
+            show();
+        }
+    }
+
 
 }

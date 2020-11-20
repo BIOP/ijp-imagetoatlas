@@ -34,13 +34,13 @@ public class SliceSourcesPopupMenu {
 
             addPopupAction("Hide Slices", (slices) -> {
                 for (SliceSources slice : slices) {
-                    slice.getGUIState().hide();
+                    slice.getGUIState().setSliceInvisible();
                 }
             });
 
             addPopupAction("Show Slices", (slices) -> {
                 for (SliceSources slice : slices) {
-                    slice.getGUIState().show();
+                    slice.getGUIState().setSliceVisible();
                 }
             });
 

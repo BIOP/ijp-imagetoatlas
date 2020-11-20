@@ -7,7 +7,6 @@ import ch.epfl.biop.atlas.BiopAtlas;
 import ch.epfl.biop.atlas.aligner.commands.*;
 import ch.epfl.biop.atlas.aligner.serializers.*;
 import ch.epfl.biop.atlas.aligner.sourcepreprocessors.*;
-import ch.epfl.biop.bdv.select.SelectedSourcesListener;
 import ch.epfl.biop.bdv.select.SourceSelectorBehaviour;
 import ch.epfl.biop.registration.Registration;
 import ch.epfl.biop.registration.sourceandconverter.affine.Elastix2DAffineRegistration;
@@ -49,7 +48,6 @@ import sc.fiji.bdvpg.services.serializers.AffineTransform3DAdapter;
 import sc.fiji.bdvpg.services.serializers.RuntimeTypeAdapterFactory;
 import sc.fiji.bdvpg.services.serializers.plugins.BdvPlaygroundObjectAdapterService;
 import sc.fiji.bdvpg.services.serializers.plugins.IClassRuntimeAdapter;
-import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -65,7 +63,6 @@ import java.util.stream.Collectors;
 import static bdv.ui.BdvDefaultCards.DEFAULT_SOURCEGROUPS_CARD;
 import static bdv.ui.BdvDefaultCards.DEFAULT_VIEWERMODES_CARD;
 import static sc.fiji.bdvpg.scijava.services.SourceAndConverterService.SPIM_DATA_INFO;
-import static sc.fiji.bdvpg.scijava.services.SourceAndConverterService.errlog;
 
 /**
  * All specific functions and method dedicated to the multislice positioner
@@ -133,8 +130,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     final static String REGISTRATION_BEHAVIOURS_KEY = REGISTRATION_MODE + "-behaviours";
     Behaviours registration_behaviours = new Behaviours(new InputTriggerConfig(), REGISTRATION_MODE);
 
-    //boolean single_slide_display_mode = false;
-    int sliceDisplayMode = CURRENT_SLICE_DISPLAY_MODE;
+    int sliceDisplayMode = ALL_SLICES_DISPLAY_MODE;
 
     final public static int NO_SLICE_DISPLAY_MODE = 2; // For faster draw when restoring
     final public static int CURRENT_SLICE_DISPLAY_MODE = 1;
@@ -218,7 +214,6 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
         bdvh.getTriggerbindings().addBehaviourMap(COMMON_BEHAVIOURS_KEY, common_behaviours.getBehaviourMap());
         bdvh.getTriggerbindings().addInputTriggerMap(COMMON_BEHAVIOURS_KEY, common_behaviours.getInputTriggerMap()); // "transform", "bdv"
-        //common_behaviours.install(bdvh.getTriggerbindings(), COMMON_BEHAVIOURS_KEY);
 
         overrideStandardNavigation();
 
@@ -237,8 +232,6 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.equalSpacingSelectedSlices(), "equalSpacingSelectedSlices", "A");
         positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> {slices.forEach(slice -> slice.select());bdvh.getViewerPanel().getDisplay().repaint();}, "selectAllSlices", "ctrl A");
         positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> {slices.forEach(slice -> slice.deSelect());bdvh.getViewerPanel().getDisplay().repaint();}, "deselectAllSlices", "ctrl shift A");
-
-        //ssb.addSelectedSourcesListener(this);
 
         List<SourceAndConverter<?>> sacsToAppend = new ArrayList<>();
         for (int i = 0; i < biopAtlas.map.getStructuralImages().length; i++) {
@@ -413,28 +406,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     public void changeSliceDisplayMode() {
         sliceDisplayMode = 1-sliceDisplayMode;
         synchronized (slices) {
-            slices.forEach(this::updateSliceDisplay);
-        }
-    }
-
-    public void setAllSliceDisplayMode() {
-        sliceDisplayMode = ALL_SLICES_DISPLAY_MODE;
-        synchronized (slices) {
-            slices.forEach(this::updateSliceDisplay);
-        }
-    }
-
-    private void setNoSliceDisplayMode() {
-        sliceDisplayMode = NO_SLICE_DISPLAY_MODE;
-        synchronized (slices) {
-            slices.forEach(this::updateSliceDisplay);
-        }
-    }
-
-    public void setSingleSliceDisplayMode() {
-        sliceDisplayMode = CURRENT_SLICE_DISPLAY_MODE;
-        synchronized (slices) {
-            slices.forEach(this::updateSliceDisplay);
+            slices.forEach(slice -> slice.getGUIState().sliceDisplayModeChanged());
         }
     }
 
@@ -562,28 +534,13 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     public void setPositioningMode() {
         if (!(displayMode == POSITIONING_MODE_INT)) {
 
-            /*SourceAndConverterUtils.transferColorConverters(reslicedAtlas.nonExtendedSlicedSources, reslicedAtlas.extendedSlicedSources);
-            for (int i = 0; i < reslicedAtlas.nonExtendedSlicedSources.length; i++) {
-                boolean wasVisible = bdvh.getViewerPanel().state().isSourceActive(reslicedAtlas.nonExtendedSlicedSources[i]);
-                bdvh.getViewerPanel().state().removeSource(reslicedAtlas.nonExtendedSlicedSources[i]);
-                SourceAndConverterServices.getSourceAndConverterDisplayService()
-                    .show(bdvh, reslicedAtlas.extendedSlicedSources[i]);//bdvh.getViewerPanel().state().addSource();
-                if (wasVisible) {
-                    bdvh.getViewerPanel().state().setSourceActive(reslicedAtlas.extendedSlicedSources[i], true);
-                } else {
-                    bdvh.getViewerPanel().state().setSourceActive(reslicedAtlas.extendedSlicedSources[i], false);
-                }
-            }*/
-
             synchronized (slices) {
                 reslicedAtlas.unlock();
                 displayMode = POSITIONING_MODE_INT;
                 ghs.forEach(gh -> gh.enable());
                 slices.forEach(slice -> slice.getGUIState().enableGraphicalHandles());
                 getSortedSlices().forEach(slice -> {
-                    slice.getGUIState().modeChanged();
-                    //SourceAndConverterUtils.transferColorConverters(ss.registered_sacs, ss.relocated_sacs_positioning_mode);
-                    //updateSliceDisplay(ss);
+                    slice.getGUIState().displayModeChanged();
                 });
             }
 
@@ -596,63 +553,29 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     }
 
     void hide(SliceSources slice) {
-        /*SourceAndConverterServices
-                .getSourceAndConverterDisplayService()
-                .remove(bdvh, slice.registered_sacs);
-        SourceAndConverterServices
-                .getSourceAndConverterDisplayService()
-                .remove(bdvh, slice.relocated_sacs_positioning_mode);*/
-        slice.getGUIState().hide();
+        slice.getGUIState().setSliceVisible();
     }
 
     void show(SliceSources slice) {
-        /*SourceAndConverterServices
-                .getSourceAndConverterDisplayService()
-                .remove(bdvh, slice.registered_sacs);
-        SourceAndConverterServices
-                .getSourceAndConverterDisplayService()
-                .remove(bdvh, slice.relocated_sacs_positioning_mode);*/
-        slice.getGUIState().show();
+        slice.getGUIState().setSliceInvisible();
     }
 
-    /*void showPositioning(SliceSources slice) {
-        SourceAndConverterServices
-                .getSourceAndConverterDisplayService()
-                .remove(bdvh, slice.registered_sacs);
-        SourceAndConverterServices
-                .getSourceAndConverterDisplayService()
-                .show(bdvh, slice.relocated_sacs_positioning_mode);
-    }
-
-    void showRegistration(SliceSources slice) {
-        SourceAndConverterServices
-                .getSourceAndConverterDisplayService()
-                .remove(bdvh, slice.relocated_sacs_positioning_mode);
-        SourceAndConverterServices
-                .getSourceAndConverterDisplayService()
-                .show(bdvh, slice.registered_sacs);
-    }*/
-
-    void updateSliceDisplay(SliceSources slice) {
-        /*if (sliceDisplayMode==NO_SLICE_DISPLAY_MODE) {
-            hide(slice);
+    /*void updateSliceDisplay(SliceSources slice) {
+        if (sliceDisplayMode==NO_SLICE_DISPLAY_MODE) {
+            slice.getGUIState().hideSilently();
         } else {
             if (sliceDisplayMode == CURRENT_SLICE_DISPLAY_MODE) {
                 if ((iCurrentSlice >= 0) && (iCurrentSlice < slices.size())) {
                     if (getSortedSlices().get(iCurrentSlice) != slice) {
-                        hide(slice);
+                        slice.getGUIState().hideSilently();
                         return;
                     }
+                } else {
+                    slice.getGUIState().showSilently();
                 }
             }
-            if (displayMode == POSITIONING_MODE_INT) { // TODO : fix potential issue if user switches fast between modes ?
-                showPositioning(slice);
-            }
-            if (displayMode == REGISTRATION_MODE_INT) { // TODO : fix potential issue if user switches fast between modes ?
-                showRegistration(slice);
-            }
-        }*/
-    }
+        }
+    }*/
 
     /**
      * Set the registration mode
@@ -665,25 +588,9 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
             ghs.forEach(gh -> gh.disable());
 
-            /*SourceAndConverterUtils.transferColorConverters(reslicedAtlas.extendedSlicedSources, reslicedAtlas.nonExtendedSlicedSources);
-
-            for (int i = 0; i < reslicedAtlas.nonExtendedSlicedSources.length; i++) {
-                boolean wasVisible = bdvh.getViewerPanel().state().isSourceActive(reslicedAtlas.extendedSlicedSources[i]);
-                bdvh.getViewerPanel().state().removeSource(reslicedAtlas.extendedSlicedSources[i]);
-                SourceAndConverterServices.getSourceAndConverterDisplayService()
-                        .show(bdvh, reslicedAtlas.nonExtendedSlicedSources[i]);
-                if (wasVisible) {
-                    bdvh.getViewerPanel().state().setSourceActive(reslicedAtlas.nonExtendedSlicedSources[i], true);
-                } else {
-                    bdvh.getViewerPanel().state().setSourceActive(reslicedAtlas.nonExtendedSlicedSources[i], false);
-                }
-            }*/
-
             synchronized (slices) {
                 getSortedSlices().forEach(slice -> {
-                    //SourceAndConverterUtils.transferColorConverters(ss.relocated_sacs_positioning_mode, ss.registered_sacs);
-                    //updateSliceDisplay(ss);
-                    slice.getGUIState().modeChanged();
+                    slice.getGUIState().displayModeChanged();
                 });
             }
 
@@ -710,9 +617,9 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
             if (sortedSlices.size() > 0) {
                 centerBdvViewOn(sortedSlices.get(iCurrentSlice));
                 if ((previousSliceIndex>=0)&&(previousSliceIndex<sortedSlices.size())) { // Could have been deleted
-                    updateSliceDisplay(sortedSlices.get(previousSliceIndex));
+                    sortedSlices.get(previousSliceIndex).getGUIState().isNotCurrent();
                 }
-                updateSliceDisplay(sortedSlices.get(iCurrentSlice));
+                sortedSlices.get(iCurrentSlice).getGUIState().isCurrent();
             }
     }
 
@@ -783,9 +690,9 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         if (sortedSlices.size() > 0) {
             centerBdvViewOn(sortedSlices.get(iCurrentSlice));
             if ((previousSliceIndex>=0)&&(previousSliceIndex<sortedSlices.size())) { // Could have been deleted
-                updateSliceDisplay(sortedSlices.get(previousSliceIndex));
+                sortedSlices.get(previousSliceIndex).getGUIState().isNotCurrent();
             }
-            updateSliceDisplay(sortedSlices.get(iCurrentSlice));
+            sortedSlices.get(iCurrentSlice).getGUIState().isCurrent();
         }
     }
 
@@ -893,10 +800,6 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
             slices.forEach(slice -> slice.getGUIState().setYShift(0));
         }
 
-        /*for (SliceSources slice : slices) {
-            slice.updatePosition();
-        }*/
-
         bdvh.getViewerPanel().requestRepaint();
     }
 
@@ -908,8 +811,6 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
             int colorCode = this.info.getColor().get();
             Color color = new Color(ARGBType.red(colorCode), ARGBType.green(colorCode), ARGBType.blue(colorCode), ARGBType.alpha(colorCode));
             g.setColor(color);
-
-            //g.drawString(currentMode, 10, 10);
 
             RealPoint[][] ptRectWorld = new RealPoint[2][2];
             Point[][] ptRectScreen = new Point[2][2];
@@ -1011,30 +912,6 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         }
     }
 
-    /*@Override
-    public void selectedSourcesUpdated(Collection<SourceAndConverter<?>> selectedSources, String triggerMode) {
-        boolean changed = false;
-        for (SliceSources slice : slices) {
-            if (slice.isContainingAny(selectedSources)) {
-                if (!slice.isSelected()) {
-                    changed = true;
-                }
-                slice.select();
-            } else {
-                if (slice.isSelected()) {
-                    changed = true;
-                }
-                slice.deSelect();
-            }
-        }
-        if (changed) bdvh.getViewerPanel().getDisplay().repaint();//.requestRepaint();
-    }
-
-    @Override
-    public void lastSelectionEvent(Collection<SourceAndConverter<?>> lastSelectedSources, String mode, String triggerMode) {
-        // Nothing
-    }*/
-
     public String getUndoMessage() {
         if (userActions.size()==0) {
             return "(None)";
@@ -1102,61 +979,39 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         return sliceDisplayMode;
     }
 
-    public void setSliceDisplayMode(int mode) {
-        switch (mode) {
-            case CURRENT_SLICE_DISPLAY_MODE :
-                setSingleSliceDisplayMode();
-                break;
-            case ALL_SLICES_DISPLAY_MODE :
-                setAllSliceDisplayMode();
-                break;
-            case NO_SLICE_DISPLAY_MODE :
-                setNoSliceDisplayMode();
-                break;
-            default:
-                errlog.accept("Unknown slice display mode "+mode);
+    /*public void setSliceDisplayMode(int mode) {
+        sliceDisplayMode = mode;
+        synchronized (slices) {
+            slices.forEach(this::updateSliceDisplay);
         }
-    }
+    }*/
 
     public void showAllSlices() {
-        List<SourceAndConverter<?>> sacsToAppend = new ArrayList<>();
         for (SliceSources slice : getSortedSlices()) {
-           /* if (this.getDisplayMode() == MultiSlicePositioner.POSITIONING_MODE_INT) {
-                sacsToAppend.addAll(Arrays.asList(slice.relocated_sacs_positioning_mode));
-            }
-            if (slice.mp.getDisplayMode() == MultiSlicePositioner.REGISTRATION_MODE_INT) {
-                sacsToAppend.addAll(Arrays.asList(slice.registered_sacs));
-            }*/
-            slice.getGUIState().show();
+            slice.getGUIState().setSliceVisible();
         }
-        //bdvh.getViewerPanel().state().setSourcesActive(sacsToAppend, true);
     }
 
     public void showCurrentSlice() {
-        //SliceSources ss =
-        getSortedSlices().get(iCurrentSlice).getGUIState().show();
-
-        /*for (SliceSources slice : getSortedSlices()) {
-            if (slice.mp.getDisplayMode() == MultiSlicePositioner.POSITIONING_MODE_INT) {
-                bdvh.getViewerPanel().state().setSourcesActive(Arrays.asList(ss.relocated_sacs_positioning_mode), true);
-            }
-            if (slice.mp.getDisplayMode() == MultiSlicePositioner.REGISTRATION_MODE_INT) {
-                bdvh.getViewerPanel().state().setSourcesActive(Arrays.asList(ss.registered_sacs), true);
-            }
-        }*/
+        getSortedSlices().get(iCurrentSlice).getGUIState().setSliceVisible();
     }
 
     protected void removeSlice(SliceSources sliceSource) {
         slices.remove(sliceSource);
         sliceSource.getGUIState().sliceDeleted();
-        /*if (sliceSource.relocated_sacs_positioning_mode == null) {System.out.println("slice null");}
-        SourceAndConverterServices.getSourceAndConverterDisplayService()
-                .remove(bdvh, sliceSource.relocated_sacs_positioning_mode);
-        SourceAndConverterServices.getSourceAndConverterDisplayService()
-                .remove(bdvh, sliceSource.registered_sacs);*/
+    }
 
-         //new DeleteSlice(this, sliceSource).runRequest();
-        //updateDisplay();
+    public boolean isCurrentSlice(SliceSources slice) {
+        List<SliceSources> sortedSlices = getSortedSlices();
+        if (iCurrentSlice >= sortedSlices.size()) {
+            iCurrentSlice = 0;
+        }
+
+        if (sortedSlices.size() > 0) {
+            return slice.equals(sortedSlices.get(iCurrentSlice));
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -1437,23 +1292,11 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                 at3D.scale(this.sizePixX, this.sizePixY, this.sizePixZ);
                 at3D.translate(0, 0, slice.getSlicingAxisPosition());
 
-                // 0 - slicing model : empty source but properly defined in space and resolution
-                /*SourceAndConverter singleSliceModel = new EmptySourceAndConverterCreator("SlicingModel", at3D,
-                        nPixX,
-                        nPixY,
-                        1
-                ).get();*/
-
-                /*SourceResampler resampler = new SourceResampler(null,
-                        singleSliceModel, false, false, false
-                );*/
-
                 AffineTransform3D translateZ = new AffineTransform3D();
                 translateZ.translate(0, 0, -slice.getSlicingAxisPosition());
 
                 SourcesProcessor fixedProcess = SourcesProcessorHelper.compose(
                                 new SourcesAffineTransformer(translateZ),
-                      //          new SourcesResampler(singleSliceModel),
                                 preprocessFixed
                         );
 
@@ -1610,7 +1453,6 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
             for (SliceSources slice : slicesDragged) {
                 slice.setSlicingAxisPosition( lastAxisPos + (initialAxisPositions.get(slice) - lastAxisPos) * ratio);
-                //slice.updatePosition();
             }
 
             updateDisplay();
@@ -1678,7 +1520,6 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
             for (SliceSources slice : slicesDragged) {
                 slice.setSlicingAxisPosition( lastAxisPos - (initialAxisPositions.get(slice) - lastAxisPos) * ratio );
-                //slice.updatePosition();
             }
 
             updateDisplay();
@@ -1750,7 +1591,6 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                 deltaOrigin = iniSlicingAxisPosition - sliceOrigin.getSlicingAxisPosition();
                 if (initialAxisPositions.containsKey(sliceOrigin)) {
                     sliceOrigin.setSlicingAxisPosition( initialAxisPositions.get(sliceOrigin) + deltaOrigin );
-                    //sliceOrigin.updatePosition();
                 }
             }
 
@@ -1771,9 +1611,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
                 if (initialAxisPositions.containsKey(sliceOrigin)) {
                     sliceOrigin.setSlicingAxisPosition( initialAxisPositions.get(sliceOrigin) + deltaAxis + deltaOrigin );
-                    //sliceOrigin.updatePosition();
                 }
-
                 updateDisplay();
             }
         }
@@ -1846,13 +1684,10 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                 for (SliceSources slice : selectedSources) {
                     if (initialAxisPositions.containsKey(slice)) {
                         slice.setSlicingAxisPosition( initialAxisPositions.get(slice) + deltaOrigin );
-                        //slice.updatePosition();
                     }
                 }
             }
-
             updateDisplay();
-
         }
 
         @Override
@@ -1869,10 +1704,8 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                 for (SliceSources slice : selectedSources) {
                     if (initialAxisPositions.containsKey(slice)) {
                         slice.setSlicingAxisPosition( initialAxisPositions.get(slice) + deltaAxis + deltaOrigin );
-                        //slice.updatePosition();
                     }
                 }
-
                 updateDisplay();
             }
         }
@@ -1897,7 +1730,6 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                         }
                     }
                     new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
-
                     updateDisplay();
                 }
 
@@ -1947,10 +1779,9 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         Register the RealTransformAdapters from Bdv-playground
      */
     void registerTransformAdapters(final GsonBuilder gsonbuilder) {
-        // AffineTransform3D seroalization
+        // AffineTransform3D serialization
         gsonbuilder.registerTypeAdapter(AffineTransform3D.class, new AffineTransform3DAdapter());
 
-        // Realtransforms see package sc.fiji.bdvpg.services.serializers.plugins;
         Map<Class, List<Class>> runTimeAdapters = new HashMap<>();
         scijavaCtx.getService(BdvPlaygroundObjectAdapterService.class)
                 .getAdapters(IClassRuntimeAdapter.class)
@@ -2141,7 +1972,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
                 state.slices_state_list.forEach(sliceState -> {
                     sliceState.slice.waitForEndOfTasks();
-                    //sliceState.slice.setVisible(sliceState.isVisible);
+                    //sliceState.slice.setVisible(sliceState.isVisible); // TODO : restore
                     //sliceState.slice.setDisplaysettings(sliceState.settings_per_channel);
                     sliceState.slice.transformSourceOrigin(sliceState.preTransform);
                 });
