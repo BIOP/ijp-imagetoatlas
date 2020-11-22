@@ -17,6 +17,7 @@ public class AlignerState {
 
         displayMode = mp.getDisplayMode();
         sliceDisplayMode = mp.getSliceDisplayMode();
+        overlapMode = mp.getOverlapMode();
         bdvView = mp.getBdvh().getViewerPanel().state().getViewerTransform();
 
         mp.getSortedSlices().forEach(sliceSource -> {
@@ -36,6 +37,8 @@ public class AlignerState {
     public int displayMode;
 
     public int sliceDisplayMode;
+
+    public int overlapMode;
 
     public AffineTransform3D bdvView;
 

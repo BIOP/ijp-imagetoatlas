@@ -36,7 +36,7 @@ public class CreateSlice extends CancelableAction {
         synchronized (CreateSlice.class) { // only one slice addition at a time
             boolean sacAlreadyPresent = false;
             for (SourceAndConverter sac : sacs) {
-                for (SliceSources slice : mp.slices) {
+                for (SliceSources slice : mp.getPrivateSlices()) {
                     for (SourceAndConverter test : slice.original_sacs) {
                         if (test.equals(sac)) {
                             sacAlreadyPresent = true;
@@ -52,7 +52,7 @@ public class CreateSlice extends CancelableAction {
                 // If all sources match exactly what's in a single SliceSources -> that's a move operation
 
                 boolean exactMatch = false;
-                for (SliceSources ss : mp.slices) {
+                for (SliceSources ss : mp.getPrivateSlices()) {
                     if (ss.exactMatch(sacs)) {
                         exactMatch = true;
                         zeSlice = ss;
@@ -75,7 +75,7 @@ public class CreateSlice extends CancelableAction {
                         slicingAxisPosition, mp);
             }
 
-            mp.slices.add(sliceSource);
+            mp.getPrivateSlices().add(sliceSource);
 
             mp.updateDisplay();
 

@@ -74,8 +74,9 @@ public class MultiSliceObserver {
         int yInc = 20;
         g.setColor(new Color(255,255,255,200));
         synchronized (sliceSortedActions) {
+            List<SliceSources> slices = mp.getSlices();
             sliceSortedActions.forEach(((slice, actions) -> {
-                if (mp.slices.contains(slice)) {
+                if (slices.contains(slice)) {
                     int xP = slice.getGUIState().getBdvHandleCoords()[0];
                     int yP = slice.getGUIState().getBdvHandleCoords()[1] + yInc;
 
@@ -95,8 +96,8 @@ public class MultiSliceObserver {
                                 action.draw(g, xP, yP, 1);
                                 yP += yInc;
 
-                                if ((mp.iCurrentSlice >= 0) && (mp.iCurrentSlice < mp.slices.size()))
-                                    if (mp.slices.get(mp.iCurrentSlice).equals(slice)) {
+                                if ((mp.iCurrentSlice >= 0) && (mp.iCurrentSlice < slices.size()))
+                                    if (slices.get(mp.iCurrentSlice).equals(slice)) {
                                         action.draw(g, 50, yP - yP0 + 50, 1);
                                     }
                             } else {
@@ -106,8 +107,8 @@ public class MultiSliceObserver {
                                     action.draw(g, xP, yP, 1);
                                     yP += yInc;
 
-                                    if ((mp.iCurrentSlice >= 0) && (mp.iCurrentSlice < mp.slices.size()))
-                                        if (mp.slices.get(mp.iCurrentSlice).equals(slice)) {
+                                    if ((mp.iCurrentSlice >= 0) && (mp.iCurrentSlice < slices.size()))
+                                        if (slices.get(mp.iCurrentSlice).equals(slice)) {
                                             action.draw(g, 50, yP - yP0 + 50, 1);
                                         }
                                 }
@@ -115,8 +116,8 @@ public class MultiSliceObserver {
                         } else {
                             action.draw(g, xP, yP, 1);
                             yP += yInc;
-                            if ((mp.iCurrentSlice >= 0) && (mp.iCurrentSlice < mp.slices.size()))
-                                if (mp.slices.get(mp.iCurrentSlice).equals(slice)) {
+                            if ((mp.iCurrentSlice >= 0) && (mp.iCurrentSlice < slices.size()))
+                                if (slices.get(mp.iCurrentSlice).equals(slice)) {
                                     action.draw(g, 50, yP - yP0, 1);
                                 }
                         }
@@ -174,7 +175,7 @@ public class MultiSliceObserver {
     public synchronized void updateInfoPanel(SliceSources slice) {
         //System.out.println("updateInfoPanel called");
         if (sliceSortedActions.containsKey(slice)
-                &&mp.slices.contains(slice)
+                &&mp.getSlices().contains(slice)
                 &&sliceSortedActions.get(slice).size()!=0) {
 
             if (!actionPerSlice.containsKey(slice)) {

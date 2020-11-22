@@ -94,7 +94,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     final public double sX, sY, sZ;
     double sizePixX, sizePixY, sizePixZ;
 
-    List<SliceSources> slices = Collections.synchronizedList(new ArrayList<>());//Collections.synchronizedList(); // Thread safety ?
+    private List<SliceSources> slices = Collections.synchronizedList(new ArrayList<>());//Collections.synchronizedList(); // Thread safety ?
 
     int totalNumberOfActionsRecorded = 30; // TODO : Implement
 
@@ -165,6 +165,14 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     Consumer<String> errlog = (message) -> {
         System.err.println("Multipositioner : "+message);
     };
+
+    public List<SliceSources> getSlices() {
+        return new ArrayList<>(slices);
+    }
+
+    protected List<SliceSources> getPrivateSlices() {
+        return slices;
+    }
 
     public MultiSlicePositioner(BdvHandle bdvh, BiopAtlas biopAtlas, ReslicedAtlas reslicedAtlas, Context ctx) {
         this.reslicedAtlas = reslicedAtlas;
@@ -410,9 +418,9 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
     public void setSliceDisplayMode(int sliceDisplayMode) {
         this.sliceDisplayMode = sliceDisplayMode;
-        synchronized (slices) {
-            slices.forEach(slice -> slice.getGUIState().sliceDisplayModeChanged());
-        }
+        //synchronized (slices) {
+            getSlices().forEach(slice -> slice.getGUIState().sliceDisplayModeChanged());
+        //}
     }
 
     public ReslicedAtlas getReslicedAtlas() {
@@ -539,7 +547,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     public void setPositioningMode() {
         if (!(displayMode == POSITIONING_MODE_INT)) {
 
-            synchronized (slices) {
+            //synchronized (slices) {
                 reslicedAtlas.unlock();
                 displayMode = POSITIONING_MODE_INT;
                 ghs.forEach(gh -> gh.enable());
@@ -547,7 +555,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                 getSortedSlices().forEach(slice -> {
                     slice.getGUIState().displayModeChanged();
                 });
-            }
+            //}
 
             bdvh.getTriggerbindings().removeInputTriggerMap(REGISTRATION_BEHAVIOURS_KEY);
             bdvh.getTriggerbindings().removeBehaviourMap(REGISTRATION_BEHAVIOURS_KEY);
@@ -576,11 +584,11 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
             ghs.forEach(gh -> gh.disable());
 
-            synchronized (slices) {
+            //synchronized (slices) {
                 getSortedSlices().forEach(slice -> {
                     slice.getGUIState().displayModeChanged();
                 });
-            }
+            //}
 
             bdvh.getTriggerbindings().removeInputTriggerMap(POSITIONING_BEHAVIOURS_KEY);
             bdvh.getTriggerbindings().removeBehaviourMap(POSITIONING_BEHAVIOURS_KEY);
@@ -765,9 +773,9 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     protected void updateDisplay() {
         // Sort slices along slicing axis
 
-        if (cycleToggle == 0) {
+        if (overlapMode == 0) {
             slices.forEach(slice -> slice.getGUIState().setYShift(1));
-        } else if (cycleToggle == 2) {
+        } else if (overlapMode == 2) {
 
             double lastPositionAlongX = -Double.MAX_VALUE;
 
@@ -784,18 +792,20 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                     slice.getGUIState().setYShift(1 + stairIndex);
                 }
             }
-        } else if (cycleToggle == 1) {
+        } else if (overlapMode == 1) {
             slices.forEach(slice -> slice.getGUIState().setYShift(0));
         }
 
         bdvh.getViewerPanel().requestRepaint();
     }
 
-    int cycleToggle = 0;
+    int overlapMode = 0;
 
     @Override
-    protected synchronized void draw(Graphics2D g) {
+    protected void draw(Graphics2D g) { // synchronized
         {
+            List<SliceSources> slicesCopy = getSlices();
+
             int colorCode = this.info.getColor().get();
             Color color = new Color(ARGBType.red(colorCode), ARGBType.green(colorCode), ARGBType.blue(colorCode), ARGBType.alpha(colorCode));
             g.setColor(color);
@@ -824,15 +834,16 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
             g.drawLine(ptRectScreen[1][1].x, ptRectScreen[1][1].y, ptRectScreen[0][1].x, ptRectScreen[0][1].y);
             g.drawLine(ptRectScreen[0][1].x, ptRectScreen[0][1].y, ptRectScreen[0][0].x, ptRectScreen[0][0].y);
 
-            synchronized (slices) {
-                for (SliceSources slice : slices) {
-                    slice.getGUIState().drawGraphicalHandles(g);
-                }
-            }
+            //isted (slices) {
+            slicesCopy.forEach(slice -> slice.getGUIState().drawGraphicalHandles(g));
+                //for (SliceSources slice : slices) {
+
+                //}
+            //}
 
             g.setColor(color);
 
-            if (iCurrentSlice != -1 && slices.size() > iCurrentSlice) {
+            if (iCurrentSlice != -1 && slicesCopy.size() > iCurrentSlice) {
                 SliceSources slice = getSortedSlices().get(iCurrentSlice);
                 g.setColor(new Color(255, 255, 255, 128));
                 Integer[] coords = slice.getGUIState().getBdvHandleCoords();
@@ -840,7 +851,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                 g.drawOval((int) sliceCenter.getDoublePosition(0) - 15, (int) sliceCenter.getDoublePosition(1) - 15, 30, 30);
             }
 
-            if ((displayMode == POSITIONING_MODE_INT) && slices.stream().anyMatch(slice -> slice.isSelected())) {
+            if ((displayMode == POSITIONING_MODE_INT) && slicesCopy.stream().anyMatch(slice -> slice.isSelected())) {
                 List<SliceSources> sortedSelected = getSortedSlices().stream().filter(slice -> slice.isSelected()).collect(Collectors.toList());
                 RealPoint precedentPoint = null;
 
@@ -929,9 +940,9 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     }
 
     public void clearUserActions() {
-        synchronized (slices) {
+        //synchronized (slices) {
             this.userActions.clear();
-        }
+        //}
     }
 
     public void rotateSlices(int axis, double angle_rad) {
@@ -1164,10 +1175,23 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
      * Overlap or not of the positioned slices
      */
     public void toggleOverlap() {
-        cycleToggle++;
-        if (cycleToggle == 3) cycleToggle = 0;
+        overlapMode++;
+        if (overlapMode == 3) overlapMode = 0;
         updateDisplay();
         navigateCurrentSlice();
+    }
+
+
+    private void setOverlapMode(int overlapMode) {
+        if (overlapMode<0) overlapMode=0;
+        if (overlapMode>2) overlapMode=2;
+        this.overlapMode = overlapMode;
+        updateDisplay();
+        navigateCurrentSlice();
+    }
+
+    public int getOverlapMode() {
+        return overlapMode;
     }
 
     public static SourcesProcessor getChannel(int... channels) {
@@ -1372,10 +1396,9 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     @Override
     public synchronized void mouseMoved(MouseEvent e) {
         this.ghs.forEach(gh -> gh.mouseMoved(e));
-        synchronized (slices) {
-            for (SliceSources slice : slices)
-                slice.getGUIState().ghs.forEach(gh -> gh.mouseMoved(e));
-        }
+        //synchronized (slices) {
+        slices.forEach(slice -> slice.getGUIState().ghs.forEach(gh -> gh.mouseMoved(e)));
+        //}
     }
 
     @Override
@@ -1872,7 +1895,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
             slice.waitForEndOfTasks();
         });
 
-        synchronized (this) {
+        //synchronized (this) {
 
             // First save all sources required in the state
             List<SourceAndConverter> allSacs = new ArrayList<>();
@@ -1906,7 +1929,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
+        //}
     }
 
     volatile private SliceSources currentSerializedSlice = null;
@@ -1941,25 +1964,25 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
         if (stateFile.exists()) {
             try {
+                    FileReader fileReader = new FileReader(stateFile);
 
-                FileReader fileReader = new FileReader(stateFile);
+                    setSliceDisplayMode(NO_SLICE_DISPLAY_MODE);
 
-                setSliceDisplayMode(NO_SLICE_DISPLAY_MODE);
+                    AlignerState state = gson.fromJson(fileReader, AlignerState.class); // actions are executed during deserialization
+                    fileReader.close();
 
-                AlignerState state = gson.fromJson(fileReader, AlignerState.class); // actions are executed during deserialization
-                fileReader.close();
+                    setDisplayMode(state.displayMode);
+                    setOverlapMode(state.overlapMode);
 
-                setDisplayMode(state.displayMode);
+                    bdvh.getViewerPanel().state().setViewerTransform(state.bdvView);
 
-                bdvh.getViewerPanel().state().setViewerTransform(state.bdvView);
-
-                state.slices_state_list.forEach(sliceState -> {
-                    sliceState.slice.waitForEndOfTasks();
-                    sliceState.slice.getGUIState().setChannelsVisibility(sliceState.channelsVisibility); // TODO : restore
-                    sliceState.slice.getGUIState().setDisplaysettings(sliceState.settings_per_channel);
-                    sliceState.slice.transformSourceOrigin(sliceState.preTransform);
-                });
-                setSliceDisplayMode(state.sliceDisplayMode);
+                    state.slices_state_list.forEach(sliceState -> {
+                        sliceState.slice.waitForEndOfTasks();
+                        sliceState.slice.getGUIState().setChannelsVisibility(sliceState.channelsVisibility); // TODO : restore
+                        sliceState.slice.getGUIState().setDisplaysettings(sliceState.settings_per_channel);
+                        sliceState.slice.transformSourceOrigin(sliceState.preTransform);
+                    });
+                    setSliceDisplayMode(state.sliceDisplayMode);
 
             } catch (Exception e) {
                 e.printStackTrace();

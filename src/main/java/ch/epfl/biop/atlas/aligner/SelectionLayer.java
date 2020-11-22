@@ -8,6 +8,7 @@ import org.scijava.ui.behaviour.util.Behaviours;
 import java.awt.*;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.List;
 
 public class SelectionLayer {
 
@@ -68,10 +69,11 @@ public class SelectionLayer {
      * @param eventSource a String which can indicate the origin of the modification
      */
     public void processSelectionModificationEvent(Set<SliceSources> currentSources, String mode, String eventSource) {
-        synchronized (mp.slices) {
+        //synchronized (mp.slices) {
+        List<SliceSources> slices = mp.getSlices();
             switch(mode) {
                 case SourceSelectorBehaviour.SET :
-                    for (SliceSources slice : mp.slices) {
+                    for (SliceSources slice : slices) {
                         slice.deSelect();
                         if (currentSources.contains(slice)&&!slice.isSelected()) {
                             slice.select();
@@ -79,7 +81,7 @@ public class SelectionLayer {
                     }
                     break;
                 case SourceSelectorBehaviour.ADD :
-                    for (SliceSources slice : mp.slices) {
+                    for (SliceSources slice : slices) {
                         // Sanity check : only visible sources can be selected
                         if (currentSources.contains(slice) && !slice.isSelected()) {
                             slice.select();
@@ -87,7 +89,7 @@ public class SelectionLayer {
                     }
                     break;
                 case SourceSelectorBehaviour.REMOVE :
-                    for (SliceSources slice : mp.slices) {
+                    for (SliceSources slice : slices) {
                         // Sanity check : only visible sources can be selected
                         if (currentSources.contains(slice) && slice.isSelected()) {
                             slice.deSelect();
@@ -99,7 +101,7 @@ public class SelectionLayer {
                     break;
             }
             //viewer.getDisplay().repaint();
-        }
+        //}
     }
 
     Stroke normalStroke = new BasicStroke();
@@ -138,13 +140,13 @@ public class SelectionLayer {
     Set<SliceSources> getLastSelectedSources() {
         Set<SliceSources> lastSelected = new HashSet<>();
         Rectangle r = getCurrentSelectionRectangle();
-        synchronized (mp.slices) {
-            for (SliceSources slice : mp.slices) {
+        //synchronized (mp.slices) {
+            for (SliceSources slice : mp.getSlices()) {
                 Integer[] coords = slice.getGUIState().getBdvHandleCoords();
                 Point p = new Point(coords[0], coords[1]);
                 if (r.contains(p)) lastSelected.add(slice);
             }
-        }
+        //}
         return lastSelected;
     }
 
