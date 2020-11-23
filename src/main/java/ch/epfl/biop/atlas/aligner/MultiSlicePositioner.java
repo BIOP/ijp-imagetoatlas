@@ -989,6 +989,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     }
 
     protected void removeSlice(SliceSources sliceSource) {
+        listeners.forEach(listener -> listener.sliceDeleted(sliceSource));
         slices.remove(sliceSource);
         sliceSource.getGUIState().sliceDeleted();
     }
@@ -1004,6 +1005,19 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         } else {
             return false;
         }
+    }
+
+    protected void createSlice(SliceSources sliceSource) {
+        slices.add(sliceSource);
+        listeners.forEach(listener -> listener.sliceCreated(sliceSource));
+    }
+
+    public void positionZChanged(SliceSources slice) {
+        listeners.forEach(listener -> listener.sliceZPositionChanged(slice));
+    }
+
+    public void sliceVisibilityChanged(SliceSources slice) {
+        listeners.forEach(listener -> listener.sliceVisibilityChanged(slice));
     }
 
     /**
@@ -1990,7 +2004,23 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         } else {
             errlog.accept("Error : file "+stateFile.getAbsolutePath()+" not found!");
         }
+    }
 
+    List<SliceChangeListener> listeners = new ArrayList<>();
+
+    public void addSliceListener(SliceChangeListener listener) {
+        listeners.add(listener);
+    }
+
+    public void removeSliceListener(SliceChangeListener listener) {
+        listeners.remove(listener);
+    }
+
+    interface SliceChangeListener {
+        void sliceDeleted(SliceSources slice);
+        void sliceCreated(SliceSources slice);
+        void sliceZPositionChanged(SliceSources slice);
+        void sliceVisibilityChanged(SliceSources slice);
     }
 
 }

@@ -56,6 +56,8 @@ public class SliceSources {
     // What are they ?
     final SourceAndConverter<?>[] original_sacs;
 
+    public final int nChannels;
+
     // Used for registration : like 3D, but tilt and roll ignored because it is handled on the fixed source side
     private SourceAndConverter<?>[] registered_sacs;
 
@@ -102,6 +104,9 @@ public class SliceSources {
 
     // For fast display : Icon TODO : see https://github.com/bigdataviewer/bigdataviewer-core/blob/17d2f55d46213d1e2369ad7ef4464e3efecbd70a/src/main/java/bdv/tools/RecordMovieDialog.java#L256-L318
     protected SliceSources(SourceAndConverter<?>[] sacs, double slicingAxisPosition, MultiSlicePositioner mp) {
+
+        nChannels = sacs.length;
+
         this.mp = mp;
         this.original_sacs = sacs;
         this.slicingAxisPosition = slicingAxisPosition;

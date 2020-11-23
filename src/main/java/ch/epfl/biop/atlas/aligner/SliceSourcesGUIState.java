@@ -201,6 +201,7 @@ public class SliceSourcesGUIState {
 
     public void setSliceVisible() {
         if (!sliceIsVisibleUser) {
+            mp.sliceVisibilityChanged(slice);
             sliceIsVisibleUser = true;
             show();
         }
@@ -208,6 +209,7 @@ public class SliceSourcesGUIState {
 
     public void setSliceInvisible() {
         if (sliceIsVisibleUser) {
+            mp.sliceVisibilityChanged(slice);
             sliceIsVisibleUser = false;
             hide();
         }
@@ -265,14 +267,15 @@ public class SliceSourcesGUIState {
     }
 
     public void disableGraphicalHandles() {
-        ghs.forEach(gh -> gh.disable());
+        ghs.forEach(GraphicalHandle::disable);
     }
 
     public void enableGraphicalHandles() {
-        ghs.forEach(gh -> gh.enable());
+        ghs.forEach(GraphicalHandle::enable);
     }
 
     protected void positionChanged() {
+        mp.positionZChanged(slice);
         AffineTransform3D slicingModePositionAffineTransform = new AffineTransform3D();
         RealPoint center = getCenterPositionPMode();
         slicingModePositionAffineTransform.translate(center.getDoublePosition(0), center.getDoublePosition(1), -slice.getSlicingAxisPosition());
@@ -289,13 +292,12 @@ public class SliceSourcesGUIState {
     }
 
     public void setChannelsVisibility(boolean[] channelsVisibility) {
-        for (int i=0;i<nChannels; i++) {
-            channelVisible[i] = channelsVisibility[i];
+        if (nChannels >= 0) {
+            System.arraycopy(channelsVisibility, 0, channelVisible, 0, nChannels);
         }
         if (sliceIsVisibleUser) {
             show();
         }
-
     }
 
     public void sliceDeleted() {
@@ -318,5 +320,21 @@ public class SliceSourcesGUIState {
 
     public boolean isSliceVisible() {
         return sliceIsVisibleUser;
+    }
+
+    public boolean isChannelVisible(int iChannel) {
+        return channelVisible[iChannel];
+    }
+
+    public void setChannelVisibility(int iChannel, boolean flag) {
+        if (iChannel<nChannels) {
+            boolean oldValue = channelVisible[iChannel];
+            if (oldValue!=flag) {
+                hide();
+                mp.sliceVisibilityChanged(slice);
+                channelVisible[iChannel] = flag;
+                show();
+            }
+        }
     }
 }

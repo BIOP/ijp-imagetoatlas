@@ -36,7 +36,7 @@ public class CreateSlice extends CancelableAction {
         synchronized (CreateSlice.class) { // only one slice addition at a time
             boolean sacAlreadyPresent = false;
             for (SourceAndConverter sac : sacs) {
-                for (SliceSources slice : mp.getPrivateSlices()) {
+                for (SliceSources slice : mp.getSlices()) {
                     for (SourceAndConverter test : slice.original_sacs) {
                         if (test.equals(sac)) {
                             sacAlreadyPresent = true;
@@ -75,7 +75,7 @@ public class CreateSlice extends CancelableAction {
                         slicingAxisPosition, mp);
             }
 
-            mp.getPrivateSlices().add(sliceSource);
+            mp.createSlice(sliceSource);//.getPrivateSlices().add(sliceSource);
 
             mp.updateDisplay();
 
