@@ -333,7 +333,9 @@ public class SliceSourcesGUIState {
                 hide();
                 mp.sliceVisibilityChanged(slice);
                 channelVisible[iChannel] = flag;
-                show();
+                if (sliceIsVisibleUser) {
+                    show();
+                }
             }
         }
     }
