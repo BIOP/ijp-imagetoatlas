@@ -59,6 +59,10 @@ public class SliceSourcesGUIState {
     // Visible to the user in slicing mode
     private SourceAndConverter<?>[] sources_displayed_or_readyfordisplay; // For Positioning mode
 
+    public SourceAndConverter<?>[] getCurrentSources() {
+        return sources_displayed_or_readyfordisplay;
+    }
+
     public SliceSourcesGUIState(SliceSources slice, MultiSlicePositioner mp) {
         this.mp = mp;
         this.nChannels = slice.getRegisteredSources().length;

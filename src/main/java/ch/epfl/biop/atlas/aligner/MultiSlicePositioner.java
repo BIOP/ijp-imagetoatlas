@@ -60,8 +60,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static bdv.ui.BdvDefaultCards.DEFAULT_SOURCEGROUPS_CARD;
-import static bdv.ui.BdvDefaultCards.DEFAULT_VIEWERMODES_CARD;
+import static bdv.ui.BdvDefaultCards.*;
 import static sc.fiji.bdvpg.scijava.services.SourceAndConverterService.SPIM_DATA_INFO;
 
 /**
@@ -275,8 +274,10 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
         mso = new MultiSliceObserver(this);
 
+        //bdvh.getCardPanel().removeCard(DEFAULT_SOURCES_CARD);
         bdvh.getCardPanel().removeCard(DEFAULT_SOURCEGROUPS_CARD);
         bdvh.getCardPanel().removeCard(DEFAULT_VIEWERMODES_CARD);
+        bdvh.getCardPanel().setCardExpanded(DEFAULT_SOURCES_CARD, false);
 
         BdvScijavaHelper.clearBdvHandleMenuBar(bdvh);
 

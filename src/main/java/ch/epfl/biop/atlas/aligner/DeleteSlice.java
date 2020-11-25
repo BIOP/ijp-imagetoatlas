@@ -36,14 +36,15 @@ public class DeleteSlice extends CancelableAction {
             /*savedActions.forEach(action ->  {
                 System.out.println("\t"+action);
             });*/
-
-            Collections.reverse(savedActions);
-            savedActions.forEach(action ->  {
-                if (action!=this) {
-                    action.cancel();
-                }
-            });
-            Collections.reverse(savedActions);
+            synchronized (savedActions) { // TODO SOLVE ISSUE!! CANCELING DELETE SLICE DOES NOT WORK RELIABLY
+                Collections.reverse(savedActions);
+                savedActions.forEach(action -> {
+                    if (action != this) {
+                        action.cancel();
+                    }
+                });
+                Collections.reverse(savedActions);
+            }
             return true;
         }
     }
