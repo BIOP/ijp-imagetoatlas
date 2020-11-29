@@ -2,7 +2,6 @@ package ch.epfl.biop.atlas.aligner;
 
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.commands.DisplaySettingsCommand;
-import org.scijava.command.CommandModule;
 import org.scijava.command.CommandService;
 import spimdata.util.Displaysettings;
 
@@ -12,17 +11,12 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
-import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Future;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class SliceDisplayPanel implements MultiSlicePositioner.SliceChangeListener, ListSelectionListener {
@@ -39,8 +33,6 @@ public class SliceDisplayPanel implements MultiSlicePositioner.SliceChangeListen
 
     final SelectedSliceDisplayTableModel modelSelect;
 
-    Consumer<String> log = (str) -> System.out.println(SliceDisplayPanel.class+":"+str);
-
     int maxChannels = 0;
 
     int nSlices = 0;
@@ -51,14 +43,14 @@ public class SliceDisplayPanel implements MultiSlicePositioner.SliceChangeListen
 
     List<Displaysettings> globalDisplaySettingsPerChannel = new ArrayList<>();
 
+    List<SliceSources> sortedSlices = new ArrayList<>();
+
     public SliceDisplayPanel(MultiSlicePositioner mp) {
         this.mp = mp;
         paneDisplay = new JPanel(new BorderLayout());
 
         JButton toggleDisplayMode = new JButton("Multi/Single Slice");
-        toggleDisplayMode.addActionListener(e -> {
-            mp.changeSliceDisplayMode();
-        });
+        toggleDisplayMode.addActionListener(e -> mp.changeSliceDisplayMode());
 
         mp.addSliceListener(this);
 
@@ -85,15 +77,10 @@ public class SliceDisplayPanel implements MultiSlicePositioner.SliceChangeListen
         tableSelectionControl.setDefaultRenderer(Displaysettings.class, new DisplaySettingsRenderer(true));
         tableSelectionControl.setDefaultRenderer(Boolean.class, new VisibilityRenderer(true));
 
-        // table.setDefaultEditor(Displaysettings.class, new DisplaysettingsEditor());
-        // tableSelectionControl.setDefaultEditor(Displaysettings.class, new DisplaysettingsEditor());
-
         JScrollPane scPane = new JScrollPane(tableSelectionControl);
         Dimension d = new Dimension(tableSelectionControl.getPreferredSize());
 
-        //d.height*=2;
-        tableSelectionControl.setPreferredScrollableViewportSize(d);//new Dimension(400,500));
-
+        tableSelectionControl.setPreferredScrollableViewportSize(d);
 
         paneDisplay.add(scPane, BorderLayout.NORTH);
         paneDisplay.add(table, BorderLayout.CENTER);
@@ -126,8 +113,6 @@ public class SliceDisplayPanel implements MultiSlicePositioner.SliceChangeListen
                             } else {
                                 mp.log.accept("Please select a slice with a valid channel in the tab.");
                             }
-
-
                         }
                     }
                 }
@@ -160,9 +145,8 @@ public class SliceDisplayPanel implements MultiSlicePositioner.SliceChangeListen
                         if (sortedSlices.get(row).nChannels>iChannel) {
                             sacs[0] = sortedSlices.get(row).getGUIState().getCurrentSources()[iChannel];
 
-                            Runnable update = () -> {
-                                //model.fireTableRowsUpdated(row, row);
-                                model.fireTableCellUpdated(row, col);};
+                            Runnable update = () -> model.fireTableCellUpdated(row, col);
+
                             mp.scijavaCtx
                                     .getService(CommandService.class)
                                     .run(DisplaySettingsCommand.class, true, "sacs", sacs, "postrun", update);
@@ -181,20 +165,19 @@ public class SliceDisplayPanel implements MultiSlicePositioner.SliceChangeListen
 
     @Override
     public synchronized void sliceDeleted(SliceSources slice) {
-        //log.accept(slice+" deleted");
         nSlices--;
         sortSlices();
-        List<SliceSources> slices = sortedSlices;//mp.getSortedSlices();
+        List<SliceSources> slices = sortedSlices;
         int index = slices.indexOf(slice);
         slices.remove(slice);
-        model.fireTableRowsDeleted(index, index); // Which thread ?
+        model.fireTableRowsDeleted(index, index);
 
         // What happened to the number of channels ?
         if (slice.nChannels==maxChannels) {
             // Maybe it's the last one with this number of channels...
-            int newMaxChannels = slices.stream()
-                    .map(s -> s.nChannels)
-                    .reduce(Math::max).get();
+            int newMaxChannels;
+            newMaxChannels = slices.stream()
+                    .mapToInt(s -> s.nChannels).max().getAsInt();
             if (newMaxChannels < maxChannels) {
                 // The number of channels diminished... full update
                 maxChannels = newMaxChannels;
@@ -205,21 +188,19 @@ public class SliceDisplayPanel implements MultiSlicePositioner.SliceChangeListen
                 modelSelect.fireTableStructureChanged();
             }
 
-        } else {
-            // No need to worry
-        }
+        } // else no change of number of channels
+
     }
 
     @Override
     public synchronized void sliceCreated(SliceSources slice) {
-        //log.accept(slice+" created");
         nSlices++;
         sortSlices();
         int index = sortedSlices.indexOf(slice);
-        model.fireTableRowsInserted(index, index); // Which thread ?
+        model.fireTableRowsInserted(index, index);
         if (slice.nChannels>maxChannels) {
             for (int i=maxChannels;i<slice.nChannels;i++) {
-                globalFlagPerChannel.add(new Boolean(true));
+                globalFlagPerChannel.add(Boolean.TRUE);
                 globalDisplaySettingsPerChannel.add(new Displaysettings(-1));
             }
             maxChannels = slice.nChannels;
@@ -230,7 +211,6 @@ public class SliceDisplayPanel implements MultiSlicePositioner.SliceChangeListen
 
     @Override
     public void sliceZPositionChanged(SliceSources slice) {
-        //log.accept(slice+" display changed");
         sortSlices();
         model.fireTableDataChanged();
     }
@@ -244,15 +224,13 @@ public class SliceDisplayPanel implements MultiSlicePositioner.SliceChangeListen
     @Override
     public void sliceSelected(SliceSources slice) {
         int idx = sortedSlices.indexOf(slice);
-        //if (slice.isSelected())
-            table.getSelectionModel().addSelectionInterval(idx, idx);
+        table.getSelectionModel().addSelectionInterval(idx, idx);
     }
 
     @Override
     public void sliceDeselected(SliceSources slice) {
         int idx = sortedSlices.indexOf(slice);
-        //if (!slice.isSelected())
-            table.getSelectionModel().removeSelectionInterval(idx, idx);
+        table.getSelectionModel().removeSelectionInterval(idx, idx);
     }
 
     int currentIndex = -1;
@@ -283,14 +261,7 @@ public class SliceDisplayPanel implements MultiSlicePositioner.SliceChangeListen
 
         List<Integer> currentSelection = new ArrayList<>();
 
-        if (lsm.isSelectionEmpty()) {
-            //output.append(" <none>");
-           // sortedSlices.forEach(SliceSources::deSelect);
-        } else {
-
-            // Find out which indexes are selected.
-            int minIndex = lsm.getMinSelectionIndex();
-            int maxIndex = lsm.getMaxSelectionIndex();
+        if (!lsm.isSelectionEmpty()) {
             for (int i = 0; i < sortedSlices.size(); i++) {
                 if (lsm.isSelectedIndex(i)) {
                     currentSelection.add(i);
@@ -299,13 +270,11 @@ public class SliceDisplayPanel implements MultiSlicePositioner.SliceChangeListen
                     sortedSlices.get(i).deSelect();
                 }
             }
-
         }
+
         mp.getBdvh().getViewerPanel().getDisplay().repaint(); // To update current selection state
         setCurrentlySelectedIndices(currentSelection);
     }
-
-    List<SliceSources> sortedSlices = new ArrayList<>();
 
     public void sortSlices() {
         sortedSlices = mp.getSortedSlices();
@@ -338,20 +307,20 @@ public class SliceDisplayPanel implements MultiSlicePositioner.SliceChangeListen
 
         @Override
         public Object getValueAt(int rowIndex, int columnIndex) {
-            SliceSources slice =  sortedSlices.get(rowIndex); // Not efficient
+            SliceSources slice =  sortedSlices.get(rowIndex);
             if ((columnIndex == 0)) {
                 if (rowIndex == currentIndex) {
-                    return "["+new Integer(rowIndex).toString()+"]";
+                    return "["+ rowIndex +"]";
                 }
-                return " "+new Integer(rowIndex).toString();
+                return " "+ rowIndex;
             } else if ((columnIndex) == 1) {
-                return new Boolean(slice.getGUIState().isSliceVisible());
+                return slice.getGUIState().isSliceVisible();
             } else if (columnIndex%2 == 0) {
                 int iChannel = (columnIndex-2)/2;
                 if (slice.nChannels>iChannel) {
-                    return new Boolean(slice.getGUIState().channelVisible[iChannel]);
+                    return slice.getGUIState().channelVisible[iChannel];
                 } else {
-                    return new Boolean(false);
+                    return Boolean.FALSE;
                 }
             } else {
                 int iChannel = (columnIndex-3)/2;
@@ -371,41 +340,32 @@ public class SliceDisplayPanel implements MultiSlicePositioner.SliceChangeListen
          */
         public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
             SliceSources slice =  sortedSlices.get(rowIndex);
-            if ((columnIndex) == 0) {
-                // Nothing
-            } else if ((columnIndex) == 1) {
-                Boolean flag = (Boolean) aValue;
-                if (flag) {
-                    if (!slice.getGUIState().isSliceVisible())
-                        slice.getGUIState().setSliceVisible();
-                } else {
-                    if (slice.getGUIState().isSliceVisible()) {
-                        slice.getGUIState().setSliceInvisible();
-                    }
-                }
-            } else if (columnIndex%2 == 0) {
-                int iChannel = (columnIndex-2)/2;
-                if (slice.nChannels>iChannel) {
+            if (columnIndex != 0) { // column zero used for selecting
+                if ((columnIndex) == 1) {
                     Boolean flag = (Boolean) aValue;
-                    if (slice.getGUIState().isChannelVisible(iChannel)) {
-                        if (!flag) {
-                            slice.getGUIState().setChannelVisibility(iChannel, false);
-                        }
+                    if (flag) {
+                        if (!slice.getGUIState().isSliceVisible())
+                            slice.getGUIState().setSliceVisible();
                     } else {
-                        if (flag) {
-                            slice.getGUIState().setChannelVisibility(iChannel, true);
+                        if (slice.getGUIState().isSliceVisible()) {
+                            slice.getGUIState().setSliceInvisible();
                         }
                     }
-                } else {
-                    // Channel not available for this slice
-                }
-            } else {
-                int iChannel = (columnIndex-3)/2;
-                if (slice.nChannels>iChannel) {
-                    //return slice.getGUIState().getDisplaysettings()[iChannel];
-                } else {
-                    //return new Displaysettings(-1,"-");
-                }
+                } else if (columnIndex%2 == 0) {
+                    int iChannel = (columnIndex-2)/2;
+                    if (slice.nChannels>iChannel) {
+                        Boolean flag = (Boolean) aValue;
+                        if (slice.getGUIState().isChannelVisible(iChannel)) {
+                            if (!flag) {
+                                slice.getGUIState().setChannelVisibility(iChannel, false);
+                            }
+                        } else {
+                            if (flag) {
+                                slice.getGUIState().setChannelVisibility(iChannel, true);
+                            }
+                        }
+                    } // else Channel not available for this slice
+                } // else -> dealt in the mouse adapter
             }
         }
 
@@ -420,8 +380,6 @@ public class SliceDisplayPanel implements MultiSlicePositioner.SliceChangeListen
         }
 
         public boolean isCellEditable(int row, int col) {
-            //Note that the data/cell address is constant,
-            //no matter where the cell appears onscreen.
             return col>0;
         }
 
@@ -429,58 +387,42 @@ public class SliceDisplayPanel implements MultiSlicePositioner.SliceChangeListen
 
     class SelectedSliceDisplayTableModel extends SliceDisplayTableModel {
 
-        /**
-         *
-         *  @param  aValue   value to assign to cell
-         *  @param  rowIndex   row of cell
-         *  @param  columnIndex  column of cell
-         */
         public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-            if ((columnIndex) == 0) {
-
-            } else if ((columnIndex) == 1) {
-                Boolean flag = (Boolean) aValue;
-                globalFlagVisible = flag;
-                getSelectedIndices().forEach(idx -> {
-                SliceSources cSlice = sortedSlices.get(idx);
-                    if (flag) {
-                        if (!cSlice.getGUIState().isSliceVisible())
-                            cSlice.getGUIState().setSliceVisible();
-                    } else {
-                        if (cSlice.getGUIState().isSliceVisible()) {
-                            cSlice.getGUIState().setSliceInvisible();
-                        }
-                    }
-                });
-            } else if (columnIndex%2 == 0) {
-                int iChannel = (columnIndex-2)/2;
-                Boolean flag = (Boolean) aValue;
-                globalFlagPerChannel.set(iChannel, flag);
-                getSelectedIndices().forEach(idx -> {
-                    SliceSources cSlice = sortedSlices.get(idx);
-                    if (cSlice.nChannels>iChannel) {
-                        if (cSlice.getGUIState().isChannelVisible(iChannel)) {
-                            if (!flag) {
-                                cSlice.getGUIState().setChannelVisibility(iChannel, false);
-                            }
+            if (columnIndex != 0) { // Column zero is not used
+                if ((columnIndex) == 1) {
+                    Boolean flag = (Boolean) aValue;
+                    globalFlagVisible = flag;
+                    getSelectedIndices().forEach(idx -> {
+                        SliceSources cSlice = sortedSlices.get(idx);
+                        if (flag) {
+                            if (!cSlice.getGUIState().isSliceVisible())
+                                cSlice.getGUIState().setSliceVisible();
                         } else {
-                            if (flag) {
-                                cSlice.getGUIState().setChannelVisibility(iChannel, true);
+                            if (cSlice.getGUIState().isSliceVisible()) {
+                                cSlice.getGUIState().setSliceInvisible();
                             }
                         }
-                    } else {
-                        // Channel not available for this slice
-                    }
-                });
-            } else {
-                int iChannel = (columnIndex-3)/2;
-                /*if (cSlice.nChannels>iChannel) {
-                    //return slice.getGUIState().getDisplaysettings()[iChannel];
-                } else {
-                    //return new Displaysettings(-1,"-");
-                }*/
+                    });
+                } else if (columnIndex%2 == 0) {
+                    int iChannel = (columnIndex-2)/2;
+                    Boolean flag = (Boolean) aValue;
+                    globalFlagPerChannel.set(iChannel, flag);
+                    getSelectedIndices().forEach(idx -> {
+                        SliceSources cSlice = sortedSlices.get(idx);
+                        if (cSlice.nChannels>iChannel) {
+                            if (cSlice.getGUIState().isChannelVisible(iChannel)) {
+                                if (!flag) {
+                                    cSlice.getGUIState().setChannelVisibility(iChannel, false);
+                                }
+                            } else {
+                                if (flag) {
+                                    cSlice.getGUIState().setChannelVisibility(iChannel, true);
+                                }
+                            }
+                        } //else Channel not available for this slice
+                    });
+                } // else dealt with in the mouse manager
             }
-
         }
 
         @Override
@@ -488,13 +430,13 @@ public class SliceDisplayPanel implements MultiSlicePositioner.SliceChangeListen
             if ((columnIndex) == 0) {
                 return ".";
             } else if ((columnIndex) == 1) {
-                return new Boolean(globalFlagVisible);
+                return globalFlagVisible;
             } if (columnIndex%2 == 0) {
                 int iChannel = (columnIndex-2)/2;
                 if (sortedSlices.size()>0) {
-                    return new Boolean(globalFlagPerChannel.get(iChannel));
+                    return globalFlagPerChannel.get(iChannel);
                 } else {
-                    return new Boolean(false);
+                    return Boolean.FALSE;
                 }
             } else {
                 int iChannel = (columnIndex-3)/2;
@@ -516,7 +458,7 @@ public class SliceDisplayPanel implements MultiSlicePositioner.SliceChangeListen
             implements TableCellRenderer {
         Border unselectedBorder = null;
         Border selectedBorder = null;
-        boolean isBordered = true;
+        boolean isBordered;
 
         public DisplaySettingsRenderer(boolean isBordered) {
             this.isBordered = isBordered;
@@ -529,10 +471,7 @@ public class SliceDisplayPanel implements MultiSlicePositioner.SliceChangeListen
                 int row, int column) {
             Displaysettings ds = (Displaysettings) displaysettings;
 
-            if (ds.getName().equals("-")) {
-
-            } else {
-
+            if (!ds.getName().equals("-")) {
                 Color newColor = new Color(ds.color[0], ds.color[1], ds.color[2]);
                 setBackground(newColor);
                 setForeground(new Color( (ds.color[0]+128) % 256, (ds.color[1]+128) % 256, (ds.color[2]+128)%256));
@@ -585,7 +524,7 @@ public class SliceDisplayPanel implements MultiSlicePositioner.SliceChangeListen
 
         Border unselectedBorder = null;
         Border selectedBorder = null;
-        boolean isBordered = true;
+        boolean isBordered;
 
         public VisibilityRenderer(boolean isBordered) {
             this.isBordered = isBordered;
@@ -615,9 +554,6 @@ public class SliceDisplayPanel implements MultiSlicePositioner.SliceChangeListen
                 }
             }
 
-            /*setToolTipText("RGB value: " + newColor.getRed() + ", "
-                    + newColor.getGreen() + ", "
-                    + newColor.getBlue());*/
             if (visible) {
                 setIcon(visibleIcon);
             } else {
