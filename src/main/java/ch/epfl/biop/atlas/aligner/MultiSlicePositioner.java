@@ -315,7 +315,10 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
 
         // TODO BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Registration>Remove Last Registration",0,() -> );
-        bdvh.getCardPanel().addCard("Display Options", new DisplayPanel(this).getPanel(), true);
+
+        bdvh.getCardPanel().addCard("Atlas Display Options", new AtlasDisplayPanel(this).getPanel(), true);
+
+        bdvh.getCardPanel().addCard("Slices Display Options", new SliceDisplayPanel(this).getPanel(), true);
 
         bdvh.getCardPanel().addCard("Edit Slices", new EditPanel(this).getPanel(), true);
 
@@ -547,7 +550,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
      */
     public void setPositioningMode() {
         if (!(displayMode == POSITIONING_MODE_INT)) {
-
+                int oldMode = displayMode;
             //synchronized (slices) {
                 reslicedAtlas.unlock();
                 displayMode = POSITIONING_MODE_INT;
@@ -563,6 +566,8 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
             positioning_behaviours.install(bdvh.getTriggerbindings(), POSITIONING_BEHAVIOURS_KEY);
             navigateCurrentSlice();
             refreshBlockMap();
+
+            modeListeners.forEach(ml -> ml.modeChanged(this, oldMode, displayMode));
         }
     }
 
@@ -579,6 +584,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
      */
     public void setRegistrationMode() {
         if (!(displayMode == REGISTRATION_MODE_INT)) {
+            int oldMode = REGISTRATION_MODE_INT;
             displayMode = POSITIONING_MODE_INT;
             reslicedAtlas.lock();
             displayMode = REGISTRATION_MODE_INT;
@@ -595,8 +601,9 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
             bdvh.getTriggerbindings().removeBehaviourMap(POSITIONING_BEHAVIOURS_KEY);
             registration_behaviours.install(bdvh.getTriggerbindings(), REGISTRATION_BEHAVIOURS_KEY);
             navigateCurrentSlice();
+            refreshBlockMap();
+            modeListeners.forEach(ml -> ml.modeChanged(this, oldMode, displayMode));
         }
-        refreshBlockMap();
     }
 
     // -------------------------------------------------------- NAVIGATION ( BOTH MODES )
@@ -843,9 +850,9 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
             //}
 
             g.setColor(color);
-
             if (iCurrentSlice != -1 && slicesCopy.size() > iCurrentSlice) {
                 SliceSources slice = getSortedSlices().get(iCurrentSlice);
+                listeners.forEach(listener -> listener.isCurrentSlice(slice));
                 g.setColor(new Color(255, 255, 255, 128));
                 Integer[] coords = slice.getGUIState().getBdvHandleCoords();
                 RealPoint sliceCenter = new RealPoint(coords[0], coords[1], 0);
@@ -1019,6 +1026,24 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
     public void sliceVisibilityChanged(SliceSources slice) {
         listeners.forEach(listener -> listener.sliceVisibilityChanged(slice));
+    }
+
+    public void sliceSelected(SliceSources slice) {
+        listeners.forEach(listener -> listener.sliceSelected(slice));
+    }
+
+    public void sliceDeselected(SliceSources slice) {
+        listeners.forEach(listener -> listener.sliceDeselected(slice));
+    }
+
+    List<ModeListener> modeListeners = new ArrayList<>();
+
+    public void addModeListener(ModeListener modeListener) {
+        modeListeners.add(modeListener);
+    }
+
+    public void removeModeListener(ModeListener modeListener) {
+        modeListeners.remove(modeListener);
     }
 
     /**
@@ -2022,6 +2047,13 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         void sliceCreated(SliceSources slice);
         void sliceZPositionChanged(SliceSources slice);
         void sliceVisibilityChanged(SliceSources slice);
+        void sliceSelected(SliceSources slice);
+        void sliceDeselected(SliceSources slice);
+        void isCurrentSlice(SliceSources slice);
+    }
+
+    interface ModeListener {
+        void modeChanged(MultiSlicePositioner mp, int oldmode, int newmode);
     }
 
 }

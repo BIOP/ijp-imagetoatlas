@@ -28,6 +28,9 @@ public class DisplaySettingsCommand implements Command {
     @Parameter(type = ItemIO.OUTPUT)
     Displaysettings ds;
 
+    @Parameter
+    Runnable postrun;
+
     @Override
     public void run() {
         ds = new Displaysettings(-1);
@@ -38,5 +41,9 @@ public class DisplaySettingsCommand implements Command {
         DisplaysettingsHelper.applyDisplaysettings(sacs, ds);
         SourceAndConverterServices.getSourceAndConverterDisplayService()
                 .updateDisplays(sacs);
+
+        if (postrun!=null) {
+            postrun.run();
+        }
     }
 }

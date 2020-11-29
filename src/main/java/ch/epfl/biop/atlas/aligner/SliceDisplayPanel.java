@@ -10,6 +10,7 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
@@ -23,7 +24,7 @@ import java.util.concurrent.Future;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public class DisplayPanel implements MultiSlicePositioner.SliceChangeListener, ListSelectionListener {
+public class SliceDisplayPanel implements MultiSlicePositioner.SliceChangeListener, ListSelectionListener {
 
     final JPanel paneDisplay;
 
@@ -37,7 +38,7 @@ public class DisplayPanel implements MultiSlicePositioner.SliceChangeListener, L
 
     final SelectedSliceDisplayTableModel modelSelect;
 
-    Consumer<String> log = (str) -> System.out.println(DisplayPanel.class+":"+str);
+    Consumer<String> log = (str) -> System.out.println(SliceDisplayPanel.class+":"+str);
 
     int maxChannels = 0;
 
@@ -49,7 +50,7 @@ public class DisplayPanel implements MultiSlicePositioner.SliceChangeListener, L
 
     List<Displaysettings> globalDisplaySettingsPerChannel = new ArrayList<>();
 
-    public DisplayPanel(MultiSlicePositioner mp) {
+    public SliceDisplayPanel(MultiSlicePositioner mp) {
         this.mp = mp;
         paneDisplay = new JPanel(new BorderLayout());
 
@@ -95,7 +96,7 @@ public class DisplayPanel implements MultiSlicePositioner.SliceChangeListener, L
 
         paneDisplay.add(scPane, BorderLayout.NORTH);
         paneDisplay.add(table, BorderLayout.CENTER);
-
+        paneDisplay.add(toggleDisplayMode, BorderLayout.SOUTH);
 
         tableSelectionControl.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
@@ -114,9 +115,13 @@ public class DisplayPanel implements MultiSlicePositioner.SliceChangeListener, L
                                     .collect(Collectors.toList()).toArray(new SourceAndConverter[0]);
 
                             if (sacs.length>0) {
+                                Runnable update = () -> {
+                                    model.fireTableChanged(new TableModelEvent(model, 0, nSlices, col,
+                                            TableModelEvent.UPDATE));
+                                    modelSelect.fireTableCellUpdated(row, col);};
                                 mp.scijavaCtx
                                         .getService(CommandService.class)
-                                        .run(DisplaySettingsCommand.class, true, "sacs", sacs);
+                                        .run(DisplaySettingsCommand.class, true, "sacs", sacs, "postrun", update);
                             } else {
                                 mp.log.accept("Please select a slice with a valid channel in the tab.");
                             }
@@ -141,9 +146,12 @@ public class DisplayPanel implements MultiSlicePositioner.SliceChangeListener, L
                         if (sortedSlices.get(row).nChannels>iChannel) {
                             sacs[0] = sortedSlices.get(row).getGUIState().getCurrentSources()[iChannel];
 
+                            Runnable update = () -> {
+                                //model.fireTableRowsUpdated(row, row);
+                                model.fireTableCellUpdated(row, col);};
                             mp.scijavaCtx
                                     .getService(CommandService.class)
-                                    .run(DisplaySettingsCommand.class, true, "sacs", sacs);
+                                    .run(DisplaySettingsCommand.class, true, "sacs", sacs, "postrun", update);
                         } else {
                             mp.log.accept("This slice has no channel indexed "+iChannel);
                         }
@@ -208,7 +216,7 @@ public class DisplayPanel implements MultiSlicePositioner.SliceChangeListener, L
 
     @Override
     public void sliceZPositionChanged(SliceSources slice) {
-        log.accept(slice+" display changed");
+        //log.accept(slice+" display changed");
         sortSlices();
         model.fireTableDataChanged();
     }
@@ -217,6 +225,32 @@ public class DisplayPanel implements MultiSlicePositioner.SliceChangeListener, L
     public void sliceVisibilityChanged(SliceSources slice) {
         int index = sortedSlices.indexOf(slice);
         model.fireTableRowsUpdated(index,index);
+    }
+
+    @Override
+    public void sliceSelected(SliceSources slice) {
+        int idx = sortedSlices.indexOf(slice);
+        //if (slice.isSelected())
+            table.getSelectionModel().addSelectionInterval(idx, idx);
+    }
+
+    @Override
+    public void sliceDeselected(SliceSources slice) {
+        int idx = sortedSlices.indexOf(slice);
+        //if (!slice.isSelected())
+            table.getSelectionModel().removeSelectionInterval(idx, idx);
+    }
+
+    int currentIndex = -1;
+
+    @Override
+    public void isCurrentSlice(SliceSources slice) {
+        int oldIndex = currentIndex;
+        currentIndex = -1;
+        model.fireTableCellUpdated(oldIndex,0);
+        int idx = sortedSlices.indexOf(slice);
+        currentIndex = idx;
+        model.fireTableCellUpdated(idx,0);
     }
 
     List<Integer> currentlySelectedIndices = new ArrayList<>();
@@ -237,18 +271,23 @@ public class DisplayPanel implements MultiSlicePositioner.SliceChangeListener, L
 
         if (lsm.isSelectionEmpty()) {
             //output.append(" <none>");
+           // sortedSlices.forEach(SliceSources::deSelect);
         } else {
 
             // Find out which indexes are selected.
             int minIndex = lsm.getMinSelectionIndex();
             int maxIndex = lsm.getMaxSelectionIndex();
-            for (int i = minIndex; i <= maxIndex; i++) {
+            for (int i = 0; i < sortedSlices.size(); i++) {
                 if (lsm.isSelectedIndex(i)) {
                     currentSelection.add(i);
+                    sortedSlices.get(i).select();
+                } else {
+                    sortedSlices.get(i).deSelect();
                 }
             }
-        }
 
+        }
+        mp.getBdvh().getViewerPanel().getDisplay().repaint(); // To update current selection state
         setCurrentlySelectedIndices(currentSelection);
     }
 
@@ -266,7 +305,7 @@ public class DisplayPanel implements MultiSlicePositioner.SliceChangeListener, L
             } else if ((columnIndex) == 1) {
                 return "Vis.";
             } else if (columnIndex%2 == 0) {
-                int iChannel = (columnIndex-3)/2;
+                int iChannel = (columnIndex-2)/2;
                 return "Ch_"+iChannel;
             } else {
                 return "";
@@ -287,7 +326,10 @@ public class DisplayPanel implements MultiSlicePositioner.SliceChangeListener, L
         public Object getValueAt(int rowIndex, int columnIndex) {
             SliceSources slice =  sortedSlices.get(rowIndex); // Not efficient
             if ((columnIndex == 0)) {
-                return new Integer(rowIndex).toString();
+                if (rowIndex == currentIndex) {
+                    return "["+new Integer(rowIndex).toString()+"]";
+                }
+                return " "+new Integer(rowIndex).toString();
             } else if ((columnIndex) == 1) {
                 return new Boolean(slice.getGUIState().isSliceVisible());
             } else if (columnIndex%2 == 0) {
@@ -479,7 +521,7 @@ public class DisplayPanel implements MultiSlicePositioner.SliceChangeListener, L
 
                 Color newColor = new Color(ds.color[0], ds.color[1], ds.color[2]);
                 setBackground(newColor);
-                setForeground(new Color(255 - ds.color[0], 255 - ds.color[1], 255 - ds.color[2]));
+                setForeground(new Color( (ds.color[0]+128) % 256, (ds.color[1]+128) % 256, (ds.color[2]+128)%256));
                 setText((int) ds.min + ":" + (int) ds.max);
                 if (isBordered) {
                     if (isSelected) {
@@ -512,7 +554,7 @@ public class DisplayPanel implements MultiSlicePositioner.SliceChangeListener, L
 
         static {
             URL iconURL;
-            iconURL = DisplayPanel.class.getResource("/graphics/Visible.png");
+            iconURL = SliceDisplayPanel.class.getResource("/graphics/Visible.png");
 
             visibleIcon = new ImageIcon(iconURL);
             Image image = visibleIcon.getImage(); // transform it
@@ -520,7 +562,7 @@ public class DisplayPanel implements MultiSlicePositioner.SliceChangeListener, L
             visibleIcon = new ImageIcon(newimg);  // transform it back
 
 
-            iconURL = DisplayPanel.class.getResource("/graphics/InvisibleL.png");
+            iconURL = SliceDisplayPanel.class.getResource("/graphics/InvisibleL.png");
             invisibleIcon = new ImageIcon(iconURL);
             image = invisibleIcon.getImage(); // transform it
             newimg = image.getScaledInstance(15, 15,  java.awt.Image.SCALE_SMOOTH); // scale it the smooth way
@@ -571,82 +613,5 @@ public class DisplayPanel implements MultiSlicePositioner.SliceChangeListener, L
         }
     }
 
-
-    public class DisplaysettingsEditor extends AbstractCellEditor
-            implements TableCellEditor,
-            ActionListener {
-        Displaysettings currentDisplaySettings = new Displaysettings(-1);
-        JButton button;
-        //JColorChooser colorChooser;
-        //JDialog dialog;
-        protected static final String EDIT = "edit";
-        volatile Future<CommandModule> cm;
-
-        public DisplaysettingsEditor() {
-            //Set up the editor (from the table's point of view),
-            //which is a button.
-            //This button brings up the color chooser dialog,
-            //which is the editor from the user's point of view.
-            button = new JButton();
-            button.setActionCommand(EDIT);
-            button.addActionListener(this);
-            button.setBorderPainted(false);
-
-            //Set up the dialog that the button brings up.
-            //colorChooser = new JColorChooser();
-            /*dialog = JColorChooser.createDialog(button,
-                    "Pick a Color",
-                    true,  //modal
-                    colorChooser,
-                    this,  //OK button handler
-                    null); //no CANCEL button handler*/
-        }
-
-        /**
-         * Handles events from the editor button and from
-         * the dialog's OK button.
-         */
-        public void actionPerformed(ActionEvent e) {
-            if (EDIT.equals(e.getActionCommand())) {
-                log.accept("Inside action");
-
-                cm = null;
-                cm = mp.scijavaCtx
-                        .getService(CommandService.class)
-                        .run(DisplaySettingsCommand.class, false);
-                //fireEditingStopped();
-                try {
-                    Thread.sleep(3000);
-                } catch (Exception exception) {
-
-                }
-
-            } else { //User pressed dialog's "OK" button.
-              //   currentColor = colorChooser.getColor();
-                log.accept("Other stuff");
-            }
-        }
-
-        //Implement the one CellEditor method that AbstractCellEditor doesn't.
-        public Object getCellEditorValue() {
-            try {
-                cm.get();
-            } catch (Exception exception) {
-                exception.printStackTrace();
-            }
-            System.out.println("Getting Cell Editor Value NOW");
-            return currentDisplaySettings;
-        }
-
-        //Implement the one method defined by TableCellEditor.
-        public Component getTableCellEditorComponent(JTable table,
-                                                     Object value,
-                                                     boolean isSelected,
-                                                     int row,
-                                                     int column) {
-            currentDisplaySettings = (Displaysettings) value;
-            return button;
-        }
-    }
 
 }

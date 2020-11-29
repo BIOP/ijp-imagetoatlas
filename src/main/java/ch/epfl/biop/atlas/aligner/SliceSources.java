@@ -151,13 +151,17 @@ public class SliceSources {
     }
 
     public synchronized void select() {
-        this.isSelected = true;
-        //guiState.select();
+        if (!this.isSelected) {
+            this.isSelected = true;
+            guiState.select();
+        }
     }
 
     public synchronized void deSelect() {
-        this.isSelected = false;
-        //guiState.deselect();
+        if (this.isSelected) {
+            this.isSelected = false;
+            guiState.deselect();
+        }
     } // TODO : thread lock!
 
     public boolean isSelected() {
