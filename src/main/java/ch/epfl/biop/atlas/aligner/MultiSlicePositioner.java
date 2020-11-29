@@ -37,6 +37,7 @@ import org.scijava.object.ObjectService;
 import org.scijava.ui.behaviour.*;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
+import sc.fiji.bdvpg.bdv.BdvUtils;
 import sc.fiji.bdvpg.behaviour.EditorBehaviourUnInstaller;
 import sc.fiji.bdvpg.scijava.BdvHandleHelper;
 import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
@@ -214,8 +215,8 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.changeSliceDisplayMode(), "toggle_single_source_mode", "S");
         common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.cancelLastAction(), "cancel_last_action", "ctrl Z");
         common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.redoAction(), "redo_last_action", "ctrl Y", "ctrl shift Z");
-        common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.navigateNextSlice(), "navigate_next_slice", "N");
-        common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.navigatePreviousSlice(), "navigate_previous_slice", "P"); // P taken for panel
+        common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.navigateNextSlice(), "navigate_next_slice", "N", "RIGHT");
+        common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.navigatePreviousSlice(), "navigate_previous_slice", "P", "LEFT"); // P taken for panel
         common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.navigateCurrentSlice(), "navigate_current_slice", "C");
         common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.nextMode(), "change_mode", "Q");
 
@@ -619,7 +620,13 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                 iCurrentSlice = 0;
             }
             if (sortedSlices.size() > 0) {
-                centerBdvViewOn(sortedSlices.get(iCurrentSlice));
+
+                SliceSources previousSlice = null;
+                if ((previousSliceIndex>=0)&&(previousSliceIndex<sortedSlices.size())) {
+                    previousSlice = sortedSlices.get(previousSliceIndex);
+                }
+                centerBdvViewOn(sortedSlices.get(iCurrentSlice), true, previousSlice);
+                //centerBdvViewOn(sortedSlices.get(iCurrentSlice), true);
                 if ((previousSliceIndex>=0)&&(previousSliceIndex<sortedSlices.size())) { // Could have been deleted
                     sortedSlices.get(previousSliceIndex).getGUIState().isNotCurrent();
                 }
@@ -664,6 +671,19 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
     }
 
+    public SliceSources getCurrentSlice() {
+        List<SliceSources> sortedSlices = getSortedSlices();
+
+            if (sortedSlices.size()>0) {
+            if (iCurrentSlice >= sortedSlices.size()) {
+                iCurrentSlice = 0;
+            }
+            return sortedSlices.get(iCurrentSlice);
+        } else {
+            return null;
+        }
+    }
+
     /**
      * Center bdv on current slice (iCurrentSlice)
      */
@@ -692,7 +712,11 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         }
 
         if (sortedSlices.size() > 0) {
-            centerBdvViewOn(sortedSlices.get(iCurrentSlice));
+            SliceSources previousSlice = null;
+            if ((previousSliceIndex>=0)&&(previousSliceIndex<sortedSlices.size())) {
+                previousSlice = sortedSlices.get(previousSliceIndex);
+            }
+            centerBdvViewOn(sortedSlices.get(iCurrentSlice), true, previousSlice);
             if ((previousSliceIndex>=0)&&(previousSliceIndex<sortedSlices.size())) { // Could have been deleted
                 sortedSlices.get(previousSliceIndex).getGUIState().isNotCurrent();
             }
@@ -726,56 +750,66 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         });
     }
 
+    public void centerBdvViewOn(SliceSources slice) {
+        centerBdvViewOn(slice, false, null);
+    }
+
     /**
      * Center bdv on a slice
      *
-     * @param slice
      */
-    public void centerBdvViewOn(SliceSources slice) {
+    public void centerBdvViewOn(SliceSources current_slice, boolean maintainoffset, SliceSources previous_slice) {
+
+        RealPoint offset = new RealPoint(3);
+
+        if ((maintainoffset)&&(previous_slice!=null)) {
+
+                RealPoint oldCenter = new RealPoint(3);
+
+                if (displayMode == MultiSlicePositioner.POSITIONING_MODE_INT) {
+                    oldCenter = previous_slice.getGUIState().getCenterPositionPMode();
+                } else if (displayMode == MultiSlicePositioner.REGISTRATION_MODE_INT) {
+                    oldCenter = previous_slice.getGUIState().getCenterPositionRMode();
+                }
+
+                RealPoint centerScreen = getCurrentBdvCenter();
+                offset.setPosition(-oldCenter.getDoublePosition(0) + centerScreen.getDoublePosition(0), 0);
+                offset.setPosition(-oldCenter.getDoublePosition(1) + centerScreen.getDoublePosition(1), 1);
+                offset.setPosition(-oldCenter.getDoublePosition(2) + centerScreen.getDoublePosition(2), 2);
+
+                if (Math.abs(offset.getDoublePosition(0))>sX/2.0) {maintainoffset = false;}
+                if (Math.abs(offset.getDoublePosition(1))>sY/2.0) {maintainoffset = false;}
+
+        } else {
+            maintainoffset = false;
+        }
 
         RealPoint centerSlice = new RealPoint(3);
 
         if (displayMode == MultiSlicePositioner.POSITIONING_MODE_INT) {
-            centerSlice = slice.getGUIState().getCenterPositionPMode();
+            centerSlice = current_slice.getGUIState().getCenterPositionPMode();
         } else if (displayMode == MultiSlicePositioner.REGISTRATION_MODE_INT) {
-            centerSlice = slice.getGUIState().getCenterPositionRMode();
+            centerSlice = current_slice.getGUIState().getCenterPositionRMode();
         }
 
-        AffineTransform3D nextAffineTransform = new AffineTransform3D();
+        if(maintainoffset) {
+            centerSlice.move(offset);
+        }
+        AffineTransform3D at3d = BdvUtils.getViewerTransformWithNewCenter(bdvh, centerSlice.positionAsDoubleArray());
 
-        // It should have the same scaling and rotation than the current view
-        AffineTransform3D at3D = new AffineTransform3D();
-        bdvh.getViewerPanel().state().getViewerTransform(at3D);
-        nextAffineTransform.set(at3D);
-
-        // No Shift
-        nextAffineTransform.set(0, 0, 3);
-        nextAffineTransform.set(0, 1, 3);
-        nextAffineTransform.set(0, 2, 3);
-
-        double next_wcx = bdvh.getViewerPanel().getWidth() / 2.0; // Next Window Center X
-        double next_wcy = bdvh.getViewerPanel().getHeight() / 2.0; // Next Window Center Y
-
-        RealPoint centerScreenNextBdv = new RealPoint(new double[]{next_wcx, next_wcy, 0});
-        RealPoint shiftNextBdv = new RealPoint(3);
-
-        nextAffineTransform.inverse().apply(centerScreenNextBdv, shiftNextBdv);
-
-        double sx = -centerSlice.getDoublePosition(0) + shiftNextBdv.getDoublePosition(0);
-        double sy = -centerSlice.getDoublePosition(1) + shiftNextBdv.getDoublePosition(1);
-        double sz = -centerSlice.getDoublePosition(2) + shiftNextBdv.getDoublePosition(2);
-
-        RealPoint shiftWindow = new RealPoint(new double[]{sx, sy, sz});
-        RealPoint shiftMatrix = new RealPoint(3);
-        nextAffineTransform.apply(shiftWindow, shiftMatrix);
-
-        nextAffineTransform.set(shiftMatrix.getDoublePosition(0), 0, 3);
-        nextAffineTransform.set(shiftMatrix.getDoublePosition(1), 1, 3);
-        nextAffineTransform.set(shiftMatrix.getDoublePosition(2), 2, 3);
-
-        bdvh.getViewerPanel().state().setViewerTransform(nextAffineTransform);
+        bdvh.getViewerPanel().state().setViewerTransform(at3d);
         bdvh.getViewerPanel().requestRepaint();
 
+    }
+
+    RealPoint getCurrentBdvCenter() {
+        RealPoint centerBdv = new RealPoint(3);
+
+        double px = bdvh.getViewerPanel().getDisplay().getWidth() / 2.0;
+        double py = bdvh.getViewerPanel().getDisplay().getHeight() / 2.0;
+        bdvh.getViewerPanel().displayToGlobalCoordinates(px,py,centerBdv);
+
+        return centerBdv;
     }
 
     protected void updateDisplay() {

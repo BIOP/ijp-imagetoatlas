@@ -1,6 +1,5 @@
 package ch.epfl.biop.registration.sourceandconverter.spline;
 
-import bdv.gui.TransformTypeSelectDialog;
 import bdv.tools.brightness.ConverterSetup;
 import bdv.util.BdvHandle;
 import bdv.viewer.SourceAndConverter;
@@ -145,14 +144,14 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
                 }
                 toFile+="\n";
             }
-            System.out.println(toFile);
+            //System.out.println(toFile);
 
             FileWriter writer = new FileWriter(file);
             writer.write(toFile);
             writer.flush();
             writer.close();
 
-            System.out.println(file.getAbsolutePath());
+            //System.out.println(file.getAbsolutePath());
 
             return file.getAbsolutePath();
         } catch (IOException e) {

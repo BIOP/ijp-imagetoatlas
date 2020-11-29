@@ -17,6 +17,7 @@ import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -133,6 +134,19 @@ public class SliceDisplayPanel implements MultiSlicePositioner.SliceChangeListen
             }
         });
         table.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (e.isPopupTrigger() && e.getComponent() instanceof JTable ) {
+
+                    SliceSources[] slices = getSelectedIndices().stream()
+                            .map(idx -> sortedSlices.get(idx))
+                            .collect(Collectors.toList()).toArray(new SliceSources[0]);
+                    JPopupMenu popup = new SliceSourcesPopupMenu(mp, slices).getPopup();
+                    popup.show(e.getComponent(), e.getX(), e.getY());
+                }
+                super.mouseReleased(e);
+            }
+
             @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 int row = table.rowAtPoint(evt.getPoint());
