@@ -1320,12 +1320,12 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         }
     }
 
-    public void registerElastixSpline(int iChannelFixed, int iChannelMoving, boolean showIJ1Result) {
-        registerElastixSpline(getChannel(iChannelFixed), getChannel(iChannelMoving), showIJ1Result);
+    public void registerElastixSpline(int iChannelFixed, int iChannelMoving, int nbControlPointsX, boolean showIJ1Result) {
+        registerElastixSpline(getChannel(iChannelFixed), getChannel(iChannelMoving), nbControlPointsX,  showIJ1Result);
     }
 
     public void registerElastixSpline(SourcesProcessor preprocessFixed,
-                                      SourcesProcessor preprocessMoving, boolean showIJ1Result) {
+                                      SourcesProcessor preprocessMoving, int nbControlPointsX, boolean showIJ1Result) {
         if (getSelectedSources().size()==0) {
             log.accept("Registration ignored : no slice selected");
         }
@@ -1346,6 +1346,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                 params.put("pz", 0);//slice.getSlicingAxisPosition());
                 params.put("sx", roiSX);
                 params.put("sy", roiSY);
+                params.put("nbControlPointsX", nbControlPointsX);
                 elastixSplineReg.setScijavaParameters(params);
 
                 AffineTransform3D at3d = new AffineTransform3D();

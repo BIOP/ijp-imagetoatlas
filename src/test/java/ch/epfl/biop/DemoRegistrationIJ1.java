@@ -27,7 +27,7 @@ public class DemoRegistrationIJ1 {
 
         SourceAndConverter[] sac = ij.convert().convert(demoSlice.getTitle(), SourceAndConverter[].class);
 
-        mp.createSlice(sac,4.5);//, 2, Tile.class, new Tile(-1));
+        mp.createSlice(sac,4.5);
 
         SliceSources slice = mp.getSortedSlices().get(0);
 
@@ -35,7 +35,7 @@ public class DemoRegistrationIJ1 {
         mp.selectSlice(slice);
 
         mp.registerElastixAffine(1,0, false);
-        mp.registerElastixSpline(0,0, false);
+        mp.registerElastixSpline(0,0, 4,false);
 
         mp.exportSelectedSlicesRegionsToRoiManager("name");
 

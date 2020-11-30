@@ -244,11 +244,11 @@ public class AtlasDisplayPanel implements MultiSlicePositioner.ModeListener {//}
             } else if ((columnIndex) == 1) {
                 Boolean flag = (Boolean) aValue;
 
-                log.accept(" All sources atlas set "+flag);
+                //log.accept(" All sources atlas set "+flag);
                 globalFlagVisible = flag;
                 for (int i=0; i<getSources().length;i++) {
                     SourceAndConverter sac = getSources()[i];
-                    if (globalFlagPerChannel.get(i)&&flag) {
+                    if (globalFlagPerChannel.get(i)) {
                         mp.getBdvh().getViewerPanel().state().setSourceActive(sac, flag);
                     }
                 }
