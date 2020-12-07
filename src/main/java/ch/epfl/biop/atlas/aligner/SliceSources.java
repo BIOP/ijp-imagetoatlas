@@ -24,6 +24,7 @@ import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
 import sc.fiji.bdvpg.scijava.services.ui.SourceAndConverterInspector;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterAndTimeRange;
+import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterUtils;
 import sc.fiji.bdvpg.sourceandconverter.importer.EmptySourceAndConverterCreator;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceResampler;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
@@ -718,9 +719,11 @@ public class SliceSources {
         }
     }
 
-    // TODO!!!!!!!!
     public int getAdaptedMipMapLevel(double pxSizeInMm) {
-        return registered_sacs[0].getSpimSource().getNumMipmapLevels() - 1;
+        /*int maxLevel = registered_sacs[0].getSpimSource().getNumMipmapLevels() - 1;
+        int chosenLevel = SourceAndConverterUtils.bestLevel(registered_sacs[0],0,pxSizeInMm);
+        mp.log.accept(this+":"+chosenLevel+ "/" +maxLevel);*/
+        return SourceAndConverterUtils.bestLevel(registered_sacs[0],0,pxSizeInMm);
     }
 
     public static class RegistrationAndSources {

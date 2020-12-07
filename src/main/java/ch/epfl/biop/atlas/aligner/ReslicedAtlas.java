@@ -3,6 +3,7 @@ package ch.epfl.biop.atlas.aligner;
 import bdv.tools.transformation.TransformedSource;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.BiopAtlas;
+import ch.epfl.biop.sourceandconverter.EmptyMultiResolutionSourceAndConverterCreator;
 import ch.epfl.biop.registration.sourceandconverter.affine.AffineTransformedSourceWrapperRegistration;
 import ch.epfl.biop.sourceandconverter.transform.SourceMosaicZSlicer;
 import net.imglib2.RandomAccessibleInterval;
@@ -125,9 +126,10 @@ public class ReslicedAtlas {
                 }
 
         // Adds a margin of 15 % for tilt correction
-
-        minZAxis*=1.15;
-        maxZAxis*=1.15;
+        double cZ = (minZAxis+maxZAxis)/2.0;
+        double dZ = (maxZAxis-minZAxis)/2.0;
+        minZAxis = cZ - dZ*1.15;
+        maxZAxis = cZ + dZ*1.15;
 
         // Adds margin XY 15 % also for correct registration
         double cX = (maxXAxis+minXAxis)/2.0;
@@ -144,7 +146,7 @@ public class ReslicedAtlas {
 
         // Gets slicing resolution
         // TODO : check null pointer exception if getvoxel not present
-        double slicingResolution = 0.01;
+        //double slicingResolution = 0.01;
 
         slicingTransfom.scale(slicingResolution);
 
@@ -156,23 +158,28 @@ public class ReslicedAtlas {
 
         // ------------------- NOW COMPUTES SOURCEANDCONVERTERS
         // 0 - slicing model : empty source but properly defined in space and resolution
-        SourceAndConverter nonWrappedSlicingModel = new EmptySourceAndConverterCreator("SlicingModel",new AffineTransform3D(),
+        AffineTransform3D m = new AffineTransform3D();
+        /*SourceAndConverter nonWrappedSlicingModel = new EmptySourceAndConverterCreator("SlicingModel", m,
                 nPixX,
                 nPixY,
                 nPixZ
+        ).get();*/
+        SourceAndConverter nonWrappedSlicingModel = new EmptyMultiResolutionSourceAndConverterCreator("SlicingModel", m,
+                nPixX,
+                nPixY,
+                nPixZ,
+                2,2,1,5
         ).get();
 
         if (slicingModel!=null) {
-            SourceAndConverterServices.getSourceAndConverterService().remove(slicingModel);
+            SourceAndConverterServices.getSourceAndConverterService().remove(slicingModel); // Hmm maybe I should document what I do...
         }
-
         // Wrapped as TransformedSource to adjust slicing
         slicingModel = new SourceAffineTransformer(nonWrappedSlicingModel, slicingTransfom).getSourceOut();
 
         SourceAndConverterServices.getSourceAndConverterService().register(slicingModel);
 
         // 1 -
-
         extendedSlicedSources = new SourceAndConverter[ba.map.getStructuralImages().length+1];
         SourceAndConverter[] tempNonExtendedSlicedSources = new SourceAndConverter[ba.map.getStructuralImages().length+1];
 
@@ -222,7 +229,14 @@ public class ReslicedAtlas {
 
     }
 
-    public static  void adjustShiftSlicingTransform(AffineTransform3D slicingTransfom, long nX, long nY, long nZ) {
+    /**
+     * ?? TODO : doc
+     * @param slicingTransfom
+     * @param nX
+     * @param nY
+     * @param nZ
+     */
+    public static void adjustShiftSlicingTransform(AffineTransform3D slicingTransfom, long nX, long nY, long nZ) {
         AffineTransform3D notShifted = new AffineTransform3D();
         notShifted.set(slicingTransfom);
         notShifted.set(0,0,3);
