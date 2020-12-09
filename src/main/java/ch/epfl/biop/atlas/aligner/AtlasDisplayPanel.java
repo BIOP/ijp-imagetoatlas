@@ -2,7 +2,10 @@ package ch.epfl.biop.atlas.aligner;
 
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.commands.DisplaySettingsCommand;
+import org.scijava.command.CommandModule;
 import org.scijava.command.CommandService;
+import org.scijava.module.ModuleService;
+import org.scijava.util.ColorRGB;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterUtils;
 import spimdata.util.Displaysettings;
 import spimdata.util.DisplaysettingsHelper;
@@ -107,9 +110,16 @@ public class AtlasDisplayPanel implements MultiSlicePositioner.ModeListener {//}
 
                             Runnable update = () -> {model.fireTableCellUpdated(row, col);};
 
+                            // ---- Just to have the correct parameters displayed (dirty hack)
+                            Displaysettings ds_in = new Displaysettings(-1);
+                            DisplaysettingsHelper.GetDisplaySettingsFromCurrentConverter(sacs[0], ds_in);
+                            DisplaySettingsCommand.IniValue = ds_in;
+
                             mp.scijavaCtx
                                     .getService(CommandService.class)
-                                    .run(DisplaySettingsCommand.class, true, "sacs", sacs, "postrun", update);
+                                    .run(DisplaySettingsCommand.class, true,
+                                            "sacs", sacs,
+                                            "postrun", update);
                         } else {
                             mp.log.accept("This slice has no channel indexed "+iChannel);
                         }

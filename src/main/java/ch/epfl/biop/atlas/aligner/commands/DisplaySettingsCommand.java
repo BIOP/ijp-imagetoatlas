@@ -1,8 +1,11 @@
 package ch.epfl.biop.atlas.aligner.commands;
 
 import bdv.viewer.SourceAndConverter;
+import org.scijava.Initializable;
 import org.scijava.ItemIO;
 import org.scijava.command.Command;
+import org.scijava.command.DynamicCommand;
+import org.scijava.module.MutableModuleItem;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.util.ColorRGB;
@@ -11,15 +14,18 @@ import spimdata.util.Displaysettings;
 import spimdata.util.DisplaysettingsHelper;
 
 @Plugin(type = Command.class)
-public class DisplaySettingsCommand implements Command {
+public class DisplaySettingsCommand extends DynamicCommand implements
+        Initializable {
 
-    @Parameter
+    public static Displaysettings IniValue;
+
+    @Parameter(persist = false)
     double min;
 
-    @Parameter
+    @Parameter(persist = false)
     double max;
 
-    @Parameter
+    @Parameter(persist = false)
     ColorRGB color;
 
     @Parameter
@@ -28,8 +34,23 @@ public class DisplaySettingsCommand implements Command {
     @Parameter(type = ItemIO.OUTPUT)
     Displaysettings ds;
 
-    @Parameter
+    @Parameter(required = false)
     Runnable postrun;
+
+    @Override
+    public void initialize() {
+        final MutableModuleItem<ColorRGB> colorItem = //
+                getInfo().getMutableInput("color", ColorRGB.class);
+        colorItem.setValue(this, new ColorRGB(IniValue.color[0],IniValue.color[1],IniValue.color[2]));
+
+        final MutableModuleItem<Double> minItem = //
+                getInfo().getMutableInput("min", Double.class);
+        minItem.setValue(this, new Double(IniValue.min));
+
+        final MutableModuleItem<Double> maxItem = //
+                getInfo().getMutableInput("max", Double.class);
+        maxItem.setValue(this, new Double(IniValue.max));
+    }
 
     @Override
     public void run() {
@@ -46,4 +67,5 @@ public class DisplaySettingsCommand implements Command {
             postrun.run();
         }
     }
+
 }
