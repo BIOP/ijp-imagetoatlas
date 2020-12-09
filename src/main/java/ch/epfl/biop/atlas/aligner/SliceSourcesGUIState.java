@@ -1,13 +1,9 @@
 package ch.epfl.biop.atlas.aligner;
 
-import bdv.util.BdvFunctions;
-import bdv.util.BdvStackSource;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.registration.sourceandconverter.affine.AffineTransformedSourceWrapperRegistration;
-import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
-import net.imglib2.type.numeric.ARGBType;
 import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;

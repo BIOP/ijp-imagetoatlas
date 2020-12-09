@@ -79,6 +79,8 @@ public class CreateSlice extends CancelableAction {
 
             mp.updateDisplay();
 
+            sliceSource.getGUIState().sliceDisplayModeChanged(); // Triggers redraw on cancel
+
             mp.log.accept("Slice added");
         }
         return true;
@@ -94,10 +96,8 @@ public class CreateSlice extends CancelableAction {
 
     @Override
     public boolean cancel() {
-        System.out.println("Cancelling source creation");
         mp.removeSlice(sliceSource);
-
-        mp.log.accept("Slice removed");
+        mp.log.accept("Slice "+sliceSource+" removed ");
         return true;
     }
 

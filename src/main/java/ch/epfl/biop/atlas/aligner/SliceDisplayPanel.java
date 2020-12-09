@@ -174,10 +174,16 @@ public class SliceDisplayPanel implements MultiSlicePositioner.SliceChangeListen
 
         // What happened to the number of channels ?
         if (slice.nChannels==maxChannels) {
+
             // Maybe it's the last one with this number of channels...
             int newMaxChannels;
-            newMaxChannels = slices.stream()
-                    .mapToInt(s -> s.nChannels).max().getAsInt();
+            if (slices.size()==0) { // special case : hangs forever if the last slice is removed
+                newMaxChannels = 0;
+            } else {
+                newMaxChannels = slices.stream()
+                        .mapToInt(s -> s.nChannels).max().getAsInt();
+            }
+
             if (newMaxChannels < maxChannels) {
                 // The number of channels diminished... full update
                 maxChannels = newMaxChannels;
@@ -185,6 +191,7 @@ public class SliceDisplayPanel implements MultiSlicePositioner.SliceChangeListen
 
                 globalFlagPerChannel.remove(globalFlagPerChannel.size()-1);
                 globalDisplaySettingsPerChannel.remove(globalDisplaySettingsPerChannel.size()-1);
+
                 modelSelect.fireTableStructureChanged();
             }
 

@@ -814,7 +814,6 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
     protected void updateDisplay() {
         // Sort slices along slicing axis
-
         if (overlapMode == 0) {
             slices.forEach(slice -> slice.getGUIState().setYShift(1));
         } else if (overlapMode == 2) {
@@ -1031,7 +1030,10 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     }
 
     protected void removeSlice(SliceSources sliceSource) {
-        listeners.forEach(listener -> listener.sliceDeleted(sliceSource));
+        listeners.forEach(listener -> {
+            System.out.println(listener);
+            listener.sliceDeleted(sliceSource);
+        });
         slices.remove(sliceSource);
         sliceSource.getGUIState().sliceDeleted();
     }
@@ -1323,6 +1325,18 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     public void registerElastixSpline(int iChannelFixed, int iChannelMoving, int nbControlPointsX, boolean showIJ1Result) {
         registerElastixSpline(getChannel(iChannelFixed), getChannel(iChannelMoving), nbControlPointsX,  showIJ1Result);
     }
+
+    /*protected void ignoreSlice(SliceSources slice) {
+        synchronized (slices) {
+            slices.remove(slice);
+        }
+    }
+
+    protected void considerSlice(SliceSources slice) {
+        /*synchronized (slices) {
+            slices.add(slice);
+        }
+    }*/
 
     public void registerElastixSpline(SourcesProcessor preprocessFixed,
                                       SourcesProcessor preprocessMoving, int nbControlPointsX, boolean showIJ1Result) {
@@ -2070,6 +2084,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     List<SliceChangeListener> listeners = new ArrayList<>();
 
     public void addSliceListener(SliceChangeListener listener) {
+        System.out.println("listener :"+listener);
         listeners.add(listener);
     }
 
