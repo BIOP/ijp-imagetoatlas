@@ -13,7 +13,7 @@ public class RegistrationElastixSplineCommand extends RegistrationCommand {
     @Parameter(label = "Show registration results as ImagePlus")
     boolean showIJ1Result;
 
-    public void run() {
+    public void runValidated() {
         mp.registerElastixSpline(getFixedFilter(), getMovingFilter(), nbControlPointsX, showIJ1Result);
     }
 

@@ -75,7 +75,11 @@ public class RegisterSlice extends CancelableAction {
                 g.setColor(new Color(255, 255, 0, 200));
                 break;
         }
-        g.fillOval((int) (px - 7), (int) (py - 7), 14, 14);
+        if (registration.isManual()) {
+            g.fillRect((int) (px - 7), (int) (py - 7), 14, 14);
+        } else {
+            g.fillOval((int) (px - 7), (int) (py - 7), 14, 14);
+        }
         g.setColor(new Color(255, 255, 255, 200));
         g.drawString("R", (int) px - 4, (int) py + 5);
     }

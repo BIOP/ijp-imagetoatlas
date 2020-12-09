@@ -10,7 +10,7 @@ public class RegistrationElastixAffineCommand extends RegistrationCommand {
     @Parameter(label = "Show registration results as ImagePlus")
     boolean showIJ1Result;
 
-    public void run() {
+    public void runValidated() {
         mp.registerElastixAffine(getFixedFilter(), getMovingFilter(), showIJ1Result);
     }
 

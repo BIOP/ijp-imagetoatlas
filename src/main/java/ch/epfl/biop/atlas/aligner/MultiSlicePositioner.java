@@ -157,12 +157,12 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
     double roiPX, roiPY, roiSX, roiSY;
 
-    Consumer<String> log = (message) -> {
+    public Consumer<String> log = (message) -> {
         System.out.println("Multipositioner : "+message);
         getBdvh().getViewerPanel().showMessage(message);
     };
 
-    Consumer<String> errlog = (message) -> {
+    public Consumer<String> errlog = (message) -> {
         System.err.println("Multipositioner : "+message);
     };
 
@@ -1080,6 +1080,29 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
     public void removeModeListener(ModeListener modeListener) {
         modeListeners.remove(modeListener);
+    }
+
+    public BiopAtlas getAtlas() {
+        return biopAtlas;
+    }
+
+    public int getNumberOfAtlasChannels() {
+        return reslicedAtlas.nonExtendedSlicedSources.length;
+    }
+
+    public int getNumberOfSelectedSources() {
+        return getSelectedSources().size();
+    }
+
+    public int getChannelBoundForSelectedSlices() {
+        List<SliceSources> sources = getSelectedSources();
+        if (sources.size()==0) {
+            return 0;
+        } else {
+            return sources.stream()
+                    .mapToInt(slice -> slice.nChannels)
+                    .min().getAsInt();
+        }
     }
 
     /**
