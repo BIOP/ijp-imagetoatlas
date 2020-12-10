@@ -485,9 +485,9 @@ public class SliceSources {
             CompositeFloatPoly roi = roiList.rois.get(i);
             int atlasId = Integer.valueOf(roi.name );
             // Issue with modulo 65000!!
-            if (mp.biopAtlas.ontology instanceof AllenOntology) {
+            /*if (mp.biopAtlas.ontology instanceof AllenOntology) {
                 atlasId = atlasId % 65000;
-            }
+            }*/
             String name = mp.biopAtlas.ontology.getProperties(atlasId).get(namingChoice);
             roi.name = name;
             roi.color = mp.biopAtlas.ontology.getColor(atlasId);
@@ -576,7 +576,7 @@ public class SliceSources {
             if (bvs.getAttribute(QuPathEntryEntity.class)!=null) {
                 QuPathEntryEntity qpent = bvs.getAttribute(QuPathEntryEntity.class);
 
-                String filePath = qpent.getQuPathProjectionLocation();
+                String filePath = new File(qpent.getQuPathProjectionLocation()).getParent();
 
                 // under filePath, there should be a folder data/#entryID
 

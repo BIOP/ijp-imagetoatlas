@@ -8,9 +8,9 @@ import java.text.DecimalFormat;
  */
 public class MoveSlice extends CancelableAction {
 
-    private SliceSources sliceSource;
-    private double oldSlicingAxisPosition;
-    private double newSlicingAxisPosition;
+    private final SliceSources sliceSource;
+    private final double oldSlicingAxisPosition;
+    private final double newSlicingAxisPosition;
 
     public MoveSlice(MultiSlicePositioner mp, SliceSources sliceSource, double slicingAxisPosition) {
         super(mp);
