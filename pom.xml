@@ -137,17 +137,17 @@
 
 		<bigdataviewer-biop-tools.version>0.2.0-SNAPSHOT</bigdataviewer-biop-tools.version>
 		<bigdataviewer-bioformats.version>0.2.9</bigdataviewer-bioformats.version>
-		<bigdataviewer-playground.version>0.2.7-SNAPSHOT</bigdataviewer-playground.version>
+		<bigdataviewer-playground.version>0.2.7</bigdataviewer-playground.version>
 		<bigdataviewer-selector.version>0.1.5</bigdataviewer-selector.version>
 
 		<bigdataviewer-core.version>10.0.2</bigdataviewer-core.version>
-		<bigdataviewer-vistools.version>1.0.0-beta-24-SNAPSHOT</bigdataviewer-vistools.version>
+		<bigdataviewer-vistools.version>1.0.0-beta-24</bigdataviewer-vistools.version>
 		<imglib2-cache.version>1.0.0-beta-15</imglib2-cache.version>
 
-		<ijl-utilities-wrappers.version>0.3.16-SNAPSHOT</ijl-utilities-wrappers.version>
+		<ijl-utilities-wrappers.version>0.3.16</ijl-utilities-wrappers.version>
 		<json.version>20180813</json.version>
 		<!-- temp build because of culling wrongly handled with warped source -->
-		<bigwarp_fiji.version>6.0.3-SNAPSHOT-NOCULLING</bigwarp_fiji.version>
+		<bigwarp_fiji.version>6.0.3-SNAPSHOT</bigwarp_fiji.version>
 
 		<bigdataviewer-spimdata-extras.version>0.1.0</bigdataviewer-spimdata-extras.version>
 
