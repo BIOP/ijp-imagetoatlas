@@ -111,13 +111,6 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
     public MultiSliceObserver mso;
 
-    /**
-     * Shift in Y : control overlay or not of sources
-     *
-     * @param bdvh
-     * @param slicingModel
-     */
-
     public int displayMode = POSITIONING_MODE_INT;
 
     public final static int POSITIONING_MODE_INT = 0;
@@ -162,9 +155,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         getBdvh().getViewerPanel().showMessage(message);
     };
 
-    public Consumer<String> errlog = (message) -> {
-        System.err.println("Multipositioner : "+message);
-    };
+    public Consumer<String> errlog = (message) -> System.err.println("Multipositioner : "+message);
 
     public List<SliceSources> getSlices() {
         return new ArrayList<>(slices);
@@ -238,8 +229,9 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         }, "toggle_editormode", "E");
 
         positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.equalSpacingSelectedSlices(), "equalSpacingSelectedSlices", "A");
-        positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> {slices.forEach(slice -> slice.select());bdvh.getViewerPanel().getDisplay().repaint();}, "selectAllSlices", "ctrl A");
-        positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> {slices.forEach(slice -> slice.deSelect());bdvh.getViewerPanel().getDisplay().repaint();}, "deselectAllSlices", "ctrl shift A");
+        //positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.equalSpacingSelectedSlices(), "stretch ", "ctrl RIGHT");
+        positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> {slices.forEach(SliceSources::select);bdvh.getViewerPanel().getDisplay().repaint();}, "selectAllSlices", "ctrl A");
+        positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> {slices.forEach(SliceSources::deSelect);bdvh.getViewerPanel().getDisplay().repaint();}, "deselectAllSlices", "ctrl shift A");
 
         List<SourceAndConverter<?>> sacsToAppend = new ArrayList<>();
         for (int i = 0; i < biopAtlas.map.getStructuralImages().length; i++) {
@@ -287,21 +279,21 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, MSPStateLoadCommand.class, hierarchyLevelsSkipped,"mp", this );
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, MSPStateSaveCommand.class, hierarchyLevelsSkipped,"mp", this);
 
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Undo [Ctrl+Z]",0,() -> this.cancelLastAction());
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Redo [Ctrl+Shift+Z]",0,() -> this.redoAction());
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Select all slices [Ctrl+A]",0,() -> slices.forEach(slice -> slice.select()));
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Deselect all slices [Ctrl+Shift+A]",0,() -> slices.forEach(slice -> slice.deSelect()));
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Undo [Ctrl+Z]",0, this::cancelLastAction);
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Redo [Ctrl+Shift+Z]",0, this::redoAction);
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Select all slices [Ctrl+A]",0,() -> slices.forEach(SliceSources::select));
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Deselect all slices [Ctrl+Shift+A]",0,() -> slices.forEach(SliceSources::deSelect));
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Distribute spacing [A]",0,() -> {
             if (this.displayMode == POSITIONING_MODE_INT) this.equalSpacingSelectedSlices();
         });
 
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Positioning Mode",0,() -> this.setPositioningMode());
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Registration Mode",0,() -> this.setRegistrationMode());
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Change Slice Display Mode [Q]",0,() -> this.changeSliceDisplayMode());
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Change Overlap Mode [O]",0,() -> this.toggleOverlap());
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Navigate>Next Slice [N]",0,() -> this.navigateNextSlice());
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Navigate>Previous Slice [P]",0,() -> this.navigatePreviousSlice());
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Navigate>Center On Current Slice [C]",0,() -> this.navigateCurrentSlice());
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Positioning Mode",0, this::setPositioningMode);
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Registration Mode",0, this::setRegistrationMode);
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Change Slice Display Mode [Q]",0, this::changeSliceDisplayMode);
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Change Overlap Mode [O]",0, this::toggleOverlap);
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Navigate>Next Slice [N]",0, this::navigateNextSlice);
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Navigate>Previous Slice [P]",0, this::navigatePreviousSlice);
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Navigate>Center On Current Slice [C]",0, this::navigateCurrentSlice);
 
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ImportQuPathProjectCommand.class, hierarchyLevelsSkipped,"mp", this );
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ImportImagePlusCommand.class, hierarchyLevelsSkipped,"mp", this );
@@ -366,7 +358,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
         };
 
-        FunctionRealRandomAccessible<UnsignedShortType> roiOverlay = new FunctionRealRandomAccessible(3, fun, () -> new UnsignedShortType());
+        FunctionRealRandomAccessible<UnsignedShortType> roiOverlay = new FunctionRealRandomAccessible<>(3, fun, UnsignedShortType::new);
 
         BdvStackSource bss = BdvFunctions.show(roiOverlay,
                 new FinalInterval(new long[]{0, 0, 0}, new long[]{10, 10, 10}),"ROI", BdvOptions.options().addTo(bdvh));
@@ -465,7 +457,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         double cur_wcx = bdvh.getViewerPanel().getWidth() / 2.0; // Current Window Center X
         double cur_wcy = bdvh.getViewerPanel().getHeight() / 2.0; // Current Window Center Y
 
-        RealPoint centerScreenCurrentBdv = new RealPoint(new double[]{cur_wcx, cur_wcy, 0});
+        RealPoint centerScreenCurrentBdv = new RealPoint(cur_wcx, cur_wcy, 0);
         RealPoint centerScreenGlobalCoord = new RealPoint(3);
 
         AffineTransform3D at3D = new AffineTransform3D();
@@ -494,7 +486,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         double next_wcx = bdvh.getViewerPanel().getWidth() / 2.0; // Next Window Center X
         double next_wcy = bdvh.getViewerPanel().getHeight() / 2.0; // Next Window Center Y
 
-        RealPoint centerScreenNextBdv = new RealPoint(new double[]{next_wcx, next_wcy, 0});
+        RealPoint centerScreenNextBdv = new RealPoint(next_wcx, next_wcy, 0);
         RealPoint shiftNextBdv = new RealPoint(3);
 
         nextAffineTransform.inverse().apply(centerScreenNextBdv, shiftNextBdv);
@@ -503,7 +495,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         double sy = -centerScreenGlobalCoord.getDoublePosition(1) + shiftNextBdv.getDoublePosition(1);
         double sz = -centerScreenGlobalCoord.getDoublePosition(2) + shiftNextBdv.getDoublePosition(2);
 
-        RealPoint shiftWindow = new RealPoint(new double[]{sx, sy, sz});
+        RealPoint shiftWindow = new RealPoint(sx, sy, sz);
         RealPoint shiftMatrix = new RealPoint(3);
         nextAffineTransform.apply(shiftWindow, shiftMatrix);
 
@@ -518,11 +510,11 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     /**
      * Gets all slices sorted along the slicing axis
      *
-     * @return
+     * @return the list of slices present, sorted along the z axis
      */
     public List<SliceSources> getSortedSlices() {
         List<SliceSources> sortedSlices = new ArrayList<>(slices);
-        Collections.sort(sortedSlices, Comparator.comparingDouble(s -> s.getSlicingAxisPosition()));
+        sortedSlices.sort(Comparator.comparingDouble(SliceSources::getSlicingAxisPosition));
         // Sending index info to slices each time this function is called
         for (int i = 0; i < sortedSlices.size(); i++) {
             sortedSlices.get(i).setIndex(i);
@@ -555,11 +547,9 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
             //synchronized (slices) {
                 reslicedAtlas.unlock();
                 displayMode = POSITIONING_MODE_INT;
-                ghs.forEach(gh -> gh.enable());
+                ghs.forEach(GraphicalHandle::enable);
                 slices.forEach(slice -> slice.getGUIState().enableGraphicalHandles());
-                getSortedSlices().forEach(slice -> {
-                    slice.getGUIState().displayModeChanged();
-                });
+                getSortedSlices().forEach(slice -> slice.getGUIState().displayModeChanged());
             //}
 
             bdvh.getTriggerbindings().removeInputTriggerMap(REGISTRATION_BEHAVIOURS_KEY);
@@ -573,11 +563,11 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     }
 
     void hide(SliceSources slice) {
-        slice.getGUIState().setSliceVisible();
+        slice.getGUIState().setSliceInvisible();
     }
 
     void show(SliceSources slice) {
-        slice.getGUIState().setSliceInvisible();
+        slice.getGUIState().setSliceVisible();
     }
 
     /**
@@ -590,12 +580,10 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
             reslicedAtlas.lock();
             displayMode = REGISTRATION_MODE_INT;
 
-            ghs.forEach(gh -> gh.disable());
+            ghs.forEach(GraphicalHandle::disable);
 
             //synchronized (slices) {
-                getSortedSlices().forEach(slice -> {
-                    slice.getGUIState().displayModeChanged();
-                });
+                getSortedSlices().forEach(slice -> slice.getGUIState().displayModeChanged());
             //}
 
             bdvh.getTriggerbindings().removeInputTriggerMap(POSITIONING_BEHAVIOURS_KEY);
@@ -636,10 +624,10 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
     /**
      * Defines, in physical units, the region that will be used to perform the automated registration
-     * @param px
-     * @param py
-     * @param sx
-     * @param sy
+     * @param px center of the region, x axis
+     * @param py center of the region, y axis
+     * @param sx size of the region, x axis
+     * @param sy size of the region, y axis
      */
     public void setROI(double px, double py, double sx, double sy) {
         if (px<-sX / 2.0) {
@@ -731,7 +719,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     }
 
     public void selectSlice(List<SliceSources> slices) {
-        selectSlice(slices.toArray(new SliceSources[slices.size()]));
+        selectSlice(slices.toArray(new SliceSources[0]));
     }
 
     public void deselectSlice(SliceSources... slices) {
@@ -741,13 +729,11 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     }
 
     public void deselectSlice(List<SliceSources> slices) {
-        deselectSlice(slices.toArray(new SliceSources[slices.size()]));
+        deselectSlice(slices.toArray(new SliceSources[0]));
     }
 
     public void waitForTasks() {
-        slices.forEach(slice -> {
-            slice.waitForEndOfTasks();
-        });
+        slices.forEach(SliceSources::waitForEndOfTasks);
     }
 
     public void centerBdvViewOn(SliceSources slice) {
@@ -892,8 +878,8 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                 g.drawOval((int) sliceCenter.getDoublePosition(0) - 15, (int) sliceCenter.getDoublePosition(1) - 15, 30, 30);
             }
 
-            if ((displayMode == POSITIONING_MODE_INT) && slicesCopy.stream().anyMatch(slice -> slice.isSelected())) {
-                List<SliceSources> sortedSelected = getSortedSlices().stream().filter(slice -> slice.isSelected()).collect(Collectors.toList());
+            if ((displayMode == POSITIONING_MODE_INT) && slicesCopy.stream().anyMatch(SliceSources::isSelected)) {
+                List<SliceSources> sortedSelected = getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
                 RealPoint precedentPoint = null;
 
                 for (int i = 0; i < sortedSelected.size(); i++) {
@@ -934,11 +920,11 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                 }
 
                 if (sortedSelected.size() > 1) {
-                    ghs.forEach(gh -> gh.enable());
+                    ghs.forEach(GraphicalHandle::enable);
                     g.setColor(new Color(255, 0, 255, 200));
                     g.drawLine(leftPosition[0], leftPosition[1], rightPosition[0], rightPosition[1]);
                 } else {
-                    ghs.forEach(gh -> gh.disable());
+                    ghs.forEach(GraphicalHandle::disable);
                 }
                 ghs.forEach(gh -> gh.draw(g));
             }
@@ -987,7 +973,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     }
 
     public void rotateSlices(int axis, double angle_rad) {
-        List<SliceSources> sortedSelected = getSortedSlices().stream().filter(slice -> slice.isSelected()).collect(Collectors.toList());
+        List<SliceSources> sortedSelected = getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
         //new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
 
         for (SliceSources slice : sortedSelected) {
@@ -1128,8 +1114,8 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         /**
          * When the user drops the data -> import the slices
          *
-         * @param support
-         * @param sacs
+         * @param support weird stuff for swing drag and drop TODO : link proper documentation
+         * @param sacs list of source and converter to import
          */
         @Override
         public void importSourcesAndConverters(TransferSupport support, List<SourceAndConverter<?>> sacs) {
@@ -1165,15 +1151,13 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                             SourceAndConverterService.SpimDataInfo sdi = (SourceAndConverterService.SpimDataInfo) SourceAndConverterServices.getSourceAndConverterService().getMetadata(sac, SPIM_DATA_INFO);
                             AbstractSpimData<AbstractSequenceDescription<BasicViewSetup, ?, ?>> asd = (AbstractSpimData<AbstractSequenceDescription<BasicViewSetup, ?, ?>>) sdi.asd;
                             BasicViewSetup bvs = asd.getSequenceDescription().getViewSetups().get(sdi.setupId);
-                            return (T) bvs.getAttribute(attributeClass);
+                            return bvs.getAttribute(attributeClass);
                         } else {
                             return defaultEntity;
                         }
                     }));
 
-            List<T> sortedTiles = new ArrayList<>();
-
-            sortedTiles.addAll(sacsGroups.keySet());
+            List<T> sortedTiles = new ArrayList<>(sacsGroups.keySet());
 
             sortedTiles.sort(Comparator.comparingInt(T::getId));
 
@@ -1200,15 +1184,15 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
     /**
      * Helper function to move a slice
-     * @param slice
-     * @param axisPosition
+     * @param slice the slice you want to move
+     * @param axisPosition the axis at which it should be
      */
     public void moveSlice(SliceSources slice, double axisPosition) {
         new MoveSlice(this, slice, axisPosition).runRequest();
     }
 
     public void exportSelectedSlicesRegionsToRoiManager(String namingChoice) {
-        List<SliceSources> sortedSelected = getSortedSlices().stream().filter(slice -> slice.isSelected()).collect(Collectors.toList());
+        List<SliceSources> sortedSelected = getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
         new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
 
         for (SliceSources slice : sortedSelected) {
@@ -1219,7 +1203,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     }
 
     public void exportSelectedSlicesRegionsToQuPathProject(boolean erasePreviousFile) {
-        List<SliceSources> sortedSelected = getSortedSlices().stream().filter(slice -> slice.isSelected()).collect(Collectors.toList());
+        List<SliceSources> sortedSelected = getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
         new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
 
         for (SliceSources slice : sortedSelected) {
@@ -1230,7 +1214,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     }
 
     public void exportSelectedSlicesRegionsToFile(String namingChoice, File dirOutput, boolean erasePreviousFile) {
-        List<SliceSources> sortedSelected = getSortedSlices().stream().filter(slice -> slice.isSelected()).collect(Collectors.toList());
+        List<SliceSources> sortedSelected = getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
         new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
 
         for (SliceSources slice : sortedSelected) {
@@ -1256,7 +1240,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
      * Equal spacing between selected slices
      */
     public void equalSpacingSelectedSlices() {
-        List<SliceSources> sortedSelected = getSortedSlices().stream().filter(slice -> slice.isSelected()).collect(Collectors.toList());
+        List<SliceSources> sortedSelected = getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
         if (sortedSelected.size() > 2) {
             SliceSources first = sortedSelected.get(0);
             SliceSources last = sortedSelected.get(sortedSelected.size() - 1);
@@ -1542,11 +1526,9 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
         @Override
         public void init(int x, int y) {
-            slicesDragged = getSortedSlices().stream().filter(slice -> slice.isSelected()).collect(Collectors.toList());
+            slicesDragged = getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
 
-            slicesDragged.stream().forEach(slice -> {
-                initialAxisPositions.put(slice, slice.getSlicingAxisPosition());
-            });
+            slicesDragged.forEach(slice -> initialAxisPositions.put(slice, slice.getSlicingAxisPosition()));
 
             range = initialAxisPositions.get(slicesDragged.get(slicesDragged.size() - 1)) - initialAxisPositions.get(slicesDragged.get(0));
             lastAxisPos = initialAxisPositions.get(slicesDragged.get(slicesDragged.size() - 1));
@@ -1609,11 +1591,9 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
         @Override
         public void init(int x, int y) {
-            slicesDragged = getSortedSlices().stream().filter(slice -> slice.isSelected()).collect(Collectors.toList());
+            slicesDragged = getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
 
-            slicesDragged.stream().forEach(slice -> {
-                initialAxisPositions.put(slice, slice.getSlicingAxisPosition());
-            });
+            slicesDragged.forEach(slice -> initialAxisPositions.put(slice, slice.getSlicingAxisPosition()));
 
             range = initialAxisPositions.get(slicesDragged.get(slicesDragged.size() - 1)) - initialAxisPositions.get(slicesDragged.get(0));
             lastAxisPos = initialAxisPositions.get(slicesDragged.get(0));
@@ -1782,12 +1762,10 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
             iniSlicePointing = iniPointBdv.getDoublePosition(0) / sX + 0.5;
             iniSlicingAxisPosition = ((int) iniSlicePointing) * sizePixX * (int) reslicedAtlas.getStep();
 
-            selectedSources = getSortedSlices().stream().filter(slice -> slice.isSelected()).collect(Collectors.toList());
+            selectedSources = getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
             if ((selectedSources.size() > 0)) {// && (sliceOrigin.isSelected())) {
                 perform = true;
-                selectedSources.stream().forEach(slice -> {
-                    initialAxisPositions.put(slice, slice.getSlicingAxisPosition());
-                });
+                selectedSources.forEach(slice -> initialAxisPositions.put(slice, slice.getSlicingAxisPosition()));
             }
 
             if (displayMode != POSITIONING_MODE_INT) {
@@ -2003,18 +1981,14 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     public void saveState(File stateFile, boolean overwrite) {
 
         // Wait patiently for all tasks to be performed
-        this.getSortedSlices().forEach(slice -> {
-            slice.waitForEndOfTasks();
-        });
+        this.getSortedSlices().forEach(SliceSources::waitForEndOfTasks);
 
         //synchronized (this) {
 
             // First save all sources required in the state
             List<SourceAndConverter> allSacs = new ArrayList<>();
 
-            this.getSortedSlices().forEach(sliceSource -> {
-                allSacs.addAll(Arrays.asList(sliceSource.getOriginalSources()));
-            });
+            this.getSortedSlices().forEach(sliceSource -> allSacs.addAll(Arrays.asList(sliceSource.getOriginalSources())));
 
             String fileNoExt = FilenameUtils.removeExtension(stateFile.getAbsolutePath());
             File sacsFile = new File(fileNoExt+"_sources.json");
@@ -2044,17 +2018,9 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         //}
     }
 
-    volatile private SliceSources currentSerializedSlice = null;
-
-    SliceSources currentSliceGetter() {
-        return currentSerializedSlice;
-    }
-
     public void loadState(File stateFile) {
         // TODO : add a clock as an overlay
-        this.getSortedSlices().forEach(slice -> {
-            slice.waitForEndOfTasks();
-        });
+        this.getSortedSlices().forEach(SliceSources::waitForEndOfTasks);
 
         String fileNoExt = FilenameUtils.removeExtension(stateFile.getAbsolutePath());
         File sacsFile = new File(fileNoExt+"_sources.json");
@@ -2068,33 +2034,31 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         sacsl.run();
         List<SourceAndConverter> serialized_sources = new ArrayList<>();
 
-        sacsl.getSacToId().values().stream().sorted().forEach(i -> {
-            serialized_sources.add(sacsl.getIdToSac().get(i));
-        });
+        sacsl.getSacToId().values().stream().sorted().forEach(i -> serialized_sources.add(sacsl.getIdToSac().get(i)));
 
         Gson gson = getGsonStateSerializer(serialized_sources);
 
         if (stateFile.exists()) {
             try {
-                    FileReader fileReader = new FileReader(stateFile);
+                FileReader fileReader = new FileReader(stateFile);
 
-                    setSliceDisplayMode(NO_SLICE_DISPLAY_MODE);
+                setSliceDisplayMode(NO_SLICE_DISPLAY_MODE);
 
-                    AlignerState state = gson.fromJson(fileReader, AlignerState.class); // actions are executed during deserialization
-                    fileReader.close();
+                AlignerState state = gson.fromJson(fileReader, AlignerState.class); // actions are executed during deserialization
+                fileReader.close();
 
-                    setDisplayMode(state.displayMode);
-                    setOverlapMode(state.overlapMode);
+                setDisplayMode(state.displayMode);
+                setOverlapMode(state.overlapMode);
 
-                    bdvh.getViewerPanel().state().setViewerTransform(state.bdvView);
+                bdvh.getViewerPanel().state().setViewerTransform(state.bdvView);
 
-                    state.slices_state_list.forEach(sliceState -> {
-                        sliceState.slice.waitForEndOfTasks();
-                        sliceState.slice.getGUIState().setChannelsVisibility(sliceState.channelsVisibility); // TODO : restore
-                        sliceState.slice.getGUIState().setDisplaysettings(sliceState.settings_per_channel);
-                        sliceState.slice.transformSourceOrigin(sliceState.preTransform);
-                    });
-                    setSliceDisplayMode(state.sliceDisplayMode);
+                state.slices_state_list.forEach(sliceState -> {
+                    sliceState.slice.waitForEndOfTasks();
+                    sliceState.slice.getGUIState().setChannelsVisibility(sliceState.channelsVisibility); // TODO : restore
+                    sliceState.slice.getGUIState().setDisplaysettings(sliceState.settings_per_channel);
+                    sliceState.slice.transformSourceOrigin(sliceState.preTransform);
+                });
+                setSliceDisplayMode(state.sliceDisplayMode);
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -2102,6 +2066,14 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         } else {
             errlog.accept("Error : file "+stateFile.getAbsolutePath()+" not found!");
         }
+    }
+
+    volatile private SliceSources currentSerializedSlice = null;
+
+    //-------------------- Event listeners
+
+    SliceSources currentSliceGetter() {
+        return currentSerializedSlice;
     }
 
     List<SliceChangeListener> listeners = new ArrayList<>();
