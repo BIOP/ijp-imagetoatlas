@@ -229,7 +229,12 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         }, "toggle_editormode", "E");
 
         positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.equalSpacingSelectedSlices(), "equalSpacingSelectedSlices", "A");
-        //positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.equalSpacingSelectedSlices(), "stretch ", "ctrl RIGHT");
+        positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.stretchRightSelectedSlices(), "stretch_selectedslices_right", "ctrl RIGHT");
+        positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.shrinkRightSelectedSlices(), "shrink_selectedslices_right", "ctrl LEFT");
+        positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.stretchLeftSelectedSlices(), "stretch_selectedslices_left", "ctrl shift LEFT");
+        positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.shrinkLeftSelectedSlices(), "shrink_selectedslices_left", "ctrl shift RIGHT");
+        positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.shiftUpSelectedSlices(), "shift_selectedslices_up", "ctrl UP");
+        positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.shiftDownSelectedSlices(), "shift_selectedslices_down", "ctrl DOWN");
         positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> {slices.forEach(SliceSources::select);bdvh.getViewerPanel().getDisplay().repaint();}, "selectAllSlices", "ctrl A");
         positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> {slices.forEach(SliceSources::deSelect);bdvh.getViewerPanel().getDisplay().repaint();}, "deselectAllSlices", "ctrl shift A");
 
@@ -439,12 +444,12 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         itm.put(InputTrigger.getFromString("button3"), "drag translate");
         itm.put(InputTrigger.getFromString("UP"), "zoom in");
         itm.put(InputTrigger.getFromString("shift UP"), "zoom in fast");
-        itm.put(InputTrigger.getFromString("ctrl UP"), "zoom in slow");
+        //itm.put(InputTrigger.getFromString("ctrl UP"), "zoom in slow");
         itm.put(InputTrigger.getFromString("scroll"), "scroll zoom");
 
         itm.put(InputTrigger.getFromString("DOWN"), "zoom out");
         itm.put(InputTrigger.getFromString("shift DOWN"), "zoom out fast");
-        itm.put(InputTrigger.getFromString("ctrl DOWN"), "zoom out slow");
+        //itm.put(InputTrigger.getFromString("ctrl DOWN"), "zoom out slow");
 
         selectionLayer = new SelectionLayer(this);
         selectionLayer.addSelectionBehaviours(common_behaviours);
@@ -1252,6 +1257,120 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
             }
             new MarkActionSequenceBatch(this).runRequest();
         }
+    }
+
+    /**
+     * Stretch right spacing between selected slices
+     */
+    public void stretchRightSelectedSlices() {
+        List<SliceSources> sortedSelected = getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
+        double startAxis = sortedSelected.get(0).getSlicingAxisPosition();
+        double endAxis = sortedSelected.get(sortedSelected.size()-1).getSlicingAxisPosition();
+        double range = endAxis - startAxis;
+        if (range!=0) {
+            double stepSize = sizePixX * (int) reslicedAtlas.getStep();
+            double ratio = (range + stepSize) / range;
+
+            new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
+            for (SliceSources slice : sortedSelected) {
+                //slice.setSlicingAxisPosition( initialAxisPositions.get(slice) );
+                double dist = slice.getSlicingAxisPosition() - startAxis;
+                moveSlice(slice,startAxis + dist * ratio );
+            }
+            new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
+        }
+    }
+
+    /**
+     * Stretch right spacing between selected slices
+     */
+    public void shrinkRightSelectedSlices() {
+        List<SliceSources> sortedSelected = getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
+        double startAxis = sortedSelected.get(0).getSlicingAxisPosition();
+        double endAxis = sortedSelected.get(sortedSelected.size()-1).getSlicingAxisPosition();
+        double range = endAxis - startAxis;
+        if (range!=0) {
+            double stepSize = sizePixX * (int) reslicedAtlas.getStep();
+            double ratio = (range - stepSize) / range;
+
+            new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
+            for (SliceSources slice : sortedSelected) {
+                //slice.setSlicingAxisPosition( initialAxisPositions.get(slice) );
+                double dist = slice.getSlicingAxisPosition() - startAxis;
+                moveSlice(slice,startAxis + dist * ratio );
+            }
+            new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
+        }
+    }
+
+    /**
+     * Stretch right spacing between selected slices
+     */
+    public void stretchLeftSelectedSlices() {
+        List<SliceSources> sortedSelected = getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
+        double startAxis = sortedSelected.get(0).getSlicingAxisPosition();
+        double endAxis = sortedSelected.get(sortedSelected.size()-1).getSlicingAxisPosition();
+        double range = endAxis - startAxis;
+        if (range!=0) {
+            double stepSize = sizePixX * (int) reslicedAtlas.getStep();
+            double ratio = (range + stepSize) / range;
+            new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
+            for (SliceSources slice : sortedSelected) {
+                //slice.setSlicingAxisPosition( initialAxisPositions.get(slice) );
+                double dist = endAxis - slice.getSlicingAxisPosition();
+                moveSlice(slice,endAxis - dist * ratio );
+            }
+            new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
+        }
+    }
+
+    /**
+     * Stretch right spacing between selected slices
+     */
+    public void shrinkLeftSelectedSlices() {
+        List<SliceSources> sortedSelected = getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
+        double startAxis = sortedSelected.get(0).getSlicingAxisPosition();
+        double endAxis = sortedSelected.get(sortedSelected.size()-1).getSlicingAxisPosition();
+        double range = endAxis - startAxis;
+        if (range!=0) {
+            double stepSize = sizePixX * (int) reslicedAtlas.getStep();
+            double ratio = (range - stepSize) / range;
+            new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
+            for (SliceSources slice : sortedSelected) {
+                //slice.setSlicingAxisPosition( initialAxisPositions.get(slice) );
+                double dist = endAxis - slice.getSlicingAxisPosition();
+                moveSlice(slice,endAxis - dist * ratio );
+            }
+            new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
+        }
+    }
+
+    /**
+     * Shift position of all slices to the right (further along the slicing axis)
+     */
+    public void shiftUpSelectedSlices() {
+        List<SliceSources> sortedSelected = getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
+        new MarkActionSequenceBatch(this).runRequest();
+        double shift = sizePixX * (int) reslicedAtlas.getStep();
+        for (int idx = 0; idx < sortedSelected.size(); idx++) {
+            SliceSources slice = sortedSelected.get(idx);
+            moveSlice(slice, slice.getSlicingAxisPosition() + shift);
+        }
+        new MarkActionSequenceBatch(this).runRequest();
+    }
+
+    /**
+     * Shift position of all slices to the right (nearer along the slicing axis)
+     */
+    public void shiftDownSelectedSlices() {
+        List<SliceSources> sortedSelected = getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
+        new MarkActionSequenceBatch(this).runRequest();
+        double shift = sizePixX * (int) reslicedAtlas.getStep();
+        for (int idx = 0; idx < sortedSelected.size(); idx++) {
+            SliceSources slice = sortedSelected.get(idx);
+            moveSlice(slice, slice.getSlicingAxisPosition() - shift);
+        }
+        new MarkActionSequenceBatch(this).runRequest();
     }
 
     /**
