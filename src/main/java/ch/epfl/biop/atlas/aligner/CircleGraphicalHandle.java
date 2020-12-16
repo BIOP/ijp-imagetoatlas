@@ -74,4 +74,14 @@ public class CircleGraphicalHandle extends GraphicalHandle{
         double d = (pos[0]-x)*(pos[0]-x)+(pos[1]-y)*(pos[1]-y);
         return d<(r*r);
     }
+
+    @Override
+    public int[] getScreenCoordinates() {
+        int[] unboxed = new int[3];
+        Integer[] c = coords.get();
+        for (int i = 0;i<3;i++) {
+            unboxed[i] = c[i];
+        }
+        return unboxed;
+    }
 }

@@ -2,6 +2,10 @@ package ch.epfl.biop.atlas.aligner;
 
 interface GraphicalHandleListener {
 
+        void disabled(GraphicalHandle gh);
+
+        void enabled(GraphicalHandle gh);
+
         void hover_in(GraphicalHandle gh);
 
         void hover_out(GraphicalHandle gh);

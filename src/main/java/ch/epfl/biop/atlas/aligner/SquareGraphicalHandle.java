@@ -69,4 +69,14 @@ public class SquareGraphicalHandle extends GraphicalHandle{
         if ((pos == null) || (pos[0] == null) || (pos[1] == null)) return false;
         return (x>pos[0]-r)&&(x<pos[0]+r)&&(y>pos[1]-r)&&(y<pos[1]+r);
     }
+
+    @Override
+    public int[] getScreenCoordinates() {
+        int[] unboxed = new int[3];
+        Integer[] c = coords.get();
+        for (int i = 0;i<3;i++) {
+            unboxed[i] = c[i];
+        }
+        return unboxed;
+    }
 }

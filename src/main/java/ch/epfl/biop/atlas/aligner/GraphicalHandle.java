@@ -6,10 +6,14 @@ import org.scijava.ui.behaviour.util.TriggerBehaviourBindings;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.util.ArrayList;
+import java.util.List;
 
 abstract public class GraphicalHandle extends MouseMotionAdapter {
 
-    final GraphicalHandleListener ghl;
+    final List<GraphicalHandleListener> ghls = new ArrayList<>();
+
+    //final GraphicalHandleListener ghl;
 
     final Behaviours behaviours;
 
@@ -18,12 +22,29 @@ abstract public class GraphicalHandle extends MouseMotionAdapter {
     final String nameMap;
 
     public GraphicalHandle(GraphicalHandleListener ghl, Behaviours behaviours, TriggerBehaviourBindings bindings, String nameMap) {
-        this.ghl = ghl;
+        addGraphicalHandleListener(ghl);
         this.behaviours = behaviours;
         this.bindings = bindings;
         this.nameMap = nameMap;
-        ghl.created(this);
+        if (ghl!=null) ghl.created(this);
     }
+
+    public GraphicalHandle(Behaviours behaviours, TriggerBehaviourBindings bindings, String nameMap) {
+        //addGraphicalHandleListener(ghl);
+        this.behaviours = behaviours;
+        this.bindings = bindings;
+        this.nameMap = nameMap;
+        //ghl.created(this);
+    }
+
+    public void addGraphicalHandleListener(GraphicalHandleListener ghl) {
+        if (ghl!=null) {ghls.add(ghl);}
+    }
+
+    public void removeGraphicalHandleListener(GraphicalHandleListener ghl) {
+        ghls.remove(ghl);
+    }
+
 
     public void draw(Graphics2D g) {
         if (!isDisabled) {
@@ -37,7 +58,7 @@ abstract public class GraphicalHandle extends MouseMotionAdapter {
     abstract protected void disabledDraw(Graphics2D g);
 
     public void remove() {
-        ghl.removed(this);
+        ghls.forEach(ghl -> ghl.removed(this));
     }
 
     abstract boolean isPresentAt(int x, int y);
@@ -54,15 +75,19 @@ abstract public class GraphicalHandle extends MouseMotionAdapter {
         if (!isDisabled) {
             if (mouseAbove) {
                 mouseAbove = false;
-                ghl.hover_out(this);
+                ghls.forEach(ghl -> ghl.hover_out(this));
             }
             isDisabled = true;
+            ghls.forEach(ghl -> ghl.disabled(this));
         }
     }
+
+    abstract public int[] getScreenCoordinates();
 
     public synchronized void enable() {
         if (isDisabled) {
             isDisabled = false;
+            ghls.forEach(ghl -> ghl.enabled(this));
         }
     }
 
@@ -75,13 +100,13 @@ abstract public class GraphicalHandle extends MouseMotionAdapter {
         if (isPresentAt(x,y)) {
             if ((!mouseAbove)&&(!isDisabled)) {
                 mouseAbove = true;
-                ghl.hover_in(this);
+                ghls.forEach(ghl -> ghl.hover_in(this));
                 behaviours.install(bindings, nameMap);
             }
         } else {
             if ((mouseAbove)&&(!isDisabled)) {
                 mouseAbove = false;
-                ghl.hover_out(this);
+                ghls.forEach(ghl -> ghl.hover_out(this));
                 bindings.removeBehaviourMap(nameMap);
                 bindings.removeInputTriggerMap(nameMap);
             }

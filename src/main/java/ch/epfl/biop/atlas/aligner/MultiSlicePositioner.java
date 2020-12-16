@@ -249,14 +249,26 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
         bdvh.getViewerPanel().getDisplay().addHandler(this);
 
-        GraphicalHandle ghRight = new SquareGraphicalHandle(this, new DragRight(), "drag_right", "button1", bdvh.getTriggerbindings(),
+        SquareGraphicalHandle ghRight = new SquareGraphicalHandle(this, new DragRight(), "drag_right", "button1", bdvh.getTriggerbindings(),
                 () -> rightPosition, () -> 25, () -> new Integer[]{255, 0, 255, 200});
-        GraphicalHandle ghCenter = new CircleGraphicalHandle(this, new SelectedSliceSourcesDrag(), "translate_selected", "button1", bdvh.getTriggerbindings(),
-                () -> new Integer[]{(leftPosition[0]+rightPosition[0])/2,(leftPosition[1]+rightPosition[1])/2}, () -> 25, () -> new Integer[]{255, 0, 255, 200});
-        GraphicalHandle ghLeft = new SquareGraphicalHandle(this, new DragLeft(), "drag_right", "button1", bdvh.getTriggerbindings(),
+
+        GraphicalHandleToolTip ghRightToolTip = new GraphicalHandleToolTip(ghRight, "Ctrl + \u25C4 \u25BA ");
+
+        CircleGraphicalHandle ghCenter = new CircleGraphicalHandle(this, new SelectedSliceSourcesDrag(), "translate_selected", "button1", bdvh.getTriggerbindings(),
+                () -> new Integer[]{(leftPosition[0]+rightPosition[0])/2,(leftPosition[1]+rightPosition[1])/2, 0}, () -> 25, () -> new Integer[]{255, 0, 255, 200});
+
+        GraphicalHandleToolTip ghCenterToolTip = new GraphicalHandleToolTip(ghCenter, "Ctrl + \u25B2 \u25BC ");
+
+        SquareGraphicalHandle ghLeft = new SquareGraphicalHandle(this, new DragLeft(), "drag_right", "button1", bdvh.getTriggerbindings(),
                 () -> leftPosition, () -> 25, () -> new Integer[]{255, 0, 255, 200});
 
+        GraphicalHandleToolTip ghLeftToolTip = new GraphicalHandleToolTip(ghLeft, "Ctrl + Shift + \u25C4 \u25BA ");
+
         ghs.add(ghRight);
+        ghs_tool_tip.add(ghRightToolTip);
+        ghs_tool_tip.add(ghCenterToolTip);
+        ghs_tool_tip.add(ghLeftToolTip);
+        //ghs.add(ghRightToolTip);
         ghs.add(ghCenter);
         ghs.add(ghLeft);
 
@@ -932,6 +944,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                     ghs.forEach(GraphicalHandle::disable);
                 }
                 ghs.forEach(gh -> gh.draw(g));
+                ghs_tool_tip.forEach(gh -> gh.draw(g));
             }
             if (selectionLayer != null) {
                 selectionLayer.draw(g);
@@ -1584,7 +1597,19 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
     Set<GraphicalHandle> ghs = new HashSet<>();
 
+    Set<GraphicalHandle> ghs_tool_tip = new HashSet<>();
+
     Set<GraphicalHandle> gh_below_mouse = new HashSet<>();
+
+    @Override
+    public void disabled(GraphicalHandle gh) {
+
+    }
+
+    @Override
+    public void enabled(GraphicalHandle gh) {
+
+    }
 
     @Override
     public synchronized void hover_in(GraphicalHandle gh) {
