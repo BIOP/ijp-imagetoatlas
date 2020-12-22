@@ -17,6 +17,7 @@ public class EditPanel {
         iconCW = new ImageIcon( iconCW.getImage().getScaledInstance( 35, 35,  java.awt.Image.SCALE_SMOOTH ) );
 
         JButton turnCW = new JButton(iconCW);
+        turnCW.setToolTipText("Rotate selected slices 90 degrees clockwise");
         turnCW.addActionListener(e -> mp.rotateSlices(2,Math.PI/2.0));
 
         // CCW
@@ -25,6 +26,7 @@ public class EditPanel {
         iconCCW = new ImageIcon( iconCCW.getImage().getScaledInstance( 35, 35,  java.awt.Image.SCALE_SMOOTH ) );
 
         JButton turnCCW = new JButton(iconCCW);
+        turnCCW.setToolTipText("Rotate selected slices 90 degrees counter clockwise");
         turnCCW.addActionListener(e -> mp.rotateSlices(2,-Math.PI/2.0));
 
         paneEdit.add(turnCW);

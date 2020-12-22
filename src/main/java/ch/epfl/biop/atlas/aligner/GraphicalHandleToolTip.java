@@ -10,11 +10,15 @@ public class GraphicalHandleToolTip extends GraphicalHandle implements Graphical
     final GraphicalHandle gh;
     String toolTipText;
 
-    public GraphicalHandleToolTip(GraphicalHandle gh, String toolTip) {
+    int shiftX, shiftY;
+
+    public GraphicalHandleToolTip(GraphicalHandle gh, String toolTip, int shiftX, int shiftY) {
         super(null, null, null, null);
         this.gh = gh;
         this.toolTipText = toolTip;
         this.gh.addGraphicalHandleListener(this);
+        this.shiftX = shiftX;
+        this.shiftY = shiftY;
     }
 
     @Override
@@ -54,9 +58,9 @@ public class GraphicalHandleToolTip extends GraphicalHandle implements Graphical
         g.setColor(new Color(c[0], c[1], c[2], c[3]));
         g.setFont(new Font("TimesRoman", Font.PLAIN, 16));
 
-        int xPos = pos[0] - 40;
+        int xPos = pos[0] - 40 + shiftX;
 
-        int yPos = pos[1] - 50;
+        int yPos = pos[1] - 50 + shiftY;
 
         if (xPos > bounds.width - 70 ) xPos = bounds.width - 70;
 

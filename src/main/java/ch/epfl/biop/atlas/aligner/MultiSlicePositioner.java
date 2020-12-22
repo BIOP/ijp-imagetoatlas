@@ -252,25 +252,28 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         SquareGraphicalHandle ghRight = new SquareGraphicalHandle(this, new DragRight(), "drag_right", "button1", bdvh.getTriggerbindings(),
                 () -> rightPosition, () -> 25, () -> new Integer[]{255, 0, 255, 200});
 
-        GraphicalHandleToolTip ghRightToolTip = new GraphicalHandleToolTip(ghRight, "Ctrl + \u25C4 \u25BA ");
+        GraphicalHandleToolTip ghRightToolTip = new GraphicalHandleToolTip(ghRight, "Ctrl + \u25C4 \u25BA ",0,20);
 
         CircleGraphicalHandle ghCenter = new CircleGraphicalHandle(this, new SelectedSliceSourcesDrag(), "translate_selected", "button1", bdvh.getTriggerbindings(),
                 () -> new Integer[]{(leftPosition[0]+rightPosition[0])/2,(leftPosition[1]+rightPosition[1])/2, 0}, () -> 25, () -> new Integer[]{255, 0, 255, 200});
 
-        GraphicalHandleToolTip ghCenterToolTip = new GraphicalHandleToolTip(ghCenter, "Ctrl + \u25B2 \u25BC ");
+        GraphicalHandleToolTip ghCenterToolTip = new GraphicalHandleToolTip(ghCenter, "Ctrl + \u25B2 \u25BC ",0,0);
 
         SquareGraphicalHandle ghLeft = new SquareGraphicalHandle(this, new DragLeft(), "drag_right", "button1", bdvh.getTriggerbindings(),
                 () -> leftPosition, () -> 25, () -> new Integer[]{255, 0, 255, 200});
 
-        GraphicalHandleToolTip ghLeftToolTip = new GraphicalHandleToolTip(ghLeft, "Ctrl + Shift + \u25C4 \u25BA ");
+        GraphicalHandleToolTip ghLeftToolTip = new GraphicalHandleToolTip(ghLeft, "Ctrl + Shift + \u25C4 \u25BA ", 0,-20);
 
-        ghs.add(ghRight);
+        stretchRight = ghRight;
+        stretchLeft = ghLeft;
+        center = ghCenter;
+
+        ghs.add(stretchRight);
         ghs_tool_tip.add(ghRightToolTip);
         ghs_tool_tip.add(ghCenterToolTip);
         ghs_tool_tip.add(ghLeftToolTip);
-        //ghs.add(ghRightToolTip);
-        ghs.add(ghCenter);
-        ghs.add(ghLeft);
+        ghs.add(center);
+        ghs.add(stretchLeft);
 
         this.bdvh.getCardPanel().setCardExpanded("Sources", false);
         this.bdvh.getCardPanel().setCardExpanded("Groups", false);
@@ -284,7 +287,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
         mso = new MultiSliceObserver(this);
 
-        //bdvh.getCardPanel().removeCard(DEFAULT_SOURCES_CARD);
+        //bdvh.getCardPanel().removeCard(DEFAULT_SOURCES_CARD); // Cannot do this : errors
         bdvh.getCardPanel().removeCard(DEFAULT_SOURCEGROUPS_CARD);
         bdvh.getCardPanel().removeCard(DEFAULT_VIEWERMODES_CARD);
         bdvh.getCardPanel().setCardExpanded(DEFAULT_SOURCES_CARD, false);
@@ -937,7 +940,16 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                 }
 
                 if (sortedSelected.size() > 1) {
+                    center.enable();
+                    stretchLeft.enable();
+                    stretchRight.enable();
                     ghs.forEach(GraphicalHandle::enable);
+                    g.setColor(new Color(255, 0, 255, 200));
+                    g.drawLine(leftPosition[0], leftPosition[1], rightPosition[0], rightPosition[1]);
+                } else if (sortedSelected.size() == 1) {
+                    center.enable();//ghs.forEach(GraphicalHandle::enable);
+                    stretchLeft.disable();
+                    stretchRight.disable();
                     g.setColor(new Color(255, 0, 255, 200));
                     g.drawLine(leftPosition[0], leftPosition[1], rightPosition[0], rightPosition[1]);
                 } else {
@@ -1363,13 +1375,13 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
      */
     public void shiftUpSelectedSlices() {
         List<SliceSources> sortedSelected = getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
-        new MarkActionSequenceBatch(this).runRequest();
+        if (sortedSelected.size()>1) new MarkActionSequenceBatch(this).runRequest();
         double shift = sizePixX * (int) reslicedAtlas.getStep();
         for (int idx = 0; idx < sortedSelected.size(); idx++) {
             SliceSources slice = sortedSelected.get(idx);
             moveSlice(slice, slice.getSlicingAxisPosition() + shift);
         }
-        new MarkActionSequenceBatch(this).runRequest();
+        if (sortedSelected.size()>1) new MarkActionSequenceBatch(this).runRequest();
     }
 
     /**
@@ -1377,13 +1389,13 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
      */
     public void shiftDownSelectedSlices() {
         List<SliceSources> sortedSelected = getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
-        new MarkActionSequenceBatch(this).runRequest();
+        if (sortedSelected.size()>1) new MarkActionSequenceBatch(this).runRequest();
         double shift = sizePixX * (int) reslicedAtlas.getStep();
         for (int idx = 0; idx < sortedSelected.size(); idx++) {
             SliceSources slice = sortedSelected.get(idx);
             moveSlice(slice, slice.getSlicingAxisPosition() - shift);
         }
-        new MarkActionSequenceBatch(this).runRequest();
+        if (sortedSelected.size()>1) new MarkActionSequenceBatch(this).runRequest();
     }
 
     /**
@@ -1596,6 +1608,8 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     //------------------------------ Multipositioner Graphical handles
 
     Set<GraphicalHandle> ghs = new HashSet<>();
+
+    GraphicalHandle stretchLeft, center, stretchRight;
 
     Set<GraphicalHandle> ghs_tool_tip = new HashSet<>();
 
