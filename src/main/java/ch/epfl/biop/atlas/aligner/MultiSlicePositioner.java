@@ -156,7 +156,15 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         getBdvh().getViewerPanel().showMessage(message);
     };
 
-    public Consumer<String> errlog = (message) -> System.err.println("Multipositioner : "+message);
+    public BiConsumer<String, String> errorMessageForUser = (title, message) -> {
+        JOptionPane.showMessageDialog(new JFrame(), message, title,
+                JOptionPane.ERROR_MESSAGE);
+    };
+
+    public Consumer<String> errlog = (message) -> {
+        System.err.println("Multipositioner : "+message);
+        errorMessageForUser.accept("Error", message);
+    };
 
     public Consumer<String> debuglog = (message) -> {};//System.err.println("Multipositioner Debug : "+message);
 

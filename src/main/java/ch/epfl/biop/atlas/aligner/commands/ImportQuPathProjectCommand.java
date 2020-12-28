@@ -30,14 +30,14 @@ public class ImportQuPathProjectCommand implements Command {
     @Parameter
     double incrementBetweenSlices;
 
-    @Parameter
-    String filterSources="";
+    //@Parameter
+    //String filterSources="";
 
     @Parameter
     CommandService command_service;
 
-    @Parameter
-    ConvertService convert_service;
+    //@Parameter
+    //ConvertService convert_service;
 
     @Parameter
     SourceAndConverterService sac_service;
@@ -55,6 +55,11 @@ public class ImportQuPathProjectCommand implements Command {
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
+            mp.errorMessageForUser.accept("QuPath Import Error",
+                    "QuPath project couldn't be imported.\n"+
+                       "Check whether the project can be opened in QuPath (v0.2+), fix URI if necessary.\n"+
+                       "Only BioFormats image server are supported.");
+
             e.printStackTrace();
         }
     }
