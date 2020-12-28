@@ -103,6 +103,8 @@ public class SliceSources {
 
     private int currentSliceIndex = -1;
 
+    public String name = "";
+
     // For fast display : Icon TODO : see https://github.com/bigdataviewer/bigdataviewer-core/blob/17d2f55d46213d1e2369ad7ef4464e3efecbd70a/src/main/java/bdv/tools/RecordMovieDialog.java#L256-L318
     protected SliceSources(SourceAndConverter<?>[] sacs, double slicingAxisPosition, MultiSlicePositioner mp) {
 
@@ -127,6 +129,21 @@ public class SliceSources {
         waitForEndOfTasks();
         updateZPosition();
         guiState.positionChanged();
+
+        try {
+            name = SourceAndConverterUtils.getRootSource(sacs[0].getSpimSource(), new AffineTransform3D()).getName();
+        } catch(Exception e) {
+            mp.errlog.accept("Couldn't name slice");
+            e.printStackTrace();
+        }
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public SliceSourcesGUIState getGUIState() {
@@ -634,8 +651,12 @@ public class SliceSources {
     }
 
     public String toString() {
-        int index = mp.getSortedSlices().indexOf(this);
-        return "Slice_"+index;
+        if (!name.equals("") ) {
+            return name;
+        } else {
+            int index = mp.getSortedSlices().indexOf(this);
+            return "Slice_"+index;
+        }
     }
 
     private void computeTransformedRois() {

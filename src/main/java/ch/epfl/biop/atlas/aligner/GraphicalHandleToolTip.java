@@ -5,17 +5,27 @@ import org.scijava.ui.behaviour.util.TriggerBehaviourBindings;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
+import java.util.function.Supplier;
 
 public class GraphicalHandleToolTip extends GraphicalHandle implements GraphicalHandleListener {
     final GraphicalHandle gh;
-    String toolTipText;
+    Supplier<String> toolTipText;
 
     int shiftX, shiftY;
 
-    public GraphicalHandleToolTip(GraphicalHandle gh, String toolTip, int shiftX, int shiftY) {
+    public GraphicalHandleToolTip(GraphicalHandle gh, Supplier<String> toolTip, int shiftX, int shiftY) {
         super(null, null, null, null);
         this.gh = gh;
         this.toolTipText = toolTip;
+        this.gh.addGraphicalHandleListener(this);
+        this.shiftX = shiftX;
+        this.shiftY = shiftY;
+    }
+
+    public GraphicalHandleToolTip(GraphicalHandle gh, String text, int shiftX, int shiftY) {
+        super(null, null, null, null);
+        this.gh = gh;
+        this.toolTipText = () -> text;
         this.gh.addGraphicalHandleListener(this);
         this.shiftX = shiftX;
         this.shiftY = shiftY;
@@ -70,7 +80,7 @@ public class GraphicalHandleToolTip extends GraphicalHandle implements Graphical
 
         if ( yPos < 30 ) yPos = 30;
 
-        g.drawString(toolTipText, xPos, yPos);
+        g.drawString(toolTipText.get(), xPos, yPos);
     }
 
     @Override

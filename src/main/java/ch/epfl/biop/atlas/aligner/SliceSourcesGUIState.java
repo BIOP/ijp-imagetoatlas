@@ -63,6 +63,9 @@ public class SliceSourcesGUIState {
         return sources_displayed_or_readyfordisplay;
     }
 
+    // Display name of slice
+    GraphicalHandleToolTip tt;
+
     public SliceSourcesGUIState(SliceSources slice, MultiSlicePositioner mp) {
         this.mp = mp;
         this.nChannels = slice.getRegisteredSources().length;
@@ -91,7 +94,10 @@ public class SliceSourcesGUIState {
                 this::getBdvHandleColor
         );
 
+        tt = new GraphicalHandleToolTip(gh, slice::toString, -20, -10);
+
         ghs.add(gh);
+        //ghs.add(tt);
     }
 
     protected void sourcesChanged() {
@@ -197,7 +203,7 @@ public class SliceSourcesGUIState {
             RealPoint zero = new RealPoint(3);
             zero.setPosition(0, 0);
             bdvAt3D.apply(zero, zero);
-            return new Integer[]{35 * (slice.getIndex() - mp.getSlices().size() / 2) + (int) zero.getDoublePosition(0), 20, 0};
+            return new Integer[]{35 * (slice.getIndex() - mp.getSlices().size() / 2) + (int) zero.getDoublePosition(0), 80, 0};
         } else {
             return new Integer[]{0, 0, 0};
         }
@@ -268,6 +274,19 @@ public class SliceSourcesGUIState {
 
     public void drawGraphicalHandles(Graphics2D g) {
         ghs.forEach(gh -> gh.draw(g));
+        if (mp.getDisplayMode() == MultiSlicePositioner.POSITIONING_MODE_INT) {
+            if (mp.getSliceDisplayMode() == MultiSlicePositioner.ALL_SLICES_DISPLAY_MODE) {
+                tt.draw(g);
+            } else {
+                if (mp.getCurrentSlice().equals(slice)) {
+                    tt.draw(g);
+                }
+            }
+        } else {
+            if (mp.getCurrentSlice().equals(slice)) {
+                tt.draw(g);
+            }
+        }
     }
 
     public void disableGraphicalHandles() {
