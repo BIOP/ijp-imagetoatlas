@@ -54,6 +54,10 @@ public class ReslicedAtlas {
         computeReslicedSources();
     }
 
+    public AffineTransform3D getSlicingTransform() {
+        return slicingTransfom.copy();
+    }
+
     public void setResolution(double slicingResolution) {
         this.slicingResolution = slicingResolution;
         computeReslicedSources();
@@ -280,6 +284,14 @@ public class ReslicedAtlas {
             slicingUpdate();
             listeners.forEach(r -> r.run());
         }
+    }
+
+    public double getRotateX() {
+        return rx;
+    }
+
+    public double getRotateY() {
+        return ry;
     }
 
     public void setRotateY(double ry) {

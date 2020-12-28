@@ -55,11 +55,13 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.io.*;
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static bdv.ui.BdvDefaultCards.*;
@@ -159,6 +161,11 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     public BiConsumer<String, String> errorMessageForUser = (title, message) -> {
         JOptionPane.showMessageDialog(new JFrame(), message, title,
                 JOptionPane.ERROR_MESSAGE);
+    };
+
+    public BiConsumer<String, String> warningMessageForUser = (title, message) -> {
+        JOptionPane.showMessageDialog(new JFrame(), message, title,
+                JOptionPane.WARNING_MESSAGE);
     };
 
     public Consumer<String> errlog = (message) -> {
@@ -2306,6 +2313,26 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
                 AlignerState state = gson.fromJson(fileReader, AlignerState.class); // actions are executed during deserialization
                 fileReader.close();
+
+                String warningMessageForUser = "";
+
+                DecimalFormat df = new DecimalFormat("###.000");
+
+                Function<Double, String> a = (d) -> df.format(d*180/Math.PI);
+
+                if (state.rotationX!=reslicedAtlas.getRotateX()) {
+                    warningMessageForUser+="Current X Angle : "+a.apply(reslicedAtlas.getRotateX())+" has been updated to "+a.apply(state.rotationX)+"\n";
+                    reslicedAtlas.setRotateX(state.rotationX);
+                }
+
+                if (state.rotationY!=reslicedAtlas.getRotateY()) {
+                    warningMessageForUser+="Current Y Angle : "+a.apply(reslicedAtlas.getRotateY())+" has been updated to "+a.apply(state.rotationY)+"\n";
+                    reslicedAtlas.setRotateY(state.rotationY);
+                }
+
+                if (!warningMessageForUser.equals("")) {
+                   this.warningMessageForUser.accept("Warning", warningMessageForUser);
+                }
 
                 setDisplayMode(state.displayMode);
                 setOverlapMode(state.overlapMode);

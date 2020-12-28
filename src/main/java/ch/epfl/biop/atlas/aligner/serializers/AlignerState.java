@@ -19,6 +19,9 @@ public class AlignerState {
         sliceDisplayMode = mp.getSliceDisplayMode();
         overlapMode = mp.getOverlapMode();
         bdvView = mp.getBdvh().getViewerPanel().state().getViewerTransform();
+        //slicingTransform = mp.getReslicedAtlas().getSlicingTransform();
+        rotationX = mp.getReslicedAtlas().getRotateX();
+        rotationY = mp.getReslicedAtlas().getRotateY();
 
         mp.getSortedSlices().forEach(sliceSource -> {
             SliceSourcesState slice_state = new SliceSourcesState();
@@ -39,6 +42,12 @@ public class AlignerState {
     public int sliceDisplayMode;
 
     public int overlapMode;
+
+    //public AffineTransform3D slicingTransform;
+
+    public double rotationX;
+
+    public double rotationY;
 
     public AffineTransform3D bdvView;
 
