@@ -56,6 +56,7 @@ public class AtlasDisplayPanel implements MultiSlicePositioner.ModeListener {//}
 
     public AtlasDisplayPanel(MultiSlicePositioner mp) {
         this.mp = mp;
+
         ra = mp.reslicedAtlas;
         nChannels = ra.nonExtendedSlicedSources.length;
         globalFlagPerChannel = new ArrayList<>(nChannels);
@@ -184,6 +185,11 @@ public class AtlasDisplayPanel implements MultiSlicePositioner.ModeListener {//}
                     ;
             }
         }
+
+    }
+
+    @Override
+    public void sliceDisplayModeChanged(MultiSlicePositioner mp, int oldmode, int newmode) {
 
     }
 

@@ -3,7 +3,6 @@ package ch.epfl.biop.atlas.aligner;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.commands.DisplaySettingsCommand;
 import org.scijava.command.CommandService;
-import org.scijava.util.ColorRGB;
 import spimdata.util.Displaysettings;
 import spimdata.util.DisplaysettingsHelper;
 
@@ -21,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class SliceDisplayPanel implements MultiSlicePositioner.SliceChangeListener, ListSelectionListener {
+public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, MultiSlicePositioner.SliceChangeListener, ListSelectionListener {
 
     final JPanel paneDisplay;
 
@@ -47,14 +46,24 @@ public class SliceDisplayPanel implements MultiSlicePositioner.SliceChangeListen
 
     List<SliceSources> sortedSlices = new ArrayList<>();
 
+    JButton toggleDisplayMode;
+
     public SliceDisplayPanel(MultiSlicePositioner mp) {
         this.mp = mp;
         paneDisplay = new JPanel(new BorderLayout());
 
-        JButton toggleDisplayMode = new JButton("Multi/Single Slice");
-        toggleDisplayMode.addActionListener(e -> mp.changeSliceDisplayMode());
+        toggleDisplayMode = new JButton("Display One Slice Only (fast)");
+        toggleDisplayMode.addActionListener(e -> {
+            if (mp.getSliceDisplayMode() == MultiSlicePositioner.ALL_SLICES_DISPLAY_MODE) {
+                mp.setSliceDisplayMode(MultiSlicePositioner.CURRENT_SLICE_DISPLAY_MODE);
+
+            } else if (mp.getSliceDisplayMode() == MultiSlicePositioner.CURRENT_SLICE_DISPLAY_MODE) {
+                mp.setSliceDisplayMode(MultiSlicePositioner.ALL_SLICES_DISPLAY_MODE);
+            }
+        });
 
         mp.addSliceListener(this);
+        mp.addModeListener(this);
 
         model = new SliceDisplayTableModel();
         modelSelect = new SelectedSliceDisplayTableModel();
@@ -293,6 +302,21 @@ public class SliceDisplayPanel implements MultiSlicePositioner.SliceChangeListen
 
     public void sortSlices() {
         sortedSlices = mp.getSortedSlices();
+    }
+
+    @Override
+    public void modeChanged(MultiSlicePositioner mp, int oldmode, int newmode) {
+    }
+
+    @Override
+    public void sliceDisplayModeChanged(MultiSlicePositioner mp, int oldmode, int newmode) {
+        if (newmode == MultiSlicePositioner.CURRENT_SLICE_DISPLAY_MODE) {
+            toggleDisplayMode.setText("Display All Slices");
+        }
+
+        if (newmode == MultiSlicePositioner.ALL_SLICES_DISPLAY_MODE) {
+            toggleDisplayMode.setText("Display Current Slice Only (fast)");
+        }
     }
 
     class SliceDisplayTableModel extends AbstractTableModel {

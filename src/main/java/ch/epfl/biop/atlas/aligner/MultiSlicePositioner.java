@@ -224,10 +224,10 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.changeSliceDisplayMode(), "toggle_single_source_mode", "S");
         common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.cancelLastAction(), "cancel_last_action", "ctrl Z");
         common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.redoAction(), "redo_last_action", "ctrl Y", "ctrl shift Z");
-        common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.navigateNextSlice(), "navigate_next_slice", "N", "RIGHT");
-        common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.navigatePreviousSlice(), "navigate_previous_slice", "P", "LEFT"); // P taken for panel
+        common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.navigateNextSlice(), "navigate_next_slice", "RIGHT");
+        common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.navigatePreviousSlice(), "navigate_previous_slice",  "LEFT"); // P taken for panel
         common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.navigateCurrentSlice(), "navigate_current_slice", "C");
-        common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.nextMode(), "change_mode", "Q");
+        common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.nextMode(), "change_mode", "R");
 
         bdvh.getTriggerbindings().addBehaviourMap(COMMON_BEHAVIOURS_KEY, common_behaviours.getBehaviourMap());
         bdvh.getTriggerbindings().addInputTriggerMap(COMMON_BEHAVIOURS_KEY, common_behaviours.getInputTriggerMap()); // "transform", "bdv"
@@ -451,11 +451,10 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         setSliceDisplayMode(sliceDisplayMode);
     }
 
-    public void setSliceDisplayMode(int sliceDisplayMode) {
-        this.sliceDisplayMode = sliceDisplayMode;
-        //synchronized (slices) {
-            getSlices().forEach(slice -> slice.getGUIState().sliceDisplayModeChanged());
-        //}
+    public void setSliceDisplayMode(int newSliceDisplayMode) {
+        modeListeners.forEach(l -> l.sliceDisplayModeChanged(this, this.sliceDisplayMode,newSliceDisplayMode));
+        this.sliceDisplayMode = newSliceDisplayMode;
+        getSlices().forEach(slice -> slice.getGUIState().sliceDisplayModeChanged());
     }
 
     public ReslicedAtlas getReslicedAtlas() {
@@ -897,14 +896,10 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
             g.drawLine(ptRectScreen[1][1].x, ptRectScreen[1][1].y, ptRectScreen[0][1].x, ptRectScreen[0][1].y);
             g.drawLine(ptRectScreen[0][1].x, ptRectScreen[0][1].y, ptRectScreen[0][0].x, ptRectScreen[0][0].y);
 
-            //isted (slices) {
             slicesCopy.forEach(slice -> slice.getGUIState().drawGraphicalHandles(g));
-                //for (SliceSources slice : slices) {
-
-                //}
-            //}
 
             g.setColor(color);
+
             if (iCurrentSlice != -1 && slicesCopy.size() > iCurrentSlice) {
                 SliceSources slice = getSortedSlices().get(iCurrentSlice);
                 listeners.forEach(listener -> listener.isCurrentSlice(slice));
@@ -912,6 +907,12 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                 Integer[] coords = slice.getGUIState().getBdvHandleCoords();
                 RealPoint sliceCenter = new RealPoint(coords[0], coords[1], 0);
                 g.drawOval((int) sliceCenter.getDoublePosition(0) - 15, (int) sliceCenter.getDoublePosition(1) - 15, 30, 30);
+                // "Ctrl + \u25C4 \u25BA "
+                Integer[] c = {255,255,255,128};//color.get();
+                g.setColor(new Color(c[0], c[1], c[2], c[3]));
+                g.setFont(new Font("TimesRoman", Font.PLAIN, 16));
+                g.drawString("\u25C4 \u25BA", (int) (sliceCenter.getDoublePosition(0) - 15), (int) (sliceCenter.getDoublePosition(1) - 20));
+
             }
 
             if ((displayMode == POSITIONING_MODE_INT) && slicesCopy.stream().anyMatch(SliceSources::isSelected)) {
@@ -974,6 +975,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                 ghs.forEach(gh -> gh.draw(g));
                 ghs_tool_tip.forEach(gh -> gh.draw(g));
             }
+
             if (selectionLayer != null) {
                 selectionLayer.draw(g);
             }
@@ -2386,6 +2388,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
     interface ModeListener {
         void modeChanged(MultiSlicePositioner mp, int oldmode, int newmode);
+        void sliceDisplayModeChanged(MultiSlicePositioner mp, int oldmode, int newmode);
     }
 
 }
