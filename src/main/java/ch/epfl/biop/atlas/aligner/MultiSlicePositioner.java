@@ -68,14 +68,13 @@ import static bdv.ui.BdvDefaultCards.*;
 import static sc.fiji.bdvpg.scijava.services.SourceAndConverterService.SPIM_DATA_INFO;
 
 /**
- * All specific functions and method dedicated to the multislice positioner
+ * All specific methods dedicated to the multislice positioner
  *
  * Let's think a bit:
  * There will be:
  * - a positioning mode
- * - a registration mode
- * - a 3d view mode
- *
+ * - a review mode
+ * - a 3d view mode (todo)
  */
 
 public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandleListener, MouseMotionListener { // SelectedSourcesListener,
@@ -97,9 +96,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     final public double sX, sY, sZ;
     double sizePixX, sizePixY, sizePixZ;
 
-    private List<SliceSources> slices = Collections.synchronizedList(new ArrayList<>());//Collections.synchronizedList(); // Thread safety ?
-
-    int totalNumberOfActionsRecorded = 30; // TODO : Implement
+    private List<SliceSources> slices = Collections.synchronizedList(new ArrayList<>());
 
     protected List<CancelableAction> userActions = new ArrayList<>();
 
@@ -326,11 +323,11 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         });
 
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Positioning Mode",0, this::setPositioningMode);
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Registration Mode",0, this::setRegistrationMode);
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Change Slice Display Mode [Q]",0, this::changeSliceDisplayMode);
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Review Mode",0, this::setRegistrationMode);
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Change Slice Display Mode [S]",0, this::changeSliceDisplayMode);
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Change Overlap Mode [O]",0, this::toggleOverlap);
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Navigate>Next Slice [N]",0, this::navigateNextSlice);
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Navigate>Previous Slice [P]",0, this::navigatePreviousSlice);
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Navigate>Next Slice [Right]",0, this::navigateNextSlice);
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Navigate>Previous Slice [Left]",0, this::navigatePreviousSlice);
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Navigate>Center On Current Slice [C]",0, this::navigateCurrentSlice);
 
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ImportQuPathProjectCommand.class, hierarchyLevelsSkipped,"mp", this );
@@ -398,7 +395,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
         FunctionRealRandomAccessible<UnsignedShortType> roiOverlay = new FunctionRealRandomAccessible<>(3, fun, UnsignedShortType::new);
 
-        BdvStackSource bss = BdvFunctions.show(roiOverlay,
+        BdvStackSource<?> bss = BdvFunctions.show(roiOverlay,
                 new FinalInterval(new long[]{0, 0, 0}, new long[]{10, 10, 10}),"ROI", BdvOptions.options().addTo(bdvh));
 
         bss.setDisplayRangeBounds(0,1600);
@@ -421,25 +418,25 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         bdvh.getSplitPanel().setDividerLocation(0.7);
 
         BdvHandleHelper.setBdvHandleCloseOperation(bdvh, ctx.getService(CacheService.class),
-                SourceAndConverterServices.getSourceAndConverterDisplayService(), false,
-                    () -> {
-                        if (mso!=null) this.mso.clear();
-                        if (userActions!=null) this.userActions.clear();
-                        if (slices!=null) this.slices.clear();
-                        this.biopAtlas = null;
-                        this.slices = null;
-                        this.userActions = null;
-                        ctx.getService(ObjectService.class).removeObject(this);
-                        this.mso = null;
-                        this.selectionLayer = null;
-                        this.common_behaviours = null;
-                        this.positioning_behaviours = null;
-                        this.registration_behaviours = null;
-                        this.ssb = null;
-                        this.reslicedAtlas = null;
-                        this.info = null;
-                    }
-                );
+            SourceAndConverterServices.getSourceAndConverterDisplayService(), false,
+                () -> {
+                    if (mso!=null) this.mso.clear();
+                    if (userActions!=null) this.userActions.clear();
+                    if (slices!=null) this.slices.clear();
+                    this.biopAtlas = null;
+                    this.slices = null;
+                    this.userActions = null;
+                    ctx.getService(ObjectService.class).removeObject(this);
+                    this.mso = null;
+                    this.selectionLayer = null;
+                    this.common_behaviours = null;
+                    this.positioning_behaviours = null;
+                    this.registration_behaviours = null;
+                    this.ssb = null;
+                    this.reslicedAtlas = null;
+                    this.info = null;
+                }
+            );
     }
 
     void addRightClickActions() {
@@ -597,11 +594,11 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         }
     }
 
-    void hide(SliceSources slice) {
+    public void hide(SliceSources slice) {
         slice.getGUIState().setSliceInvisible();
     }
 
-    void show(SliceSources slice) {
+    public void show(SliceSources slice) {
         slice.getGUIState().setSliceVisible();
     }
 
@@ -1014,21 +1011,11 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         }
     }
 
-    public void clearUserActions() {
-        //synchronized (slices) {
-            this.userActions.clear();
-        //}
-    }
-
     public void rotateSlices(int axis, double angle_rad) {
         List<SliceSources> sortedSelected = getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
-        //new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
-
         for (SliceSources slice : sortedSelected) {
-            slice.rotateSourceOrigin(axis, angle_rad);//slice, namingChoice);
+            slice.rotateSourceOrigin(axis, angle_rad);
         }
-
-        //new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
         bdvh.getViewerPanel().requestRepaint();
     }
 
@@ -1242,33 +1229,27 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     public void exportSelectedSlicesRegionsToRoiManager(String namingChoice) {
         List<SliceSources> sortedSelected = getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
         new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
-
         for (SliceSources slice : sortedSelected) {
             exportSliceRegionsToRoiManager(slice, namingChoice);
         }
-
         new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
     }
 
     public void exportSelectedSlicesRegionsToQuPathProject(boolean erasePreviousFile) {
         List<SliceSources> sortedSelected = getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
         new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
-
         for (SliceSources slice : sortedSelected) {
             exportSliceRegionsToQuPathProject(slice, erasePreviousFile);
         }
-
         new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
     }
 
     public void exportSelectedSlicesRegionsToFile(String namingChoice, File dirOutput, boolean erasePreviousFile) {
         List<SliceSources> sortedSelected = getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
         new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
-
         for (SliceSources slice : sortedSelected) {
             exportSliceRegionsToFile(slice, namingChoice, dirOutput, erasePreviousFile);
         }
-
         new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
     }
 
@@ -1313,10 +1294,8 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         if (range!=0) {
             double stepSize = sizePixX * (int) reslicedAtlas.getStep();
             double ratio = (range + stepSize) / range;
-
             new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
             for (SliceSources slice : sortedSelected) {
-                //slice.setSlicingAxisPosition( initialAxisPositions.get(slice) );
                 double dist = slice.getSlicingAxisPosition() - startAxis;
                 moveSlice(slice,startAxis + dist * ratio );
             }
@@ -1335,10 +1314,8 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         if (range!=0) {
             double stepSize = sizePixX * (int) reslicedAtlas.getStep();
             double ratio = (range - stepSize) / range;
-
             new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
             for (SliceSources slice : sortedSelected) {
-                //slice.setSlicingAxisPosition( initialAxisPositions.get(slice) );
                 double dist = slice.getSlicingAxisPosition() - startAxis;
                 moveSlice(slice,startAxis + dist * ratio );
             }
@@ -1359,7 +1336,6 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
             double ratio = (range + stepSize) / range;
             new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
             for (SliceSources slice : sortedSelected) {
-                //slice.setSlicingAxisPosition( initialAxisPositions.get(slice) );
                 double dist = endAxis - slice.getSlicingAxisPosition();
                 moveSlice(slice,endAxis - dist * ratio );
             }
@@ -1380,7 +1356,6 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
             double ratio = (range - stepSize) / range;
             new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
             for (SliceSources slice : sortedSelected) {
-                //slice.setSlicingAxisPosition( initialAxisPositions.get(slice) );
                 double dist = endAxis - slice.getSlicingAxisPosition();
                 moveSlice(slice,endAxis - dist * ratio );
             }
@@ -1478,7 +1453,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                 params.put("tpFixed", 0);
                 params.put("levelFixedSource", 2);
                 params.put("tpMoving", 0);
-                params.put("levelMovingSource", slice.getAdaptedMipMapLevel(0.04));//.registered_sacs[0].getSpimSource().getNumMipmapLevels() - 1);
+                params.put("levelMovingSource", slice.getAdaptedMipMapLevel(0.04));
                 params.put("pxSizeInCurrentUnit", 0.04);
                 params.put("interpolate", false);
                 params.put("showImagePlusRegistrationResult", showIJ1Result);
@@ -1514,10 +1489,10 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                 params.put("levelMovingSource", slice.getAdaptedMipMapLevel(0.02));
                 params.put("pxSizeInCurrentUnit", 0.02);
                 params.put("interpolate", true);
-                params.put("showImagePlusRegistrationResult", showIJ1Result);//false);//true);
+                params.put("showImagePlusRegistrationResult", showIJ1Result);
                 params.put("px", roiPX);
                 params.put("py", roiPY);
-                params.put("pz", 0);//slice.getSlicingAxisPosition());
+                params.put("pz", 0);
                 params.put("sx", roiSX);
                 params.put("sy", roiSY);
                 params.put("nbControlPointsX", nbControlPointsX);
@@ -1549,19 +1524,16 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
                 AffineTransform3D translateZ = new AffineTransform3D();
                 translateZ.translate(0, 0, -slice.getSlicingAxisPosition());
-
                 SourcesProcessor fixedProcess = SourcesProcessorHelper.compose(
                                 new SourcesAffineTransformer(translateZ),
                                 preprocessFixed
                         );
-
                 SourcesProcessor movingProcess = SourcesProcessorHelper.compose(
                                 new SourcesAffineTransformer(translateZ),
                                 preprocessMoving
                         );
 
-                new RegisterSlice(this, slice, registration, fixedProcess, movingProcess)
-                        .runRequest();
+                new RegisterSlice(this, slice, registration, fixedProcess, movingProcess).runRequest();
             }
         }
     }
@@ -1660,9 +1632,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     @Override
     public synchronized void mouseMoved(MouseEvent e) {
         this.ghs.forEach(gh -> gh.mouseMoved(e));
-        //synchronized (slices) {
         slices.forEach(slice -> slice.getGUIState().ghs.forEach(gh -> gh.mouseMoved(e)));
-        //}
     }
 
     @Override
@@ -1696,7 +1666,6 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     synchronized void stopDragAction() {
         dragActionInProgress.set(false);
     }
-
 
     /*
      * Stretching selected slices to the left
@@ -1887,8 +1856,6 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                     }
                 }
                 new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
-
-
                 updateDisplay();
                 stopDragAction();
             }
@@ -1946,10 +1913,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                 }
                 updateDisplay();
             }
-
-
             debuglog.accept(" SliceSourcesDrag perform : ("+perform+")");
-
         }
 
         @Override
@@ -2240,43 +2204,41 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     }
 
     public void saveState(File stateFile, boolean overwrite) {
+        slices.get(0).waitForEndOfTasks();
 
         // Wait patiently for all tasks to be performed
         this.getSortedSlices().forEach(SliceSources::waitForEndOfTasks);
 
-        //synchronized (this) {
+        // First save all sources required in the state
+        List<SourceAndConverter> allSacs = new ArrayList<>();
 
-            // First save all sources required in the state
-            List<SourceAndConverter> allSacs = new ArrayList<>();
+        this.getSortedSlices().forEach(sliceSource -> allSacs.addAll(Arrays.asList(sliceSource.getOriginalSources())));
 
-            this.getSortedSlices().forEach(sliceSource -> allSacs.addAll(Arrays.asList(sliceSource.getOriginalSources())));
+        String fileNoExt = FilenameUtils.removeExtension(stateFile.getAbsolutePath());
+        File sacsFile = new File(fileNoExt+"_sources.json");
 
-            String fileNoExt = FilenameUtils.removeExtension(stateFile.getAbsolutePath());
-            File sacsFile = new File(fileNoExt+"_sources.json");
+        if (sacsFile.exists()&&(!overwrite)) {
+            System.err.println("File "+sacsFile.getAbsolutePath()+" already exists. Abort command");
+            return;
+        }
 
-            if (sacsFile.exists()&&(!overwrite)) {
-                System.err.println("File "+sacsFile.getAbsolutePath()+" already exists. Abort command");
-                return;
-            }
+        SourceAndConverterServiceSaver sacss = new SourceAndConverterServiceSaver(sacsFile,this.scijavaCtx,allSacs);
+        sacss.run();
+        List<SourceAndConverter> serialized_sources = new ArrayList<>();
 
-            SourceAndConverterServiceSaver sacss = new SourceAndConverterServiceSaver(sacsFile,this.scijavaCtx,allSacs);
-            sacss.run();
-            List<SourceAndConverter> serialized_sources = new ArrayList<>();
+        sacss.getSacToId().values().stream().sorted().forEach(i -> {
+            System.out.println(i);
+            serialized_sources.add(sacss.getIdToSac().get(i));
+        });
 
-            sacss.getSacToId().values().stream().sorted().forEach(i -> {
-                System.out.println(i);
-                serialized_sources.add(sacss.getIdToSac().get(i));
-            });
-
-            try {
-                FileWriter writer = new FileWriter(stateFile.getAbsolutePath());
-                getGsonStateSerializer(serialized_sources).toJson(new AlignerState(this), writer);
-                writer.flush();
-                writer.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        //}
+        try {
+            FileWriter writer = new FileWriter(stateFile.getAbsolutePath());
+            getGsonStateSerializer(serialized_sources).toJson(new AlignerState(this), writer);
+            writer.flush();
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void loadState(File stateFile) {
@@ -2339,6 +2301,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                     sliceState.slice.getGUIState().setDisplaysettings(sliceState.settings_per_channel);
                     sliceState.slice.transformSourceOrigin(sliceState.preTransform);
                 });
+
                 setSliceDisplayMode(state.sliceDisplayMode);
 
             } catch (Exception e) {

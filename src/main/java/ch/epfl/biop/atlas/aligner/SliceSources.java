@@ -242,7 +242,7 @@ public class SliceSources {
                 lastTask.get();
             } catch (Exception e) {
                 e.printStackTrace();
-                System.err.println("Some registration were cancelled");
+                System.err.println("Tasks were cancelled for slice "+this.toString());
             }
         }
     }
