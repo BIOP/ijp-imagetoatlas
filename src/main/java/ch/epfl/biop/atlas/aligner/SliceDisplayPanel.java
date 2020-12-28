@@ -48,11 +48,20 @@ public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, Mul
 
     JButton toggleDisplayMode;
 
+    JButton changeOverlapMode;
+
+    JPanel panelDisplayOptions =new JPanel();
+
     public SliceDisplayPanel(MultiSlicePositioner mp) {
         this.mp = mp;
         paneDisplay = new JPanel(new BorderLayout());
 
         toggleDisplayMode = new JButton("Display One Slice Only (fast)");
+
+        changeOverlapMode = new JButton("Change Overlap Mode");
+
+        changeOverlapMode.addActionListener(e -> mp.toggleOverlap());
+
         toggleDisplayMode.addActionListener(e -> {
             if (mp.getSliceDisplayMode() == MultiSlicePositioner.ALL_SLICES_DISPLAY_MODE) {
                 mp.setSliceDisplayMode(MultiSlicePositioner.CURRENT_SLICE_DISPLAY_MODE);
@@ -61,6 +70,10 @@ public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, Mul
                 mp.setSliceDisplayMode(MultiSlicePositioner.ALL_SLICES_DISPLAY_MODE);
             }
         });
+
+        panelDisplayOptions.add(toggleDisplayMode);
+        panelDisplayOptions.add(changeOverlapMode);
+
 
         mp.addSliceListener(this);
         mp.addModeListener(this);
@@ -95,7 +108,7 @@ public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, Mul
 
         paneDisplay.add(scPane, BorderLayout.NORTH);
         paneDisplay.add(table, BorderLayout.CENTER);
-        paneDisplay.add(toggleDisplayMode, BorderLayout.SOUTH);
+        paneDisplay.add(panelDisplayOptions, BorderLayout.SOUTH);
 
         tableSelectionControl.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override

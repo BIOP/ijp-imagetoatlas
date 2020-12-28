@@ -1453,6 +1453,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
     public void editLastRegistration() {
         if (getSelectedSources().size()==0) {
+            warningMessageForUser.accept("No selected slice", "Please select the slice you want to edit");
             log.accept("Edit registration ignored : no slice selected");
         } else {
             for (SliceSources slice : slices) {
@@ -1466,6 +1467,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     public void registerElastixAffine(SourcesProcessor preprocessFixed,
                                       SourcesProcessor preprocessMoving, boolean showIJ1Result) {
         if (getSelectedSources().size()==0) {
+            warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to register");
             log.accept("Registration ignored : no slice selected");
         }
         for (SliceSources slice : slices) {
@@ -1495,21 +1497,10 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         registerElastixSpline(getChannel(iChannelFixed), getChannel(iChannelMoving), nbControlPointsX,  showIJ1Result);
     }
 
-    /*protected void ignoreSlice(SliceSources slice) {
-        synchronized (slices) {
-            slices.remove(slice);
-        }
-    }
-
-    protected void considerSlice(SliceSources slice) {
-        /*synchronized (slices) {
-            slices.add(slice);
-        }
-    }*/
-
     public void registerElastixSpline(SourcesProcessor preprocessFixed,
                                       SourcesProcessor preprocessMoving, int nbControlPointsX, boolean showIJ1Result) {
         if (getSelectedSources().size()==0) {
+            warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to register");
             log.accept("Registration ignored : no slice selected");
         }
         for (SliceSources slice : slices) {
@@ -1544,6 +1535,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     public void registerBigWarp(SourcesProcessor preprocessFixed,
                                 SourcesProcessor preprocessMoving) {
         if (getSelectedSources().size()==0) {
+            warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to register");
             log.accept("Registration ignored : no slice selected");
         }
         for (SliceSources slice : slices) {

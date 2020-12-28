@@ -13,6 +13,7 @@ public class EditLastRegistrationCommand implements Command {
 
     @Override
     public void run() {
+
         System.out.println("Edit last registration");
         mp.editLastRegistration();
     }
