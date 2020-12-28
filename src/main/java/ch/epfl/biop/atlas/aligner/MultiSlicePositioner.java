@@ -57,6 +57,7 @@ import java.awt.event.MouseMotionListener;
 import java.io.*;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -157,6 +158,8 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
     public Consumer<String> errlog = (message) -> System.err.println("Multipositioner : "+message);
 
+    public Consumer<String> debuglog = (message) -> {};//System.err.println("Multipositioner Debug : "+message);
+
     public List<SliceSources> getSlices() {
         return new ArrayList<>(slices);
     }
@@ -250,7 +253,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         bdvh.getViewerPanel().getDisplay().addHandler(this);
 
         SquareGraphicalHandle ghRight = new SquareGraphicalHandle(this, new DragRight(), "drag_right", "button1", bdvh.getTriggerbindings(),
-                () -> rightPosition, () -> 25, () -> new Integer[]{255, 0, 255, 200});
+                () -> new Integer[]{rightPosition[0]+25, rightPosition[1], rightPosition[2]}, () -> 25, () -> new Integer[]{255, 0, 255, 200});
 
         GraphicalHandleToolTip ghRightToolTip = new GraphicalHandleToolTip(ghRight, "Ctrl + \u25C4 \u25BA ",0,20);
 
@@ -260,7 +263,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         GraphicalHandleToolTip ghCenterToolTip = new GraphicalHandleToolTip(ghCenter, "Ctrl + \u25B2 \u25BC ",0,0);
 
         SquareGraphicalHandle ghLeft = new SquareGraphicalHandle(this, new DragLeft(), "drag_right", "button1", bdvh.getTriggerbindings(),
-                () -> leftPosition, () -> 25, () -> new Integer[]{255, 0, 255, 200});
+                () -> new Integer[]{leftPosition[0]-25, leftPosition[1], leftPosition[2]}, () -> 25, () -> new Integer[]{255, 0, 255, 200});
 
         GraphicalHandleToolTip ghLeftToolTip = new GraphicalHandleToolTip(ghLeft, "Ctrl + Shift + \u25C4 \u25BA ", 0,-20);
 
@@ -563,14 +566,12 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
      */
     public void setPositioningMode() {
         if (!(displayMode == POSITIONING_MODE_INT)) {
-                int oldMode = displayMode;
-            //synchronized (slices) {
-                reslicedAtlas.unlock();
-                displayMode = POSITIONING_MODE_INT;
-                ghs.forEach(GraphicalHandle::enable);
-                slices.forEach(slice -> slice.getGUIState().enableGraphicalHandles());
-                getSortedSlices().forEach(slice -> slice.getGUIState().displayModeChanged());
-            //}
+            int oldMode = displayMode;
+            reslicedAtlas.unlock();
+            displayMode = POSITIONING_MODE_INT;
+            ghs.forEach(GraphicalHandle::enable);
+            slices.forEach(slice -> slice.getGUIState().enableGraphicalHandles());
+            getSortedSlices().forEach(slice -> slice.getGUIState().displayModeChanged());
 
             bdvh.getTriggerbindings().removeInputTriggerMap(REGISTRATION_BEHAVIOURS_KEY);
             bdvh.getTriggerbindings().removeBehaviourMap(REGISTRATION_BEHAVIOURS_KEY);
@@ -1669,7 +1670,25 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         ghs.remove(gh);
     }
 
+
     //------------------------------------------ DRAG BEHAVIOURS
+
+    AtomicBoolean dragActionInProgress = new AtomicBoolean(false);
+
+    synchronized boolean startDragAction() {
+        if (dragActionInProgress.get()) {
+            return false;
+        } else {
+            dragActionInProgress.set(true);
+            return true;
+        }
+    }
+
+    synchronized void stopDragAction() {
+        dragActionInProgress.set(false);
+    }
+
+
     /*
      * Stretching selected slices to the left
      */
@@ -1681,56 +1700,89 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         RealPoint iniPointBdv = new RealPoint(3);
         double iniSlicePointing;
         double iniSlicingAxisPosition;
+        boolean perform;
 
         @Override
         public void init(int x, int y) {
-            slicesDragged = getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
+            debuglog.accept(" DragLeft start ("+x+":"+y+")");
+            perform = startDragAction();
 
-            slicesDragged.forEach(slice -> initialAxisPositions.put(slice, slice.getSlicingAxisPosition()));
+            if (perform) {
+                slicesDragged = getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
 
-            range = initialAxisPositions.get(slicesDragged.get(slicesDragged.size() - 1)) - initialAxisPositions.get(slicesDragged.get(0));
-            lastAxisPos = initialAxisPositions.get(slicesDragged.get(slicesDragged.size() - 1));
+                slicesDragged.forEach(slice -> initialAxisPositions.put(slice, slice.getSlicingAxisPosition()));
 
-            // Computes which slice it corresponds to (useful for overlay redraw)
-            bdvh.getViewerPanel().getGlobalMouseCoordinates(iniPointBdv);
-            iniSlicePointing = iniPointBdv.getDoublePosition(0) / sX;
-            iniSlicingAxisPosition = (iniSlicePointing) * sizePixX * (int) reslicedAtlas.getStep();
+                range = initialAxisPositions.get(slicesDragged.get(slicesDragged.size() - 1)) - initialAxisPositions.get(slicesDragged.get(0));
+
+                lastAxisPos = initialAxisPositions.get(slicesDragged.get(slicesDragged.size() - 1));
+
+                // Computes which slice it corresponds to (useful for overlay redraw)
+                bdvh.getViewerPanel().getGlobalMouseCoordinates(iniPointBdv);
+                iniSlicePointing = iniPointBdv.getDoublePosition(0) / sX;
+                iniSlicingAxisPosition = (iniSlicePointing) * sizePixX * (int) reslicedAtlas.getStep();
+            }
+            debuglog.accept(" DragLeft perform : ("+perform+")");
         }
 
         @Override
         public void drag(int x, int y) {
-            RealPoint currentMousePosition = new RealPoint(3);
-            bdvh.getViewerPanel().getGlobalMouseCoordinates(currentMousePosition);
+            if (perform) {
+                debuglog.accept(" DragLeft drag (" + x + ":" + y + ")");
+                RealPoint currentMousePosition = new RealPoint(3);
+                bdvh.getViewerPanel().getGlobalMouseCoordinates(currentMousePosition);
 
-            int currentSlicePointing = (int) (currentMousePosition.getDoublePosition(0) / sX);
-            double currentSlicingAxisPosition = (currentSlicePointing) * sizePixX * (int) reslicedAtlas.getStep();
+                int currentSlicePointing = (int) (currentMousePosition.getDoublePosition(0) / sX);
+                double currentSlicingAxisPosition = (currentSlicePointing) * sizePixX * (int) reslicedAtlas.getStep();
 
-            double ratio = (lastAxisPos - currentSlicingAxisPosition) / range;
+                double ratio;
 
-            for (SliceSources slice : slicesDragged) {
-                slice.setSlicingAxisPosition( lastAxisPos + (initialAxisPositions.get(slice) - lastAxisPos) * ratio);
+                if (range == 0) {
+                    ratio = 1.0 / (slicesDragged.size()-1);
+                    for (SliceSources slice : slicesDragged) {
+                        slice.setSlicingAxisPosition(lastAxisPos + (currentSlicingAxisPosition - lastAxisPos) * ratio * slicesDragged.indexOf(slice));
+                    }
+                } else {
+                    ratio = (lastAxisPos - currentSlicingAxisPosition) / range;
+                    for (SliceSources slice : slicesDragged) {
+                        slice.setSlicingAxisPosition(lastAxisPos + (initialAxisPositions.get(slice) - lastAxisPos) * ratio);
+                    }
+                }
+
+                updateDisplay();
             }
-
-            updateDisplay();
         }
 
         @Override
         public void end(int x, int y) {
-            RealPoint currentMousePosition = new RealPoint(3);
-            bdvh.getViewerPanel().getGlobalMouseCoordinates(currentMousePosition);
+            if (perform) {
+                debuglog.accept(" DragLeft end (" + x + ":" + y + ")");
+                RealPoint currentMousePosition = new RealPoint(3);
+                bdvh.getViewerPanel().getGlobalMouseCoordinates(currentMousePosition);
 
-            int currentSlicePointing = (int) (currentMousePosition.getDoublePosition(0) / sX);
-            double currentSlicingAxisPosition = (currentSlicePointing) * sizePixX * (int) reslicedAtlas.getStep();
+                int currentSlicePointing = (int) (currentMousePosition.getDoublePosition(0) / sX);
+                double currentSlicingAxisPosition = (currentSlicePointing) * sizePixX * (int) reslicedAtlas.getStep();
 
-            double ratio = (lastAxisPos - currentSlicingAxisPosition) / range;
+                double ratio;
 
-            new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
-            for (SliceSources slice : slicesDragged) {
-                slice.setSlicingAxisPosition( initialAxisPositions.get(slice));
-                moveSlice(slice, lastAxisPos + (initialAxisPositions.get(slice) - lastAxisPos) * ratio);
+                new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
+                if (range == 0) {
+                    ratio = 1.0 / (slicesDragged.size()-1);
+                    for (SliceSources slice : slicesDragged) {
+                        slice.setSlicingAxisPosition(initialAxisPositions.get(slice));
+                        moveSlice(slice, lastAxisPos + (currentSlicingAxisPosition - lastAxisPos) * ratio * slicesDragged.indexOf(slice));
+                    }
+                } else {
+                    ratio = (lastAxisPos - currentSlicingAxisPosition) / range;
+                    for (SliceSources slice : slicesDragged) {
+                        slice.setSlicingAxisPosition(initialAxisPositions.get(slice));
+                        moveSlice(slice, lastAxisPos + (initialAxisPositions.get(slice) - lastAxisPos) * ratio);
+                    }
+                }
+                new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
+
+                updateDisplay();
+                stopDragAction();
             }
-            new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
-            updateDisplay();
         }
     }
 
@@ -1746,56 +1798,91 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         RealPoint iniPointBdv = new RealPoint(3);
         double iniSlicePointing;
         double iniSlicingAxisPosition;
+        boolean perform;
 
         @Override
         public void init(int x, int y) {
-            slicesDragged = getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
 
-            slicesDragged.forEach(slice -> initialAxisPositions.put(slice, slice.getSlicingAxisPosition()));
+            debuglog.accept(" DragRight start ("+x+":"+y+")");
+            perform = startDragAction();
+            if (perform) {
+                slicesDragged = getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
 
-            range = initialAxisPositions.get(slicesDragged.get(slicesDragged.size() - 1)) - initialAxisPositions.get(slicesDragged.get(0));
-            lastAxisPos = initialAxisPositions.get(slicesDragged.get(0));
+                slicesDragged.forEach(slice -> initialAxisPositions.put(slice, slice.getSlicingAxisPosition()));
 
-            // Computes which slice it corresponds to (useful for overlay redraw)
-            bdvh.getViewerPanel().getGlobalMouseCoordinates(iniPointBdv);
-            iniSlicePointing = iniPointBdv.getDoublePosition(0) / sX;
-            iniSlicingAxisPosition = (iniSlicePointing) * sizePixX * (int) reslicedAtlas.getStep();
+                range = initialAxisPositions.get(slicesDragged.get(slicesDragged.size() - 1)) - initialAxisPositions.get(slicesDragged.get(0));
+                lastAxisPos = initialAxisPositions.get(slicesDragged.get(0));
+
+                // Computes which slice it corresponds to (useful for overlay redraw)
+                bdvh.getViewerPanel().getGlobalMouseCoordinates(iniPointBdv);
+                iniSlicePointing = iniPointBdv.getDoublePosition(0) / sX;
+                iniSlicingAxisPosition = (iniSlicePointing) * sizePixX * (int) reslicedAtlas.getStep();
+            }
         }
 
         @Override
         public void drag(int x, int y) {
-            RealPoint currentMousePosition = new RealPoint(3);
-            bdvh.getViewerPanel().getGlobalMouseCoordinates(currentMousePosition);
+            if (perform) {
+                debuglog.accept(" DragRight drag (" + x + ":" + y + ")");
 
-            int currentSlicePointing = (int) (currentMousePosition.getDoublePosition(0) / sX);
-            double currentSlicingAxisPosition = (currentSlicePointing) * sizePixX * (int) reslicedAtlas.getStep();
+                RealPoint currentMousePosition = new RealPoint(3);
+                bdvh.getViewerPanel().getGlobalMouseCoordinates(currentMousePosition);
 
-            double ratio = (lastAxisPos - currentSlicingAxisPosition) / range;
+                int currentSlicePointing = (int) (currentMousePosition.getDoublePosition(0) / sX);
+                double currentSlicingAxisPosition = (currentSlicePointing) * sizePixX * (int) reslicedAtlas.getStep();
 
-            for (SliceSources slice : slicesDragged) {
-                slice.setSlicingAxisPosition( lastAxisPos - (initialAxisPositions.get(slice) - lastAxisPos) * ratio );
+                double ratio;
+
+                if (range == 0) {
+                    ratio = 1.0 / (slicesDragged.size()-1);
+                    for (SliceSources slice : slicesDragged) {
+                        slice.setSlicingAxisPosition(lastAxisPos + (currentSlicingAxisPosition - lastAxisPos) * ratio * slicesDragged.indexOf(slice));
+                    }
+                } else {
+                    ratio = (lastAxisPos - currentSlicingAxisPosition) / range;
+                    for (SliceSources slice : slicesDragged) {
+                        slice.setSlicingAxisPosition(lastAxisPos - (initialAxisPositions.get(slice) - lastAxisPos) * ratio);
+                    }
+                }
+
+
+                updateDisplay();
             }
-
-            updateDisplay();
         }
 
         @Override
         public void end(int x, int y) {
-            RealPoint currentMousePosition = new RealPoint(3);
-            bdvh.getViewerPanel().getGlobalMouseCoordinates(currentMousePosition);
+            if (perform) {
+                debuglog.accept(" DragRight end (" + x + ":" + y + ")");
 
-            int currentSlicePointing = (int) (currentMousePosition.getDoublePosition(0) / sX);
-            double currentSlicingAxisPosition = (currentSlicePointing) * sizePixX * (int) reslicedAtlas.getStep();
+                RealPoint currentMousePosition = new RealPoint(3);
+                bdvh.getViewerPanel().getGlobalMouseCoordinates(currentMousePosition);
 
-            double ratio = (lastAxisPos - currentSlicingAxisPosition) / range;
+                int currentSlicePointing = (int) (currentMousePosition.getDoublePosition(0) / sX);
+                double currentSlicingAxisPosition = (currentSlicePointing) * sizePixX * (int) reslicedAtlas.getStep();
 
-            new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
-            for (SliceSources slice : slicesDragged) {
-                slice.setSlicingAxisPosition( initialAxisPositions.get(slice) );
-                moveSlice(slice, lastAxisPos - (initialAxisPositions.get(slice) - lastAxisPos) * ratio);
+                double ratio;
+
+                new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
+                if (range == 0) {
+                    ratio = 1.0 / (slicesDragged.size()-1);
+                    for (SliceSources slice : slicesDragged) {
+                        slice.setSlicingAxisPosition(initialAxisPositions.get(slice));
+                        moveSlice(slice, lastAxisPos + (currentSlicingAxisPosition - lastAxisPos) * ratio * slicesDragged.indexOf(slice));
+                    }
+                } else {
+                    ratio = (lastAxisPos - currentSlicingAxisPosition) / range;
+                    for (SliceSources slice : slicesDragged) {
+                        slice.setSlicingAxisPosition(initialAxisPositions.get(slice));
+                        moveSlice(slice, lastAxisPos - (initialAxisPositions.get(slice) - lastAxisPos) * ratio);
+                    }
+                }
+                new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
+
+
+                updateDisplay();
+                stopDragAction();
             }
-            new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
-            updateDisplay();
         }
     }
 
@@ -1820,14 +1907,13 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
         @Override
         public void init(int x, int y) {
+            debuglog.accept(" SliceSourcesDrag start ("+x+":"+y+")");
             bdvh.getViewerPanel().getGlobalMouseCoordinates(iniPointBdv);
-
             // Computes which slice it corresponds to (useful for overlay redraw)
             iniSlicePointing = iniPointBdv.getDoublePosition(0) / sX + 0.5;
             iniSlicingAxisPosition = ((int) iniSlicePointing) * sizePixX * (int) reslicedAtlas.getStep();
 
             if ((sliceOrigin.isSelected())) {
-                perform = true;
                 initialAxisPositions.put(sliceOrigin, sliceOrigin.getSlicingAxisPosition());
             } else {
                 if (!sliceOrigin.isSelected()) {
@@ -1840,22 +1926,27 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                 perform = false;
             }
 
+            perform = perform && startDragAction(); // ensure unicity of drag action
+
             // Initialize the delta on a step of the zStepper
+
             if (perform) {
                 deltaOrigin = iniSlicingAxisPosition - sliceOrigin.getSlicingAxisPosition();
                 if (initialAxisPositions.containsKey(sliceOrigin)) {
                     sliceOrigin.setSlicingAxisPosition( initialAxisPositions.get(sliceOrigin) + deltaOrigin );
                 }
+                updateDisplay();
             }
 
-            updateDisplay();
+
+            debuglog.accept(" SliceSourcesDrag perform : ("+perform+")");
 
         }
 
         @Override
         public void drag(int x, int y) {
-
             if (perform) {
+                debuglog.accept(" SliceSourcesDrag drag ("+x+":"+y+")");
                 RealPoint currentMousePosition = new RealPoint(3);
                 bdvh.getViewerPanel().getGlobalMouseCoordinates(currentMousePosition);
 
@@ -1873,20 +1964,19 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         @Override
         public void end(int x, int y) {
             if (perform) {
-                {
-                    RealPoint currentMousePosition = new RealPoint(3);
-                    bdvh.getViewerPanel().getGlobalMouseCoordinates(currentMousePosition);
+                debuglog.accept(" SliceSourcesDrag end ("+x+":"+y+")");
+                RealPoint currentMousePosition = new RealPoint(3);
+                bdvh.getViewerPanel().getGlobalMouseCoordinates(currentMousePosition);
+                double currentSlicePointing = currentMousePosition.getDoublePosition(0) / sX;
+                double currentSlicingAxisPosition = ((int) currentSlicePointing) * sizePixX * (int) reslicedAtlas.getStep();
+                double deltaAxis = currentSlicingAxisPosition - iniSlicingAxisPosition;
 
-                    double currentSlicePointing = currentMousePosition.getDoublePosition(0) / sX;
-                    double currentSlicingAxisPosition = ((int) currentSlicePointing) * sizePixX * (int) reslicedAtlas.getStep();
-                    double deltaAxis = currentSlicingAxisPosition - iniSlicingAxisPosition;
-
-                    if (initialAxisPositions.containsKey(sliceOrigin)) {
-                        sliceOrigin.setSlicingAxisPosition( initialAxisPositions.get(sliceOrigin) );
-                        moveSlice(sliceOrigin, initialAxisPositions.get(sliceOrigin) + deltaAxis + deltaOrigin);
-                    }
-                    updateDisplay();
+                if (initialAxisPositions.containsKey(sliceOrigin)) {
+                    sliceOrigin.setSlicingAxisPosition( initialAxisPositions.get(sliceOrigin) );
+                    moveSlice(sliceOrigin, initialAxisPositions.get(sliceOrigin) + deltaAxis + deltaOrigin);
                 }
+                updateDisplay();
+                stopDragAction();
             }
         }
     }
@@ -1914,6 +2004,9 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
         @Override
         public void init(int x, int y) {
+
+            debuglog.accept(" SelectedSliceSourcesDrag init ("+x+":"+y+")");
+
             bdvh.getViewerPanel().getGlobalMouseCoordinates(iniPointBdv);
 
             // Computes which slice it corresponds to (useful for overlay redraw)
@@ -1930,6 +2023,8 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                 perform = false;
             }
 
+            perform = perform && startDragAction(); // ensure unicity of drag action
+
             // Initialize the delta on a step of the zStepper
             if (perform) {
                 deltaOrigin = 0;
@@ -1938,14 +2033,15 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                         slice.setSlicingAxisPosition( initialAxisPositions.get(slice) + deltaOrigin );
                     }
                 }
+                updateDisplay();
             }
-            updateDisplay();
+            debuglog.accept(" SelectedSliceSourcesDrag perform : ("+perform+")");
         }
 
         @Override
         public void drag(int x, int y) {
-
             if (perform) {
+                debuglog.accept(" SelectedSliceSourcesDrag drag ("+x+":"+y+")");
                 RealPoint currentMousePosition = new RealPoint(3);
                 bdvh.getViewerPanel().getGlobalMouseCoordinates(currentMousePosition);
 
@@ -1965,26 +2061,24 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         @Override
         public void end(int x, int y) {
             if (perform) {
-                {
+                debuglog.accept(" SelectedSliceSourcesDrag end ("+x+":"+y+")");
+                RealPoint currentMousePosition = new RealPoint(3);
+                bdvh.getViewerPanel().getGlobalMouseCoordinates(currentMousePosition);
 
-                    RealPoint currentMousePosition = new RealPoint(3);
-                    bdvh.getViewerPanel().getGlobalMouseCoordinates(currentMousePosition);
+                double currentSlicePointing = currentMousePosition.getDoublePosition(0) / sX;
+                double currentSlicingAxisPosition = ((int) currentSlicePointing) * sizePixX * (int) reslicedAtlas.getStep();
+                double deltaAxis = currentSlicingAxisPosition - iniSlicingAxisPosition;
 
-                    double currentSlicePointing = currentMousePosition.getDoublePosition(0) / sX;
-                    double currentSlicingAxisPosition = ((int) currentSlicePointing) * sizePixX * (int) reslicedAtlas.getStep();
-                    double deltaAxis = currentSlicingAxisPosition - iniSlicingAxisPosition;
-
-                    new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
-                    for (SliceSources slice : selectedSources) {
-                        if (initialAxisPositions.containsKey(slice)) {
-                            slice.setSlicingAxisPosition( initialAxisPositions.get(slice) );
-                            moveSlice(slice, initialAxisPositions.get(slice) + deltaAxis + deltaOrigin);
-                        }
+                new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
+                for (SliceSources slice : selectedSources) {
+                    if (initialAxisPositions.containsKey(slice)) {
+                        slice.setSlicingAxisPosition( initialAxisPositions.get(slice) );
+                        moveSlice(slice, initialAxisPositions.get(slice) + deltaAxis + deltaOrigin);
                     }
-                    new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
-                    updateDisplay();
                 }
-
+                new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
+                updateDisplay();
+                stopDragAction();
             }
         }
     }
