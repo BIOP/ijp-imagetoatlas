@@ -58,7 +58,7 @@ public class ImportQuPathProjectCommand implements Command {
             mp.errorMessageForUser.accept("QuPath Import Error",
                     "QuPath project couldn't be imported.\n"+
                        "Check whether the project can be opened in QuPath (v0.2+), fix URI if necessary.\n"+
-                       "Only BioFormats image server are supported.");
+                       "Only (rotated) Bio-Formats image server are supported.");
 
             e.printStackTrace();
         }

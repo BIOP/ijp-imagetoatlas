@@ -2,6 +2,7 @@ package ch.epfl.biop.atlas.aligner;
 
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.allen.AllenOntology;
+import ch.epfl.biop.atlas.allen.AllenOntologyJson;
 import ch.epfl.biop.atlas.commands.ConstructROIsFromImgLabel;
 import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
 import ch.epfl.biop.java.utilities.roi.types.CompositeFloatPoly;
@@ -13,6 +14,7 @@ import ch.epfl.biop.registration.Registration;
 import ch.epfl.biop.registration.sourceandconverter.affine.AffineTransformedSourceWrapperRegistration;
 import ch.epfl.biop.registration.sourceandconverter.affine.CenterZeroRegistration;
 import ch.epfl.biop.scijava.command.ExportToImagePlusCommand;
+import com.google.gson.Gson;
 import ij.ImagePlus;
 import ij.gui.Roi;
 import ij.plugin.frame.RoiManager;
@@ -30,8 +32,7 @@ import sc.fiji.bdvpg.sourceandconverter.transform.SourceResampler;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
 
 import java.awt.*;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
@@ -637,17 +638,19 @@ public class SliceSources {
     // TODO
     static public synchronized void writeOntotogyIfNotPresent(String quPathFilePath) {
         File ontology = new File(quPathFilePath, "AllenMouseBrainOntology.json");
-       /* if (!ontology.exists()) {
-            // Write ontology once
-            Gson gson = new Gson();
-            AllenOntologyJson onto = AllenOntologyJson.getOntologyFromFile(new File("src/main/resources/AllenBrainData/1.json"));
+        if (!ontology.exists()) {
             try {
-                gson.toJson(onto, new FileWriter(quPathFilePath));
-            } catch (IOException e) {
+                InputStream initialStream = SliceSources.class.getClassLoader().getResourceAsStream("AllenMouseBrainOntology.json"); // Should work in jar
+                OutputStream outStream = new FileOutputStream(ontology);
+                byte[] buffer = new byte[initialStream.available()];
+                initialStream.read(buffer);
+                outStream.write(buffer);
+                outStream.close();
+                initialStream.close();
+            } catch (Exception e) {
                 e.printStackTrace();
             }
-
-        }*/
+        }
     }
 
     public String toString() {
