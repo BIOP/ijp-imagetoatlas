@@ -124,7 +124,7 @@
 		<!-- NB: for project parent -->
 		<repository>
 			<id>imagej.public</id>
-			<url>http://maven.imagej.net/content/groups/public</url>
+			<url>http://maven.scijava.org/content/groups/public</url>
 		</repository>
 	</repositories>
 	
@@ -135,7 +135,7 @@
 		<license.copyrightOwners>N/A</license.copyrightOwners>
 		<scijava.app.directory>C:\Users\nicol\Desktop\fiji-win64-ABBA\Fiji.app</scijava.app.directory>
 
-		<bigdataviewer-biop-tools.version>0.2.1</bigdataviewer-biop-tools.version>
+		<bigdataviewer-biop-tools.version>0.2.2</bigdataviewer-biop-tools.version>
 		<bigdataviewer-bioformats.version>0.2.9</bigdataviewer-bioformats.version>
 		<bigdataviewer-playground.version>0.2.7</bigdataviewer-playground.version>
 		<bigdataviewer-selector.version>0.1.5</bigdataviewer-selector.version>
