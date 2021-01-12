@@ -1,10 +1,8 @@
 package ch.epfl.biop.atlas.allen;
 
-import java.net.URL;
-import java.util.List;
-import java.util.function.BiConsumer;
-
-import bdv.util.*;
+import bdv.util.BdvHandle;
+import bdv.util.BdvHandleFrame;
+import bdv.util.RealRandomAccessibleIntervalSource;
 import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
 import bdv.viewer.SynchronizedViewerState;
@@ -12,21 +10,20 @@ import ch.epfl.biop.atlas.AtlasMap;
 import ch.epfl.biop.scijava.command.ExportToImagePlusCommand;
 import ij.IJ;
 import ij.ImagePlus;
-import ij.Prefs;
 import net.imglib2.FinalInterval;
 import net.imglib2.RealLocalizable;
-import net.imglib2.cache.img.DiskCachedCellImgFactory;
-import net.imglib2.cache.img.DiskCachedCellImgOptions;
 import net.imglib2.position.FunctionRealRandomAccessible;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
-import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterUtils;
+import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
 import sc.fiji.bdvpg.sourceandconverter.importer.EmptySourceAndConverterCreator;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceResampler;
 import sc.fiji.bdvpg.spimdata.importer.SpimDataFromXmlImporter;
 
-import static net.imglib2.cache.img.DiskCachedCellImgOptions.options;
+import java.net.URL;
+import java.util.List;
+import java.util.function.BiConsumer;
 
 public class AllenMap implements AtlasMap {
 
@@ -85,7 +82,7 @@ public class AllenMap implements AtlasMap {
 				FinalInterval.createMinMax( 0, 0, 0, 1000, 1000, 0),
 				new UnsignedShortType(), new AffineTransform3D(), "Left_Right" );
 
-		SourceAndConverter leftRight = SourceAndConverterUtils.createSourceAndConverter(s);
+		SourceAndConverter leftRight = SourceAndConverterHelper.createSourceAndConverter(s);
 
 		sacs.add(leftRight);
 

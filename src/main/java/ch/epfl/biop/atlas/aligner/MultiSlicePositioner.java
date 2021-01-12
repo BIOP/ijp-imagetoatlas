@@ -37,9 +37,8 @@ import org.scijava.object.ObjectService;
 import org.scijava.ui.behaviour.*;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
-import sc.fiji.bdvpg.bdv.BdvUtils;
+import sc.fiji.bdvpg.bdv.BdvHandleHelper;
 import sc.fiji.bdvpg.behaviour.EditorBehaviourUnInstaller;
-import sc.fiji.bdvpg.scijava.BdvHandleHelper;
 import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
 import sc.fiji.bdvpg.scijava.services.ui.swingdnd.BdvTransferHandler;
 import sc.fiji.bdvpg.services.SourceAndConverterServiceLoader;
@@ -813,7 +812,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         if(maintainoffset) {
             centerSlice.move(offset);
         }
-        AffineTransform3D at3d = BdvUtils.getViewerTransformWithNewCenter(bdvh, centerSlice.positionAsDoubleArray());
+        AffineTransform3D at3d = BdvHandleHelper.getViewerTransformWithNewCenter(bdvh, centerSlice.positionAsDoubleArray());
 
         bdvh.getViewerPanel().state().setViewerTransform(at3d);
         bdvh.getViewerPanel().requestRepaint();

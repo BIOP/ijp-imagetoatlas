@@ -8,7 +8,7 @@ import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
-import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterUtils;
+import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
 import spimdata.util.Displaysettings;
 import spimdata.util.DisplaysettingsHelper;
 
@@ -76,7 +76,7 @@ public class SliceSourcesGUIState {
         }
 
         sources_displayed_or_readyfordisplay = slice.original_sacs;
-        SourceAndConverterUtils.transferColorConverters(slice.original_sacs, sources_displayed_or_readyfordisplay);
+        SourceAndConverterHelper.transferColorConverters(slice.original_sacs, sources_displayed_or_readyfordisplay);
 
         behavioursHandleSlice = new Behaviours(new InputTriggerConfig());
         behavioursHandleSlice.behaviour(mp.getSelectedSourceDragBehaviour(slice), "dragSelectedSources" + this.toString(), "button1");
@@ -115,8 +115,8 @@ public class SliceSourcesGUIState {
 
                 positionChanged();
 
-                SourceAndConverterUtils.transferColorConverters(sources_displayed_or_readyfordisplay, sacs_registration_mode);
-                SourceAndConverterUtils.transferColorConverters(sources_displayed_or_readyfordisplay, relocated_sacs_positioning_mode);
+                SourceAndConverterHelper.transferColorConverters(sources_displayed_or_readyfordisplay, sacs_registration_mode);
+                SourceAndConverterHelper.transferColorConverters(sources_displayed_or_readyfordisplay, relocated_sacs_positioning_mode);
 
                 switch (mp.displayMode) {
                     case MultiSlicePositioner.POSITIONING_MODE_INT:
@@ -162,14 +162,14 @@ public class SliceSourcesGUIState {
                     case MultiSlicePositioner.POSITIONING_MODE_INT:
                         if (sources_displayed_or_readyfordisplay != relocated_sacs_positioning_mode) {
                             mp.bdvh.getViewerPanel().state().removeSources(Arrays.asList(sources_displayed_or_readyfordisplay));
-                            SourceAndConverterUtils.transferColorConverters(sources_displayed_or_readyfordisplay, relocated_sacs_positioning_mode);
+                            SourceAndConverterHelper.transferColorConverters(sources_displayed_or_readyfordisplay, relocated_sacs_positioning_mode);
                             sources_displayed_or_readyfordisplay = relocated_sacs_positioning_mode;
                         }
                         break;
                     case MultiSlicePositioner.REGISTRATION_MODE_INT:
                         if (sources_displayed_or_readyfordisplay != sacs_registration_mode) {
                             mp.bdvh.getViewerPanel().state().removeSources(Arrays.asList(sources_displayed_or_readyfordisplay));
-                            SourceAndConverterUtils.transferColorConverters(sources_displayed_or_readyfordisplay, sacs_registration_mode);
+                            SourceAndConverterHelper.transferColorConverters(sources_displayed_or_readyfordisplay, sacs_registration_mode);
                             sources_displayed_or_readyfordisplay = sacs_registration_mode;
                         }
                         break;

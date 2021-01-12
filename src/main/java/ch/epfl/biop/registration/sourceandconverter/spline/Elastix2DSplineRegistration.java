@@ -12,7 +12,7 @@ import net.imglib2.realtransform.RealTransform;
 import org.scijava.Context;
 import org.scijava.command.CommandModule;
 import org.scijava.command.CommandService;
-import sc.fiji.bdvpg.bdv.BdvUtils;
+import sc.fiji.bdvpg.bdv.BdvHandleHelper;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import sc.fiji.bdvpg.sourceandconverter.register.BigWarpLauncher;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceRealTransformer;
@@ -141,8 +141,8 @@ public class Elastix2DSplineRegistration extends SourceAndConverterRegistration 
         BdvHandle bdvhQ = bwl.getBdvHandleQ();
         BdvHandle bdvhP = bwl.getBdvHandleP();
 
-        bdvhP.getViewerPanel().state().setViewerTransform(BdvUtils.getViewerTransformWithNewCenter(bdvhP, new double[]{0,0,0}));
-        bdvhQ.getViewerPanel().state().setViewerTransform(BdvUtils.getViewerTransformWithNewCenter(bdvhQ, new double[]{0,0,0}));
+        bdvhP.getViewerPanel().state().setViewerTransform(BdvHandleHelper.getViewerTransformWithNewCenter(bdvhP, new double[]{0,0,0}));
+        bdvhQ.getViewerPanel().state().setViewerTransform(BdvHandleHelper.getViewerTransformWithNewCenter(bdvhQ, new double[]{0,0,0}));
 
         SourceAndConverterServices.getSourceAndConverterDisplayService().pairClosing(bdvhQ,bdvhP);
 

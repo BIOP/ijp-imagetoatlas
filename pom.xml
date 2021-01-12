@@ -135,13 +135,13 @@
 		<license.copyrightOwners>N/A</license.copyrightOwners>
 		<scijava.app.directory>C:\Users\nicol\Desktop\fiji-win64-ABBA\Fiji.app</scijava.app.directory>
 
-		<bigdataviewer-biop-tools.version>0.2.2</bigdataviewer-biop-tools.version>
-		<bigdataviewer-bioformats.version>0.2.9</bigdataviewer-bioformats.version>
-		<bigdataviewer-playground.version>0.2.7</bigdataviewer-playground.version>
-		<bigdataviewer-selector.version>0.1.5</bigdataviewer-selector.version>
+		<bigdataviewer-biop-tools.version>0.2.3-SNAPSHOT-local</bigdataviewer-biop-tools.version>
+		<bigdataviewer-bioformats.version>0.2.13</bigdataviewer-bioformats.version>
+		<bigdataviewer-playground.version>0.2.8-SNAPSHOT-local</bigdataviewer-playground.version>
+		<bigdataviewer-selector.version>0.1.6-SNAPSHOT</bigdataviewer-selector.version>
 
-		<bigdataviewer-core.version>10.0.2</bigdataviewer-core.version>
-		<bigdataviewer-vistools.version>1.0.0-beta-24</bigdataviewer-vistools.version>
+		<bigdataviewer-core.version>10.1.1-SNAPSHOT-IMARIS</bigdataviewer-core.version>
+		<bigdataviewer-vistools.version>1.0.0-beta-26</bigdataviewer-vistools.version>
 		<imglib2-cache.version>1.0.0-beta-15</imglib2-cache.version>
 
 		<ijl-utilities-wrappers.version>0.3.16</ijl-utilities-wrappers.version>

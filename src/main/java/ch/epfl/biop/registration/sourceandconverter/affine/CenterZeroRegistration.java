@@ -2,11 +2,10 @@ package ch.epfl.biop.registration.sourceandconverter.affine;
 
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
-import ch.epfl.biop.registration.Registration;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterAndTimeRange;
-import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterUtils;
+import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
 
 import java.util.ArrayList;
@@ -37,7 +36,7 @@ public class CenterZeroRegistration extends AffineTransformSourceAndConverterReg
 
         SourceAndConverter sac = mimg[0];
 
-        RealPoint center = SourceAndConverterUtils.getSourceAndConverterCenterPoint(sac);
+        RealPoint center = SourceAndConverterHelper.getSourceAndConverterCenterPoint(sac);
 
         at3d = new AffineTransform3D();
 

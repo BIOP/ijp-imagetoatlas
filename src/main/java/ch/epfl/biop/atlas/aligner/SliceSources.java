@@ -26,7 +26,7 @@ import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
 import sc.fiji.bdvpg.scijava.services.ui.SourceAndConverterInspector;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterAndTimeRange;
-import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterUtils;
+import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
 import sc.fiji.bdvpg.sourceandconverter.importer.EmptySourceAndConverterCreator;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceResampler;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
@@ -132,7 +132,7 @@ public class SliceSources {
         guiState.positionChanged();
 
         try {
-            name = SourceAndConverterUtils.getRootSource(sacs[0].getSpimSource(), new AffineTransform3D()).getName();
+            name = SourceAndConverterHelper.getRootSource(sacs[0].getSpimSource(), new AffineTransform3D()).getName();
         } catch(Exception e) {
             mp.errlog.accept("Couldn't name slice");
             e.printStackTrace();
@@ -747,7 +747,7 @@ public class SliceSources {
         /*int maxLevel = registered_sacs[0].getSpimSource().getNumMipmapLevels() - 1;
         int chosenLevel = SourceAndConverterUtils.bestLevel(registered_sacs[0],0,pxSizeInMm);
         mp.log.accept(this+":"+chosenLevel+ "/" +maxLevel);*/
-        return SourceAndConverterUtils.bestLevel(registered_sacs[0],0,pxSizeInMm);
+        return SourceAndConverterHelper.bestLevel(registered_sacs[0],0,pxSizeInMm);
     }
 
     public static class RegistrationAndSources {

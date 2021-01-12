@@ -2,27 +2,17 @@ package ch.epfl.biop.atlas.aligner;
 
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.commands.DisplaySettingsCommand;
-import org.scijava.command.CommandModule;
 import org.scijava.command.CommandService;
-import org.scijava.module.ModuleService;
-import org.scijava.util.ColorRGB;
-import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterUtils;
+import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
 import spimdata.util.Displaysettings;
 import spimdata.util.DisplaysettingsHelper;
 
 import javax.swing.*;
-import javax.swing.border.Border;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
-import javax.swing.table.TableCellRenderer;
 import java.awt.*;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 public class AtlasDisplayPanel implements MultiSlicePositioner.ModeListener {//}, ListSelectionListener {
 
@@ -153,9 +143,9 @@ public class AtlasDisplayPanel implements MultiSlicePositioner.ModeListener {//}
     public void modeChanged(MultiSlicePositioner mp, int oldmode, int newmode) {
 
         if (newmode == MultiSlicePositioner.REGISTRATION_MODE_INT) {
-            SourceAndConverterUtils.transferColorConverters(ra.extendedSlicedSources, ra.nonExtendedSlicedSources);
+            SourceAndConverterHelper.transferColorConverters(ra.extendedSlicedSources, ra.nonExtendedSlicedSources);
         } else {
-            SourceAndConverterUtils.transferColorConverters(ra.nonExtendedSlicedSources, ra.extendedSlicedSources);
+            SourceAndConverterHelper.transferColorConverters(ra.nonExtendedSlicedSources, ra.extendedSlicedSources);
         }
 
         for (SourceAndConverter sac : ra.extendedSlicedSources) {
