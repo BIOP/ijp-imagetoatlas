@@ -137,8 +137,8 @@
 
 		<bigdataviewer-biop-tools.version>0.2.3-SNAPSHOT-local</bigdataviewer-biop-tools.version>
 		<bigdataviewer-bioformats.version>0.2.13</bigdataviewer-bioformats.version>
-		<bigdataviewer-playground.version>0.2.8-SNAPSHOT-local</bigdataviewer-playground.version>
-		<bigdataviewer-selector.version>0.1.6-SNAPSHOT</bigdataviewer-selector.version>
+		<bigdataviewer-playground.version>0.2.8</bigdataviewer-playground.version>
+		<bigdataviewer-selector.version>0.1.6</bigdataviewer-selector.version>
 
 		<bigdataviewer-core.version>10.1.1-SNAPSHOT-IMARIS</bigdataviewer-core.version>
 		<bigdataviewer-vistools.version>1.0.0-beta-26</bigdataviewer-vistools.version>

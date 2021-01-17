@@ -2,6 +2,8 @@ package ch.epfl.biop.atlas.allen.adultmousebrain;
 
 import java.io.File;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public class AllenBrainCCFv3Downloader {
 
@@ -12,6 +14,10 @@ public class AllenBrainCCFv3Downloader {
     public static File cachedSampleDir = new File(System.getProperty("user.home"),"cached_atlas");
 
     static public URL getMapUrl() {
+        if (!cachedSampleDir.exists()) {
+            cachedSampleDir.mkdir();
+        }
+
         File fileXml = new File(cachedSampleDir, "mouse_brain_ccfv3.xml");
         File fileHdf5 = new File(cachedSampleDir, "ccf2017-mod65000-border-centered-mm-bc.h5");
 
