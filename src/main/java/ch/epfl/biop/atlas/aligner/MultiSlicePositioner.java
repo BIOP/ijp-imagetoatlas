@@ -1177,7 +1177,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         List<SourceAndConverter<?>> sacs = Arrays.asList(sacsArray);
         if ((sacs.size() > 1) && (attributeClass != null)) {
             // Check whether the source can be splitted, maybe based
-            // Split based on Tile ?
+            // Split based on attribute
 
             Map<T, List<SourceAndConverter<?>>> sacsGroups =
                     sacs.stream().collect(Collectors.groupingBy(sac -> {
@@ -1198,10 +1198,12 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
             new MarkActionSequenceBatch(this).runRequest();
             for (int i = 0; i < sortedTiles.size(); i++) {
                 T group = sortedTiles.get(i);
-                CreateSlice cs = new CreateSlice(this, sacsGroups.get(group), slicingAxisPosition + i * axisIncrement);
-                cs.runRequest();
-                if (cs.getSlice() != null) {
-                    out.add(cs.getSlice());
+                if (group.getId()!=-1) {
+                    CreateSlice cs = new CreateSlice(this, sacsGroups.get(group), slicingAxisPosition + i * axisIncrement);
+                    cs.runRequest();
+                    if (cs.getSlice() != null) {
+                        out.add(cs.getSlice());
+                    }
                 }
             }
             new MarkActionSequenceBatch(this).runRequest();
