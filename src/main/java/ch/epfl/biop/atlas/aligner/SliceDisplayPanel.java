@@ -166,6 +166,11 @@ public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, Mul
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 int row = table.rowAtPoint(evt.getPoint());
                 int col = table.columnAtPoint(evt.getPoint());
+                if (evt.getClickCount() == 2 && !evt.isConsumed()) {
+                    evt.consume();
+                    //handle double click event.
+                    mp.centerBdvViewOn(sortedSlices.get(row));
+                }
                 if (row >= 0 && col >= 0) {
                     if ((col>1)&&(col%2 == 1)) {
                         int iChannel = (col-3)/2;

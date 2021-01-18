@@ -5,18 +5,13 @@ import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.scijava.command.QuPathProjectToBDVDatasetCommand;
 import ch.epfl.biop.spimdata.qupath.QuPathEntryEntity;
 import mpicbg.spim.data.generic.AbstractSpimData;
-import mpicbg.spim.data.generic.sequence.BasicViewSetup;
-import mpicbg.spim.data.sequence.Tile;
 import org.scijava.command.Command;
 import org.scijava.command.CommandService;
-import org.scijava.convert.ConvertService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 @Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Import>Import QuPath Project")
@@ -25,23 +20,17 @@ public class ImportQuPathProjectCommand implements Command {
     @Parameter
     MultiSlicePositioner mp;
 
-    @Parameter
+    @Parameter(label = "QuPath project file (.qpproj)")
     File quPathProject;
 
-    @Parameter
+    @Parameter(label = "Initial axis position (0 = front, mm units)")
     double sliceAxisInitial;
 
-    @Parameter
+    @Parameter(label = "Axis increment between slices (mm, can be negative for reverse order)")
     double incrementBetweenSlices;
-
-    //@Parameter
-    //String filterSources="";
 
     @Parameter
     CommandService command_service;
-
-    //@Parameter
-    //ConvertService convert_service;
 
     @Parameter
     SourceAndConverterService sac_service;
@@ -62,7 +51,6 @@ public class ImportQuPathProjectCommand implements Command {
                     "QuPath project couldn't be imported.\n"+
                        "Check whether the project can be opened in QuPath (v0.2+), fix URI if necessary.\n"+
                        "Only (rotated) Bio-Formats image server are supported.");
-
             e.printStackTrace();
         }
     }
