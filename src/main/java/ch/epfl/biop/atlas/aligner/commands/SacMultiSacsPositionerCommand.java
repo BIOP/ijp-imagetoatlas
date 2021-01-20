@@ -54,13 +54,13 @@ public class SacMultiSacsPositionerCommand implements Command {
             //case "free" :
             //    throw new UnsupportedOperationException();
             case "coronal" :
-                slicingTransfom.rotate(1,-Math.PI/2);
+                slicingTransfom.rotate(1,Math.PI/2);
                 break;
             case "sagittal" :
                 // No Change
                 break;
             case "vertical" :
-                slicingTransfom.rotate(0,Math.PI/2);
+                slicingTransfom.rotate(0,-Math.PI/2);
                 break;
         }
 

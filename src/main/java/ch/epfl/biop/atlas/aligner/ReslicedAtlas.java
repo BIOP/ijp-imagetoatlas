@@ -9,6 +9,7 @@ import ch.epfl.biop.sourceandconverter.transform.SourceMosaicZSlicer;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
+import net.imglib2.util.LinAlgHelpers;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import sc.fiji.bdvpg.sourceandconverter.importer.EmptySourceAndConverterCreator;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceAffineTransformer;
@@ -323,11 +324,11 @@ public class ReslicedAtlas {
     }
 
     public long getStep() {
-        return (long) zStep;
+        return zStep;
     }
 
     void slicingUpdate() {
-
+        // Pfou I don't understand anything anymore ...
         long nPixX = slicingModel.getSpimSource().getSource(0,0).max(0);
         long nPixY = slicingModel.getSpimSource().getSource(0,0).max(1);
         long nPixZ = slicingModel.getSpimSource().getSource(0,0).max(2);
@@ -344,10 +345,60 @@ public class ReslicedAtlas {
         double m21 = slicingTransfom.get(1,2);
         double m22 = slicingTransfom.get(2,2);
 
-        slicingTransfom.rotate(0,rx);//180.0*Math.PI);
-        slicingTransfom.rotate(1,ry);///180.0*Math.PI);
+        // Store X Axis
+        double m00 = slicingTransfom.get(0,0);
+        double m01 = slicingTransfom.get(1,0);
+        double m02 = slicingTransfom.get(2,0);
 
-        // ReStore ZAxis
+        // Store Y Axis
+        double m10 = slicingTransfom.get(0,1);
+        double m11 = slicingTransfom.get(1,1);
+        double m12 = slicingTransfom.get(2,1);
+
+        // Rotate first along Y then along X
+
+        // A spatial rotation around a fixed point of θ {\displaystyle \theta } \theta radians about a unit axis ( X , Y , Z ) {\displaystyle (X,Y,Z)} (X,Y,Z) that denotes the Euler axis is given by the quaternion ( C , X S , Y S , Z S ) {\displaystyle (C,X\,S,Y\,S,Z\,S)} {\displaystyle (C,X\,S,Y\,S,Z\,S)}, where C = cos ⁡ ( θ / 2 ) {\displaystyle C=\cos(\theta /2)} {\displaystyle C=\cos(\theta /2)} and S = sin ⁡ ( θ / 2 ) {\displaystyle S=\sin(\theta /2)} {\displaystyle S=\sin(\theta /2)}.
+
+        double[] qx = new double[4];
+        double normRx = Math.sqrt(m00*m00+m01*m01+m02*m02);
+        m00/=normRx;m01/=normRx;m02/=normRx;
+
+        qx[0] = Math.cos(rx/2.0);
+        qx[1] = Math.sin(rx/2.0)*m00;
+        qx[2] = Math.sin(rx/2.0)*m01;
+        qx[3] = Math.sin(rx/2.0)*m02;
+
+        double[] qy = new double[4];
+        double normRy = Math.sqrt(m10*m10+m11*m11+m12*m12);
+        m10/=normRy;m11/=normRy;m12/=normRy;
+
+        qy[0] = Math.cos(ry/2.0);
+        qy[1] = Math.sin(ry/2.0)*m10;
+        qy[2] = Math.sin(ry/2.0)*m11;
+        qy[3] = Math.sin(ry/2.0)*m12;
+
+        double[] qXY = new double[4];
+
+        LinAlgHelpers.quaternionMultiply(qy,qx,qXY);
+
+        AffineTransform3D rotMatrix = new AffineTransform3D();
+
+        double [][] m = new double[3][3];
+
+        if ((rx!=0)||(ry!=0)) {
+            LinAlgHelpers.quaternionToR(qXY, m);
+
+            rotMatrix.set(m[0][0], m[0][1], m[0][2], 0,
+                    m[1][0], m[1][1], m[1][2], 0,
+                    m[2][0], m[2][1], m[2][2], 0);
+
+            slicingTransfom.preConcatenate(rotMatrix);
+        }
+
+        //slicingTransfom.rotate(0,rx);//180.0*Math.PI);
+        //slicingTransfom.rotate(1,ry);///180.0*Math.PI);
+
+        // Restore Z axis
         slicingTransfom.set(m20, 0,2 );
         slicingTransfom.set(m21, 1,2 );
         slicingTransfom.set(m22, 2,2 );
@@ -363,16 +414,20 @@ public class ReslicedAtlas {
         this.slicingModel.getSpimSource().getSourceTransform(0,0,atToInvert);
 
         this.slicingModel.getSpimSource().getSourceTransform(0,0,at3d);
+
         at3d.set(0,0,3);
         at3d.set(0,1,3);
         at3d.set(0,2,3);
+
         double xScale = getNormTransform(0, at3d);
         double yScale = getNormTransform(1, at3d);
         double zScale = getNormTransform(2, at3d);
+
         at3d.identity();
         at3d.scale(xScale, yScale, zScale);
 
         AffineTransform3D centerTr = centerTransform.copy();
+
         centerTr.translate(-centerTransform.get(0,3)/2,0,0);
 
         at3d = at3d.preConcatenate(centerTr);
