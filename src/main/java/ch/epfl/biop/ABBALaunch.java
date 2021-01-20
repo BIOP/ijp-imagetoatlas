@@ -3,8 +3,6 @@ package ch.epfl.biop;
 import ch.epfl.biop.atlas.ABBACommand;
 import net.imagej.ImageJ;
 
-import javax.swing.*;
-
 public class ABBALaunch {
 
     public static void main(String[] args) throws Exception{

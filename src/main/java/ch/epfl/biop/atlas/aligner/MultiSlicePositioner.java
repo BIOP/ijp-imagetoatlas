@@ -218,8 +218,8 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         setPositioningMode();
 
         common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.changeSliceDisplayMode(), "toggle_single_source_mode", "S");
-        common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.cancelLastAction(), "cancel_last_action", "ctrl Z");
-        common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.redoAction(), "redo_last_action", "ctrl Y", "ctrl shift Z");
+        common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.cancelLastAction(), "cancel_last_action", "ctrl Z", "meta Z");
+        common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.redoAction(), "redo_last_action", "ctrl Y", "ctrl shift Z", "meta Y", "ctrl meta Z");
         common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.navigateNextSlice(), "navigate_next_slice", "RIGHT");
         common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.navigatePreviousSlice(), "navigate_previous_slice",  "LEFT"); // P taken for panel
         common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.navigateCurrentSlice(), "navigate_current_slice", "C");
@@ -243,14 +243,14 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         }, "toggle_editormode", "E");
 
         positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.equalSpacingSelectedSlices(), "equalSpacingSelectedSlices", "A");
-        positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.stretchRightSelectedSlices(), "stretch_selectedslices_right", "ctrl RIGHT");
-        positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.shrinkRightSelectedSlices(), "shrink_selectedslices_right", "ctrl LEFT");
-        positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.stretchLeftSelectedSlices(), "stretch_selectedslices_left", "ctrl shift LEFT");
-        positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.shrinkLeftSelectedSlices(), "shrink_selectedslices_left", "ctrl shift RIGHT");
-        positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.shiftUpSelectedSlices(), "shift_selectedslices_up", "ctrl UP");
-        positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.shiftDownSelectedSlices(), "shift_selectedslices_down", "ctrl DOWN");
-        positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> {slices.forEach(SliceSources::select);bdvh.getViewerPanel().getDisplay().repaint();}, "selectAllSlices", "ctrl A");
-        positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> {slices.forEach(SliceSources::deSelect);bdvh.getViewerPanel().getDisplay().repaint();}, "deselectAllSlices", "ctrl shift A");
+        positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.stretchRightSelectedSlices(), "stretch_selectedslices_right", "ctrl RIGHT", "meta RIGHT");
+        positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.shrinkRightSelectedSlices(), "shrink_selectedslices_right", "ctrl LEFT", "meta LEFT");
+        positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.stretchLeftSelectedSlices(), "stretch_selectedslices_left", "ctrl shift LEFT", "meta shift LEFT");
+        positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.shrinkLeftSelectedSlices(), "shrink_selectedslices_left", "ctrl shift RIGHT", "meta shift RIGHT");
+        positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.shiftUpSelectedSlices(), "shift_selectedslices_up", "ctrl UP", "meta UP");
+        positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.shiftDownSelectedSlices(), "shift_selectedslices_down", "ctrl DOWN", "meta DOWN");
+        positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> {slices.forEach(SliceSources::select);bdvh.getViewerPanel().getDisplay().repaint();}, "selectAllSlices", "ctrl A", "meta A");
+        positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> {slices.forEach(SliceSources::deSelect);bdvh.getViewerPanel().getDisplay().repaint();}, "deselectAllSlices", "ctrl shift A", "meta shift A");
 
         List<SourceAndConverter<?>> sacsToAppend = new ArrayList<>();
         for (int i = 0; i < biopAtlas.map.getStructuralImages().length; i++) {

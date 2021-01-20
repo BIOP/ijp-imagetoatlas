@@ -39,6 +39,8 @@ public class ReslicedAtlas {
     private double rx;
     private double ry;
 
+    private double cX, cY, cZ;
+
     List<Runnable> listeners = new ArrayList<>();
 
     public ReslicedAtlas(BiopAtlas ba) {
@@ -64,7 +66,10 @@ public class ReslicedAtlas {
     }
 
     void computeReslicedSources() {
-        if ((slicingTransfom==null)||(slicingResolution<=0)) return;
+        if ((slicingTransfom==null)||(slicingResolution<=0)) {
+            System.err.println("No slicing transform or slicing resolution specified");
+            return;
+        }
 
         // ----------------------------- COMPUTES BOUNDS
 
@@ -130,14 +135,14 @@ public class ReslicedAtlas {
                 }
 
         // Adds a margin of 15 % for tilt correction
-        double cZ = (minZAxis+maxZAxis)/2.0;
+        cZ = (minZAxis+maxZAxis)/2.0;
         double dZ = (maxZAxis-minZAxis)/2.0;
         minZAxis = cZ - dZ*1.15;
         maxZAxis = cZ + dZ*1.15;
 
         // Adds margin XY 15 % also for correct registration
-        double cX = (maxXAxis+minXAxis)/2.0;
-        double cY = (maxYAxis+minYAxis)/2.0;
+        cX = (maxXAxis+minXAxis)/2.0;
+        cY = (maxYAxis+minYAxis)/2.0;
 
         double dX = (maxXAxis-minXAxis)/2.0;
         double dY = (maxYAxis-minYAxis)/2.0;
@@ -147,6 +152,13 @@ public class ReslicedAtlas {
 
         minXAxis = cX-dX*1.15;
         minYAxis = cY-dY*1.15;
+
+        RealPoint realCenter = new RealPoint(cX, cY, cZ);
+
+        slicingTransfom.inverse().apply(realCenter, realCenter);
+        cX = realCenter.getDoublePosition(0);
+        cY = realCenter.getDoublePosition(1);
+        cZ = realCenter.getDoublePosition(2);
 
         // Gets slicing resolution
         // TODO : check null pointer exception if getvoxel not present
@@ -158,7 +170,7 @@ public class ReslicedAtlas {
         long nPixY = (long)((maxYAxis-minYAxis)/slicingResolution);
         long nPixZ = (long)((maxZAxis-minZAxis)/slicingResolution);
 
-        adjustShiftSlicingTransform(slicingTransfom, nPixX, nPixY, nPixZ);
+        adjustShiftSlicingTransform(slicingTransfom, cX, cY, cZ, nPixX, nPixY, nPixZ);
 
         // ------------------- NOW COMPUTES SOURCEANDCONVERTERS
         // 0 - slicing model : empty source but properly defined in space and resolution
@@ -240,22 +252,29 @@ public class ReslicedAtlas {
      * @param nY
      * @param nZ
      */
-    public static void adjustShiftSlicingTransform(AffineTransform3D slicingTransfom, long nX, long nY, long nZ) {
+    public static void adjustShiftSlicingTransform(AffineTransform3D slicingTransfom, double cx, double cy, double cz, long nX, long nY, long nZ) {
         AffineTransform3D notShifted = new AffineTransform3D();
         notShifted.set(slicingTransfom);
         notShifted.set(0,0,3);
         notShifted.set(0,1,3);
         notShifted.set(0,2,3);
 
-        RealPoint pt = new RealPoint(nX, nY, nZ);
+        // We want that [notShifted+TR].[nx/2, nY/2, nZ/2, 1] = [cx, cy, cz, 1]
+        // [notShifted].[nx/2, nY/2, nZ/2, 1] + TR.[nx/2, nY/2, nZ/2, 1] = [cx, cy, cz]
+        // [TRX, TRY, TRZ] = [cx, cy, cz] - [notShifted].[nx/2, nY/2, nZ/2, 1]
+
+        RealPoint pt = new RealPoint(nX/2, nY/2, nZ/2);
+        //pt.setPosition(new double[]{cx, cy, cz});
 
         RealPoint ptRealSpace = new RealPoint(3);
 
         notShifted.apply(pt, ptRealSpace);
 
-        slicingTransfom.set(-ptRealSpace.getDoublePosition(0)/2.0, 0,3);
-        slicingTransfom.set(-ptRealSpace.getDoublePosition(1)/2.0, 1,3);
-        slicingTransfom.set(-ptRealSpace.getDoublePosition(2)/2.0, 2,3);
+        slicingTransfom.set(cx-ptRealSpace.getDoublePosition(0), 0,3);
+        slicingTransfom.set(cy-ptRealSpace.getDoublePosition(1), 1,3);
+        slicingTransfom.set(cz-ptRealSpace.getDoublePosition(2), 2,3);
+
+
     }
 
     boolean lock = false;
@@ -333,7 +352,7 @@ public class ReslicedAtlas {
         slicingTransfom.set(m21, 1,2 );
         slicingTransfom.set(m22, 2,2 );
 
-        adjustShiftSlicingTransform(slicingTransfom, nPixX, nPixY, nPixZ);
+        adjustShiftSlicingTransform(slicingTransfom, cX, cY, cZ, nPixX, nPixY, nPixZ);
 
         ((TransformedSource) (slicingModel.getSpimSource())).setFixedTransform(slicingTransfom);
 
