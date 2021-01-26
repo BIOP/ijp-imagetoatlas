@@ -1,7 +1,7 @@
 package ch.epfl.biop.atlas.aligner.commands;
 
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
-import ch.epfl.biop.scijava.command.bdv.userdefinedregion.GetUserRectangleCommand;
+import ch.epfl.biop.bdv.userdefinedregion.GetUserRectangleCommand;
 import net.imglib2.RealPoint;
 import org.scijava.command.Command;
 import org.scijava.command.CommandService;
