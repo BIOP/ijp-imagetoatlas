@@ -12,6 +12,9 @@ import ch.epfl.biop.registration.Registration;
 import ch.epfl.biop.registration.sourceandconverter.affine.Elastix2DAffineRegistration;
 import ch.epfl.biop.registration.sourceandconverter.spline.Elastix2DSplineRegistration;
 import ch.epfl.biop.registration.sourceandconverter.spline.SacBigWarp2DRegistration;
+import ch.epfl.biop.scijava.command.Elastix2DAffineRegisterCommand;
+import ch.epfl.biop.scijava.command.Elastix2DAffineRegisterServerCommand;
+import ch.epfl.biop.scijava.command.Elastix2DSplineRegisterServerCommand;
 import ch.epfl.biop.scijava.ui.bdv.BdvScijavaHelper;
 import ch.epfl.biop.scijava.ui.swing.ScijavaSwingUI;
 import com.google.gson.Gson;
@@ -333,6 +336,8 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ImportImagePlusCommand.class, hierarchyLevelsSkipped,"mp", this );
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, RegistrationElastixAffineCommand.class, hierarchyLevelsSkipped,"mp", this);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, RegistrationElastixSplineCommand.class, hierarchyLevelsSkipped,"mp", this);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, RegistrationElastixAffineRemoteCommand.class, hierarchyLevelsSkipped,"mp", this);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, RegistrationElastixSplineRemoteCommand.class, hierarchyLevelsSkipped,"mp", this);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, RegistrationBigWarpCommand.class, hierarchyLevelsSkipped,"mp", this);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, EditLastRegistrationCommand.class, hierarchyLevelsSkipped,"mp", this);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportRegionsToFileCommand.class, hierarchyLevelsSkipped,"mp", this);
@@ -1402,7 +1407,6 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         navigateCurrentSlice();
     }
 
-
     private void setOverlapMode(int overlapMode) {
         if (overlapMode<0) overlapMode=0;
         if (overlapMode>2) overlapMode=2;
@@ -1419,14 +1423,6 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         return new SourcesChannelsSelect(channels);
     }
 
-    public void registerElastixAffine(int iChannelFixed, int iChannelMoving, boolean showIJ1Result) {
-        registerElastixAffine(getChannel(iChannelFixed), getChannel(iChannelMoving), showIJ1Result);
-    }
-
-    public void registerBigWarp(int iChannelFixed, int iChannelMoving) {
-        registerBigWarp(getChannel(iChannelFixed), getChannel(iChannelMoving));
-    }
-
     public void editLastRegistration() {
         if (getSelectedSources().size()==0) {
             warningMessageForUser.accept("No selected slice", "Please select the slice you want to edit");
@@ -1440,6 +1436,45 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         }
     }
 
+    public void registerBigWarp(int iChannelFixed, int iChannelMoving) {
+        registerBigWarp(getChannel(iChannelFixed), getChannel(iChannelMoving));
+    }
+
+    public void registerBigWarp(SourcesProcessor preprocessFixed,
+                                SourcesProcessor preprocessMoving) {
+        if (getSelectedSources().size()==0) {
+            warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to register");
+            log.accept("Registration ignored : no slice selected");
+        }
+        for (SliceSources slice : slices) {
+            if (slice.isSelected()) {
+                SacBigWarp2DRegistration registration = new SacBigWarp2DRegistration();
+
+                AffineTransform3D at3D = new AffineTransform3D();
+                at3D.translate(-this.nPixX / 2.0, -this.nPixY / 2.0, 0);
+                at3D.scale(this.sizePixX, this.sizePixY, this.sizePixZ);
+                at3D.translate(0, 0, slice.getSlicingAxisPosition());
+
+                AffineTransform3D translateZ = new AffineTransform3D();
+                translateZ.translate(0, 0, -slice.getSlicingAxisPosition());
+                SourcesProcessor fixedProcess = SourcesProcessorHelper.compose(
+                        new SourcesAffineTransformer(translateZ),
+                        preprocessFixed
+                );
+                SourcesProcessor movingProcess = SourcesProcessorHelper.compose(
+                        new SourcesAffineTransformer(translateZ),
+                        preprocessMoving
+                );
+
+                new RegisterSlice(this, slice, registration, fixedProcess, movingProcess).runRequest();
+            }
+        }
+    }
+
+    public void registerElastixAffine(int iChannelFixed, int iChannelMoving, boolean showIJ1Result) {
+        registerElastixAffine(getChannel(iChannelFixed), getChannel(iChannelMoving), showIJ1Result);
+    }
+
     public void registerElastixAffine(SourcesProcessor preprocessFixed,
                                       SourcesProcessor preprocessMoving, boolean showIJ1Result) {
         if (getSelectedSources().size()==0) {
@@ -1449,6 +1484,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         for (SliceSources slice : slices) {
             if (slice.isSelected()) {
                 Elastix2DAffineRegistration elastixAffineReg = new Elastix2DAffineRegistration();
+                elastixAffineReg.setRegistrationCommand(Elastix2DAffineRegisterCommand.class);
                 elastixAffineReg.setScijavaContext(scijavaCtx);
                 Map<String, Object> params = new HashMap<>();
                 params.put("tpFixed", 0);
@@ -1508,36 +1544,85 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         }
     }
 
-    public void registerBigWarp(SourcesProcessor preprocessFixed,
-                                SourcesProcessor preprocessMoving) {
+    public void registerElastixAffineRemote(String serverURL, int iChannelFixed, int iChannelMoving) {
+        registerElastixAffineRemote(serverURL, getChannel(iChannelFixed), getChannel(iChannelMoving));
+    }
+
+    public void registerElastixAffineRemote(String serverURL, SourcesProcessor preprocessFixed,
+                                      SourcesProcessor preprocessMoving) {
         if (getSelectedSources().size()==0) {
             warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to register");
             log.accept("Registration ignored : no slice selected");
         }
         for (SliceSources slice : slices) {
             if (slice.isSelected()) {
-                SacBigWarp2DRegistration registration = new SacBigWarp2DRegistration();
-
-                AffineTransform3D at3D = new AffineTransform3D();
-                at3D.translate(-this.nPixX / 2.0, -this.nPixY / 2.0, 0);
-                at3D.scale(this.sizePixX, this.sizePixY, this.sizePixZ);
-                at3D.translate(0, 0, slice.getSlicingAxisPosition());
-
-                AffineTransform3D translateZ = new AffineTransform3D();
-                translateZ.translate(0, 0, -slice.getSlicingAxisPosition());
-                SourcesProcessor fixedProcess = SourcesProcessorHelper.compose(
-                                new SourcesAffineTransformer(translateZ),
-                                preprocessFixed
-                        );
-                SourcesProcessor movingProcess = SourcesProcessorHelper.compose(
-                                new SourcesAffineTransformer(translateZ),
-                                preprocessMoving
-                        );
-
-                new RegisterSlice(this, slice, registration, fixedProcess, movingProcess).runRequest();
+                Elastix2DAffineRegistration elastixAffineReg = new Elastix2DAffineRegistration();
+                elastixAffineReg.setRegistrationCommand(Elastix2DAffineRegisterServerCommand.class);
+                elastixAffineReg.setScijavaContext(scijavaCtx);
+                Map<String, Object> params = new HashMap<>();
+                params.put("tpFixed", 0);
+                params.put("levelFixedSource", 2);
+                params.put("tpMoving", 0);
+                params.put("levelMovingSource", slice.getAdaptedMipMapLevel(0.04));
+                params.put("pxSizeInCurrentUnit", 0.04);
+                params.put("interpolate", false);
+                params.put("showImagePlusRegistrationResult", false);
+                params.put("px", roiPX);
+                params.put("py", roiPY);
+                params.put("pz", slice.getSlicingAxisPosition());
+                params.put("sx", roiSX);
+                params.put("sy", roiSY);
+                params.put("serverURL", serverURL);
+                params.put("taskInfo", "");
+                elastixAffineReg.setScijavaParameters(params);
+                new RegisterSlice(this, slice, elastixAffineReg, preprocessFixed, preprocessMoving).runRequest();
             }
         }
     }
+
+    public void registerElastixSplineRemote(String serverURL, int iChannelFixed, int iChannelMoving, int nbControlPointsX) {
+        registerElastixSplineRemote(serverURL, getChannel(iChannelFixed), getChannel(iChannelMoving), nbControlPointsX);
+    }
+
+    public void registerElastixSplineRemote(String serverURL, SourcesProcessor preprocessFixed,
+                                      SourcesProcessor preprocessMoving, int nbControlPointsX) {
+        if (getSelectedSources().size()==0) {
+            warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to register");
+            log.accept("Registration ignored : no slice selected");
+        }
+        for (SliceSources slice : slices) {
+            if (slice.isSelected()) {
+                Elastix2DSplineRegistration elastixSplineReg = new Elastix2DSplineRegistration();
+                elastixSplineReg.setScijavaContext(scijavaCtx);
+                elastixSplineReg.setRegistrationCommand(Elastix2DSplineRegisterServerCommand.class);
+                Map<String, Object> params = new HashMap<>();
+                params.put("tpFixed", 0);
+                params.put("levelFixedSource", 1);
+                params.put("tpMoving", 0);
+                params.put("levelMovingSource", slice.getAdaptedMipMapLevel(0.02));
+                params.put("pxSizeInCurrentUnit", 0.02);
+                params.put("interpolate", true);
+                params.put("showImagePlusRegistrationResult", false);
+                params.put("px", roiPX);
+                params.put("py", roiPY);
+                params.put("pz", 0);
+                params.put("sx", roiSX);
+                params.put("sy", roiSY);
+                params.put("nbControlPointsX", nbControlPointsX);
+                params.put("serverURL", serverURL);
+                params.put("taskInfo", "");
+                elastixSplineReg.setScijavaParameters(params);
+
+                AffineTransform3D at3d = new AffineTransform3D();
+                at3d.translate(0,0,-slice.getSlicingAxisPosition());
+                SourcesAffineTransformer z_zero = new SourcesAffineTransformer(at3d);
+
+                new RegisterSlice(this, slice, elastixSplineReg, SourcesProcessorHelper.compose(z_zero, preprocessFixed), SourcesProcessorHelper.compose(z_zero, preprocessMoving)).runRequest();
+            }
+        }
+    }
+
+
 
     // --------------------------------- ACTION CLASSES
 

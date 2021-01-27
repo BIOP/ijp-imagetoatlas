@@ -5,11 +5,13 @@ import bdv.util.BdvHandle;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import ch.epfl.biop.registration.sourceandconverter.SourceAndConverterRegistration;
+import ch.epfl.biop.scijava.command.Elastix2DAffineRegisterCommand;
 import ch.epfl.biop.scijava.command.Elastix2DSplineRegisterCommand;
 import ij.gui.WaitForUserDialog;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.RealTransform;
 import org.scijava.Context;
+import org.scijava.command.Command;
 import org.scijava.command.CommandModule;
 import org.scijava.command.CommandService;
 import sc.fiji.bdvpg.bdv.BdvHandleHelper;
@@ -61,12 +63,18 @@ public class Elastix2DSplineRegistration extends SourceAndConverterRegistration 
         scijavaParameters.put("sac_moving", mimg[0]);
     }
 
+    Class<? extends Command> registrationCommandClass = Elastix2DSplineRegisterCommand.class;
+
+    public void setRegistrationCommand(Class<? extends Command> registrationCommandClass) {
+        this.registrationCommandClass = registrationCommandClass;
+    }
+
     @Override
     public boolean register() {
         try {
              Future<CommandModule> task = ctx
                     .getService(CommandService.class)
-                    .run(Elastix2DSplineRegisterCommand.class, true, scijavaParameters );
+                    .run(registrationCommandClass, true, scijavaParameters );
 
              rt = (RealTransform) task.get().getOutput("rt");
              isDone = true;

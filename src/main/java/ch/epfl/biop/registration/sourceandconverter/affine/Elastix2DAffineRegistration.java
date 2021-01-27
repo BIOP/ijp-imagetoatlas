@@ -4,6 +4,7 @@ import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.scijava.command.Elastix2DAffineRegisterCommand;
 import net.imglib2.realtransform.AffineTransform3D;
 import org.scijava.Context;
+import org.scijava.command.Command;
 import org.scijava.command.CommandModule;
 import org.scijava.command.CommandService;
 
@@ -39,12 +40,18 @@ public class Elastix2DAffineRegistration extends AffineTransformSourceAndConvert
         scijavaParameters.put("sac_moving", mimg[0]);
     }
 
+    Class<? extends Command> registrationCommandClass = Elastix2DAffineRegisterCommand.class;
+
+    public void setRegistrationCommand(Class<? extends Command> registrationCommandClass) {
+        this.registrationCommandClass = registrationCommandClass;
+    }
+
     @Override
     public boolean register() {
         try {
              Future<CommandModule> task = ctx
                     .getService(CommandService.class)
-                    .run(Elastix2DAffineRegisterCommand.class, true, scijavaParameters );
+                    .run(registrationCommandClass, true, scijavaParameters );
 
              at3d = (AffineTransform3D) task.get().getOutput("at3D");
              isDone = true;
