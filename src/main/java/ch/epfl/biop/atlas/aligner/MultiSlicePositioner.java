@@ -1,6 +1,7 @@
 package ch.epfl.biop.atlas.aligner;
 
 import bdv.util.*;
+import bdv.viewer.Interpolation;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.ResourcesMonitor;
 import ch.epfl.biop.atlas.BiopAtlas;
@@ -24,13 +25,13 @@ import mpicbg.spim.data.generic.base.Entity;
 import mpicbg.spim.data.generic.sequence.AbstractSequenceDescription;
 import mpicbg.spim.data.generic.sequence.BasicViewSetup;
 import mpicbg.spim.data.sequence.Tile;
-import net.imglib2.FinalInterval;
-import net.imglib2.RealLocalizable;
-import net.imglib2.RealPoint;
+import net.imglib2.*;
+import net.imglib2.converter.Converter;
 import net.imglib2.position.FunctionRealRandomAccessible;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.realtransform.RealTransform;
 import net.imglib2.type.numeric.ARGBType;
+import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import org.apache.commons.io.FilenameUtils;
 import org.scijava.Context;
@@ -51,9 +52,11 @@ import sc.fiji.bdvpg.services.serializers.AffineTransform3DAdapter;
 import sc.fiji.bdvpg.services.serializers.RuntimeTypeAdapterFactory;
 import sc.fiji.bdvpg.services.serializers.plugins.BdvPlaygroundObjectAdapterService;
 import sc.fiji.bdvpg.services.serializers.plugins.IClassRuntimeAdapter;
+import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.io.*;
@@ -328,6 +331,8 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Review Mode",0, this::setRegistrationMode);
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Change Slice Display Mode [S]",0, this::changeSliceDisplayMode);
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Change Overlap Mode [O]",0, this::toggleOverlap);
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Show Atlas Position On Mouse",0, this::showAtlasPosition);
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Hide Atlas Position On Mouse",0, this::hideAtlasPosition);
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Navigate>Next Slice [Right]",0, this::navigateNextSlice);
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Navigate>Previous Slice [Left]",0, this::navigatePreviousSlice);
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Navigate>Center On Current Slice [C]",0, this::navigateCurrentSlice);
@@ -441,6 +446,16 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                     this.info = null;
                 }
             );
+    }
+
+    boolean showAtlasPosition = true;
+
+    public void showAtlasPosition() {
+        showAtlasPosition = true;
+    }
+
+    public void hideAtlasPosition() {
+        showAtlasPosition = false;
     }
 
     void addRightClickActions() {
@@ -865,125 +880,171 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     int overlapMode = 0;
 
     @Override
-    protected void draw(Graphics2D g) { // synchronized
-        {
-            List<SliceSources> slicesCopy = getSlices();
+    protected void draw(Graphics2D g) {
+        List<SliceSources> slicesCopy = getSlices();
 
-            int colorCode = this.info.getColor().get();
-            Color color = new Color(ARGBType.red(colorCode), ARGBType.green(colorCode), ARGBType.blue(colorCode), ARGBType.alpha(colorCode));
-            g.setColor(color);
+        int colorCode = this.info.getColor().get();
+        Color color = new Color(ARGBType.red(colorCode), ARGBType.green(colorCode), ARGBType.blue(colorCode), ARGBType.alpha(colorCode));
+        g.setColor(color);
 
-            RealPoint[][] ptRectWorld = new RealPoint[2][2];
-            Point[][] ptRectScreen = new Point[2][2];
+        RealPoint[][] ptRectWorld = new RealPoint[2][2];
+        Point[][] ptRectScreen = new Point[2][2];
 
-            AffineTransform3D bdvAt3D = new AffineTransform3D();
+        AffineTransform3D bdvAt3D = new AffineTransform3D();
 
-            bdvh.getViewerPanel().state().getViewerTransform(bdvAt3D);
+        bdvh.getViewerPanel().state().getViewerTransform(bdvAt3D);
 
-            for (int xp = 0; xp < 2; xp++) {
-                for (int yp = 0; yp < 2; yp++) {
-                    ptRectWorld[xp][yp] = new RealPoint(3);
-                    RealPoint pt = ptRectWorld[xp][yp];
-                    pt.setPosition(sX * (iSliceNoStep + xp), 0);
-                    pt.setPosition(sY * (0.5 + yp), 1);
-                    pt.setPosition(0, 2);
-                    bdvAt3D.apply(pt, pt);
-                    ptRectScreen[xp][yp] = new Point((int) pt.getDoublePosition(0), (int) pt.getDoublePosition(1));
-                }
+        for (int xp = 0; xp < 2; xp++) {
+            for (int yp = 0; yp < 2; yp++) {
+                ptRectWorld[xp][yp] = new RealPoint(3);
+                RealPoint pt = ptRectWorld[xp][yp];
+                pt.setPosition(sX * (iSliceNoStep + xp), 0);
+                pt.setPosition(sY * (0.5 + yp), 1);
+                pt.setPosition(0, 2);
+                bdvAt3D.apply(pt, pt);
+                ptRectScreen[xp][yp] = new Point((int) pt.getDoublePosition(0), (int) pt.getDoublePosition(1));
             }
+        }
 
-            g.drawLine(ptRectScreen[0][0].x, ptRectScreen[0][0].y, ptRectScreen[1][0].x, ptRectScreen[1][0].y);
-            g.drawLine(ptRectScreen[1][0].x, ptRectScreen[1][0].y, ptRectScreen[1][1].x, ptRectScreen[1][1].y);
-            g.drawLine(ptRectScreen[1][1].x, ptRectScreen[1][1].y, ptRectScreen[0][1].x, ptRectScreen[0][1].y);
-            g.drawLine(ptRectScreen[0][1].x, ptRectScreen[0][1].y, ptRectScreen[0][0].x, ptRectScreen[0][0].y);
+        g.drawLine(ptRectScreen[0][0].x, ptRectScreen[0][0].y, ptRectScreen[1][0].x, ptRectScreen[1][0].y);
+        g.drawLine(ptRectScreen[1][0].x, ptRectScreen[1][0].y, ptRectScreen[1][1].x, ptRectScreen[1][1].y);
+        g.drawLine(ptRectScreen[1][1].x, ptRectScreen[1][1].y, ptRectScreen[0][1].x, ptRectScreen[0][1].y);
+        g.drawLine(ptRectScreen[0][1].x, ptRectScreen[0][1].y, ptRectScreen[0][0].x, ptRectScreen[0][0].y);
 
-            slicesCopy.forEach(slice -> slice.getGUIState().drawGraphicalHandles(g));
+        slicesCopy.forEach(slice -> slice.getGUIState().drawGraphicalHandles(g));
 
-            g.setColor(color);
+        g.setColor(color);
 
-            if (iCurrentSlice != -1 && slicesCopy.size() > iCurrentSlice) {
-                SliceSources slice = getSortedSlices().get(iCurrentSlice);
-                listeners.forEach(listener -> listener.isCurrentSlice(slice));
-                g.setColor(new Color(255, 255, 255, 128));
+        if (iCurrentSlice != -1 && slicesCopy.size() > iCurrentSlice) {
+            SliceSources slice = getSortedSlices().get(iCurrentSlice);
+            listeners.forEach(listener -> listener.isCurrentSlice(slice));
+            g.setColor(new Color(255, 255, 255, 128));
+            Integer[] coords = slice.getGUIState().getBdvHandleCoords();
+            RealPoint sliceCenter = new RealPoint(coords[0], coords[1], 0);
+            g.drawOval((int) sliceCenter.getDoublePosition(0) - 15, (int) sliceCenter.getDoublePosition(1) - 15, 30, 30);
+            // "Ctrl + \u25C4 \u25BA "
+            Integer[] c = {255,255,255,128};//color.get();
+            g.setColor(new Color(c[0], c[1], c[2], c[3]));
+            g.setFont(new Font("TimesRoman", Font.PLAIN, 16));
+            g.drawString("\u25C4 \u25BA", (int) (sliceCenter.getDoublePosition(0) - 15), (int) (sliceCenter.getDoublePosition(1) - 20));
+
+        }
+
+        if ((displayMode == POSITIONING_MODE_INT) && slicesCopy.stream().anyMatch(SliceSources::isSelected)) {
+            List<SliceSources> sortedSelected = getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
+            RealPoint precedentPoint = null;
+
+            for (int i = 0; i < sortedSelected.size(); i++) {
+                SliceSources slice = sortedSelected.get(i);
+
                 Integer[] coords = slice.getGUIState().getBdvHandleCoords();
                 RealPoint sliceCenter = new RealPoint(coords[0], coords[1], 0);
-                g.drawOval((int) sliceCenter.getDoublePosition(0) - 15, (int) sliceCenter.getDoublePosition(1) - 15, 30, 30);
-                // "Ctrl + \u25C4 \u25BA "
-                Integer[] c = {255,255,255,128};//color.get();
-                g.setColor(new Color(c[0], c[1], c[2], c[3]));
-                g.setFont(new Font("TimesRoman", Font.PLAIN, 16));
-                g.drawString("\u25C4 \u25BA", (int) (sliceCenter.getDoublePosition(0) - 15), (int) (sliceCenter.getDoublePosition(1) - 20));
 
-            }
-
-            if ((displayMode == POSITIONING_MODE_INT) && slicesCopy.stream().anyMatch(SliceSources::isSelected)) {
-                List<SliceSources> sortedSelected = getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
-                RealPoint precedentPoint = null;
-
-                for (int i = 0; i < sortedSelected.size(); i++) {
-                    SliceSources slice = sortedSelected.get(i);
-
-                    Integer[] coords = slice.getGUIState().getBdvHandleCoords();
-                    RealPoint sliceCenter = new RealPoint(coords[0], coords[1], 0);
-
-                    if (precedentPoint != null) {
-                        g.drawLine((int) precedentPoint.getDoublePosition(0), (int) precedentPoint.getDoublePosition(1),
-                                (int) sliceCenter.getDoublePosition(0), (int) sliceCenter.getDoublePosition(1));
-                    } else {
-                        precedentPoint = new RealPoint(2);
-                    }
-
-                    precedentPoint.setPosition(sliceCenter.getDoublePosition(0), 0);
-                    precedentPoint.setPosition(sliceCenter.getDoublePosition(1), 1);
-
-                    bdvAt3D.apply(sliceCenter, sliceCenter);
-
-                    if (i == 0) {
-                        RealPoint handleLeftPoint = slice.getGUIState().getCenterPositionPMode();
-                        handleLeftPoint.setPosition(-sY, 1);
-                        bdvAt3D.apply(handleLeftPoint, handleLeftPoint);
-
-                        leftPosition[0] = (int) handleLeftPoint.getDoublePosition(0);
-                        leftPosition[1] = (int) handleLeftPoint.getDoublePosition(1) - 50;
-                    }
-
-                    if (i == sortedSelected.size() - 1) {
-                        RealPoint handleRightPoint = slice.getGUIState().getCenterPositionPMode();
-                        handleRightPoint.setPosition(-sY, 1);
-                        bdvAt3D.apply(handleRightPoint, handleRightPoint);
-
-                        rightPosition[0] = (int) handleRightPoint.getDoublePosition(0);
-                        rightPosition[1] = (int) handleRightPoint.getDoublePosition(1) - 50;
-                    }
-                }
-
-                if (sortedSelected.size() > 1) {
-                    center.enable();
-                    stretchLeft.enable();
-                    stretchRight.enable();
-                    ghs.forEach(GraphicalHandle::enable);
-                    g.setColor(new Color(255, 0, 255, 200));
-                    g.drawLine(leftPosition[0], leftPosition[1], rightPosition[0], rightPosition[1]);
-                } else if (sortedSelected.size() == 1) {
-                    center.enable();//ghs.forEach(GraphicalHandle::enable);
-                    stretchLeft.disable();
-                    stretchRight.disable();
-                    g.setColor(new Color(255, 0, 255, 200));
-                    g.drawLine(leftPosition[0], leftPosition[1], rightPosition[0], rightPosition[1]);
+                if (precedentPoint != null) {
+                    g.drawLine((int) precedentPoint.getDoublePosition(0), (int) precedentPoint.getDoublePosition(1),
+                            (int) sliceCenter.getDoublePosition(0), (int) sliceCenter.getDoublePosition(1));
                 } else {
-                    ghs.forEach(GraphicalHandle::disable);
+                    precedentPoint = new RealPoint(2);
                 }
-                ghs.forEach(gh -> gh.draw(g));
-                ghs_tool_tip.forEach(gh -> gh.draw(g));
+
+                precedentPoint.setPosition(sliceCenter.getDoublePosition(0), 0);
+                precedentPoint.setPosition(sliceCenter.getDoublePosition(1), 1);
+
+                bdvAt3D.apply(sliceCenter, sliceCenter);
+
+                if (i == 0) {
+                    RealPoint handleLeftPoint = slice.getGUIState().getCenterPositionPMode();
+                    handleLeftPoint.setPosition(-sY, 1);
+                    bdvAt3D.apply(handleLeftPoint, handleLeftPoint);
+
+                    leftPosition[0] = (int) handleLeftPoint.getDoublePosition(0);
+                    leftPosition[1] = (int) handleLeftPoint.getDoublePosition(1) - 50;
+                }
+
+                if (i == sortedSelected.size() - 1) {
+                    RealPoint handleRightPoint = slice.getGUIState().getCenterPositionPMode();
+                    handleRightPoint.setPosition(-sY, 1);
+                    bdvAt3D.apply(handleRightPoint, handleRightPoint);
+
+                    rightPosition[0] = (int) handleRightPoint.getDoublePosition(0);
+                    rightPosition[1] = (int) handleRightPoint.getDoublePosition(1) - 50;
+                }
             }
 
-            if (selectionLayer != null) {
-                selectionLayer.draw(g);
+            if (sortedSelected.size() > 1) {
+                center.enable();
+                stretchLeft.enable();
+                stretchRight.enable();
+                ghs.forEach(GraphicalHandle::enable);
+                g.setColor(new Color(255, 0, 255, 200));
+                g.drawLine(leftPosition[0], leftPosition[1], rightPosition[0], rightPosition[1]);
+            } else if (sortedSelected.size() == 1) {
+                center.enable();//ghs.forEach(GraphicalHandle::enable);
+                stretchLeft.disable();
+                stretchRight.disable();
+                g.setColor(new Color(255, 0, 255, 200));
+                g.drawLine(leftPosition[0], leftPosition[1], rightPosition[0], rightPosition[1]);
+            } else {
+                ghs.forEach(GraphicalHandle::disable);
+            }
+            ghs.forEach(gh -> gh.draw(g));
+            ghs_tool_tip.forEach(gh -> gh.draw(g));
+        }
+
+        if (selectionLayer != null) {
+            selectionLayer.draw(g);
+        }
+
+        if (mso != null) {
+            mso.draw(g);
+        }
+
+        if (showAtlasPosition) {
+            RealPoint globalMouseCoordinates = new RealPoint(3);
+            bdvh.getViewerPanel().getGlobalMouseCoordinates(globalMouseCoordinates);
+            int labelValue;
+            if (displayMode==POSITIONING_MODE_INT) {
+                SourceAndConverter label = reslicedAtlas.extendedSlicedSources[reslicedAtlas.extendedSlicedSources.length-1]; // By convention the label image is the last one
+                labelValue = ((UnsignedShortType) getSourceValueAt(label, globalMouseCoordinates)).get();
+            } else {
+                assert displayMode == REGISTRATION_MODE_INT;
+                SourceAndConverter label = reslicedAtlas.nonExtendedSlicedSources[reslicedAtlas.nonExtendedSlicedSources.length-1]; // By convention the label image is the last one
+                labelValue = ((UnsignedShortType) getSourceValueAt(label, globalMouseCoordinates)).get();
             }
 
-            if (mso != null) {
-                mso.draw(g);
+            String ontologyLocation = null;
+            if (labelValue!=0) {
+                ontologyLocation = biopAtlas.ontology.getProperties(labelValue).get("acronym");
+                while (labelValue!=biopAtlas.ontology.getRootIndex()) {
+                    labelValue = biopAtlas.ontology.getParent(labelValue);
+                    ontologyLocation = biopAtlas.ontology.getProperties(labelValue).get("acronym")+">"+ontologyLocation;
+                }
             }
+
+            g.setFont(new Font("TimesRoman", Font.PLAIN, 16));
+            g.setColor(new Color(255, 255, 255, 200));
+            Point mouseLocation = bdvh.getViewerPanel().getMousePosition();
+            if ((ontologyLocation!=null)&&(mouseLocation!=null)) {
+                g.drawString(ontologyLocation,mouseLocation.x,mouseLocation.y);
+            }
+
+
+        }
+
+    }
+
+    Object getSourceValueAt(SourceAndConverter sac, RealPoint pt) {
+        RealRandomAccessible rra_ible = sac.getSpimSource().getInterpolatedSource(0, 0, Interpolation.NEARESTNEIGHBOR);
+        if (rra_ible != null) {
+            AffineTransform3D sourceTransform = new AffineTransform3D();
+            sac.getSpimSource().getSourceTransform(0, 0, sourceTransform);
+            RealRandomAccess rra = rra_ible.realRandomAccess();
+            RealPoint iPt = new RealPoint(3);
+            sourceTransform.inverse().apply(pt, iPt);
+            rra.setPosition(iPt);
+            return rra.get();
+        } else {
+            return null;
         }
     }
 
