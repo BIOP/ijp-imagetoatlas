@@ -444,7 +444,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     }
 
     void addRightClickActions() {
-        common_behaviours.behaviour(new MultiSliceContextMenuClickBehaviour( this, this::getSelectedSources ), "Slices Context Menu", "button3");
+        common_behaviours.behaviour(new MultiSliceContextMenuClickBehaviour( this, this::getSelectedSources ), "Slices Context Menu", "button3", "ctrl button1");
     }
 
     public void changeSliceDisplayMode() {
