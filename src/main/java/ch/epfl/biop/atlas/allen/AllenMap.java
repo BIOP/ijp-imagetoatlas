@@ -67,7 +67,7 @@ public class AllenMap implements AtlasMap {
 			.getSourceAndConverterFromSpimdata(importer.get());
 
 		BiConsumer<RealLocalizable, UnsignedShortType > leftRightIndicator = (l, t ) -> {
-			if (l.getFloatPosition(0)>0) {
+			if (l.getFloatPosition(2)>5.7) { // 11.4 mm / 2
 				t.set(255);
 			} else {
 				t.set(0);

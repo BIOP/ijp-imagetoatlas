@@ -1003,13 +1003,18 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
             RealPoint globalMouseCoordinates = new RealPoint(3);
             bdvh.getViewerPanel().getGlobalMouseCoordinates(globalMouseCoordinates);
             int labelValue;
+            int leftRight;
             if (displayMode==POSITIONING_MODE_INT) {
                 SourceAndConverter label = reslicedAtlas.extendedSlicedSources[reslicedAtlas.extendedSlicedSources.length-1]; // By convention the label image is the last one
                 labelValue = ((UnsignedShortType) getSourceValueAt(label, globalMouseCoordinates)).get();
+                SourceAndConverter lrSource = reslicedAtlas.extendedSlicedSources[reslicedAtlas.extendedSlicedSources.length-2]; // By convention the left right indicator image is the next to last one
+                leftRight = ((UnsignedShortType) getSourceValueAt(lrSource, globalMouseCoordinates)).get();
             } else {
                 assert displayMode == REGISTRATION_MODE_INT;
                 SourceAndConverter label = reslicedAtlas.nonExtendedSlicedSources[reslicedAtlas.nonExtendedSlicedSources.length-1]; // By convention the label image is the last one
                 labelValue = ((UnsignedShortType) getSourceValueAt(label, globalMouseCoordinates)).get();
+                SourceAndConverter lrSource = reslicedAtlas.nonExtendedSlicedSources[reslicedAtlas.nonExtendedSlicedSources.length-2]; // By convention the left right indicator image is the next to last one
+                leftRight = ((UnsignedShortType) getSourceValueAt(lrSource, globalMouseCoordinates)).get();
             }
 
             String ontologyLocation = null;
@@ -1017,9 +1022,16 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                 ontologyLocation = biopAtlas.ontology.getProperties(labelValue).get("acronym");
                 while (labelValue!=biopAtlas.ontology.getRootIndex()) {
                     labelValue = biopAtlas.ontology.getParent(labelValue);
-                    ontologyLocation = biopAtlas.ontology.getProperties(labelValue).get("acronym")+">"+ontologyLocation;
+                    ontologyLocation = ontologyLocation+"<"+biopAtlas.ontology.getProperties(labelValue).get("acronym");
+                }
+                if (leftRight == 255) {
+                    ontologyLocation += "(R)";
+                }
+                if (leftRight == 0) {
+                    ontologyLocation += "(L)";
                 }
             }
+
 
             g.setFont(new Font("TimesRoman", Font.PLAIN, 16));
             g.setColor(new Color(255, 255, 255, 200));
