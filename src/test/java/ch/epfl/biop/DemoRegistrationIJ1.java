@@ -34,10 +34,12 @@ public class DemoRegistrationIJ1 {
         mp.centerBdvViewOn(slice);
         mp.selectSlice(slice);
 
-        mp.registerElastixAffine(1,0, false);
-        mp.registerElastixSpline(0,0, 4,false);
+        mp.registerElastixAffineRemote("localhost:8090",1,0);
 
-        mp.exportSelectedSlicesRegionsToRoiManager("name");
+        //mp.registerElastixAffine(1,0, false);
+        mp.registerElastixSpline(0,0, 15,false);
+
+        //mp.exportSelectedSlicesRegionsToRoiManager("name");
 
 	}
 

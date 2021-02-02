@@ -49,14 +49,21 @@ public class RegisterSlice extends CancelableAction {
         return preprocessMoving;
     }
 
+    boolean isValid = true;
+
     @Override
     public boolean run() { //
-        if (registration.isRegistrationDone()) {
+        if (registration.isRegistrationDone()&&isValid()) {
             slice.appendRegistration(registration);
+            return true;
         } else {
-            slice.runRegistration(registration, preprocessFixed, preprocessMoving);
+            isValid = slice.runRegistration(registration, preprocessFixed, preprocessMoving);
+            return isValid;
         }
-        return true;
+    }
+
+    public boolean isValid() {
+        return isValid;
     }
 
     public String toString() {
@@ -64,24 +71,29 @@ public class RegisterSlice extends CancelableAction {
     }
 
     public void drawAction(Graphics2D g, double px, double py, double scale) {
-        switch (slice.getActionState(this)){//.getRegistrationState(registration)) {
-            case "(done)":
-                g.setColor(new Color(0, 255, 0, 200));
-                break;
-            case "(locked)":
-                g.setColor(new Color(255, 0, 0, 200));
-                break;
-            case "(pending)":
-                g.setColor(new Color(255, 255, 0, 200));
-                break;
-        }
-        if (registration.isManual()) {
-            g.fillRect((int) (px - 7), (int) (py - 7), 14, 14);
+        if (isValid) {
+            switch (slice.getActionState(this)) {//.getRegistrationState(registration)) {
+                case "(done)":
+                    g.setColor(new Color(0, 255, 0, 200));
+                    break;
+                case "(locked)":
+                    g.setColor(new Color(255, 0, 0, 200));
+                    break;
+                case "(pending)":
+                    g.setColor(new Color(255, 255, 0, 200));
+                    break;
+            }
+            if (registration.isManual()) {
+                g.fillRect((int) (px - 7), (int) (py - 7), 14, 14);
+            } else {
+                g.fillOval((int) (px - 7), (int) (py - 7), 14, 14);
+            }
+            g.setColor(new Color(255, 255, 255, 200));
+            g.drawString("R", (int) px - 4, (int) py + 5);
         } else {
-            g.fillOval((int) (px - 7), (int) (py - 7), 14, 14);
+            g.setColor(new Color(255, 0, 0, 200));
+            g.drawString("X", (int) px - 4, (int) py + 5);
         }
-        g.setColor(new Color(255, 255, 255, 200));
-        g.drawString("R", (int) px - 4, (int) py + 5);
     }
 
     @Override

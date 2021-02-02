@@ -297,7 +297,7 @@ public class SliceSources {
      *
      * @param reg
      */
-    protected void runRegistration(Registration<SourceAndConverter<?>[]> reg,
+    protected boolean runRegistration(Registration<SourceAndConverter<?>[]> reg,
                                 Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixed,
                                 Function<SourceAndConverter[], SourceAndConverter[]> preprocessMoving) {
 
@@ -305,10 +305,10 @@ public class SliceSources {
             //Waiting for manual lock release...
             synchronized (MultiSlicePositioner.manualActionLock) {
                 //Manual lock released
-                performRegistration(reg,preprocessFixed, preprocessMoving);
+                return performRegistration(reg,preprocessFixed, preprocessMoving);
             }
         } else {
-            performRegistration(reg,preprocessFixed, preprocessMoving);
+            return performRegistration(reg,preprocessFixed, preprocessMoving);
         }
 
     }
@@ -346,19 +346,29 @@ public class SliceSources {
             tasks.add(startingPoint.thenApplyAsync((out) -> {
                 if (out) {
                     actionInProgress = action;
+                    System.out.println("Action:"+action);
                     boolean result = action.run();
-                    actionInProgress = null;
-                    postRun.run();
+                    System.out.println("Success:"+result);
+                    if (result) {
+                        actionInProgress = null;
+                        postRun.run();
+                    } else {
+                        mp.errorMessageForUser.accept("Action failed",""+action);
+                        tasks.remove(mapActionTask.get(action));
+                        mapActionTask.remove(action);
+                        mp.mso.cancelInfo(action);
+                        mp.userActions.remove(action);
+                    }
                     return result;
                 } else {
+                    mp.errorMessageForUser.accept("Action not started","Upstream tasked failed, canceling action "+action);
+                    tasks.remove(mapActionTask.get(action));
+                    mapActionTask.remove(action);
+                    mp.mso.cancelInfo(action);
+                    mp.userActions.remove(action);
                     return false;
                 }
             }));
-            tasks.add(tasks.get(tasks.size() - 1).thenApplyAsync(
-                (out) -> {
-                    mp.mso.updateInfoPanel(this);
-                    return out;}
-                ));
             mapActionTask.put(action, tasks.get(tasks.size() - 1));
         }
     }
@@ -367,7 +377,9 @@ public class SliceSources {
         synchronized(tasks) {
             // Has the action started ?
             if (mapActionTask.containsKey(action)) {
+                System.out.println("Cancel "+action+" 0");
                 if (mapActionTask.get(action).isDone() || ((action!=null)&&(action == this.actionInProgress))) {
+                    System.out.println("Cancel "+action+" Done");
                     CompletableFuture<Boolean> startingPoint;
                     if (tasks.size() == 0) {
                         startingPoint = CompletableFuture.supplyAsync(() -> true);
@@ -383,9 +395,11 @@ public class SliceSources {
                             return result;
                         } else {
                             return false;
+                        //    return out;
                         }
                     }));
                 } else {
+                    System.out.println("Cancel "+action+" Not Done");
                     // Not done yet! - let's remove right now from the task list
                     mapActionTask.get(action).cancel(true);
                     tasks.remove(mapActionTask.get(action));

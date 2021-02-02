@@ -44,7 +44,7 @@ public class ExportSliceRegionsToRoiManager extends CancelableAction {
     @Override
     public boolean cancel() {
         mp.log.accept("Export cancel : no action");
-        return false;
+        return true;
     }
 
     @Override
