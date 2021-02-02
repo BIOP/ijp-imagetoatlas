@@ -1,8 +1,6 @@
 package ch.epfl.biop.atlas.aligner;
 
 import bdv.viewer.SourceAndConverter;
-import ch.epfl.biop.atlas.allen.AllenOntology;
-import ch.epfl.biop.atlas.allen.AllenOntologyJson;
 import ch.epfl.biop.atlas.commands.ConstructROIsFromImgLabel;
 import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
 import ch.epfl.biop.java.utilities.roi.types.CompositeFloatPoly;
@@ -14,7 +12,6 @@ import ch.epfl.biop.registration.Registration;
 import ch.epfl.biop.registration.sourceandconverter.affine.AffineTransformedSourceWrapperRegistration;
 import ch.epfl.biop.registration.sourceandconverter.affine.CenterZeroRegistration;
 import ch.epfl.biop.scijava.command.ExportToImagePlusCommand;
-import com.google.gson.Gson;
 import ij.ImagePlus;
 import ij.gui.Roi;
 import ij.plugin.frame.RoiManager;
@@ -63,7 +60,7 @@ public class SliceSources {
     // Used for registration : like 3D, but tilt and roll ignored because it is handled on the fixed source side
     private SourceAndConverter<?>[] registered_sacs;
 
-    private List<RegistrationAndSources> registered_sacs_sequence = new ArrayList<>();
+    private final List<RegistrationAndSources> registered_sacs_sequence = new ArrayList<>();
 
     // Where is the slice located along the slicing axis
     private double slicingAxisPosition;
@@ -74,11 +71,11 @@ public class SliceSources {
 
     private final MultiSlicePositioner mp;
 
-    private AffineTransformedSourceWrapperRegistration zPositioner;
+    private final AffineTransformedSourceWrapperRegistration zPositioner;
 
-    private AffineTransformedSourceWrapperRegistration preTransform;
+    private final AffineTransformedSourceWrapperRegistration preTransform;
 
-    private CenterZeroRegistration centerPositioner;
+    private final CenterZeroRegistration centerPositioner;
 
     private ImagePlus impLabelImage;
 
@@ -92,15 +89,15 @@ public class SliceSources {
 
     private ConvertibleRois leftRightTranformed;
 
-    private List<Registration<SourceAndConverter<?>[]>> registrations = new ArrayList<>();
+    private final List<Registration<SourceAndConverter<?>[]>> registrations = new ArrayList<>();
 
     private final List<CompletableFuture<Boolean>> tasks = new ArrayList<>();
 
-    private Map<CancelableAction, CompletableFuture<Boolean>> mapActionTask = new HashMap<>();
+    private final Map<CancelableAction, CompletableFuture<Boolean>> mapActionTask = new HashMap<>();
 
     private volatile CancelableAction actionInProgress = null;
 
-    private ConvertibleRois leftRightOrigin = new ConvertibleRois();
+    private final ConvertibleRois leftRightOrigin = new ConvertibleRois();
 
     private int currentSliceIndex = -1;
 
@@ -207,7 +204,7 @@ public class SliceSources {
         }
         if (mapActionTask.containsKey(action)) {
             if (tasks.contains(mapActionTask.get(action))) {
-                CompletableFuture future = tasks.get(tasks.indexOf(mapActionTask.get(action)));
+                CompletableFuture<Boolean> future = tasks.get(tasks.indexOf(mapActionTask.get(action)));
                 if (future.isDone()) {
                     return "(done)";
                 } else if (future.isCancelled()) {
@@ -229,7 +226,7 @@ public class SliceSources {
     }
 
     protected boolean isContainingAny(Collection<SourceAndConverter<?>> sacs) {
-        Set originalSacsSet = new HashSet();
+        Set<SourceAndConverter> originalSacsSet = new HashSet<>();
         for (SourceAndConverter sac : original_sacs) {
             originalSacsSet.add(sac);
         }
@@ -239,7 +236,7 @@ public class SliceSources {
     public void waitForEndOfTasks() {
         if (tasks.size()>0) {
             try {
-                CompletableFuture lastTask = tasks.get(tasks.size()-1);
+                CompletableFuture<Boolean> lastTask = tasks.get(tasks.size()-1);
                 lastTask.get();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -295,7 +292,7 @@ public class SliceSources {
     /**
      * Asynchronous handling of registrations + combining with manual sequential registration if necessary
      *
-     * @param reg
+     * @param reg the registration to perform
      */
     protected boolean runRegistration(Registration<SourceAndConverter<?>[]> reg,
                                 Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixed,
@@ -415,7 +412,7 @@ public class SliceSources {
         }
     }
 
-    void computeLabelImage(AffineTransform3D at3D, String naming) {
+    void computeLabelImage(AffineTransform3D at3D) {
         labelImageBeingComputed = true;
 
         // 0 - slicing model : empty source but properly defined in space and resolution
@@ -498,7 +495,7 @@ public class SliceSources {
         }
 
         if (computeLabelImageNecessary) {
-            computeLabelImage(at3D, namingChoice);
+            computeLabelImage(at3D);
         } else {
             while (labelImageBeingComputed) {
                 try {
@@ -516,10 +513,6 @@ public class SliceSources {
         for (int i=0;i<roiList.rois.size();i++) {
             CompositeFloatPoly roi = roiList.rois.get(i);
             int atlasId = Integer.valueOf(roi.name );
-            // Issue with modulo 65000!!
-            /*if (mp.biopAtlas.ontology instanceof AllenOntology) {
-                atlasId = atlasId % 65000;
-            }*/
             String name = mp.biopAtlas.ontology.getProperties(atlasId).get(namingChoice);
             roi.name = name;
             roi.color = mp.biopAtlas.ontology.getColor(atlasId);
@@ -536,7 +529,6 @@ public class SliceSources {
         right.setStrokeColor(new Color(255,0,255));
         right.setName("Right");
         roiList.rois.add(new CompositeFloatPoly(right));
-
     }
 
     protected synchronized void exportRegionsToROIManager(String namingChoice) {
@@ -758,9 +750,6 @@ public class SliceSources {
     }
 
     public int getAdaptedMipMapLevel(double pxSizeInMm) {
-        /*int maxLevel = registered_sacs[0].getSpimSource().getNumMipmapLevels() - 1;
-        int chosenLevel = SourceAndConverterUtils.bestLevel(registered_sacs[0],0,pxSizeInMm);
-        mp.log.accept(this+":"+chosenLevel+ "/" +maxLevel);*/
         return SourceAndConverterHelper.bestLevel(registered_sacs[0],0,pxSizeInMm);
     }
 
