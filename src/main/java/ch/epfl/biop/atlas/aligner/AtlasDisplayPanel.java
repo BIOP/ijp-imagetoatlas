@@ -22,23 +22,14 @@ public class AtlasDisplayPanel implements MultiSlicePositioner.ModeListener {//}
 
     final JTable tableAtlasDisplay;
 
-    //final JTable tableSelectionControl;
-
     final AtlasDisplayTableModel model;
-
-    //final SelectedSliceDisplayTableModel modelSelect;
 
     Consumer<String> log = (str) -> System.out.println(AtlasDisplayPanel.class+":"+str);
 
-    //int maxChannels = 0;
-
-    int nSlices = 0;
 
     boolean globalFlagVisible = true;
 
-    List<Boolean> globalFlagPerChannel = new ArrayList<>();
-
-    List<Displaysettings> globalDisplaySettingsPerChannel = new ArrayList<>();
+    List<Boolean> globalFlagPerChannel;
 
     ReslicedAtlas ra;
 
@@ -135,6 +126,10 @@ public class AtlasDisplayPanel implements MultiSlicePositioner.ModeListener {//}
 
     public JPanel getPanel() {
         return paneDisplay;
+    }
+
+    public AtlasDisplayTableModel getModel() {
+        return model;
     }
 
     int currentIndex = -1;

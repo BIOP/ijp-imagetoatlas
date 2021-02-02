@@ -354,7 +354,15 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
         // TODO BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Registration>Remove Last Registration",0,() -> );
 
-        bdvh.getCardPanel().addCard("Atlas Display Options", new AtlasDisplayPanel(this).getPanel(), true);
+        AtlasDisplayPanel adp = new AtlasDisplayPanel(this);
+        // Hide useless channels on startup -
+        adp.getModel().setValueAt(new Boolean(false),0,8); // X Coord
+        adp.getModel().setValueAt(new Boolean(false),0,10);// Y Coord
+        adp.getModel().setValueAt(new Boolean(false),0,12);// Z Coord
+        adp.getModel().setValueAt(new Boolean(false),0,14);// Left Right
+        adp.getModel().setValueAt(new Boolean(false),0,16);// Label ?
+
+        bdvh.getCardPanel().addCard("Atlas Display Options", adp.getPanel(), true);
 
         bdvh.getCardPanel().addCard("Slices Display Options", new SliceDisplayPanel(this).getPanel(), true);
 
@@ -1037,29 +1045,30 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
             DecimalFormat df = new DecimalFormat("#0.00");
             String coordinates = "["+df.format(coords[0])+";"+df.format(coords[1])+";"+df.format(coords[2])+"]";
-
+            if (leftRight == 255) {
+                coordinates += "(R)";
+            }
+            if (leftRight == 0) {
+                coordinates += "(L)";
+            }
             String ontologyLocation = null;
             if (labelValue!=0) {
                 ontologyLocation = biopAtlas.ontology.getProperties(labelValue).get("acronym");
                 while (labelValue!=biopAtlas.ontology.getRootIndex()) {
                     labelValue = biopAtlas.ontology.getParent(labelValue);
+                    if (labelValue!=biopAtlas.ontology.getRootIndex())
                     ontologyLocation = ontologyLocation+"<"+biopAtlas.ontology.getProperties(labelValue).get("acronym");
                 }
-                if (leftRight == 255) {
-                    ontologyLocation += "(R)";
-                }
-                if (leftRight == 0) {
-                    ontologyLocation += "(L)";
-                }
+
             }
 
-            g.setFont(new Font("TimesRoman", Font.PLAIN, 16));
-            g.setColor(new Color(255, 0, 155, 250));
+            g.setFont(new Font("TimesRoman", Font.BOLD, 16));
+            g.setColor(new Color(255, 255, 100, 250));
             Point mouseLocation = bdvh.getViewerPanel().getMousePosition();
             if ((ontologyLocation!=null)&&(mouseLocation!=null)) {
                 g.drawString(ontologyLocation,mouseLocation.x,mouseLocation.y);
             }
-            if ((mouseLocation!=null)&&(!coordinates.equals("[0.00;0.00;0.00]"))) {
+            if ((mouseLocation!=null)&&(!coordinates.startsWith("[0.00;0.00;0.00]"))) {
                 g.drawString(coordinates, mouseLocation.x, mouseLocation.y - 20);
             }
         }
