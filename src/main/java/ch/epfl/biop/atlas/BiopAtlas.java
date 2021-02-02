@@ -12,7 +12,7 @@ import ij.gui.Roi;
 import ij.plugin.frame.RoiManager;
 import ij.process.FloatPolygon;
 
-abstract public class BiopAtlas implements Closeable {
+abstract public class BiopAtlas {
 
     // An atlas is : an ontology and an xml hdf5 data source
 
@@ -25,8 +25,6 @@ abstract public class BiopAtlas implements Closeable {
     public AtlasOntology ontology;
     
     abstract public void initialize(URL mapURL, URL ontologyURL);
-    
-    abstract public void runOnClose(Runnable onClose);
     
     /*public void browse() {
     	map.show();
@@ -42,7 +40,7 @@ abstract public class BiopAtlas implements Closeable {
         }
     }
     
-    abstract public ConvertibleRois getCurrentROIs();
+    //abstract public ConvertibleRois getCurrentROIs();
     
     public void putROISToROIManager(
     		ConvertibleRois cr,

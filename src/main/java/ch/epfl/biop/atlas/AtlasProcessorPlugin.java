@@ -39,7 +39,7 @@ public class AtlasProcessorPlugin extends AbstractPostprocessorPlugin {
 				if (!os.getObjects(BiopAtlas.class).contains(ba)) { // Avoids double addition
 					os.addObject(ba);
 				}
-				ba.runOnClose(() -> os.removeObject(ba)); // removes the object when the atlas window is closed
+				//ba.runOnClose(() -> os.removeObject(ba)); // removes the object when the atlas window is closed
 			}
 		});
 	}

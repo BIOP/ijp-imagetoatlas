@@ -1,6 +1,8 @@
 package ch.epfl.biop.atlas;
 
 import java.net.URL;
+import java.util.List;
+import java.util.Map;
 
 import bdv.viewer.SourceAndConverter;
 import ij.ImagePlus;
@@ -36,23 +38,12 @@ public interface AtlasMap {
 	 * @return
 	 */
 	URL getDataSource();
-	
-	//void show();
-	//void hide();
 
-	ImagePlus getCurrentStructuralImageAsImagePlus();
-	ImagePlus getCurrentLabelImageAsImagePlus();
+	Map<String,SourceAndConverter> getStructuralImages();
 
-	SourceAndConverter[] getCurrentStructuralImageSliceAsSacs();
-	SourceAndConverter getCurrentLabelImageSliceAsSac();
+	List<String> getImagesKeys();
 
-	SourceAndConverter[] getStructuralImages();
 	SourceAndConverter getLabelImage();
 
-	/*int getLabelImageSacIndex();
-	int getLeftRightImageSacIndex();
-
-	Object getCurrentLocation();
-	void setCurrentLocation(Object location);*/
 	
 }

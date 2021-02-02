@@ -76,7 +76,7 @@ public class ReslicedAtlas {
 
         // No let's check for bounds along the z axis
         // Pick the first SourceAndConverter
-        SourceAndConverter sacForBoundsTesting = ba.map.getStructuralImages()[0];
+        SourceAndConverter sacForBoundsTesting = ba.map.getStructuralImages().get(ba.map.getImagesKeys().get(0));
 
         // Gets level 0 (and timepoint 0) and source transform
         AffineTransform3D sacTransform = new AffineTransform3D();
@@ -197,8 +197,8 @@ public class ReslicedAtlas {
         SourceAndConverterServices.getSourceAndConverterService().register(slicingModel);
 
         // 1 -
-        extendedSlicedSources = new SourceAndConverter[ba.map.getStructuralImages().length+1];
-        SourceAndConverter[] tempNonExtendedSlicedSources = new SourceAndConverter[ba.map.getStructuralImages().length+1];
+        extendedSlicedSources = new SourceAndConverter[ba.map.getStructuralImages().size()+1];
+        SourceAndConverter[] tempNonExtendedSlicedSources = new SourceAndConverter[ba.map.getStructuralImages().size()+1];
 
         SourceMosaicZSlicer mosaic = new SourceMosaicZSlicer(null, slicingModel, true, false, false,
                 () -> getStep());
@@ -206,10 +206,13 @@ public class ReslicedAtlas {
         SourceResampler resampler = new SourceResampler(null, slicingModel, true, false, false);
 
         centerTransform = null;
-        for (int index = 0; index<ba.map.getStructuralImages().length+1;index++) {
+
+        List<String> keys = ba.map.getImagesKeys();
+
+        for (int index = 0; index<ba.map.getStructuralImages().size()+1;index++) {
             SourceAndConverter sac;
-            if (index<ba.map.getStructuralImages().length) {
-                sac = ba.map.getStructuralImages()[index];
+            if (index<ba.map.getStructuralImages().size()) {
+                sac = ba.map.getStructuralImages().get(keys.get(index));
             } else {
                 sac = ba.map.getLabelImage();
             }
