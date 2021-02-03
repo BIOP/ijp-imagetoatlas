@@ -219,7 +219,6 @@ public class MultiSliceObserver {
             sliceSortedActions.get(action.getSliceSources()).remove(action);
             updateInfoPanel(action.getSliceSources());
         }
-
         repaintNeeded = true;
     }
 
