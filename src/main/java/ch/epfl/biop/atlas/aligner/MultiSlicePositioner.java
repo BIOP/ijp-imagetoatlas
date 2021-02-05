@@ -2393,6 +2393,12 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     }
 
     public void saveState(File stateFile, boolean overwrite) {
+
+        if (slices.size() == 0) {
+            errorMessageForUser.accept("No Slices To Save", "No slices are present. Nothing saved");
+            return;
+        }
+
         slices.get(0).waitForEndOfTasks();
 
         // Wait patiently for all tasks to be performed

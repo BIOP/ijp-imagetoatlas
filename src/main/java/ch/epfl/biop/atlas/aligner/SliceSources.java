@@ -753,6 +753,14 @@ public class SliceSources {
         return SourceAndConverterHelper.bestLevel(registered_sacs[0],0,pxSizeInMm);
     }
 
+    public void appendTiltCorrection() {
+        // TODO
+    }
+
+    public void removeTiltCorrection() {
+        // TODO
+    }
+
     public static class RegistrationAndSources {
 
         final Registration reg;

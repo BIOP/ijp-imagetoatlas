@@ -7,6 +7,7 @@ import org.scijava.Context;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
+import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
 import sc.fiji.bdvpg.services.SourceAndConverterServiceSaver;
 
 import java.util.ArrayList;
@@ -17,14 +18,20 @@ import java.util.stream.Collectors;
 @Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>Export Slices to BDV Json Dataset (Experimental)")
 public class ExportSlicesToBDVJsonDataset implements Command {
 
-    @Parameter
+    @Parameter(label = "Please specify a json file to store the reconstructed data")
     File datasetFile;
+
+    @Parameter(label = "Enter a tag to identify the registered sources (metadata key = \"ABBA\")" )
+    String tag;
 
     @Parameter
     MultiSlicePositioner mp;
 
     @Parameter
     Context ctx;
+
+    @Parameter
+    SourceAndConverterService sac_service;
 
     @Override
     public void run() {
@@ -37,12 +44,16 @@ public class ExportSlicesToBDVJsonDataset implements Command {
         if (slices.size()==0) {
             mp.errorMessageForUser.accept("No slice selected", "You did not select any slice to save");
         } else {
+            slices.forEach(slice -> slice.appendTiltCorrection());
             slices.forEach(slice -> {
                 for (SourceAndConverter sac : slice.getRegisteredSources()) {
+                    sac_service.setMetadata(sac, "ABBA", tag);
                     sacs.add(sac);
                 }
             });
             new SourceAndConverterServiceSaver(datasetFile, ctx, sacs).run();
+            slices.forEach(slice -> slice.removeTiltCorrection());
+
             mp.log.accept("Saved!");
         }
     }
