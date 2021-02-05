@@ -350,7 +350,9 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportRegionsToRoiManagerCommand.class, hierarchyLevelsSkipped,"mp", this);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportRegionsToQuPathCommand.class, hierarchyLevelsSkipped,"mp", this);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportSlicesToBDVJsonDataset.class, hierarchyLevelsSkipped,"mp", this);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportSlicesToBDV.class, hierarchyLevelsSkipped,"mp", this);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, RotateSourcesCommand.class, hierarchyLevelsSkipped,"mp", this);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, EditSliceThicknessCommand.class, hierarchyLevelsSkipped,"mp", this);
 
         // TODO BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Registration>Remove Last Registration",0,() -> );
 
@@ -1275,7 +1277,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     //-----------------------------------------
 
     public SliceSources createSlice(SourceAndConverter[] sacsArray, double slicingAxisPosition) {
-        CreateSlice cs = new CreateSlice(this, Arrays.asList(sacsArray), slicingAxisPosition);
+        CreateSlice cs = new CreateSlice(this, Arrays.asList(sacsArray), slicingAxisPosition,1,0);
         cs.runRequest();
         return cs.getSlice();
     }
@@ -1307,7 +1309,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
             for (int i = 0; i < sortedTiles.size(); i++) {
                 T group = sortedTiles.get(i);
                 if (group.getId()!=-1) {
-                    CreateSlice cs = new CreateSlice(this, sacsGroups.get(group), slicingAxisPosition + i * axisIncrement);
+                    CreateSlice cs = new CreateSlice(this, sacsGroups.get(group), slicingAxisPosition + i * axisIncrement,1,0);
                     cs.runRequest();
                     if (cs.getSlice() != null) {
                         out.add(cs.getSlice());
@@ -1317,7 +1319,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
             new MarkActionSequenceBatch(this).runRequest();
 
         } else {
-            CreateSlice cs = new CreateSlice(this, sacs, slicingAxisPosition);
+            CreateSlice cs = new CreateSlice(this, sacs, slicingAxisPosition,1,0);
             cs.runRequest();
             if (cs.getSlice() != null) {
                 out.add(cs.getSlice());

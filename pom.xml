@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.scijava</groupId>
 		<artifactId>pom-scijava</artifactId>
-		<version>29.2.1</version>
+		<version>30.0.0</version>
 		<relativePath />
 	</parent>
 
@@ -136,15 +136,15 @@
 		<scijava.app.directory>C:\Users\nicol\Desktop\fiji-win64-ABBA\Fiji.app</scijava.app.directory>
 
 		<bigdataviewer-biop-tools.version>0.2.3-SNAPSHOT-local</bigdataviewer-biop-tools.version>
-		<bigdataviewer-bioformats.version>0.2.13</bigdataviewer-bioformats.version>
-		<bigdataviewer-playground.version>0.2.8</bigdataviewer-playground.version>
-		<bigdataviewer-selector.version>0.1.6</bigdataviewer-selector.version>
+		<bigdataviewer-bioformats.version>0.2.14</bigdataviewer-bioformats.version>
+		<bigdataviewer-playground.version>0.2.9</bigdataviewer-playground.version>
+		<bigdataviewer-selector.version>0.1.8</bigdataviewer-selector.version>
 
-		<bigdataviewer-core.version>10.1.1-SNAPSHOT-IMARIS</bigdataviewer-core.version>
-		<bigdataviewer-vistools.version>1.0.0-beta-26</bigdataviewer-vistools.version>
-		<imglib2-cache.version>1.0.0-beta-15</imglib2-cache.version>
+		<bigdataviewer-core.version>10.2.0</bigdataviewer-core.version>
+		<bigdataviewer-vistools.version>1.0.0-beta-28</bigdataviewer-vistools.version>
+		<imglib2-cache.version>1.0.0-beta-16</imglib2-cache.version>
 
-		<ijl-utilities-wrappers.version>0.3.17-SNAPSHOT-LOCAL</ijl-utilities-wrappers.version>
+		<ijl-utilities-wrappers.version>0.3.17</ijl-utilities-wrappers.version>
 		<json.version>20180813</json.version>
 		<!-- temp build because of culling wrongly handled with warped source -->
 		<bigwarp_fiji.version>6.0.3-SNAPSHOT</bigwarp_fiji.version>

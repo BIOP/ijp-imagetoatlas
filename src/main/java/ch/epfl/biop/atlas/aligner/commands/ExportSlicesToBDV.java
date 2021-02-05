@@ -1,5 +1,6 @@
 package ch.epfl.biop.atlas.aligner.commands;
 
+import bdv.util.BdvHandle;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
@@ -9,17 +10,18 @@ import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
 import sc.fiji.bdvpg.services.SourceAndConverterServiceSaver;
+import sc.fiji.bdvpg.services.SourceAndConverterServices;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.io.File;
 import java.util.stream.Collectors;
 
-@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>Export Slices to BDV Json Dataset (Experimental)")
-public class ExportSlicesToBDVJsonDataset implements Command {
+@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>Export Slices to BDV window")
+public class ExportSlicesToBDV implements Command {
 
-    @Parameter(label = "Please specify a json file to store the reconstructed data")
-    File datasetFile;
+    @Parameter(label = "Select the bdv to append the file - only one")
+    BdvHandle[] bdvh;
 
     @Parameter(label = "Enter a tag to identify the registered sources (metadata key = \"ABBA\")" )
     String tag;
@@ -35,27 +37,31 @@ public class ExportSlicesToBDVJsonDataset implements Command {
 
     @Override
     public void run() {
+        if (bdvh[0].equals(mp.getBdvh())) {
+            mp.errorMessageForUser.accept("Error","Do not use the same window as ABBA!");
+            return;
+        }
         mp.log.accept("Waiting for the end of all current tasks...");
         mp.waitForTasks();
         mp.log.accept("All tasks ended");
-        mp.log.accept("Starting saving...");
-        List<SourceAndConverter> sacs = new ArrayList<>();
+
         List<SliceSources> slices = mp.getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
         if (slices.size()==0) {
-            mp.errorMessageForUser.accept("No slice selected", "You did not select any slice to save");
+            mp.errorMessageForUser.accept("No slice selected", "You did not select any slice to export");
         } else {
-            slices.forEach(slice -> slice.appendTiltCorrection());
+            //slices.forEach(slice -> slice.appendTiltCorrection());
+            List<SourceAndConverter> sacsToAppend = new ArrayList<>();
             slices.forEach(slice -> {
                 for (SourceAndConverter sac : slice.getRegisteredSources()) {
                     sac_service.register(sac);
                     sac_service.setMetadata(sac, "ABBA", tag);
-                    sacs.add(sac);
+                    sacsToAppend.add(sac);
                 }
             });
-            new SourceAndConverterServiceSaver(datasetFile, ctx, sacs).run();
-            slices.forEach(slice -> slice.removeTiltCorrection());
 
-            mp.log.accept("Saved!");
+            SourceAndConverterServices
+                    .getSourceAndConverterDisplayService()
+                    .show(bdvh[0], sacsToAppend.toArray(new SourceAndConverter[0]));
         }
     }
 

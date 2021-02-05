@@ -15,11 +15,15 @@ public class CreateSlice extends CancelableAction {
     final private List<SourceAndConverter<?>> sacs;
     private SliceSources sliceSource;
     final public double slicingAxisPosition;
+    final public double zSliceThicknessCorrection;
+    final public double zSliceShiftCorrection;
 
-    public CreateSlice(MultiSlicePositioner mp, List<SourceAndConverter<?>> sacs, double slicingAxisPosition) {
+    public CreateSlice(MultiSlicePositioner mp, List<SourceAndConverter<?>> sacs, double slicingAxisPosition, double zSliceThicknessCorrection, double zSliceShiftCorrection) {
         super(mp);
         this.sacs = sacs;
         this.slicingAxisPosition = slicingAxisPosition;
+        this.zSliceShiftCorrection = zSliceShiftCorrection;
+        this.zSliceThicknessCorrection = zSliceThicknessCorrection;
     }
 
     @Override
@@ -72,7 +76,7 @@ public class CreateSlice extends CancelableAction {
 
             if (sliceSource == null) {// for proper redo function
                 sliceSource = new SliceSources(sacs.toArray(new SourceAndConverter[sacs.size()]),
-                        slicingAxisPosition, mp);
+                        slicingAxisPosition, mp, zSliceThicknessCorrection, zSliceShiftCorrection);
             }
 
             mp.createSlice(sliceSource);//.getPrivateSlices().add(sliceSource);

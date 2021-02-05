@@ -22,7 +22,9 @@ public class CreateSliceAdapter implements JsonSerializer<CreateSlice>,
         JsonObject obj = jsonElement.getAsJsonObject();
         SourceAndConverter[] sacs = jsonDeserializationContext.deserialize(obj.get("original_sources"), SourceAndConverter[].class);
         double location = obj.get("original_location").getAsDouble();
-        return new CreateSlice(mp, Arrays.asList(sacs), location);
+        double thicknessCorrection = obj.get("thicknessCorrection").getAsDouble();
+        double zShiftCorrection = obj.get("zShiftCorrection").getAsDouble();
+        return new CreateSlice(mp, Arrays.asList(sacs), location,thicknessCorrection, zShiftCorrection);
     }
 
     @Override
@@ -31,6 +33,8 @@ public class CreateSliceAdapter implements JsonSerializer<CreateSlice>,
         obj.addProperty("type", CreateSlice.class.getSimpleName());
         obj.add("original_sources",jsonSerializationContext.serialize(createSlice.getSlice().getOriginalSources()));
         obj.addProperty("original_location", createSlice.slicingAxisPosition);
+        obj.addProperty("thicknessCorrection", createSlice.zSliceThicknessCorrection);
+        obj.addProperty("zShiftCorrection", createSlice.zSliceShiftCorrection);
         return obj;
     }
 }

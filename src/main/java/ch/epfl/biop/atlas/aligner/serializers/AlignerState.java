@@ -9,7 +9,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static sc.fiji.bdvpg.scijava.services.SourceAndConverterService.errlog;
 
 public class AlignerState {
 
@@ -19,7 +18,6 @@ public class AlignerState {
         sliceDisplayMode = mp.getSliceDisplayMode();
         overlapMode = mp.getOverlapMode();
         bdvView = mp.getBdvh().getViewerPanel().state().getViewerTransform();
-        //slicingTransform = mp.getReslicedAtlas().getSlicingTransform();
         rotationX = mp.getReslicedAtlas().getRotateX();
         rotationY = mp.getReslicedAtlas().getRotateY();
 
@@ -42,8 +40,6 @@ public class AlignerState {
     public int sliceDisplayMode;
 
     public int overlapMode;
-
-    //public AffineTransform3D slicingTransform;
 
     public double rotationX;
 
@@ -81,11 +77,11 @@ public class AlignerState {
         skipableActions.add(ExportSliceRegionsToRoiManager.class);
 
         if ((ini_actions == null)||(ini_actions.size()==0)) {
-            errlog.accept("Wrong number of actions to be serialized");
+            System.err.println("Wrong number of actions to be serialized");
             return null;
         }
         if (!(ini_actions.get(0) instanceof CreateSlice)) {
-            errlog.accept("Error : the first action is not a CreateSlice action");
+            System.err.println("Error : the first action is not a CreateSlice action");
             return null;
         }
         List<CancelableAction> compiledActions = new ArrayList<>();
@@ -108,11 +104,11 @@ public class AlignerState {
                             idxCompiledActions--;
                             idxIniActions++;
                         } else {
-                            errlog.accept("Error : issue with filtering serializable actions");
+                            System.err.println("Error : issue with filtering serializable actions");
                             idxIniActions++;
                         }
                     } else {
-                        errlog.accept("Error : issue with filtering serializable actions. Action class = "+nextAction.getClass());
+                        System.err.println("Error : issue with filtering serializable actions. Action class = "+nextAction.getClass());
                         idxIniActions++;
                     }
                 }

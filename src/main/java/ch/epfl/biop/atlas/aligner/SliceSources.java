@@ -103,8 +103,15 @@ public class SliceSources {
 
     public String name = "";
 
+    double zThicknessCorrection = 1;
+
+    double zShiftCorrection = 0;
+
     // For fast display : Icon TODO : see https://github.com/bigdataviewer/bigdataviewer-core/blob/17d2f55d46213d1e2369ad7ef4464e3efecbd70a/src/main/java/bdv/tools/RecordMovieDialog.java#L256-L318
-    protected SliceSources(SourceAndConverter<?>[] sacs, double slicingAxisPosition, MultiSlicePositioner mp) {
+    protected SliceSources(SourceAndConverter<?>[] sacs, double slicingAxisPosition, MultiSlicePositioner mp, double thicknessCorrection, double zShiftCorrection) {
+
+        this.zThicknessCorrection = thicknessCorrection;
+        this.zShiftCorrection = zShiftCorrection;
 
         nChannels = sacs.length;
 
@@ -162,6 +169,37 @@ public class SliceSources {
         guiState.positionChanged();
     }
 
+    public void setSliceThickness(double sizeInMm) {
+        // adjustement based on the first channel (indexed 0) of the pretransformed image
+        SourceAndConverter sourceUsedForInitialMeasurement = registered_sacs_sequence.get(1).sacs[0]; // 0 = center 1 = pretransform -> the one to take
+
+        // this is more tricky than it appears ...
+        // Let's compute the position in real space of the extreme opposite corners
+
+        long[] dimensions = new long[3];
+        sourceUsedForInitialMeasurement.getSpimSource().getSource(0,0).dimensions(dimensions);
+
+        RealPoint pt1 = new RealPoint(3);
+        RealPoint pt2 = new RealPoint(3);
+        pt2.setPosition(dimensions);
+
+        AffineTransform3D at3D = new AffineTransform3D();
+        sourceUsedForInitialMeasurement.getSpimSource().getSourceTransform(0,0,at3D);
+
+        at3D.apply(pt1,pt1);
+        at3D.apply(pt2,pt2);
+
+        double currentZSliceOccupancy = Math.abs(pt1.getDoublePosition(2)-pt2.getDoublePosition(2));
+
+        if (currentZSliceOccupancy == 0) {
+            System.err.println("Error : slice thickness is null! Cannot set slice thickness");
+            return;
+        }
+        zThicknessCorrection = sizeInMm/currentZSliceOccupancy;
+
+        updateZPosition();
+    }
+
     public SourceAndConverter<?>[] getOriginalSources() {
         return original_sacs;
     }
@@ -190,6 +228,7 @@ public class SliceSources {
 
     private void updateZPosition() {
         AffineTransform3D zShiftAffineTransform = new AffineTransform3D();
+        zShiftAffineTransform.scale(1,1,zThicknessCorrection);
         zShiftAffineTransform.translate(0, 0, slicingAxisPosition);
         zPositioner.setAffineTransform(zShiftAffineTransform); // Moves the registered slices to the correct position
     }
