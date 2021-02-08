@@ -1,0 +1,23 @@
+[
+  "BDV - Set Number Of Timepoints",
+  "BDV - Show Sources (new Bdv window)",
+  "BDV - Screenshot",
+  "PopupLine",
+  "BDV - Remove Sources From BDV",
+  "Set Sources Color",
+  "Set Sources Brightness",
+  "Make Sources Invisible",
+  "Set Sources Projection Mode",
+  "PopupLine",
+  "Create New Source (Set LUT)",
+  "PopupLine",
+  "Manual Sources Transformation",
+  "Basic Transformation",
+  "Make Global Source Group",
+  "PopupLine",
+  "Inspect Sources",
+  "PopupLine",
+  "Add Metadata To Sources",
+  "PopupLine",
+  "Export Sources to XML/HDF5 Spimdataset"
+]

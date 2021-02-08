@@ -251,7 +251,7 @@ public class SliceSources {
         }
     }
 
-    public synchronized void deSelect() {
+    public void deSelect() {
         if (this.isSelected) {
             this.isSelected = false;
             guiState.deselect();
@@ -840,14 +840,6 @@ public class SliceSources {
 
     public int getAdaptedMipMapLevel(double pxSizeInMm) {
         return SourceAndConverterHelper.bestLevel(registered_sacs[0],0,pxSizeInMm);
-    }
-
-    public void appendTiltCorrection() {
-        // TODO
-    }
-
-    public void removeTiltCorrection() {
-        // TODO
     }
 
     public static class RegistrationAndSources {

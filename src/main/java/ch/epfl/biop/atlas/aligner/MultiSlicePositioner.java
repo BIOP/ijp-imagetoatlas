@@ -346,6 +346,8 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, RegistrationElastixSplineRemoteCommand.class, hierarchyLevelsSkipped,"mp", this);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, RegistrationBigWarpCommand.class, hierarchyLevelsSkipped,"mp", this);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, EditLastRegistrationCommand.class, hierarchyLevelsSkipped,"mp", this);
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Align>Remove Last Registration",0, this::removeLastRegistration );
+
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportRegionsToFileCommand.class, hierarchyLevelsSkipped,"mp", this);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportRegionsToRoiManagerCommand.class, hierarchyLevelsSkipped,"mp", this);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportRegionsToQuPathCommand.class, hierarchyLevelsSkipped,"mp", this);
@@ -353,8 +355,6 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportSlicesToBDV.class, hierarchyLevelsSkipped,"mp", this);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, RotateSourcesCommand.class, hierarchyLevelsSkipped,"mp", this);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, EditSliceThicknessCommand.class, hierarchyLevelsSkipped,"mp", this);
-
-        // TODO BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Registration>Remove Last Registration",0,() -> );
 
         AtlasDisplayPanel adp = new AtlasDisplayPanel(this);
         // Hide useless channels on startup -
@@ -1235,6 +1235,10 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         }
     }
 
+    public AffineTransform3D getAffineTransformFormAlignerToAtlas() {
+        return reslicedAtlas.getSlicingTransformToAtlas();
+    }
+
     /**
      * TransferHandler class :
      * Controls drag and drop actions in the multislice positioner
@@ -1538,6 +1542,21 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                     new EditLastRegistration(this, slice).runRequest();
                 }
             }
+        }
+    }
+
+    public void removeLastRegistration() {
+        if (getSelectedSources().size()==0) {
+            warningMessageForUser.accept("No selected slice", "Please select the slice where you want to remove the registration");
+            log.accept("Remove registration ignored : no slice selected");
+        } else {
+            new MarkActionSequenceBatch(this).runRequest();
+            for (SliceSources slice : slices) {
+                if (slice.isSelected()) {
+                    new DeleteLastRegistration(this, slice).runRequest();
+                }
+            }
+            new MarkActionSequenceBatch(this).runRequest();
         }
     }
 

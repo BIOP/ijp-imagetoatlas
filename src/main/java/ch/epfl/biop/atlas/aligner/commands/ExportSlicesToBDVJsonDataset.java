@@ -3,12 +3,14 @@ package ch.epfl.biop.atlas.aligner.commands;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
+import net.imglib2.realtransform.AffineTransform3D;
 import org.scijava.Context;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
 import sc.fiji.bdvpg.services.SourceAndConverterServiceSaver;
+import sc.fiji.bdvpg.sourceandconverter.transform.SourceAffineTransformer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,16 +46,17 @@ public class ExportSlicesToBDVJsonDataset implements Command {
         if (slices.size()==0) {
             mp.errorMessageForUser.accept("No slice selected", "You did not select any slice to save");
         } else {
-            slices.forEach(slice -> slice.appendTiltCorrection());
+            AffineTransform3D at3D = mp.getAffineTransformFormAlignerToAtlas();
+            SourceAffineTransformer sat = new SourceAffineTransformer(null, at3D);
             slices.forEach(slice -> {
                 for (SourceAndConverter sac : slice.getRegisteredSources()) {
-                    sac_service.register(sac);
-                    sac_service.setMetadata(sac, "ABBA", tag);
-                    sacs.add(sac);
+                    SourceAndConverter source = sat.apply(sac);
+                    sac_service.register(source);
+                    sac_service.setMetadata(source, "ABBA", tag);
+                    sacs.add(source);
                 }
             });
             new SourceAndConverterServiceSaver(datasetFile, ctx, sacs).run();
-            slices.forEach(slice -> slice.removeTiltCorrection());
 
             mp.log.accept("Saved!");
         }

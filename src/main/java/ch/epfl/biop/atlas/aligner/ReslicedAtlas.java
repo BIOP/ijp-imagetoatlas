@@ -42,6 +42,8 @@ public class ReslicedAtlas implements RealInterval {
 
     private double cX, cY, cZ;
 
+    private double cXinSlicingRef, cYinSlicingRef, cZinSlicingRef;
+
     List<Runnable> listeners = new ArrayList<>();
 
     public ReslicedAtlas(BiopAtlas ba) {
@@ -163,9 +165,14 @@ public class ReslicedAtlas implements RealInterval {
         minXAxis = cX-dX*1.15;
         minYAxis = cY-dY*1.15;
 
+        cXinSlicingRef = cX;
+        cYinSlicingRef = cY;
+        cZinSlicingRef = cZ;
+
         RealPoint realCenter = new RealPoint(cX, cY, cZ);
 
         slicingTransfom.inverse().apply(realCenter, realCenter);
+
         cX = realCenter.getDoublePosition(0);
         cY = realCenter.getDoublePosition(1);
         cZ = realCenter.getDoublePosition(2);
@@ -252,7 +259,7 @@ public class ReslicedAtlas implements RealInterval {
         }
 
         nonExtendedSlicedSources = nonExtendedAffineTransform.getTransformedImageMovingToFixed(tempNonExtendedSlicedSources);
-
+        //slicingUpdate();
     }
 
     /**
@@ -273,7 +280,7 @@ public class ReslicedAtlas implements RealInterval {
         // [notShifted].[nx/2, nY/2, nZ/2, 1] + TR.[nx/2, nY/2, nZ/2, 1] = [cx, cy, cz]
         // [TRX, TRY, TRZ] = [cx, cy, cz] - [notShifted].[nx/2, nY/2, nZ/2, 1]
 
-        RealPoint pt = new RealPoint(nX/2, nY/2, nZ/2);
+        RealPoint pt = new RealPoint(nX/2.0, nY/2.0, nZ/2.0);
         //pt.setPosition(new double[]{cx, cy, cz});
 
         RealPoint ptRealSpace = new RealPoint(3);
@@ -283,7 +290,6 @@ public class ReslicedAtlas implements RealInterval {
         slicingTransfom.set(cx-ptRealSpace.getDoublePosition(0), 0,3);
         slicingTransfom.set(cy-ptRealSpace.getDoublePosition(1), 1,3);
         slicingTransfom.set(cz-ptRealSpace.getDoublePosition(2), 2,3);
-
 
     }
 
@@ -335,6 +341,8 @@ public class ReslicedAtlas implements RealInterval {
     public long getStep() {
         return zStep;
     }
+
+    AffineTransform3D atlasToSlicingTransform = new AffineTransform3D();
 
     void slicingUpdate() {
         // Pfou I don't understand anything anymore ...
@@ -441,7 +449,8 @@ public class ReslicedAtlas implements RealInterval {
 
         at3d = at3d.preConcatenate(centerTr);
 
-        nonExtendedAffineTransform.setAffineTransform(atToInvert.inverse().preConcatenate(at3d));
+        atlasToSlicingTransform = atToInvert.inverse().preConcatenate(at3d);
+        nonExtendedAffineTransform.setAffineTransform(atlasToSlicingTransform);
     }
 
     /**
@@ -481,4 +490,9 @@ public class ReslicedAtlas implements RealInterval {
     public int numDimensions() {
         return 3;
     }
+
+    public AffineTransform3D getSlicingTransformToAtlas() {
+        return atlasToSlicingTransform.inverse().copy();
+    }
+
 }
