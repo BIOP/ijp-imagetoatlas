@@ -7,18 +7,18 @@ import ch.epfl.biop.sourceandconverter.EmptyMultiResolutionSourceAndConverterCre
 import ch.epfl.biop.registration.sourceandconverter.affine.AffineTransformedSourceWrapperRegistration;
 import ch.epfl.biop.sourceandconverter.transform.SourceMosaicZSlicer;
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.RealInterval;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.util.LinAlgHelpers;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
-import sc.fiji.bdvpg.sourceandconverter.importer.EmptySourceAndConverterCreator;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceAffineTransformer;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceResampler;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ReslicedAtlas {
+public class ReslicedAtlas implements RealInterval {
 
     final public BiopAtlas ba;
 
@@ -37,8 +37,8 @@ public class ReslicedAtlas {
     AffineTransformedSourceWrapperRegistration nonExtendedAffineTransform = new AffineTransformedSourceWrapperRegistration();
 
     private volatile int zStep = 1;
-    private double rx;
-    private double ry;
+    private double rotx;
+    private double roty;
 
     private double cX, cY, cZ;
 
@@ -66,6 +66,15 @@ public class ReslicedAtlas {
         computeReslicedSources();
     }
 
+    double minZAxis = Double.MAX_VALUE;
+    double maxZAxis = -Double.MAX_VALUE;
+
+    double minXAxis = Double.MAX_VALUE;
+    double maxXAxis = -Double.MAX_VALUE;
+
+    double minYAxis = Double.MAX_VALUE;
+    double maxYAxis = -Double.MAX_VALUE;
+
     void computeReslicedSources() {
         if ((slicingTransfom==null)||(slicingResolution<=0)) {
             System.err.println("No slicing transform or slicing resolution specified");
@@ -84,14 +93,14 @@ public class ReslicedAtlas {
 
         RandomAccessibleInterval rai = sacForBoundsTesting.getSpimSource().getSource(0,0);
 
-        double minZAxis = Double.MAX_VALUE;
-        double maxZAxis = -Double.MAX_VALUE;
+        minZAxis = Double.MAX_VALUE;
+        maxZAxis = -Double.MAX_VALUE;
 
-        double minXAxis = Double.MAX_VALUE;
-        double maxXAxis = -Double.MAX_VALUE;
+        minXAxis = Double.MAX_VALUE;
+        maxXAxis = -Double.MAX_VALUE;
 
-        double minYAxis = Double.MAX_VALUE;
-        double maxYAxis = -Double.MAX_VALUE;
+        minYAxis = Double.MAX_VALUE;
+        maxYAxis = -Double.MAX_VALUE;
 
         // Project all corners on slicing coordinate system and find min / max
         for (int x=0;x<2;x++)
@@ -176,11 +185,7 @@ public class ReslicedAtlas {
         // ------------------- NOW COMPUTES SOURCEANDCONVERTERS
         // 0 - slicing model : empty source but properly defined in space and resolution
         AffineTransform3D m = new AffineTransform3D();
-        /*SourceAndConverter nonWrappedSlicingModel = new EmptySourceAndConverterCreator("SlicingModel", m,
-                nPixX,
-                nPixY,
-                nPixZ
-        ).get();*/
+
         SourceAndConverter nonWrappedSlicingModel = new EmptyMultiResolutionSourceAndConverterCreator("SlicingModel", m,
                 nPixX,
                 nPixY,
@@ -191,6 +196,7 @@ public class ReslicedAtlas {
         if (slicingModel!=null) {
             SourceAndConverterServices.getSourceAndConverterService().remove(slicingModel); // Hmm maybe I should document what I do...
         }
+
         // Wrapped as TransformedSource to adjust slicing
         slicingModel = new SourceAffineTransformer(nonWrappedSlicingModel, slicingTransfom).getSourceOut();
 
@@ -302,25 +308,25 @@ public class ReslicedAtlas {
 
     public void setRotateX(double rx) {
         if (!lock)
-        if (rx!=this.rx) {
-            this.rx = rx;
+        if (rx!=this.rotx) {
+            this.rotx = rx;
             slicingUpdate();
             listeners.forEach(r -> r.run());
         }
     }
 
     public double getRotateX() {
-        return rx;
+        return rotx;
     }
 
     public double getRotateY() {
-        return ry;
+        return roty;
     }
 
     public void setRotateY(double ry) {
         if (!lock)
-        if (ry!=this.ry) {
-            this.ry = ry;
+        if (ry!=this.roty) {
+            this.roty = ry;
             slicingUpdate();
             listeners.forEach(r -> r.run());
         }
@@ -366,19 +372,19 @@ public class ReslicedAtlas {
         double normRx = Math.sqrt(m00*m00+m01*m01+m02*m02);
         m00/=normRx;m01/=normRx;m02/=normRx;
 
-        qx[0] = Math.cos(rx/2.0);
-        qx[1] = Math.sin(rx/2.0)*m00;
-        qx[2] = Math.sin(rx/2.0)*m01;
-        qx[3] = Math.sin(rx/2.0)*m02;
+        qx[0] = Math.cos(rotx /2.0);
+        qx[1] = Math.sin(rotx /2.0)*m00;
+        qx[2] = Math.sin(rotx /2.0)*m01;
+        qx[3] = Math.sin(rotx /2.0)*m02;
 
         double[] qy = new double[4];
         double normRy = Math.sqrt(m10*m10+m11*m11+m12*m12);
         m10/=normRy;m11/=normRy;m12/=normRy;
 
-        qy[0] = Math.cos(ry/2.0);
-        qy[1] = Math.sin(ry/2.0)*m10;
-        qy[2] = Math.sin(ry/2.0)*m11;
-        qy[3] = Math.sin(ry/2.0)*m12;
+        qy[0] = Math.cos(roty /2.0);
+        qy[1] = Math.sin(roty /2.0)*m10;
+        qy[2] = Math.sin(roty /2.0)*m11;
+        qy[3] = Math.sin(roty /2.0)*m12;
 
         double[] qXY = new double[4];
 
@@ -388,7 +394,7 @@ public class ReslicedAtlas {
 
         double [][] m = new double[3][3];
 
-        if ((rx!=0)||(ry!=0)) {
+        if ((rotx !=0)||(roty !=0)) {
             LinAlgHelpers.quaternionToR(qXY, m);
 
             rotMatrix.set(m[0][0], m[0][1], m[0][2], 0,
@@ -451,4 +457,28 @@ public class ReslicedAtlas {
         return Math.sqrt(f0 * f0 + f1 * f1 + f2 * f2);
     }
 
+    @Override
+    public double realMin(int i) {
+        switch (i) {
+            case 0:return minXAxis-(maxXAxis+minXAxis)/2.0;
+            case 1:return minYAxis-(maxYAxis+minYAxis)/2.0;
+            case 2:return minZAxis-(maxZAxis+minZAxis)/2.0;
+            default:return -Double.MAX_VALUE;
+        }
+    }
+
+    @Override
+    public double realMax(int i) {
+        switch (i) {
+            case 0:return maxXAxis-(maxXAxis+minXAxis)/2.0;
+            case 1:return maxYAxis-(maxYAxis+minYAxis)/2.0;
+            case 2:return maxZAxis-(maxZAxis+minZAxis)/2.0;
+            default:return Double.MAX_VALUE;
+        }
+    }
+
+    @Override
+    public int numDimensions() {
+        return 3;
+    }
 }

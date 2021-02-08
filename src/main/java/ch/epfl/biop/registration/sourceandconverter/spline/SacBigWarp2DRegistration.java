@@ -2,6 +2,7 @@ package ch.epfl.biop.registration.sourceandconverter.spline;
 
 import bdv.tools.brightness.ConverterSetup;
 import bdv.util.BdvHandle;
+import bdv.util.BoundedRealTransform;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import ch.epfl.biop.registration.Registration;
@@ -118,6 +119,18 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
                 rt = ((WrappedIterativeInvertibleRealTransform)rt).getTransform();
             }
 
+            if (rt instanceof BoundedRealTransform) {
+                rt = ((BoundedRealTransform)rt).getTransform();
+
+                if (rt instanceof Wrapped2DTransformAs3D) {
+                    rt = ((Wrapped2DTransformAs3D)rt).transform;
+                }
+
+                if (rt instanceof WrappedIterativeInvertibleRealTransform) {
+                    rt = ((WrappedIterativeInvertibleRealTransform)rt).getTransform();
+                }
+            }
+
             if (!(rt instanceof ThinplateSplineTransform)) {
                 System.err.println("Cannot edit the transform : it's not of class thinplatesplinetransform");
             }
@@ -144,14 +157,11 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
                 }
                 toFile+="\n";
             }
-            //System.out.println(toFile);
 
             FileWriter writer = new FileWriter(file);
             writer.write(toFile);
             writer.flush();
             writer.close();
-
-            //System.out.println(file.getAbsolutePath());
 
             return file.getAbsolutePath();
         } catch (IOException e) {

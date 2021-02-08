@@ -2,13 +2,15 @@ package ch.epfl.biop.registration.sourceandconverter.spline;
 
 import bdv.tools.brightness.ConverterSetup;
 import bdv.util.BdvHandle;
+import bdv.util.BoundedRealTransform;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import ch.epfl.biop.registration.sourceandconverter.SourceAndConverterRegistration;
-import ch.epfl.biop.scijava.command.Elastix2DAffineRegisterCommand;
 import ch.epfl.biop.scijava.command.Elastix2DSplineRegisterCommand;
 import ij.gui.WaitForUserDialog;
+import net.imglib2.FinalRealInterval;
 import net.imglib2.RealPoint;
+import net.imglib2.realtransform.InvertibleRealTransform;
 import net.imglib2.realtransform.RealTransform;
 import org.scijava.Context;
 import org.scijava.command.Command;
@@ -202,4 +204,5 @@ public class Elastix2DSplineRegistration extends SourceAndConverterRegistration 
     public void setTimePoint(int timePoint) {
         // TODO
     }
+
 }

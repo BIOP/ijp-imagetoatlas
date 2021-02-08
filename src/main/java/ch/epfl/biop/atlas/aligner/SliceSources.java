@@ -1,5 +1,6 @@
 package ch.epfl.biop.atlas.aligner;
 
+import bdv.util.BoundedRealTransform;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.commands.ConstructROIsFromImgLabel;
 import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
@@ -7,6 +8,7 @@ import ch.epfl.biop.java.utilities.roi.types.CompositeFloatPoly;
 import ch.epfl.biop.java.utilities.roi.types.IJShapeRoiArray;
 import ch.epfl.biop.java.utilities.roi.types.ImageJRoisFile;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
+import ch.epfl.biop.registration.sourceandconverter.spline.Elastix2DSplineRegistration;
 import ch.epfl.biop.spimdata.qupath.QuPathEntryEntity;
 import ch.epfl.biop.registration.Registration;
 import ch.epfl.biop.registration.sourceandconverter.affine.AffineTransformedSourceWrapperRegistration;
@@ -17,8 +19,10 @@ import ij.gui.Roi;
 import ij.plugin.frame.RoiManager;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import mpicbg.spim.data.generic.sequence.BasicViewSetup;
+import net.imglib2.RealInterval;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
+import net.imglib2.realtransform.InvertibleRealTransform;
 import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
 import sc.fiji.bdvpg.scijava.services.ui.SourceAndConverterInspector;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
@@ -135,6 +139,8 @@ public class SliceSources {
         updateZPosition();
         guiState.positionChanged();
 
+        computeZThickness();
+
         try {
             name = SourceAndConverterHelper.getRootSource(sacs[0].getSpimSource(), new AffineTransform3D()).getName();
         } catch(Exception e) {
@@ -170,6 +176,10 @@ public class SliceSources {
     }
 
     public void setSliceThickness(double sizeInMm) {
+
+        RealPoint pt1 = new RealPoint(3);
+        RealPoint pt2 = new RealPoint(3);
+
         // adjustement based on the first channel (indexed 0) of the pretransformed image
         SourceAndConverter sourceUsedForInitialMeasurement = registered_sacs_sequence.get(1).sacs[0]; // 0 = center 1 = pretransform -> the one to take
 
@@ -179,8 +189,6 @@ public class SliceSources {
         long[] dimensions = new long[3];
         sourceUsedForInitialMeasurement.getSpimSource().getSource(0,0).dimensions(dimensions);
 
-        RealPoint pt1 = new RealPoint(3);
-        RealPoint pt2 = new RealPoint(3);
         pt2.setPosition(dimensions);
 
         AffineTransform3D at3D = new AffineTransform3D();
@@ -192,13 +200,45 @@ public class SliceSources {
         double currentZSliceOccupancy = Math.abs(pt1.getDoublePosition(2)-pt2.getDoublePosition(2));
 
         if (currentZSliceOccupancy == 0) {
-            System.err.println("Error : slice thickness is null! Cannot set slice thickness");
+            System.err.println("Error : slice thickness is 0! Cannot set slice thickness");
             return;
         }
-        zThicknessCorrection = sizeInMm/currentZSliceOccupancy;
 
+        zThicknessCorrection = sizeInMm/currentZSliceOccupancy;
+        computeZThickness();
         updateZPosition();
     }
+
+    double thicknessInMm;
+
+    private void computeZThickness() {
+
+        RealPoint pt1 = new RealPoint(3);
+        RealPoint pt2 = new RealPoint(3);
+
+        // adjustement based on the first channel (indexed 0) of the pretransformed image
+        SourceAndConverter sourceUsedForInitialMeasurement = registered_sacs_sequence.get(1).sacs[0]; // 0 = center 1 = pretransform -> the one to take
+
+        // this is more tricky than it appears ...
+        // Let's compute the position in real space of the extreme opposite corners
+
+        long[] dimensions = new long[3];
+        sourceUsedForInitialMeasurement.getSpimSource().getSource(0,0).dimensions(dimensions);
+
+        pt2.setPosition(dimensions);
+
+        AffineTransform3D at3D = new AffineTransform3D();
+        sourceUsedForInitialMeasurement.getSpimSource().getSourceTransform(0,0,at3D);
+
+        at3D.apply(pt1,pt1);
+        at3D.apply(pt2,pt2);
+
+        double currentZSliceOccupancy = Math.abs(pt1.getDoublePosition(2)-pt2.getDoublePosition(2));
+
+        thicknessInMm = zThicknessCorrection * currentZSliceOccupancy;
+
+    }
+
 
     public SourceAndConverter<?>[] getOriginalSources() {
         return original_sacs;
@@ -231,6 +271,7 @@ public class SliceSources {
         zShiftAffineTransform.scale(1,1,zThicknessCorrection);
         zShiftAffineTransform.translate(0, 0, slicingAxisPosition);
         zPositioner.setAffineTransform(zShiftAffineTransform); // Moves the registered slices to the correct position
+        si.updateBox();
     }
 
     protected void setIndex(int idx) {
@@ -299,6 +340,15 @@ public class SliceSources {
     }
 
     public void appendRegistration(Registration<SourceAndConverter<?>[]> reg) {
+
+        if (reg instanceof Elastix2DSplineRegistration) {
+            Elastix2DSplineRegistration sreg = (Elastix2DSplineRegistration) reg;
+            if (!(sreg.getRealTransform() instanceof BoundedRealTransform)) {
+                BoundedRealTransform brt = new BoundedRealTransform((InvertibleRealTransform) sreg.getRealTransform(), si);
+                si.updateBox();
+                sreg.setRealTransform(brt);
+            }
+        }
 
         registered_sacs = reg.getTransformedImageMovingToFixed(registered_sacs);
 
@@ -808,6 +858,40 @@ public class SliceSources {
         public RegistrationAndSources(Registration reg, SourceAndConverter[] sacs) {
             this.reg = reg;
             this.sacs = sacs;
+        }
+    }
+
+    SliceInterval si = new SliceInterval();
+
+    class SliceInterval implements RealInterval {
+
+        RealPoint ptMin = new RealPoint(3);
+        RealPoint ptMax = new RealPoint(3);
+
+        void updateBox() {
+            ptMin.setPosition(mp.reslicedAtlas.realMin(0),0);
+            ptMin.setPosition(mp.reslicedAtlas.realMin(1),1);
+            ptMin.setPosition(slicingAxisPosition-thicknessInMm/2.0, 2);
+
+            ptMax.setPosition(mp.reslicedAtlas.realMax(0),0);
+            ptMax.setPosition(mp.reslicedAtlas.realMax(1),1);
+            ptMax.setPosition(slicingAxisPosition+thicknessInMm/2.0, 2);
+        }
+
+        @Override
+        public double realMin(int i) {
+            // TODO : fix X and Y issues
+            return ptMin.getDoublePosition(i);
+        }
+
+        @Override
+        public double realMax(int i) {
+            return ptMax.getDoublePosition(i);
+        }
+
+        @Override
+        public int numDimensions() {
+            return 3;
         }
     }
 }

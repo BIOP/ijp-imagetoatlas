@@ -3,7 +3,7 @@ import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 
 /**
  *
- * @param <T>
+ * @param <T> Type of the image to register ( ImagePlus / SourceAndConverter, what else ? )
  */
 
 public interface Registration<T> {
