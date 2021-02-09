@@ -457,7 +457,7 @@ public class ReslicedAtlas implements RealInterval {
      * Returns the norm of an axis after an affinetransform is applied
      * @param axis
      * @param t
-     * @return
+     * @return the norm of an axis after an affinetransform is applied
      */
     static public double getNormTransform(int axis, AffineTransform3D t) {
         double f0 = t.get(0,axis);
