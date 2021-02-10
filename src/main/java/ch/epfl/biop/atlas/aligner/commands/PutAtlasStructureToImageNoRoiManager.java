@@ -2,12 +2,11 @@ package ch.epfl.biop.atlas.aligner.commands;
 
 import ch.epfl.biop.atlas.BiopAtlas;
 import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
+import ch.epfl.biop.java.utilities.roi.types.CompositeFloatPoly;
 import ch.epfl.biop.java.utilities.roi.types.IJShapeRoiArray;
 import ij.gui.Roi;
-import ij.plugin.frame.RoiManager;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
-import org.scijava.plugin.Plugin;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -75,18 +74,18 @@ public class PutAtlasStructureToImageNoRoiManager implements Command {
         
         // Duplicate ROIs (of interest for our purpose) into RoiManager with user specified naming convention
         rois.rois.stream()
-                .map (roi -> roi.getRoi())
+                .map (CompositeFloatPoly::getRoi)
         .filter(roi -> isInteger(roi.getName()))
         .filter(roi -> ids.contains(Integer.valueOf(roi.getName())))
         .forEach(roi -> {
-            String name = atlas.ontology.getProperties(Integer.valueOf(roi.getName())).get(namingChoice);
+            String name = atlas.ontology.getProperties(Integer.parseInt(roi.getName())).get(namingChoice);
             roi.setName(name);
             listOut.add(roi);
         });
 
         if (namingChoice.equals("Roi Manager Index (no suffix)")) {
             for (int i=0;i<listOut.size();i++) {
-                listOut.get(i).setName(roiPrefix+Integer.toString(i));
+                listOut.get(i).setName(roiPrefix + i);
             }
         }
 

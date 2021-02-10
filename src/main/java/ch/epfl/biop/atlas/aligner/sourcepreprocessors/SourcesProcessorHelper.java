@@ -11,8 +11,8 @@ public class SourcesProcessorHelper {
      * out = f[0](f[1](f[2]( in )))
      * other notation :
      * out = f[0] o f[1] o f[2] (in)
-     * @param fs
-     * @return
+     * @param fs list of functions for the channel processing
+     * @return the concatenated functions
      */
     public static SourcesProcessor compose(SourcesProcessor... fs) {
         SourcesProcessor sp = fs[fs.length-1];

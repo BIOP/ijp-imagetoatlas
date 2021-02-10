@@ -20,8 +20,7 @@ public class SourcesResampler implements SourcesProcessor {
         SourceResampler resampler = new SourceResampler(null,
                 model, false, false, false
         );
-        return Arrays.asList(sourceAndConverters)
-                .stream()
+        return Arrays.stream(sourceAndConverters)
                 .map(resampler)
                 .collect(Collectors.toList())
                 .toArray(new SourceAndConverter[sourceAndConverters.length]);

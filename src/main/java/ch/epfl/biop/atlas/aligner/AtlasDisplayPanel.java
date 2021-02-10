@@ -12,9 +12,8 @@ import javax.swing.table.AbstractTableModel;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
-public class AtlasDisplayPanel implements MultiSlicePositioner.ModeListener {//}, ListSelectionListener {
+public class AtlasDisplayPanel implements MultiSlicePositioner.ModeListener {
 
     final JPanel paneDisplay;
 
@@ -23,9 +22,6 @@ public class AtlasDisplayPanel implements MultiSlicePositioner.ModeListener {//}
     final JTable tableAtlasDisplay;
 
     final AtlasDisplayTableModel model;
-
-    Consumer<String> log = (str) -> System.out.println(AtlasDisplayPanel.class+":"+str);
-
 
     boolean globalFlagVisible = true;
 
@@ -42,7 +38,7 @@ public class AtlasDisplayPanel implements MultiSlicePositioner.ModeListener {//}
         nChannels = ra.nonExtendedSlicedSources.length;
         globalFlagPerChannel = new ArrayList<>(nChannels);
         for (int i=0;i<nChannels;i++) {
-            globalFlagPerChannel.add(new Boolean(true));
+            globalFlagPerChannel.add(Boolean.TRUE);
         }
         paneDisplay = new JPanel(new BorderLayout());
 
@@ -90,7 +86,7 @@ public class AtlasDisplayPanel implements MultiSlicePositioner.ModeListener {//}
                         if (nChannels>iChannel) {
                             sacs[0] = getSources()[iChannel];//sortedSlices.get(row).getGUIState().getCurrentSources()[iChannel];
 
-                            Runnable update = () -> {model.fireTableCellUpdated(row, col);};
+                            Runnable update = () -> model.fireTableCellUpdated(row, col);
 
                             // ---- Just to have the correct parameters displayed (dirty hack)
                             Displaysettings ds_in = new Displaysettings(-1);
@@ -167,7 +163,6 @@ public class AtlasDisplayPanel implements MultiSlicePositioner.ModeListener {//}
                     }
                     break;
                 default:
-                    ;
             }
         }
 
@@ -208,9 +203,9 @@ public class AtlasDisplayPanel implements MultiSlicePositioner.ModeListener {//}
             //SliceSources slice =  sortedSlices.get(rowIndex); // Not efficient
             if ((columnIndex == 0)) {
                 if (rowIndex == currentIndex) {
-                    return "["+new Integer(rowIndex).toString()+"]";
+                    return "["+ rowIndex +"]";
                 }
-                return " "+new Integer(rowIndex).toString();
+                return " "+ rowIndex;
             } else if ((columnIndex) == 1) {
                 return globalFlagVisible;
             } else if (columnIndex%2 == 0) {
@@ -218,7 +213,7 @@ public class AtlasDisplayPanel implements MultiSlicePositioner.ModeListener {//}
                 if (nChannels>iChannel) {
                     return globalFlagPerChannel.get(iChannel);
                 } else {
-                    return new Boolean(false);
+                    return Boolean.FALSE;
                 }
             } else {
                 int iChannel = (columnIndex-3)/2;

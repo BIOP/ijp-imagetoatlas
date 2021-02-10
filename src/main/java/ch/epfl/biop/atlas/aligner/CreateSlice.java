@@ -1,7 +1,6 @@
 package ch.epfl.biop.atlas.aligner;
 
 import bdv.viewer.SourceAndConverter;
-import sc.fiji.bdvpg.services.SourceAndConverterServices;
 
 import java.awt.*;
 import java.text.DecimalFormat;
@@ -44,6 +43,7 @@ public class CreateSlice extends CancelableAction {
                     for (SourceAndConverter test : slice.original_sacs) {
                         if (test.equals(sac)) {
                             sacAlreadyPresent = true;
+                            break;
                         }
                     }
                 }
@@ -75,7 +75,7 @@ public class CreateSlice extends CancelableAction {
             }
 
             if (sliceSource == null) {// for proper redo function
-                sliceSource = new SliceSources(sacs.toArray(new SourceAndConverter[sacs.size()]),
+                sliceSource = new SliceSources(sacs.toArray(new SourceAndConverter[0]),
                         slicingAxisPosition, mp, zSliceThicknessCorrection, zSliceShiftCorrection);
             }
 

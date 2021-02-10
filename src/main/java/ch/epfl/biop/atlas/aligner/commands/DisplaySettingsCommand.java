@@ -45,11 +45,11 @@ public class DisplaySettingsCommand extends DynamicCommand implements
 
         final MutableModuleItem<Double> minItem = //
                 getInfo().getMutableInput("min", Double.class);
-        minItem.setValue(this, new Double(IniValue.min));
+        minItem.setValue(this, IniValue.min);
 
         final MutableModuleItem<Double> maxItem = //
                 getInfo().getMutableInput("max", Double.class);
-        maxItem.setValue(this, new Double(IniValue.max));
+        maxItem.setValue(this, IniValue.max);
     }
 
     @Override

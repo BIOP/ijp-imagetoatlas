@@ -20,14 +20,14 @@ public class SourcesChannelsSelect implements SourcesProcessor {
 
     public SourcesChannelsSelect(int... channels_indices) {
         this.channels_indices = new ArrayList<>(channels_indices.length);
-        for (int i=0;i<channels_indices.length;i++) {
-            this.channels_indices.add(new Integer(channels_indices[i]));
+        for (int channels_index : channels_indices) {
+            this.channels_indices.add(channels_index);
         }
     }
 
     public SourcesChannelsSelect(int channel) {
         this.channels_indices = new ArrayList<>(1);
-        this.channels_indices.add(new Integer(channel));
+        this.channels_indices.add(channel);
     }
 
     @Override

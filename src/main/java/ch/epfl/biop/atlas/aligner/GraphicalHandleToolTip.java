@@ -1,8 +1,5 @@
 package ch.epfl.biop.atlas.aligner;
 
-import org.scijava.ui.behaviour.util.Behaviours;
-import org.scijava.ui.behaviour.util.TriggerBehaviourBindings;
-
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.function.Supplier;
@@ -100,23 +97,6 @@ public class GraphicalHandleToolTip extends GraphicalHandle implements Graphical
     @Override
     public synchronized void mouseMoved( final MouseEvent e )
     {
-        /*final int x = e.getX();
-        final int y = e.getY();
-
-        if (isPresentAt(x,y)) {
-            if ((!mouseAbove)&&(!isDisabled)) {
-                mouseAbove = true;
-                ghls.forEach(ghl -> ghl.hover_in(this));
-                //behaviours.install(bindings, nameMap);
-            }
-        } else {
-            if ((mouseAbove)&&(!isDisabled)) {
-                mouseAbove = false;
-                ghls.forEach(ghl -> ghl.hover_out(this));
-                //bindings.removeBehaviourMap(nameMap);
-                //bindings.removeInputTriggerMap(nameMap);
-            }
-        }*/
 
     }
 }

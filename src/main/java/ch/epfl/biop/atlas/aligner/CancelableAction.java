@@ -21,27 +21,25 @@ public abstract class CancelableAction {
 
     final MultiSlicePositioner mp;
 
-    public static Consumer<String> errlog = (str) ->  System.err.println(str);
+    public static Consumer<String> errlog = System.err::println;
 
     /**
      * Provides the reference to the MultiSlicePositioner
-     * @param mp
+     * @param mp multipositioner input
      */
     public CancelableAction(MultiSlicePositioner mp) {
         this.mp = mp;
     }
 
     /**
-     * Returns the SliceSources involved in this action
-     * @return
+     *
+     * @return the SliceSources involved in this action
      */
     abstract public SliceSources getSliceSources();
 
     final public void runRequest() {
         if ((getSliceSources()!=null)) {
-            getSliceSources().enqueueRunAction(this, () -> {
-                mp.mso.updateInfoPanel(getSliceSources());
-            } );
+            getSliceSources().enqueueRunAction(this, () -> mp.mso.updateInfoPanel(getSliceSources()) );
         } else {
             // Not asynchronous
             run();

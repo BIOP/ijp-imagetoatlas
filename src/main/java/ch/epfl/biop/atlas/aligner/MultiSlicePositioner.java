@@ -158,15 +158,11 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         getBdvh().getViewerPanel().showMessage(message);
     };
 
-    public BiConsumer<String, String> errorMessageForUser = (title, message) -> {
-        JOptionPane.showMessageDialog(new JFrame(), message, title,
-                JOptionPane.ERROR_MESSAGE);
-    };
+    public BiConsumer<String, String> errorMessageForUser = (title, message) ->
+            JOptionPane.showMessageDialog(new JFrame(), message, title, JOptionPane.ERROR_MESSAGE);
 
-    public BiConsumer<String, String> warningMessageForUser = (title, message) -> {
-        JOptionPane.showMessageDialog(new JFrame(), message, title,
-                JOptionPane.WARNING_MESSAGE);
-    };
+    public BiConsumer<String, String> warningMessageForUser = (title, message) ->
+            JOptionPane.showMessageDialog(new JFrame(), message, title, JOptionPane.WARNING_MESSAGE);
 
     public Consumer<String> errlog = (message) -> {
         System.err.println("Multipositioner : "+message);
@@ -356,11 +352,11 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
         AtlasDisplayPanel adp = new AtlasDisplayPanel(this);
         // Hide useless channels on startup -
-        adp.getModel().setValueAt(new Boolean(false),0,8); // X Coord
-        adp.getModel().setValueAt(new Boolean(false),0,10);// Y Coord
-        adp.getModel().setValueAt(new Boolean(false),0,12);// Z Coord
-        adp.getModel().setValueAt(new Boolean(false),0,14);// Left Right
-        adp.getModel().setValueAt(new Boolean(false),0,16);// Label ?
+        adp.getModel().setValueAt(Boolean.FALSE,0,8); // X Coord
+        adp.getModel().setValueAt(Boolean.FALSE,0,10);// Y Coord
+        adp.getModel().setValueAt(Boolean.FALSE,0,12);// Z Coord
+        adp.getModel().setValueAt(Boolean.FALSE,0,14);// Left Right
+        adp.getModel().setValueAt(Boolean.FALSE,0,16);// Label ?
 
         bdvh.getCardPanel().addCard("Atlas Display Options", adp.getPanel(), true);
 
@@ -1051,13 +1047,13 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
             if (leftRight == 0) {
                 coordinates += "(L)";
             }
-            String ontologyLocation = null;
+            StringBuilder ontologyLocation = null;
             if (labelValue!=0) {
-                ontologyLocation = biopAtlas.ontology.getProperties(labelValue).get("acronym");
+                ontologyLocation = new StringBuilder(biopAtlas.ontology.getProperties(labelValue).get("acronym"));
                 while (labelValue!=biopAtlas.ontology.getRootIndex()) {
                     labelValue = biopAtlas.ontology.getParent(labelValue);
                     if (labelValue!=biopAtlas.ontology.getRootIndex())
-                    ontologyLocation = ontologyLocation+"<"+biopAtlas.ontology.getProperties(labelValue).get("acronym");
+                    ontologyLocation.append("<").append(biopAtlas.ontology.getProperties(labelValue).get("acronym"));
                 }
 
             }
@@ -1066,7 +1062,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
             g.setColor(new Color(255, 255, 100, 250));
             Point mouseLocation = bdvh.getViewerPanel().getMousePosition();
             if ((ontologyLocation!=null)&&(mouseLocation!=null)) {
-                g.drawString(ontologyLocation,mouseLocation.x,mouseLocation.y);
+                g.drawString(ontologyLocation.toString(),mouseLocation.x,mouseLocation.y);
             }
             if ((mouseLocation!=null)&&(!coordinates.startsWith("[0.00;0.00;0.00]"))) {
                 g.drawString(coordinates, mouseLocation.x, mouseLocation.y - 20);
@@ -1483,8 +1479,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         List<SliceSources> sortedSelected = getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
         if (sortedSelected.size()>1) new MarkActionSequenceBatch(this).runRequest();
         double shift = sizePixX * (int) reslicedAtlas.getStep();
-        for (int idx = 0; idx < sortedSelected.size(); idx++) {
-            SliceSources slice = sortedSelected.get(idx);
+        for (SliceSources slice : sortedSelected) {
             moveSlice(slice, slice.getSlicingAxisPosition() + shift);
         }
         if (sortedSelected.size()>1) new MarkActionSequenceBatch(this).runRequest();
@@ -1497,8 +1492,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         List<SliceSources> sortedSelected = getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
         if (sortedSelected.size()>1) new MarkActionSequenceBatch(this).runRequest();
         double shift = sizePixX * (int) reslicedAtlas.getStep();
-        for (int idx = 0; idx < sortedSelected.size(); idx++) {
-            SliceSources slice = sortedSelected.get(idx);
+        for (SliceSources slice : sortedSelected) {
             moveSlice(slice, slice.getSlicingAxisPosition() - shift);
         }
         if (sortedSelected.size()>1) new MarkActionSequenceBatch(this).runRequest();

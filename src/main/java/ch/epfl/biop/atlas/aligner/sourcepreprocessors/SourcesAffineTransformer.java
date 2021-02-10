@@ -18,8 +18,7 @@ public class SourcesAffineTransformer implements SourcesProcessor {
 
     @Override
     public SourceAndConverter[] apply(SourceAndConverter[] sourceAndConverters) {
-        return Arrays.asList(sourceAndConverters)
-                .stream()
+        return Arrays.stream(sourceAndConverters)
                 .map(sac -> SourceTransformHelper.createNewTransformedSourceAndConverter(at3d, new SourceAndConverterAndTimeRange(sac, 0)))
                 .collect(Collectors.toList())
                 .toArray(new SourceAndConverter[sourceAndConverters.length]);

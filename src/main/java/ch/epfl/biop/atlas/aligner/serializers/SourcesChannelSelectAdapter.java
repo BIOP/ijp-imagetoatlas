@@ -1,13 +1,9 @@
 package ch.epfl.biop.atlas.aligner.serializers;
 
 import ch.epfl.biop.atlas.aligner.sourcepreprocessors.SourcesChannelsSelect;
-import ch.epfl.biop.registration.sourceandconverter.affine.Elastix2DAffineRegistration;
-import ch.epfl.biop.registration.sourceandconverter.spline.Elastix2DSplineRegistration;
 import com.google.gson.*;
-import net.imglib2.realtransform.AffineTransform3D;
 
 import java.lang.reflect.Type;
-import java.util.List;
 
 public class SourcesChannelSelectAdapter implements JsonSerializer<SourcesChannelsSelect>,
         JsonDeserializer<SourcesChannelsSelect> {

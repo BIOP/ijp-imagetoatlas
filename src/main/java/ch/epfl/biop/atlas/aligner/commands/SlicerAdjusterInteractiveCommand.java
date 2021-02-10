@@ -12,7 +12,7 @@ public class SlicerAdjusterInteractiveCommand extends InteractiveCommand {
     int zSamplingSteps = 10;
 
     @Parameter(label = "Lock XY angles")
-    Boolean lockAngles = new Boolean(false);
+    Boolean lockAngles = Boolean.FALSE;
 
     @Parameter(min = "-20", max = "+20", stepSize = "1", style = "slider", label = "half degrees (X)",
             callback = "changeRotate")

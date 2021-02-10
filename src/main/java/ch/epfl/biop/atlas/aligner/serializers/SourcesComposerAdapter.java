@@ -1,9 +1,7 @@
 package ch.epfl.biop.atlas.aligner.serializers;
 
-import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.sourcepreprocessors.SourcesProcessComposer;
 import ch.epfl.biop.atlas.aligner.sourcepreprocessors.SourcesProcessor;
-import ch.epfl.biop.atlas.aligner.sourcepreprocessors.SourcesResampler;
 import com.google.gson.*;
 
 import java.lang.reflect.Type;

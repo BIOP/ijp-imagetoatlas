@@ -1,7 +1,12 @@
 [
   "BDV - Set Number Of Timepoints",
   "BDV - Show Sources (new Bdv window)",
+  "Show Sources (split) (IJ1)",
   "BDV - Screenshot",
+  "PopupLine",
+  "Manual Sources Transformation",
+  "Basic Transformation",
+  "Recenter sources",
   "PopupLine",
   "BDV - Remove Sources From BDV",
   "Set Sources Color",
@@ -11,13 +16,10 @@
   "PopupLine",
   "Create New Source (Set LUT)",
   "PopupLine",
-  "Manual Sources Transformation",
-  "Basic Transformation",
-  "Make Global Source Group",
-  "PopupLine",
   "Inspect Sources",
   "PopupLine",
   "Add Metadata To Sources",
+  "Make Global Source Group",
   "PopupLine",
   "Export Sources to XML/HDF5 Spimdataset"
 ]

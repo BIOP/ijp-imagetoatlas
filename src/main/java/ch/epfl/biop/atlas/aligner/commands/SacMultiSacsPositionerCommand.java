@@ -2,7 +2,6 @@ package ch.epfl.biop.atlas.aligner.commands;
 
 import bdv.util.BdvHandle;
 import bdv.util.BdvHandleFrame;
-import ch.epfl.biop.ABBAHelper;
 import ch.epfl.biop.atlas.BiopAtlas;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.ReslicedAtlas;
@@ -51,8 +50,6 @@ public class SacMultiSacsPositionerCommand implements Command {
         slicingTransfom = new AffineTransform3D();
 
         switch(slicingMode) {
-            //case "free" :
-            //    throw new UnsupportedOperationException();
             case "coronal" :
                 slicingTransfom.rotate(1,Math.PI/2);
                 break;
