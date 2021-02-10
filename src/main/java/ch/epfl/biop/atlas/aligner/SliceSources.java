@@ -175,6 +175,25 @@ public class SliceSources {
         guiState.positionChanged();
     }
 
+    public void setSliceThickness(double zBeginInMm, double zEndInMm) {
+        if ((this.slicingAxisPosition<zBeginInMm)||(this.slicingAxisPosition>zEndInMm)) {
+            errlog.accept("Wrong slice position. Cannot set slice bounds");
+            return;
+        }
+        if (zBeginInMm>zEndInMm) {
+            errlog.accept("z(End) inferior to z(Begin). Cannot set slice bounds");
+            return;
+        }
+        setSliceThickness(zEndInMm-zBeginInMm);
+        zShiftCorrection = ((zEndInMm+zBeginInMm) / 2) - slicingAxisPosition;
+        updateZPosition();
+
+    }
+
+    public double getZAxisPosition() {
+        return slicingAxisPosition;
+    }
+
     public void setSliceThickness(double sizeInMm) {
 
         RealPoint pt1 = new RealPoint(3);
@@ -200,7 +219,7 @@ public class SliceSources {
         double currentZSliceOccupancy = Math.abs(pt1.getDoublePosition(2)-pt2.getDoublePosition(2));
 
         if (currentZSliceOccupancy == 0) {
-            System.err.println("Error : slice thickness is 0! Cannot set slice thickness");
+            errlog.accept("Error : slice thickness is 0! Cannot set slice thickness");
             return;
         }
 
@@ -269,7 +288,7 @@ public class SliceSources {
     private void updateZPosition() {
         AffineTransform3D zShiftAffineTransform = new AffineTransform3D();
         zShiftAffineTransform.scale(1,1,zThicknessCorrection);
-        zShiftAffineTransform.translate(0, 0, slicingAxisPosition);
+        zShiftAffineTransform.translate(0, 0, slicingAxisPosition+zShiftCorrection);
         zPositioner.setAffineTransform(zShiftAffineTransform); // Moves the registered slices to the correct position
         si.updateBox();
     }
@@ -320,7 +339,7 @@ public class SliceSources {
                 lastTask.get();
             } catch (Exception e) {
                 e.printStackTrace();
-                System.err.println("Tasks were cancelled for slice "+this.toString());
+                errlog.accept("Tasks were cancelled for slice "+this.toString());
             }
         }
     }
@@ -432,9 +451,9 @@ public class SliceSources {
             tasks.add(startingPoint.thenApplyAsync((out) -> {
                 if (out) {
                     actionInProgress = action;
-                    System.out.println("Action:"+action);
+                    //System.out.println("Action:"+action);
                     boolean result = action.run();
-                    System.out.println("Success:"+result);
+                    //System.out.println("Success:"+result);
                     if (result) {
                         actionInProgress = null;
                         postRun.run();
@@ -463,9 +482,9 @@ public class SliceSources {
         synchronized(tasks) {
             // Has the action started ?
             if (mapActionTask.containsKey(action)) {
-                System.out.println("Cancel "+action+" 0");
+                //System.out.println("Cancel "+action+" 0");
                 if (mapActionTask.get(action).isDone() || ((action!=null)&&(action == this.actionInProgress))) {
-                    System.out.println("Cancel "+action+" Done");
+                    //System.out.println("Cancel "+action+" Done");
                     CompletableFuture<Boolean> startingPoint;
                     if (tasks.size() == 0) {
                         startingPoint = CompletableFuture.supplyAsync(() -> true);
@@ -485,7 +504,7 @@ public class SliceSources {
                         }
                     }));
                 } else {
-                    System.out.println("Cancel "+action+" Not Done");
+                    //System.out.println("Cancel "+action+" Not Done");
                     // Not done yet! - let's remove right now from the task list
                     mapActionTask.get(action).cancel(true);
                     tasks.remove(mapActionTask.get(action));
@@ -651,7 +670,7 @@ public class SliceSources {
                     // Save in user specified folder
                     Files.copy(Paths.get(ijroisfile.f.getAbsolutePath()),Paths.get(f.getAbsolutePath()));
                 } else {
-                    System.err.println("ROI File already exists!");
+                    errlog.accept("ROI File already exists!");
                 }
             } else {
                 // Save in user specified folder
@@ -671,7 +690,7 @@ public class SliceSources {
         if (SourceAndConverterServices.getSourceAndConverterService()
                 .getMetadata(rootSac, SourceAndConverterService.SPIM_DATA_INFO)==null) {
 
-            System.out.println("Slice not associated to any dataset");
+            errlog.accept("Slice "+this+" not associated to any bdv dataset.");
 
         } else {
             AbstractSpimData asd =
@@ -699,7 +718,7 @@ public class SliceSources {
                 if (dataEntryFolder.exists()) {
 
                     File f = new File(dataEntryFolder, "ABBA-RoiSet.zip");
-                    System.out.println("attempt save QuPath" + f.getAbsolutePath());
+                    mp.log.accept("Save slice ROI to quPath project " + f.getAbsolutePath());
                     try {
 
                         if (f.exists()) {
@@ -709,7 +728,7 @@ public class SliceSources {
                                 Files.copy(Paths.get(ijroisfile.f.getAbsolutePath()),Paths.get(f.getAbsolutePath()));
                                 writeOntotogyIfNotPresent(filePath);
                             } else {
-                                System.err.println("Error : QuPath ROI file already exists");
+                                errlog.accept("Error : QuPath ROI file already exists");
                             }
                         } else {
                             // Save in user specified folder
