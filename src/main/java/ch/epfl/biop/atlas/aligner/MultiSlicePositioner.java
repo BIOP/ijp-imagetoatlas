@@ -1339,29 +1339,42 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
     public void exportSelectedSlicesRegionsToRoiManager(String namingChoice) {
         List<SliceSources> sortedSelected = getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
-        new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
-        for (SliceSources slice : sortedSelected) {
-            exportSliceRegionsToRoiManager(slice, namingChoice);
+        if (sortedSelected.size()==0) {
+            errorMessageForUser.accept("No slice selected", "You did not select any slice to save");
+        } else {
+            new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
+            for (SliceSources slice : sortedSelected) {
+                exportSliceRegionsToRoiManager(slice, namingChoice);
+            }
+            new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
         }
-        new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
     }
 
     public void exportSelectedSlicesRegionsToQuPathProject(boolean erasePreviousFile) {
         List<SliceSources> sortedSelected = getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
-        new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
-        for (SliceSources slice : sortedSelected) {
-            exportSliceRegionsToQuPathProject(slice, erasePreviousFile);
+        if (sortedSelected.size()==0) {
+            errorMessageForUser.accept("No slice selected", "You did not select any slice to save");
+        } else {
+            new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
+            for (SliceSources slice : sortedSelected) {
+                exportSliceRegionsToQuPathProject(slice, erasePreviousFile);
+            }
+            new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
         }
-        new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
     }
 
     public void exportSelectedSlicesRegionsToFile(String namingChoice, File dirOutput, boolean erasePreviousFile) {
         List<SliceSources> sortedSelected = getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
-        new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
-        for (SliceSources slice : sortedSelected) {
-            exportSliceRegionsToFile(slice, namingChoice, dirOutput, erasePreviousFile);
+         if (sortedSelected.size()==0) {
+            errorMessageForUser.accept("No slice selected", "You did not select any slice to save");
+        } else {
+
+            new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
+            for (SliceSources slice : sortedSelected) {
+                exportSliceRegionsToFile(slice, namingChoice, dirOutput, erasePreviousFile);
+            }
+            new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
         }
-        new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
     }
 
     public void exportSliceRegionsToFile(SliceSources slice, String namingChoice, File dirOutput, boolean erasePreviousFile) {
