@@ -2,15 +2,12 @@ package ch.epfl.biop.registration.sourceandconverter.spline;
 
 import bdv.tools.brightness.ConverterSetup;
 import bdv.util.BdvHandle;
-import bdv.util.BoundedRealTransform;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import ch.epfl.biop.registration.sourceandconverter.SourceAndConverterRegistration;
 import ch.epfl.biop.scijava.command.Elastix2DSplineRegisterCommand;
 import ij.gui.WaitForUserDialog;
-import net.imglib2.FinalRealInterval;
 import net.imglib2.RealPoint;
-import net.imglib2.realtransform.InvertibleRealTransform;
 import net.imglib2.realtransform.RealTransform;
 import org.scijava.Context;
 import org.scijava.command.Command;
@@ -23,6 +20,7 @@ import sc.fiji.bdvpg.sourceandconverter.transform.SourceRealTransformer;
 
 import java.util.*;
 import java.util.concurrent.Future;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static ch.epfl.biop.registration.sourceandconverter.spline.SacBigWarp2DRegistration.BigWarpFileFromRealTransform;
@@ -87,6 +85,12 @@ public class Elastix2DSplineRegistration extends SourceAndConverterRegistration 
         }
     }
 
+    Supplier<Double> zPosition;
+
+    public void setZPositioner(Supplier<Double> zPosition) {
+        this.zPosition = zPosition;
+    }
+
     @Override
     public SourceAndConverter[] getTransformedImageMovingToFixed(SourceAndConverter[] img) {
         SourceAndConverter[] out = new SourceAndConverter[img.length];
@@ -104,12 +108,13 @@ public class Elastix2DSplineRegistration extends SourceAndConverterRegistration 
 
         ArrayList<RealPoint> cvtList = new ArrayList<>();
 
-        RealTransform inverted = rt;
-
         for (RealPoint p : pts.ptList) {
             RealPoint pt3d = new RealPoint(3);
             pt3d.setPosition(new double[]{p.getDoublePosition(0), p.getDoublePosition(1),0});
-            inverted.apply(pt3d, pt3d);
+            if (zPosition!=null) {
+                pt3d.setPosition(zPosition.get(), 2);
+            }
+            rt.apply(pt3d, pt3d);
             RealPoint cpt = new RealPoint(pt3d.getDoublePosition(0), pt3d.getDoublePosition(1));
             cvtList.add(cpt);
         }

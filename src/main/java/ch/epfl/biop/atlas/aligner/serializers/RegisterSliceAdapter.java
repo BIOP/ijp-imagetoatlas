@@ -6,6 +6,7 @@ import ch.epfl.biop.atlas.aligner.RegisterSlice;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.atlas.aligner.sourcepreprocessors.SourcesProcessor;
 import ch.epfl.biop.registration.Registration;
+import ch.epfl.biop.registration.sourceandconverter.spline.Elastix2DSplineRegistration;
 import com.google.gson.*;
 
 import java.lang.reflect.Type;
@@ -31,6 +32,10 @@ public class RegisterSliceAdapter implements JsonSerializer<RegisterSlice>,
     public RegisterSlice deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
         JsonObject obj = jsonElement.getAsJsonObject();
         Registration<SourceAndConverter<?>[]> reg = jsonDeserializationContext.deserialize(obj.get("registration"), Registration.class); // isDone should be true when deserialized
+
+        if (reg instanceof Elastix2DSplineRegistration) {
+            ((Elastix2DSplineRegistration)reg).setZPositioner(currentSliceGetter.get()::getZAxisPosition);
+        }
 
         SourcesProcessor fixed_sources_preprocess = jsonDeserializationContext.deserialize(obj.get("fixed_sources_preprocess"), SourcesProcessor.class);
         SourcesProcessor moving_souces_preprocess = jsonDeserializationContext.deserialize(obj.get("moving_sources_preprocess"), SourcesProcessor.class);
