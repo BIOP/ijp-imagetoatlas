@@ -14,12 +14,12 @@ public class SlicerAdjusterInteractiveCommand extends InteractiveCommand {
     @Parameter(label = "Lock XY angles")
     Boolean lockAngles = Boolean.FALSE;
 
-    @Parameter(min = "-20", max = "+20", stepSize = "1", style = "slider", label = "half degrees (X)",
+    @Parameter(min = "-90", max = "+90", stepSize = "1", style = "slider", label = "HALF degrees (X)",
             callback = "changeRotate")
     int rotateX = 0;
     int oldRotateX = 0;
 
-    @Parameter(min = "-20", max = "+20", stepSize = "1", style = "slider", label = "half degrees (Y)",
+    @Parameter(min = "-90", max = "+90", stepSize = "1", style = "slider", label = "HALF degrees (Y)",
     callback = "changeRotate")
     int rotateY = 0;
     int oldRotateY = 0;
