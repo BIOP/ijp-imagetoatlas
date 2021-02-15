@@ -318,6 +318,13 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Redo [Ctrl+Shift+Z]",0, this::redoAction);
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Select all slices [Ctrl+A]",0,() -> slices.forEach(SliceSources::select));
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Deselect all slices [Ctrl+Shift+A]",0,() -> slices.forEach(SliceSources::deSelect));
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Delete selected slices",0,() ->
+            getSortedSlices()
+                    .stream()
+                    .filter(SliceSources::isSelected)
+                    .forEach(slice -> new DeleteSlice(this, slice).runRequest())
+        );
+
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Distribute spacing [A]",0,() -> {
             if (this.displayMode == POSITIONING_MODE_INT) this.equalSpacingSelectedSlices();
         });
@@ -351,7 +358,6 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, EditSliceThicknessCommand.class, hierarchyLevelsSkipped,"mp", this);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, SliceThicknessMatchNeighborsCommand.class, hierarchyLevelsSkipped,"mp", this);
 
-
         AtlasDisplayPanel adp = new AtlasDisplayPanel(this);
         // Hide useless channels on startup -
         adp.getModel().setValueAt(Boolean.FALSE,0,8); // X Coord
@@ -366,9 +372,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
         bdvh.getCardPanel().addCard("Edit Slices", new EditPanel(this).getPanel(), true);
 
-        bdvh.getCardPanel().addCard("Atlas Slicing",
-                ScijavaSwingUI.getPanel(scijavaCtx, SlicerAdjusterInteractiveCommand.class, "reslicedAtlas", reslicedAtlas),
-                true);
+        bdvh.getCardPanel().addCard("Atlas Slicing", ScijavaSwingUI.getPanel(scijavaCtx, SlicerAdjusterInteractiveCommand.class, "reslicedAtlas", reslicedAtlas), true);
 
         bdvh.getCardPanel().addCard("Define region of interest",
                 ScijavaSwingUI.getPanel(scijavaCtx, RectangleROIDefineInteractiveCommand.class, "mp", this),
@@ -394,8 +398,9 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
             if (py>sY/1.9) {val.set(0); return;}
 
             if (displayMode == POSITIONING_MODE_INT) {
-                if (Math.IEEEremainder(px+sX*0.5, sX) < roiPX) {val.set(255); return;}
-                if (Math.IEEEremainder(px+sX*0.5, sX) > roiPX+roiSX) {val.set(255); return;}
+                final double v = Math.IEEEremainder(px + sX * 0.5, sX);
+                if (v < roiPX) {val.set(255); return;}
+                if (v > roiPX+roiSX) {val.set(255); return;}
                 if (py<roiPY) {val.set(255); return;}
                 if (py>roiPY+roiSY) {val.set(255); return;}
                 val.set(0);
