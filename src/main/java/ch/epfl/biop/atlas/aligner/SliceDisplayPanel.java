@@ -18,7 +18,6 @@ import java.awt.event.MouseEvent;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, MultiSlicePositioner.SliceChangeListener, ListSelectionListener {
 
@@ -120,11 +119,11 @@ public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, Mul
                         if ((col>1)&&(col%2 == 1)) {
                             int iChannel = (col-3)/2;
 
-                            SourceAndConverter[] sacs = getSelectedIndices().stream()
+                            SourceAndConverter<?>[] sacs = getSelectedIndices().stream()
                                     .map(idx -> sortedSlices.get(idx))
-                                    .filter(slice -> slice.nChannels>iChannel)
+                                    .filter(slice -> slice.nChannels > iChannel)
                                     .map(slice -> slice.getGUIState().getCurrentSources()[iChannel])
-                                    .collect(Collectors.toList()).toArray(new SourceAndConverter[0]);
+                                    .toArray(SourceAndConverter<?>[]::new);
 
                             if (sacs.length>0) {
                                 Runnable update = () -> {
@@ -155,7 +154,8 @@ public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, Mul
 
                     SliceSources[] slices = getSelectedIndices().stream()
                             .map(idx -> sortedSlices.get(idx))
-                            .collect(Collectors.toList()).toArray(new SliceSources[0]);
+                            .toArray(SliceSources[]::new);
+
                     JPopupMenu popup = new SliceSourcesPopupMenu(mp, slices).getPopup();
                     popup.show(e.getComponent(), e.getX(), e.getY());
                 }
@@ -175,12 +175,17 @@ public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, Mul
                     if ((col>1)&&(col%2 == 1)) {
                         int iChannel = (col-3)/2;
 
-                        SourceAndConverter[] sacs = new SourceAndConverter[1];
+                        SourceAndConverter<?>[] sacs = new SourceAndConverter<?>[1];
 
                         if (sortedSlices.get(row).nChannels>iChannel) {
                             sacs[0] = sortedSlices.get(row).getGUIState().getCurrentSources()[iChannel];
 
                             Runnable update = () -> model.fireTableCellUpdated(row, col);
+
+                            // ---- Just to have the correct parameters displayed (dirty hack)
+                            Displaysettings ds_in = new Displaysettings(-1);
+                            DisplaysettingsHelper.GetDisplaySettingsFromCurrentConverter(sacs[0], ds_in);
+                            DisplaySettingsCommand.IniValue = ds_in;
 
                             mp.scijavaCtx
                                     .getService(CommandService.class)
