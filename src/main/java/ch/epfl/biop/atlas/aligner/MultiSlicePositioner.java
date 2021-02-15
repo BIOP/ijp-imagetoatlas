@@ -1343,7 +1343,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     public void exportSelectedSlicesRegionsToRoiManager(String namingChoice) {
         List<SliceSources> sortedSelected = getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
         if (sortedSelected.size()==0) {
-            errorMessageForUser.accept("No slice selected", "You did not select any slice to save");
+            errorMessageForUser.accept("No slice selected", "You did not select any slice.");
         } else {
             new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
             for (SliceSources slice : sortedSelected) {
@@ -1356,7 +1356,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     public void exportSelectedSlicesRegionsToQuPathProject(boolean erasePreviousFile) {
         List<SliceSources> sortedSelected = getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
         if (sortedSelected.size()==0) {
-            errorMessageForUser.accept("No slice selected", "You did not select any slice to save");
+            errorMessageForUser.accept("No slice selected", "You did not select any slice.");
         } else {
             new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();
             for (SliceSources slice : sortedSelected) {
@@ -1369,7 +1369,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     public void exportSelectedSlicesRegionsToFile(String namingChoice, File dirOutput, boolean erasePreviousFile) {
         List<SliceSources> sortedSelected = getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
          if (sortedSelected.size()==0) {
-            errorMessageForUser.accept("No slice selected", "You did not select any slice to save");
+            errorMessageForUser.accept("No slice selected", "You did not select any slice.");
         } else {
 
             new MarkActionSequenceBatch(MultiSlicePositioner.this).runRequest();

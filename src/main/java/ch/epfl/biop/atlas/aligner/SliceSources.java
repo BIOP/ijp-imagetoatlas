@@ -589,8 +589,7 @@ public class SliceSources {
 
         ImagePlus leftRightImage = export.imp_out;
 
-        leftRightOrigin.set(leftRightImage);
-
+        leftRightOrigin.set(ConvertibleRois.labelImageToRoiArrayKeepSinglePixelPrecision(leftRightImage));
     }
 
     void prepareExport(String namingChoice) {
