@@ -72,13 +72,22 @@ public class Elastix2DSplineRegistration extends SourceAndConverterRegistration 
     @Override
     public boolean register() {
         try {
-             Future<CommandModule> task = ctx
-                    .getService(CommandService.class)
-                    .run(registrationCommandClass, true, scijavaParameters );
+            boolean success = true;
+            Future<CommandModule> task = ctx
+                   .getService(CommandService.class)
+                   .run(registrationCommandClass, false, scijavaParameters );
 
-             rt = (RealTransform) task.get().getOutput("rt");
-             isDone = true;
-             return true;
+            CommandModule module = task.get();
+
+            if (module.getOutputs().keySet().contains("success")) {
+                success = (boolean) module.getOutput("success");
+            }
+            if (success) {
+                rt = (RealTransform) module.getOutput("rt");
+            }
+
+            isDone = true;
+            return success;
         } catch (Exception e) {
             e.printStackTrace();
             return false;

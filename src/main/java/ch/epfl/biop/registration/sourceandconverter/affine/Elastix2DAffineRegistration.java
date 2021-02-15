@@ -52,7 +52,7 @@ public class Elastix2DAffineRegistration extends AffineTransformSourceAndConvert
             boolean success = true;
              Future<CommandModule> task = ctx
                     .getService(CommandService.class)
-                    .run(registrationCommandClass, true, scijavaParameters );
+                    .run(registrationCommandClass, false, scijavaParameters );
 
              CommandModule module = task.get();
 
@@ -62,6 +62,7 @@ public class Elastix2DAffineRegistration extends AffineTransformSourceAndConvert
              if (success) {
                 at3d = (AffineTransform3D) module.getOutput("at3D");
              }
+
              isDone = true;
              return success;
         } catch (Exception e) {
