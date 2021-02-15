@@ -376,7 +376,9 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
         bdvh.getCardPanel().addCard("Tasks Info", mso.getJPanel(), false);
 
-        bdvh.getCardPanel().addCard("Resources Monitor", new ResourcesMonitor(), false);
+        ResourcesMonitor rm = new ResourcesMonitor();
+
+        bdvh.getCardPanel().addCard("Resources Monitor", rm, false);
 
         // Default registration region = full atlas size
         roiPX = -sX / 2.0;
@@ -451,6 +453,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                     this.ssb = null;
                     this.reslicedAtlas = null;
                     this.info = null;
+                    rm.stop();
                 }
             );
     }
