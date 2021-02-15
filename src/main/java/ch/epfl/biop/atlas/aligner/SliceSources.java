@@ -107,10 +107,6 @@ public class SliceSources {
 
     public String name = "";
 
-    double zThicknessCorrection = 1;
-
-    double zShiftCorrection = 0;
-
     // For fast display : Icon TODO : see https://github.com/bigdataviewer/bigdataviewer-core/blob/17d2f55d46213d1e2369ad7ef4464e3efecbd70a/src/main/java/bdv/tools/RecordMovieDialog.java#L256-L318
     protected SliceSources(SourceAndConverter<?>[] sacs, double slicingAxisPosition, MultiSlicePositioner mp, double thicknessCorrection, double zShiftCorrection) {
 
@@ -147,6 +143,18 @@ public class SliceSources {
             mp.errlog.accept("Couldn't name slice");
             e.printStackTrace();
         }
+    }
+
+    protected double zThicknessCorrection = 1;
+
+    protected double zShiftCorrection = 0;
+
+    public double getZThicknessCorrection() {
+        return zThicknessCorrection;
+    }
+
+    public double getZShiftCorrection() {
+        return zShiftCorrection;
     }
 
     public void setName(String name) {
