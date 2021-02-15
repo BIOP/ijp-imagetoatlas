@@ -34,7 +34,9 @@ import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
 
 import java.awt.*;
 import java.io.*;
+import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.List;
@@ -733,14 +735,14 @@ public class SliceSources {
                                 Files.delete(Paths.get(f.getAbsolutePath()));
                                 // Save in user specified folder
                                 Files.copy(Paths.get(ijroisfile.f.getAbsolutePath()),Paths.get(f.getAbsolutePath()));
-                                writeOntotogyIfNotPresent(filePath);
+                                writeOntotogyIfNotPresent(mp, filePath);
                             } else {
                                 errlog.accept("Error : QuPath ROI file already exists");
                             }
                         } else {
                             // Save in user specified folder
                             Files.copy(Paths.get(ijroisfile.f.getAbsolutePath()),Paths.get(f.getAbsolutePath()));
-                            writeOntotogyIfNotPresent(filePath);
+                            writeOntotogyIfNotPresent(mp, filePath);
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -756,18 +758,17 @@ public class SliceSources {
         }
     }
 
-    // TODO
-    static public synchronized void writeOntotogyIfNotPresent(String quPathFilePath) {
+    static public synchronized void writeOntotogyIfNotPresent(MultiSlicePositioner mp, String quPathFilePath) { //statically synchronized to avoid race conditions in file writing
         File ontology = new File(quPathFilePath, "AllenMouseBrainOntology.json");
         if (!ontology.exists()) {
             try {
-                InputStream initialStream = SliceSources.class.getClassLoader().getResourceAsStream("AllenMouseBrainOntology.json"); // Should work in jar
-                OutputStream outStream = new FileOutputStream(ontology);
-                byte[] buffer = new byte[initialStream.available()];
-                initialStream.read(buffer);
-                outStream.write(buffer);
-                outStream.close();
-                initialStream.close();
+                URL ontologyURL = mp.biopAtlas.ontology.getDataSource();
+                if (ontologyURL.getFile()==null) {
+                    mp.errlog.accept("No ontology file found at location "+ontologyURL);
+                    return;
+                }
+                Path originalOntologyFile = Paths.get(ontologyURL.toURI());
+                Files.copy(originalOntologyFile, Paths.get(quPathFilePath, "AllenMouseBrainOntology.json"));
             } catch (Exception e) {
                 e.printStackTrace();
             }
