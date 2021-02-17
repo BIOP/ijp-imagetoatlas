@@ -13,7 +13,7 @@ public class MSPStateSaveCommand implements Command {
     @Parameter
     MultiSlicePositioner mp;
 
-    @Parameter
+    @Parameter(style = "save")
     File stateFile;
 
     @Override

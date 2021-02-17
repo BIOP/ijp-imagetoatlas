@@ -8,21 +8,21 @@ import org.scijava.plugin.Plugin;
 @Plugin(type = InteractiveCommand.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Adjust Slicing")
 public class SlicerAdjusterInteractiveCommand extends InteractiveCommand {
 
-    @Parameter(min = "10", max = "500", stepSize = "10", style = "slider", label = "microns")
+    @Parameter(min = "10", max = "500", stepSize = "10", style = "slider", label = "Displayed slicing [micron]")
     int zSamplingSteps = 10;
 
-    @Parameter(label = "Lock XY angles")
+    @Parameter(label = "Lock rotations")
     Boolean lockAngles = Boolean.FALSE;
 
-    @Parameter(min = "-90", max = "+90", stepSize = "1", style = "slider", label = "HALF degrees (X)",
+    @Parameter(min = "-45", max = "+45", stepSize = "0.5", style = "slider", label = "X Rotation [deg]",
             callback = "changeRotate")
-    int rotateX = 0;
-    int oldRotateX = 0;
+    float rotateX = 0;
+    float oldRotateX = 0;
 
-    @Parameter(min = "-90", max = "+90", stepSize = "1", style = "slider", label = "HALF degrees (Y)",
+    @Parameter(min = "-45", max = "+45", stepSize = "0.5", style = "slider", label = "Y Rotation [deg]",
     callback = "changeRotate")
-    int rotateY = 0;
-    int oldRotateY = 0;
+    float rotateY = 0;
+    float oldRotateY = 0;
 
     @Parameter
     ReslicedAtlas reslicedAtlas;
@@ -30,8 +30,8 @@ public class SlicerAdjusterInteractiveCommand extends InteractiveCommand {
     public void run() {
         reslicedAtlas.setStep(zSamplingSteps/10);
         if (!lockAngles) {
-            reslicedAtlas.setRotateX(rotateX / 360.0 * Math.PI);
-            reslicedAtlas.setRotateY(rotateY / 360.0 * Math.PI);
+            reslicedAtlas.setRotateX(rotateX / 180.0 * Math.PI);
+            reslicedAtlas.setRotateY(rotateY / 180.0 * Math.PI);
             oldRotateX = rotateX;
             oldRotateY = rotateY;
         } else {

@@ -13,7 +13,7 @@ public class MSPStateLoadCommand implements Command {
     @Parameter
     MultiSlicePositioner mp;
 
-    @Parameter
+    @Parameter(style = "open")
     File stateFile;
 
     @Override
