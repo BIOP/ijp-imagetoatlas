@@ -1684,12 +1684,12 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         }
     }
 
-    public void registerElastixAffineRemote(String serverURL, int iChannelFixed, int iChannelMoving) {
-        registerElastixAffineRemote(serverURL, getChannel(iChannelFixed), getChannel(iChannelMoving));
+    public void registerElastixAffineRemote(String serverURL, int iChannelFixed, int iChannelMoving, boolean userConsent) {
+        registerElastixAffineRemote(serverURL, getChannel(iChannelFixed), getChannel(iChannelMoving), userConsent);
     }
 
     public void registerElastixAffineRemote(String serverURL, SourcesProcessor preprocessFixed,
-                                      SourcesProcessor preprocessMoving) {
+                                      SourcesProcessor preprocessMoving, boolean userConsent) {
         if (getSelectedSources().size()==0) {
             warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to register");
             log.accept("Registration ignored : no slice selected");
@@ -1713,19 +1713,25 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                 params.put("sx", roiSX);
                 params.put("sy", roiSY);
                 params.put("serverURL", serverURL);
-                params.put("taskInfo", "");
+                if (!userConsent) {
+                    params.put("taskInfo", "");
+                } else {
+                    String taskInfo = new Gson().toJson(new TaskInfo(slice));
+                    System.out.println(taskInfo);
+                    params.put("taskInfo", taskInfo);
+                }
                 elastixAffineReg.setScijavaParameters(params);
                 new RegisterSlice(this, slice, elastixAffineReg, preprocessFixed, preprocessMoving).runRequest();
             }
         }
     }
 
-    public void registerElastixSplineRemote(String serverURL, int iChannelFixed, int iChannelMoving, int nbControlPointsX) {
-        registerElastixSplineRemote(serverURL, getChannel(iChannelFixed), getChannel(iChannelMoving), nbControlPointsX);
+    public void registerElastixSplineRemote(String serverURL, int iChannelFixed, int iChannelMoving, int nbControlPointsX, boolean userConsent) {
+        registerElastixSplineRemote(serverURL, getChannel(iChannelFixed), getChannel(iChannelMoving), nbControlPointsX, userConsent);
     }
 
     public void registerElastixSplineRemote(String serverURL, SourcesProcessor preprocessFixed,
-                                      SourcesProcessor preprocessMoving, int nbControlPointsX) {
+                                      SourcesProcessor preprocessMoving, int nbControlPointsX, boolean userConsent) {
         if (getSelectedSources().size()==0) {
             warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to register");
             log.accept("Registration ignored : no slice selected");
@@ -1751,7 +1757,12 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                 params.put("sy", roiSY);
                 params.put("nbControlPointsX", nbControlPointsX);
                 params.put("serverURL", serverURL);
-                params.put("taskInfo", "");
+                if (!userConsent) {
+                    params.put("taskInfo", "");
+                } else {
+                    params.put("taskInfo", new Gson().toJson(new TaskInfo(slice)));
+                }
+
                 elastixSplineReg.setScijavaParameters(params);
 
                 AffineTransform3D at3d = new AffineTransform3D();
@@ -2577,6 +2588,41 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     interface ModeListener {
         void modeChanged(MultiSlicePositioner mp, int oldmode, int newmode);
         void sliceDisplayModeChanged(MultiSlicePositioner mp, int oldmode, int newmode);
+    }
+
+    /**
+     * Informations sent to the registration server (provided the user agrees)
+     */
+    public class TaskInfo {
+
+        public TaskInfo(SliceSources slice) {
+            sliceAxisPosition = slice.getSlicingAxisPosition();
+            matrixAtlas = reslicedAtlas.getSlicingTransform().getRowPackedCopy();
+            matrixAlignerToAtlas = MultiSlicePositioner.this.getAffineTransformFormAlignerToAtlas().getRowPackedCopy();
+            rotX = reslicedAtlas.getRotateX();
+            rotY = reslicedAtlas.getRotateY();
+            sliceHashCode = slice.hashCode();
+            sessionHashcode = MultiSlicePositioner.this.hashCode();
+        }
+
+        String type = "ABBA Registration"; // Tag to know where from which software this job comes from
+
+        String TaskInfoVersion = "0.1"; // To handle future versions
+
+        String Atlas = "Allen Adult Mouse Brain CCFv3"; // Could be made modular later - for now ABBA only uses this
+
+        int sliceHashCode; // Provide a way to know if the same slice was registered several times
+
+        int sessionHashcode; // Anonymously identifies a full ABBA session
+
+        double[] matrixAtlas; // How the atlas is sliced (rotation correction NOT taken into acount )
+
+        double[] matrixAlignerToAtlas; // How the atlas is sliced (rotation correction taken into account)
+
+        double sliceAxisPosition; // Position of the slice along the atlas
+
+        double rotX, rotY; // Rotation x and y slicing correction
+
     }
 
 }
