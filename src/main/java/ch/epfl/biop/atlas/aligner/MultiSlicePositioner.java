@@ -358,6 +358,9 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, EditSliceThicknessCommand.class, hierarchyLevelsSkipped,"mp", this);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, SliceThicknessMatchNeighborsCommand.class, hierarchyLevelsSkipped,"mp", this);
 
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ABBAForumHelpCommand.class, hierarchyLevelsSkipped);
+
+
         AtlasDisplayPanel adp = new AtlasDisplayPanel(this);
         // Hide useless channels on startup -
         adp.getModel().setValueAt(Boolean.FALSE,0,8); // X Coord
