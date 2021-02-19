@@ -7,7 +7,7 @@ import org.scijava.plugin.Plugin;
 
 import java.io.File;
 
-@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>File>MP Load State [experimental]")
+@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>File>MP Load State [Experimental]")
 public class MSPStateLoadCommand implements Command {
 
     @Parameter
