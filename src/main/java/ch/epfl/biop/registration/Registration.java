@@ -24,4 +24,6 @@ public interface Registration<T> {
     boolean isManual();
     boolean isEditable();
 
+    void abort();
+
 }

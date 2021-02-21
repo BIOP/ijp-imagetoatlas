@@ -46,11 +46,13 @@ public class Elastix2DAffineRegistration extends AffineTransformSourceAndConvert
         this.registrationCommandClass = registrationCommandClass;
     }
 
+    Future<CommandModule> task = null;
+
     @Override
     public boolean register() {
         try {
             boolean success = true;
-             Future<CommandModule> task = ctx
+             task = ctx
                     .getService(CommandService.class)
                     .run(registrationCommandClass, false, scijavaParameters );
 
@@ -66,7 +68,7 @@ public class Elastix2DAffineRegistration extends AffineTransformSourceAndConvert
              isDone = true;
              return success;
         } catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             return false;
         }
     }
@@ -98,4 +100,11 @@ public class Elastix2DAffineRegistration extends AffineTransformSourceAndConvert
         isDone = false;
     }
 
+    @Override
+    public void abort() {
+        if (task!=null) {
+            System.out.println("Cancel Attempt");
+            task.cancel(true);
+        }
+    }
 }

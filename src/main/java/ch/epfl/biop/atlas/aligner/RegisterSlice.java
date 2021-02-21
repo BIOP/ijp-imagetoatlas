@@ -98,6 +98,10 @@ public class RegisterSlice extends CancelableAction {
 
     @Override
     public boolean cancel() {
+        if (registration!=null) {
+           // System.out.println("---------------- Action "+this+" registration cancel");
+            registration.abort(); // Probably not necessary
+        }
         return slice.removeRegistration(registration);
     }
 }

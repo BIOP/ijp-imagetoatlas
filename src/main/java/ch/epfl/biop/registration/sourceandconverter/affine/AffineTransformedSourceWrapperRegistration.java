@@ -99,4 +99,9 @@ public class AffineTransformedSourceWrapperRegistration extends SourceAndConvert
     public boolean isEditable() {
         return false;
     }
+
+    @Override
+    public void abort() {
+
+    }
 }

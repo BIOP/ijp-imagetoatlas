@@ -107,4 +107,8 @@ public class CenterZeroRegistration extends AffineTransformSourceAndConverterReg
         isDone = false;
     }
 
+    @Override
+    public void abort() {
+
+    }
 }

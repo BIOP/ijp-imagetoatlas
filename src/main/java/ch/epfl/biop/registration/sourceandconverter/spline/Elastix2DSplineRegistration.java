@@ -69,11 +69,12 @@ public class Elastix2DSplineRegistration extends SourceAndConverterRegistration 
         this.registrationCommandClass = registrationCommandClass;
     }
 
+    Future<CommandModule> task = null;
     @Override
     public boolean register() {
         try {
             boolean success = true;
-            Future<CommandModule> task = ctx
+             task = ctx
                    .getService(CommandService.class)
                    .run(registrationCommandClass, false, scijavaParameters );
 
@@ -217,6 +218,13 @@ public class Elastix2DSplineRegistration extends SourceAndConverterRegistration 
     @Override
     public void setTimePoint(int timePoint) {
         // TODO
+    }
+
+    @Override
+    public void abort() {
+        if (task!=null) {
+           task.cancel(true);
+        }
     }
 
 }

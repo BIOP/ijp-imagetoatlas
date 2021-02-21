@@ -251,4 +251,9 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
         // TODO
     }
 
+    @Override
+    public void abort() {
+
+    }
+
 }

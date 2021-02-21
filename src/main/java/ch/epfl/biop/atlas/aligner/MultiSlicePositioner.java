@@ -158,6 +158,9 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         getBdvh().getViewerPanel().showMessage(message);
     };
 
+    public BiConsumer<String, String> nonBlockingErrorMessageForUser = (title, message) ->
+            System.err.println(title+":"+message);
+
     public BiConsumer<String, String> errorMessageForUser = (title, message) ->
             JOptionPane.showMessageDialog(new JFrame(), message, title, JOptionPane.ERROR_MESSAGE);
 
@@ -831,7 +834,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                 RealPoint centerScreen = getCurrentBdvCenter();
                 offset.setPosition(-oldCenter.getDoublePosition(0) + centerScreen.getDoublePosition(0), 0);
                 offset.setPosition(-oldCenter.getDoublePosition(1) + centerScreen.getDoublePosition(1), 1);
-                offset.setPosition(-oldCenter.getDoublePosition(2) + centerScreen.getDoublePosition(2), 2);
+                //offset.setPosition(-oldCenter.getDoublePosition(2) + centerScreen.getDoublePosition(2), 2); // hmm no reason to maintain offset in z
 
                 if (Math.abs(offset.getDoublePosition(0))>sX/2.0) {maintainoffset = false;}
                 if (Math.abs(offset.getDoublePosition(1))>sY/2.0) {maintainoffset = false;}

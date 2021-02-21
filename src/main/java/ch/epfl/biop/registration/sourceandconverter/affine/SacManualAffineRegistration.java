@@ -70,4 +70,9 @@ public class SacManualAffineRegistration implements Registration<SourceAndConver
     public void setTimePoint(int timePoint) {
         // TODO
     }
+
+    @Override
+    public void abort() {
+
+    }
 }

@@ -468,8 +468,11 @@ public class SliceSources {
                         actionInProgress = null;
                         postRun.run();
                     } else {
-                        mp.errorMessageForUser.accept("Action failed",""+action);
-                        tasks.remove(mapActionTask.get(action));
+                        mp.nonBlockingErrorMessageForUser.accept("Action failed", action.toString());
+                        if (mapActionTask.containsKey(action)) {
+                            CompletableFuture future = mapActionTask.get(action);
+                            tasks.remove(future);
+                        }
                         mapActionTask.remove(action);
                         mp.mso.cancelInfo(action);
                         mp.userActions.remove(action);
@@ -477,7 +480,10 @@ public class SliceSources {
                     return result;
                 } else {
                     mp.errorMessageForUser.accept("Action not started","Upstream tasked failed, canceling action "+action);
-                    tasks.remove(mapActionTask.get(action));
+                    if (mapActionTask.containsKey(action)) {
+                        CompletableFuture future = mapActionTask.get(action);
+                        tasks.remove(future);
+                    }
                     mapActionTask.remove(action);
                     mp.mso.cancelInfo(action);
                     mp.userActions.remove(action);
@@ -492,29 +498,44 @@ public class SliceSources {
         synchronized(tasks) {
             // Has the action started ?
             if (mapActionTask.containsKey(action)) {
-                //System.out.println("Cancel "+action+" 0");
                 if (mapActionTask.get(action).isDone() || ((action!=null)&&(action == this.actionInProgress))) {
-                    //System.out.println("Cancel "+action+" Done");
-                    CompletableFuture<Boolean> startingPoint;
-                    if (tasks.size() == 0) {
-                        startingPoint = CompletableFuture.supplyAsync(() -> true);
-                    } else {
-                        startingPoint = tasks.get(tasks.size() - 1);
-                    }
-                    tasks.add(startingPoint.thenApplyAsync((out) -> {
-                        if (out) {
-                            boolean result = action.cancel();
-                            tasks.remove(mapActionTask.get(action));
+
+                    if (action==actionInProgress) {
+                        if (actionInProgress instanceof RegisterSlice) {
+                            // Special case : let's abort ASAP the registration to avoid overloading the server
+                            //System.out.println("Abort registration");
+                            ((RegisterSlice) actionInProgress).registration.abort();
+                            //postRun.run();
+                            action.cancel();
+                            if (mapActionTask.containsKey(action)) {
+                                CompletableFuture future = mapActionTask.get(action);
+                                tasks.remove(future);
+                            }
                             mapActionTask.remove(action);
+                            mp.mso.cancelInfo(action);
+                            mp.userActions.remove(action);
                             postRun.run();
-                            return result;
-                        } else {
-                            return false;
-                        //    return out;
                         }
-                    }));
+                    } else {
+                        CompletableFuture<Boolean> startingPoint;
+                        if (tasks.size() == 0) {
+                            startingPoint = CompletableFuture.supplyAsync(() -> true);
+                        } else {
+                            startingPoint = tasks.get(tasks.size() - 1);
+                        }
+                        tasks.add(startingPoint.thenApplyAsync((out) -> {
+                            if (out) {
+                                boolean result = action.cancel();
+                                tasks.remove(mapActionTask.get(action));
+                                mapActionTask.remove(action);
+                                postRun.run();
+                                return result;
+                            } else {
+                                return false;
+                            }
+                        }));
+                    }
                 } else {
-                    //System.out.println("Cancel "+action+" Not Done");
                     // Not done yet! - let's remove right now from the task list
                     mapActionTask.get(action).cancel(true);
                     tasks.remove(mapActionTask.get(action));
