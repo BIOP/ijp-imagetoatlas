@@ -7,6 +7,7 @@ import ch.epfl.biop.ABBALaunch;
 import ch.epfl.biop.bdv.bioformats.BioFormatsMetaDataHelper;
 import ch.epfl.biop.sourceandconverter.register.Elastix2DSplineRegister;
 import ch.epfl.biop.wrappers.elastix.ElastixTask;
+import ch.epfl.biop.wrappers.elastix.RemoteElastixTask;
 import ij.IJ;
 import net.imagej.ImageJ;
 import org.scijava.command.Command;
@@ -48,6 +49,7 @@ public class ABBAForumHelpCommand implements Command {
             body +="Bdv Playground "+VersionUtils.getVersion(SourceAndConverterServices.class)+nl;
             body +="Bdv BioFormats "+VersionUtils.getVersion(BioFormatsMetaDataHelper.class)+nl;
             body +="Biop Wrappers "+VersionUtils.getVersion(ElastixTask.class)+nl;
+            body +="Registration Server "+VersionUtils.getVersion(RemoteElastixTask.class)+nl;
             body +="```";
 
             String fullUrl = imageScForumUrl+"new-topic?"

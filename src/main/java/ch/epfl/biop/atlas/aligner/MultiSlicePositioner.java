@@ -2458,7 +2458,9 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         slices.get(0).waitForEndOfTasks();
 
         // Wait patiently for all tasks to be performed
+        log.accept("Waiting for all tasks to be finished ... ");
         this.getSortedSlices().forEach(SliceSources::waitForEndOfTasks);
+        log.accept("All tasks have been performed!");
 
         // First save all sources required in the state
         List<SourceAndConverter> allSacs = new ArrayList<>();
