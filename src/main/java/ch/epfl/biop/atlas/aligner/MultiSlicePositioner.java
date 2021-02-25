@@ -387,7 +387,9 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
         bdvh.getCardPanel().addCard("Tasks Info", mso.getJPanel(), false);
 
-        ResourcesMonitor rm = new ResourcesMonitor();
+        ResourcesMonitor rm = null;
+
+        rm = new ResourcesMonitor();
 
         bdvh.getCardPanel().addCard("Resources Monitor", rm, false);
 
@@ -871,7 +873,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         return centerBdv;
     }
 
-    protected void updateDisplay() {
+    public void updateDisplay() {
         // Sort slices along slicing axis
         if (overlapMode == 0) {
             slices.forEach(slice -> slice.getGUIState().setYShift(1));

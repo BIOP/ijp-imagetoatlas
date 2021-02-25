@@ -62,6 +62,7 @@ public class SliceThicknessMatchNeighborsCommand implements Command {
 
                     }
                 }
+                mp.updateDisplay();
             }
         }
     }

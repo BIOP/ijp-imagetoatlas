@@ -13,7 +13,7 @@ public class RegistrationElastixSplineRemoteCommand extends RegistrationCommand 
     int nbControlPointsX = 10;
 
     @Parameter(label = "Registration Server URL")
-    String serverURL;
+    String serverURL = "https://snappy.epfl.ch";
 
     @Parameter(visibility = ItemVisibility.MESSAGE, style = TextWidget.AREA_STYLE )
     String userConsentMessage =

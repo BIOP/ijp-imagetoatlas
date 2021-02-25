@@ -10,7 +10,7 @@ import org.scijava.widget.TextWidget;
 public class RegistrationElastixAffineRemoteCommand extends RegistrationCommand {
 
     @Parameter(label = "Registration Server URL")
-    String serverURL;
+    String serverURL = "https://snappy.epfl.ch";
 
     @Parameter(visibility = ItemVisibility.MESSAGE, style = TextWidget.AREA_STYLE )
     String userConsentMessage =

@@ -1,5 +1,6 @@
 package ch.epfl.biop;
 
+
 import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
 import oshi.hardware.HardwareAbstractionLayer;
