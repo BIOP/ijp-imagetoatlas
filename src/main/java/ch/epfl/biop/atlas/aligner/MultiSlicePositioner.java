@@ -387,9 +387,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
         bdvh.getCardPanel().addCard("Tasks Info", mso.getJPanel(), false);
 
-        ResourcesMonitor rm = null;
-
-        rm = new ResourcesMonitor();
+        final ResourcesMonitor rm = new ResourcesMonitor();
 
         bdvh.getCardPanel().addCard("Resources Monitor", rm, false);
 
