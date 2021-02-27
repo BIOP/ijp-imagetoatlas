@@ -147,7 +147,7 @@
 		<ijl-utilities-wrappers.version>0.3.17</ijl-utilities-wrappers.version>
 		<json.version>20180813</json.version>
 		<!-- temp build because of culling wrongly handled with warped source -->
-		<bigwarp_fiji.version>6.0.1</bigwarp_fiji.version>
+		<bigwarp_fiji.version>6.1.0</bigwarp_fiji.version>
 
 		<bigdataviewer-spimdata-extras.version>0.1.0</bigdataviewer-spimdata-extras.version>
 		<oshi-core.version>5.5.1</oshi-core.version>

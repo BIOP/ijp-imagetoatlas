@@ -95,9 +95,8 @@ public class SliceSourcesGUIState {
         );
 
         tt = new GraphicalHandleToolTip(gh, slice::toString, -20, -10);
-
         ghs.add(gh);
-        //ghs.add(tt);
+
     }
 
     protected void sourcesChanged() {
@@ -203,7 +202,7 @@ public class SliceSourcesGUIState {
             RealPoint zero = new RealPoint(3);
             zero.setPosition(0, 0);
             bdvAt3D.apply(zero, zero);
-            return new Integer[]{35 * (slice.getIndex() - mp.getSlices().size() / 2) + (int) zero.getDoublePosition(0), 80, 0};
+            return new Integer[]{35 * (slice.getIndex() - mp.getCurrentSliceIndex()) + (int) zero.getDoublePosition(0), 80, 0};
         } else {
             return new Integer[]{0, 0, 0};
         }

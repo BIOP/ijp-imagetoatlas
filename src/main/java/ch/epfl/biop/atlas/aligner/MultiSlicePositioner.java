@@ -745,6 +745,10 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         }
     }
 
+    public int getCurrentSliceIndex() {
+        return iCurrentSlice;
+    }
+
     /**
      * Center bdv on current slice (iCurrentSlice)
      */
@@ -905,37 +909,13 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     protected void draw(Graphics2D g) {
         List<SliceSources> slicesCopy = getSlices();
 
-        int colorCode = this.info.getColor().get();
-        Color color = new Color(ARGBType.red(colorCode), ARGBType.green(colorCode), ARGBType.blue(colorCode), ARGBType.alpha(colorCode));
-        g.setColor(color);
-
-        RealPoint[][] ptRectWorld = new RealPoint[2][2];
-        Point[][] ptRectScreen = new Point[2][2];
-
         AffineTransform3D bdvAt3D = new AffineTransform3D();
 
         bdvh.getViewerPanel().state().getViewerTransform(bdvAt3D);
 
-        for (int xp = 0; xp < 2; xp++) {
-            for (int yp = 0; yp < 2; yp++) {
-                ptRectWorld[xp][yp] = new RealPoint(3);
-                RealPoint pt = ptRectWorld[xp][yp];
-                pt.setPosition(sX * (iSliceNoStep + xp), 0);
-                pt.setPosition(sY * (0.5 + yp), 1);
-                pt.setPosition(0, 2);
-                bdvAt3D.apply(pt, pt);
-                ptRectScreen[xp][yp] = new Point((int) pt.getDoublePosition(0), (int) pt.getDoublePosition(1));
-            }
-        }
-
-        g.drawLine(ptRectScreen[0][0].x, ptRectScreen[0][0].y, ptRectScreen[1][0].x, ptRectScreen[1][0].y);
-        g.drawLine(ptRectScreen[1][0].x, ptRectScreen[1][0].y, ptRectScreen[1][1].x, ptRectScreen[1][1].y);
-        g.drawLine(ptRectScreen[1][1].x, ptRectScreen[1][1].y, ptRectScreen[0][1].x, ptRectScreen[0][1].y);
-        g.drawLine(ptRectScreen[0][1].x, ptRectScreen[0][1].y, ptRectScreen[0][0].x, ptRectScreen[0][0].y);
+        drawDragAndDropRectangle(g, bdvAt3D);
 
         slicesCopy.forEach(slice -> slice.getGUIState().drawGraphicalHandles(g));
-
-        g.setColor(color);
 
         if (iCurrentSlice != -1 && slicesCopy.size() > iCurrentSlice) {
             SliceSources slice = getSortedSlices().get(iCurrentSlice);
@@ -1086,6 +1066,37 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
             }
         }
 
+    }
+
+    void drawDragAndDropRectangle(Graphics2D g, AffineTransform3D bdvAt3D) {
+        int colorCode = this.info.getColor().get();
+
+        Color color = new Color(ARGBType.red(colorCode), ARGBType.green(colorCode), ARGBType.blue(colorCode), ARGBType.alpha(colorCode));
+
+        g.setColor(color);
+
+        RealPoint[][] ptRectWorld = new RealPoint[2][2];
+
+        Point[][] ptRectScreen = new Point[2][2];
+
+        for (int xp = 0; xp < 2; xp++) {
+            for (int yp = 0; yp < 2; yp++) {
+                ptRectWorld[xp][yp] = new RealPoint(3);
+                RealPoint pt = ptRectWorld[xp][yp];
+                pt.setPosition(sX * (iSliceNoStep + xp), 0);
+                pt.setPosition(sY * (0.5 + yp), 1);
+                pt.setPosition(0, 2);
+                bdvAt3D.apply(pt, pt);
+                ptRectScreen[xp][yp] = new Point((int) pt.getDoublePosition(0), (int) pt.getDoublePosition(1));
+            }
+        }
+
+        g.drawLine(ptRectScreen[0][0].x, ptRectScreen[0][0].y, ptRectScreen[1][0].x, ptRectScreen[1][0].y);
+        g.drawLine(ptRectScreen[1][0].x, ptRectScreen[1][0].y, ptRectScreen[1][1].x, ptRectScreen[1][1].y);
+        g.drawLine(ptRectScreen[1][1].x, ptRectScreen[1][1].y, ptRectScreen[0][1].x, ptRectScreen[0][1].y);
+        g.drawLine(ptRectScreen[0][1].x, ptRectScreen[0][1].y, ptRectScreen[0][0].x, ptRectScreen[0][0].y);
+
+        g.setColor(color);
     }
 
     Object getSourceValueAt(SourceAndConverter sac, RealPoint pt) {
