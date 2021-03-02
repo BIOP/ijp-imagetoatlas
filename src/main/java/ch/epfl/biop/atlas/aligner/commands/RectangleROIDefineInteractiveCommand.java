@@ -1,7 +1,7 @@
 package ch.epfl.biop.atlas.aligner.commands;
 
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
-import ch.epfl.biop.bdv.userdefinedregion.GetUserRectangleCommand;
+import ch.epfl.biop.bdv.command.userdefinedregion.GetUserRectangleCommand;
 import net.imglib2.RealPoint;
 import org.scijava.command.Command;
 import org.scijava.command.CommandService;
@@ -51,7 +51,10 @@ public class RectangleROIDefineInteractiveCommand extends InteractiveCommand {
         Thread t = new Thread(() -> {
         try {
             List<RealPoint> pts = (List<RealPoint>)
-            cs.run(GetUserRectangleCommand.class, true, "bdvh", mp.getBdvh(), "timeOut", -1)
+            cs.run(GetUserRectangleCommand.class, true,
+                    "bdvh", mp.getBdvh(),
+                    "timeOut", -1,
+                    "messageForUser", "Select the rectangular region of interest.")
                     .get().getOutput("pts");
 
             if (pts==null) {

@@ -28,6 +28,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static bdv.util.RealTransformHelper.BigWarpFileFromRealTransform;
+
 public class SacBigWarp2DRegistration implements Registration<SourceAndConverter<?>[]> {
 
     SourceAndConverter[] fimg, mimg;
@@ -102,71 +104,6 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
 
             return true;
 
-        }
-    }
-
-    public static String BigWarpFileFromRealTransform(RealTransform rt) {
-        try {
-            File file = File.createTempFile("temp", null);
-            System.out.println(file.getAbsolutePath());
-            file.deleteOnExit();
-
-            if (rt instanceof Wrapped2DTransformAs3D) {
-                rt = ((Wrapped2DTransformAs3D)rt).transform;
-            }
-
-            if (rt instanceof WrappedIterativeInvertibleRealTransform) {
-                rt = ((WrappedIterativeInvertibleRealTransform)rt).getTransform();
-            }
-
-            if (rt instanceof BoundedRealTransform) {
-                rt = ((BoundedRealTransform)rt).getTransform();
-
-                if (rt instanceof Wrapped2DTransformAs3D) {
-                    rt = ((Wrapped2DTransformAs3D)rt).transform;
-                }
-
-                if (rt instanceof WrappedIterativeInvertibleRealTransform) {
-                    rt = ((WrappedIterativeInvertibleRealTransform)rt).getTransform();
-                }
-            }
-
-            if (!(rt instanceof ThinplateSplineTransform)) {
-                System.err.println("Cannot edit the transform : it's not of class thinplatesplinetransform");
-            }
-
-            ThinplateSplineTransform tst = (ThinplateSplineTransform) rt;
-
-            ThinPlateR2LogRSplineKernelTransform kernel = ThinPlateSplineTransformAdapter.getKernel(tst);
-
-            double[][] srcPts = ThinPlateSplineTransformAdapter.getSrcPts(kernel);
-            double[][] tgtPts = ThinPlateSplineTransformAdapter.getTgtPts(kernel);
-
-            int nbLandmarks = kernel.getNumLandmarks();
-            int nbDimensions = kernel.getNumDims();
-
-            String toFile = "";
-
-            for (int i = 0;i<nbLandmarks;i++) {
-                toFile+="\"Pt-"+i+"\",\"true\"";
-                for (int d = 0; d<nbDimensions; d++) {
-                    toFile+=",\""+tgtPts[d][i]+"\"";
-                }
-                for (int d = 0; d<nbDimensions; d++) {
-                    toFile+=",\""+srcPts[d][i]+"\"";
-                }
-                toFile+="\n";
-            }
-
-            FileWriter writer = new FileWriter(file);
-            writer.write(toFile);
-            writer.flush();
-            writer.close();
-
-            return file.getAbsolutePath();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
         }
     }
 

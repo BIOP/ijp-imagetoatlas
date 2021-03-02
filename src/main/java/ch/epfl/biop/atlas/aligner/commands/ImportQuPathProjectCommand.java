@@ -2,7 +2,7 @@ package ch.epfl.biop.atlas.aligner.commands;
 
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
-import ch.epfl.biop.scijava.command.QuPathProjectToBDVDatasetCommand;
+import ch.epfl.biop.bdv.command.importer.QuPathProjectToBDVDatasetCommand;
 import ch.epfl.biop.spimdata.qupath.QuPathEntryEntity;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import org.scijava.command.Command;

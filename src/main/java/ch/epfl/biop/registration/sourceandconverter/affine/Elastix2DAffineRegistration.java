@@ -1,7 +1,7 @@
 package ch.epfl.biop.registration.sourceandconverter.affine;
 
 import bdv.viewer.SourceAndConverter;
-import ch.epfl.biop.scijava.command.Elastix2DAffineRegisterCommand;
+import ch.epfl.biop.bdv.command.register.Elastix2DAffineRegisterCommand;
 import net.imglib2.realtransform.AffineTransform3D;
 import org.scijava.Context;
 import org.scijava.command.Command;

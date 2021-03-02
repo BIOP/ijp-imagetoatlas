@@ -44,34 +44,6 @@
 				<role>maintainer</role>
 			</roles>
 		</developer>
-		<developer>
-			<id>oburri</id>
-			<name>Olivier Burri</name>
-			<url>http://biop.epfl.ch/INFO_Facility.html</url>
-			<roles>
-				<role>founder</role>
-				<role>lead</role>
-				<role>developer</role>
-				<role>debugger</role>
-				<role>reviewer</role>
-				<role>support</role>
-				<role>maintainer</role>
-			</roles>
-		</developer>
-		<developer>
-			<id>romainGuiet</id>
-			<name>Romain Guiet</name>
-			<url>http://biop.epfl.ch/INFO_Facility.html</url>
-			<roles>
-				<role>founder</role>
-				<role>lead</role>
-				<role>developer</role>
-				<role>debugger</role>
-				<role>reviewer</role>
-				<role>support</role>
-				<role>maintainer</role>
-			</roles>
-		</developer>
 	</developers>
 	<contributors >
 
@@ -129,13 +101,13 @@
 	</repositories>
 	
 	<properties>
-		<package-name>ch.epfl.biop.aba</package-name>
-		<main-class>ch.epfl.biop.aba.DummyCommand</main-class>
+		<package-name>ch.epfl.biop</package-name>
+		<main-class>ch.epfl.biop.ABBALaunch</main-class>
 		<license.licenseName>N/A</license.licenseName>
 		<license.copyrightOwners>N/A</license.copyrightOwners>
 		<scijava.app.directory>C:\Users\nicol\Desktop\fiji-win64-ABBA\Fiji.app</scijava.app.directory>
 
-		<bigdataviewer-biop-tools.version>0.2.5</bigdataviewer-biop-tools.version>
+		<bigdataviewer-biop-tools.version>0.2.6</bigdataviewer-biop-tools.version>
 		<bigdataviewer-bioformats.version>0.2.15</bigdataviewer-bioformats.version>
 		<bigdataviewer-playground.version>0.2.11</bigdataviewer-playground.version>
 		<bigdataviewer-selector.version>0.1.8</bigdataviewer-selector.version>
@@ -146,7 +118,7 @@
 
 		<ijl-utilities-wrappers.version>0.3.17</ijl-utilities-wrappers.version>
 		<json.version>20180813</json.version>
-		<!-- temp build because of culling wrongly handled with warped source -->
+
 		<bigwarp_fiji.version>6.1.0</bigwarp_fiji.version>
 
 		<bigdataviewer-spimdata-extras.version>0.1.0</bigdataviewer-spimdata-extras.version>

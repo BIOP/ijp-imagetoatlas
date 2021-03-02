@@ -3,9 +3,9 @@ package ch.epfl.biop.registration.sourceandconverter.spline;
 import bdv.tools.brightness.ConverterSetup;
 import bdv.util.BdvHandle;
 import bdv.viewer.SourceAndConverter;
+import ch.epfl.biop.bdv.command.register.Elastix2DSplineRegisterCommand;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import ch.epfl.biop.registration.sourceandconverter.SourceAndConverterRegistration;
-import ch.epfl.biop.scijava.command.Elastix2DSplineRegisterCommand;
 import ij.gui.WaitForUserDialog;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.RealTransform;
@@ -23,7 +23,7 @@ import java.util.concurrent.Future;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static ch.epfl.biop.registration.sourceandconverter.spline.SacBigWarp2DRegistration.BigWarpFileFromRealTransform;
+import static bdv.util.RealTransformHelper.BigWarpFileFromRealTransform;
 
 public class Elastix2DSplineRegistration extends SourceAndConverterRegistration {
 
