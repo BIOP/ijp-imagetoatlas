@@ -47,7 +47,7 @@ public class MultiSliceObserver {
             while (animate) {
 
                 if (repaintNeeded) {
-                    mp.bdvh.getViewerPanel().getDisplay().repaint();
+                    mp.getBdvh().getViewerPanel().getDisplay().repaint();
                 }
                 repaintNeeded = false;
                 try {

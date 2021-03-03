@@ -26,7 +26,7 @@ public class SelectionLayer {
 
     public SelectionLayer(MultiSlicePositioner mp) {
         this.mp = mp;
-        viewer = mp.bdvh.getViewerPanel();
+        viewer = mp.getBdvh().getViewerPanel();
     }
 
     protected void addSelectionBehaviours(Behaviours behaviours) {

@@ -1,0 +1,3199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SpimData version="0.2">
+  <BasePath type="relative">_bdvdataset_3.xml</BasePath>
+  <SequenceDescription>
+    <ImageLoader format="spimreconstruction.biop_bioformatsimageloader">
+      <opener_class>ch.epfl.biop.bdv.bioformats.bioformatssource.BioFormatsBdvOpener</opener_class>
+      <num_fetcher_threads>2</num_fetcher_threads>
+      <num_priorities>4</num_priorities>
+      <dataset_number>2</dataset_number>
+      <opener_0>{"dataLocation":"C:\\Users\\nicol\\Dropbox\\BIOP\\19-05-24 VSI Samples\\align\\Image_06.vsi","useBioFormatsXYBlockSize":true,"isSoftRef":true,"cacheBlockSize":{"min":[0,0,0],"max":[512,512,1],"n":3},"swZC":false,"splitRGBChannels":false,"u":{"measurementSystem":"SI.METRE","symbol":"mm","scaleFactor":0.001,"offset":0.0},"positionPostTransformMatrixArray":[1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0,0.0],"positionReferenceFrameLength":{"value":1.0,"unit":{"measurementSystem":"SI.METRE","symbol":"mm","scaleFactor":0.001,"offset":0.0},"hashCodeValue":-469617440},"positionIgnoreBioFormatsMetaData":true,"positionIsImageCenter":false,"voxSizeReferenceFrameLength":{"value":1.0,"unit":{"measurementSystem":"SI.METRE","symbol":"mm","scaleFactor":0.001,"offset":0.0},"hashCodeValue":-469617440},"voxSizeIgnoreBioFormatsMetaData":true,"axesOfImageFlip":[false,false,false],"nFetcherThread":2,"numPriorities":4,"maxCacheSize":1}</opener_0>
+      <opener_1>{"dataLocation":"C:\\Users\\nicol\\Dropbox\\BIOP\\19-05-24 VSI Samples\\align\\Image_07.vsi","useBioFormatsXYBlockSize":true,"isSoftRef":true,"cacheBlockSize":{"min":[0,0,0],"max":[512,512,1],"n":3},"swZC":false,"splitRGBChannels":false,"u":{"measurementSystem":"SI.METRE","symbol":"mm","scaleFactor":0.001,"offset":0.0},"positionPostTransformMatrixArray":[1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0,0.0],"positionReferenceFrameLength":{"value":1.0,"unit":{"measurementSystem":"SI.METRE","symbol":"mm","scaleFactor":0.001,"offset":0.0},"hashCodeValue":-469617440},"positionIgnoreBioFormatsMetaData":true,"positionIsImageCenter":false,"voxSizeReferenceFrameLength":{"value":1.0,"unit":{"measurementSystem":"SI.METRE","symbol":"mm","scaleFactor":0.001,"offset":0.0},"hashCodeValue":-469617440},"voxSizeIgnoreBioFormatsMetaData":true,"axesOfImageFlip":[false,false,false],"nFetcherThread":2,"numPriorities":4,"maxCacheSize":1}</opener_1>
+    </ImageLoader>
+    <ViewSetups>
+      <ViewSetup>
+        <id>0</id>
+        <name>label-s0-ch0</name>
+        <size>5017 7149 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>0.0034780633438541405 0.003478138936211383 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>0</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>-1</qupathentryentity>
+          <channel>0</channel>
+          <tile>0</tile>
+          <angle>0</angle>
+          <seriesnumber>0</seriesnumber>
+          <displaysettings>0</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>1</id>
+        <name>overview-s1-ch0</name>
+        <size>16166 6814 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>0.0034782997347079236 0.0034781150143938216 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>0</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>-1</qupathentryentity>
+          <channel>0</channel>
+          <tile>1</tile>
+          <angle>0</angle>
+          <seriesnumber>1</seriesnumber>
+          <displaysettings>1</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>2</id>
+        <name>10x_01-s2-FL DAPI</name>
+        <size>17159 10799 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441826664497763E-4 6.441594473953849E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>0</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>3</qupathentryentity>
+          <channel>1</channel>
+          <tile>2</tile>
+          <angle>0</angle>
+          <seriesnumber>2</seriesnumber>
+          <displaysettings>2</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>3</id>
+        <name>10x_01-s2-FL FITC</name>
+        <size>17159 10799 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441826664497763E-4 6.441594473953849E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>0</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>3</qupathentryentity>
+          <channel>2</channel>
+          <tile>2</tile>
+          <angle>0</angle>
+          <seriesnumber>2</seriesnumber>
+          <displaysettings>3</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>4</id>
+        <name>10x_01-s2-FL CY3</name>
+        <size>17159 10799 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441826664497763E-4 6.441594473953849E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>0</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>3</qupathentryentity>
+          <channel>3</channel>
+          <tile>2</tile>
+          <angle>0</angle>
+          <seriesnumber>2</seriesnumber>
+          <displaysettings>4</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>5</id>
+        <name>10x_02-s3-FL DAPI</name>
+        <size>17467 10799 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441738352140264E-4 6.441594473953855E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>0</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>4</qupathentryentity>
+          <channel>1</channel>
+          <tile>3</tile>
+          <angle>0</angle>
+          <seriesnumber>3</seriesnumber>
+          <displaysettings>5</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>6</id>
+        <name>10x_02-s3-FL FITC</name>
+        <size>17467 10799 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441738352140264E-4 6.441594473953855E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>0</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>4</qupathentryentity>
+          <channel>2</channel>
+          <tile>3</tile>
+          <angle>0</angle>
+          <seriesnumber>3</seriesnumber>
+          <displaysettings>6</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>7</id>
+        <name>10x_02-s3-FL CY3</name>
+        <size>17467 10799 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441738352140264E-4 6.441594473953855E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>0</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>4</qupathentryentity>
+          <channel>3</channel>
+          <tile>3</tile>
+          <angle>0</angle>
+          <seriesnumber>3</seriesnumber>
+          <displaysettings>7</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>8</id>
+        <name>10x_03-s4-FL DAPI</name>
+        <size>17850 11107 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441866863954451E-4 6.441461953530941E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>0</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>5</qupathentryentity>
+          <channel>1</channel>
+          <tile>4</tile>
+          <angle>0</angle>
+          <seriesnumber>4</seriesnumber>
+          <displaysettings>8</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>9</id>
+        <name>10x_03-s4-FL FITC</name>
+        <size>17850 11107 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441866863954451E-4 6.441461953530941E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>0</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>5</qupathentryentity>
+          <channel>2</channel>
+          <tile>4</tile>
+          <angle>0</angle>
+          <seriesnumber>4</seriesnumber>
+          <displaysettings>9</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>10</id>
+        <name>10x_03-s4-FL CY3</name>
+        <size>17850 11107 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441866863954451E-4 6.441461953530941E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>0</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>5</qupathentryentity>
+          <channel>3</channel>
+          <tile>4</tile>
+          <angle>0</angle>
+          <seriesnumber>4</seriesnumber>
+          <displaysettings>10</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>11</id>
+        <name>10x_04-s5-FL DAPI</name>
+        <size>17699 10567 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441801468643161E-4 6.441485661176943E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>0</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>6</qupathentryentity>
+          <channel>1</channel>
+          <tile>5</tile>
+          <angle>0</angle>
+          <seriesnumber>5</seriesnumber>
+          <displaysettings>11</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>12</id>
+        <name>10x_04-s5-FL FITC</name>
+        <size>17699 10567 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441801468643161E-4 6.441485661176943E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>0</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>6</qupathentryentity>
+          <channel>2</channel>
+          <tile>5</tile>
+          <angle>0</angle>
+          <seriesnumber>5</seriesnumber>
+          <displaysettings>12</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>13</id>
+        <name>10x_04-s5-FL CY3</name>
+        <size>17699 10567 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441801468643161E-4 6.441485661176943E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>0</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>6</qupathentryentity>
+          <channel>3</channel>
+          <tile>5</tile>
+          <angle>0</angle>
+          <seriesnumber>5</seriesnumber>
+          <displaysettings>13</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>14</id>
+        <name>10x_05-s6-FL DAPI</name>
+        <size>17089 10875 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441754665378626E-4 6.441353395429637E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>0</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>7</qupathentryentity>
+          <channel>1</channel>
+          <tile>6</tile>
+          <angle>0</angle>
+          <seriesnumber>6</seriesnumber>
+          <displaysettings>14</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>15</id>
+        <name>10x_05-s6-FL FITC</name>
+        <size>17089 10875 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441754665378626E-4 6.441353395429637E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>0</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>7</qupathentryentity>
+          <channel>2</channel>
+          <tile>6</tile>
+          <angle>0</angle>
+          <seriesnumber>6</seriesnumber>
+          <displaysettings>15</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>16</id>
+        <name>10x_05-s6-FL CY3</name>
+        <size>17089 10875 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441754665378626E-4 6.441353395429637E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>0</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>7</qupathentryentity>
+          <channel>3</channel>
+          <tile>6</tile>
+          <angle>0</angle>
+          <seriesnumber>6</seriesnumber>
+          <displaysettings>16</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>17</id>
+        <name>10x_06-s7-FL DAPI</name>
+        <size>17159 10718 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.44182666449775E-4 6.441598981507366E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>0</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>8</qupathentryentity>
+          <channel>1</channel>
+          <tile>7</tile>
+          <angle>0</angle>
+          <seriesnumber>7</seriesnumber>
+          <displaysettings>17</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>18</id>
+        <name>10x_06-s7-FL FITC</name>
+        <size>17159 10718 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.44182666449775E-4 6.441598981507366E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>0</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>8</qupathentryentity>
+          <channel>2</channel>
+          <tile>7</tile>
+          <angle>0</angle>
+          <seriesnumber>7</seriesnumber>
+          <displaysettings>18</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>19</id>
+        <name>10x_06-s7-FL CY3</name>
+        <size>17159 10718 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.44182666449775E-4 6.441598981507366E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>0</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>8</qupathentryentity>
+          <channel>3</channel>
+          <tile>7</tile>
+          <angle>0</angle>
+          <seriesnumber>7</seriesnumber>
+          <displaysettings>19</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>20</id>
+        <name>10x_07-s8-FL DAPI</name>
+        <size>17165 10875 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441601231616142E-4 6.44135339542963E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>0</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>9</qupathentryentity>
+          <channel>1</channel>
+          <tile>8</tile>
+          <angle>0</angle>
+          <seriesnumber>8</seriesnumber>
+          <displaysettings>20</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>21</id>
+        <name>10x_07-s8-FL FITC</name>
+        <size>17165 10875 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441601231616142E-4 6.44135339542963E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>0</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>9</qupathentryentity>
+          <channel>2</channel>
+          <tile>8</tile>
+          <angle>0</angle>
+          <seriesnumber>8</seriesnumber>
+          <displaysettings>21</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>22</id>
+        <name>10x_07-s8-FL CY3</name>
+        <size>17165 10875 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441601231616142E-4 6.44135339542963E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>0</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>9</qupathentryentity>
+          <channel>3</channel>
+          <tile>8</tile>
+          <angle>0</angle>
+          <seriesnumber>8</seriesnumber>
+          <displaysettings>22</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>23</id>
+        <name>10x_08-s9-FL DAPI</name>
+        <size>17165 11107 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441601231616142E-4 6.441461953530941E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>0</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>10</qupathentryentity>
+          <channel>1</channel>
+          <tile>9</tile>
+          <angle>0</angle>
+          <seriesnumber>9</seriesnumber>
+          <displaysettings>23</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>24</id>
+        <name>10x_08-s9-FL FITC</name>
+        <size>17165 11107 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441601231616142E-4 6.441461953530941E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>0</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>10</qupathentryentity>
+          <channel>2</channel>
+          <tile>9</tile>
+          <angle>0</angle>
+          <seriesnumber>9</seriesnumber>
+          <displaysettings>24</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>25</id>
+        <name>10x_08-s9-FL CY3</name>
+        <size>17165 11107 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441601231616142E-4 6.441461953530941E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>0</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>10</qupathentryentity>
+          <channel>3</channel>
+          <tile>9</tile>
+          <angle>0</angle>
+          <seriesnumber>9</seriesnumber>
+          <displaysettings>25</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>26</id>
+        <name>10x_09-s10-FL DAPI</name>
+        <size>17391 10340 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441889720706006E-4 6.44162095052688E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>0</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>11</qupathentryentity>
+          <channel>1</channel>
+          <tile>10</tile>
+          <angle>0</angle>
+          <seriesnumber>10</seriesnumber>
+          <displaysettings>26</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>27</id>
+        <name>10x_09-s10-FL FITC</name>
+        <size>17391 10340 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441889720706006E-4 6.44162095052688E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>0</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>11</qupathentryentity>
+          <channel>2</channel>
+          <tile>10</tile>
+          <angle>0</angle>
+          <seriesnumber>10</seriesnumber>
+          <displaysettings>27</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>28</id>
+        <name>10x_09-s10-FL CY3</name>
+        <size>17391 10340 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441889720706006E-4 6.44162095052688E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>0</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>11</qupathentryentity>
+          <channel>3</channel>
+          <tile>10</tile>
+          <angle>0</angle>
+          <seriesnumber>10</seriesnumber>
+          <displaysettings>28</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>29</id>
+        <name>10x_10-s11-FL DAPI</name>
+        <size>16625 11566 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441620732829643E-4 6.441443542594492E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>0</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>12</qupathentryentity>
+          <channel>1</channel>
+          <tile>11</tile>
+          <angle>0</angle>
+          <seriesnumber>11</seriesnumber>
+          <displaysettings>29</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>30</id>
+        <name>10x_10-s11-FL FITC</name>
+        <size>16625 11566 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441620732829643E-4 6.441443542594492E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>0</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>12</qupathentryentity>
+          <channel>2</channel>
+          <tile>11</tile>
+          <angle>0</angle>
+          <seriesnumber>11</seriesnumber>
+          <displaysettings>30</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>31</id>
+        <name>10x_10-s11-FL CY3</name>
+        <size>16625 11566 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441620732829643E-4 6.441443542594492E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>0</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>12</qupathentryentity>
+          <channel>3</channel>
+          <tile>11</tile>
+          <angle>0</angle>
+          <seriesnumber>11</seriesnumber>
+          <displaysettings>31</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>32</id>
+        <name>10x_11-s12-FL DAPI</name>
+        <size>17931 10648 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441862951882023E-4 6.441481951736335E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>0</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>13</qupathentryentity>
+          <channel>1</channel>
+          <tile>12</tile>
+          <angle>0</angle>
+          <seriesnumber>12</seriesnumber>
+          <displaysettings>32</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>33</id>
+        <name>10x_11-s12-FL FITC</name>
+        <size>17931 10648 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441862951882023E-4 6.441481951736335E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>0</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>13</qupathentryentity>
+          <channel>2</channel>
+          <tile>12</tile>
+          <angle>0</angle>
+          <seriesnumber>12</seriesnumber>
+          <displaysettings>33</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>34</id>
+        <name>10x_11-s12-FL CY3</name>
+        <size>17931 10648 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441862951882023E-4 6.441481951736335E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>0</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>13</qupathentryentity>
+          <channel>3</channel>
+          <tile>12</tile>
+          <angle>0</angle>
+          <seriesnumber>12</seriesnumber>
+          <displaysettings>34</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>35</id>
+        <name>10x_12-s13-FL DAPI</name>
+        <size>17699 10875 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441801468643161E-4 6.441353395429624E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>0</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>14</qupathentryentity>
+          <channel>1</channel>
+          <tile>13</tile>
+          <angle>0</angle>
+          <seriesnumber>13</seriesnumber>
+          <displaysettings>35</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>36</id>
+        <name>10x_12-s13-FL FITC</name>
+        <size>17699 10875 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441801468643161E-4 6.441353395429624E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>0</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>14</qupathentryentity>
+          <channel>2</channel>
+          <tile>13</tile>
+          <angle>0</angle>
+          <seriesnumber>13</seriesnumber>
+          <displaysettings>36</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>37</id>
+        <name>10x_12-s13-FL CY3</name>
+        <size>17699 10875 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441801468643161E-4 6.441353395429624E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>0</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>14</qupathentryentity>
+          <channel>3</channel>
+          <tile>13</tile>
+          <angle>0</angle>
+          <seriesnumber>13</seriesnumber>
+          <displaysettings>37</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>38</id>
+        <name>macro image-s14-ch0</name>
+        <size>620 212 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>1.0 1.0 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>0</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>-1</qupathentryentity>
+          <channel>0</channel>
+          <tile>14</tile>
+          <angle>0</angle>
+          <seriesnumber>14</seriesnumber>
+          <displaysettings>38</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>39</id>
+        <name>label-s0-ch0</name>
+        <size>5017 7149 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>0.0034780633438541405 0.003478138936211383 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>1</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>-1</qupathentryentity>
+          <channel>0</channel>
+          <tile>15</tile>
+          <angle>0</angle>
+          <seriesnumber>0</seriesnumber>
+          <displaysettings>39</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>40</id>
+        <name>overview-s1-ch0</name>
+        <size>16166 6814 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>0.0034782997347079236 0.0034781150143938216 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>1</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>-1</qupathentryentity>
+          <channel>0</channel>
+          <tile>16</tile>
+          <angle>0</angle>
+          <seriesnumber>1</seriesnumber>
+          <displaysettings>40</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>41</id>
+        <name>10x_01-s2-FL DAPI</name>
+        <size>17467 10108 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441738352140271E-4 6.441507804301256E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>1</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>17</qupathentryentity>
+          <channel>1</channel>
+          <tile>17</tile>
+          <angle>0</angle>
+          <seriesnumber>2</seriesnumber>
+          <displaysettings>41</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>42</id>
+        <name>10x_01-s2-FL FITC</name>
+        <size>17467 10108 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441738352140271E-4 6.441507804301256E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>1</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>17</qupathentryentity>
+          <channel>2</channel>
+          <tile>17</tile>
+          <angle>0</angle>
+          <seriesnumber>2</seriesnumber>
+          <displaysettings>42</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>43</id>
+        <name>10x_01-s2-FL CY3</name>
+        <size>17467 10108 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441738352140271E-4 6.441507804301256E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>1</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>17</qupathentryentity>
+          <channel>3</channel>
+          <tile>17</tile>
+          <angle>0</angle>
+          <seriesnumber>2</seriesnumber>
+          <displaysettings>43</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>44</id>
+        <name>10x_02-s3-FL DAPI</name>
+        <size>17548 10032 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441734947882594E-4 6.441768484330886E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>1</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>18</qupathentryentity>
+          <channel>1</channel>
+          <tile>18</tile>
+          <angle>0</angle>
+          <seriesnumber>3</seriesnumber>
+          <displaysettings>44</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>45</id>
+        <name>10x_02-s3-FL FITC</name>
+        <size>17548 10032 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441734947882594E-4 6.441768484330886E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>1</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>18</qupathentryentity>
+          <channel>2</channel>
+          <tile>18</tile>
+          <angle>0</angle>
+          <seriesnumber>3</seriesnumber>
+          <displaysettings>45</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>46</id>
+        <name>10x_02-s3-FL CY3</name>
+        <size>17548 10032 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441734947882594E-4 6.441768484330886E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>1</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>18</qupathentryentity>
+          <channel>3</channel>
+          <tile>18</tile>
+          <angle>0</angle>
+          <seriesnumber>3</seriesnumber>
+          <displaysettings>46</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>47</id>
+        <name>10x_03-s4-FL DAPI</name>
+        <size>17543 9805 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441588295096042E-4 6.441917703375699E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>1</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>19</qupathentryentity>
+          <channel>1</channel>
+          <tile>19</tile>
+          <angle>0</angle>
+          <seriesnumber>4</seriesnumber>
+          <displaysettings>47</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>48</id>
+        <name>10x_03-s4-FL FITC</name>
+        <size>17543 9805 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441588295096042E-4 6.441917703375699E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>1</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>19</qupathentryentity>
+          <channel>2</channel>
+          <tile>19</tile>
+          <angle>0</angle>
+          <seriesnumber>4</seriesnumber>
+          <displaysettings>48</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>49</id>
+        <name>10x_03-s4-FL CY3</name>
+        <size>17543 9805 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441588295096042E-4 6.441917703375699E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>1</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>19</qupathentryentity>
+          <channel>3</channel>
+          <tile>19</tile>
+          <angle>0</angle>
+          <seriesnumber>4</seriesnumber>
+          <displaysettings>49</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>50</id>
+        <name>10x_04-s5-FL DAPI</name>
+        <size>17013 9881 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441909469971165E-4 6.441649886921191E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>1</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>20</qupathentryentity>
+          <channel>1</channel>
+          <tile>20</tile>
+          <angle>0</angle>
+          <seriesnumber>5</seriesnumber>
+          <displaysettings>50</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>51</id>
+        <name>10x_04-s5-FL FITC</name>
+        <size>17013 9881 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441909469971165E-4 6.441649886921191E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>1</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>20</qupathentryentity>
+          <channel>2</channel>
+          <tile>20</tile>
+          <angle>0</angle>
+          <seriesnumber>5</seriesnumber>
+          <displaysettings>51</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>52</id>
+        <name>10x_04-s5-FL CY3</name>
+        <size>17013 9881 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441909469971165E-4 6.441649886921191E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>1</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>20</qupathentryentity>
+          <channel>3</channel>
+          <tile>20</tile>
+          <angle>0</angle>
+          <seriesnumber>5</seriesnumber>
+          <displaysettings>52</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>53</id>
+        <name>10x_05-s6-FL DAPI</name>
+        <size>16776 10183 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441691941545321E-4 6.441883564464964E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>1</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>21</qupathentryentity>
+          <channel>1</channel>
+          <tile>21</tile>
+          <angle>0</angle>
+          <seriesnumber>6</seriesnumber>
+          <displaysettings>53</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>54</id>
+        <name>10x_05-s6-FL FITC</name>
+        <size>16776 10183 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441691941545321E-4 6.441883564464964E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>1</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>21</qupathentryentity>
+          <channel>2</channel>
+          <tile>21</tile>
+          <angle>0</angle>
+          <seriesnumber>6</seriesnumber>
+          <displaysettings>54</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>55</id>
+        <name>10x_05-s6-FL CY3</name>
+        <size>16776 10183 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441691941545321E-4 6.441883564464964E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>1</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>21</qupathentryentity>
+          <channel>3</channel>
+          <tile>21</tile>
+          <angle>0</angle>
+          <seriesnumber>6</seriesnumber>
+          <displaysettings>55</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>56</id>
+        <name>10x_06-s7-FL DAPI</name>
+        <size>16317 10113 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441711382152099E-4 6.441762313382688E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>1</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>22</qupathentryentity>
+          <channel>1</channel>
+          <tile>22</tile>
+          <angle>0</angle>
+          <seriesnumber>7</seriesnumber>
+          <displaysettings>56</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>57</id>
+        <name>10x_06-s7-FL FITC</name>
+        <size>16317 10113 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441711382152099E-4 6.441762313382688E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>1</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>22</qupathentryentity>
+          <channel>2</channel>
+          <tile>22</tile>
+          <angle>0</angle>
+          <seriesnumber>7</seriesnumber>
+          <displaysettings>57</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>58</id>
+        <name>10x_06-s7-FL CY3</name>
+        <size>16317 10113 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441711382152099E-4 6.441762313382688E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>1</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>22</qupathentryentity>
+          <channel>3</channel>
+          <tile>22</tile>
+          <angle>0</angle>
+          <seriesnumber>7</seriesnumber>
+          <displaysettings>58</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>59</id>
+        <name>10x_07-s8-FL DAPI</name>
+        <size>16473 9573 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441939255461745E-4 6.441805425574834E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>1</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>23</qupathentryentity>
+          <channel>1</channel>
+          <tile>23</tile>
+          <angle>0</angle>
+          <seriesnumber>8</seriesnumber>
+          <displaysettings>59</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>60</id>
+        <name>10x_07-s8-FL FITC</name>
+        <size>16473 9573 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441939255461745E-4 6.441805425574834E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>1</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>23</qupathentryentity>
+          <channel>2</channel>
+          <tile>23</tile>
+          <angle>0</angle>
+          <seriesnumber>8</seriesnumber>
+          <displaysettings>60</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>61</id>
+        <name>10x_07-s8-FL CY3</name>
+        <size>16473 9573 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441939255461745E-4 6.441805425574834E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>1</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>23</qupathentryentity>
+          <channel>3</channel>
+          <tile>23</tile>
+          <angle>0</angle>
+          <seriesnumber>8</seriesnumber>
+          <displaysettings>61</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>62</id>
+        <name>10x_08-s9-FL DAPI</name>
+        <size>16857 10567 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441688620749478E-4 6.441485661176936E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>1</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>24</qupathentryentity>
+          <channel>1</channel>
+          <tile>24</tile>
+          <angle>0</angle>
+          <seriesnumber>9</seriesnumber>
+          <displaysettings>62</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>63</id>
+        <name>10x_08-s9-FL FITC</name>
+        <size>16857 10567 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441688620749478E-4 6.441485661176936E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>1</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>24</qupathentryentity>
+          <channel>2</channel>
+          <tile>24</tile>
+          <angle>0</angle>
+          <seriesnumber>9</seriesnumber>
+          <displaysettings>63</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>64</id>
+        <name>10x_08-s9-FL CY3</name>
+        <size>16857 10567 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441688620749478E-4 6.441485661176936E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>1</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>24</qupathentryentity>
+          <channel>3</channel>
+          <tile>24</tile>
+          <angle>0</angle>
+          <seriesnumber>9</seriesnumber>
+          <displaysettings>64</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>65</id>
+        <name>10x_09-s10-FL DAPI</name>
+        <size>17391 10189 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441889720706015E-4 6.441503751723305E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>1</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>25</qupathentryentity>
+          <channel>1</channel>
+          <tile>25</tile>
+          <angle>0</angle>
+          <seriesnumber>10</seriesnumber>
+          <displaysettings>65</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>66</id>
+        <name>10x_09-s10-FL FITC</name>
+        <size>17391 10189 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441889720706015E-4 6.441503751723305E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>1</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>25</qupathentryentity>
+          <channel>2</channel>
+          <tile>25</tile>
+          <angle>0</angle>
+          <seriesnumber>10</seriesnumber>
+          <displaysettings>66</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>67</id>
+        <name>10x_09-s10-FL CY3</name>
+        <size>17391 10189 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441889720706015E-4 6.441503751723305E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>1</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>25</qupathentryentity>
+          <channel>3</channel>
+          <tile>25</tile>
+          <angle>0</angle>
+          <seriesnumber>10</seriesnumber>
+          <displaysettings>67</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>68</id>
+        <name>10x_10-s11-FL DAPI</name>
+        <size>9195 9498 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.44184143442006E-4 6.441404915556783E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>1</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>26</qupathentryentity>
+          <channel>1</channel>
+          <tile>26</tile>
+          <angle>0</angle>
+          <seriesnumber>11</seriesnumber>
+          <displaysettings>68</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>69</id>
+        <name>10x_10-s11-FL FITC</name>
+        <size>9195 9498 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.44184143442006E-4 6.441404915556783E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>1</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>26</qupathentryentity>
+          <channel>2</channel>
+          <tile>26</tile>
+          <angle>0</angle>
+          <seriesnumber>11</seriesnumber>
+          <displaysettings>69</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>70</id>
+        <name>10x_10-s11-FL CY3</name>
+        <size>9195 9498 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.44184143442006E-4 6.441404915556783E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>1</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>26</qupathentryentity>
+          <channel>3</channel>
+          <tile>26</tile>
+          <angle>0</angle>
+          <seriesnumber>11</seriesnumber>
+          <displaysettings>70</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>71</id>
+        <name>10x_11-s12-FL DAPI</name>
+        <size>8812 9190 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441585595181555E-4 6.441558726258727E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>1</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>27</qupathentryentity>
+          <channel>1</channel>
+          <tile>27</tile>
+          <angle>0</angle>
+          <seriesnumber>12</seriesnumber>
+          <displaysettings>71</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>72</id>
+        <name>10x_11-s12-FL FITC</name>
+        <size>8812 9190 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441585595181555E-4 6.441558726258727E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>1</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>27</qupathentryentity>
+          <channel>2</channel>
+          <tile>27</tile>
+          <angle>0</angle>
+          <seriesnumber>12</seriesnumber>
+          <displaysettings>72</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>73</id>
+        <name>10x_11-s12-FL CY3</name>
+        <size>8812 9190 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441585595181555E-4 6.441558726258727E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>1</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>27</qupathentryentity>
+          <channel>3</channel>
+          <tile>27</tile>
+          <angle>0</angle>
+          <seriesnumber>12</seriesnumber>
+          <displaysettings>73</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>74</id>
+        <name>10x_12-s13-FL DAPI</name>
+        <size>9120 8580 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441424597089568E-4 6.441448449463735E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>1</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>28</qupathentryentity>
+          <channel>1</channel>
+          <tile>28</tile>
+          <angle>0</angle>
+          <seriesnumber>13</seriesnumber>
+          <displaysettings>74</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>75</id>
+        <name>10x_12-s13-FL FITC</name>
+        <size>9120 8580 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441424597089568E-4 6.441448449463735E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>1</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>28</qupathentryentity>
+          <channel>2</channel>
+          <tile>28</tile>
+          <angle>0</angle>
+          <seriesnumber>13</seriesnumber>
+          <displaysettings>75</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>76</id>
+        <name>10x_12-s13-FL CY3</name>
+        <size>9120 8580 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441424597089568E-4 6.441448449463735E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>1</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>28</qupathentryentity>
+          <channel>3</channel>
+          <tile>28</tile>
+          <angle>0</angle>
+          <seriesnumber>13</seriesnumber>
+          <displaysettings>76</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>77</id>
+        <name>10x_13-s14-FL DAPI</name>
+        <size>9276 9422 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441834094232668E-4 6.44168164263306E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>1</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>29</qupathentryentity>
+          <channel>1</channel>
+          <tile>29</tile>
+          <angle>0</angle>
+          <seriesnumber>14</seriesnumber>
+          <displaysettings>77</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>78</id>
+        <name>10x_13-s14-FL FITC</name>
+        <size>9276 9422 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441834094232668E-4 6.44168164263306E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>1</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>29</qupathentryentity>
+          <channel>2</channel>
+          <tile>29</tile>
+          <angle>0</angle>
+          <seriesnumber>14</seriesnumber>
+          <displaysettings>78</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>79</id>
+        <name>10x_13-s14-FL CY3</name>
+        <size>9276 9422 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441834094232668E-4 6.44168164263306E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>1</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>29</qupathentryentity>
+          <channel>3</channel>
+          <tile>29</tile>
+          <angle>0</angle>
+          <seriesnumber>14</seriesnumber>
+          <displaysettings>79</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>80</id>
+        <name>10x_14-s15-FL DAPI</name>
+        <size>8812 9341 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441585595181537E-4 6.441687570544576E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>1</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>30</qupathentryentity>
+          <channel>1</channel>
+          <tile>30</tile>
+          <angle>0</angle>
+          <seriesnumber>15</seriesnumber>
+          <displaysettings>80</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>81</id>
+        <name>10x_14-s15-FL FITC</name>
+        <size>8812 9341 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441585595181537E-4 6.441687570544576E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>1</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>30</qupathentryentity>
+          <channel>2</channel>
+          <tile>30</tile>
+          <angle>0</angle>
+          <seriesnumber>15</seriesnumber>
+          <displaysettings>81</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>82</id>
+        <name>10x_14-s15-FL CY3</name>
+        <size>8812 9341 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441585595181537E-4 6.441687570544576E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>1</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>30</qupathentryentity>
+          <channel>3</channel>
+          <tile>30</tile>
+          <angle>0</angle>
+          <seriesnumber>15</seriesnumber>
+          <displaysettings>82</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>83</id>
+        <name>10x_15-s16-FL DAPI</name>
+        <size>9811 9573 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441526053503885E-4 6.441805425574825E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>1</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>31</qupathentryentity>
+          <channel>1</channel>
+          <tile>31</tile>
+          <angle>0</angle>
+          <seriesnumber>16</seriesnumber>
+          <displaysettings>83</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>84</id>
+        <name>10x_15-s16-FL FITC</name>
+        <size>9811 9573 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441526053503885E-4 6.441805425574825E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>1</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>31</qupathentryentity>
+          <channel>2</channel>
+          <tile>31</tile>
+          <angle>0</angle>
+          <seriesnumber>16</seriesnumber>
+          <displaysettings>84</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>85</id>
+        <name>10x_15-s16-FL CY3</name>
+        <size>9811 9573 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>6.441526053503885E-4 6.441805425574825E-4 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>1</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>31</qupathentryentity>
+          <channel>3</channel>
+          <tile>31</tile>
+          <angle>0</angle>
+          <seriesnumber>16</seriesnumber>
+          <displaysettings>85</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <ViewSetup>
+        <id>86</id>
+        <name>macro image-s17-ch0</name>
+        <size>620 212 1</size>
+        <voxelSize>
+          <unit>mm</unit>
+          <size>1.0 1.0 1.0</size>
+        </voxelSize>
+        <attributes>
+          <fileindex>1</fileindex>
+          <illumination>0</illumination>
+          <qupathentryentity>-1</qupathentryentity>
+          <channel>0</channel>
+          <tile>32</tile>
+          <angle>0</angle>
+          <seriesnumber>17</seriesnumber>
+          <displaysettings>86</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <Attributes name="fileindex">
+        <fileindex>
+          <id>0</id>
+          <name>C:\Users\nicol\Dropbox\BIOP\19-05-24 VSI Samples\align\Image_06.vsi</name>
+        </fileindex>
+        <fileindex>
+          <id>1</id>
+          <name>C:\Users\nicol\Dropbox\BIOP\19-05-24 VSI Samples\align\Image_07.vsi</name>
+        </fileindex>
+      </Attributes>
+      <Attributes name="illumination">
+        <Illumination>
+          <id>0</id>
+          <name>0</name>
+        </Illumination>
+      </Attributes>
+      <Attributes name="qupathentryentity">
+        <qupathentryentity>
+          <id>-1</id>
+          <name>project_[entry:unidentified]</name>
+          <QuPathProjectLocation />
+        </qupathentryentity>
+        <qupathentryentity>
+          <id>3</id>
+          <name>project_[entry:3]</name>
+          <QuPathProjectLocation>C:\Users\nicol\Dropbox\BIOP\19-05-24 VSI Samples\align\QP0.2.1\project.qpproj</QuPathProjectLocation>
+        </qupathentryentity>
+        <qupathentryentity>
+          <id>4</id>
+          <name>project_[entry:4]</name>
+          <QuPathProjectLocation>C:\Users\nicol\Dropbox\BIOP\19-05-24 VSI Samples\align\QP0.2.1\project.qpproj</QuPathProjectLocation>
+        </qupathentryentity>
+        <qupathentryentity>
+          <id>5</id>
+          <name>project_[entry:5]</name>
+          <QuPathProjectLocation>C:\Users\nicol\Dropbox\BIOP\19-05-24 VSI Samples\align\QP0.2.1\project.qpproj</QuPathProjectLocation>
+        </qupathentryentity>
+        <qupathentryentity>
+          <id>6</id>
+          <name>project_[entry:6]</name>
+          <QuPathProjectLocation>C:\Users\nicol\Dropbox\BIOP\19-05-24 VSI Samples\align\QP0.2.1\project.qpproj</QuPathProjectLocation>
+        </qupathentryentity>
+        <qupathentryentity>
+          <id>7</id>
+          <name>project_[entry:7]</name>
+          <QuPathProjectLocation>C:\Users\nicol\Dropbox\BIOP\19-05-24 VSI Samples\align\QP0.2.1\project.qpproj</QuPathProjectLocation>
+        </qupathentryentity>
+        <qupathentryentity>
+          <id>8</id>
+          <name>project_[entry:8]</name>
+          <QuPathProjectLocation>C:\Users\nicol\Dropbox\BIOP\19-05-24 VSI Samples\align\QP0.2.1\project.qpproj</QuPathProjectLocation>
+        </qupathentryentity>
+        <qupathentryentity>
+          <id>9</id>
+          <name>project_[entry:9]</name>
+          <QuPathProjectLocation>C:\Users\nicol\Dropbox\BIOP\19-05-24 VSI Samples\align\QP0.2.1\project.qpproj</QuPathProjectLocation>
+        </qupathentryentity>
+        <qupathentryentity>
+          <id>10</id>
+          <name>project_[entry:10]</name>
+          <QuPathProjectLocation>C:\Users\nicol\Dropbox\BIOP\19-05-24 VSI Samples\align\QP0.2.1\project.qpproj</QuPathProjectLocation>
+        </qupathentryentity>
+        <qupathentryentity>
+          <id>11</id>
+          <name>project_[entry:11]</name>
+          <QuPathProjectLocation>C:\Users\nicol\Dropbox\BIOP\19-05-24 VSI Samples\align\QP0.2.1\project.qpproj</QuPathProjectLocation>
+        </qupathentryentity>
+        <qupathentryentity>
+          <id>12</id>
+          <name>project_[entry:12]</name>
+          <QuPathProjectLocation>C:\Users\nicol\Dropbox\BIOP\19-05-24 VSI Samples\align\QP0.2.1\project.qpproj</QuPathProjectLocation>
+        </qupathentryentity>
+        <qupathentryentity>
+          <id>13</id>
+          <name>project_[entry:13]</name>
+          <QuPathProjectLocation>C:\Users\nicol\Dropbox\BIOP\19-05-24 VSI Samples\align\QP0.2.1\project.qpproj</QuPathProjectLocation>
+        </qupathentryentity>
+        <qupathentryentity>
+          <id>14</id>
+          <name>project_[entry:14]</name>
+          <QuPathProjectLocation>C:\Users\nicol\Dropbox\BIOP\19-05-24 VSI Samples\align\QP0.2.1\project.qpproj</QuPathProjectLocation>
+        </qupathentryentity>
+        <qupathentryentity>
+          <id>17</id>
+          <name>project_[entry:17]</name>
+          <QuPathProjectLocation>C:\Users\nicol\Dropbox\BIOP\19-05-24 VSI Samples\align\QP0.2.1\project.qpproj</QuPathProjectLocation>
+        </qupathentryentity>
+        <qupathentryentity>
+          <id>18</id>
+          <name>project_[entry:18]</name>
+          <QuPathProjectLocation>C:\Users\nicol\Dropbox\BIOP\19-05-24 VSI Samples\align\QP0.2.1\project.qpproj</QuPathProjectLocation>
+        </qupathentryentity>
+        <qupathentryentity>
+          <id>19</id>
+          <name>project_[entry:19]</name>
+          <QuPathProjectLocation>C:\Users\nicol\Dropbox\BIOP\19-05-24 VSI Samples\align\QP0.2.1\project.qpproj</QuPathProjectLocation>
+        </qupathentryentity>
+        <qupathentryentity>
+          <id>20</id>
+          <name>project_[entry:20]</name>
+          <QuPathProjectLocation>C:\Users\nicol\Dropbox\BIOP\19-05-24 VSI Samples\align\QP0.2.1\project.qpproj</QuPathProjectLocation>
+        </qupathentryentity>
+        <qupathentryentity>
+          <id>21</id>
+          <name>project_[entry:21]</name>
+          <QuPathProjectLocation>C:\Users\nicol\Dropbox\BIOP\19-05-24 VSI Samples\align\QP0.2.1\project.qpproj</QuPathProjectLocation>
+        </qupathentryentity>
+        <qupathentryentity>
+          <id>22</id>
+          <name>project_[entry:22]</name>
+          <QuPathProjectLocation>C:\Users\nicol\Dropbox\BIOP\19-05-24 VSI Samples\align\QP0.2.1\project.qpproj</QuPathProjectLocation>
+        </qupathentryentity>
+        <qupathentryentity>
+          <id>23</id>
+          <name>project_[entry:23]</name>
+          <QuPathProjectLocation>C:\Users\nicol\Dropbox\BIOP\19-05-24 VSI Samples\align\QP0.2.1\project.qpproj</QuPathProjectLocation>
+        </qupathentryentity>
+        <qupathentryentity>
+          <id>24</id>
+          <name>project_[entry:24]</name>
+          <QuPathProjectLocation>C:\Users\nicol\Dropbox\BIOP\19-05-24 VSI Samples\align\QP0.2.1\project.qpproj</QuPathProjectLocation>
+        </qupathentryentity>
+        <qupathentryentity>
+          <id>25</id>
+          <name>project_[entry:25]</name>
+          <QuPathProjectLocation>C:\Users\nicol\Dropbox\BIOP\19-05-24 VSI Samples\align\QP0.2.1\project.qpproj</QuPathProjectLocation>
+        </qupathentryentity>
+        <qupathentryentity>
+          <id>26</id>
+          <name>project_[entry:26]</name>
+          <QuPathProjectLocation>C:\Users\nicol\Dropbox\BIOP\19-05-24 VSI Samples\align\QP0.2.1\project.qpproj</QuPathProjectLocation>
+        </qupathentryentity>
+        <qupathentryentity>
+          <id>27</id>
+          <name>project_[entry:27]</name>
+          <QuPathProjectLocation>C:\Users\nicol\Dropbox\BIOP\19-05-24 VSI Samples\align\QP0.2.1\project.qpproj</QuPathProjectLocation>
+        </qupathentryentity>
+        <qupathentryentity>
+          <id>28</id>
+          <name>project_[entry:28]</name>
+          <QuPathProjectLocation>C:\Users\nicol\Dropbox\BIOP\19-05-24 VSI Samples\align\QP0.2.1\project.qpproj</QuPathProjectLocation>
+        </qupathentryentity>
+        <qupathentryentity>
+          <id>29</id>
+          <name>project_[entry:29]</name>
+          <QuPathProjectLocation>C:\Users\nicol\Dropbox\BIOP\19-05-24 VSI Samples\align\QP0.2.1\project.qpproj</QuPathProjectLocation>
+        </qupathentryentity>
+        <qupathentryentity>
+          <id>30</id>
+          <name>project_[entry:30]</name>
+          <QuPathProjectLocation>C:\Users\nicol\Dropbox\BIOP\19-05-24 VSI Samples\align\QP0.2.1\project.qpproj</QuPathProjectLocation>
+        </qupathentryentity>
+        <qupathentryentity>
+          <id>31</id>
+          <name>project_[entry:31]</name>
+          <QuPathProjectLocation>C:\Users\nicol\Dropbox\BIOP\19-05-24 VSI Samples\align\QP0.2.1\project.qpproj</QuPathProjectLocation>
+        </qupathentryentity>
+      </Attributes>
+      <Attributes name="channel">
+        <Channel>
+          <id>0</id>
+          <name>0</name>
+        </Channel>
+        <Channel>
+          <id>1</id>
+          <name>1</name>
+        </Channel>
+        <Channel>
+          <id>2</id>
+          <name>2</name>
+        </Channel>
+        <Channel>
+          <id>3</id>
+          <name>3</name>
+        </Channel>
+      </Attributes>
+      <Attributes name="tile">
+        <Tile>
+          <id>0</id>
+          <name>0</name>
+        </Tile>
+        <Tile>
+          <id>1</id>
+          <name>1</name>
+        </Tile>
+        <Tile>
+          <id>2</id>
+          <name>2</name>
+        </Tile>
+        <Tile>
+          <id>3</id>
+          <name>3</name>
+        </Tile>
+        <Tile>
+          <id>4</id>
+          <name>4</name>
+        </Tile>
+        <Tile>
+          <id>5</id>
+          <name>5</name>
+        </Tile>
+        <Tile>
+          <id>6</id>
+          <name>6</name>
+        </Tile>
+        <Tile>
+          <id>7</id>
+          <name>7</name>
+        </Tile>
+        <Tile>
+          <id>8</id>
+          <name>8</name>
+        </Tile>
+        <Tile>
+          <id>9</id>
+          <name>9</name>
+        </Tile>
+        <Tile>
+          <id>10</id>
+          <name>10</name>
+        </Tile>
+        <Tile>
+          <id>11</id>
+          <name>11</name>
+        </Tile>
+        <Tile>
+          <id>12</id>
+          <name>12</name>
+        </Tile>
+        <Tile>
+          <id>13</id>
+          <name>13</name>
+        </Tile>
+        <Tile>
+          <id>14</id>
+          <name>14</name>
+        </Tile>
+        <Tile>
+          <id>15</id>
+          <name>15</name>
+        </Tile>
+        <Tile>
+          <id>16</id>
+          <name>16</name>
+        </Tile>
+        <Tile>
+          <id>17</id>
+          <name>17</name>
+        </Tile>
+        <Tile>
+          <id>18</id>
+          <name>18</name>
+        </Tile>
+        <Tile>
+          <id>19</id>
+          <name>19</name>
+        </Tile>
+        <Tile>
+          <id>20</id>
+          <name>20</name>
+        </Tile>
+        <Tile>
+          <id>21</id>
+          <name>21</name>
+        </Tile>
+        <Tile>
+          <id>22</id>
+          <name>22</name>
+        </Tile>
+        <Tile>
+          <id>23</id>
+          <name>23</name>
+        </Tile>
+        <Tile>
+          <id>24</id>
+          <name>24</name>
+        </Tile>
+        <Tile>
+          <id>25</id>
+          <name>25</name>
+        </Tile>
+        <Tile>
+          <id>26</id>
+          <name>26</name>
+        </Tile>
+        <Tile>
+          <id>27</id>
+          <name>27</name>
+        </Tile>
+        <Tile>
+          <id>28</id>
+          <name>28</name>
+        </Tile>
+        <Tile>
+          <id>29</id>
+          <name>29</name>
+        </Tile>
+        <Tile>
+          <id>30</id>
+          <name>30</name>
+        </Tile>
+        <Tile>
+          <id>31</id>
+          <name>31</name>
+        </Tile>
+        <Tile>
+          <id>32</id>
+          <name>32</name>
+        </Tile>
+      </Attributes>
+      <Attributes name="angle">
+        <Angle>
+          <id>0</id>
+          <name>0</name>
+        </Angle>
+      </Attributes>
+      <Attributes name="seriesnumber">
+        <seriesnumber>
+          <id>0</id>
+          <name>Series_0</name>
+        </seriesnumber>
+        <seriesnumber>
+          <id>1</id>
+          <name>Series_1</name>
+        </seriesnumber>
+        <seriesnumber>
+          <id>2</id>
+          <name>Series_2</name>
+        </seriesnumber>
+        <seriesnumber>
+          <id>3</id>
+          <name>Series_3</name>
+        </seriesnumber>
+        <seriesnumber>
+          <id>4</id>
+          <name>Series_4</name>
+        </seriesnumber>
+        <seriesnumber>
+          <id>5</id>
+          <name>Series_5</name>
+        </seriesnumber>
+        <seriesnumber>
+          <id>6</id>
+          <name>Series_6</name>
+        </seriesnumber>
+        <seriesnumber>
+          <id>7</id>
+          <name>Series_7</name>
+        </seriesnumber>
+        <seriesnumber>
+          <id>8</id>
+          <name>Series_8</name>
+        </seriesnumber>
+        <seriesnumber>
+          <id>9</id>
+          <name>Series_9</name>
+        </seriesnumber>
+        <seriesnumber>
+          <id>10</id>
+          <name>Series_10</name>
+        </seriesnumber>
+        <seriesnumber>
+          <id>11</id>
+          <name>Series_11</name>
+        </seriesnumber>
+        <seriesnumber>
+          <id>12</id>
+          <name>Series_12</name>
+        </seriesnumber>
+        <seriesnumber>
+          <id>13</id>
+          <name>Series_13</name>
+        </seriesnumber>
+        <seriesnumber>
+          <id>14</id>
+          <name>Series_14</name>
+        </seriesnumber>
+        <seriesnumber>
+          <id>15</id>
+          <name>Series_15</name>
+        </seriesnumber>
+        <seriesnumber>
+          <id>16</id>
+          <name>Series_16</name>
+        </seriesnumber>
+        <seriesnumber>
+          <id>17</id>
+          <name>Series_17</name>
+        </seriesnumber>
+      </Attributes>
+      <Attributes name="displaysettings">
+        <Displaysettings>
+          <id>0</id>
+          <isset>true</isset>
+          <color>0 0 0 0</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>1</id>
+          <isset>true</isset>
+          <color>0 0 0 0</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>2</id>
+          <isset>true</isset>
+          <color>0 97 255 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>3</id>
+          <isset>true</isset>
+          <color>49 255 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>4</id>
+          <isset>true</isset>
+          <color>255 180 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>5</id>
+          <isset>true</isset>
+          <color>0 97 255 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>6</id>
+          <isset>true</isset>
+          <color>49 255 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>7</id>
+          <isset>true</isset>
+          <color>255 180 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>8</id>
+          <isset>true</isset>
+          <color>0 97 255 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>9</id>
+          <isset>true</isset>
+          <color>49 255 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>10</id>
+          <isset>true</isset>
+          <color>255 180 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>11</id>
+          <isset>true</isset>
+          <color>0 97 255 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>12</id>
+          <isset>true</isset>
+          <color>49 255 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>13</id>
+          <isset>true</isset>
+          <color>255 180 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>14</id>
+          <isset>true</isset>
+          <color>0 97 255 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>15</id>
+          <isset>true</isset>
+          <color>49 255 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>16</id>
+          <isset>true</isset>
+          <color>255 180 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>17</id>
+          <isset>true</isset>
+          <color>0 97 255 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>18</id>
+          <isset>true</isset>
+          <color>49 255 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>19</id>
+          <isset>true</isset>
+          <color>255 180 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>20</id>
+          <isset>true</isset>
+          <color>0 97 255 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>21</id>
+          <isset>true</isset>
+          <color>49 255 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>22</id>
+          <isset>true</isset>
+          <color>255 180 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>23</id>
+          <isset>true</isset>
+          <color>0 97 255 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>24</id>
+          <isset>true</isset>
+          <color>49 255 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>25</id>
+          <isset>true</isset>
+          <color>255 180 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>26</id>
+          <isset>true</isset>
+          <color>0 97 255 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>27</id>
+          <isset>true</isset>
+          <color>49 255 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>28</id>
+          <isset>true</isset>
+          <color>255 180 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>29</id>
+          <isset>true</isset>
+          <color>0 97 255 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>30</id>
+          <isset>true</isset>
+          <color>49 255 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>31</id>
+          <isset>true</isset>
+          <color>255 180 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>32</id>
+          <isset>true</isset>
+          <color>0 97 255 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>33</id>
+          <isset>true</isset>
+          <color>49 255 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>34</id>
+          <isset>true</isset>
+          <color>255 180 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>35</id>
+          <isset>true</isset>
+          <color>0 97 255 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>36</id>
+          <isset>true</isset>
+          <color>49 255 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>37</id>
+          <isset>true</isset>
+          <color>255 180 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>38</id>
+          <isset>true</isset>
+          <color>0 0 0 0</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>39</id>
+          <isset>true</isset>
+          <color>0 0 0 0</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>40</id>
+          <isset>true</isset>
+          <color>0 0 0 0</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>41</id>
+          <isset>true</isset>
+          <color>0 97 255 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>42</id>
+          <isset>true</isset>
+          <color>49 255 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>43</id>
+          <isset>true</isset>
+          <color>255 180 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>44</id>
+          <isset>true</isset>
+          <color>0 97 255 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>45</id>
+          <isset>true</isset>
+          <color>49 255 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>46</id>
+          <isset>true</isset>
+          <color>255 180 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>47</id>
+          <isset>true</isset>
+          <color>0 97 255 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>48</id>
+          <isset>true</isset>
+          <color>49 255 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>49</id>
+          <isset>true</isset>
+          <color>255 180 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>50</id>
+          <isset>true</isset>
+          <color>0 97 255 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>51</id>
+          <isset>true</isset>
+          <color>49 255 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>52</id>
+          <isset>true</isset>
+          <color>255 180 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>53</id>
+          <isset>true</isset>
+          <color>0 97 255 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>54</id>
+          <isset>true</isset>
+          <color>49 255 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>55</id>
+          <isset>true</isset>
+          <color>255 180 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>56</id>
+          <isset>true</isset>
+          <color>0 97 255 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>57</id>
+          <isset>true</isset>
+          <color>49 255 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>58</id>
+          <isset>true</isset>
+          <color>255 180 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>59</id>
+          <isset>true</isset>
+          <color>0 97 255 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>60</id>
+          <isset>true</isset>
+          <color>49 255 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>61</id>
+          <isset>true</isset>
+          <color>255 180 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>62</id>
+          <isset>true</isset>
+          <color>0 97 255 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>63</id>
+          <isset>true</isset>
+          <color>49 255 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>64</id>
+          <isset>true</isset>
+          <color>255 180 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>65</id>
+          <isset>true</isset>
+          <color>0 97 255 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>66</id>
+          <isset>true</isset>
+          <color>49 255 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>67</id>
+          <isset>true</isset>
+          <color>255 180 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>68</id>
+          <isset>true</isset>
+          <color>0 97 255 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>69</id>
+          <isset>true</isset>
+          <color>49 255 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>70</id>
+          <isset>true</isset>
+          <color>255 180 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>71</id>
+          <isset>true</isset>
+          <color>0 97 255 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>72</id>
+          <isset>true</isset>
+          <color>49 255 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>73</id>
+          <isset>true</isset>
+          <color>255 180 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>74</id>
+          <isset>true</isset>
+          <color>0 97 255 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>75</id>
+          <isset>true</isset>
+          <color>49 255 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>76</id>
+          <isset>true</isset>
+          <color>255 180 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>77</id>
+          <isset>true</isset>
+          <color>0 97 255 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>78</id>
+          <isset>true</isset>
+          <color>49 255 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>79</id>
+          <isset>true</isset>
+          <color>255 180 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>80</id>
+          <isset>true</isset>
+          <color>0 97 255 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>81</id>
+          <isset>true</isset>
+          <color>49 255 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>82</id>
+          <isset>true</isset>
+          <color>255 180 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>83</id>
+          <isset>true</isset>
+          <color>0 97 255 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>84</id>
+          <isset>true</isset>
+          <color>49 255 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>85</id>
+          <isset>true</isset>
+          <color>255 180 0 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+        <Displaysettings>
+          <id>86</id>
+          <isset>true</isset>
+          <color>0 0 0 0</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+      </Attributes>
+    </ViewSetups>
+    <Timepoints type="range">
+      <first>0</first>
+      <last>0</last>
+    </Timepoints>
+    <MissingViews />
+  </SequenceDescription>
+  <ViewRegistrations>
+    <ViewRegistration timepoint="0" setup="0">
+      <ViewTransform type="affine">
+        <affine>0.0034780633438541405 0.0 0.0 -52.61152905581063 0.0 0.003478138936211383 0.0 -73.05722470463681 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="1">
+      <ViewTransform type="affine">
+        <affine>0.0034782997347079236 0.0 0.0 -109.44473100834928 0.0 0.0034781150143938216 0.0 -72.79023091930871 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="2">
+      <ViewTransform type="affine">
+        <affine>6.441826664497763E-4 0.0 0.0 -67.73660971345794 0.0 6.441594473953849E-4 0.0 -56.57954149433538 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="3">
+      <ViewTransform type="affine">
+        <affine>6.441826664497763E-4 0.0 0.0 -67.73660971345794 0.0 6.441594473953849E-4 0.0 -56.57954149433538 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="4">
+      <ViewTransform type="affine">
+        <affine>6.441826664497763E-4 0.0 0.0 -67.73660971345794 0.0 6.441594473953849E-4 0.0 -56.57954149433538 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="5">
+      <ViewTransform type="affine">
+        <affine>6.441738352140264E-4 0.0 0.0 -67.98355768593318 0.0 6.441594473953855E-4 0.0 -63.53581936675814 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="6">
+      <ViewTransform type="affine">
+        <affine>6.441738352140264E-4 0.0 0.0 -67.98355768593318 0.0 6.441594473953855E-4 0.0 -63.53581936675814 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="7">
+      <ViewTransform type="affine">
+        <affine>6.441738352140264E-4 0.0 0.0 -67.98355768593318 0.0 6.441594473953855E-4 0.0 -63.53581936675814 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="8">
+      <ViewTransform type="affine">
+        <affine>6.441866863954451E-4 0.0 0.0 -67.73660971345794 0.0 6.441461953530941E-4 0.0 -70.93729902301597 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="9">
+      <ViewTransform type="affine">
+        <affine>6.441866863954451E-4 0.0 0.0 -67.73660971345794 0.0 6.441461953530941E-4 0.0 -70.93729902301597 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="10">
+      <ViewTransform type="affine">
+        <affine>6.441866863954451E-4 0.0 0.0 -67.73660971345794 0.0 6.441461953530941E-4 0.0 -70.93729902301597 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="11">
+      <ViewTransform type="affine">
+        <affine>6.441801468643161E-4 0.0 0.0 -79.53446214495284 0.0 6.441485661176943E-4 0.0 -56.62823543944234 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="12">
+      <ViewTransform type="affine">
+        <affine>6.441801468643161E-4 0.0 0.0 -79.53446214495284 0.0 6.441485661176943E-4 0.0 -56.62823543944234 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="13">
+      <ViewTransform type="affine">
+        <affine>6.441801468643161E-4 0.0 0.0 -79.53446214495284 0.0 6.441485661176943E-4 0.0 -56.62823543944234 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="14">
+      <ViewTransform type="affine">
+        <affine>6.441754665378626E-4 0.0 0.0 -79.48576817854928 0.0 6.441353395429637E-4 0.0 -64.22449087612802 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="15">
+      <ViewTransform type="affine">
+        <affine>6.441754665378626E-4 0.0 0.0 -79.48576817854928 0.0 6.441353395429637E-4 0.0 -64.22449087612802 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="16">
+      <ViewTransform type="affine">
+        <affine>6.441754665378626E-4 0.0 0.0 -79.48576817854928 0.0 6.441353395429637E-4 0.0 -64.22449087612802 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="17">
+      <ViewTransform type="affine">
+        <affine>6.44182666449775E-4 0.0 0.0 -79.13795413280944 0.0 6.441598981507366E-4 0.0 -71.42771661302177 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="18">
+      <ViewTransform type="affine">
+        <affine>6.44182666449775E-4 0.0 0.0 -79.13795413280944 0.0 6.441598981507366E-4 0.0 -71.42771661302177 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="19">
+      <ViewTransform type="affine">
+        <affine>6.44182666449775E-4 0.0 0.0 -79.13795413280944 0.0 6.441598981507366E-4 0.0 -71.42771661302177 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="20">
+      <ViewTransform type="affine">
+        <affine>6.441601231616142E-4 0.0 0.0 -91.08536660397252 0.0 6.44135339542963E-4 0.0 -56.826489358806384 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="21">
+      <ViewTransform type="affine">
+        <affine>6.441601231616142E-4 0.0 0.0 -91.08536660397252 0.0 6.44135339542963E-4 0.0 -56.826489358806384 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="22">
+      <ViewTransform type="affine">
+        <affine>6.441601231616142E-4 0.0 0.0 -91.08536660397252 0.0 6.44135339542963E-4 0.0 -56.826489358806384 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="23">
+      <ViewTransform type="affine">
+        <affine>6.441601231616142E-4 0.0 0.0 -90.93580656430439 0.0 6.441461953530941E-4 0.0 -64.07840904080712 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="24">
+      <ViewTransform type="affine">
+        <affine>6.441601231616142E-4 0.0 0.0 -90.93580656430439 0.0 6.441461953530941E-4 0.0 -64.07840904080712 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="25">
+      <ViewTransform type="affine">
+        <affine>6.441601231616142E-4 0.0 0.0 -90.93580656430439 0.0 6.441461953530941E-4 0.0 -64.07840904080712 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="26">
+      <ViewTransform type="affine">
+        <affine>6.441889720706006E-4 0.0 0.0 -90.68885859182909 0.0 6.44162095052688E-4 0.0 -71.08338085833685 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="27">
+      <ViewTransform type="affine">
+        <affine>6.441889720706006E-4 0.0 0.0 -90.68885859182909 0.0 6.44162095052688E-4 0.0 -71.08338085833685 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="28">
+      <ViewTransform type="affine">
+        <affine>6.441889720706006E-4 0.0 0.0 -90.68885859182909 0.0 6.44162095052688E-4 0.0 -71.08338085833685 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="29">
+      <ViewTransform type="affine">
+        <affine>6.441620732829643E-4 0.0 0.0 -102.1875909439878 0.0 6.441443542594492E-4 0.0 -56.77779541369944 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="30">
+      <ViewTransform type="affine">
+        <affine>6.441620732829643E-4 0.0 0.0 -102.1875909439878 0.0 6.441443542594492E-4 0.0 -56.77779541369944 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="31">
+      <ViewTransform type="affine">
+        <affine>6.441620732829643E-4 0.0 0.0 -102.1875909439878 0.0 6.441443542594492E-4 0.0 -56.77779541369944 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="32">
+      <ViewTransform type="affine">
+        <affine>6.441862951882023E-4 0.0 0.0 -102.83104692860647 0.0 6.441481951736335E-4 0.0 -63.782767231229165 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="33">
+      <ViewTransform type="affine">
+        <affine>6.441862951882023E-4 0.0 0.0 -102.83104692860647 0.0 6.441481951736335E-4 0.0 -63.782767231229165 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="34">
+      <ViewTransform type="affine">
+        <affine>6.441862951882023E-4 0.0 0.0 -102.83104692860647 0.0 6.441481951736335E-4 0.0 -63.782767231229165 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="35">
+      <ViewTransform type="affine">
+        <affine>6.441801468643161E-4 0.0 0.0 -102.73365899579932 0.0 6.441353395429624E-4 0.0 -71.33032872280785 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="36">
+      <ViewTransform type="affine">
+        <affine>6.441801468643161E-4 0.0 0.0 -102.73365899579932 0.0 6.441353395429624E-4 0.0 -71.33032872280785 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="37">
+      <ViewTransform type="affine">
+        <affine>6.441801468643161E-4 0.0 0.0 -102.73365899579932 0.0 6.441353395429624E-4 0.0 -71.33032872280785 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="38">
+      <ViewTransform type="affine">
+        <affine>1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="39">
+      <ViewTransform type="affine">
+        <affine>0.0034780633438541405 0.0 0.0 -52.61152905581063 0.0 0.003478138936211383 0.0 -73.05722470463681 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="40">
+      <ViewTransform type="affine">
+        <affine>0.0034782997347079236 0.0 0.0 -109.44473100834928 0.0 0.0034781150143938216 0.0 -72.79023091930871 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="41">
+      <ViewTransform type="affine">
+        <affine>6.441738352140271E-4 0.0 0.0 -66.45317588467798 0.0 6.441507804301256E-4 0.0 -55.838697900922355 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="42">
+      <ViewTransform type="affine">
+        <affine>6.441738352140271E-4 0.0 0.0 -66.45317588467798 0.0 6.441507804301256E-4 0.0 -55.838697900922355 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="43">
+      <ViewTransform type="affine">
+        <affine>6.441738352140271E-4 0.0 0.0 -66.45317588467798 0.0 6.441507804301256E-4 0.0 -55.838697900922355 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="44">
+      <ViewTransform type="affine">
+        <affine>6.441734947882594E-4 0.0 0.0 -66.65142989074965 0.0 6.441768484330886E-4 0.0 -63.13931152803005 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="45">
+      <ViewTransform type="affine">
+        <affine>6.441734947882594E-4 0.0 0.0 -66.65142989074965 0.0 6.441768484330886E-4 0.0 -63.13931152803005 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="46">
+      <ViewTransform type="affine">
+        <affine>6.441734947882594E-4 0.0 0.0 -66.65142989074965 0.0 6.441768484330886E-4 0.0 -63.13931152803005 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="47">
+      <ViewTransform type="affine">
+        <affine>6.441588295096042E-4 0.0 0.0 -66.45317588467798 0.0 6.441917703375699E-4 0.0 -70.24514937470991 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="48">
+      <ViewTransform type="affine">
+        <affine>6.441588295096042E-4 0.0 0.0 -66.45317588467798 0.0 6.441917703375699E-4 0.0 -70.24514937470991 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="49">
+      <ViewTransform type="affine">
+        <affine>6.441588295096042E-4 0.0 0.0 -66.45317588467798 0.0 6.441917703375699E-4 0.0 -70.24514937470991 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="50">
+      <ViewTransform type="affine">
+        <affine>6.441909469971165E-4 0.0 0.0 -78.15364038336574 0.0 6.441649886921191E-4 0.0 -55.98825787517945 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="51">
+      <ViewTransform type="affine">
+        <affine>6.441909469971165E-4 0.0 0.0 -78.15364038336574 0.0 6.441649886921191E-4 0.0 -55.98825787517945 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="52">
+      <ViewTransform type="affine">
+        <affine>6.441909469971165E-4 0.0 0.0 -78.15364038336574 0.0 6.441649886921191E-4 0.0 -55.98825787517945 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="53">
+      <ViewTransform type="affine">
+        <affine>6.441691941545321E-4 0.0 0.0 -77.8058263376259 0.0 6.441883564464964E-4 0.0 -63.38625939250106 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="54">
+      <ViewTransform type="affine">
+        <affine>6.441691941545321E-4 0.0 0.0 -77.8058263376259 0.0 6.441883564464964E-4 0.0 -63.38625939250106 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="55">
+      <ViewTransform type="affine">
+        <affine>6.441691941545321E-4 0.0 0.0 -77.8058263376259 0.0 6.441883564464964E-4 0.0 -63.38625939250106 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="56">
+      <ViewTransform type="affine">
+        <affine>6.441711382152099E-4 0.0 0.0 -78.0527743101012 0.0 6.441762313382688E-4 0.0 -70.73904510365192 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="57">
+      <ViewTransform type="affine">
+        <affine>6.441711382152099E-4 0.0 0.0 -78.0527743101012 0.0 6.441762313382688E-4 0.0 -70.73904510365192 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="58">
+      <ViewTransform type="affine">
+        <affine>6.441711382152099E-4 0.0 0.0 -78.0527743101012 0.0 6.441762313382688E-4 0.0 -70.73904510365192 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="59">
+      <ViewTransform type="affine">
+        <affine>6.441939255461745E-4 0.0 0.0 -89.60367876912086 0.0 6.441805425574834E-4 0.0 -55.3934961170873 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="60">
+      <ViewTransform type="affine">
+        <affine>6.441939255461745E-4 0.0 0.0 -89.60367876912086 0.0 6.441805425574834E-4 0.0 -55.3934961170873 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="61">
+      <ViewTransform type="affine">
+        <affine>6.441939255461745E-4 0.0 0.0 -89.60367876912086 0.0 6.441805425574834E-4 0.0 -55.3934961170873 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="62">
+      <ViewTransform type="affine">
+        <affine>6.441688620749478E-4 0.0 0.0 -89.35673079664556 0.0 6.441485661176936E-4 0.0 -62.892363663559046 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="63">
+      <ViewTransform type="affine">
+        <affine>6.441688620749478E-4 0.0 0.0 -89.35673079664556 0.0 6.441485661176936E-4 0.0 -62.892363663559046 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="64">
+      <ViewTransform type="affine">
+        <affine>6.441688620749478E-4 0.0 0.0 -89.35673079664556 0.0 6.441485661176936E-4 0.0 -62.892363663559046 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="65">
+      <ViewTransform type="affine">
+        <affine>6.441889720706015E-4 0.0 0.0 -89.60367876912086 0.0 6.441503751723305E-4 0.0 -70.49209723918091 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="66">
+      <ViewTransform type="affine">
+        <affine>6.441889720706015E-4 0.0 0.0 -89.60367876912086 0.0 6.441503751723305E-4 0.0 -70.49209723918091 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="67">
+      <ViewTransform type="affine">
+        <affine>6.441889720706015E-4 0.0 0.0 -89.60367876912086 0.0 6.441503751723305E-4 0.0 -70.49209723918091 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="68">
+      <ViewTransform type="affine">
+        <affine>6.44184143442006E-4 0.0 0.0 -96.46257175111023 0.0 6.441404915556783E-4 0.0 -55.445668201130474 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="69">
+      <ViewTransform type="affine">
+        <affine>6.44184143442006E-4 0.0 0.0 -96.46257175111023 0.0 6.441404915556783E-4 0.0 -55.445668201130474 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="70">
+      <ViewTransform type="affine">
+        <affine>6.44184143442006E-4 0.0 0.0 -96.46257175111023 0.0 6.441404915556783E-4 0.0 -55.445668201130474 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="71">
+      <ViewTransform type="affine">
+        <affine>6.441585595181555E-4 0.0 0.0 -96.06954187942424 0.0 6.441558726258727E-4 0.0 -62.054132179932104 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="72">
+      <ViewTransform type="affine">
+        <affine>6.441585595181555E-4 0.0 0.0 -96.06954187942424 0.0 6.441558726258727E-4 0.0 -62.054132179932104 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="73">
+      <ViewTransform type="affine">
+        <affine>6.441585595181555E-4 0.0 0.0 -96.06954187942424 0.0 6.441558726258727E-4 0.0 -62.054132179932104 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="74">
+      <ViewTransform type="affine">
+        <affine>6.441424597089568E-4 0.0 0.0 -96.56343782437479 0.0 6.441448449463735E-4 0.0 -69.65386575555397 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="75">
+      <ViewTransform type="affine">
+        <affine>6.441424597089568E-4 0.0 0.0 -96.56343782437479 0.0 6.441448449463735E-4 0.0 -69.65386575555397 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="76">
+      <ViewTransform type="affine">
+        <affine>6.441424597089568E-4 0.0 0.0 -96.56343782437479 0.0 6.441448449463735E-4 0.0 -69.65386575555397 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="77">
+      <ViewTransform type="affine">
+        <affine>6.441834094232668E-4 0.0 0.0 -102.9806069682746 0.0 6.44168164263306E-4 0.0 -55.59175003645135 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="78">
+      <ViewTransform type="affine">
+        <affine>6.441834094232668E-4 0.0 0.0 -102.9806069682746 0.0 6.44168164263306E-4 0.0 -55.59175003645135 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="79">
+      <ViewTransform type="affine">
+        <affine>6.441834094232668E-4 0.0 0.0 -102.9806069682746 0.0 6.44168164263306E-4 0.0 -55.59175003645135 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="80">
+      <ViewTransform type="affine">
+        <affine>6.441585595181537E-4 0.0 0.0 -102.9806069682746 0.0 6.441687570544576E-4 0.0 -62.34977398951006 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="81">
+      <ViewTransform type="affine">
+        <affine>6.441585595181537E-4 0.0 0.0 -102.9806069682746 0.0 6.441687570544576E-4 0.0 -62.34977398951006 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="82">
+      <ViewTransform type="affine">
+        <affine>6.441585595181537E-4 0.0 0.0 -102.9806069682746 0.0 6.441687570544576E-4 0.0 -62.34977398951006 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="83">
+      <ViewTransform type="affine">
+        <affine>6.441526053503885E-4 0.0 0.0 -103.52319687962873 0.0 6.441805425574825E-4 0.0 -69.70255970066094 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="84">
+      <ViewTransform type="affine">
+        <affine>6.441526053503885E-4 0.0 0.0 -103.52319687962873 0.0 6.441805425574825E-4 0.0 -69.70255970066094 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="85">
+      <ViewTransform type="affine">
+        <affine>6.441526053503885E-4 0.0 0.0 -103.52319687962873 0.0 6.441805425574825E-4 0.0 -69.70255970066094 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="86">
+      <ViewTransform type="affine">
+        <affine>1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+  </ViewRegistrations>
+</SpimData>

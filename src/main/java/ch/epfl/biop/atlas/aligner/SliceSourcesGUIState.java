@@ -82,12 +82,12 @@ public class SliceSourcesGUIState {
         behavioursHandleSlice.behaviour(mp.getSelectedSourceDragBehaviour(slice), "dragSelectedSources" + this.toString(), "button1");
         behavioursHandleSlice.behaviour((ClickBehaviour) (x, y) -> {
             slice.deSelect();
-            mp.bdvh.getViewerPanel().requestRepaint();
+            mp.getBdvh().getViewerPanel().requestRepaint();
         }, "deselectedSources" + this.toString(), "button3", "ctrl button1");
 
         GraphicalHandle gh = new CircleGraphicalHandle(mp,
                 behavioursHandleSlice,
-                mp.bdvh.getTriggerbindings(),
+                mp.getBdvh().getTriggerbindings(),
                 this.toString(), // pray for unicity ? TODO : do better than thoughts and prayers
                 this::getBdvHandleCoords,
                 this::getBdvHandleRadius,
@@ -104,7 +104,7 @@ public class SliceSourcesGUIState {
 
             synchronized (lockChangeDisplay) {
 
-                mp.bdvh.getViewerPanel().state().removeSources(Arrays.asList(sources_displayed_or_readyfordisplay));
+                mp.getBdvh().getViewerPanel().state().removeSources(Arrays.asList(sources_displayed_or_readyfordisplay));
 
                 sacs_registration_mode = slice.getRegisteredSources();
 
@@ -160,14 +160,14 @@ public class SliceSourcesGUIState {
                 switch (mp.displayMode) {
                     case MultiSlicePositioner.POSITIONING_MODE_INT:
                         if (sources_displayed_or_readyfordisplay != relocated_sacs_positioning_mode) {
-                            mp.bdvh.getViewerPanel().state().removeSources(Arrays.asList(sources_displayed_or_readyfordisplay));
+                            mp.getBdvh().getViewerPanel().state().removeSources(Arrays.asList(sources_displayed_or_readyfordisplay));
                             SourceAndConverterHelper.transferColorConverters(sources_displayed_or_readyfordisplay, relocated_sacs_positioning_mode);
                             sources_displayed_or_readyfordisplay = relocated_sacs_positioning_mode;
                         }
                         break;
                     case MultiSlicePositioner.REGISTRATION_MODE_INT:
                         if (sources_displayed_or_readyfordisplay != sacs_registration_mode) {
-                            mp.bdvh.getViewerPanel().state().removeSources(Arrays.asList(sources_displayed_or_readyfordisplay));
+                            mp.getBdvh().getViewerPanel().state().removeSources(Arrays.asList(sources_displayed_or_readyfordisplay));
                             SourceAndConverterHelper.transferColorConverters(sources_displayed_or_readyfordisplay, sacs_registration_mode);
                             sources_displayed_or_readyfordisplay = sacs_registration_mode;
                         }
@@ -192,7 +192,7 @@ public class SliceSourcesGUIState {
 
     protected Integer[] getBdvHandleCoords() {
         AffineTransform3D bdvAt3D = new AffineTransform3D();
-        mp.bdvh.getViewerPanel().state().getViewerTransform(bdvAt3D);
+        mp.getBdvh().getViewerPanel().state().getViewerTransform(bdvAt3D);
         RealPoint sliceCenter;
         if (mp.getDisplayMode() == MultiSlicePositioner.POSITIONING_MODE_INT) {
             sliceCenter = getCenterPositionPMode();
@@ -225,7 +225,7 @@ public class SliceSourcesGUIState {
     }
 
     private void hide() {
-        mp.bdvh.getViewerPanel().state()
+        mp.getBdvh().getViewerPanel().state()
                 .removeSources(Arrays.asList(sources_displayed_or_readyfordisplay));
     }
 
@@ -239,7 +239,7 @@ public class SliceSourcesGUIState {
 
                 SourceAndConverterServices
                         .getSourceAndConverterDisplayService()
-                        .show(mp.bdvh, sourcesToDisplay.toArray(new SourceAndConverter[sourcesToDisplay.size()]));
+                        .show(mp.getBdvh(), sourcesToDisplay.toArray(new SourceAndConverter[sourcesToDisplay.size()]));
             }
         //}
     }

@@ -9,9 +9,12 @@
     "converter_setup_max": 255.0,
     "sac": {
       "spimdata": {
-        "datalocation": "C:\\Users\\nicol\\Dropbox\\BIOP\\ImageToAtlasRegister\\src\\test\\resources\\_bdvdataset_0.xml"
+        "datalocation": "C:\\Users\\nicol\\Dropbox\\BIOP\\ImageToAtlasRegister\\src\\test\\resources\\_bdvdataset_5.xml"
       },
       "viewsetup": 0
+    },
+    "string_metadata": {
+      "Projection Mode": "Sum"
     }
   }
 ]

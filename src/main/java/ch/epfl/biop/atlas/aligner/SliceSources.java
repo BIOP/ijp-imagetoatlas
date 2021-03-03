@@ -890,6 +890,52 @@ public class SliceSources {
         return SourceAndConverterHelper.bestLevel(registered_sacs[0],0,pxSizeInMm);
     }
 
+    public String getInfo() {
+        String sliceInfo = "";
+
+        SourceAndConverter rootSac = SourceAndConverterInspector.getRootSourceAndConverter(original_sacs[0]);
+
+        if (SourceAndConverterServices.getSourceAndConverterService()
+                .getMetadata(rootSac, SourceAndConverterService.SPIM_DATA_INFO)==null) {
+            sliceInfo+="No information available";
+        } else {
+            AbstractSpimData asd =
+                    ((SourceAndConverterService.SpimDataInfo)SourceAndConverterServices.getSourceAndConverterService()
+                            .getMetadata(rootSac, SourceAndConverterService.SPIM_DATA_INFO)).asd;
+
+            int viewSetupId = ((SourceAndConverterService.SpimDataInfo)SourceAndConverterServices.getSourceAndConverterService()
+                    .getMetadata(rootSac, SourceAndConverterService.SPIM_DATA_INFO)).setupId;
+
+            Collection<String> datasetKeys = SourceAndConverterServices.getSourceAndConverterService().getMetadataKeys(asd);
+
+            if (datasetKeys!=null) {
+                StringBuilder sb = new StringBuilder();
+                datasetKeys.stream().forEach(key -> {
+                    String value = "";
+                    Object v = SourceAndConverterServices.getSourceAndConverterService().getMetadata(asd,key);
+                    if (v!=null) value = v.toString();
+                    sb.append(key+":"+value+"\n");
+                });
+                sliceInfo+=sb.toString();
+            }
+
+            BasicViewSetup bvs = (BasicViewSetup) asd.getSequenceDescription().getViewSetups().get(viewSetupId);
+
+            if (bvs.hasName()) {
+                sliceInfo+="viewsetup:"+bvs.getName()+" ["+bvs.getId()+"]\n";
+            }
+
+            if (bvs.getAttribute(QuPathEntryEntity.class)!=null) {
+                QuPathEntryEntity qpent = bvs.getAttribute(QuPathEntryEntity.class);
+                sliceInfo+="QuPath project:"+qpent.getQuPathProjectionLocation()+"\n";
+                sliceInfo+="QuPath entity:"+qpent.getName()+" ["+qpent.getId()+"]";
+            } else {
+                //QuPathEntryEntity not found"
+            }
+        }
+        return sliceInfo;
+    }
+
     public static class RegistrationAndSources {
 
         final Registration reg;
