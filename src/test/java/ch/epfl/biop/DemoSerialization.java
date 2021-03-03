@@ -4,7 +4,7 @@ import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.ABBACommand;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
-import ch.epfl.biop.scijava.command.SourceFromImagePlusCommand;
+import ch.epfl.biop.bdv.command.importer.SourceFromImagePlusCommand;
 import ij.IJ;
 import ij.ImagePlus;
 import net.imagej.ImageJ;

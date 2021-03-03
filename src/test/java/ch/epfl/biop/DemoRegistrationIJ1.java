@@ -5,7 +5,7 @@ import ch.epfl.biop.atlas.allen.adultmousebrain.AllenBrainAdultMouseAtlasCCF2017
 import ch.epfl.biop.atlas.aligner.commands.SacMultiSacsPositionerCommand;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
-import ch.epfl.biop.scijava.command.SourceFromImagePlusCommand;
+import ch.epfl.biop.bdv.command.importer.SourceFromImagePlusCommand;
 import ij.IJ;
 import ij.ImagePlus;
 import net.imagej.ImageJ;
