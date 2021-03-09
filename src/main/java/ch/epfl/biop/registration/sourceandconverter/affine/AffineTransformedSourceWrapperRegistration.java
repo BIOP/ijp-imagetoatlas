@@ -5,6 +5,7 @@ import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import ch.epfl.biop.registration.sourceandconverter.SourceAndConverterRegistration;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
+import org.scijava.Context;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterAndTimeRange;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
 
@@ -102,6 +103,26 @@ public class AffineTransformedSourceWrapperRegistration extends SourceAndConvert
 
     @Override
     public void abort() {
+
+    }
+
+    @Override
+    public String getTransform() {
+        return null;
+    }
+
+    @Override
+    public void setTransform(String serialized_transform) {
+
+    }
+
+    @Override
+    public void setScijavaContext(Context context) {
+
+    }
+
+    @Override
+    public void setRegistrationParameters(Map<String, String> parameters) {
 
     }
 }

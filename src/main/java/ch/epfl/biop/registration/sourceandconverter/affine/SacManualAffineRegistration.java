@@ -3,12 +3,24 @@ package ch.epfl.biop.registration.sourceandconverter.affine;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import ch.epfl.biop.registration.Registration;
+import org.scijava.Context;
 
+import java.util.Map;
 import java.util.function.Function;
 
 public class SacManualAffineRegistration implements Registration<SourceAndConverter[]> {
 
     SourceAndConverter[] fimg, mimg;
+
+    @Override
+    public void setScijavaContext(Context context) {
+        // Ignored
+    }
+
+    @Override
+    public void setRegistrationParameters(Map<String, String> parameters) {
+
+    }
 
     @Override
     public void setFixedImage(SourceAndConverter[] fimg) { this.fimg = fimg; }

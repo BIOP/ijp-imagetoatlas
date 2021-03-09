@@ -1,5 +1,6 @@
 package ch.epfl.biop.registration.sourceandconverter.affine;
 
+import bdv.util.RealTransformHelper;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import ch.epfl.biop.registration.sourceandconverter.SourceAndConverterRegistration;
@@ -9,6 +10,7 @@ import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterAndTimeRange;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 abstract public class AffineTransformSourceAndConverterRegistration extends SourceAndConverterRegistration {
 
@@ -64,4 +66,16 @@ abstract public class AffineTransformSourceAndConverterRegistration extends Sour
     public boolean isEditable() {
         return false; // TODO : make it editable
     }
+
+    @Override
+    public String getTransform() {
+        RealTransformHelper.getRealTransformAdapter(context);
+        return null;
+    }
+
+    @Override
+    public void setTransform(String serialized_transform) {
+
+    }
+
 }

@@ -14,6 +14,7 @@ import net.imglib2.realtransform.RealTransform;
 import net.imglib2.realtransform.ThinplateSplineTransform;
 import net.imglib2.realtransform.Wrapped2DTransformAs3D;
 import net.imglib2.realtransform.inverse.WrappedIterativeInvertibleRealTransform;
+import org.scijava.Context;
 import sc.fiji.bdvpg.bdv.BdvHandleHelper;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import sc.fiji.bdvpg.services.serializers.plugins.ThinPlateSplineTransformAdapter;
@@ -26,6 +27,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static bdv.util.RealTransformHelper.BigWarpFileFromRealTransform;
@@ -34,8 +36,18 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
 
     SourceAndConverter[] fimg, mimg;
 
+    @Override
+    public void setScijavaContext(Context context) {
+        // Ignored
+    }
+
+    @Override
+    public void setRegistrationParameters(Map<String, String> parameters) {
+
+    }
+
     Runnable waitForUser = () -> {
-        WaitForUserDialog dialog = new WaitForUserDialog("Choose slice","Please perform carefully your registration then press ok.");
+        WaitForUserDialog dialog = new WaitForUserDialog("Big Warp registration","Please perform carefully your registration then press ok.");
         dialog.show();
     };
 

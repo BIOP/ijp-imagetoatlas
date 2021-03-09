@@ -4,11 +4,13 @@ import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
+import org.scijava.Context;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterAndTimeRange;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 public class CenterZeroRegistration extends AffineTransformSourceAndConverterRegistration {//implements Registration<SourceAndConverter[]> {
 
@@ -100,6 +102,16 @@ public class CenterZeroRegistration extends AffineTransformSourceAndConverterReg
     @Override
     public boolean isRegistrationDone() {
         return isDone;
+    }
+
+    @Override
+    public void setScijavaContext(Context context) {
+
+    }
+
+    @Override
+    public void setRegistrationParameters(Map<String, String> parameters) {
+
     }
 
     @Override

@@ -29,7 +29,7 @@ public class Elastix2DSplineRegistration extends SourceAndConverterRegistration 
 
     Context ctx;
 
-    Map<String, Object> scijavaParameters = new HashMap<>();
+    Map<String, Object> parameters = new HashMap<>();
 
     RealTransform rt;
 
@@ -37,9 +37,14 @@ public class Elastix2DSplineRegistration extends SourceAndConverterRegistration 
         this.ctx = ctx;
     }
 
-    public void setScijavaParameters(Map<String, Object> scijavaParameters) {
-        this.scijavaParameters.putAll(scijavaParameters);
+    @Override
+    public void setRegistrationParameters(Map<String, String> parameters) {
+        this.parameters.putAll(parameters);
     }
+
+    /*public void setScijavaParameters(Map<String, Object> scijavaParameters) {
+        this.scijavaParameters.putAll(scijavaParameters);
+    }*/
 
     public RealTransform getRealTransform() {
         return rt;
@@ -53,14 +58,14 @@ public class Elastix2DSplineRegistration extends SourceAndConverterRegistration 
     public void setFixedImage(SourceAndConverter[] fimg) {
         super.setFixedImage(fimg);
         assert fimg.length==1;
-        scijavaParameters.put("sac_fixed", fimg[0]);
+        parameters.put("sac_fixed", fimg[0]);
     }
 
     @Override
     public void setMovingImage(SourceAndConverter[] mimg) {
         super.setMovingImage(mimg);
         assert mimg.length==1;
-        scijavaParameters.put("sac_moving", mimg[0]);
+        parameters.put("sac_moving", mimg[0]);
     }
 
     Class<? extends Command> registrationCommandClass = Elastix2DSplineRegisterCommand.class;
@@ -76,7 +81,7 @@ public class Elastix2DSplineRegistration extends SourceAndConverterRegistration 
             boolean success = true;
              task = ctx
                    .getService(CommandService.class)
-                   .run(registrationCommandClass, false, scijavaParameters );
+                   .run(registrationCommandClass, false, parameters);
 
             CommandModule module = task.get();
 
