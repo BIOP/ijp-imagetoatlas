@@ -1871,8 +1871,6 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         }
     }
 
-
-
     // --------------------------------- ACTION CLASSES
 
     /**
@@ -2429,62 +2427,9 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     }
 
     // ------------------------------------------------ Serialization / Deserialization
-    /*
-        Register the RealTransformAdapters from Bdv-playground
-     */
-    void registerTransformAdapters(final GsonBuilder gsonbuilder) {
-        // AffineTransform3D serialization
-        gsonbuilder.registerTypeAdapter(AffineTransform3D.class, new AffineTransform3DAdapter());
-
-        Map<Class<?>, List<Class<?>>> runTimeAdapters = new HashMap<>();
-        scijavaCtx.getService(BdvPlaygroundObjectAdapterService.class)
-                .getAdapters(IClassRuntimeAdapter.class)
-                .forEach(pi -> {
-                            try {
-                                IClassRuntimeAdapter adapter = pi.createInstance();
-                                if (runTimeAdapters.containsKey(adapter.getBaseClass())) {
-                                    runTimeAdapters.get(adapter.getBaseClass()).add(adapter.getRunTimeClass());
-                                } else {
-                                    List<Class<?>> subClasses = new ArrayList<>();
-                                    subClasses.add(adapter.getRunTimeClass());
-                                    runTimeAdapters.put(adapter.getBaseClass(), subClasses);
-                                }
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        }
-                );
-
-        scijavaCtx.getService(BdvPlaygroundObjectAdapterService.class)
-                .getAdapters(IClassRuntimeAdapter.class)
-                .forEach(pi -> {
-                    try {
-                        IClassRuntimeAdapter adapter = pi.createInstance();
-                        if (adapter.getBaseClass().equals(RealTransform.class)) {
-                            gsonbuilder.registerTypeHierarchyAdapter(adapter.getRunTimeClass(), adapter);
-                        }
-                    } catch (InstantiableException e) {
-                        e.printStackTrace();
-                    }
-                });
-
-
-        log.accept("IRunTimeClassAdapters : ");
-        runTimeAdapters.keySet().forEach(baseClass -> {
-            if (baseClass.equals(RealTransform.class)) {
-                log.accept("\t " + baseClass);
-                RuntimeTypeAdapterFactory factory = RuntimeTypeAdapterFactory.of(baseClass);
-                runTimeAdapters.get(baseClass).forEach(subClass -> {
-                    factory.registerSubtype(subClass);
-                    log.accept("\t \t " + subClass);
-                });
-                gsonbuilder.registerTypeAdapterFactory(factory);
-            }
-        });
-    }
 
     Gson getGsonStateSerializer(List<SourceAndConverter> serialized_sources) {
-        GsonBuilder gsonbuider = new GsonBuilder()
+        GsonBuilder gsonbuilder = new GsonBuilder()
                 .setPrettyPrinting()
                 .registerTypeAdapter(SourceAndConverter.class, new IndexedSourceAndConverterAdapter(serialized_sources))
                 .registerTypeAdapter(SourceAndConverter[].class, new IndexedSourceAndConverterArrayAdapter(serialized_sources));
@@ -2492,7 +2437,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         // Now gets all custom serializers for RealTransform.class, using Scijava extensibility plugin
         // Most of the adapters comes from Bdv-Playground
 
-        registerTransformAdapters(gsonbuider);
+        RealTransformHelper.registerTransformAdapters(gsonbuilder, scijavaCtx);
 
         // For actions serialization
         RuntimeTypeAdapterFactory factoryActions = RuntimeTypeAdapterFactory.of(CancelableAction.class);
@@ -2501,10 +2446,10 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         factoryActions.registerSubtype(MoveSlice.class);
         factoryActions.registerSubtype(RegisterSlice.class);
 
-        gsonbuider.registerTypeAdapterFactory(factoryActions);
-        gsonbuider.registerTypeHierarchyAdapter(CreateSlice.class, new CreateSliceAdapter(this));
-        gsonbuider.registerTypeHierarchyAdapter(MoveSlice.class, new MoveSliceAdapter(this, this::currentSliceGetter));
-        gsonbuider.registerTypeHierarchyAdapter(RegisterSlice.class, new RegisterSliceAdapter(this, this::currentSliceGetter));
+        gsonbuilder.registerTypeAdapterFactory(factoryActions);
+        gsonbuilder.registerTypeHierarchyAdapter(CreateSlice.class, new CreateSliceAdapter(this));
+        gsonbuilder.registerTypeHierarchyAdapter(MoveSlice.class, new MoveSliceAdapter(this, this::currentSliceGetter));
+        gsonbuilder.registerTypeHierarchyAdapter(RegisterSlice.class, new RegisterSliceAdapter(this, this::currentSliceGetter));
 
         // For registration registration
         RuntimeTypeAdapterFactory factoryRegistrations = RuntimeTypeAdapterFactory.of(Registration.class);
@@ -2513,11 +2458,11 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         factoryRegistrations.registerSubtype(Elastix2DSplineRegistration.class);
         factoryRegistrations.registerSubtype(SacBigWarp2DRegistration.class);
 
-        gsonbuider.registerTypeAdapterFactory(factoryRegistrations);
-        gsonbuider.registerTypeHierarchyAdapter(Elastix2DAffineRegistration.class, new Elastix2DAffineRegistrationAdapter());
-        gsonbuider.registerTypeHierarchyAdapter(Elastix2DSplineRegistration.class, new Elastix2DSplineRegistrationAdapter());
-        gsonbuider.registerTypeHierarchyAdapter(SacBigWarp2DRegistration.class, new SacBigWarp2DRegistrationAdapter());
-        gsonbuider.registerTypeHierarchyAdapter(AlignerState.SliceSourcesState.class, new SliceSourcesStateDeserializer((slice) -> currentSerializedSlice = slice));
+        gsonbuilder.registerTypeAdapterFactory(factoryRegistrations);
+        gsonbuilder.registerTypeHierarchyAdapter(Elastix2DAffineRegistration.class, new Elastix2DAffineRegistrationAdapter());
+        gsonbuilder.registerTypeHierarchyAdapter(Elastix2DSplineRegistration.class, new Elastix2DSplineRegistrationAdapter());
+        gsonbuilder.registerTypeHierarchyAdapter(SacBigWarp2DRegistration.class, new SacBigWarp2DRegistrationAdapter());
+        gsonbuilder.registerTypeHierarchyAdapter(AlignerState.SliceSourcesState.class, new SliceSourcesStateDeserializer((slice) -> currentSerializedSlice = slice));
 
         // For sources processor
 
@@ -2529,13 +2474,13 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         factorySourcesProcessor.registerSubtype(SourcesResampler.class);
         factorySourcesProcessor.registerSubtype(SourcesIdentity.class);
 
-        gsonbuider.registerTypeAdapterFactory(factorySourcesProcessor);
-        gsonbuider.registerTypeHierarchyAdapter(SourcesChannelsSelect.class, new SourcesChannelSelectAdapter());
-        gsonbuider.registerTypeHierarchyAdapter(SourcesAffineTransformer.class, new SourcesAffineTransformerAdapter());
-        gsonbuider.registerTypeHierarchyAdapter(SourcesResampler.class, new SourcesResamplerAdapter());
-        gsonbuider.registerTypeHierarchyAdapter(SourcesProcessComposer.class, new SourcesComposerAdapter());
+        gsonbuilder.registerTypeAdapterFactory(factorySourcesProcessor);
+        gsonbuilder.registerTypeHierarchyAdapter(SourcesChannelsSelect.class, new SourcesChannelSelectAdapter());
+        gsonbuilder.registerTypeHierarchyAdapter(SourcesAffineTransformer.class, new SourcesAffineTransformerAdapter());
+        gsonbuilder.registerTypeHierarchyAdapter(SourcesResampler.class, new SourcesResamplerAdapter());
+        gsonbuilder.registerTypeHierarchyAdapter(SourcesProcessComposer.class, new SourcesComposerAdapter());
 
-        return gsonbuider.create();
+        return gsonbuilder.create();
     }
 
     public void saveState(File stateFile, boolean overwrite) {
