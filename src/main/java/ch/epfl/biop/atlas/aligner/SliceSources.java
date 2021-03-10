@@ -1,6 +1,7 @@
 package ch.epfl.biop.atlas.aligner;
 
 import bdv.util.BoundedRealTransform;
+import bdv.util.QuPathBdvHelper;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.commands.ConstructROIsFromImgLabel;
 import ch.epfl.biop.bdv.command.exporter.ExportToImagePlusCommand;
@@ -72,8 +73,6 @@ public class SliceSources {
     private double slicingAxisPosition;
 
     private boolean isSelected = false;
-
-    //private double yShift_slicing_mode = 0;
 
     private final MultiSlicePositioner mp;
 
@@ -714,72 +713,37 @@ public class SliceSources {
     }
 
     private void storeInQuPathProjectIfExists(ImageJRoisFile ijroisfile, boolean erasePreviousFile) {
-        //-------------------- Experimental : finding where to save the ROIS
-        SourceAndConverter rootSac = SourceAndConverterInspector.getRootSourceAndConverter(original_sacs[0]);
 
-        if (SourceAndConverterServices.getSourceAndConverterService()
-                .getMetadata(rootSac, SourceAndConverterService.SPIM_DATA_INFO)==null) {
+        if (!QuPathBdvHelper.isSourceLinkedToQuPath(original_sacs[0])) {
+            mp.errlog.accept("Slice"+toString()+" not linked to a QuPath dataset");
+        }
 
-            errlog.accept("Slice "+this+" not associated to any bdv dataset.");
+        try {
+            File dataEntryFolder = QuPathBdvHelper.getDataEntryFolder(original_sacs[0]);
 
-        } else {
-            AbstractSpimData asd =
-                    ((SourceAndConverterService.SpimDataInfo)SourceAndConverterServices.getSourceAndConverterService()
-                            .getMetadata(rootSac, SourceAndConverterService.SPIM_DATA_INFO)).asd;
+            String projectFolderPath = QuPathBdvHelper.getQuPathProjectFile(original_sacs[0]).getParent();
 
-            mp.log.accept("BDV Datasets found associated with the slice!");
+            File f = new File(dataEntryFolder, "ABBA-RoiSet.zip");
+            mp.log.accept("Save slice ROI to quPath project " + f.getAbsolutePath());
 
-
-            int viewSetupId = ((SourceAndConverterService.SpimDataInfo)SourceAndConverterServices.getSourceAndConverterService()
-                    .getMetadata(rootSac, SourceAndConverterService.SPIM_DATA_INFO)).setupId;
-
-            BasicViewSetup bvs = (BasicViewSetup) asd.getSequenceDescription().getViewSetups().get(viewSetupId);
-
-            if (bvs.getAttribute(QuPathEntryEntity.class)!=null) {
-                QuPathEntryEntity qpent = bvs.getAttribute(QuPathEntryEntity.class);
-
-                String filePath = new File(qpent.getQuPathProjectionLocation()).getParent();
-
-                // under filePath, there should be a folder data/#entryID
-
-                File dataEntryFolder = new File(filePath, "data"+File.separator+qpent.getId());
-
-                // TODO : check if the file already exists...
-                if (dataEntryFolder.exists()) {
-
-                    File f = new File(dataEntryFolder, "ABBA-RoiSet.zip");
-                    mp.log.accept("Save slice ROI to quPath project " + f.getAbsolutePath());
-                    try {
-
-                        if (f.exists()) {
-                            if (erasePreviousFile) {
-                                Files.delete(Paths.get(f.getAbsolutePath()));
-                                // Save in user specified folder
-                                Files.copy(Paths.get(ijroisfile.f.getAbsolutePath()),Paths.get(f.getAbsolutePath()));
-                                writeOntotogyIfNotPresent(mp, filePath);
-                            } else {
-                                errlog.accept("Error : QuPath ROI file already exists");
-                            }
-                        } else {
-                            // Save in user specified folder
-                            Files.copy(Paths.get(ijroisfile.f.getAbsolutePath()),Paths.get(f.getAbsolutePath()));
-                            writeOntotogyIfNotPresent(mp, filePath);
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
+            if (f.exists()) {
+                if (erasePreviousFile) {
+                    Files.delete(Paths.get(f.getAbsolutePath()));
+                    // Save in user specified folder
+                    Files.copy(Paths.get(ijroisfile.f.getAbsolutePath()),Paths.get(f.getAbsolutePath()));
+                    writeOntotogyIfNotPresent(mp, projectFolderPath);
                 } else {
-                    mp.errlog.accept("QuPath Entry data folder ["+dataEntryFolder.toString() +"] not found! : ");
+                    errlog.accept("Error : QuPath ROI file already exists");
                 }
-
-            } else {
-                mp.errlog.accept("QuPathEntryEntity not found");
             }
+
+        } catch (Exception e) {
+            mp.errlog.accept("QuPath Entry data folder not found! : ");
         }
     }
 
-    static public synchronized void writeOntotogyIfNotPresent(MultiSlicePositioner mp, String quPathFilePath) { //statically synchronized to avoid race conditions in file writing
+    // statically synchronized to avoid race conditions in file writing
+    static public synchronized void writeOntotogyIfNotPresent(MultiSlicePositioner mp, String quPathFilePath) {
         File ontology = new File(quPathFilePath, "AllenMouseBrainOntology.json");
         if (!ontology.exists()) {
             try {
@@ -850,7 +814,6 @@ public class SliceSources {
         listLeftRight.shapeRoiList = new IJShapeRoiArray(arrayIniLeftRight);
 
         cvtRoisTransformed.set(listRegions);
-
 
         leftRightTranformed.set(listLeftRight);
     }
