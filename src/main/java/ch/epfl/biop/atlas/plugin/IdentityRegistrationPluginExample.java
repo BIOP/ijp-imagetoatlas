@@ -36,6 +36,13 @@ public class IdentityRegistrationPluginExample implements IABBARegistrationPlugi
     SourceAndConverter<?>[] moving_images;
 
     /**
+     * Custom transform object - get and set using a serialized string object
+     */
+    MyTransform transform = new MyTransform();
+
+    boolean isRegistrationDone = false;
+
+    /**
      *
      * @param context scijava context being send by ABBA to the registration plugin
      */
@@ -137,10 +144,40 @@ public class IdentityRegistrationPluginExample implements IABBARegistrationPlugi
     public void abort() {
         // If the registration is long, perform an action which immediately
         // kills the running process, no source has to be restored
+        System.out.println("Abort is called!");
+    }
+
+    @Override
+    public String getTransform() {
+        return transform.getJson();
+    }
+
+    @Override
+    public void setTransform(String serialized_transform) {
+        transform.setJson(serialized_transform);
+        isRegistrationDone = true;
     }
 
     @Override
     public void setLogger(Consumer<String> logger) {
         log = logger;
     }
+
+    public static class MyTransform {
+
+        public MyTransform() {
+
+        }
+
+        public void setJson(String jsonString) {
+            // do stuff
+        }
+
+        public String getJson() {
+            // do stuff
+            return "{myTransform object serialized}";
+        }
+
+    }
+
 }

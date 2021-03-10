@@ -26,13 +26,31 @@ public interface Registration<T> {
     T getTransformedImageMovingToFixed(T img);
     RealPointList getTransformedPtsFixedToMoving(RealPointList pts);
 
-    boolean parallelSupported();
-    boolean isManual();
-    boolean isEditable();
-
+    /**
+     * Function called when a registration is cancelled while being processed
+     */
     void abort();
 
+    /**
+     * This function is used to:
+     * - save the registration into a json file
+     * - store transiently the state of a registration to cancel the edition of a transform, if needed
+     * @return a serialized representation of the transform as a String
+     */
     String getTransform();
+
+    /**
+     * Function used to bypass the real registration process (run)
+     * in order to set directly the result of the registration.
+     *
+     * This is used when:
+     * - loading a registration from a state file
+     * - restore if needed a previous transformed state after an edition
+     * a serialized representation of the transform is sent, leading
+     * to an immediate registration being done
+     * isDone should return true after this function is being called
+     * @param serialized_transform
+     */
     void setTransform(String serialized_transform);
 
 }
