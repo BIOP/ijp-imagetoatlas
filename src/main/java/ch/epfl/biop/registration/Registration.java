@@ -11,19 +11,94 @@ import java.util.Map;
 
 public interface Registration<T> {
 
+    /**
+     * Is called just after the Registration object creation to pass
+     * the current scijava context
+     *
+     * TODO : replace this by an Annotation parameter once this interface
+     * is adopted by all registrations
+     * @param context
+     */
     void setScijavaContext(Context context);
+
+    /**
+     * Is called before registration to pass any extra registration parameter
+     * argument. Passed as a dictionary of String to preserve serialization
+     * capability.
+     * @param parameters dictionary of parameters
+     */
     void setRegistrationParameters(Map<String,String> parameters);
 
+    /**
+     * Sets the fixed image
+     * @param fimg fixed image
+     */
     void setFixedImage(T fimg);
+
+    /**
+     * Set the moving image
+     * @param mimg moving image
+     */
     void setMovingImage(T mimg);
+
+    /**
+     * Sets the state of the registration to not done
+     * Called when the registration needs to be rerun for real
+     * instead of just restored (TODO : find if this is really useful)
+     *
+     */
     void resetRegistration();
+
+    /**
+     * Sets the timepoint of the source that should be used for the
+     * registration. 0 in most cases
+     * @param timePoint
+     */
     void setTimePoint(int timePoint);
 
+    /**
+     * Blocking function which performs the registration
+     * @return true if the registration was run succesfully
+     */
     boolean register();
+
+    /**
+     * Blocking function which is called when the user wants
+     * to manually edit the result of the registration
+     * @return true is the transform is been edited successfully. If not,
+     * the previous state of the registration is restored thanks to the serialization
+     * of the transform. An edition cannot occur if the transform has not been set
+     * before (either via the run method, or via setting the transform via the
+     * {@link Registration#setTransform(String)} method
+     */
     boolean edit();
+
+    /**
+     * Flag functions which serves to know whether the result of the
+     * registration is available. Should not be blocking.
+     *
+     * @return true if the transform is available
+     */
     boolean isRegistrationDone();
 
-    T getTransformedImageMovingToFixed(T img);
+    /**
+     * Function which takes an input moving image, transform it
+     * according to the result of the registration (transformation),
+     * and returns it
+     * @param img should not be modified
+     * @return the transformed image
+     */
+    T getTransformedImageMovingToFixed(final T img);
+
+    /**
+     * Reverse transforms a list of points. This function takes a list
+     * of points given in the fixed coordinates system, inverse transform
+     * their coordinates according to the result of the registration.
+     *
+     * The points can be mutated
+     * @param pts points to transform from fixed to moving system coordinates
+     * @return the transformed points
+     */
     RealPointList getTransformedPtsFixedToMoving(RealPointList pts);
 
     /**

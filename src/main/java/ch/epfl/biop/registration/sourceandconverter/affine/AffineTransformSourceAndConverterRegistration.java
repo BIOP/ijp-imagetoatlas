@@ -10,7 +10,7 @@ import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterAndTimeRange;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
 
 import java.util.ArrayList;
-import java.util.Map;
+import java.util.function.Consumer;
 
 abstract public class AffineTransformSourceAndConverterRegistration extends SourceAndConverterRegistration {
 
@@ -19,38 +19,16 @@ abstract public class AffineTransformSourceAndConverterRegistration extends Sour
     public int timePoint = 0;
 
     @Override
-    public void resetRegistration() {
-        at3d = new AffineTransform3D();
-    }
-
-    public AffineTransform3D getAffineTransform() {
-        return at3d;
-    }
-
-    public void setAffineTransform(AffineTransform3D at3d) {
-        this.at3d = at3d;
-    }
-
-    @Override
-    public boolean edit() {
-        throw new UnsupportedOperationException();
-    }
-
-
-    @Override
     public SourceAndConverter[] getTransformedImageMovingToFixed(SourceAndConverter[] img) {
         SourceAndConverter[] out = new SourceAndConverter[img.length];
-
         for (int idx = 0;idx<img.length;idx++) {
             out[idx] = SourceTransformHelper.append(at3d, new SourceAndConverterAndTimeRange(img[idx],timePoint));
         }
-
         return out;
     }
 
     @Override
     public RealPointList getTransformedPtsFixedToMoving(RealPointList pts) {
-
         ArrayList<RealPoint> cvtList = new ArrayList<>();
         for (RealPoint p : pts.ptList) {
             RealPoint pt3d = new RealPoint(3);
@@ -63,19 +41,27 @@ abstract public class AffineTransformSourceAndConverterRegistration extends Sour
     }
 
     @Override
-    public boolean isEditable() {
-        return false; // TODO : make it editable
-    }
-
-    @Override
     public String getTransform() {
-        RealTransformHelper.getRealTransformAdapter(context);
-        return null;
+        return RealTransformHelper.getRealTransformAdapter(context).toJson(at3d);
     }
 
     @Override
     public void setTransform(String serialized_transform) {
+        at3d = RealTransformHelper.getRealTransformAdapter(context).fromJson(serialized_transform, AffineTransform3D.class);
+        isDone = true;
+    }
 
+    @Override
+    public boolean edit() {
+        // TODO : find a way to edit an affine transform -> that shouldn't be so complicated
+        throw new UnsupportedOperationException();
+    }
+
+    Consumer<String> log = System.out::println;
+
+    @Override
+    public void setLogger(Consumer<String> logger) {
+        this.log = logger;
     }
 
 }
