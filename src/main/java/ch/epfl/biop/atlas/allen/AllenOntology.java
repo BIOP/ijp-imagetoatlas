@@ -17,7 +17,7 @@ import org.json.JSONObject;
 import ch.epfl.biop.atlas.AtlasOntology;
 
 /**
- * What a terrible mess, but {@link ConstructROIsFromImgLabel} has to be fixed
+ * What a terrible mess, but ConstructROIsFromImgLabel has to be fixed
  * before we can simplify this and the {@link AtlasOntology} interface
  *
  * @author ashamed of this mess, not putting his name
@@ -171,7 +171,7 @@ public class AllenOntology implements AtlasOntology {
      * which has 1 duplicate (1105) for instance.
      *
      * The annotation map has to be converted the same way...
-     * @param keyModulo
+     * @param keyModulo modulo number to id number of the atlas
      */
     public void mutateToModulo(int keyModulo) {
 

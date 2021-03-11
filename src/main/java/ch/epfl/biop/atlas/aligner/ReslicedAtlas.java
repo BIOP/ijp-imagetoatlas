@@ -262,7 +262,7 @@ public class ReslicedAtlas implements RealInterval {
         //slicingUpdate();
     }
 
-    /**
+    /*
      * ?? TODO : doc
      * @param slicingTransfom
      * @param nX
@@ -455,8 +455,8 @@ public class ReslicedAtlas implements RealInterval {
 
     /**
      * Returns the norm of an axis after an affinetransform is applied
-     * @param axis
-     * @param t
+     * @param axis 0 1 2 corresponds to x y z
+     * @param t transform matrix
      * @return the norm of an axis after an affinetransform is applied
      */
     static public double getNormTransform(int axis, AffineTransform3D t) {

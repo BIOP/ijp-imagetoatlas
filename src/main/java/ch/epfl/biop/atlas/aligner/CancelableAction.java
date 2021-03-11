@@ -6,8 +6,8 @@ import java.util.function.Consumer;
 /**
  * Backbone of a cancelable action used for Bdv Slice Positioner
  * This is used in order to:
- * - store the sequence of actions (-> for cancellation)
- * - executes actions asynchronously (-> for long computations)
+ * - store the sequence of actions (- for cancellation)
+ * - executes actions asynchronously (- for long computations)
  * - keep track of which action is executed on which SliceSources
  * - serialization
  *

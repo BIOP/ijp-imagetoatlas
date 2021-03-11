@@ -852,10 +852,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         centerBdvViewOn(slice, false, null);
     }
 
-    /**
-     * Center bdv on a slice
-     *
-     */
+    // Center bdv on a slice
     public void centerBdvViewOn(SliceSources current_slice, boolean maintainoffset, SliceSources previous_slice) {
 
         RealPoint offset = new RealPoint(3);
