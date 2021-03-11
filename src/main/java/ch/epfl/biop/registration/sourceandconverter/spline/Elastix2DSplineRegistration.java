@@ -20,52 +20,32 @@ import sc.fiji.bdvpg.sourceandconverter.transform.SourceRealTransformer;
 
 import java.util.*;
 import java.util.concurrent.Future;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static bdv.util.RealTransformHelper.BigWarpFileFromRealTransform;
 
-public class Elastix2DSplineRegistration extends SourceAndConverterRegistration {
+public class Elastix2DSplineRegistration extends RealTransformSourceAndConverterRegistration {
 
-    Context ctx;
 
-    Map<String, Object> parameters = new HashMap<>();
-
-    RealTransform rt;
-
-    public void setScijavaContext(Context ctx) {
-        this.ctx = ctx;
-    }
+    Map<String, String> parameters = new HashMap<>();
 
     @Override
     public void setRegistrationParameters(Map<String, String> parameters) {
         this.parameters.putAll(parameters);
     }
 
-    /*public void setScijavaParameters(Map<String, Object> scijavaParameters) {
-        this.scijavaParameters.putAll(scijavaParameters);
-    }*/
-
-    public RealTransform getRealTransform() {
-        return rt;
-    }
-
-    public void setRealTransform(RealTransform rt) {
-        this.rt = rt;
-    }
-
     @Override
     public void setFixedImage(SourceAndConverter[] fimg) {
         super.setFixedImage(fimg);
         assert fimg.length==1;
-        parameters.put("sac_fixed", fimg[0]);
     }
 
     @Override
     public void setMovingImage(SourceAndConverter[] mimg) {
         super.setMovingImage(mimg);
         assert mimg.length==1;
-        parameters.put("sac_moving", mimg[0]);
     }
 
     Class<? extends Command> registrationCommandClass = Elastix2DSplineRegisterCommand.class;
@@ -81,7 +61,10 @@ public class Elastix2DSplineRegistration extends SourceAndConverterRegistration 
             boolean success = true;
              task = ctx
                    .getService(CommandService.class)
-                   .run(registrationCommandClass, false, parameters);
+                   .run(registrationCommandClass, false,
+                           "sac_fixed", fimg[0],
+                           "sac_moving", mimg[0],
+                           parameters);
 
             CommandModule module = task.get();
 
@@ -232,4 +215,18 @@ public class Elastix2DSplineRegistration extends SourceAndConverterRegistration 
         }
     }
 
+    @Override
+    public String getTransform() {
+        return null;
+    }
+
+    @Override
+    public void setTransform(String serialized_transform) {
+
+    }
+
+    @Override
+    public void setLogger(Consumer<String> logger) {
+
+    }
 }
