@@ -5,6 +5,8 @@ branches:
   - master
   - "/.*-[0-9]+\\..*/"
 install: true
+before_install:
+  - chmod +x .travis/build.sh
 script: ".travis/build.sh"
 cache:
   directories:
