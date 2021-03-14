@@ -1753,6 +1753,8 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                 params.put("pz", Double.toString(slice.getSlicingAxisPosition()));
                 params.put("sx", Double.toString(roiSX));
                 params.put("sy", Double.toString(roiSY));
+                params.put("minPixSize", Integer.toString(4));
+                params.put("maxIterationNumberPerScale", Integer.toString(150));
                 elastixAffineReg.setRegistrationParameters(params);
                 new RegisterSlice(this, slice, elastixAffineReg, preprocessFixed, preprocessMoving).runRequest();
             }
@@ -1827,6 +1829,8 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                 params.put("pz", Double.toString(slice.getSlicingAxisPosition()));
                 params.put("sx", Double.toString(roiSX));
                 params.put("sy", Double.toString(roiSY));
+                params.put("minPixSize", Integer.toString(4));
+                params.put("maxIterationNumberPerScale", Integer.toString(150));
                 params.put("serverURL", serverURL);
                 if (!userConsent) {
                     params.put("taskInfo", "");
