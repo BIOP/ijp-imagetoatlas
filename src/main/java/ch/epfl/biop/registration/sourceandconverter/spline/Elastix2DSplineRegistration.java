@@ -3,6 +3,8 @@ package ch.epfl.biop.registration.sourceandconverter.spline;
 import bdv.tools.brightness.ConverterSetup;
 import bdv.util.BdvHandle;
 import bdv.viewer.SourceAndConverter;
+import ch.epfl.biop.atlas.aligner.commands.RegistrationElastixAffineCommand;
+import ch.epfl.biop.atlas.plugin.RegistrationTypeProperties;
 import ch.epfl.biop.bdv.command.register.Elastix2DSplineRegisterCommand;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import ch.epfl.biop.registration.sourceandconverter.SourceAndConverterRegistration;
@@ -26,6 +28,11 @@ import java.util.stream.Collectors;
 
 import static bdv.util.RealTransformHelper.BigWarpFileFromRealTransform;
 
+@RegistrationTypeProperties(
+        isManual = false,
+        isEditable = true,
+        userInterface = {RegistrationElastixAffineCommand.class}
+)
 public class Elastix2DSplineRegistration extends RealTransformSourceAndConverterRegistration {
 
 
@@ -59,7 +66,7 @@ public class Elastix2DSplineRegistration extends RealTransformSourceAndConverter
     public boolean register() {
         try {
             boolean success = true;
-             task = ctx
+             task = context
                    .getService(CommandService.class)
                    .run(registrationCommandClass, false,
                            "sac_fixed", fimg[0],
@@ -119,15 +126,6 @@ public class Elastix2DSplineRegistration extends RealTransformSourceAndConverter
         return new RealPointList(cvtList);
     }
 
-    @Override
-    public boolean parallelSupported() {
-        return true;
-    }
-
-    @Override
-    public boolean isManual() {
-        return false;
-    }
 
     Runnable waitForUser = () -> {
         WaitForUserDialog dialog = new WaitForUserDialog("Choose slice","Please perform carefully your registration then press ok.");
@@ -182,14 +180,9 @@ public class Elastix2DSplineRegistration extends RealTransformSourceAndConverter
 
     }
 
-    @Override
-    public boolean isEditable() {
-        return true;
-    }
-
     private boolean isDone = false;
 
-    @Override
+    /*@Override
     public boolean isRegistrationDone() {
         return isDone;
     }
@@ -206,7 +199,7 @@ public class Elastix2DSplineRegistration extends RealTransformSourceAndConverter
     @Override
     public void setTimePoint(int timePoint) {
         // TODO
-    }
+    }*/
 
     @Override
     public void abort() {
@@ -215,7 +208,7 @@ public class Elastix2DSplineRegistration extends RealTransformSourceAndConverter
         }
     }
 
-    @Override
+    /*@Override
     public String getTransform() {
         return null;
     }
@@ -223,7 +216,7 @@ public class Elastix2DSplineRegistration extends RealTransformSourceAndConverter
     @Override
     public void setTransform(String serialized_transform) {
 
-    }
+    }*/
 
     @Override
     public void setLogger(Consumer<String> logger) {

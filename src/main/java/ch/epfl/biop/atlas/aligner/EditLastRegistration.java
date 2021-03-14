@@ -1,5 +1,7 @@
 package ch.epfl.biop.atlas.aligner;
 
+import ch.epfl.biop.atlas.plugin.RegistrationPluginHelper;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,7 +36,7 @@ public class EditLastRegistration extends CancelableAction {
     }
 
     public boolean isValid() {
-        return ((rs!=null) && (rs.registration.isEditable()));
+        return ((rs!=null) && (RegistrationPluginHelper.isEditable(rs.registration)));
     }
 
     @Override

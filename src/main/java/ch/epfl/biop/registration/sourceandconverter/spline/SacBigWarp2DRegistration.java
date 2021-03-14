@@ -32,14 +32,14 @@ import java.util.stream.Collectors;
 
 import static bdv.util.RealTransformHelper.BigWarpFileFromRealTransform;
 
-public class SacBigWarp2DRegistration implements Registration<SourceAndConverter<?>[]> {
+public class SacBigWarp2DRegistration extends RealTransformSourceAndConverterRegistration {
 
     SourceAndConverter[] fimg, mimg;
 
-    @Override
+    /*@Override
     public void setScijavaContext(Context context) {
         // Ignored
-    }
+    }*/
 
     @Override
     public void setRegistrationParameters(Map<String, String> parameters) {
@@ -147,7 +147,7 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
         return pts;
     }
 
-    @Override
+    /*@Override
     public boolean parallelSupported() {
         return false;
     }
@@ -155,7 +155,7 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
     @Override
     public boolean isManual() {
         return true;
-    }
+    }*/
 
     @Override
     public boolean edit() {
@@ -166,14 +166,14 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
         //throw new UnsupportedOperationException();
     }
 
-    @Override
+    /*@Override
     public boolean isEditable() {
         return true;
-    }
+    }*/
 
-    private boolean isDone = false;
+    //private boolean isDone = false;
 
-    public void setDone() {
+    /*public void setDone() {
         isDone = true;
     }
 
@@ -198,7 +198,7 @@ public class SacBigWarp2DRegistration implements Registration<SourceAndConverter
     @Override
     public void setTimePoint(int timePoint) {
         // TODO
-    }
+    }*/
 
     @Override
     public void abort() {

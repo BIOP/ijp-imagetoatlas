@@ -13,7 +13,7 @@ public class SacBigWarp2DRegistrationAdapter implements JsonSerializer<SacBigWar
     public SacBigWarp2DRegistration deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
         SacBigWarp2DRegistration registration = new SacBigWarp2DRegistration();
         registration.setRealTransform(context.deserialize(json.getAsJsonObject().get("spline_transform"), RealTransform.class));
-        registration.setDone();
+        //registration.setDone();
         return registration;
     }
 

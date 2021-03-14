@@ -45,14 +45,23 @@ abstract public class RealTransformSourceAndConverterRegistration extends Source
         return new RealPointList(cvtList);
     }
 
+    public RealTransform getRealTransform() {
+        return rt;
+    }
+
+    public void setRealTransform(RealTransform transform) {
+        this.rt = transform.copy();
+    }
+
     @Override
-    public String getTransform() {
+    final public String getTransform() {
         return RealTransformHelper.getRealTransformAdapter(context).toJson(rt);
     }
 
     @Override
-    public void setTransform(String serialized_transform) {
-        rt = RealTransformHelper.getRealTransformAdapter(context).fromJson(serialized_transform, RealTransform.class);
+    final public void setTransform(String serialized_transform) {
+        setRealTransform(RealTransformHelper.getRealTransformAdapter(context).fromJson(serialized_transform, RealTransform.class));
+        //rt = RealTransformHelper.getRealTransformAdapter(context).fromJson(serialized_transform, RealTransform.class);
         isDone = true;
     }
 

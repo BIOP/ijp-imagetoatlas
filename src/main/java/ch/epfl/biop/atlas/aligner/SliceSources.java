@@ -4,6 +4,8 @@ import bdv.util.BoundedRealTransform;
 import bdv.util.QuPathBdvHelper;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.commands.ConstructROIsFromImgLabel;
+import ch.epfl.biop.atlas.plugin.RegistrationPluginHelper;
+import ch.epfl.biop.atlas.plugin.RegistrationTypeProperties;
 import ch.epfl.biop.bdv.command.exporter.ExportToImagePlusCommand;
 import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
 import ch.epfl.biop.java.utilities.roi.types.CompositeFloatPoly;
@@ -11,6 +13,7 @@ import ch.epfl.biop.java.utilities.roi.types.IJShapeRoiArray;
 import ch.epfl.biop.java.utilities.roi.types.ImageJRoisFile;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import ch.epfl.biop.registration.sourceandconverter.spline.Elastix2DSplineRegistration;
+import ch.epfl.biop.registration.sourceandconverter.spline.RealTransformSourceAndConverterRegistration;
 import ch.epfl.biop.spimdata.qupath.QuPathEntryEntity;
 import ch.epfl.biop.registration.Registration;
 import ch.epfl.biop.registration.sourceandconverter.affine.AffineTransformedSourceWrapperRegistration;
@@ -369,8 +372,8 @@ public class SliceSources {
 
     public void appendRegistration(Registration<SourceAndConverter<?>[]> reg) {
 
-        if (reg instanceof Elastix2DSplineRegistration) {
-            Elastix2DSplineRegistration sreg = (Elastix2DSplineRegistration) reg;
+        if (reg instanceof RealTransformSourceAndConverterRegistration) {
+            RealTransformSourceAndConverterRegistration sreg = (RealTransformSourceAndConverterRegistration) reg;
             if (!(sreg.getRealTransform() instanceof BoundedRealTransform)) {
                 BoundedRealTransform brt = new BoundedRealTransform((InvertibleRealTransform) sreg.getRealTransform(), si);
                 si.updateBox();
@@ -415,7 +418,7 @@ public class SliceSources {
                                 Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixed,
                                 Function<SourceAndConverter[], SourceAndConverter[]> preprocessMoving) {
 
-        if (reg.isManual()) {
+        if (RegistrationPluginHelper.isManual(reg)) {
             //Waiting for manual lock release...
             synchronized (MultiSlicePositioner.manualActionLock) {
                 //Manual lock released
@@ -834,7 +837,7 @@ public class SliceSources {
         Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixed,
         Function<SourceAndConverter[], SourceAndConverter[]> preprocessMoving) {
         Registration reg = this.registrations.get(registrations.size() - 1);
-        if (reg.isEditable()) {
+        if (RegistrationPluginHelper.isEditable(reg)) {
             mp.log.accept("Edition will begin when the manual lock is acquired");
             synchronized (MultiSlicePositioner.manualActionLock) {
                 this.removeRegistration(reg);

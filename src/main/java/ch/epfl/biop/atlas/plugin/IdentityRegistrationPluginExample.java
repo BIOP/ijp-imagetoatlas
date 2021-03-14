@@ -126,21 +126,6 @@ public class IdentityRegistrationPluginExample implements IABBARegistrationPlugi
     }
 
     @Override
-    public boolean parallelSupported() {
-        return false;
-    }
-
-    @Override
-    public boolean isManual() {
-        return false;
-    }
-
-    @Override
-    public boolean isEditable() {
-        return true;
-    }
-
-    @Override
     public void abort() {
         // If the registration is long, perform an action which immediately
         // kills the running process, no source has to be restored

@@ -12,9 +12,9 @@ public class Elastix2DSplineRegistrationAdapter implements JsonSerializer<Elasti
     @Override
     public Elastix2DSplineRegistration deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
         Elastix2DSplineRegistration registration = new Elastix2DSplineRegistration();
-        registration.setRealTransform(context.deserialize(json.getAsJsonObject().get("spline_transform"), RealTransform.class));
-        registration.setDone();
-        return registration;
+        registration.setTransform(context.deserialize(json.getAsJsonObject().get("spline_transform"), RealTransform.class));
+        //registration.setDone();
+        return null;//registration;
     }
 
     @Override
@@ -22,6 +22,6 @@ public class Elastix2DSplineRegistrationAdapter implements JsonSerializer<Elasti
         JsonObject obj = new JsonObject();
         obj.addProperty("type", Elastix2DSplineRegistration.class.getSimpleName());
         obj.add("spline_transform", context.serialize(registration.getRealTransform()));
-        return obj;
+        return null;//obj;
     }
 }

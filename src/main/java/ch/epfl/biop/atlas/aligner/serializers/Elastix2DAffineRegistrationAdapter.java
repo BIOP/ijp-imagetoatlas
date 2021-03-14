@@ -12,8 +12,8 @@ public class Elastix2DAffineRegistrationAdapter implements JsonSerializer<Elasti
     @Override
     public Elastix2DAffineRegistration deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
         Elastix2DAffineRegistration registration = new Elastix2DAffineRegistration();
-        registration.setAffineTransform(context.deserialize(json.getAsJsonObject().get("affine_transform"), AffineTransform3D.class));
-        registration.setDone();
+        registration.setTransform(context.deserialize(json.getAsJsonObject().get("affine_transform"), AffineTransform3D.class));
+        //registration.setDone();
         return registration;
     }
 
@@ -21,7 +21,11 @@ public class Elastix2DAffineRegistrationAdapter implements JsonSerializer<Elasti
     public JsonElement serialize(Elastix2DAffineRegistration registration, Type typeOfSrc, JsonSerializationContext context) {
         JsonObject obj = new JsonObject();
         obj.addProperty("type", Elastix2DAffineRegistration.class.getSimpleName());
-        obj.add("affine_transform", context.serialize(registration.getAffineTransform(), AffineTransform3D.class));
+        //obj.add("affine_transform", context.serialize(registration.getAffineTransform(), AffineTransform3D.class));
+        obj.addProperty("transform",
+                //        context.serialize(registration.getAffineTransform(), AffineTransform3D.class)
+                registration.getTransform()
+        );
         return obj;
     }
 }
