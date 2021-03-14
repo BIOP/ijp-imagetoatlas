@@ -1,13 +1,22 @@
 package ch.epfl.biop.registration.sourceandconverter.affine;
 
 import bdv.viewer.SourceAndConverter;
+import ch.epfl.biop.atlas.aligner.commands.RegistrationElastixAffineCommand;
+import ch.epfl.biop.atlas.aligner.commands.RegistrationElastixAffineRemoteCommand;
+import ch.epfl.biop.atlas.plugin.IABBARegistrationPlugin;
+import ch.epfl.biop.atlas.plugin.RegistrationTypeProperties;
 import ch.epfl.biop.bdv.command.register.Elastix2DAffineRegisterCommand;
 import net.imglib2.realtransform.AffineTransform3D;
 import org.scijava.command.Command;
 import org.scijava.command.CommandModule;
 import org.scijava.command.CommandService;
+import org.scijava.command.DefaultCommandService;
+import org.scijava.module.DefaultModuleService;
+import org.scijava.plugin.Plugin;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 
@@ -15,9 +24,18 @@ import java.util.concurrent.Future;
  * Uses Elastix backend to perform an affine transform registration
  *
  */
+@Plugin(type = IABBARegistrationPlugin.class)
+@RegistrationTypeProperties(
+        isManual = false,
+        isEditable = false,
+        userInterface = {
+                RegistrationElastixAffineCommand.class,
+                RegistrationElastixAffineRemoteCommand.class
+        })
+
 public class Elastix2DAffineRegistration extends AffineTransformSourceAndConverterRegistration{
 
-    Map<String, Object> parameters = new HashMap<>();
+    Map<String, String> parameters = new HashMap<>();
 
     @Override
     public void setRegistrationParameters(Map<String, String> parameters) {
@@ -32,8 +50,7 @@ public class Elastix2DAffineRegistration extends AffineTransformSourceAndConvert
         if (fimg.length>1) {
             log.accept("Multichannel image registration not supported for class "+this.getClass().getSimpleName());
         }
-        super.setFixedImage(this.fimg);
-
+        super.setFixedImage(fimg);
     }
 
     @Override
@@ -60,12 +77,27 @@ public class Elastix2DAffineRegistration extends AffineTransformSourceAndConvert
     public boolean register() {
         try {
             boolean success = true;
-             task = context
+
+            // Transforms map into flat String : key1, value1, key2, value2, etc.
+            // Necessary for CommandService
+            List<Object> flatParameters = new ArrayList<>(parameters.size()*2+4);
+
+            parameters.keySet().forEach(k -> {
+                flatParameters.add(k);
+                flatParameters.add(parameters.get(k));
+            });
+
+            flatParameters.add("sac_fixed");
+            flatParameters.add(fimg[0]);
+
+            flatParameters.add("sac_moving");
+            flatParameters.add(mimg[0]);
+
+            task = context
                     .getService(CommandService.class)
-                    .run(registrationCommandClass, false,
-                            parameters,
-                            "sac_fixed", fimg[0],
-                            "sac_moving", mimg[0]);
+                    .run(registrationCommandClass, true,
+                            flatParameters.toArray(new Object[0])
+                    );
 
              CommandModule module = task.get();
 

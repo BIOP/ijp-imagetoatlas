@@ -79,9 +79,12 @@ public class SacMultiSacsPositionerCommand implements Command {
             frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
             frame.setIconImage((new ImageIcon(MultiSlicePositioner.class.getResource("/graphics/ABBAFrame.jpg"))).getImage());
 
-            if (bdvMultiSlicer==null) {System.out.println("bdv multislicer null");}
+            if (bdvMultiSlicer==null) {
+                System.err.println("Error : bdv multislicer null");
+                return;
+            }
 
-            if (bdvMultiSlicer.getCardPanel()==null) {System.out.println("bdv multislicer card panel null");}
+            if (bdvMultiSlicer.getCardPanel()==null) {System.err.println("bdv multislicer card panel null");}
 
             mp = new MultiSlicePositioner(bdvMultiSlicer, ba, ra, context);
 

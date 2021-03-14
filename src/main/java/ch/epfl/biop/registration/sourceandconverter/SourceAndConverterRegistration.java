@@ -3,6 +3,7 @@ package ch.epfl.biop.registration.sourceandconverter;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.plugin.IABBARegistrationPlugin;
 import org.scijava.Context;
+import org.scijava.plugin.Parameter;
 
 abstract public class SourceAndConverterRegistration implements IABBARegistrationPlugin {
 
@@ -12,6 +13,7 @@ abstract public class SourceAndConverterRegistration implements IABBARegistratio
 
     protected int timePoint = 0;
 
+    @Parameter
     protected Context context;
 
     @Override
@@ -40,7 +42,6 @@ abstract public class SourceAndConverterRegistration implements IABBARegistratio
     public void setScijavaContext(Context context) {
         this.context = context;
     }
-
 
     protected boolean isDone = false;
 

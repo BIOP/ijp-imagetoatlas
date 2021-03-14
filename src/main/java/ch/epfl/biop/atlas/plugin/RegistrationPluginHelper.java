@@ -46,9 +46,8 @@ public class RegistrationPluginHelper {
                     .getAnnotation(RegistrationTypeProperties.class);
             return annotation.userInterface();
         } else {
-            return null; // Default value if no annotation is present
+            return new Class[0]; // Default value if no annotation is present
         }
     }
-
 
 }
