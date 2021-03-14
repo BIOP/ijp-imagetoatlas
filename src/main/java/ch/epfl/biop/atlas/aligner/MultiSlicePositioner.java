@@ -39,6 +39,7 @@ import org.scijava.Context;
 import org.scijava.InstantiableException;
 import org.scijava.cache.CacheService;
 import org.scijava.command.Command;
+import org.scijava.convert.ConvertService;
 import org.scijava.object.ObjectService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.PluginService;
@@ -1740,22 +1741,24 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                 Elastix2DAffineRegistration elastixAffineReg = new Elastix2DAffineRegistration();
                 elastixAffineReg.setRegistrationCommand(Elastix2DAffineRegisterCommand.class);
                 elastixAffineReg.setScijavaContext(scijavaCtx);
-                Map<String, String> params = new HashMap<>();
-                params.put("tpFixed", "0");
-                params.put("levelFixedSource", "2");
-                params.put("tpMoving", "0");
-                params.put("levelMovingSource", Integer.toString(slice.getAdaptedMipMapLevel(0.04)));
+                Map<String, Object> params = new HashMap<>();
+                params.put("tpFixed", 0);
+                params.put("levelFixedSource", 2);
+                params.put("tpMoving", 0);
+                params.put("levelMovingSource", slice.getAdaptedMipMapLevel(0.04));
                 params.put("pxSizeInCurrentUnit", "0.04");
                 params.put("interpolate", "false");
-                params.put("showImagePlusRegistrationResult", Boolean.toString(showIJ1Result));
-                params.put("px", Double.toString(roiPX));
-                params.put("py", Double.toString(roiPY));
-                params.put("pz", Double.toString(slice.getSlicingAxisPosition()));
-                params.put("sx", Double.toString(roiSX));
-                params.put("sy", Double.toString(roiSY));
-                params.put("minPixSize", Integer.toString(4));
-                params.put("maxIterationNumberPerScale", Integer.toString(150));
-                elastixAffineReg.setRegistrationParameters(params);
+                params.put("showImagePlusRegistrationResult", showIJ1Result);
+                params.put("px", roiPX);
+                params.put("py", roiPY);
+                params.put("pz", slice.getSlicingAxisPosition());
+                params.put("sx", roiSX);
+                params.put("sy", roiSY);
+                params.put("minPixSize",4);
+                params.put("maxIterationNumberPerScale",150);
+                params.put("verbose", false);
+                params.put("automaticTransformInitialization", true);
+                elastixAffineReg.setRegistrationParameters(convertToString(params));
                 new RegisterSlice(this, slice, elastixAffineReg, preprocessFixed, preprocessMoving).runRequest();
             }
         }
@@ -1805,6 +1808,18 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         registerElastixAffineRemote(serverURL, getChannel(iChannelFixed), getChannel(iChannelMoving), userConsent);
     }
 
+    Map<String,String> convertToString(Map<String, Object> params) {
+        Map<String,String> convertedParams = new HashMap<>();
+
+        ConvertService cs = scijavaCtx.getService(ConvertService.class);
+
+        params.keySet().forEach(k -> {
+            convertedParams.put(k, cs.convert(params.get(k), String.class));
+        });
+
+        return convertedParams;
+    }
+
     public void registerElastixAffineRemote(String serverURL, SourcesProcessor preprocessFixed,
                                       SourcesProcessor preprocessMoving, boolean userConsent) {
         if (getSelectedSources().size()==0) {
@@ -1816,21 +1831,23 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                 Elastix2DAffineRegistration elastixAffineReg = new Elastix2DAffineRegistration();
                 elastixAffineReg.setRegistrationCommand(Elastix2DAffineRegisterServerCommand.class);
                 elastixAffineReg.setScijavaContext(scijavaCtx);
-                Map<String, String> params = new HashMap<>();
-                params.put("tpFixed", "0");
-                params.put("levelFixedSource", "2");
-                params.put("tpMoving", "0");
-                params.put("levelMovingSource", Integer.toString(slice.getAdaptedMipMapLevel(0.04)));
-                params.put("pxSizeInCurrentUnit", "0.04");
-                params.put("interpolate", "false");
-                params.put("showImagePlusRegistrationResult", "false");
-                params.put("px", Double.toString(roiPX));
-                params.put("py", Double.toString(roiPY));
-                params.put("pz", Double.toString(slice.getSlicingAxisPosition()));
-                params.put("sx", Double.toString(roiSX));
-                params.put("sy", Double.toString(roiSY));
-                params.put("minPixSize", Integer.toString(4));
-                params.put("maxIterationNumberPerScale", Integer.toString(150));
+                Map<String, Object> params = new HashMap<>();
+                params.put("tpFixed", 0);
+                params.put("levelFixedSource", 2);
+                params.put("tpMoving", 0);
+                params.put("levelMovingSource", slice.getAdaptedMipMapLevel(0.04));
+                params.put("pxSizeInCurrentUnit", 0.04);
+                params.put("interpolate", false);
+                params.put("showImagePlusRegistrationResult", false);
+                params.put("px", roiPX);
+                params.put("py", roiPY);
+                params.put("pz", slice.getSlicingAxisPosition());
+                params.put("sx", roiSX);
+                params.put("sy", roiSY);
+                params.put("minPixSize", 4);
+                params.put("maxIterationNumberPerScale", 150);
+                params.put("verbose", false);
+                params.put("automaticTransformInitialization", true);
                 params.put("serverURL", serverURL);
                 if (!userConsent) {
                     params.put("taskInfo", "");
@@ -1839,7 +1856,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                     System.out.println(taskInfo);
                     params.put("taskInfo", taskInfo);
                 }
-                elastixAffineReg.setRegistrationParameters(params);
+                elastixAffineReg.setRegistrationParameters(convertToString(params));
                 new RegisterSlice(this, slice, elastixAffineReg, preprocessFixed, preprocessMoving).runRequest();
             }
         }

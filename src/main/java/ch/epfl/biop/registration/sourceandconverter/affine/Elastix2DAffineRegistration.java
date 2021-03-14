@@ -95,7 +95,7 @@ public class Elastix2DAffineRegistration extends AffineTransformSourceAndConvert
 
             task = context
                     .getService(CommandService.class)
-                    .run(registrationCommandClass, true,
+                    .run(registrationCommandClass, false,
                             flatParameters.toArray(new Object[0])
                     );
 
