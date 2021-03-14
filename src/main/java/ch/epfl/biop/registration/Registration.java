@@ -30,6 +30,12 @@ public interface Registration<T> {
     void setRegistrationParameters(Map<String,String> parameters);
 
     /**
+     * For serialization and reproducibility
+     * @return parameters that were used for the registration
+     */
+    Map<String,String> getRegistrationParameters();
+
+    /**
      * Sets the fixed image
      * @param fimg fixed image
      */

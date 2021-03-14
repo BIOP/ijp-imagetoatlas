@@ -5,6 +5,7 @@ import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import org.scijava.Context;
 import org.scijava.plugin.Plugin;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -54,6 +55,11 @@ public class IdentityRegistrationPluginExample implements IABBARegistrationPlugi
     @Override
     public void setRegistrationParameters(Map<String, String> parameters) {
 
+    }
+
+    @Override
+    public Map<String, String> getRegistrationParameters() {
+        return new HashMap<>();
     }
 
     /**

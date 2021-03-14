@@ -5,6 +5,10 @@ import ch.epfl.biop.atlas.plugin.IABBARegistrationPlugin;
 import org.scijava.Context;
 import org.scijava.plugin.Parameter;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Consumer;
+
 abstract public class SourceAndConverterRegistration implements IABBARegistrationPlugin {
 
     protected SourceAndConverter[] fimg;
@@ -55,5 +59,27 @@ abstract public class SourceAndConverterRegistration implements IABBARegistratio
         isDone = false;
     }
 
+    protected Map<String, String> parameters;
+
+    @Override
+    public Map<String, String> getRegistrationParameters() {
+        if (parameters!=null) {
+            return parameters;
+        } else {
+            return new HashMap<>();
+        }
+    }
+
+    @Override
+    public void setRegistrationParameters(Map<String, String> parameters) {
+        this.parameters = parameters;
+    }
+
+    protected Consumer<String> log = System.out::println;
+
+    @Override
+    public void setLogger(Consumer<String> logger) {
+        this.log = logger;
+    }
 
 }

@@ -69,8 +69,4 @@ public class AffineTransformedSourceWrapperRegistration extends AffineTransformS
 
     }
 
-    @Override
-    public void setRegistrationParameters(Map<String, String> parameters) {
-
-    }
 }

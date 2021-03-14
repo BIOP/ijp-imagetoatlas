@@ -10,7 +10,6 @@ import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterAndTimeRange;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
 
 import java.util.ArrayList;
-import java.util.function.Consumer;
 
 abstract public class AffineTransformSourceAndConverterRegistration extends SourceAndConverterRegistration {
 
@@ -55,13 +54,6 @@ abstract public class AffineTransformSourceAndConverterRegistration extends Sour
     public boolean edit() {
         // TODO : find a way to edit an affine transform -> that shouldn't be so complicated
         throw new UnsupportedOperationException();
-    }
-
-    Consumer<String> log = System.out::println;
-
-    @Override
-    public void setLogger(Consumer<String> logger) {
-        this.log = logger;
     }
 
 }

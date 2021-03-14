@@ -6,18 +6,15 @@ import ch.epfl.biop.atlas.aligner.commands.RegistrationElastixAffineRemoteComman
 import ch.epfl.biop.atlas.plugin.IABBARegistrationPlugin;
 import ch.epfl.biop.atlas.plugin.RegistrationTypeProperties;
 import ch.epfl.biop.bdv.command.register.Elastix2DAffineRegisterCommand;
+import ch.epfl.biop.bdv.command.register.Elastix2DAffineRegisterServerCommand;
 import net.imglib2.realtransform.AffineTransform3D;
 import org.scijava.command.Command;
 import org.scijava.command.CommandModule;
 import org.scijava.command.CommandService;
-import org.scijava.command.DefaultCommandService;
-import org.scijava.module.DefaultModuleService;
 import org.scijava.plugin.Plugin;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Future;
 
 /**
@@ -34,13 +31,6 @@ import java.util.concurrent.Future;
         })
 
 public class Elastix2DAffineRegistration extends AffineTransformSourceAndConverterRegistration{
-
-    Map<String, String> parameters = new HashMap<>();
-
-    @Override
-    public void setRegistrationParameters(Map<String, String> parameters) {
-        this.parameters.putAll(parameters);
-    }
 
     @Override
     public void setFixedImage(SourceAndConverter[] fimg) {
@@ -66,17 +56,18 @@ public class Elastix2DAffineRegistration extends AffineTransformSourceAndConvert
 
     Class<? extends Command> registrationCommandClass = Elastix2DAffineRegisterCommand.class;
 
-    // TODO : set command name in parameters instead...
-    public void setRegistrationCommand(Class<? extends Command> registrationCommandClass) {
-        this.registrationCommandClass = registrationCommandClass;
-    }
-
     Future<CommandModule> task = null;
 
     @Override
     public boolean register() {
         try {
             boolean success = true;
+
+            // Is it supposed to be done on a server ?
+            if (parameters.containsKey("serverURL")) {
+                // Yes -> changes command class name
+                registrationCommandClass = Elastix2DAffineRegisterServerCommand.class;
+            }
 
             // Transforms map into flat String : key1, value1, key2, value2, etc.
             // Necessary for CommandService

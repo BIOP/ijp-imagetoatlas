@@ -1739,7 +1739,6 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         for (SliceSources slice : slices) {
             if (slice.isSelected()) {
                 Elastix2DAffineRegistration elastixAffineReg = new Elastix2DAffineRegistration();
-                elastixAffineReg.setRegistrationCommand(Elastix2DAffineRegisterCommand.class);
                 elastixAffineReg.setScijavaContext(scijavaCtx);
                 Map<String, Object> params = new HashMap<>();
                 params.put("tpFixed", 0);
@@ -1829,7 +1828,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         for (SliceSources slice : slices) {
             if (slice.isSelected()) {
                 Elastix2DAffineRegistration elastixAffineReg = new Elastix2DAffineRegistration();
-                elastixAffineReg.setRegistrationCommand(Elastix2DAffineRegisterServerCommand.class);
+                //elastixAffineReg.setRegistrationCommand(Elastix2DAffineRegisterServerCommand.class);
                 elastixAffineReg.setScijavaContext(scijavaCtx);
                 Map<String, Object> params = new HashMap<>();
                 params.put("tpFixed", 0);
