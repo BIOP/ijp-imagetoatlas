@@ -14,7 +14,7 @@ import ij.ImagePlus;
  *
  * The Atlas Map contains :
  * - 3D images among which there are:
- *     - structural images, which are different modalities acquired for an atlas -> (fluorescence, brightfield)
+ *     - structural images, which are different modalities acquired for an atlas (fluorescence, brightfield)
  *     - a single Label Image
  *
  *

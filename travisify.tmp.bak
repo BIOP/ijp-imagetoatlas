@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+		http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -11,7 +13,7 @@
 
 	<groupId>ch.epfl.biop</groupId>
 	<artifactId>ImageToAtlasRegister</artifactId>
-	<version>0.1.44-SNAPSHOT</version>
+	<version>0.1.43-SNAPSHOT</version>
 
 	<name>Plugin To Register Images to Atlases</name>
 	<description>Collection of tools to register images to atlases in FIJI.</description>
@@ -43,7 +45,7 @@
 			</roles>
 		</developer>
 	</developers>
-	<contributors>
+	<contributors >
 
 		<contributor>
 			<name>Nicolas Chiaruttini</name>
@@ -127,9 +129,6 @@
 		<oshi-core.version>5.5.1</oshi-core.version>
 		<jna.version>5.6.0</jna.version>
 
-
-		<!-- NB: Deploy releases to the SciJava Maven repository. -->
-		<releaseProfiles>deploy-to-scijava</releaseProfiles>
 	</properties>
 
 	<dependencies>

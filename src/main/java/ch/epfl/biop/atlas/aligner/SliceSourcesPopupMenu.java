@@ -114,7 +114,7 @@ public class SliceSourcesPopupMenu {
         popup.addSeparator();
     }
 
-    /**
+    /*
      * Adds a line and an action which consumes all the selected SourceAndConverter objects
      * in the popup Menu
      * @param action

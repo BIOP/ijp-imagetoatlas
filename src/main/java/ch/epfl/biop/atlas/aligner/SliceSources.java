@@ -406,7 +406,7 @@ public class SliceSources {
         return out;
     }
 
-    /**
+    /*
      * Asynchronous handling of registrations + combining with manual sequential registration if necessary
      *
      * @param reg the registration to perform
