@@ -32,13 +32,11 @@ abstract public class RealTransformSourceAndConverterRegistration extends Source
         for (RealPoint p : pts.ptList) {
             RealPoint pt3d = new RealPoint(3);
             pt3d.setPosition(new double[]{p.getDoublePosition(0), p.getDoublePosition(1),0});
-           /* if (zPosition!=null) {
-                pt3d.setPosition(zPosition.get(), 2);
-            } */ // TODO : Is it ok to remove it ?
             rt.apply(pt3d, pt3d);
             RealPoint cpt = new RealPoint(pt3d.getDoublePosition(0), pt3d.getDoublePosition(1));
             cvtList.add(cpt);
         }
+
         return new RealPointList(cvtList);
     }
 
@@ -58,15 +56,7 @@ abstract public class RealTransformSourceAndConverterRegistration extends Source
     @Override
     final public void setTransform(String serialized_transform) {
         setRealTransform(RealTransformHelper.getRealTransformAdapter(context).fromJson(serialized_transform, RealTransform.class));
-        //rt = RealTransformHelper.getRealTransformAdapter(context).fromJson(serialized_transform, RealTransform.class);
         isDone = true;
     }
-
-    @Override
-    public boolean edit() {
-        // TODO : find a way to edit an affine transform -> that shouldn't be so complicated
-        throw new UnsupportedOperationException();
-    }
-
 
 }

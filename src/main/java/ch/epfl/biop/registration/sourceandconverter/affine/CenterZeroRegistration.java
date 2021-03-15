@@ -1,13 +1,8 @@
 package ch.epfl.biop.registration.sourceandconverter.affine;
 
 import bdv.viewer.SourceAndConverter;
-import ch.epfl.biop.atlas.aligner.commands.RegistrationElastixAffineCommand;
-import ch.epfl.biop.atlas.aligner.commands.RegistrationElastixAffineRemoteCommand;
-import ch.epfl.biop.atlas.plugin.IABBARegistrationPlugin;
-import ch.epfl.biop.atlas.plugin.RegistrationTypeProperties;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
-import org.scijava.plugin.Plugin;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterAndTimeRange;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;

@@ -42,19 +42,29 @@ import static bdv.util.RealTransformHelper.BigWarpFileFromRealTransform;
 
 public class Elastix2DSplineRegistration extends RealTransformSourceAndConverterRegistration {
 
+    Future<CommandModule> task;
+
     @Override
     public void setFixedImage(SourceAndConverter[] fimg) {
+        if (fimg.length==0) {
+            System.err.println("Error, no fixed image set in class "+this.getClass().getSimpleName());
+        }
+        if (fimg.length>1) {
+            log.accept("Multichannel image registration not supported for class "+this.getClass().getSimpleName());
+        }
         super.setFixedImage(fimg);
-        assert fimg.length==1;
     }
 
     @Override
     public void setMovingImage(SourceAndConverter[] mimg) {
+        if (mimg.length==0) {
+            System.err.println("Error, no fixed image set in class "+this.getClass().getSimpleName());
+        }
+        if (mimg.length>1) {
+            log.accept("Multichannel image registration not supported for class "+this.getClass().getSimpleName());
+        }
         super.setMovingImage(mimg);
-        assert mimg.length==1;
     }
-
-    Future<CommandModule> task;
 
     @Override
     public boolean register() {

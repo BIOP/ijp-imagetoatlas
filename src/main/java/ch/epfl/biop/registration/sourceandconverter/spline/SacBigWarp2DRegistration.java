@@ -7,7 +7,6 @@ import ch.epfl.biop.atlas.aligner.commands.RegistrationBigWarpCommand;
 import ch.epfl.biop.atlas.plugin.IABBARegistrationPlugin;
 import ch.epfl.biop.atlas.plugin.RegistrationTypeProperties;
 import ij.gui.WaitForUserDialog;
-import net.imglib2.realtransform.RealTransform;
 import org.scijava.plugin.Plugin;
 import sc.fiji.bdvpg.bdv.BdvHandleHelper;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
@@ -31,8 +30,6 @@ import static bdv.util.RealTransformHelper.BigWarpFileFromRealTransform;
 public class SacBigWarp2DRegistration extends RealTransformSourceAndConverterRegistration {
 
     BigWarpLauncher bwl;
-
-    RealTransform innerBigWarpTransform;
 
     Runnable waitForUser = () -> {
         WaitForUserDialog dialog = new WaitForUserDialog("Big Warp registration","Please perform carefully your registration then press ok.");
@@ -75,6 +72,7 @@ public class SacBigWarp2DRegistration extends RealTransformSourceAndConverterReg
 
             bwl.getBigWarp().getLandmarkFrame().repaint();
 
+            // Restores landmarks if some were already defined
             if (rt!=null) {
                 bwl.getBigWarp().loadLandmarks(BigWarpFileFromRealTransform(rt));
                 bwl.getBigWarp().setInLandmarkMode(true);
@@ -96,7 +94,7 @@ public class SacBigWarp2DRegistration extends RealTransformSourceAndConverterReg
 
     @Override
     public boolean edit() {
-        // Il faut relancer bigwarp... s'il a été lancé
+        // Just launching again BigWarp
         this.register();
         return true;
     }

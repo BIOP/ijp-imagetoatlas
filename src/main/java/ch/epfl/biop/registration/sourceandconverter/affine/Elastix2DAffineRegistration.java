@@ -55,7 +55,6 @@ public class Elastix2DAffineRegistration extends AffineTransformSourceAndConvert
         super.setMovingImage(mimg);
     }
 
-
     Future<CommandModule> task;
 
     @Override
