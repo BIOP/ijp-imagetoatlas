@@ -12,6 +12,7 @@ import org.scijava.command.Command;
 import org.scijava.command.CommandModule;
 import org.scijava.command.CommandService;
 import org.scijava.plugin.Plugin;
+import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,6 +73,27 @@ public class Elastix2DAffineRegistration extends AffineTransformSourceAndConvert
             // Transforms map into flat String : key1, value1, key2, value2, etc.
             // Necessary for CommandService
             List<Object> flatParameters = new ArrayList<>(parameters.size()*2+4);
+
+            // Start registration with a 4x4 pixel iamge
+            parameters.put("minPixSize","4");
+            // 150 iteration steps
+            parameters.put("maxIterationNumberPerScale","150");
+            // Do not write anything
+            parameters.put("verbose", "false");
+            // Centers centers of mass of both images before starting registration
+            parameters.put("automaticTransformInitialization", "true");
+            // Atlas image : a single timepoint
+            parameters.put("tpFixed", "0");
+            // Level 2 for the atlas
+            parameters.put("levelFixedSource", "2");
+            // Timepoint moving source (normally 0)
+            parameters.put("tpMoving", Integer.toString(timePoint));
+            // Tries to be clever for the moving source sampling
+            parameters.put("levelMovingSource", Integer.toString(SourceAndConverterHelper.bestLevel(fimg[0], timePoint, 0.04)));
+            // 40 microns per pixel for thsi initial registration
+            parameters.put("pxSizeInCurrentUnit", "0.04");
+            // No interpolation in resampling
+            parameters.put("interpolate", "false");
 
             parameters.keySet().forEach(k -> {
                 flatParameters.add(k);

@@ -1741,22 +1741,12 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                 Elastix2DAffineRegistration elastixAffineReg = new Elastix2DAffineRegistration();
                 elastixAffineReg.setScijavaContext(scijavaCtx);
                 Map<String, Object> params = new HashMap<>();
-                params.put("tpFixed", 0);
-                params.put("levelFixedSource", 2);
-                params.put("tpMoving", 0);
-                params.put("levelMovingSource", slice.getAdaptedMipMapLevel(0.04));
-                params.put("pxSizeInCurrentUnit", "0.04");
-                params.put("interpolate", "false");
                 params.put("showImagePlusRegistrationResult", showIJ1Result);
                 params.put("px", roiPX);
                 params.put("py", roiPY);
                 params.put("pz", slice.getSlicingAxisPosition());
                 params.put("sx", roiSX);
                 params.put("sy", roiSY);
-                params.put("minPixSize",4);
-                params.put("maxIterationNumberPerScale",150);
-                params.put("verbose", false);
-                params.put("automaticTransformInitialization", true);
                 elastixAffineReg.setRegistrationParameters(convertToString(params));
                 new RegisterSlice(this, slice, elastixAffineReg, preprocessFixed, preprocessMoving).runRequest();
             }
@@ -1831,22 +1821,11 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                 //elastixAffineReg.setRegistrationCommand(Elastix2DAffineRegisterServerCommand.class);
                 elastixAffineReg.setScijavaContext(scijavaCtx);
                 Map<String, Object> params = new HashMap<>();
-                params.put("tpFixed", 0);
-                params.put("levelFixedSource", 2);
-                params.put("tpMoving", 0);
-                params.put("levelMovingSource", slice.getAdaptedMipMapLevel(0.04));
-                params.put("pxSizeInCurrentUnit", 0.04);
-                params.put("interpolate", false);
-                params.put("showImagePlusRegistrationResult", false);
                 params.put("px", roiPX);
                 params.put("py", roiPY);
                 params.put("pz", slice.getSlicingAxisPosition());
                 params.put("sx", roiSX);
                 params.put("sy", roiSY);
-                params.put("minPixSize", 4);
-                params.put("maxIterationNumberPerScale", 150);
-                params.put("verbose", false);
-                params.put("automaticTransformInitialization", true);
                 params.put("serverURL", serverURL);
                 if (!userConsent) {
                     params.put("taskInfo", "");
