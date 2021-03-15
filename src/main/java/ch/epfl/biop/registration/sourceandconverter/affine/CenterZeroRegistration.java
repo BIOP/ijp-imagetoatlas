@@ -1,18 +1,22 @@
 package ch.epfl.biop.registration.sourceandconverter.affine;
 
 import bdv.viewer.SourceAndConverter;
+import ch.epfl.biop.atlas.aligner.commands.RegistrationElastixAffineCommand;
+import ch.epfl.biop.atlas.aligner.commands.RegistrationElastixAffineRemoteCommand;
+import ch.epfl.biop.atlas.plugin.IABBARegistrationPlugin;
+import ch.epfl.biop.atlas.plugin.RegistrationTypeProperties;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
+import org.scijava.plugin.Plugin;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterAndTimeRange;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
-
-import java.util.Map;
 
 /**
  * Fake registration : simply centers the image in order to put its center
  * at the origin of the global coordinate system.
  */
+
 public class CenterZeroRegistration extends AffineTransformSourceAndConverterRegistration {
 
     @Override
@@ -46,11 +50,6 @@ public class CenterZeroRegistration extends AffineTransformSourceAndConverterReg
             out[idx] = SourceTransformHelper.createNewTransformedSourceAndConverter(at3d, new SourceAndConverterAndTimeRange(img[idx], timePoint));
         }
         return out;
-    }
-
-    @Override
-    public void setRegistrationParameters(Map<String, String> parameters) {
-        // Parameter less registration
     }
 
     @Override
