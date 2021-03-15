@@ -1698,7 +1698,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         for (SliceSources slice : slices) {
             if (slice.isSelected()) {
                 SacBigWarp2DRegistration registration = new SacBigWarp2DRegistration();
-
+                registration.setScijavaContext(scijavaCtx);
                 AffineTransform3D at3D = new AffineTransform3D();
                 at3D.translate(-this.nPixX / 2.0, -this.nPixY / 2.0, 0);
                 at3D.scale(this.sizePixX, this.sizePixY, this.sizePixZ);
@@ -2460,6 +2460,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
         PluginService pluginService = scijavaCtx.getService(PluginService.class);
 
+        // Creates adapter for all registration plugins
         RegistrationAdapter registrationAdapter = new RegistrationAdapter(scijavaCtx);
         pluginService.getPluginsOfType(IABBARegistrationPlugin.class).forEach(registrationPluginClass -> {
             IABBARegistrationPlugin plugin = pluginService.createInstance(registrationPluginClass);
