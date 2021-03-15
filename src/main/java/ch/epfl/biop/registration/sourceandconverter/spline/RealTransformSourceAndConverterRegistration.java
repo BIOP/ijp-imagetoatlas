@@ -15,8 +15,6 @@ abstract public class RealTransformSourceAndConverterRegistration extends Source
 
     protected RealTransform rt;
 
-    public int timePoint = 0;
-
     @Override
     public SourceAndConverter[] getTransformedImageMovingToFixed(SourceAndConverter[] img) {
         SourceAndConverter[] out = new SourceAndConverter[img.length];
@@ -70,8 +68,6 @@ abstract public class RealTransformSourceAndConverterRegistration extends Source
         // TODO : find a way to edit an affine transform -> that shouldn't be so complicated
         throw new UnsupportedOperationException();
     }
-
-    Consumer<String> log = System.out::println;
 
     @Override
     public void setLogger(Consumer<String> logger) {

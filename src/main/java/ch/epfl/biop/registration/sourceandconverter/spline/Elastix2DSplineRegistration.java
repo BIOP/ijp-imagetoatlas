@@ -3,20 +3,24 @@ package ch.epfl.biop.registration.sourceandconverter.spline;
 import bdv.tools.brightness.ConverterSetup;
 import bdv.util.BdvHandle;
 import bdv.viewer.SourceAndConverter;
-import ch.epfl.biop.atlas.aligner.commands.RegistrationElastixAffineCommand;
+import ch.epfl.biop.atlas.aligner.commands.RegistrationElastixSplineCommand;
+import ch.epfl.biop.atlas.aligner.commands.RegistrationElastixSplineRemoteCommand;
+import ch.epfl.biop.atlas.plugin.IABBARegistrationPlugin;
 import ch.epfl.biop.atlas.plugin.RegistrationTypeProperties;
+import ch.epfl.biop.bdv.command.register.Elastix2DAffineRegisterServerCommand;
 import ch.epfl.biop.bdv.command.register.Elastix2DSplineRegisterCommand;
+import ch.epfl.biop.bdv.command.register.Elastix2DSplineRegisterServerCommand;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
-import ch.epfl.biop.registration.sourceandconverter.SourceAndConverterRegistration;
 import ij.gui.WaitForUserDialog;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.RealTransform;
-import org.scijava.Context;
 import org.scijava.command.Command;
 import org.scijava.command.CommandModule;
 import org.scijava.command.CommandService;
+import org.scijava.plugin.Plugin;
 import sc.fiji.bdvpg.bdv.BdvHandleHelper;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
+import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
 import sc.fiji.bdvpg.sourceandconverter.register.BigWarpLauncher;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceRealTransformer;
 
@@ -28,15 +32,16 @@ import java.util.stream.Collectors;
 
 import static bdv.util.RealTransformHelper.BigWarpFileFromRealTransform;
 
+@Plugin(type = IABBARegistrationPlugin.class)
 @RegistrationTypeProperties(
         isManual = false,
         isEditable = true,
-        userInterface = {RegistrationElastixAffineCommand.class}
+        userInterface = {
+                RegistrationElastixSplineCommand.class,
+                RegistrationElastixSplineRemoteCommand.class
+        }
 )
 public class Elastix2DSplineRegistration extends RealTransformSourceAndConverterRegistration {
-
-
-    Map<String, String> parameters = new HashMap<>();
 
     @Override
     public void setRegistrationParameters(Map<String, String> parameters) {
@@ -55,29 +60,69 @@ public class Elastix2DSplineRegistration extends RealTransformSourceAndConverter
         assert mimg.length==1;
     }
 
-    Class<? extends Command> registrationCommandClass = Elastix2DSplineRegisterCommand.class;
+    Future<CommandModule> task;
 
-    public void setRegistrationCommand(Class<? extends Command> registrationCommandClass) {
-        this.registrationCommandClass = registrationCommandClass;
-    }
-
-    Future<CommandModule> task = null;
     @Override
     public boolean register() {
         try {
             boolean success = true;
+            Class<? extends Command> registrationCommandClass;
+            // Is it supposed to be done on a server ?
+            if (parameters.containsKey("serverURL")) {
+                // Yes -> changes command class name
+                registrationCommandClass = Elastix2DSplineRegisterServerCommand.class;
+            } else {
+                registrationCommandClass = Elastix2DSplineRegisterCommand.class;
+            }
+
+            // Start registration with a 4x4 pixel iamge
+            parameters.put("minPixSize","32");
+            // 150 iteration steps
+            parameters.put("maxIterationNumberPerScale","150");
+            // Do not write anything
+            parameters.put("verbose", "false");
+            // Centers centers of mass of both images before starting registration
+            parameters.put("automaticTransformInitialization", "false");
+            // Atlas image : a single timepoint
+            parameters.put("tpFixed", "0");
+            // Level 2 for the atlas
+            parameters.put("levelFixedSource", "1");
+            // Timepoint moving source (normally 0)
+            parameters.put("tpMoving", Integer.toString(timePoint));
+            // Tries to be clever for the moving source sampling
+            parameters.put("levelMovingSource", Integer.toString(SourceAndConverterHelper.bestLevel(fimg[0], timePoint, 0.02)));
+            // 20 microns per pixel for the initial registration
+            parameters.put("pxSizeInCurrentUnit", "0.02");
+            // Interpolation in resampling
+            parameters.put("interpolate", "true");
+
+            // Transforms map into flat String : key1, value1, key2, value2, etc.
+            // Necessary for CommandService
+            List<Object> flatParameters = new ArrayList<>(parameters.size()*2+4);
+
+            parameters.keySet().forEach(k -> {
+                flatParameters.add(k);
+                flatParameters.add(parameters.get(k));
+            });
+
+            flatParameters.add("sac_fixed");
+            flatParameters.add(fimg[0]);
+
+            flatParameters.add("sac_moving");
+            flatParameters.add(mimg[0]);
+
+
              task = context
                    .getService(CommandService.class)
-                   .run(registrationCommandClass, false,
-                           "sac_fixed", fimg[0],
-                           "sac_moving", mimg[0],
-                           parameters);
+                   .run(registrationCommandClass, true,
+                           flatParameters.toArray(new Object[0]));
 
             CommandModule module = task.get();
 
             if (module.getOutputs().keySet().contains("success")) {
                 success = (boolean) module.getOutput("success");
             }
+
             if (success) {
                 rt = (RealTransform) module.getOutput("rt");
             }
@@ -180,43 +225,12 @@ public class Elastix2DSplineRegistration extends RealTransformSourceAndConverter
 
     }
 
-    private boolean isDone = false;
-
-    /*@Override
-    public boolean isRegistrationDone() {
-        return isDone;
-    }
-
-    public void setDone() {
-        isDone = true;
-    }
-
-    @Override
-    public void resetRegistration() {
-        isDone = false;
-    }
-
-    @Override
-    public void setTimePoint(int timePoint) {
-        // TODO
-    }*/
-
     @Override
     public void abort() {
         if (task!=null) {
            task.cancel(true);
         }
     }
-
-    /*@Override
-    public String getTransform() {
-        return null;
-    }
-
-    @Override
-    public void setTransform(String serialized_transform) {
-
-    }*/
 
     @Override
     public void setLogger(Consumer<String> logger) {

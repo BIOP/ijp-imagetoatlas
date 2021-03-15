@@ -55,20 +55,23 @@ public class Elastix2DAffineRegistration extends AffineTransformSourceAndConvert
         super.setMovingImage(mimg);
     }
 
-    Class<? extends Command> registrationCommandClass = Elastix2DAffineRegisterCommand.class;
 
-    Future<CommandModule> task = null;
+    Future<CommandModule> task;
 
     @Override
     public boolean register() {
         try {
-            boolean success = true;
-
+            Class<? extends Command> registrationCommandClass;
             // Is it supposed to be done on a server ?
             if (parameters.containsKey("serverURL")) {
                 // Yes -> changes command class name
                 registrationCommandClass = Elastix2DAffineRegisterServerCommand.class;
+            } else {
+                registrationCommandClass = Elastix2DAffineRegisterCommand.class;
             }
+
+            // Registration success flag
+            boolean success = true;
 
             // Transforms map into flat String : key1, value1, key2, value2, etc.
             // Necessary for CommandService
@@ -90,7 +93,7 @@ public class Elastix2DAffineRegistration extends AffineTransformSourceAndConvert
             parameters.put("tpMoving", Integer.toString(timePoint));
             // Tries to be clever for the moving source sampling
             parameters.put("levelMovingSource", Integer.toString(SourceAndConverterHelper.bestLevel(fimg[0], timePoint, 0.04)));
-            // 40 microns per pixel for thsi initial registration
+            // 40 microns per pixel for the initial registration
             parameters.put("pxSizeInCurrentUnit", "0.04");
             // No interpolation in resampling
             parameters.put("interpolate", "false");

@@ -20,28 +20,17 @@ public class RegistrationAdapter implements JsonSerializer<Registration>,
 
     @Override
     public Registration deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-        System.out.println("Deserialize registration of type : "+typeOfT.getTypeName());
-
-        Registration registration = null;
         try {
-            registration = (Registration) scijavacontext.getService(PluginService.class)
+            Registration registration = registration = (Registration) scijavacontext.getService(PluginService.class)
             .getPlugin(typeOfT.getTypeName()).createInstance();
             registration.setScijavaContext(scijavacontext);
+            registration.setTransform(json.getAsJsonObject().get("transform").getAsString());
+            registration.setRegistrationParameters(context.deserialize(json.getAsJsonObject().get("parameters"), Map.class));
+            return registration;
         } catch (InstantiableException e) {
             e.printStackTrace();
             return null;
         }
-
-        System.out.println(json.getAsJsonObject().get("transform").getAsString());
-        registration.setTransform(json.getAsJsonObject().get("transform").getAsString());
-
-        registration.setRegistrationParameters(context.deserialize(json.getAsJsonObject().get("parameters"), Map.class));
-
-        System.out.println("Serializing : "+registration.getClass().getSimpleName());
-        System.out.println("Transform"+ registration.getTransform());
-        System.out.println("Parameters : "+ registration.getRegistrationParameters());
-
-        return registration;
     }
 
     @Override
@@ -50,10 +39,6 @@ public class RegistrationAdapter implements JsonSerializer<Registration>,
         obj.addProperty("type", registration.getClass().getSimpleName());
         obj.addProperty("transform", registration.getTransform());
         obj.add("parameters", context.serialize(registration.getRegistrationParameters()));
-
-        System.out.println("Serializing : "+registration.getClass().getSimpleName());
-        System.out.println("Transform : "+ registration.getTransform());
-        System.out.println("Parameters : "+ registration.getRegistrationParameters());
         return obj;
     }
 }

@@ -1764,19 +1764,15 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                 elastixSplineReg.setScijavaContext(scijavaCtx);
                 elastixSplineReg.setZPositioner(slice::getZAxisPosition);
                 Map<String, Object> params = new HashMap<>();
-                params.put("tpFixed", 0);
-                params.put("levelFixedSource", 1);
-                params.put("tpMoving", 0);
-                params.put("levelMovingSource", slice.getAdaptedMipMapLevel(0.02));
-                params.put("pxSizeInCurrentUnit", 0.02);
-                params.put("interpolate", true);
+
                 params.put("showImagePlusRegistrationResult", showIJ1Result);
                 params.put("px", roiPX);
                 params.put("py", roiPY);
-                params.put("pz", "0");
+                params.put("pz", 0);
                 params.put("sx", roiSX);
                 params.put("sy", roiSY);
                 params.put("nbControlPointsX", nbControlPointsX);
+
                 elastixSplineReg.setRegistrationParameters(convertToString(params));
 
                 AffineTransform3D at3d = new AffineTransform3D();
@@ -1850,14 +1846,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                 Elastix2DSplineRegistration elastixSplineReg = new Elastix2DSplineRegistration();
                 elastixSplineReg.setZPositioner(slice::getZAxisPosition);
                 elastixSplineReg.setScijavaContext(scijavaCtx);
-                elastixSplineReg.setRegistrationCommand(Elastix2DSplineRegisterServerCommand.class);
                 Map<String, Object> params = new HashMap<>();
-                params.put("tpFixed", 0);
-                params.put("levelFixedSource", 1);
-                params.put("tpMoving", 0);
-                params.put("levelMovingSource", slice.getAdaptedMipMapLevel(0.02));
-                params.put("pxSizeInCurrentUnit", 0.02);
-                params.put("interpolate", true);
                 params.put("showImagePlusRegistrationResult", false);
                 params.put("px", roiPX);
                 params.put("py", roiPY);
@@ -2472,22 +2461,12 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
         PluginService pluginService = scijavaCtx.getService(PluginService.class);
 
-
+        RegistrationAdapter registrationAdapter = new RegistrationAdapter(scijavaCtx);
         pluginService.getPluginsOfType(IABBARegistrationPlugin.class).forEach(registrationPluginClass -> {
             IABBARegistrationPlugin plugin = pluginService.createInstance(registrationPluginClass);
             factoryRegistrations.registerSubtype(plugin.getClass());
-            gsonbuilder.registerTypeHierarchyAdapter(Elastix2DAffineRegistration.class, new RegistrationAdapter(scijavaCtx));
+            gsonbuilder.registerTypeHierarchyAdapter(Elastix2DAffineRegistration.class, registrationAdapter);
         });
-
-        /*factoryRegistrations.registerSubtype(Elastix2DAffineRegistration.class);
-        factoryRegistrations.registerSubtype(Elastix2DSplineRegistration.class);
-        factoryRegistrations.registerSubtype(SacBigWarp2DRegistration.class);
-
-        gsonbuilder.registerTypeAdapterFactory(factoryRegistrations);
-        gsonbuilder.registerTypeHierarchyAdapter(Elastix2DAffineRegistration.class, new Elastix2DAffineRegistrationAdapter());
-        gsonbuilder.registerTypeHierarchyAdapter(Elastix2DSplineRegistration.class, new Elastix2DSplineRegistrationAdapter());
-        gsonbuilder.registerTypeHierarchyAdapter(SacBigWarp2DRegistration.class, new SacBigWarp2DRegistrationAdapter());
-        */
 
         // For sources processor
 

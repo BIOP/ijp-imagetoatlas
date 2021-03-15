@@ -59,7 +59,7 @@ abstract public class SourceAndConverterRegistration implements IABBARegistratio
         isDone = false;
     }
 
-    protected Map<String, String> parameters;
+    protected Map<String, String> parameters = new HashMap<>();
 
     @Override
     public Map<String, String> getRegistrationParameters() {
