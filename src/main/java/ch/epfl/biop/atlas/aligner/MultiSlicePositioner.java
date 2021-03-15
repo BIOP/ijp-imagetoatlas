@@ -11,7 +11,6 @@ import ch.epfl.biop.atlas.aligner.sourcepreprocessors.*;
 import ch.epfl.biop.atlas.plugin.IABBARegistrationPlugin;
 import ch.epfl.biop.atlas.plugin.RegistrationPluginHelper;
 import ch.epfl.biop.bdv.BdvScijavaHelper;
-import ch.epfl.biop.bdv.command.register.Elastix2DSplineRegisterServerCommand;
 import ch.epfl.biop.bdv.select.SourceSelectorBehaviour;
 import ch.epfl.biop.registration.Registration;
 import ch.epfl.biop.registration.sourceandconverter.affine.Elastix2DAffineRegistration;
@@ -2465,7 +2464,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         pluginService.getPluginsOfType(IABBARegistrationPlugin.class).forEach(registrationPluginClass -> {
             IABBARegistrationPlugin plugin = pluginService.createInstance(registrationPluginClass);
             factoryRegistrations.registerSubtype(plugin.getClass());
-            gsonbuilder.registerTypeHierarchyAdapter(Elastix2DAffineRegistration.class, registrationAdapter);
+            gsonbuilder.registerTypeHierarchyAdapter(plugin.getClass(), registrationAdapter);
         });
 
         // For sources processor

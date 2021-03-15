@@ -7,7 +7,6 @@ import ch.epfl.biop.atlas.aligner.commands.RegistrationElastixSplineCommand;
 import ch.epfl.biop.atlas.aligner.commands.RegistrationElastixSplineRemoteCommand;
 import ch.epfl.biop.atlas.plugin.IABBARegistrationPlugin;
 import ch.epfl.biop.atlas.plugin.RegistrationTypeProperties;
-import ch.epfl.biop.bdv.command.register.Elastix2DAffineRegisterServerCommand;
 import ch.epfl.biop.bdv.command.register.Elastix2DSplineRegisterCommand;
 import ch.epfl.biop.bdv.command.register.Elastix2DSplineRegisterServerCommand;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
@@ -26,7 +25,6 @@ import sc.fiji.bdvpg.sourceandconverter.transform.SourceRealTransformer;
 
 import java.util.*;
 import java.util.concurrent.Future;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -41,12 +39,8 @@ import static bdv.util.RealTransformHelper.BigWarpFileFromRealTransform;
                 RegistrationElastixSplineRemoteCommand.class
         }
 )
-public class Elastix2DSplineRegistration extends RealTransformSourceAndConverterRegistration {
 
-    @Override
-    public void setRegistrationParameters(Map<String, String> parameters) {
-        this.parameters.putAll(parameters);
-    }
+public class Elastix2DSplineRegistration extends RealTransformSourceAndConverterRegistration {
 
     @Override
     public void setFixedImage(SourceAndConverter[] fimg) {
@@ -110,7 +104,6 @@ public class Elastix2DSplineRegistration extends RealTransformSourceAndConverter
 
             flatParameters.add("sac_moving");
             flatParameters.add(mimg[0]);
-
 
              task = context
                    .getService(CommandService.class)
@@ -232,8 +225,4 @@ public class Elastix2DSplineRegistration extends RealTransformSourceAndConverter
         }
     }
 
-    @Override
-    public void setLogger(Consumer<String> logger) {
-
-    }
 }

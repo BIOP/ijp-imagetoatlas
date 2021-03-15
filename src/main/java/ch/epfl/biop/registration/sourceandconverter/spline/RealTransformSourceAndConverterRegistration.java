@@ -9,7 +9,6 @@ import net.imglib2.realtransform.RealTransform;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceRealTransformer;
 
 import java.util.ArrayList;
-import java.util.function.Consumer;
 
 abstract public class RealTransformSourceAndConverterRegistration extends SourceAndConverterRegistration {
 
@@ -69,9 +68,5 @@ abstract public class RealTransformSourceAndConverterRegistration extends Source
         throw new UnsupportedOperationException();
     }
 
-    @Override
-    public void setLogger(Consumer<String> logger) {
-        this.log = logger;
-    }
 
 }

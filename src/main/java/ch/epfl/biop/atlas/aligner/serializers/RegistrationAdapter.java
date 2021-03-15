@@ -21,7 +21,7 @@ public class RegistrationAdapter implements JsonSerializer<Registration>,
     @Override
     public Registration deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
         try {
-            Registration registration = registration = (Registration) scijavacontext.getService(PluginService.class)
+            Registration registration = (Registration) scijavacontext.getService(PluginService.class)
             .getPlugin(typeOfT.getTypeName()).createInstance();
             registration.setScijavaContext(scijavacontext);
             registration.setTransform(json.getAsJsonObject().get("transform").getAsString());
@@ -36,9 +36,16 @@ public class RegistrationAdapter implements JsonSerializer<Registration>,
     @Override
     public JsonElement serialize(Registration registration, Type typeOfSrc, JsonSerializationContext context) {
         JsonObject obj = new JsonObject();
+
+        /*System.out.println(registration.getClass().getSimpleName());
+        System.out.println(registration.getTransform());
+        System.out.println(registration.getRegistrationParameters());
+        System.out.println(context.serialize(registration.getRegistrationParameters()));*/
+
         obj.addProperty("type", registration.getClass().getSimpleName());
         obj.addProperty("transform", registration.getTransform());
         obj.add("parameters", context.serialize(registration.getRegistrationParameters()));
+
         return obj;
     }
 }
