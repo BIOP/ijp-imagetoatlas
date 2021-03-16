@@ -7,7 +7,7 @@ import org.scijava.plugin.Plugin;
 public class RegistrationBigWarpCommand extends RegistrationCommand {
 
     public void runValidated() {
-        mp.registerBigWarp(getFixedFilter(), getMovingFilter());
+        mp.register(this, getFixedFilter(), getMovingFilter());
     }
 
 }

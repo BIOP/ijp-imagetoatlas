@@ -6,10 +6,13 @@ import ch.epfl.biop.registration.Registration;
 import org.scijava.plugin.SciJavaPlugin;
 
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public interface IABBARegistrationPlugin extends SciJavaPlugin, Registration<SourceAndConverter<?>[]> {
 
-    //void setMultiSlicePositioner(MultiSlicePositioner msp); // TODO
-
     void setLogger(Consumer<String> logger);
+
+    void setSliceInfo(MultiSlicePositioner.SliceInfo sliceInfo);
+
+    //void setZPositioner(Supplier<Double> zPosition);
 }

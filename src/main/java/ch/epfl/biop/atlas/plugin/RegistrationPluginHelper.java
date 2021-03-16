@@ -1,9 +1,13 @@
 package ch.epfl.biop.atlas.plugin;
 
+import ch.epfl.biop.bdv.BdvScijavaHelper;
 import ch.epfl.biop.registration.Registration;
+import org.scijava.Context;
 import org.scijava.command.Command;
+import org.scijava.plugin.PluginService;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 
 // Facilitates accessing annotation values
 public class RegistrationPluginHelper {
@@ -48,6 +52,26 @@ public class RegistrationPluginHelper {
         } else {
             return new Class[0]; // Default value if no annotation is present
         }
+    }
+
+    /**
+     * Assumes unicity! Find the registration class from a UI class
+     * @param queryUIClass
+     * @return null is nothing is found
+     */
+    public static Class<? extends IABBARegistrationPlugin> registrationFromUI (Context ctx, Class<? extends Command> queryUIClass) {
+        PluginService pluginService = ctx.getService(PluginService.class);
+
+        // OK... intellij found this alone, let's hope it works
+        return pluginService
+                .getPluginsOfType(IABBARegistrationPlugin.class)
+                .stream().map(pluginService::createInstance)
+                .filter(plugin -> Arrays.stream(RegistrationPluginHelper.userInterfaces(plugin))
+                .anyMatch(commandUI -> commandUI.equals(queryUIClass)))
+                .findFirst()
+                .map(IABBARegistrationPlugin::getClass)
+                .orElse(null);
+
     }
 
 }

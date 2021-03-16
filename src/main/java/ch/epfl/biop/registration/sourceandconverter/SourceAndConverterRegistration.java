@@ -1,13 +1,17 @@
 package ch.epfl.biop.registration.sourceandconverter;
 
 import bdv.viewer.SourceAndConverter;
+import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.plugin.IABBARegistrationPlugin;
 import org.scijava.Context;
 import org.scijava.plugin.Parameter;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 abstract public class SourceAndConverterRegistration implements IABBARegistrationPlugin {
 
@@ -81,5 +85,21 @@ abstract public class SourceAndConverterRegistration implements IABBARegistratio
     public void setLogger(Consumer<String> logger) {
         this.log = logger;
     }
+
+    protected MultiSlicePositioner.SliceInfo sliceInfo;
+
+    public void setSliceInfo(MultiSlicePositioner.SliceInfo sliceInfo){
+        this.sliceInfo = sliceInfo;
+    };
+
+    protected static void addToFlatParameters(List<Object> flatParameters, Object... args) {
+        flatParameters.addAll(Arrays.asList(args));
+    }
+
+    /*protected Supplier<Double> zPosition;
+
+    public void setZPositioner(Supplier<Double> zPosition) {
+        this.zPosition = zPosition;
+    }*/
 
 }

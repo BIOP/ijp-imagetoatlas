@@ -33,9 +33,9 @@ public class RegisterSliceAdapter implements JsonSerializer<RegisterSlice>,
         JsonObject obj = jsonElement.getAsJsonObject();
         Registration<SourceAndConverter<?>[]> reg = jsonDeserializationContext.deserialize(obj.get("registration"), Registration.class); // isDone should be true when deserialized
 
-        if (reg instanceof Elastix2DSplineRegistration) {
+        /*if (reg instanceof Elastix2DSplineRegistration) {
             ((Elastix2DSplineRegistration)reg).setZPositioner(currentSliceGetter.get()::getZAxisPosition);
-        }
+        }*/
 
         SourcesProcessor fixed_sources_preprocess = jsonDeserializationContext.deserialize(obj.get("fixed_sources_preprocess"), SourcesProcessor.class);
         SourcesProcessor moving_souces_preprocess = jsonDeserializationContext.deserialize(obj.get("moving_sources_preprocess"), SourcesProcessor.class);

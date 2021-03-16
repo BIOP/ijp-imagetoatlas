@@ -1,6 +1,7 @@
 package ch.epfl.biop.atlas.plugin;
 
 import bdv.viewer.SourceAndConverter;
+import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import org.scijava.Context;
 import org.scijava.plugin.Plugin;
@@ -152,6 +153,11 @@ public class IdentityRegistrationPluginExample implements IABBARegistrationPlugi
     @Override
     public void setLogger(Consumer<String> logger) {
         log = logger;
+    }
+
+    @Override
+    public void setSliceInfo(MultiSlicePositioner.SliceInfo sliceInfo) {
+        // Can be used to retrieve some info about the slice being registered
     }
 
     public static class MyTransform {

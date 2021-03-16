@@ -13,9 +13,6 @@ import ch.epfl.biop.atlas.plugin.RegistrationPluginHelper;
 import ch.epfl.biop.bdv.BdvScijavaHelper;
 import ch.epfl.biop.bdv.select.SourceSelectorBehaviour;
 import ch.epfl.biop.registration.Registration;
-import ch.epfl.biop.registration.sourceandconverter.affine.Elastix2DAffineRegistration;
-import ch.epfl.biop.registration.sourceandconverter.spline.Elastix2DSplineRegistration;
-import ch.epfl.biop.registration.sourceandconverter.spline.SacBigWarp2DRegistration;
 import ch.epfl.biop.scijava.ui.swing.ScijavaSwingUI;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -32,6 +29,7 @@ import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
 import org.apache.commons.io.FilenameUtils;
 import org.scijava.Context;
+import org.scijava.InstantiableException;
 import org.scijava.cache.CacheService;
 import org.scijava.command.Command;
 import org.scijava.convert.ConvertService;
@@ -1685,108 +1683,6 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         }
     }
 
-    public void registerBigWarp(int iChannelFixed, int iChannelMoving) {
-        registerBigWarp(getChannel(iChannelFixed), getChannel(iChannelMoving));
-    }
-
-    public void registerBigWarp(SourcesProcessor preprocessFixed,
-                                SourcesProcessor preprocessMoving) {
-        if (getSelectedSources().size()==0) {
-            warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to register");
-            log.accept("Registration ignored : no slice selected");
-        }
-        for (SliceSources slice : slices) {
-            if (slice.isSelected()) {
-                SacBigWarp2DRegistration registration = new SacBigWarp2DRegistration();
-                registration.setScijavaContext(scijavaCtx);
-                AffineTransform3D at3D = new AffineTransform3D();
-                at3D.translate(-this.nPixX / 2.0, -this.nPixY / 2.0, 0);
-                at3D.scale(this.sizePixX, this.sizePixY, this.sizePixZ);
-                at3D.translate(0, 0, slice.getSlicingAxisPosition());
-
-                AffineTransform3D translateZ = new AffineTransform3D();
-                translateZ.translate(0, 0, -slice.getSlicingAxisPosition());
-                SourcesProcessor fixedProcess = SourcesProcessorHelper.compose(
-                        new SourcesAffineTransformer(translateZ),
-                        preprocessFixed
-                );
-                SourcesProcessor movingProcess = SourcesProcessorHelper.compose(
-                        new SourcesAffineTransformer(translateZ),
-                        preprocessMoving
-                );
-
-                new RegisterSlice(this, slice, registration, fixedProcess, movingProcess).runRequest();
-            }
-        }
-    }
-
-    public void registerElastixAffine(int iChannelFixed, int iChannelMoving, boolean showIJ1Result) {
-        registerElastixAffine(getChannel(iChannelFixed), getChannel(iChannelMoving), showIJ1Result);
-    }
-
-    public void registerElastixAffine(SourcesProcessor preprocessFixed,
-                                      SourcesProcessor preprocessMoving, boolean showIJ1Result) {
-        if (getSelectedSources().size()==0) {
-            warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to register");
-            log.accept("Registration ignored : no slice selected");
-        }
-        for (SliceSources slice : slices) {
-            if (slice.isSelected()) {
-                Elastix2DAffineRegistration elastixAffineReg = new Elastix2DAffineRegistration();
-                elastixAffineReg.setScijavaContext(scijavaCtx);
-                Map<String, Object> params = new HashMap<>();
-                params.put("showImagePlusRegistrationResult", showIJ1Result);
-                params.put("px", roiPX);
-                params.put("py", roiPY);
-                params.put("pz", slice.getSlicingAxisPosition());
-                params.put("sx", roiSX);
-                params.put("sy", roiSY);
-                elastixAffineReg.setRegistrationParameters(convertToString(params));
-                new RegisterSlice(this, slice, elastixAffineReg, preprocessFixed, preprocessMoving).runRequest();
-            }
-        }
-    }
-
-    public void registerElastixSpline(int iChannelFixed, int iChannelMoving, int nbControlPointsX, boolean showIJ1Result) {
-        registerElastixSpline(getChannel(iChannelFixed), getChannel(iChannelMoving), nbControlPointsX,  showIJ1Result);
-    }
-
-    public void registerElastixSpline(SourcesProcessor preprocessFixed,
-                                      SourcesProcessor preprocessMoving, int nbControlPointsX, boolean showIJ1Result) {
-        if (getSelectedSources().size()==0) {
-            warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to register");
-            log.accept("Registration ignored : no slice selected");
-        }
-        for (SliceSources slice : slices) {
-            if (slice.isSelected()) {
-                Elastix2DSplineRegistration elastixSplineReg = new Elastix2DSplineRegistration();
-                elastixSplineReg.setScijavaContext(scijavaCtx);
-                elastixSplineReg.setZPositioner(slice::getZAxisPosition);
-                Map<String, Object> params = new HashMap<>();
-
-                params.put("showImagePlusRegistrationResult", showIJ1Result);
-                params.put("px", roiPX);
-                params.put("py", roiPY);
-                params.put("pz", 0);
-                params.put("sx", roiSX);
-                params.put("sy", roiSY);
-                params.put("nbControlPointsX", nbControlPointsX);
-
-                elastixSplineReg.setRegistrationParameters(convertToString(params));
-
-                AffineTransform3D at3d = new AffineTransform3D();
-                at3d.translate(0,0,-slice.getSlicingAxisPosition());
-                SourcesAffineTransformer z_zero = new SourcesAffineTransformer(at3d);
-
-                new RegisterSlice(this, slice, elastixSplineReg, SourcesProcessorHelper.compose(z_zero, preprocessFixed), SourcesProcessorHelper.compose(z_zero, preprocessMoving)).runRequest();
-            }
-        }
-    }
-
-    public void registerElastixAffineRemote(String serverURL, int iChannelFixed, int iChannelMoving, boolean userConsent) {
-        registerElastixAffineRemote(serverURL, getChannel(iChannelFixed), getChannel(iChannelMoving), userConsent);
-    }
-
     Map<String,String> convertToString(Map<String, Object> params) {
         Map<String,String> convertedParams = new HashMap<>();
 
@@ -1799,77 +1695,87 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         return convertedParams;
     }
 
-    public void registerElastixAffineRemote(String serverURL, SourcesProcessor preprocessFixed,
-                                      SourcesProcessor preprocessMoving, boolean userConsent) {
+    public void register(Command command,
+                         SourcesProcessor preprocessFixed,
+                         SourcesProcessor preprocessMoving) {
+        register(command,
+                preprocessFixed,
+                preprocessMoving,
+                new HashMap<>()
+        );
+    }
+
+    /**
+     * Main function which triggers registration of the selected slices
+     * @param command the ui command
+     * @param preprocessFixed how fixed sources need to be preprocessed before being registered
+     * @param preprocessMoving how moving sources need to be preprocessed before being registered
+     * @param parameters parameters used for the registration - all objects will be converted
+     *                   to String using the scijava {@link ConvertService}. They need to be strings
+     *                   to be serialized
+     */
+    public void register(Command command,
+                         SourcesProcessor preprocessFixed,
+                         SourcesProcessor preprocessMoving,
+                         Map<String,Object> parameters) {
+        register(RegistrationPluginHelper.registrationFromUI(scijavaCtx,command.getClass()),
+                preprocessFixed,
+                preprocessMoving,
+                parameters
+        );
+    }
+
+    /**
+     * Main function which triggers registration of the selected slices
+     * @param registrationClass the kind of registration which should be started
+     * @param preprocessFixed how fixed sources need to be preprocessed before being registered
+     * @param preprocessMoving how moving sources need to be preprocessed before being registered
+     * @param parameters parameters used for the registration - all objects will be converted
+     *                   to String using the scijava {@link ConvertService}. They need to be strings
+     *                   to be serialized
+     */
+    public void register(Class<? extends IABBARegistrationPlugin> registrationClass,
+                         SourcesProcessor preprocessFixed,
+                         SourcesProcessor preprocessMoving,
+                         Map<String,Object> parameters) {
         if (getSelectedSources().size()==0) {
             warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to register");
             log.accept("Registration ignored : no slice selected");
-        }
-        for (SliceSources slice : slices) {
-            if (slice.isSelected()) {
-                Elastix2DAffineRegistration elastixAffineReg = new Elastix2DAffineRegistration();
-                //elastixAffineReg.setRegistrationCommand(Elastix2DAffineRegisterServerCommand.class);
-                elastixAffineReg.setScijavaContext(scijavaCtx);
-                Map<String, Object> params = new HashMap<>();
-                params.put("px", roiPX);
-                params.put("py", roiPY);
-                params.put("pz", slice.getSlicingAxisPosition());
-                params.put("sx", roiSX);
-                params.put("sy", roiSY);
-                params.put("serverURL", serverURL);
-                if (!userConsent) {
-                    params.put("taskInfo", "");
-                } else {
-                    String taskInfo = new Gson().toJson(new TaskInfo(slice));
-                    System.out.println(taskInfo);
-                    params.put("taskInfo", taskInfo);
+        } else {
+            try {
+
+                // Putting user defined ROIs
+                parameters.put("px", roiPX);
+                parameters.put("py", roiPY);
+                parameters.put("sx", roiSX);
+                parameters.put("sy", roiSY);
+
+                PluginService ps = scijavaCtx.getService(PluginService.class);
+                for (SliceSources slice : slices) {
+                    if (slice.isSelected()) {
+                        IABBARegistrationPlugin registration = (IABBARegistrationPlugin) ps.getPlugin(registrationClass).createInstance();
+                        registration.setScijavaContext(scijavaCtx);
+
+                        registration.setSliceInfo(new SliceInfo(slice));
+
+                        // Sends parameters to the registration
+                        registration.setRegistrationParameters(convertToString(parameters));
+
+                        // Always set slice at zero position for registration
+                        parameters.put("pz", 0);
+                        AffineTransform3D at3d = new AffineTransform3D();
+                        at3d.translate(0,0,-slice.getSlicingAxisPosition());
+                        SourcesAffineTransformer z_zero = new SourcesAffineTransformer(at3d);
+
+                        new RegisterSlice(this, slice, registration, SourcesProcessorHelper.compose(z_zero, preprocessFixed), SourcesProcessorHelper.compose(z_zero, preprocessMoving)).runRequest();
+                    }
                 }
-                elastixAffineReg.setRegistrationParameters(convertToString(params));
-                new RegisterSlice(this, slice, elastixAffineReg, preprocessFixed, preprocessMoving).runRequest();
+            } catch (InstantiableException e) {
+                e.printStackTrace();
             }
         }
     }
 
-    public void registerElastixSplineRemote(String serverURL, int iChannelFixed, int iChannelMoving, int nbControlPointsX, boolean userConsent) {
-        registerElastixSplineRemote(serverURL, getChannel(iChannelFixed), getChannel(iChannelMoving), nbControlPointsX, userConsent);
-    }
-
-    public void registerElastixSplineRemote(String serverURL, SourcesProcessor preprocessFixed,
-                                      SourcesProcessor preprocessMoving, int nbControlPointsX, boolean userConsent) {
-        if (getSelectedSources().size()==0) {
-            warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to register");
-            log.accept("Registration ignored : no slice selected");
-        }
-        for (SliceSources slice : slices) {
-            if (slice.isSelected()) {
-                Elastix2DSplineRegistration elastixSplineReg = new Elastix2DSplineRegistration();
-                elastixSplineReg.setZPositioner(slice::getZAxisPosition);
-                elastixSplineReg.setScijavaContext(scijavaCtx);
-                Map<String, Object> params = new HashMap<>();
-                params.put("showImagePlusRegistrationResult", false);
-                params.put("px", roiPX);
-                params.put("py", roiPY);
-                params.put("pz", 0);
-                params.put("sx", roiSX);
-                params.put("sy", roiSY);
-                params.put("nbControlPointsX", nbControlPointsX);
-                params.put("serverURL", serverURL);
-                if (!userConsent) {
-                    params.put("taskInfo", "");
-                } else {
-                    params.put("taskInfo", new Gson().toJson(new TaskInfo(slice)));
-                }
-
-                elastixSplineReg.setRegistrationParameters(convertToString(params));
-
-                AffineTransform3D at3d = new AffineTransform3D();
-                at3d.translate(0,0,-slice.getSlicingAxisPosition());
-                SourcesAffineTransformer z_zero = new SourcesAffineTransformer(at3d);
-
-                new RegisterSlice(this, slice, elastixSplineReg, SourcesProcessorHelper.compose(z_zero, preprocessFixed), SourcesProcessorHelper.compose(z_zero, preprocessMoving)).runRequest();
-            }
-        }
-    }
 
     // --------------------------------- ACTION CLASSES
 
@@ -2641,9 +2547,9 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     /**
      * Informations sent to the registration server (provided the user agrees)
      */
-    public class TaskInfo {
+    public class SliceInfo {
 
-        public TaskInfo(SliceSources slice) {
+        public SliceInfo(SliceSources slice) {
             sliceAxisPosition = slice.getSlicingAxisPosition();
             matrixAtlas = reslicedAtlas.getSlicingTransform().getRowPackedCopy();
             matrixAlignerToAtlas = MultiSlicePositioner.this.getAffineTransformFormAlignerToAtlas().getRowPackedCopy();

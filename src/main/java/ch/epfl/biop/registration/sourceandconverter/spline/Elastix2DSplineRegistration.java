@@ -10,6 +10,7 @@ import ch.epfl.biop.atlas.plugin.RegistrationTypeProperties;
 import ch.epfl.biop.bdv.command.register.Elastix2DSplineRegisterCommand;
 import ch.epfl.biop.bdv.command.register.Elastix2DSplineRegisterServerCommand;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
+import com.google.gson.Gson;
 import ij.gui.WaitForUserDialog;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.RealTransform;
@@ -75,30 +76,14 @@ public class Elastix2DSplineRegistration extends RealTransformSourceAndConverter
             if (parameters.containsKey("serverURL")) {
                 // Yes -> changes command class name
                 registrationCommandClass = Elastix2DSplineRegisterServerCommand.class;
+                if (parameters.get("userConsentForServerKeepingData").equals("true")) {
+                    String taskInfo = new Gson().toJson(sliceInfo);
+                    parameters.put("taskInfo", taskInfo);
+                }
+                parameters.remove("userConsentForServerKeepingData");
             } else {
                 registrationCommandClass = Elastix2DSplineRegisterCommand.class;
             }
-
-            // Start registration with a 4x4 pixel iamge
-            parameters.put("minPixSize","32");
-            // 150 iteration steps
-            parameters.put("maxIterationNumberPerScale","150");
-            // Do not write anything
-            parameters.put("verbose", "false");
-            // Centers centers of mass of both images before starting registration
-            parameters.put("automaticTransformInitialization", "false");
-            // Atlas image : a single timepoint
-            parameters.put("tpFixed", "0");
-            // Level 2 for the atlas
-            parameters.put("levelFixedSource", "1");
-            // Timepoint moving source (normally 0)
-            parameters.put("tpMoving", Integer.toString(timePoint));
-            // Tries to be clever for the moving source sampling
-            parameters.put("levelMovingSource", Integer.toString(SourceAndConverterHelper.bestLevel(fimg[0], timePoint, 0.02)));
-            // 20 microns per pixel for the initial registration
-            parameters.put("pxSizeInCurrentUnit", "0.02");
-            // Interpolation in resampling
-            parameters.put("interpolate", "true");
 
             // Transforms map into flat String : key1, value1, key2, value2, etc.
             // Necessary for CommandService
@@ -109,15 +94,36 @@ public class Elastix2DSplineRegistration extends RealTransformSourceAndConverter
                 flatParameters.add(parameters.get(k));
             });
 
-            flatParameters.add("sac_fixed");
-            flatParameters.add(fimg[0]);
-
-            flatParameters.add("sac_moving");
-            flatParameters.add(mimg[0]);
+            addToFlatParameters(flatParameters,
+                    // Fixed image
+                    "sac_fixed",fimg[0],
+                    // Moving image
+                    "sac_moving", mimg[0],
+                    // Interpolation in resampling
+                    "interpolate", true,
+                    // Start registration with a 32x32 pixel image
+                    "minPixSize", 32,
+                    // 100 iteration steps
+                    "maxIterationNumberPerScale",100,
+                    // Do not write anything
+                    "verbose", false,
+                    // Do not center centers of mass of both images before starting registration
+                    "automaticTransformInitialization", false,
+                    // Atlas image : a single timepoint
+                    "tpFixed", 0,
+                    // Level 2 for the atlas
+                    "levelFixedSource", 1,
+                    // Timepoint moving source (normally 0)
+                    "tpMoving", timePoint,
+                    // Tries to be clever for the moving source sampling
+                    "levelMovingSource", SourceAndConverterHelper.bestLevel(fimg[0], timePoint, 0.02),
+                    // 40 microns per pixel for the initial registration
+                    "pxSizeInCurrentUnit", 0.02
+                    );
 
              task = context
                    .getService(CommandService.class)
-                   .run(registrationCommandClass, true,
+                   .run(registrationCommandClass, false,
                            flatParameters.toArray(new Object[0]));
 
             CommandModule module = task.get();
@@ -136,12 +142,6 @@ public class Elastix2DSplineRegistration extends RealTransformSourceAndConverter
             e.printStackTrace();
             return false;
         }
-    }
-
-    Supplier<Double> zPosition;
-
-    public void setZPositioner(Supplier<Double> zPosition) {
-        this.zPosition = zPosition;
     }
 
     @Override
@@ -164,9 +164,9 @@ public class Elastix2DSplineRegistration extends RealTransformSourceAndConverter
         for (RealPoint p : pts.ptList) {
             RealPoint pt3d = new RealPoint(3);
             pt3d.setPosition(new double[]{p.getDoublePosition(0), p.getDoublePosition(1),0});
-            if (zPosition!=null) {
+            /*if (zPosition!=null) {
                 pt3d.setPosition(zPosition.get(), 2);
-            }
+            }*/
             rt.apply(pt3d, pt3d);
             RealPoint cpt = new RealPoint(pt3d.getDoublePosition(0), pt3d.getDoublePosition(1));
             cvtList.add(cpt);

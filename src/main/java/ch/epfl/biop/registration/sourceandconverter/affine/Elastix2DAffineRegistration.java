@@ -7,6 +7,7 @@ import ch.epfl.biop.atlas.plugin.IABBARegistrationPlugin;
 import ch.epfl.biop.atlas.plugin.RegistrationTypeProperties;
 import ch.epfl.biop.bdv.command.register.Elastix2DAffineRegisterCommand;
 import ch.epfl.biop.bdv.command.register.Elastix2DAffineRegisterServerCommand;
+import com.google.gson.Gson;
 import net.imglib2.realtransform.AffineTransform3D;
 import org.scijava.command.Command;
 import org.scijava.command.CommandModule;
@@ -15,6 +16,7 @@ import org.scijava.plugin.Plugin;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Future;
 
@@ -63,8 +65,13 @@ public class Elastix2DAffineRegistration extends AffineTransformSourceAndConvert
             Class<? extends Command> registrationCommandClass;
             // Is it supposed to be done on a server ?
             if (parameters.containsKey("serverURL")) {
-                // Yes -> changes command class name
+                // Yes -> changes command class name to the server one
                 registrationCommandClass = Elastix2DAffineRegisterServerCommand.class;
+                if (parameters.get("userConsentForServerKeepingData").equals("true")) {
+                    String taskInfo = new Gson().toJson(sliceInfo);
+                    parameters.put("taskInfo", taskInfo);
+                }
+                parameters.remove("userConsentForServerKeepingData");
             } else {
                 registrationCommandClass = Elastix2DAffineRegisterCommand.class;
             }
@@ -76,37 +83,37 @@ public class Elastix2DAffineRegistration extends AffineTransformSourceAndConvert
             // Necessary for CommandService
             List<Object> flatParameters = new ArrayList<>(parameters.size()*2+4);
 
-            // Start registration with a 4x4 pixel iamge
-            parameters.put("minPixSize","4");
-            // 150 iteration steps
-            parameters.put("maxIterationNumberPerScale","150");
-            // Do not write anything
-            parameters.put("verbose", "false");
-            // Centers centers of mass of both images before starting registration
-            parameters.put("automaticTransformInitialization", "true");
-            // Atlas image : a single timepoint
-            parameters.put("tpFixed", "0");
-            // Level 2 for the atlas
-            parameters.put("levelFixedSource", "2");
-            // Timepoint moving source (normally 0)
-            parameters.put("tpMoving", Integer.toString(timePoint));
-            // Tries to be clever for the moving source sampling
-            parameters.put("levelMovingSource", Integer.toString(SourceAndConverterHelper.bestLevel(fimg[0], timePoint, 0.04)));
-            // 40 microns per pixel for the initial registration
-            parameters.put("pxSizeInCurrentUnit", "0.04");
-            // No interpolation in resampling
-            parameters.put("interpolate", "false");
-
             parameters.keySet().forEach(k -> {
                 flatParameters.add(k);
                 flatParameters.add(parameters.get(k));
             });
 
-            flatParameters.add("sac_fixed");
-            flatParameters.add(fimg[0]);
-
-            flatParameters.add("sac_moving");
-            flatParameters.add(mimg[0]);
+            addToFlatParameters(flatParameters,
+                // Fixed image
+          "sac_fixed",fimg[0],
+                // Moving image
+                "sac_moving", mimg[0],
+                // No interpolation in resampling
+                "interpolate", false,
+                // Start registration with a 4x4 pixel image
+                "minPixSize",4,
+                // 100 iteration steps
+                "maxIterationNumberPerScale",100,
+                 // Do not write anything
+                 "verbose", false,
+                 // Centers centers of mass of both images before starting registration
+                 "automaticTransformInitialization", true,
+                 // Atlas image : a single timepoint
+                 "tpFixed", 0,
+                 // Level 2 for the atlas
+                 "levelFixedSource", 2,
+                 // Timepoint moving source (normally 0)
+                 "tpMoving", timePoint,
+                 // Tries to be clever for the moving source sampling
+                 "levelMovingSource", SourceAndConverterHelper.bestLevel(fimg[0], timePoint, 0.04),
+                 // 40 microns per pixel for the initial registration
+                 "pxSizeInCurrentUnit", "0.04"
+            );
 
             task = context
                     .getService(CommandService.class)
