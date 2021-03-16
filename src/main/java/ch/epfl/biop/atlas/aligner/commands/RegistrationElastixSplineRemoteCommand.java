@@ -6,10 +6,13 @@ import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.widget.TextWidget;
 
-@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>Elastix Registration (Spline) on Server")
-public class RegistrationElastixSplineRemoteCommand extends RegistrationCommand {
+import java.util.HashMap;
+import java.util.Map;
 
-    @Parameter(label = "Number of control points along X, minimum 2.", validater = "checkNumberOfPoints")
+@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>Elastix Registration (Spline) on Server")
+public class RegistrationElastixSplineRemoteCommand extends SingleChannelRegistrationCommand {
+
+    @Parameter(label = "Number of control points along X, minimum 2.")
     int nbControlPointsX = 10;
 
     @Parameter(label = "Registration Server URL")
@@ -29,14 +32,24 @@ public class RegistrationElastixSplineRemoteCommand extends RegistrationCommand 
     boolean userConsentForServerKeepingData = false;
 
     public void runValidated() {
-        mp.registerElastixSplineRemote(serverURL,getFixedFilter(), getMovingFilter(), nbControlPointsX, userConsentForServerKeepingData);
-    }
-
-    public void checkNumberOfPoints() {
         if (nbControlPointsX<2) {
             mp.errorMessageForUser.accept("Cannot start registration", "Number of control points too low.");
             validationError = true;
+            return;
         }
+
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("serverURL", serverURL);
+        parameters.put("taskInfo", "");
+        parameters.put("userConsentForServerKeepingData", userConsentForServerKeepingData);
+
+        parameters.put("showImagePlusRegistrationResult", false);
+        parameters.put("nbControlPointsX", nbControlPointsX);
+
+        mp.register(this,
+                getFixedFilter(),
+                getMovingFilter(),
+                parameters);
     }
 
 }

@@ -33,9 +33,9 @@ public class RegisterSliceAdapter implements JsonSerializer<RegisterSlice>,
         JsonObject obj = jsonElement.getAsJsonObject();
         Registration<SourceAndConverter<?>[]> reg = jsonDeserializationContext.deserialize(obj.get("registration"), Registration.class); // isDone should be true when deserialized
 
-        if (reg instanceof Elastix2DSplineRegistration) {
+        /*if (reg instanceof Elastix2DSplineRegistration) {
             ((Elastix2DSplineRegistration)reg).setZPositioner(currentSliceGetter.get()::getZAxisPosition);
-        }
+        }*/
 
         SourcesProcessor fixed_sources_preprocess = jsonDeserializationContext.deserialize(obj.get("fixed_sources_preprocess"), SourcesProcessor.class);
         SourcesProcessor moving_souces_preprocess = jsonDeserializationContext.deserialize(obj.get("moving_sources_preprocess"), SourcesProcessor.class);
@@ -49,10 +49,18 @@ public class RegisterSliceAdapter implements JsonSerializer<RegisterSlice>,
     @Override
     public JsonElement serialize(RegisterSlice regSlice, Type type, JsonSerializationContext jsonSerializationContext) {
         JsonObject obj = new JsonObject();
+        System.out.println("Register RegisterSlice action start");
         obj.addProperty("type", RegisterSlice.class.getSimpleName());
-        obj.add("registration", jsonSerializationContext.serialize(regSlice.getRegistration()));
+
+        System.out.println("0");
         obj.add("fixed_sources_preprocess", jsonSerializationContext.serialize(regSlice.getFixedSourcesProcessor()));
+
+        System.out.println("1");
         obj.add("moving_sources_preprocess", jsonSerializationContext.serialize(regSlice.getMovingSourcesProcessor()));
+
+        System.out.println("2");
+        obj.add("registration", jsonSerializationContext.serialize(regSlice.getRegistration()));
+        System.out.println("Register RegisterSlice action end");
         return obj;
     }
 }

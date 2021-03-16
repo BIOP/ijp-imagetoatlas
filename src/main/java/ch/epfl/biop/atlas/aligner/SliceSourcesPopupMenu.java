@@ -94,7 +94,7 @@ public class SliceSourcesPopupMenu {
             });
         }
 
-        if (mp.getDisplayMode() != MultiSlicePositioner.REGISTRATION_MODE_INT) {
+        if (mp.getDisplayMode() != MultiSlicePositioner.REVIEW_MODE_INT) {
             addPopupAction("Registration mode", (slices) -> {
                 mp.setRegistrationMode();
             });

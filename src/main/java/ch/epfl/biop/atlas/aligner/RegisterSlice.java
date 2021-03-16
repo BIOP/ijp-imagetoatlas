@@ -2,6 +2,7 @@ package ch.epfl.biop.atlas.aligner;
 
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.sourcepreprocessors.SourcesProcessor;
+import ch.epfl.biop.atlas.plugin.RegistrationPluginHelper;
 import ch.epfl.biop.registration.Registration;
 
 import java.awt.*;
@@ -83,7 +84,7 @@ public class RegisterSlice extends CancelableAction {
                     g.setColor(new Color(255, 255, 0, 200));
                     break;
             }
-            if (registration.isManual()) {
+            if (RegistrationPluginHelper.isManual(registration)) {
                 g.fillRect((int) (px - 7), (int) (py - 7), 14, 14);
             } else {
                 g.fillOval((int) (px - 7), (int) (py - 7), 14, 14);

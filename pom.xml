@@ -107,7 +107,7 @@
 		<license.excludes>**/resources/**</license.excludes>
 		<main-class>ch.epfl.biop.ABBALaunch</main-class>
 
-		<bigdataviewer-biop-tools.version>0.2.13</bigdataviewer-biop-tools.version>
+		<bigdataviewer-biop-tools.version>0.2.14</bigdataviewer-biop-tools.version>
 		<bigdataviewer-bioformats.version>0.2.15</bigdataviewer-bioformats.version>
 		<bigdataviewer-playground.version>0.2.13</bigdataviewer-playground.version>
 		<bigdataviewer-selector.version>0.1.8</bigdataviewer-selector.version>
@@ -118,7 +118,7 @@
 		<imglib2-cache.version>1.0.0-beta-16</imglib2-cache.version>
 		<bigwarp_fiji.version>6.1.0</bigwarp_fiji.version>
 
-		<ijl-utilities-wrappers.version>0.3.17</ijl-utilities-wrappers.version>
+		<ijl-utilities-wrappers.version>0.3.18</ijl-utilities-wrappers.version>
 		<json.version>20180813</json.version>
 
 		<bigdataviewer-spimdata-extras.version>0.1.0</bigdataviewer-spimdata-extras.version>
@@ -126,7 +126,6 @@
 
 		<oshi-core.version>5.5.1</oshi-core.version>
 		<jna.version>5.6.0</jna.version>
-
 
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>deploy-to-scijava</releaseProfiles>
