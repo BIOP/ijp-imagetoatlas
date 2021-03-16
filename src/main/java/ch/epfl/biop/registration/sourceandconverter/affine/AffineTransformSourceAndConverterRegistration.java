@@ -1,5 +1,6 @@
 package ch.epfl.biop.registration.sourceandconverter.affine;
 
+import bdv.util.RealTransformHelper;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import ch.epfl.biop.registration.sourceandconverter.SourceAndConverterRegistration;
@@ -17,38 +18,16 @@ abstract public class AffineTransformSourceAndConverterRegistration extends Sour
     public int timePoint = 0;
 
     @Override
-    public void resetRegistration() {
-        at3d = new AffineTransform3D();
-    }
-
-    public AffineTransform3D getAffineTransform() {
-        return at3d;
-    }
-
-    public void setAffineTransform(AffineTransform3D at3d) {
-        this.at3d = at3d;
-    }
-
-    @Override
-    public boolean edit() {
-        throw new UnsupportedOperationException();
-    }
-
-
-    @Override
     public SourceAndConverter[] getTransformedImageMovingToFixed(SourceAndConverter[] img) {
         SourceAndConverter[] out = new SourceAndConverter[img.length];
-
         for (int idx = 0;idx<img.length;idx++) {
             out[idx] = SourceTransformHelper.append(at3d, new SourceAndConverterAndTimeRange(img[idx],timePoint));
         }
-
         return out;
     }
 
     @Override
     public RealPointList getTransformedPtsFixedToMoving(RealPointList pts) {
-
         ArrayList<RealPoint> cvtList = new ArrayList<>();
         for (RealPoint p : pts.ptList) {
             RealPoint pt3d = new RealPoint(3);
@@ -61,7 +40,20 @@ abstract public class AffineTransformSourceAndConverterRegistration extends Sour
     }
 
     @Override
-    public boolean isEditable() {
-        return false; // TODO : make it editable
+    public String getTransform() {
+        return RealTransformHelper.getRealTransformAdapter(context).toJson(at3d);
     }
+
+    @Override
+    public void setTransform(String serialized_transform) {
+        at3d = RealTransformHelper.getRealTransformAdapter(context).fromJson(serialized_transform, AffineTransform3D.class);
+        isDone = true;
+    }
+
+    @Override
+    public boolean edit() {
+        // TODO : find a way to edit an affine transform -> that shouldn't be so complicated
+        throw new UnsupportedOperationException();
+    }
+
 }

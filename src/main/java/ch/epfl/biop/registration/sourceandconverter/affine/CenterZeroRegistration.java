@@ -1,35 +1,18 @@
 package ch.epfl.biop.registration.sourceandconverter.affine;
 
 import bdv.viewer.SourceAndConverter;
-import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterAndTimeRange;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
 
-import java.util.ArrayList;
+/**
+ * Fake registration : simply centers the image in order to put its center
+ * at the origin of the global coordinate system.
+ */
 
-public class CenterZeroRegistration extends AffineTransformSourceAndConverterRegistration {//implements Registration<SourceAndConverter[]> {
-
-    //SourceAndConverter[] fimg;
-    //SourceAndConverter[] mimg;
-
-    AffineTransform3D at3d;
-
-    /*int timePoint = 0;
-
-    @Override
-    public void setFixedImage(SourceAndConverter[] fimg) {
-        this.fimg = fimg;
-    }
-
-    @Override
-    public void setMovingImage(SourceAndConverter[] mimg) {
-        this.mimg = mimg;
-    }*/
-
-
+public class CenterZeroRegistration extends AffineTransformSourceAndConverterRegistration {
 
     @Override
     public boolean register() {
@@ -50,65 +33,23 @@ public class CenterZeroRegistration extends AffineTransformSourceAndConverterReg
         return true;
     }
 
-    @Override
-    public boolean edit() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean isEditable() {
-        return false;
-    }
-
+    /**
+     * TODO : find a way to remove this function and use the one of the super class
+     * @param img image
+     * @return transformed images (new source created)
+     */
     @Override
     public SourceAndConverter[] getTransformedImageMovingToFixed(SourceAndConverter[] img) {
-
         SourceAndConverter[] out = new SourceAndConverter[img.length];
-
         for (int idx = 0;idx<img.length;idx++) {
             out[idx] = SourceTransformHelper.createNewTransformedSourceAndConverter(at3d, new SourceAndConverterAndTimeRange(img[idx], timePoint));
         }
-
         return out;
     }
 
     @Override
-    public RealPointList getTransformedPtsFixedToMoving(RealPointList pts) {
-        ArrayList<RealPoint> cvtList = new ArrayList<>();
-        for (RealPoint p : pts.ptList) {
-            RealPoint pt3d = new RealPoint(3);
-            pt3d.setPosition(new double[]{p.getDoublePosition(0), p.getDoublePosition(1),0});
-            at3d.inverse().apply(pt3d, pt3d);
-            RealPoint cpt = new RealPoint(pt3d.getDoublePosition(0), pt3d.getDoublePosition(1));
-            cvtList.add(cpt);
-        }
-        return new RealPointList(cvtList);
-    }
-
-    @Override
-    public boolean parallelSupported() {
-        return true;
-    }
-
-    @Override
-    public boolean isManual() {
-        return false;
-    }
-
-    private boolean isDone = false;
-
-    @Override
-    public boolean isRegistrationDone() {
-        return isDone;
-    }
-
-    @Override
-    public void resetRegistration() {
-        isDone = false;
-    }
-
-    @Override
     public void abort() {
-
+        // Cannot be aborted - is very fast anyway
     }
+
 }

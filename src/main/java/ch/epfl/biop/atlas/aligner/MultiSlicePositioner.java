@@ -8,15 +8,11 @@ import ch.epfl.biop.atlas.BiopAtlas;
 import ch.epfl.biop.atlas.aligner.commands.*;
 import ch.epfl.biop.atlas.aligner.serializers.*;
 import ch.epfl.biop.atlas.aligner.sourcepreprocessors.*;
+import ch.epfl.biop.atlas.plugin.IABBARegistrationPlugin;
+import ch.epfl.biop.atlas.plugin.RegistrationPluginHelper;
 import ch.epfl.biop.bdv.BdvScijavaHelper;
-import ch.epfl.biop.bdv.command.register.Elastix2DAffineRegisterCommand;
-import ch.epfl.biop.bdv.command.register.Elastix2DAffineRegisterServerCommand;
-import ch.epfl.biop.bdv.command.register.Elastix2DSplineRegisterServerCommand;
 import ch.epfl.biop.bdv.select.SourceSelectorBehaviour;
 import ch.epfl.biop.registration.Registration;
-import ch.epfl.biop.registration.sourceandconverter.affine.Elastix2DAffineRegistration;
-import ch.epfl.biop.registration.sourceandconverter.spline.Elastix2DSplineRegistration;
-import ch.epfl.biop.registration.sourceandconverter.spline.SacBigWarp2DRegistration;
 import ch.epfl.biop.scijava.ui.swing.ScijavaSwingUI;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -28,7 +24,6 @@ import mpicbg.spim.data.sequence.Tile;
 import net.imglib2.*;
 import net.imglib2.position.FunctionRealRandomAccessible;
 import net.imglib2.realtransform.AffineTransform3D;
-import net.imglib2.realtransform.RealTransform;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
@@ -36,7 +31,10 @@ import org.apache.commons.io.FilenameUtils;
 import org.scijava.Context;
 import org.scijava.InstantiableException;
 import org.scijava.cache.CacheService;
+import org.scijava.command.Command;
+import org.scijava.convert.ConvertService;
 import org.scijava.object.ObjectService;
+import org.scijava.plugin.PluginService;
 import org.scijava.ui.behaviour.*;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
@@ -47,20 +45,20 @@ import sc.fiji.bdvpg.scijava.services.ui.swingdnd.BdvTransferHandler;
 import sc.fiji.bdvpg.services.SourceAndConverterServiceLoader;
 import sc.fiji.bdvpg.services.SourceAndConverterServiceSaver;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
-import sc.fiji.bdvpg.services.serializers.AffineTransform3DAdapter;
 import sc.fiji.bdvpg.services.serializers.RuntimeTypeAdapterFactory;
-import sc.fiji.bdvpg.services.serializers.plugins.BdvPlaygroundObjectAdapterService;
-import sc.fiji.bdvpg.services.serializers.plugins.IClassRuntimeAdapter;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.Point;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
-import java.io.*;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.DecimalFormat;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -77,7 +75,7 @@ import static sc.fiji.bdvpg.scijava.services.SourceAndConverterService.SPIM_DATA
  *
  * - a positioning mode
  *      This is mosly useful at the beginning of the registration
- *      Slices can be moved along the axis / streched and shrinked
+ *      Slices can be moved along the axis / stretched and shrunk
  *      Only certain sections of the atlas are shown to improve global overview, based on the user need
  *
  * - a review mode
@@ -96,7 +94,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     static public final Object manualActionLock = new Object();
 
     // BdvHandle displaying the multislice positioner - publicly accessible through getBdvh();
-    private BdvHandle bdvh;
+    private final BdvHandle bdvh;
 
     // Behaviour (and linked overlay) that handles user rectangular selection of sources
     private SourceSelectorBehaviour ssb;
@@ -126,8 +124,8 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     // scijava context
     Context scijavaCtx;
 
-    // TODO : make protected
-    public MultiSliceObserver mso;
+    // Multislice observer observes and display events happening to slices
+    protected MultiSliceObserver mso;
 
     // Multipositioner display mode
     int displayMode = POSITIONING_MODE_INT;
@@ -137,17 +135,17 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     final static String POSITIONING_BEHAVIOURS_KEY = POSITIONING_MODE + "-behaviours";
     Behaviours positioning_behaviours = new Behaviours(new InputTriggerConfig(), POSITIONING_MODE);
 
-    public final static int REGISTRATION_MODE_INT = 1;
-    final static String REGISTRATION_MODE = "Registration";
-    final static String REGISTRATION_BEHAVIOURS_KEY = REGISTRATION_MODE + "-behaviours";
-    Behaviours registration_behaviours = new Behaviours(new InputTriggerConfig(), REGISTRATION_MODE);
+    public final static int REVIEW_MODE_INT = 1;
+    final static String REVIEW_MODE = "review-mode";
+    final static String REVIEW_BEHAVIOURS_KEY = REVIEW_MODE + "-behaviours";
+    Behaviours review_behaviours = new Behaviours(new InputTriggerConfig(), REVIEW_MODE);
 
     // Slices display mode
     int sliceDisplayMode = ALL_SLICES_DISPLAY_MODE;
 
-    final public static int NO_SLICE_DISPLAY_MODE = 2; // For faster draw when restoring
-    final public static int CURRENT_SLICE_DISPLAY_MODE = 1;
-    final public static int ALL_SLICES_DISPLAY_MODE = 0;
+    final public static int NO_SLICE_DISPLAY_MODE = 2; // For faster draw when restoring a state
+    final public static int CURRENT_SLICE_DISPLAY_MODE = 1; // Only the current slice is displayed
+    final public static int ALL_SLICES_DISPLAY_MODE = 0; // All slices are displayed
 
     final static String COMMON_BEHAVIOURS_KEY = "multipositioner-behaviours";
     Behaviours common_behaviours = new Behaviours(new InputTriggerConfig(), "multipositioner");
@@ -157,33 +155,52 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     // Index of the current slice
     int iCurrentSlice = 0;
 
-
+    // Maximum right position of the selected slices
     Integer[] rightPosition = new Integer[]{0, 0, 0};
 
+    // Maximum left position of the selected slices
     Integer[] leftPosition = new Integer[]{0, 0, 0};
 
+    // Resliced atlas
     ReslicedAtlas reslicedAtlas;
 
+    // Original biop atlas
     BiopAtlas biopAtlas;
 
+    // Selection layer : responsible to listen to mouse drawing events that select sources
     SelectionLayer selectionLayer;
 
+    // Temporary saves the previous slicing steps - I don't remember why it was useful, but it is
     int previouszStep;
 
+    // Rectangle user defined regions that crops the region of interest for registrations
     double roiPX, roiPY, roiSX, roiSY;
 
     // Loggers
+
+    /**
+     * Non blocking log message for users
+     */
     public Consumer<String> log = (message) -> {
         System.out.println("Multipositioner : "+message);
         getBdvh().getViewerPanel().showMessage(message);
     };
 
+    /**
+     * Non blocking error message for users
+     */
     public BiConsumer<String, String> nonBlockingErrorMessageForUser = (title, message) ->
             System.err.println(title+":"+message);
 
+    /**
+     * Blocking error message for users
+     */
     public BiConsumer<String, String> errorMessageForUser = (title, message) ->
             JOptionPane.showMessageDialog(new JFrame(), message, title, JOptionPane.ERROR_MESSAGE);
 
+    /**
+     * Blocking warning message for users
+     */
     public BiConsumer<String, String> warningMessageForUser = (title, message) ->
             JOptionPane.showMessageDialog(new JFrame(), message, title, JOptionPane.WARNING_MESSAGE);
 
@@ -194,10 +211,14 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
     public Consumer<String> debuglog = (message) -> {};//System.err.println("Multipositioner Debug : "+message);
 
+    /**
+     * @return a copy of the array of current slices in this ABBA instance
+     */
     public List<SliceSources> getSlices() {
         return new ArrayList<>(slices);
     }
 
+    // Used for CreateSlice action
     protected List<SliceSources> getPrivateSlices() {
         return slices;
     }
@@ -208,6 +229,13 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     // Flag for overlaying the info of the slice under which the mouse is
     boolean showSliceInfo = true;
 
+    /**
+     * Starts ABBA in a bigdataviewer window
+     * @param bdvh a BdvHandle
+     * @param biopAtlas an atlas
+     * @param reslicedAtlas a resliced atlas
+     * @param ctx a scijava context
+     */
     public MultiSlicePositioner(BdvHandle bdvh, BiopAtlas biopAtlas, ReslicedAtlas reslicedAtlas, Context ctx) {
         this.reslicedAtlas = reslicedAtlas;
         this.biopAtlas = biopAtlas;
@@ -338,8 +366,12 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
         BdvScijavaHelper.clearBdvHandleMenuBar(bdvh);
 
+        // Skips 4 levels of hierarchy in scijava command path (Plugins>BIOP>Atlas>Multi Image To Atlas>)
+        // And uses the rest to make the hierarchy of the top menu in the bdv window
+
         int hierarchyLevelsSkipped = 4;
 
+        // Load and Save state
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, MSPStateLoadCommand.class, hierarchyLevelsSkipped,"mp", this );
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, MSPStateSaveCommand.class, hierarchyLevelsSkipped,"mp", this);
 
@@ -348,10 +380,10 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Select all slices [Ctrl+A]",0,() -> slices.forEach(SliceSources::select));
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Deselect all slices [Ctrl+Shift+A]",0,() -> slices.forEach(SliceSources::deSelect));
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Delete selected slices",0,() ->
-            getSortedSlices()
-                    .stream()
-                    .filter(SliceSources::isSelected)
-                    .forEach(slice -> new DeleteSlice(this, slice).runRequest())
+                getSortedSlices()
+                        .stream()
+                        .filter(SliceSources::isSelected)
+                        .forEach(slice -> new DeleteSlice(this, slice).runRequest())
         );
 
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Distribute spacing [A]",0,() -> {
@@ -370,13 +402,22 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Navigate>Previous Slice [Left]",0, this::navigatePreviousSlice);
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Navigate>Center On Current Slice [C]",0, this::navigateCurrentSlice);
 
+        // Slice importer
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ImportQuPathProjectCommand.class, hierarchyLevelsSkipped,"mp", this );
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ImportImagePlusCommand.class, hierarchyLevelsSkipped,"mp", this );
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, RegistrationElastixAffineCommand.class, hierarchyLevelsSkipped,"mp", this);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, RegistrationElastixSplineCommand.class, hierarchyLevelsSkipped,"mp", this);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, RegistrationElastixAffineRemoteCommand.class, hierarchyLevelsSkipped,"mp", this);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, RegistrationElastixSplineRemoteCommand.class, hierarchyLevelsSkipped,"mp", this);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, RegistrationBigWarpCommand.class, hierarchyLevelsSkipped,"mp", this);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ImportImageCommand.class, hierarchyLevelsSkipped,"mp", this );
+
+        // Adds registration plugin commands : discovered via scijava plugin autodiscovery mechanism
+
+        PluginService pluginService = ctx.getService(PluginService.class);
+
+        pluginService.getPluginsOfType(IABBARegistrationPlugin.class).forEach(registrationPluginClass -> {
+            IABBARegistrationPlugin plugin = pluginService.createInstance(registrationPluginClass);
+            for (Class<? extends Command> commandUI: RegistrationPluginHelper.userInterfaces(plugin)) {
+                BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, commandUI, hierarchyLevelsSkipped,"mp", this);
+            }
+        });
+
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, EditLastRegistrationCommand.class, hierarchyLevelsSkipped,"mp", this);
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Align>Remove Last Registration",0, this::removeLastRegistration );
 
@@ -389,10 +430,10 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, EditSliceThicknessCommand.class, hierarchyLevelsSkipped,"mp", this);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, SliceThicknessMatchNeighborsCommand.class, hierarchyLevelsSkipped,"mp", this);
 
+        // Help commands
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ABBAForumHelpCommand.class, hierarchyLevelsSkipped);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ABBADocumentationCommand.class, hierarchyLevelsSkipped);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ABBAUserFeedbackCommand.class, hierarchyLevelsSkipped);
-
 
         AtlasDisplayPanel adp = new AtlasDisplayPanel(this);
         // Hide useless channels on startup -
@@ -442,7 +483,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                 val.set(0);
             }
 
-            if (displayMode == REGISTRATION_MODE_INT) {
+            if (displayMode == REVIEW_MODE_INT) {
                 if (loc.getFloatPosition(0) < roiPX) {val.set(255); return;}
                 if (loc.getFloatPosition(0) > roiPX+roiSX) {val.set(255); return;}
                 if (loc.getFloatPosition(1)<roiPY) {val.set(255); return;}
@@ -458,7 +499,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                 new FinalInterval(new long[]{0, 0, 0}, new long[]{10, 10, 10}),"ROI", BdvOptions.options().addTo(bdvh));
 
         bss.setDisplayRangeBounds(0,1600);
-        displayMode = REGISTRATION_MODE_INT; // For correct toggling
+        displayMode = REVIEW_MODE_INT; // For correct toggling
         setPositioningMode();
 
         addRightClickActions();
@@ -476,8 +517,9 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         bdvh.getSplitPanel().setCollapsed(false);
         bdvh.getSplitPanel().setDividerLocation(0.7);
 
+        // Close hook to try to release as many resources as possible
         BdvHandleHelper.setBdvHandleCloseOperation(bdvh, ctx.getService(CacheService.class),
-            SourceAndConverterServices.getSourceAndConverterDisplayService(), false,
+                SourceAndConverterServices.getSourceAndConverterDisplayService(), false,
                 () -> {
                     if (mso!=null) this.mso.clear();
                     if (userActions!=null) this.userActions.clear();
@@ -490,13 +532,13 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                     this.selectionLayer = null;
                     this.common_behaviours = null;
                     this.positioning_behaviours = null;
-                    this.registration_behaviours = null;
+                    this.review_behaviours = null;
                     this.ssb = null;
                     this.reslicedAtlas = null;
                     this.info = null;
                     rm.stop();
                 }
-            );
+        );
     }
 
     public void showAtlasPosition() {
@@ -642,7 +684,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
             case POSITIONING_MODE_INT:
                 setRegistrationMode();
                 break;
-            case REGISTRATION_MODE_INT:
+            case REVIEW_MODE_INT:
                 setPositioningMode();
                 break;
         }
@@ -660,8 +702,8 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
             slices.forEach(slice -> slice.getGUIState().enableGraphicalHandles());
             getSortedSlices().forEach(slice -> slice.getGUIState().displayModeChanged());
 
-            bdvh.getTriggerbindings().removeInputTriggerMap(REGISTRATION_BEHAVIOURS_KEY);
-            bdvh.getTriggerbindings().removeBehaviourMap(REGISTRATION_BEHAVIOURS_KEY);
+            bdvh.getTriggerbindings().removeInputTriggerMap(REVIEW_BEHAVIOURS_KEY);
+            bdvh.getTriggerbindings().removeBehaviourMap(REVIEW_BEHAVIOURS_KEY);
             positioning_behaviours.install(bdvh.getTriggerbindings(), POSITIONING_BEHAVIOURS_KEY);
             navigateCurrentSlice();
             refreshBlockMap();
@@ -682,21 +724,21 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
      * Set the registration mode
      */
     public void setRegistrationMode() {
-        if (!(displayMode == REGISTRATION_MODE_INT)) {
-            int oldMode = REGISTRATION_MODE_INT;
+        if (!(displayMode == REVIEW_MODE_INT)) {
+            int oldMode = REVIEW_MODE_INT;
             displayMode = POSITIONING_MODE_INT;
             reslicedAtlas.lock();
-            displayMode = REGISTRATION_MODE_INT;
+            displayMode = REVIEW_MODE_INT;
 
             ghs.forEach(GraphicalHandle::disable);
 
             //synchronized (slices) {
-                getSortedSlices().forEach(slice -> slice.getGUIState().displayModeChanged());
+            getSortedSlices().forEach(slice -> slice.getGUIState().displayModeChanged());
             //}
 
             bdvh.getTriggerbindings().removeInputTriggerMap(POSITIONING_BEHAVIOURS_KEY);
             bdvh.getTriggerbindings().removeBehaviourMap(POSITIONING_BEHAVIOURS_KEY);
-            registration_behaviours.install(bdvh.getTriggerbindings(), REGISTRATION_BEHAVIOURS_KEY);
+            review_behaviours.install(bdvh.getTriggerbindings(), REVIEW_BEHAVIOURS_KEY);
             navigateCurrentSlice();
             refreshBlockMap();
             modeListeners.forEach(ml -> ml.modeChanged(this, oldMode, displayMode));
@@ -709,25 +751,25 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
      * Center bdv on next slice (iCurrentSlice + 1)
      */
     public void navigateNextSlice() {
-            List<SliceSources> sortedSlices = getSortedSlices();
-            int previousSliceIndex = iCurrentSlice;
-            iCurrentSlice++;
-            if (iCurrentSlice >= sortedSlices.size()) {
-                iCurrentSlice = 0;
-            }
-            if (sortedSlices.size() > 0) {
+        List<SliceSources> sortedSlices = getSortedSlices();
+        int previousSliceIndex = iCurrentSlice;
+        iCurrentSlice++;
+        if (iCurrentSlice >= sortedSlices.size()) {
+            iCurrentSlice = 0;
+        }
+        if (sortedSlices.size() > 0) {
 
-                SliceSources previousSlice = null;
-                if ((previousSliceIndex>=0)&&(previousSliceIndex<sortedSlices.size())) {
-                    previousSlice = sortedSlices.get(previousSliceIndex);
-                }
-                centerBdvViewOn(sortedSlices.get(iCurrentSlice), true, previousSlice);
-                //centerBdvViewOn(sortedSlices.get(iCurrentSlice), true);
-                if ((previousSliceIndex>=0)&&(previousSliceIndex<sortedSlices.size())) { // Could have been deleted
-                    sortedSlices.get(previousSliceIndex).getGUIState().isNotCurrent();
-                }
-                sortedSlices.get(iCurrentSlice).getGUIState().isCurrent();
+            SliceSources previousSlice = null;
+            if ((previousSliceIndex>=0)&&(previousSliceIndex<sortedSlices.size())) {
+                previousSlice = sortedSlices.get(previousSliceIndex);
             }
+            centerBdvViewOn(sortedSlices.get(iCurrentSlice), true, previousSlice);
+            //centerBdvViewOn(sortedSlices.get(iCurrentSlice), true);
+            if ((previousSliceIndex>=0)&&(previousSliceIndex<sortedSlices.size())) { // Could have been deleted
+                sortedSlices.get(previousSliceIndex).getGUIState().isNotCurrent();
+            }
+            sortedSlices.get(iCurrentSlice).getGUIState().isCurrent();
+        }
     }
 
     /**
@@ -770,7 +812,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     public SliceSources getCurrentSlice() {
         List<SliceSources> sortedSlices = getSortedSlices();
 
-            if (sortedSlices.size()>0) {
+        if (sortedSlices.size()>0) {
             if (iCurrentSlice >= sortedSlices.size()) {
                 iCurrentSlice = 0;
             }
@@ -859,21 +901,21 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
         if ((maintainoffset)&&(previous_slice!=null)) {
 
-                RealPoint oldCenter = new RealPoint(3);
+            RealPoint oldCenter = new RealPoint(3);
 
-                if (displayMode == MultiSlicePositioner.POSITIONING_MODE_INT) {
-                    oldCenter = previous_slice.getGUIState().getCenterPositionPMode();
-                } else if (displayMode == MultiSlicePositioner.REGISTRATION_MODE_INT) {
-                    oldCenter = previous_slice.getGUIState().getCenterPositionRMode();
-                }
+            if (displayMode == MultiSlicePositioner.POSITIONING_MODE_INT) {
+                oldCenter = previous_slice.getGUIState().getCenterPositionPMode();
+            } else if (displayMode == MultiSlicePositioner.REVIEW_MODE_INT) {
+                oldCenter = previous_slice.getGUIState().getCenterPositionRMode();
+            }
 
-                RealPoint centerScreen = getCurrentBdvCenter();
-                offset.setPosition(-oldCenter.getDoublePosition(0) + centerScreen.getDoublePosition(0), 0);
-                offset.setPosition(-oldCenter.getDoublePosition(1) + centerScreen.getDoublePosition(1), 1);
-                //offset.setPosition(-oldCenter.getDoublePosition(2) + centerScreen.getDoublePosition(2), 2); // hmm no reason to maintain offset in z
+            RealPoint centerScreen = getCurrentBdvCenter();
+            offset.setPosition(-oldCenter.getDoublePosition(0) + centerScreen.getDoublePosition(0), 0);
+            offset.setPosition(-oldCenter.getDoublePosition(1) + centerScreen.getDoublePosition(1), 1);
+            //offset.setPosition(-oldCenter.getDoublePosition(2) + centerScreen.getDoublePosition(2), 2); // hmm no reason to maintain offset in z
 
-                if (Math.abs(offset.getDoublePosition(0))>sX/2.0) {maintainoffset = false;}
-                if (Math.abs(offset.getDoublePosition(1))>sY/2.0) {maintainoffset = false;}
+            if (Math.abs(offset.getDoublePosition(0))>sX/2.0) {maintainoffset = false;}
+            if (Math.abs(offset.getDoublePosition(1))>sY/2.0) {maintainoffset = false;}
 
         } else {
             maintainoffset = false;
@@ -883,7 +925,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
         if (displayMode == MultiSlicePositioner.POSITIONING_MODE_INT) {
             centerSlice = current_slice.getGUIState().getCenterPositionPMode();
-        } else if (displayMode == MultiSlicePositioner.REGISTRATION_MODE_INT) {
+        } else if (displayMode == MultiSlicePositioner.REVIEW_MODE_INT) {
             centerSlice = current_slice.getGUIState().getCenterPositionRMode();
         }
 
@@ -1084,7 +1126,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
             coords[1] = ((FloatType) getSourceValueAt(ySource, globalMouseCoordinates)).get();
             coords[2] = ((FloatType) getSourceValueAt(zSource, globalMouseCoordinates)).get();
         } else {
-            assert displayMode == REGISTRATION_MODE_INT;
+            assert displayMode == REVIEW_MODE_INT;
             SourceAndConverter label = reslicedAtlas.nonExtendedSlicedSources[reslicedAtlas.nonExtendedSlicedSources.length-1]; // By convention the label image is the last one
             labelValue = ((UnsignedShortType) getSourceValueAt(label, globalMouseCoordinates)).get();
             SourceAndConverter lrSource = reslicedAtlas.nonExtendedSlicedSources[reslicedAtlas.nonExtendedSlicedSources.length-2]; // By convention the left right indicator image is the next to last one
@@ -1136,9 +1178,10 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
             SliceSources slice = getSortedSlices().get(iCurrentSlice);
             listeners.forEach(listener -> listener.isCurrentSlice(slice));
             g.setColor(new Color(255, 255, 255, 128));
+            g.setStroke(new BasicStroke(5));
             Integer[] coords = slice.getGUIState().getBdvHandleCoords();
             RealPoint sliceCenter = new RealPoint(coords[0], coords[1], 0);
-            g.drawOval((int) sliceCenter.getDoublePosition(0) - 15, (int) sliceCenter.getDoublePosition(1) - 15, 30, 30);
+            g.drawOval((int) sliceCenter.getDoublePosition(0) - 15, (int) sliceCenter.getDoublePosition(1) - 15, 29, 29);
             Integer[] c = {255,255,255,128};
             g.setColor(new Color(c[0], c[1], c[2], c[3]));
             g.setFont(new Font("TimesRoman", Font.PLAIN, 16));
@@ -1234,7 +1277,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
     public void setDisplayMode(int mode) {
         switch (mode) {
-            case REGISTRATION_MODE_INT :
+            case REVIEW_MODE_INT:
                 setRegistrationMode();
                 break;
             case POSITIONING_MODE_INT :
@@ -1337,6 +1380,10 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
     public AffineTransform3D getAffineTransformFormAlignerToAtlas() {
         return reslicedAtlas.getSlicingTransformToAtlas();
+    }
+
+    public List<CancelableAction> getActionsFromSlice(SliceSources sliceSource) {
+        return mso.getActionsFromSlice(sliceSource);
     }
 
     /**
@@ -1467,7 +1514,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
     public void exportSelectedSlicesRegionsToFile(String namingChoice, File dirOutput, boolean erasePreviousFile) {
         List<SliceSources> sortedSelected = getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
-         if (sortedSelected.size()==0) {
+        if (sortedSelected.size()==0) {
             errorMessageForUser.accept("No slice selected", "You did not select any slice.");
         } else {
 
@@ -1669,208 +1716,97 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         }
     }
 
-    public void registerBigWarp(int iChannelFixed, int iChannelMoving) {
-        registerBigWarp(getChannel(iChannelFixed), getChannel(iChannelMoving));
+    Map<String,String> convertToString(Map<String, Object> params) {
+        Map<String,String> convertedParams = new HashMap<>();
+
+        ConvertService cs = scijavaCtx.getService(ConvertService.class);
+
+        params.keySet().forEach(k -> convertedParams.put(k, cs.convert(params.get(k), String.class)));
+
+        return convertedParams;
     }
 
-    public void registerBigWarp(SourcesProcessor preprocessFixed,
-                                SourcesProcessor preprocessMoving) {
+    public void register(Command command,
+                         SourcesProcessor preprocessFixed,
+                         SourcesProcessor preprocessMoving) {
+        register(command,
+                preprocessFixed,
+                preprocessMoving,
+                new HashMap<>()
+        );
+    }
+
+    /**
+     * Main function which triggers registration of the selected slices
+     * @param command the ui command
+     * @param preprocessFixed how fixed sources need to be preprocessed before being registered
+     * @param preprocessMoving how moving sources need to be preprocessed before being registered
+     * @param parameters parameters used for the registration - all objects will be converted
+     *                   to String using the scijava {@link ConvertService}. They need to be strings
+     *                   to be serialized
+     */
+    public void register(Command command,
+                         SourcesProcessor preprocessFixed,
+                         SourcesProcessor preprocessMoving,
+                         Map<String,Object> parameters) {
+        register(RegistrationPluginHelper.registrationFromUI(scijavaCtx,command.getClass()),
+                preprocessFixed,
+                preprocessMoving,
+                parameters
+        );
+    }
+
+    /**
+     * Main function which triggers registration of the selected slices
+     * @param registrationClass the kind of registration which should be started
+     * @param preprocessFixed how fixed sources need to be preprocessed before being registered
+     * @param preprocessMoving how moving sources need to be preprocessed before being registered
+     * @param parameters parameters used for the registration - all objects will be converted
+     *                   to String using the scijava {@link ConvertService}. They need to be strings
+     *                   to be serialized
+     */
+    public void register(Class<? extends IABBARegistrationPlugin> registrationClass,
+                         SourcesProcessor preprocessFixed,
+                         SourcesProcessor preprocessMoving,
+                         Map<String,Object> parameters) {
         if (getSelectedSources().size()==0) {
             warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to register");
             log.accept("Registration ignored : no slice selected");
-        }
-        for (SliceSources slice : slices) {
-            if (slice.isSelected()) {
-                SacBigWarp2DRegistration registration = new SacBigWarp2DRegistration();
+        } else {
+            try {
 
-                AffineTransform3D at3D = new AffineTransform3D();
-                at3D.translate(-this.nPixX / 2.0, -this.nPixY / 2.0, 0);
-                at3D.scale(this.sizePixX, this.sizePixY, this.sizePixZ);
-                at3D.translate(0, 0, slice.getSlicingAxisPosition());
+                // Putting user defined ROIs
+                parameters.put("px", roiPX);
+                parameters.put("py", roiPY);
+                parameters.put("sx", roiSX);
+                parameters.put("sy", roiSY);
 
-                AffineTransform3D translateZ = new AffineTransform3D();
-                translateZ.translate(0, 0, -slice.getSlicingAxisPosition());
-                SourcesProcessor fixedProcess = SourcesProcessorHelper.compose(
-                        new SourcesAffineTransformer(translateZ),
-                        preprocessFixed
-                );
-                SourcesProcessor movingProcess = SourcesProcessorHelper.compose(
-                        new SourcesAffineTransformer(translateZ),
-                        preprocessMoving
-                );
+                PluginService ps = scijavaCtx.getService(PluginService.class);
+                for (SliceSources slice : slices) {
+                    if (slice.isSelected()) {
+                        IABBARegistrationPlugin registration = (IABBARegistrationPlugin) ps.getPlugin(registrationClass).createInstance();
+                        registration.setScijavaContext(scijavaCtx);
 
-                new RegisterSlice(this, slice, registration, fixedProcess, movingProcess).runRequest();
-            }
-        }
-    }
+                        registration.setSliceInfo(new SliceInfo(slice));
 
-    public void registerElastixAffine(int iChannelFixed, int iChannelMoving, boolean showIJ1Result) {
-        registerElastixAffine(getChannel(iChannelFixed), getChannel(iChannelMoving), showIJ1Result);
-    }
+                        // Sends parameters to the registration
+                        registration.setRegistrationParameters(convertToString(parameters));
 
-    public void registerElastixAffine(SourcesProcessor preprocessFixed,
-                                      SourcesProcessor preprocessMoving, boolean showIJ1Result) {
-        if (getSelectedSources().size()==0) {
-            warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to register");
-            log.accept("Registration ignored : no slice selected");
-        }
-        for (SliceSources slice : slices) {
-            if (slice.isSelected()) {
-                Elastix2DAffineRegistration elastixAffineReg = new Elastix2DAffineRegistration();
-                elastixAffineReg.setRegistrationCommand(Elastix2DAffineRegisterCommand.class);
-                elastixAffineReg.setScijavaContext(scijavaCtx);
-                Map<String, Object> params = new HashMap<>();
-                params.put("tpFixed", 0);
-                params.put("levelFixedSource", 2);
-                params.put("tpMoving", 0);
-                params.put("levelMovingSource", slice.getAdaptedMipMapLevel(0.04));
-                params.put("pxSizeInCurrentUnit", 0.04);
-                params.put("interpolate", false);
-                params.put("showImagePlusRegistrationResult", showIJ1Result);
-                params.put("px", roiPX);
-                params.put("py", roiPY);
-                params.put("pz", slice.getSlicingAxisPosition());
-                params.put("sx", roiSX);
-                params.put("sy", roiSY);
-                params.put("minPixSize", 4);
-                params.put("maxIterationNumberPerScale", 150);
-                elastixAffineReg.setScijavaParameters(params);
-                new RegisterSlice(this, slice, elastixAffineReg, preprocessFixed, preprocessMoving).runRequest();
-            }
-        }
-    }
+                        // Always set slice at zero position for registration
+                        parameters.put("pz", 0);
+                        AffineTransform3D at3d = new AffineTransform3D();
+                        at3d.translate(0,0,-slice.getSlicingAxisPosition());
+                        SourcesAffineTransformer z_zero = new SourcesAffineTransformer(at3d);
 
-    public void registerElastixSpline(int iChannelFixed, int iChannelMoving, int nbControlPointsX, boolean showIJ1Result) {
-        registerElastixSpline(getChannel(iChannelFixed), getChannel(iChannelMoving), nbControlPointsX,  showIJ1Result);
-    }
-
-    public void registerElastixSpline(SourcesProcessor preprocessFixed,
-                                      SourcesProcessor preprocessMoving, int nbControlPointsX, boolean showIJ1Result) {
-        if (getSelectedSources().size()==0) {
-            warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to register");
-            log.accept("Registration ignored : no slice selected");
-        }
-        for (SliceSources slice : slices) {
-            if (slice.isSelected()) {
-                Elastix2DSplineRegistration elastixSplineReg = new Elastix2DSplineRegistration();
-                elastixSplineReg.setScijavaContext(scijavaCtx);
-                elastixSplineReg.setZPositioner(slice::getZAxisPosition);
-                Map<String, Object> params = new HashMap<>();
-                params.put("tpFixed", 0);
-                params.put("levelFixedSource", 1);
-                params.put("tpMoving", 0);
-                params.put("levelMovingSource", slice.getAdaptedMipMapLevel(0.02));
-                params.put("pxSizeInCurrentUnit", 0.02);
-                params.put("interpolate", true);
-                params.put("showImagePlusRegistrationResult", showIJ1Result);
-                params.put("px", roiPX);
-                params.put("py", roiPY);
-                params.put("pz", 0);
-                params.put("sx", roiSX);
-                params.put("sy", roiSY);
-                params.put("nbControlPointsX", nbControlPointsX);
-                elastixSplineReg.setScijavaParameters(params);
-
-                AffineTransform3D at3d = new AffineTransform3D();
-                at3d.translate(0,0,-slice.getSlicingAxisPosition());
-                SourcesAffineTransformer z_zero = new SourcesAffineTransformer(at3d);
-
-                new RegisterSlice(this, slice, elastixSplineReg, SourcesProcessorHelper.compose(z_zero, preprocessFixed), SourcesProcessorHelper.compose(z_zero, preprocessMoving)).runRequest();
-            }
-        }
-    }
-
-    public void registerElastixAffineRemote(String serverURL, int iChannelFixed, int iChannelMoving, boolean userConsent) {
-        registerElastixAffineRemote(serverURL, getChannel(iChannelFixed), getChannel(iChannelMoving), userConsent);
-    }
-
-    public void registerElastixAffineRemote(String serverURL, SourcesProcessor preprocessFixed,
-                                      SourcesProcessor preprocessMoving, boolean userConsent) {
-        if (getSelectedSources().size()==0) {
-            warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to register");
-            log.accept("Registration ignored : no slice selected");
-        }
-        for (SliceSources slice : slices) {
-            if (slice.isSelected()) {
-                Elastix2DAffineRegistration elastixAffineReg = new Elastix2DAffineRegistration();
-                elastixAffineReg.setRegistrationCommand(Elastix2DAffineRegisterServerCommand.class);
-                elastixAffineReg.setScijavaContext(scijavaCtx);
-                Map<String, Object> params = new HashMap<>();
-                params.put("tpFixed", 0);
-                params.put("levelFixedSource", 2);
-                params.put("tpMoving", 0);
-                params.put("levelMovingSource", slice.getAdaptedMipMapLevel(0.04));
-                params.put("pxSizeInCurrentUnit", 0.04);
-                params.put("interpolate", false);
-                params.put("showImagePlusRegistrationResult", false);
-                params.put("px", roiPX);
-                params.put("py", roiPY);
-                params.put("pz", slice.getSlicingAxisPosition());
-                params.put("sx", roiSX);
-                params.put("sy", roiSY);
-                params.put("minPixSize", 4);
-                params.put("maxIterationNumberPerScale", 150);
-                params.put("serverURL", serverURL);
-                if (!userConsent) {
-                    params.put("taskInfo", "");
-                } else {
-                    String taskInfo = new Gson().toJson(new TaskInfo(slice));
-                    System.out.println(taskInfo);
-                    params.put("taskInfo", taskInfo);
+                        new RegisterSlice(this, slice, registration, SourcesProcessorHelper.compose(z_zero, preprocessFixed), SourcesProcessorHelper.compose(z_zero, preprocessMoving)).runRequest();
+                    }
                 }
-                elastixAffineReg.setScijavaParameters(params);
-                new RegisterSlice(this, slice, elastixAffineReg, preprocessFixed, preprocessMoving).runRequest();
+            } catch (InstantiableException e) {
+                e.printStackTrace();
             }
         }
     }
 
-    public void registerElastixSplineRemote(String serverURL, int iChannelFixed, int iChannelMoving, int nbControlPointsX, boolean userConsent) {
-        registerElastixSplineRemote(serverURL, getChannel(iChannelFixed), getChannel(iChannelMoving), nbControlPointsX, userConsent);
-    }
-
-    public void registerElastixSplineRemote(String serverURL, SourcesProcessor preprocessFixed,
-                                      SourcesProcessor preprocessMoving, int nbControlPointsX, boolean userConsent) {
-        if (getSelectedSources().size()==0) {
-            warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to register");
-            log.accept("Registration ignored : no slice selected");
-        }
-        for (SliceSources slice : slices) {
-            if (slice.isSelected()) {
-                Elastix2DSplineRegistration elastixSplineReg = new Elastix2DSplineRegistration();
-                elastixSplineReg.setZPositioner(slice::getZAxisPosition);
-                elastixSplineReg.setScijavaContext(scijavaCtx);
-                elastixSplineReg.setRegistrationCommand(Elastix2DSplineRegisterServerCommand.class);
-                Map<String, Object> params = new HashMap<>();
-                params.put("tpFixed", 0);
-                params.put("levelFixedSource", 1);
-                params.put("tpMoving", 0);
-                params.put("levelMovingSource", slice.getAdaptedMipMapLevel(0.02));
-                params.put("pxSizeInCurrentUnit", 0.02);
-                params.put("interpolate", true);
-                params.put("showImagePlusRegistrationResult", false);
-                params.put("px", roiPX);
-                params.put("py", roiPY);
-                params.put("pz", 0);
-                params.put("sx", roiSX);
-                params.put("sy", roiSY);
-                params.put("nbControlPointsX", nbControlPointsX);
-                params.put("serverURL", serverURL);
-                if (!userConsent) {
-                    params.put("taskInfo", "");
-                } else {
-                    params.put("taskInfo", new Gson().toJson(new TaskInfo(slice)));
-                }
-
-                elastixSplineReg.setScijavaParameters(params);
-
-                AffineTransform3D at3d = new AffineTransform3D();
-                at3d.translate(0,0,-slice.getSlicingAxisPosition());
-                SourcesAffineTransformer z_zero = new SourcesAffineTransformer(at3d);
-
-                new RegisterSlice(this, slice, elastixSplineReg, SourcesProcessorHelper.compose(z_zero, preprocessFixed), SourcesProcessorHelper.compose(z_zero, preprocessMoving)).runRequest();
-            }
-        }
-    }
 
     // --------------------------------- ACTION CLASSES
 
@@ -2440,6 +2376,9 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
         RealTransformHelper.registerTransformAdapters(gsonbuilder, scijavaCtx);
 
+        gsonbuilder.registerTypeHierarchyAdapter(AlignerState.SliceSourcesState.class, new SliceSourcesStateDeserializer((slice) -> currentSerializedSlice = slice));
+
+
         // For actions serialization
         RuntimeTypeAdapterFactory factoryActions = RuntimeTypeAdapterFactory.of(CancelableAction.class);
 
@@ -2454,16 +2393,17 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
         // For registration registration
         RuntimeTypeAdapterFactory factoryRegistrations = RuntimeTypeAdapterFactory.of(Registration.class);
-
-        factoryRegistrations.registerSubtype(Elastix2DAffineRegistration.class);
-        factoryRegistrations.registerSubtype(Elastix2DSplineRegistration.class);
-        factoryRegistrations.registerSubtype(SacBigWarp2DRegistration.class);
-
         gsonbuilder.registerTypeAdapterFactory(factoryRegistrations);
-        gsonbuilder.registerTypeHierarchyAdapter(Elastix2DAffineRegistration.class, new Elastix2DAffineRegistrationAdapter());
-        gsonbuilder.registerTypeHierarchyAdapter(Elastix2DSplineRegistration.class, new Elastix2DSplineRegistrationAdapter());
-        gsonbuilder.registerTypeHierarchyAdapter(SacBigWarp2DRegistration.class, new SacBigWarp2DRegistrationAdapter());
-        gsonbuilder.registerTypeHierarchyAdapter(AlignerState.SliceSourcesState.class, new SliceSourcesStateDeserializer((slice) -> currentSerializedSlice = slice));
+
+        PluginService pluginService = scijavaCtx.getService(PluginService.class);
+
+        // Creates adapter for all registration plugins
+        RegistrationAdapter registrationAdapter = new RegistrationAdapter(scijavaCtx);
+        pluginService.getPluginsOfType(IABBARegistrationPlugin.class).forEach(registrationPluginClass -> {
+            IABBARegistrationPlugin plugin = pluginService.createInstance(registrationPluginClass);
+            factoryRegistrations.registerSubtype(plugin.getClass());
+            gsonbuilder.registerTypeHierarchyAdapter(plugin.getClass(), registrationAdapter);
+        });
 
         // For sources processor
 
@@ -2480,6 +2420,8 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         gsonbuilder.registerTypeHierarchyAdapter(SourcesAffineTransformer.class, new SourcesAffineTransformerAdapter());
         gsonbuilder.registerTypeHierarchyAdapter(SourcesResampler.class, new SourcesResamplerAdapter());
         gsonbuilder.registerTypeHierarchyAdapter(SourcesProcessComposer.class, new SourcesComposerAdapter());
+        gsonbuilder.registerTypeHierarchyAdapter(SourcesIdentity.class, new SourcesIdentityAdapter());
+
 
         return gsonbuilder.create();
     }
@@ -2576,7 +2518,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                 }
 
                 if (!warningMessageForUser.equals("")) {
-                   this.warningMessageForUser.accept("Warning", warningMessageForUser);
+                    this.warningMessageForUser.accept("Warning", warningMessageForUser);
                 }
 
                 setDisplayMode(state.displayMode);
@@ -2638,9 +2580,9 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     /**
      * Informations sent to the registration server (provided the user agrees)
      */
-    public class TaskInfo {
+    public class SliceInfo {
 
-        public TaskInfo(SliceSources slice) {
+        public SliceInfo(SliceSources slice) {
             sliceAxisPosition = slice.getSlicingAxisPosition();
             matrixAtlas = reslicedAtlas.getSlicingTransform().getRowPackedCopy();
             matrixAlignerToAtlas = MultiSlicePositioner.this.getAffineTransformFormAlignerToAtlas().getRowPackedCopy();

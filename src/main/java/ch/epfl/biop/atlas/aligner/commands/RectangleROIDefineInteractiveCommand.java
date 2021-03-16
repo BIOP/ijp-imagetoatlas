@@ -78,7 +78,7 @@ public class RectangleROIDefineInteractiveCommand extends InteractiveCommand {
                     py = miny;
                 }
 
-                if (mp.getDisplayMode() == MultiSlicePositioner.REGISTRATION_MODE_INT) {
+                if (mp.getDisplayMode() == MultiSlicePositioner.REVIEW_MODE_INT) {
                     px = minx;
                     py = miny;
                 }

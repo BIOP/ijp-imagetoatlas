@@ -6,8 +6,11 @@ import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.widget.TextWidget;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>Elastix Registration (Affine) on Server")
-public class RegistrationElastixAffineRemoteCommand extends RegistrationCommand {
+public class RegistrationElastixAffineRemoteCommand extends SingleChannelRegistrationCommand {
 
     @Parameter(label = "Registration Server URL")
     String serverURL = "https://snappy.epfl.ch";
@@ -26,7 +29,15 @@ public class RegistrationElastixAffineRemoteCommand extends RegistrationCommand 
     boolean userConsentForServerKeepingData = false;
 
     public void runValidated() {
-        mp.registerElastixAffineRemote(serverURL, getFixedFilter(), getMovingFilter(), userConsentForServerKeepingData);
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("serverURL", serverURL);
+        parameters.put("taskInfo", "");
+        parameters.put("userConsentForServerKeepingData", userConsentForServerKeepingData);
+
+        mp.register(this,
+                getFixedFilter(),
+                getMovingFilter(),
+                parameters);
     }
 
 }
