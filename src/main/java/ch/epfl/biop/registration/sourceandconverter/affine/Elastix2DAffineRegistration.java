@@ -16,7 +16,6 @@ import org.scijava.plugin.Plugin;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Future;
 
@@ -123,7 +122,7 @@ public class Elastix2DAffineRegistration extends AffineTransformSourceAndConvert
 
              CommandModule module = task.get();
 
-             if (module.getOutputs().keySet().contains("success")) {
+             if (module.getOutputs().containsKey("success")) {
                  success = (boolean) module.getOutput("success");
              }
              if (success) {

@@ -64,7 +64,6 @@ public class SacBigWarp2DRegistration extends RealTransformSourceAndConverterReg
             bdvhP.getViewerPanel().state().setViewerTransform(BdvHandleHelper.getViewerTransformWithNewCenter(bdvhP, new double[]{0,0,0}));
             bdvhQ.getViewerPanel().state().setViewerTransform(BdvHandleHelper.getViewerTransformWithNewCenter(bdvhQ, new double[]{0,0,0}));
 
-
             SourceAndConverterServices.getSourceAndConverterDisplayService().pairClosing(bdvhQ,bdvhP);
 
             bdvhP.getViewerPanel().requestRepaint();

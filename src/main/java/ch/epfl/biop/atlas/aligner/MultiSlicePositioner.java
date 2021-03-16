@@ -379,17 +379,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
             for (Class<? extends Command> commandUI: RegistrationPluginHelper.userInterfaces(plugin)) {
                 BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, commandUI, hierarchyLevelsSkipped,"mp", this);
             }
-            //RegistrationPluginHelper.userInterfaces(registrationPlugin.createInstance())
-            //System.out.println(registrationPlugin.getClassName());
         });
-
-        //BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, RegistrationElastixAffineCommand.class, hierarchyLevelsSkipped,"mp", this);
-        //BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, RegistrationElastixSplineCommand.class, hierarchyLevelsSkipped,"mp", this);
-        //BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, RegistrationElastixAffineRemoteCommand.class, hierarchyLevelsSkipped,"mp", this);
-        //BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, RegistrationElastixSplineRemoteCommand.class, hierarchyLevelsSkipped,"mp", this);
-        //BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, RegistrationBigWarpCommand.class, hierarchyLevelsSkipped,"mp", this);
-
-
 
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, EditLastRegistrationCommand.class, hierarchyLevelsSkipped,"mp", this);
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Align>Remove Last Registration",0, this::removeLastRegistration );

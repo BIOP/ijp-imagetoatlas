@@ -9,10 +9,8 @@ import ch.epfl.biop.atlas.plugin.IABBARegistrationPlugin;
 import ch.epfl.biop.atlas.plugin.RegistrationTypeProperties;
 import ch.epfl.biop.bdv.command.register.Elastix2DSplineRegisterCommand;
 import ch.epfl.biop.bdv.command.register.Elastix2DSplineRegisterServerCommand;
-import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import com.google.gson.Gson;
 import ij.gui.WaitForUserDialog;
-import net.imglib2.RealPoint;
 import net.imglib2.realtransform.RealTransform;
 import org.scijava.command.Command;
 import org.scijava.command.CommandModule;
@@ -22,11 +20,9 @@ import sc.fiji.bdvpg.bdv.BdvHandleHelper;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
 import sc.fiji.bdvpg.sourceandconverter.register.BigWarpLauncher;
-import sc.fiji.bdvpg.sourceandconverter.transform.SourceRealTransformer;
 
 import java.util.*;
 import java.util.concurrent.Future;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static bdv.util.RealTransformHelper.BigWarpFileFromRealTransform;
@@ -128,7 +124,7 @@ public class Elastix2DSplineRegistration extends RealTransformSourceAndConverter
 
             CommandModule module = task.get();
 
-            if (module.getOutputs().keySet().contains("success")) {
+            if (module.getOutputs().containsKey("success")) {
                 success = (boolean) module.getOutput("success");
             }
 
@@ -143,37 +139,6 @@ public class Elastix2DSplineRegistration extends RealTransformSourceAndConverter
             return false;
         }
     }
-
-    @Override
-    public SourceAndConverter[] getTransformedImageMovingToFixed(SourceAndConverter[] img) {
-        SourceAndConverter[] out = new SourceAndConverter[img.length];
-        SourceRealTransformer srt = new SourceRealTransformer(null, rt);
-
-        for (int idx = 0;idx<img.length;idx++) {
-            out[idx] = srt.apply(img[idx]);
-        }
-
-        return out;
-    }
-
-    @Override
-    public RealPointList getTransformedPtsFixedToMoving(RealPointList pts) {
-
-        ArrayList<RealPoint> cvtList = new ArrayList<>();
-
-        for (RealPoint p : pts.ptList) {
-            RealPoint pt3d = new RealPoint(3);
-            pt3d.setPosition(new double[]{p.getDoublePosition(0), p.getDoublePosition(1),0});
-            /*if (zPosition!=null) {
-                pt3d.setPosition(zPosition.get(), 2);
-            }*/
-            rt.apply(pt3d, pt3d);
-            RealPoint cpt = new RealPoint(pt3d.getDoublePosition(0), pt3d.getDoublePosition(1));
-            cvtList.add(cpt);
-        }
-        return new RealPointList(cvtList);
-    }
-
 
     Runnable waitForUser = () -> {
         WaitForUserDialog dialog = new WaitForUserDialog("Choose slice","Please perform carefully your registration then press ok.");

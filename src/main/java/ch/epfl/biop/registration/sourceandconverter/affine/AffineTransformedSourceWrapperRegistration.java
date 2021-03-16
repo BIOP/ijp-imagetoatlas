@@ -26,7 +26,7 @@ public class AffineTransformedSourceWrapperRegistration extends AffineTransformS
     /**
      * These function are kept in order to avoid serializing many times
      * unnecessary affinetransform
-     * @param at3d_in
+     * @param at3d_in affine transform
      */
     public void setAffineTransform(AffineTransform3D at3d_in) {
         this.at3d = at3d_in;
@@ -43,8 +43,8 @@ public class AffineTransformedSourceWrapperRegistration extends AffineTransformS
      * Overriding to actually mutate SourceAndConverter,
      * it's the only registration which does that, because
      * it's actually not really a registration
-     * @param img
-     * @return
+     * @param img image
+     * @return mutates the transform
      */
     @Override
     public SourceAndConverter[] getTransformedImageMovingToFixed(SourceAndConverter[] img) {
@@ -52,7 +52,7 @@ public class AffineTransformedSourceWrapperRegistration extends AffineTransformS
         SourceAndConverter[] out = new SourceAndConverter[img.length];
 
         for (int idx = 0;idx<img.length;idx++) {
-            if (alreadyTransformedSources.keySet().contains(img[idx])) {
+            if (alreadyTransformedSources.containsKey(img[idx])) {
                 out[idx] = alreadyTransformedSources.get(img[idx]);
                 SourceTransformHelper.set(at3d, new SourceAndConverterAndTimeRange(out[idx], timePoint));
             } else {
