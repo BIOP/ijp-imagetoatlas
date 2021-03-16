@@ -4,7 +4,7 @@ import org.scijava.command.Command;
 import org.scijava.plugin.Plugin;
 
 @Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>BigWarp Registration")
-public class RegistrationBigWarpCommand extends RegistrationCommand {
+public class RegistrationBigWarpCommand extends SingleChannelRegistrationCommand {
 
     public void runValidated() {
         mp.register(this, getFixedFilter(), getMovingFilter());

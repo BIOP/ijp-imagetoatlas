@@ -6,7 +6,7 @@ import ch.epfl.biop.atlas.aligner.sourcepreprocessors.SourcesProcessor;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 
-abstract public class RegistrationCommand implements Command {
+abstract public class SingleChannelRegistrationCommand implements Command {
 
     @Parameter
     MultiSlicePositioner mp;

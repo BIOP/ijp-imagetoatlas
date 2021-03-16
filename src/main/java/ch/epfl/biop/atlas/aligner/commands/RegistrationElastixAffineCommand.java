@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>Elastix Registration (Affine)")
-public class RegistrationElastixAffineCommand extends RegistrationCommand {
+public class RegistrationElastixAffineCommand extends SingleChannelRegistrationCommand {
 
     @Parameter(label = "Show registration results as ImagePlus")
     boolean showImagePlusRegistrationResult;

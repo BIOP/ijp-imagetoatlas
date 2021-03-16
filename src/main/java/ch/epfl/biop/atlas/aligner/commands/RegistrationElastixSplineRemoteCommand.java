@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>Elastix Registration (Spline) on Server")
-public class RegistrationElastixSplineRemoteCommand extends RegistrationCommand {
+public class RegistrationElastixSplineRemoteCommand extends SingleChannelRegistrationCommand {
 
     @Parameter(label = "Number of control points along X, minimum 2.")
     int nbControlPointsX = 10;

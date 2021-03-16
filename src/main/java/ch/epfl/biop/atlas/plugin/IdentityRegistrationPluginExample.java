@@ -5,6 +5,8 @@ import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import org.scijava.Context;
 import org.scijava.plugin.Plugin;
+import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
+import sc.fiji.bdvpg.sourceandconverter.importer.SourceAndConverterDuplicator;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,14 +21,18 @@ import java.util.function.Consumer;
  *
  * TODO : explain how to obtain a simple data image from a SourceAndConverter object
  *
- *
  */
 @Plugin(type = IABBARegistrationPlugin.class)
+@RegistrationTypeProperties(
+        isEditable = false,
+        isManual = false,
+        userInterface = {IdentityRegistrationCommand.class}
+)
 public class IdentityRegistrationPluginExample implements IABBARegistrationPlugin{
 
     public static Consumer<String> defaultLog = (string) -> System.out.println(IdentityRegistrationPluginExample.class.getSimpleName()+":"+string);
 
-    public Consumer<String> log = defaultLog;
+    public static Consumer<String> log = defaultLog;
 
     /**
      * The moving sources as well as the fixed sources should not be modified
@@ -55,7 +61,7 @@ public class IdentityRegistrationPluginExample implements IABBARegistrationPlugi
 
     @Override
     public void setRegistrationParameters(Map<String, String> parameters) {
-
+        log.accept("Registration parameters set : "+parameters);
     }
 
     @Override
@@ -86,9 +92,11 @@ public class IdentityRegistrationPluginExample implements IABBARegistrationPlugi
         log.accept("Registration has been reset");
     }
 
+    int timepoint;
     @Override
     public void setTimePoint(int timePoint) {
         // Timepoint of sources and converter used for registration - normally always 0
+        this.timepoint = timePoint;
     }
 
     @Override
@@ -97,7 +105,8 @@ public class IdentityRegistrationPluginExample implements IABBARegistrationPlugi
 
         // Let's take a break
         try {
-            Thread.sleep(3000);
+            // That's some heavy work
+            Thread.sleep(1000+(int)(Math.random()*2000));
         } catch (InterruptedException e) {
             e.printStackTrace();
             log.accept("The registration has been interrupted!");
@@ -106,6 +115,7 @@ public class IdentityRegistrationPluginExample implements IABBARegistrationPlugi
 
         if (Math.random()<0.1) {
             // Something went wrong in 10% of the case
+            log.accept("Error in registration!");
             return false;
         } else {
             return true;
@@ -114,17 +124,31 @@ public class IdentityRegistrationPluginExample implements IABBARegistrationPlugi
 
     @Override
     public boolean edit() {
+        // Not editable
         return false;
     }
 
     @Override
     public boolean isRegistrationDone() {
-        return false;
+        return isRegistrationDone;
     }
 
+    // The image should not be mutated but copied
+    // The length of the array should be identical between input and output
     @Override
     public SourceAndConverter<?>[] getTransformedImageMovingToFixed(SourceAndConverter<?>[] img) {
-        return new SourceAndConverter[0];
+
+        SourceAndConverterDuplicator duplicator = new SourceAndConverterDuplicator(null);
+
+        SourceAndConverter[] out = new SourceAndConverter[img.length];
+
+        for (int i=0;i<out.length;i++) {
+            out[i] = duplicator.apply(img[i]);
+        }
+
+        isRegistrationDone = true;
+
+        return out;
     }
 
     @Override
@@ -168,10 +192,12 @@ public class IdentityRegistrationPluginExample implements IABBARegistrationPlugi
 
         public void setJson(String jsonString) {
             // do stuff
+            log.accept("Transform set in "+this+" : "+jsonString);
         }
 
         public String getJson() {
             // do stuff
+            log.accept("Transform get in "+this);
             return "{myTransform object serialized}";
         }
 

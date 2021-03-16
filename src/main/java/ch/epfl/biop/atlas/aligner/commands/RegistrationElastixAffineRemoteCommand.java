@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>Elastix Registration (Affine) on Server")
-public class RegistrationElastixAffineRemoteCommand extends RegistrationCommand {
+public class RegistrationElastixAffineRemoteCommand extends SingleChannelRegistrationCommand {
 
     @Parameter(label = "Registration Server URL")
     String serverURL = "https://snappy.epfl.ch";
