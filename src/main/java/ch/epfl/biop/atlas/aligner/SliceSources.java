@@ -738,6 +738,9 @@ public class SliceSources {
                 } else {
                     errlog.accept("Error : QuPath ROI file already exists");
                 }
+            } else {
+                Files.copy(Paths.get(ijroisfile.f.getAbsolutePath()),Paths.get(f.getAbsolutePath()));
+                writeOntotogyIfNotPresent(mp, projectFolderPath);
             }
 
         } catch (Exception e) {
