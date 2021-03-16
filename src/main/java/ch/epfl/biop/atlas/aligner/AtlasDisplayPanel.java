@@ -112,7 +112,7 @@ public class AtlasDisplayPanel implements MultiSlicePositioner.ModeListener {
             case MultiSlicePositioner.POSITIONING_MODE_INT:
                 return ra.extendedSlicedSources;
 
-            case MultiSlicePositioner.REGISTRATION_MODE_INT:
+            case MultiSlicePositioner.REVIEW_MODE_INT:
                 return ra.nonExtendedSlicedSources;
 
             default:
@@ -133,7 +133,7 @@ public class AtlasDisplayPanel implements MultiSlicePositioner.ModeListener {
     @Override
     public void modeChanged(MultiSlicePositioner mp, int oldmode, int newmode) {
 
-        if (newmode == MultiSlicePositioner.REGISTRATION_MODE_INT) {
+        if (newmode == MultiSlicePositioner.REVIEW_MODE_INT) {
             SourceAndConverterHelper.transferColorConverters(ra.extendedSlicedSources, ra.nonExtendedSlicedSources);
         } else {
             SourceAndConverterHelper.transferColorConverters(ra.nonExtendedSlicedSources, ra.extendedSlicedSources);
@@ -155,7 +155,7 @@ public class AtlasDisplayPanel implements MultiSlicePositioner.ModeListener {
                             mp.getBdvh().getViewerPanel().state().setSourceActive(sac, true);
                     }
                     break;
-                case MultiSlicePositioner.REGISTRATION_MODE_INT:
+                case MultiSlicePositioner.REVIEW_MODE_INT:
                     for (int i = 0;i<nChannels;i++) {
                         SourceAndConverter sac = ra.nonExtendedSlicedSources[i];
                         if (globalFlagPerChannel.get(i))

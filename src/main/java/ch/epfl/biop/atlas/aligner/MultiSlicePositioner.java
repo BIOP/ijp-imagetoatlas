@@ -75,7 +75,7 @@ import static sc.fiji.bdvpg.scijava.services.SourceAndConverterService.SPIM_DATA
  *
  * - a positioning mode
  *      This is mosly useful at the beginning of the registration
- *      Slices can be moved along the axis / streched and shrinked
+ *      Slices can be moved along the axis / stretched and shrunk
  *      Only certain sections of the atlas are shown to improve global overview, based on the user need
  *
  * - a review mode
@@ -94,7 +94,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     static public final Object manualActionLock = new Object();
 
     // BdvHandle displaying the multislice positioner - publicly accessible through getBdvh();
-    private BdvHandle bdvh;
+    private final BdvHandle bdvh;
 
     // Behaviour (and linked overlay) that handles user rectangular selection of sources
     private SourceSelectorBehaviour ssb;
@@ -124,8 +124,8 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     // scijava context
     Context scijavaCtx;
 
-    // TODO : make protected
-    public MultiSliceObserver mso;
+    // Multislice observer observes and display events happening to slices
+    protected MultiSliceObserver mso;
 
     // Multipositioner display mode
     int displayMode = POSITIONING_MODE_INT;
@@ -135,17 +135,17 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     final static String POSITIONING_BEHAVIOURS_KEY = POSITIONING_MODE + "-behaviours";
     Behaviours positioning_behaviours = new Behaviours(new InputTriggerConfig(), POSITIONING_MODE);
 
-    public final static int REGISTRATION_MODE_INT = 1;
-    final static String REGISTRATION_MODE = "Registration";
-    final static String REGISTRATION_BEHAVIOURS_KEY = REGISTRATION_MODE + "-behaviours";
-    Behaviours registration_behaviours = new Behaviours(new InputTriggerConfig(), REGISTRATION_MODE);
+    public final static int REVIEW_MODE_INT = 1;
+    final static String REVIEW_MODE = "review-mode";
+    final static String REVIEW_BEHAVIOURS_KEY = REVIEW_MODE + "-behaviours";
+    Behaviours review_behaviours = new Behaviours(new InputTriggerConfig(), REVIEW_MODE);
 
     // Slices display mode
     int sliceDisplayMode = ALL_SLICES_DISPLAY_MODE;
 
-    final public static int NO_SLICE_DISPLAY_MODE = 2; // For faster draw when restoring
-    final public static int CURRENT_SLICE_DISPLAY_MODE = 1;
-    final public static int ALL_SLICES_DISPLAY_MODE = 0;
+    final public static int NO_SLICE_DISPLAY_MODE = 2; // For faster draw when restoring a state
+    final public static int CURRENT_SLICE_DISPLAY_MODE = 1; // Only the current slice is displayed
+    final public static int ALL_SLICES_DISPLAY_MODE = 0; // All slices are displayed
 
     final static String COMMON_BEHAVIOURS_KEY = "multipositioner-behaviours";
     Behaviours common_behaviours = new Behaviours(new InputTriggerConfig(), "multipositioner");
@@ -155,33 +155,52 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     // Index of the current slice
     int iCurrentSlice = 0;
 
-
+    // Maximum right position of the selected slices
     Integer[] rightPosition = new Integer[]{0, 0, 0};
 
+    // Maximum left position of the selected slices
     Integer[] leftPosition = new Integer[]{0, 0, 0};
 
+    // Resliced atlas
     ReslicedAtlas reslicedAtlas;
 
+    // Original biop atlas
     BiopAtlas biopAtlas;
 
+    // Selection layer : responsible to listen to mouse drawing events that select sources
     SelectionLayer selectionLayer;
 
+    // Temporary saves the previous slicing steps - I don't remember why it was useful, but it is
     int previouszStep;
 
+    // Rectangle user defined regions that crops the region of interest for registrations
     double roiPX, roiPY, roiSX, roiSY;
 
     // Loggers
+
+    /**
+     * Non blocking log message for users
+     */
     public Consumer<String> log = (message) -> {
         System.out.println("Multipositioner : "+message);
         getBdvh().getViewerPanel().showMessage(message);
     };
 
+    /**
+     * Non blocking error message for users
+     */
     public BiConsumer<String, String> nonBlockingErrorMessageForUser = (title, message) ->
             System.err.println(title+":"+message);
 
+    /**
+     * Blocking error message for users
+     */
     public BiConsumer<String, String> errorMessageForUser = (title, message) ->
             JOptionPane.showMessageDialog(new JFrame(), message, title, JOptionPane.ERROR_MESSAGE);
 
+    /**
+     * Blocking warning message for users
+     */
     public BiConsumer<String, String> warningMessageForUser = (title, message) ->
             JOptionPane.showMessageDialog(new JFrame(), message, title, JOptionPane.WARNING_MESSAGE);
 
@@ -192,10 +211,14 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
     public Consumer<String> debuglog = (message) -> {};//System.err.println("Multipositioner Debug : "+message);
 
+    /**
+     * @return a copy of the array of current slices in this ABBA instance
+     */
     public List<SliceSources> getSlices() {
         return new ArrayList<>(slices);
     }
 
+    // Used for CreateSlice action
     protected List<SliceSources> getPrivateSlices() {
         return slices;
     }
@@ -206,6 +229,13 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     // Flag for overlaying the info of the slice under which the mouse is
     boolean showSliceInfo = true;
 
+    /**
+     * Starts ABBA in a bigdataviewer window
+     * @param bdvh a BdvHandle
+     * @param biopAtlas an atlas
+     * @param reslicedAtlas a resliced atlas
+     * @param ctx a scijava context
+     */
     public MultiSlicePositioner(BdvHandle bdvh, BiopAtlas biopAtlas, ReslicedAtlas reslicedAtlas, Context ctx) {
         this.reslicedAtlas = reslicedAtlas;
         this.biopAtlas = biopAtlas;
@@ -336,8 +366,12 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
         BdvScijavaHelper.clearBdvHandleMenuBar(bdvh);
 
+        // Skips 4 levels of hierarchy in scijava command path (Plugins>BIOP>Atlas>Multi Image To Atlas>)
+        // And uses the rest to make the hierarchy of the top menu in the bdv window
+
         int hierarchyLevelsSkipped = 4;
 
+        // Load and Save state
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, MSPStateLoadCommand.class, hierarchyLevelsSkipped,"mp", this );
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, MSPStateSaveCommand.class, hierarchyLevelsSkipped,"mp", this);
 
@@ -368,9 +402,11 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Navigate>Previous Slice [Left]",0, this::navigatePreviousSlice);
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Navigate>Center On Current Slice [C]",0, this::navigateCurrentSlice);
 
+        // Slice importer
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ImportQuPathProjectCommand.class, hierarchyLevelsSkipped,"mp", this );
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ImportImagePlusCommand.class, hierarchyLevelsSkipped,"mp", this );
 
+        // Adds registration plugin commands : discovered via scijava plugin autodiscovery mechanism
 
         PluginService pluginService = ctx.getService(PluginService.class);
 
@@ -393,10 +429,10 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, EditSliceThicknessCommand.class, hierarchyLevelsSkipped,"mp", this);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, SliceThicknessMatchNeighborsCommand.class, hierarchyLevelsSkipped,"mp", this);
 
+        // Help commands
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ABBAForumHelpCommand.class, hierarchyLevelsSkipped);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ABBADocumentationCommand.class, hierarchyLevelsSkipped);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ABBAUserFeedbackCommand.class, hierarchyLevelsSkipped);
-
 
         AtlasDisplayPanel adp = new AtlasDisplayPanel(this);
         // Hide useless channels on startup -
@@ -446,7 +482,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                 val.set(0);
             }
 
-            if (displayMode == REGISTRATION_MODE_INT) {
+            if (displayMode == REVIEW_MODE_INT) {
                 if (loc.getFloatPosition(0) < roiPX) {val.set(255); return;}
                 if (loc.getFloatPosition(0) > roiPX+roiSX) {val.set(255); return;}
                 if (loc.getFloatPosition(1)<roiPY) {val.set(255); return;}
@@ -462,7 +498,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                 new FinalInterval(new long[]{0, 0, 0}, new long[]{10, 10, 10}),"ROI", BdvOptions.options().addTo(bdvh));
 
         bss.setDisplayRangeBounds(0,1600);
-        displayMode = REGISTRATION_MODE_INT; // For correct toggling
+        displayMode = REVIEW_MODE_INT; // For correct toggling
         setPositioningMode();
 
         addRightClickActions();
@@ -480,6 +516,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         bdvh.getSplitPanel().setCollapsed(false);
         bdvh.getSplitPanel().setDividerLocation(0.7);
 
+        // Close hook to try to release as many resources as possible
         BdvHandleHelper.setBdvHandleCloseOperation(bdvh, ctx.getService(CacheService.class),
             SourceAndConverterServices.getSourceAndConverterDisplayService(), false,
                 () -> {
@@ -494,7 +531,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                     this.selectionLayer = null;
                     this.common_behaviours = null;
                     this.positioning_behaviours = null;
-                    this.registration_behaviours = null;
+                    this.review_behaviours = null;
                     this.ssb = null;
                     this.reslicedAtlas = null;
                     this.info = null;
@@ -646,7 +683,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
             case POSITIONING_MODE_INT:
                 setRegistrationMode();
                 break;
-            case REGISTRATION_MODE_INT:
+            case REVIEW_MODE_INT:
                 setPositioningMode();
                 break;
         }
@@ -664,8 +701,8 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
             slices.forEach(slice -> slice.getGUIState().enableGraphicalHandles());
             getSortedSlices().forEach(slice -> slice.getGUIState().displayModeChanged());
 
-            bdvh.getTriggerbindings().removeInputTriggerMap(REGISTRATION_BEHAVIOURS_KEY);
-            bdvh.getTriggerbindings().removeBehaviourMap(REGISTRATION_BEHAVIOURS_KEY);
+            bdvh.getTriggerbindings().removeInputTriggerMap(REVIEW_BEHAVIOURS_KEY);
+            bdvh.getTriggerbindings().removeBehaviourMap(REVIEW_BEHAVIOURS_KEY);
             positioning_behaviours.install(bdvh.getTriggerbindings(), POSITIONING_BEHAVIOURS_KEY);
             navigateCurrentSlice();
             refreshBlockMap();
@@ -686,11 +723,11 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
      * Set the registration mode
      */
     public void setRegistrationMode() {
-        if (!(displayMode == REGISTRATION_MODE_INT)) {
-            int oldMode = REGISTRATION_MODE_INT;
+        if (!(displayMode == REVIEW_MODE_INT)) {
+            int oldMode = REVIEW_MODE_INT;
             displayMode = POSITIONING_MODE_INT;
             reslicedAtlas.lock();
-            displayMode = REGISTRATION_MODE_INT;
+            displayMode = REVIEW_MODE_INT;
 
             ghs.forEach(GraphicalHandle::disable);
 
@@ -700,7 +737,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
             bdvh.getTriggerbindings().removeInputTriggerMap(POSITIONING_BEHAVIOURS_KEY);
             bdvh.getTriggerbindings().removeBehaviourMap(POSITIONING_BEHAVIOURS_KEY);
-            registration_behaviours.install(bdvh.getTriggerbindings(), REGISTRATION_BEHAVIOURS_KEY);
+            review_behaviours.install(bdvh.getTriggerbindings(), REVIEW_BEHAVIOURS_KEY);
             navigateCurrentSlice();
             refreshBlockMap();
             modeListeners.forEach(ml -> ml.modeChanged(this, oldMode, displayMode));
@@ -867,7 +904,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
                 if (displayMode == MultiSlicePositioner.POSITIONING_MODE_INT) {
                     oldCenter = previous_slice.getGUIState().getCenterPositionPMode();
-                } else if (displayMode == MultiSlicePositioner.REGISTRATION_MODE_INT) {
+                } else if (displayMode == MultiSlicePositioner.REVIEW_MODE_INT) {
                     oldCenter = previous_slice.getGUIState().getCenterPositionRMode();
                 }
 
@@ -887,7 +924,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
         if (displayMode == MultiSlicePositioner.POSITIONING_MODE_INT) {
             centerSlice = current_slice.getGUIState().getCenterPositionPMode();
-        } else if (displayMode == MultiSlicePositioner.REGISTRATION_MODE_INT) {
+        } else if (displayMode == MultiSlicePositioner.REVIEW_MODE_INT) {
             centerSlice = current_slice.getGUIState().getCenterPositionRMode();
         }
 
@@ -1088,7 +1125,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
             coords[1] = ((FloatType) getSourceValueAt(ySource, globalMouseCoordinates)).get();
             coords[2] = ((FloatType) getSourceValueAt(zSource, globalMouseCoordinates)).get();
         } else {
-            assert displayMode == REGISTRATION_MODE_INT;
+            assert displayMode == REVIEW_MODE_INT;
             SourceAndConverter label = reslicedAtlas.nonExtendedSlicedSources[reslicedAtlas.nonExtendedSlicedSources.length-1]; // By convention the label image is the last one
             labelValue = ((UnsignedShortType) getSourceValueAt(label, globalMouseCoordinates)).get();
             SourceAndConverter lrSource = reslicedAtlas.nonExtendedSlicedSources[reslicedAtlas.nonExtendedSlicedSources.length-2]; // By convention the left right indicator image is the next to last one
@@ -1140,9 +1177,10 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
             SliceSources slice = getSortedSlices().get(iCurrentSlice);
             listeners.forEach(listener -> listener.isCurrentSlice(slice));
             g.setColor(new Color(255, 255, 255, 128));
+            g.setStroke(new BasicStroke(5));
             Integer[] coords = slice.getGUIState().getBdvHandleCoords();
             RealPoint sliceCenter = new RealPoint(coords[0], coords[1], 0);
-            g.drawOval((int) sliceCenter.getDoublePosition(0) - 15, (int) sliceCenter.getDoublePosition(1) - 15, 30, 30);
+            g.drawOval((int) sliceCenter.getDoublePosition(0) - 15, (int) sliceCenter.getDoublePosition(1) - 15, 29, 29);
             Integer[] c = {255,255,255,128};
             g.setColor(new Color(c[0], c[1], c[2], c[3]));
             g.setFont(new Font("TimesRoman", Font.PLAIN, 16));
@@ -1238,7 +1276,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
     public void setDisplayMode(int mode) {
         switch (mode) {
-            case REGISTRATION_MODE_INT :
+            case REVIEW_MODE_INT:
                 setRegistrationMode();
                 break;
             case POSITIONING_MODE_INT :
@@ -1341,6 +1379,10 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
     public AffineTransform3D getAffineTransformFormAlignerToAtlas() {
         return reslicedAtlas.getSlicingTransformToAtlas();
+    }
+
+    public List<CancelableAction> getActionsFromSlice(SliceSources sliceSource) {
+        return mso.getActionsFromSlice(sliceSource);
     }
 
     /**
@@ -1678,9 +1720,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
         ConvertService cs = scijavaCtx.getService(ConvertService.class);
 
-        params.keySet().forEach(k -> {
-            convertedParams.put(k, cs.convert(params.get(k), String.class));
-        });
+        params.keySet().forEach(k -> convertedParams.put(k, cs.convert(params.get(k), String.class)));
 
         return convertedParams;
     }

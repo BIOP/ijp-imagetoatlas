@@ -121,7 +121,7 @@ public class SliceSourcesGUIState {
                     case MultiSlicePositioner.POSITIONING_MODE_INT:
                         sources_displayed_or_readyfordisplay = relocated_sacs_positioning_mode;
                         break;
-                    case MultiSlicePositioner.REGISTRATION_MODE_INT:
+                    case MultiSlicePositioner.REVIEW_MODE_INT:
                         sources_displayed_or_readyfordisplay = sacs_registration_mode;
                         break;
                 }
@@ -165,7 +165,7 @@ public class SliceSourcesGUIState {
                             sources_displayed_or_readyfordisplay = relocated_sacs_positioning_mode;
                         }
                         break;
-                    case MultiSlicePositioner.REGISTRATION_MODE_INT:
+                    case MultiSlicePositioner.REVIEW_MODE_INT:
                         if (sources_displayed_or_readyfordisplay != sacs_registration_mode) {
                             mp.getBdvh().getViewerPanel().state().removeSources(Arrays.asList(sources_displayed_or_readyfordisplay));
                             SourceAndConverterHelper.transferColorConverters(sources_displayed_or_readyfordisplay, sacs_registration_mode);
@@ -198,7 +198,7 @@ public class SliceSourcesGUIState {
             sliceCenter = getCenterPositionPMode();
             bdvAt3D.apply(sliceCenter, sliceCenter);
             return new Integer[]{(int) sliceCenter.getDoublePosition(0), (int) sliceCenter.getDoublePosition(1), (int) sliceCenter.getDoublePosition(2)};
-        } else if (mp.getDisplayMode() == MultiSlicePositioner.REGISTRATION_MODE_INT) {
+        } else if (mp.getDisplayMode() == MultiSlicePositioner.REVIEW_MODE_INT) {
             RealPoint zero = new RealPoint(3);
             zero.setPosition(0, 0);
             bdvAt3D.apply(zero, zero);
