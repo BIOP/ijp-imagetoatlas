@@ -302,7 +302,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
             }
         }, "toggle_editormode", "E");
 
-        positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.equalSpacingSelectedSlices(), "equalSpacingSelectedSlices", "A");
+        positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.equalSpacingSelectedSlices(), "equalSpacingSelectedSlices", "D");
         positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.stretchRightSelectedSlices(), "stretch_selectedslices_right", "ctrl RIGHT", "meta RIGHT");
         positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.shrinkRightSelectedSlices(), "shrink_selectedslices_right", "ctrl LEFT", "meta LEFT");
         positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.stretchLeftSelectedSlices(), "stretch_selectedslices_left", "ctrl shift LEFT", "meta shift LEFT");
@@ -386,7 +386,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                         .forEach(slice -> new DeleteSlice(this, slice).runRequest())
         );
 
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Distribute spacing [A]",0,() -> {
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Distribute spacing [D]",0,() -> {
             if (this.displayMode == POSITIONING_MODE_INT) this.equalSpacingSelectedSlices();
         });
 
@@ -1067,20 +1067,20 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
                 if (i == 0) {
                     RealPoint handleLeftPoint = slice.getGUIState().getCenterPositionPMode();
-                    handleLeftPoint.setPosition(-sY, 1);
+                    handleLeftPoint.setPosition(+sY/2.0, 1);
                     bdvAt3D.apply(handleLeftPoint, handleLeftPoint);
 
                     leftPosition[0] = (int) handleLeftPoint.getDoublePosition(0);
-                    leftPosition[1] = (int) handleLeftPoint.getDoublePosition(1) - 50;
+                    leftPosition[1] = (int) handleLeftPoint.getDoublePosition(1);
                 }
 
                 if (i == sortedSelected.size() - 1) {
                     RealPoint handleRightPoint = slice.getGUIState().getCenterPositionPMode();
-                    handleRightPoint.setPosition(-sY, 1);
+                    handleRightPoint.setPosition(+sY/2.0, 1);
                     bdvAt3D.apply(handleRightPoint, handleRightPoint);
 
                     rightPosition[0] = (int) handleRightPoint.getDoublePosition(0);
-                    rightPosition[1] = (int) handleRightPoint.getDoublePosition(1) - 50;
+                    rightPosition[1] = (int) handleRightPoint.getDoublePosition(1);
                 }
             }
 
