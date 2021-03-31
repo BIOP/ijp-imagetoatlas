@@ -436,16 +436,18 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ABBAUserFeedbackCommand.class, hierarchyLevelsSkipped);
 
         AtlasDisplayPanel adp = new AtlasDisplayPanel(this);
-        // Hide useless channels on startup -
+        /*// Hide useless channels on startup -
         adp.getModel().setValueAt(Boolean.FALSE,0,8); // X Coord
         adp.getModel().setValueAt(Boolean.FALSE,0,10);// Y Coord
         adp.getModel().setValueAt(Boolean.FALSE,0,12);// Z Coord
         adp.getModel().setValueAt(Boolean.FALSE,0,14);// Left Right
         adp.getModel().setValueAt(Boolean.FALSE,0,16);// Label ?
 
-        bdvh.getCardPanel().addCard("Atlas Display Options", adp.getPanel(), true);
+        bdvh.getCardPanel().addCard("Atlas Display Options", adp.getPanel(), true);*/
 
-        bdvh.getCardPanel().addCard("Slices Display Options", new SliceDisplayPanel(this).getPanel(), true);
+        bdvh.getCardPanel().addCard("Atlas Display", ScijavaSwingUI.getPanel(scijavaCtx, AllenAtlasDisplayCommand.class, "mp", this), true);
+
+        bdvh.getCardPanel().addCard("Slices Display", new SliceDisplayPanel(this).getPanel(), true);
 
         bdvh.getCardPanel().addCard("Edit Slices", new EditPanel(this).getPanel(), true);
 
@@ -2562,7 +2564,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         listeners.remove(listener);
     }
 
-    interface SliceChangeListener {
+    public interface SliceChangeListener {
         void sliceDeleted(SliceSources slice);
         void sliceCreated(SliceSources slice);
         void sliceZPositionChanged(SliceSources slice);
@@ -2572,7 +2574,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         void isCurrentSlice(SliceSources slice);
     }
 
-    interface ModeListener {
+    public interface ModeListener {
         void modeChanged(MultiSlicePositioner mp, int oldmode, int newmode);
         void sliceDisplayModeChanged(MultiSlicePositioner mp, int oldmode, int newmode);
     }

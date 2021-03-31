@@ -28,9 +28,9 @@ public class ReslicedAtlas implements RealInterval {
 
     SourceAndConverter slicingModel;
 
-    SourceAndConverter[] extendedSlicedSources;
+    public SourceAndConverter[] extendedSlicedSources; // TODO : make accessors
 
-    SourceAndConverter[] nonExtendedSlicedSources;
+    public SourceAndConverter[] nonExtendedSlicedSources; // TODO : make accessors
 
     AffineTransform3D centerTransform;
 
