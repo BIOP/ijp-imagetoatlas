@@ -19,6 +19,7 @@ public class EditPanel {
         JButton turnCW = new JButton(iconCW);
         turnCW.setToolTipText("Rotate selected slices 90 degrees clockwise");
         turnCW.addActionListener(e -> mp.rotateSlices(2,Math.PI/2.0));
+        paneEdit.add(turnCW);
 
         // CCW
         URL turnCCWURLIcon = MultiSlicePositioner.class.getResource("/graphics/TurnCCW.png");
@@ -28,9 +29,28 @@ public class EditPanel {
         JButton turnCCW = new JButton(iconCCW);
         turnCCW.setToolTipText("Rotate selected slices 90 degrees counter clockwise");
         turnCCW.addActionListener(e -> mp.rotateSlices(2,-Math.PI/2.0));
-
-        paneEdit.add(turnCW);
         paneEdit.add(turnCCW);
+
+        // Rotate X (/flipX)
+        URL turnRotXURLIcon = MultiSlicePositioner.class.getResource("/graphics/RotX.png");
+        ImageIcon iconRotX = new ImageIcon(turnRotXURLIcon);
+        iconRotX = new ImageIcon( iconRotX.getImage().getScaledInstance( 35, 35,  java.awt.Image.SCALE_SMOOTH ) );
+
+        JButton rotX = new JButton(iconRotX);
+        rotX.setToolTipText("Rotate around X axis (~ flip vertically)");
+        rotX.addActionListener(e -> mp.rotateSlices(0,Math.PI));
+        paneEdit.add(rotX);
+
+        // Rotate X (/flipX)
+        URL turnRotYURLIcon = MultiSlicePositioner.class.getResource("/graphics/RotY.png");
+        ImageIcon iconRotY = new ImageIcon(turnRotYURLIcon);
+        iconRotY = new ImageIcon( iconRotY.getImage().getScaledInstance( 35, 35,  java.awt.Image.SCALE_SMOOTH ) );
+
+        JButton rotY = new JButton(iconRotY);
+        rotY.setToolTipText("Rotate around Y axis (~ flip horizontally)");
+        rotY.addActionListener(e -> mp.rotateSlices(1,Math.PI));
+        paneEdit.add(rotY);
+
     }
 
     public JPanel getPanel() {
