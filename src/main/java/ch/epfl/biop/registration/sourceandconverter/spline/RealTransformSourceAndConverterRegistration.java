@@ -66,4 +66,8 @@ abstract public class RealTransformSourceAndConverterRegistration extends Source
         isDone = true;
     }
 
+    public RealTransform getTransformAsRealTransform() {
+        return rt.copy();
+    }
+
 }

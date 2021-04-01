@@ -6,6 +6,7 @@ import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import ch.epfl.biop.registration.sourceandconverter.SourceAndConverterRegistration;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
+import net.imglib2.realtransform.RealTransform;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterAndTimeRange;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
 
@@ -56,4 +57,7 @@ abstract public class AffineTransformSourceAndConverterRegistration extends Sour
         throw new UnsupportedOperationException();
     }
 
+    public RealTransform getTransformAsRealTransform() {
+        return at3d.copy();
+    }
 }

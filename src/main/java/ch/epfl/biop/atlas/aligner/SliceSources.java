@@ -25,8 +25,7 @@ import mpicbg.spim.data.generic.AbstractSpimData;
 import mpicbg.spim.data.generic.sequence.BasicViewSetup;
 import net.imglib2.RealInterval;
 import net.imglib2.RealPoint;
-import net.imglib2.realtransform.AffineTransform3D;
-import net.imglib2.realtransform.InvertibleRealTransform;
+import net.imglib2.realtransform.*;
 import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
 import sc.fiji.bdvpg.scijava.services.ui.SourceAndConverterInspector;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
@@ -715,6 +714,41 @@ public class SliceSources {
 
     }
 
+    private RealTransform getConcatenatedRealTransform() {
+        RealTransformSequence rts = new RealTransformSequence();
+        InvertibleRealTransformSequence irts = new InvertibleRealTransformSequence();
+
+        AffineTransform3D at3D = new AffineTransform3D();
+        at3D.translate(-mp.nPixX / 2.0, -mp.nPixY / 2.0, 0);
+        at3D.scale(mp.sizePixX, mp.sizePixY, mp.sizePixZ);
+        at3D.translate(0, 0, slicingAxisPosition);
+
+        rts.add(at3D.inverse().copy());
+        irts.add(at3D.inverse().copy());
+
+        Collections.reverse(this.registrations);
+
+        for (Registration reg : this.registrations) {
+            RealTransform current = reg.getTransformAsRealTransform();
+            if (current==null) return null;
+            rts.add(reg.getTransformAsRealTransform().copy());
+            if ((current instanceof InvertibleRealTransform)&&(irts!=null)) {
+                irts.add((InvertibleRealTransform) reg.getTransformAsRealTransform().copy());
+            } else {
+                irts = null;
+            }
+        }
+
+        Collections.reverse(this.registrations);
+
+        this.original_sacs[0].getSpimSource().getSourceTransform(0,0,at3D);
+
+        rts.add(at3D.copy());
+        if (irts!=null) irts.add(at3D.copy());
+
+        return (irts==null)?rts:irts;
+    }
+
     private void storeInQuPathProjectIfExists(ImageJRoisFile ijroisfile, boolean erasePreviousFile) {
 
         if (!QuPathBdvHelper.isSourceLinkedToQuPath(original_sacs[0])) {
@@ -725,6 +759,8 @@ public class SliceSources {
             File dataEntryFolder = QuPathBdvHelper.getDataEntryFolder(original_sacs[0]);
 
             String projectFolderPath = QuPathBdvHelper.getQuPathProjectFile(original_sacs[0]).getParent();
+
+
 
             File f = new File(dataEntryFolder, "ABBA-RoiSet.zip");
             mp.log.accept("Save slice ROI to quPath project " + f.getAbsolutePath());
@@ -741,6 +777,26 @@ public class SliceSources {
             } else {
                 Files.copy(Paths.get(ijroisfile.f.getAbsolutePath()),Paths.get(f.getAbsolutePath()));
                 writeOntotogyIfNotPresent(mp, projectFolderPath);
+            }
+
+            RealTransform transform = getConcatenatedRealTransform();
+
+            if (transform!=null) {
+                File ftransform = new File(dataEntryFolder, "ABBA-Transform.json");
+                mp.log.accept("Save transformation to quPath project " + ftransform.getAbsolutePath());
+                if (ftransform.exists()) {
+                    if (erasePreviousFile) {
+                        Files.delete(Paths.get(ftransform.getAbsolutePath()));
+                        // TODO
+                        // Save in user specified folder
+                        //Files.copy(Paths.get(ijroisfile.f.getAbsolutePath()),Paths.get(f.getAbsolutePath()));
+                    } else {
+                        errlog.accept("Error : QuPath ROI file already exists");
+                    }
+                } else {
+                    // TODO
+                    //Files.copy(Paths.get(ijroisfile.f.getAbsolutePath()),Paths.get(f.getAbsolutePath()));
+                }
             }
 
         } catch (Exception e) {
@@ -897,7 +953,9 @@ public class SliceSources {
             if (bvs.getAttribute(QuPathEntryEntity.class)!=null) {
                 QuPathEntryEntity qpent = bvs.getAttribute(QuPathEntryEntity.class);
                 sliceInfo+="QuPath project:"+qpent.getQuPathProjectionLocation()+"\n";
-                sliceInfo+="QuPath entity:"+qpent.getName()+" ["+qpent.getId()+"]";
+                sliceInfo+=qpent.getName()+" ["+qpent.getId()+"]";
+                //sliceInfo+=QuPathEntryEntity.getUri(qpent.getName())+"]\n";
+                ;
             } else {
                 //QuPathEntryEntity not found"
             }

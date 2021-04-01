@@ -3,6 +3,7 @@ package ch.epfl.biop.atlas.plugin;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
+import net.imglib2.realtransform.RealTransform;
 import org.scijava.Context;
 import org.scijava.plugin.Plugin;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
@@ -172,6 +173,11 @@ public class IdentityRegistrationPluginExample implements IABBARegistrationPlugi
     public void setTransform(String serialized_transform) {
         transform.setJson(serialized_transform);
         isRegistrationDone = true;
+    }
+
+    @Override
+    public RealTransform getTransformAsRealTransform() {
+        return null; // unsupported, but in fact in this case
     }
 
     @Override

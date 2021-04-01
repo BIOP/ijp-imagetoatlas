@@ -1,5 +1,6 @@
 package ch.epfl.biop.registration;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
+import net.imglib2.realtransform.RealTransform;
 import org.scijava.Context;
 
 import java.util.Map;
@@ -133,5 +134,14 @@ public interface Registration<T> {
      * @param serialized_transform
      */
     void setTransform(String serialized_transform);
+
+    /**
+     * If the transform can be returned as a serializable RealTransform object,
+     * this can be used to serialize the successive registrations as a
+     * {@link net.imglib2.realtransform.RealTransformSequence} object, or even,
+     * if all transformations are invertible, as a {@link net.imglib2.realtransform.InvertibleRealTransformSequence} object
+     * @return
+     */
+    RealTransform getTransformAsRealTransform();
 
 }
