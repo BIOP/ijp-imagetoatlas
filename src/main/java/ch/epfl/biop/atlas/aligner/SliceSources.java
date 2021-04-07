@@ -794,11 +794,13 @@ public class SliceSources {
                         writer.flush();
                         writer.close();
                     } else {
-                        errlog.accept("Error : QuPath ROI file already exists");
+                        errlog.accept("Error : Transformation file already exists");
                     }
                 } else {
-                    // TODO
-                    //Files.copy(Paths.get(ijroisfile.f.getAbsolutePath()),Paths.get(f.getAbsolutePath()));
+                    FileWriter writer = new FileWriter(ftransform.getAbsolutePath());
+                    writer.write(transform_string);
+                    writer.flush();
+                    writer.close();
                 }
             }
 
