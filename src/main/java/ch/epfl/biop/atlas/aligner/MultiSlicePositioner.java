@@ -435,8 +435,9 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ABBADocumentationCommand.class, hierarchyLevelsSkipped);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ABBAUserFeedbackCommand.class, hierarchyLevelsSkipped);
 
+        /* Obsolete
         AtlasDisplayPanel adp = new AtlasDisplayPanel(this);
-        /*// Hide useless channels on startup -
+        Hide useless channels on startup -
         adp.getModel().setValueAt(Boolean.FALSE,0,8); // X Coord
         adp.getModel().setValueAt(Boolean.FALSE,0,10);// Y Coord
         adp.getModel().setValueAt(Boolean.FALSE,0,12);// Z Coord
@@ -2535,6 +2536,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                     sliceState.slice.transformSourceOrigin(sliceState.preTransform);
                 });
 
+                this.iCurrentSlice = state.iCurrentSlice; // Does not work if multiple states are opened TODO : fix, but honestly not important enough
                 setSliceDisplayMode(state.sliceDisplayMode);
 
             } catch (Exception e) {
