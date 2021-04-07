@@ -2,6 +2,7 @@ package ch.epfl.biop.atlas.aligner;
 
 import bdv.util.BoundedRealTransform;
 import bdv.util.QuPathBdvHelper;
+import bdv.util.RealTransformHelper;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.commands.ConstructROIsFromImgLabel;
 import ch.epfl.biop.atlas.plugin.RegistrationPluginHelper;
@@ -784,12 +785,14 @@ public class SliceSources {
             if (transform!=null) {
                 File ftransform = new File(dataEntryFolder, "ABBA-Transform.json");
                 mp.log.accept("Save transformation to quPath project " + ftransform.getAbsolutePath());
+                String transform_string = RealTransformHelper.getRealTransformAdapter(mp.scijavaCtx).toJson(transform);
                 if (ftransform.exists()) {
                     if (erasePreviousFile) {
                         Files.delete(Paths.get(ftransform.getAbsolutePath()));
-                        // TODO
-                        // Save in user specified folder
-                        //Files.copy(Paths.get(ijroisfile.f.getAbsolutePath()),Paths.get(f.getAbsolutePath()));
+                        FileWriter writer = new FileWriter(ftransform.getAbsolutePath());
+                        writer.write(transform_string);
+                        writer.flush();
+                        writer.close();
                     } else {
                         errlog.accept("Error : QuPath ROI file already exists");
                     }
