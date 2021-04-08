@@ -16,18 +16,19 @@ public class SlicerAdjusterInteractiveCommand extends InteractiveCommand {
 
     @Parameter(min = "-45", max = "+45", stepSize = "0.5", style = "slider", label = "X Rotation [deg]",
             callback = "changeRotate")
-    float rotateX = 0;
-    float oldRotateX = 0;
+    double rotateX = 0;
+    double oldRotateX = 0;
 
     @Parameter(min = "-45", max = "+45", stepSize = "0.5", style = "slider", label = "Y Rotation [deg]",
     callback = "changeRotate")
-    float rotateY = 0;
-    float oldRotateY = 0;
+    double rotateY = 0;
+    double oldRotateY = 0;
 
     @Parameter
     ReslicedAtlas reslicedAtlas;
 
     public void run() {
+
         reslicedAtlas.setStep(zSamplingSteps/10);
         if (!lockAngles) {
             reslicedAtlas.setRotateX(rotateX / 180.0 * Math.PI);
