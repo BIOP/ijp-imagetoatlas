@@ -46,6 +46,7 @@ import sc.fiji.bdvpg.services.SourceAndConverterServiceLoader;
 import sc.fiji.bdvpg.services.SourceAndConverterServiceSaver;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import sc.fiji.bdvpg.services.serializers.RuntimeTypeAdapterFactory;
+import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
 
 import javax.swing.*;
 import java.awt.Point;
@@ -509,13 +510,17 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
         AffineTransform3D iniView = new AffineTransform3D();
 
-        iniView.translate(-500,5,0);
-        iniView.scale(20);
+        bdvh.getViewerPanel().state().getViewerTransform(iniView);
+        iniView.scale(15);
         bdvh.getViewerPanel().state().setViewerTransform(iniView);
 
         reslicedAtlas.setStep(50);
         reslicedAtlas.setRotateX(0);
         reslicedAtlas.setRotateY(0);
+
+        RealPoint center = SourceAndConverterHelper.getSourceAndConverterCenterPoint(reslicedAtlas.extendedSlicedSources[0]);
+        iniView = BdvHandleHelper.getViewerTransformWithNewCenter(bdvh, new double[]{center.getDoublePosition(0), center.getDoublePosition(1), 0});
+        bdvh.getViewerPanel().state().setViewerTransform(iniView);
 
         bdvh.getSplitPanel().setCollapsed(false);
         bdvh.getSplitPanel().setDividerLocation(0.7);

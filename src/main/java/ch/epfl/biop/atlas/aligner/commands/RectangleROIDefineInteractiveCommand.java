@@ -53,7 +53,7 @@ public class RectangleROIDefineInteractiveCommand extends InteractiveCommand {
             List<RealPoint> pts = (List<RealPoint>)
             cs.run(GetUserRectangleCommand.class, true,
                     "bdvh", mp.getBdvh(),
-                    "timeOut", -1,
+                    "timeOutInMs", -1,
                     "messageForUser", "Select the rectangular region of interest.")
                     .get().getOutput("pts");
 
