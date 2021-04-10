@@ -2,6 +2,8 @@ package ch.epfl.biop.registration.sourceandconverter.spline;
 
 import bdv.tools.brightness.ConverterSetup;
 import bdv.util.BdvHandle;
+import bdv.util.BoundedRealTransform;
+import bdv.viewer.Interpolation;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.commands.RegistrationElastixSplineCommand;
 import ch.epfl.biop.atlas.aligner.commands.RegistrationElastixSplineRemoteCommand;
@@ -11,13 +13,22 @@ import ch.epfl.biop.bdv.command.register.Elastix2DSplineRegisterCommand;
 import ch.epfl.biop.bdv.command.register.Elastix2DSplineRegisterServerCommand;
 import com.google.gson.Gson;
 import ij.gui.WaitForUserDialog;
-import net.imglib2.realtransform.RealTransform;
+import jitk.spline.ThinPlateR2LogRSplineKernelTransform;
+import net.imglib2.RealPoint;
+import net.imglib2.RealRandomAccessible;
+import net.imglib2.ops.parse.token.Real;
+import net.imglib2.realtransform.*;
+import net.imglib2.realtransform.inverse.WrappedIterativeInvertibleRealTransform;
+import net.imglib2.type.numeric.NumericType;
+import net.imglib2.type.numeric.integer.UnsignedShortType;
+import net.imglib2.type.numeric.real.DoubleType;
 import org.scijava.command.Command;
 import org.scijava.command.CommandModule;
 import org.scijava.command.CommandService;
 import org.scijava.plugin.Plugin;
 import sc.fiji.bdvpg.bdv.BdvHandleHelper;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
+import sc.fiji.bdvpg.services.serializers.plugins.ThinPlateSplineTransformAdapter;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
 import sc.fiji.bdvpg.sourceandconverter.register.BigWarpLauncher;
 
@@ -130,6 +141,7 @@ public class Elastix2DSplineRegistration extends RealTransformSourceAndConverter
 
             if (success) {
                 rt = (RealTransform) module.getOutput("rt");
+                rt = pruneLandMarksOutsideAtlas(rt);
             }
 
             isDone = true;
@@ -137,6 +149,128 @@ public class Elastix2DSplineRegistration extends RealTransformSourceAndConverter
         } catch (Exception e) {
             e.printStackTrace();
             return false;
+        }
+    }
+
+    /**
+     * This function removes the landmarks located outside the atlas,
+     * meaning where the atlas 3d image value is zero
+     * 4 landmarks are kept
+     * @param rt_in
+     * @return same transform with landmarks pruned
+     */
+    private RealTransform pruneLandMarksOutsideAtlas(RealTransform rt_in) {
+
+        RealTransform input = rt_in;
+        boolean wrapped2d3d = false;
+        boolean wrappedInvertible = false;
+        if (rt_in instanceof Wrapped2DTransformAs3D) {
+            rt_in = ((Wrapped2DTransformAs3D)rt_in).transform;
+            wrapped2d3d = true;
+        }
+
+        if (rt_in instanceof WrappedIterativeInvertibleRealTransform) {
+            rt_in = ((WrappedIterativeInvertibleRealTransform)rt_in).getTransform();
+            wrappedInvertible = true;
+        }
+
+        /*if (rt_in instanceof BoundedRealTransform) {
+            rt_in = ((BoundedRealTransform)rt_in).getTransform();
+            if (rt_in instanceof Wrapped2DTransformAs3D) {
+                rt_in = ((Wrapped2DTransformAs3D)rt_in).transform;
+            }
+
+            if (rt_in instanceof WrappedIterativeInvertibleRealTransform) {
+                rt_in = ((WrappedIterativeInvertibleRealTransform)rt_in).getTransform();
+            }
+        }*/
+
+        if (!(rt_in instanceof ThinplateSplineTransform)) {
+            System.err.println("Cannot edit the transform : it's not of class thinplatesplinetransform");
+            return input;
+        } else {
+            if (fimg_mask !=null) {
+                ThinplateSplineTransform tst = (ThinplateSplineTransform) rt_in;
+                ThinPlateR2LogRSplineKernelTransform kernel = ThinPlateSplineTransformAdapter.getKernel(tst);
+                double[][] srcPts = ThinPlateSplineTransformAdapter.getSrcPts(kernel);
+                double[][] tgtPts = ThinPlateSplineTransformAdapter.getTgtPts(kernel);
+                int nbLandmarks = kernel.getNumLandmarks();
+                int nbDimensions = kernel.getNumDims();
+
+                List<RealPoint> ptsSource = new ArrayList<>();
+                List<RealPoint> ptsTarget = new ArrayList<>();
+
+                for (int i = 0; i < nbLandmarks; ++i) {
+                    RealPoint ptSource = new RealPoint(3);
+                    RealPoint ptTarget = new RealPoint(3);
+                    int d;
+                    for (d = 0; d < nbDimensions; ++d) {
+                        ptTarget.setPosition(tgtPts[d][i], d);
+                    }
+                    ptTarget.setPosition(0,2); // 0 position in z
+
+                    for (d = 0; d < nbDimensions; ++d) {
+                        ptSource.setPosition(srcPts[d][i], d);
+                    }
+                    ptSource.setPosition(0,2); // 0 position in z
+
+                    ptsSource.add(ptSource);
+                    ptsTarget.add(ptTarget);
+                }
+
+                // Beurk - Unsigned short type : TODO removes this type specificity
+                RealRandomAccessible<UnsignedShortType> mask = fimg_mask[0].getSpimSource().getInterpolatedSource(timePoint,0, Interpolation.NEARESTNEIGHBOR);
+
+                AffineTransform3D at3D = new AffineTransform3D();
+                fimg_mask[0].getSpimSource().getSourceTransform(timePoint,0,at3D);
+
+                List<Integer> landMarksToKeep = new ArrayList<>();
+                for (int i = 0; i < nbLandmarks; ++i) {
+                    at3D.inverse().apply(ptsTarget.get(i), ptsTarget.get(i));
+                    at3D.inverse().apply(ptsSource.get(i), ptsSource.get(i));
+
+                    //System.out.println("Landmark "+i+" ["+mask.getAt(ptsSource.get(i)).get()+", "+mask.getAt(ptsTarget.get(i)).get()+"]");
+                    //System.out.println("Source:"+ptsSource.get(i));
+                    //System.out.println("Target:"+ptsTarget.get(i));
+
+                    if ((mask.getAt(ptsSource.get(i)).get() == 0) && (mask.getAt(ptsTarget.get(i)).get() == 0)) {
+
+                    } else {
+                        landMarksToKeep.add(i);
+                    }
+                }
+
+                if (landMarksToKeep.size()<4) {
+                    // Too many landmarks removed
+                    System.out.println("Too few landmarks after pruning - skip pruning");
+                    return input;
+                }
+
+                // Ok, now let's reconstruct the transform
+
+                double[][] srcPtsKept = new double[nbDimensions][landMarksToKeep.size()];
+                double[][] tgtPtsKept = new double[nbDimensions][landMarksToKeep.size()];
+
+                for (int i = 0;i<landMarksToKeep.size();i++) {
+                    for (int d = 0; d < nbDimensions; ++d) {
+                        srcPtsKept[d][i] = srcPts[d][landMarksToKeep.get(i)];
+                        tgtPtsKept[d][i] = tgtPts[d][landMarksToKeep.get(i)];
+                    }
+                }
+
+                RealTransform pruned = new ThinplateSplineTransform(srcPtsKept, tgtPtsKept);
+
+                if (wrappedInvertible) {
+                    pruned = new WrappedIterativeInvertibleRealTransform<>(pruned);
+                }
+
+                if (wrapped2d3d) {
+                    pruned = new Wrapped2DTransformAs3D((InvertibleRealTransform) pruned);
+                }
+
+                return pruned;
+
+            } else return input;
         }
     }
 

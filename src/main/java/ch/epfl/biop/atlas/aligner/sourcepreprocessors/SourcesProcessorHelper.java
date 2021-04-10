@@ -26,4 +26,27 @@ public class SourcesProcessorHelper {
         return sp;
     }
 
+    /**
+     * Gets rid of all channel selectors in the sources processor
+     *
+     * Used in registration to set the mask
+     *
+     * Used in editing to override the original channel being selected
+     *
+     * Limitation : does not work in a general manner...
+     *
+     * @param processor
+     * @return
+     */
+    public static SourcesProcessor removeChannelsSelect(SourcesProcessor processor) {
+        if (processor instanceof SourcesChannelsSelect) {
+            return new SourcesIdentity();
+        } else if (processor instanceof SourcesProcessComposer) {
+            SourcesProcessComposer composer_in = (SourcesProcessComposer) processor;
+            return new SourcesProcessComposer(
+                    removeChannelsSelect(composer_in.f2),
+                    removeChannelsSelect(composer_in.f1));
+        } else return processor;
+    }
+
 }

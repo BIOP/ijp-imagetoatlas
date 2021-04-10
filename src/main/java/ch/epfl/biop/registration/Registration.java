@@ -49,6 +49,18 @@ public interface Registration<T> {
     void setMovingImage(T mimg);
 
     /**
+     * Optional - sets the fixed image mask
+     * @param fimg_mask fixed image
+     */
+    void setFixedMask(T fimg_mask);
+
+    /**
+     * Optional - set the moving image mask
+     * @param mimg_mask moving image
+     */
+    void setMovingMask(T mimg_mask);
+
+    /**
      * Sets the state of the registration to not done
      * Called when the registration needs to be rerun for real
      * instead of just restored (TODO : find if this is really useful)

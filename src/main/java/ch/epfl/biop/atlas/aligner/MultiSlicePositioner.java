@@ -985,7 +985,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         bdvh.getViewerPanel().requestRepaint();
     }
 
-    int overlapMode = 0;
+    int overlapMode = 2;
 
     @Override
     protected void draw(Graphics2D g) {

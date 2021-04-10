@@ -19,6 +19,10 @@ abstract public class SourceAndConverterRegistration implements IABBARegistratio
 
     protected SourceAndConverter[] mimg;
 
+    protected SourceAndConverter[] fimg_mask;
+
+    protected SourceAndConverter[] mimg_mask;
+
     protected int timePoint = 0;
 
     @Parameter
@@ -32,6 +36,16 @@ abstract public class SourceAndConverterRegistration implements IABBARegistratio
     @Override
     public void setMovingImage(SourceAndConverter[] mimg) {
         this.mimg = mimg;
+    }
+
+    @Override
+    public void setFixedMask(SourceAndConverter[] fimg) {
+        this.fimg_mask = fimg;
+    }
+
+    @Override
+    public void setMovingMask(SourceAndConverter[] mimg) {
+        this.mimg_mask = mimg;
     }
 
     @Override

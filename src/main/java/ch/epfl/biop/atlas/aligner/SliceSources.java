@@ -3,7 +3,9 @@ package ch.epfl.biop.atlas.aligner;
 import bdv.util.BoundedRealTransform;
 import bdv.util.QuPathBdvHelper;
 import bdv.util.RealTransformHelper;
+import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
+import ch.epfl.biop.atlas.aligner.sourcepreprocessors.*;
 import ch.epfl.biop.atlas.commands.ConstructROIsFromImgLabel;
 import ch.epfl.biop.atlas.plugin.RegistrationPluginHelper;
 import ch.epfl.biop.atlas.plugin.RegistrationTypeProperties;
@@ -132,9 +134,9 @@ public class SliceSources {
 
         guiState = new SliceSourcesGUIState(this, mp);
 
-        runRegistration(centerPositioner, Function.identity(), Function.identity());
-        runRegistration(preTransform, Function.identity(), Function.identity());
-        runRegistration(zPositioner, Function.identity(), Function.identity());
+        runRegistration(centerPositioner, new SourcesIdentity(), new SourcesIdentity());
+        runRegistration(preTransform, new SourcesIdentity(), new SourcesIdentity());
+        runRegistration(zPositioner, new SourcesIdentity(), new SourcesIdentity());
         waitForEndOfTasks();
         updateZPosition();
         guiState.positionChanged();
@@ -395,11 +397,23 @@ public class SliceSources {
 
     // public : enqueueRegistration
     private boolean performRegistration(Registration<SourceAndConverter<?>[]> reg,
-                                       Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixed,
-                                       Function<SourceAndConverter[], SourceAndConverter[]> preprocessMoving) {
+                                       //Function<SourceAndConverter[], SourceAndConverter[]>
+                                       SourcesProcessor
+                                               preprocessFixed,
+                                       //Function<SourceAndConverter[], SourceAndConverter[]>
+                                       SourcesProcessor
+                                                preprocessMoving) {
 
         reg.setFixedImage(preprocessFixed.apply(mp.reslicedAtlas.nonExtendedSlicedSources));
         reg.setMovingImage(preprocessMoving.apply(registered_sacs));
+
+        // For the mask : we set it as the label image, pre processed identically
+        // 0 - remove channel select from pre processor
+        SourcesProcessor fixedProcessor = SourcesProcessorHelper.removeChannelsSelect(preprocessFixed);
+        // 1 - adds a channel select for the atlas (indexed 3) TODO : improve way to select indexing
+        fixedProcessor = new SourcesProcessComposer(fixedProcessor, new SourcesChannelsSelect(mp.reslicedAtlas.nonExtendedSlicedSources.length-1));
+        reg.setFixedMask(fixedProcessor.apply(mp.reslicedAtlas.nonExtendedSlicedSources));
+
         boolean out = reg.register();
         if (!out) {
             errlog.accept("Issue during registration of class "+reg.getClass().getSimpleName());
@@ -415,8 +429,11 @@ public class SliceSources {
      * @param reg the registration to perform
      */
     protected boolean runRegistration(Registration<SourceAndConverter<?>[]> reg,
-                                Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixed,
-                                Function<SourceAndConverter[], SourceAndConverter[]> preprocessMoving) {
+                                SourcesProcessor //Function<SourceAndConverter[], SourceAndConverter[]>
+                                        preprocessFixed,
+                                //Function<SourceAndConverter[], SourceAndConverter[]>
+                                SourcesProcessor
+                                              preprocessMoving) {
 
         if (RegistrationPluginHelper.isManual(reg)) {
             //Waiting for manual lock release...
@@ -898,16 +915,31 @@ public class SliceSources {
     }
 
     protected void editLastRegistration(
-        Function<SourceAndConverter[], SourceAndConverter[]> preprocessFixed,
-        Function<SourceAndConverter[], SourceAndConverter[]> preprocessMoving) {
+        //Function<SourceAndConverter[], SourceAndConverter[]>
+        SourcesProcessor
+                preprocessFixed,
+        //Function<SourceAndConverter[], SourceAndConverter[]>
+        SourcesProcessor
+                preprocessMoving) {
         Registration reg = this.registrations.get(registrations.size() - 1);
         if (RegistrationPluginHelper.isEditable(reg)) {
             mp.log.accept("Edition will begin when the manual lock is acquired");
             synchronized (MultiSlicePositioner.manualActionLock) {
                 this.removeRegistration(reg);
                 // preprocessFixed has an issue...
-                reg.setFixedImage(preprocessFixed.apply(mp.reslicedAtlas.nonExtendedSlicedSources)); // No filtering -> all channels
-                reg.setMovingImage(preprocessMoving.apply(registered_sacs)); // NO filtering -> all channels
+                reg.setFixedImage(
+                        SourcesProcessorHelper.removeChannelsSelect(preprocessFixed).apply(mp.reslicedAtlas.nonExtendedSlicedSources)
+                ); // No filtering -> all channels
+                reg.setMovingImage(
+                        SourcesProcessorHelper.removeChannelsSelect(preprocessMoving).apply(registered_sacs)
+                ); // NO filtering -> all channels
+
+                // 0 - remove channel select from pre processor
+                SourcesProcessor fixedProcessor = SourcesProcessorHelper.removeChannelsSelect(preprocessFixed);
+                // 1 - adds a channel select for the atlas (indexed 3) TODO : improve way to select indexing
+                fixedProcessor = new SourcesProcessComposer(fixedProcessor, new SourcesChannelsSelect(mp.reslicedAtlas.nonExtendedSlicedSources.length-1));
+                reg.setFixedMask(fixedProcessor.apply(mp.reslicedAtlas.nonExtendedSlicedSources));
+
                 reg.edit();
                 this.appendRegistration(reg);
             }

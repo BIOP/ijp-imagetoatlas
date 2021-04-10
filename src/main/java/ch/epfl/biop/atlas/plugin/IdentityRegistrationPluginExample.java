@@ -88,6 +88,16 @@ public class IdentityRegistrationPluginExample implements IABBARegistrationPlugi
     }
 
     @Override
+    public void setFixedMask(SourceAndConverter<?>[] fimg_mask) {
+        // Ignored
+    }
+
+    @Override
+    public void setMovingMask(SourceAndConverter<?>[] mimg_mask) {
+        // Ignored
+    }
+
+    @Override
     public void resetRegistration() {
         // TODO : document what that means
         log.accept("Registration has been reset");
