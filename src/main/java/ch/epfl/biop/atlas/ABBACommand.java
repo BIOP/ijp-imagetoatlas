@@ -35,20 +35,23 @@ public class ABBACommand implements Command {
     CommandService cs;
 
     @Parameter(label = "URL path to allen brain map data, leave empty for automated downloading and caching (3Go)", persist = false)
-    String mapUrl = Prefs.get(keyPrefix+"mapUrl","");
+    String mapUrl = ABBAHelper.getMapUrl(); //Prefs.get(keyPrefix+"mapUrl","");
 
     //static String defaultOntologyUrl = ;//"http://ec2-18-222-96-84.us-east-2.compute.amazonaws.com/1.json";//file:/home/nico/Dropbox/BIOP/ABA/BrainServerTest/1.json";
     @Parameter(label = "URL path to allen brain ontology data, leave empty for automated downloading and caching", persist = false)
-    String ontologyUrl = Prefs.get(keyPrefix+"ontologyUrl","");
+    String ontologyUrl = ABBAHelper.getOntologyUrl(); //Prefs.get(keyPrefix+"ontologyUrl","");
 
     @Parameter(label = "Select the executable file 'elastix.exe' or 'elastix.sh'", required = false)
-    File elastixExeFile;
+    File elastixExeFile = ABBAHelper.getElastixExeFile();
 
     @Parameter(label = "Select the executable file 'transformix.exe' or 'transformix.sh'",required = false)
-    File transformixExeFile;
+    File transformixExeFile = ABBAHelper.getTransformixExeFile();
 
     @Parameter(type = ItemIO.OUTPUT)
     MultiSlicePositioner mp;
+
+    @Parameter(label = "Store these settings for all users")
+    boolean storeAsGlobalSettings = false;
 
     @Override
     public void run() {
@@ -79,6 +82,14 @@ public class ABBACommand implements Command {
                     "reslicedAtlas", mp.getReslicedAtlas(),
                     "lockAngles", false);
 
+            if (storeAsGlobalSettings) {
+                ABBAHelper.ABBASettings settings = new ABBAHelper.ABBASettings();
+                settings.pathToABBAAtlas = mapUrl;
+                settings.pathToABBAOntology = ontologyUrl;
+                settings.pathToElastixExeFile = elastixExeFile.getAbsolutePath();
+                settings.pathToTransformixExeFile = transformixExeFile.getAbsolutePath();
+                ABBAHelper.setToLocalFiji(settings);
+            }
         } /*catch (MalformedURLException e) {
             e.printStackTrace();
         }*/ catch (InterruptedException e) {
