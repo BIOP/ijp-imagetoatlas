@@ -2,6 +2,7 @@ package ch.epfl.biop.registration.sourceandconverter.spline;
 
 import bdv.tools.brightness.ConverterSetup;
 import bdv.util.BdvHandle;
+import bdv.viewer.DisplayMode;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.commands.RegistrationBigWarpCommand;
 import ch.epfl.biop.atlas.plugin.IABBARegistrationPlugin;
@@ -60,6 +61,9 @@ public class SacBigWarp2DRegistration extends RealTransformSourceAndConverterReg
             // Output bdvh handles -> will be put in the object service
             BdvHandle bdvhQ = bwl.getBdvHandleQ();
             BdvHandle bdvhP = bwl.getBdvHandleP();
+
+            bdvhQ.getViewerPanel().state().setDisplayMode(DisplayMode.FUSED);
+            bdvhP.getViewerPanel().state().setDisplayMode(DisplayMode.FUSED);
 
             bdvhP.getViewerPanel().state().setViewerTransform(BdvHandleHelper.getViewerTransformWithNewCenter(bdvhP, new double[]{0,0,0}));
             bdvhQ.getViewerPanel().state().setViewerTransform(BdvHandleHelper.getViewerTransformWithNewCenter(bdvhQ, new double[]{0,0,0}));

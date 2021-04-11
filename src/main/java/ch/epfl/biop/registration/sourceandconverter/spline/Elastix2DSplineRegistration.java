@@ -3,6 +3,7 @@ package ch.epfl.biop.registration.sourceandconverter.spline;
 import bdv.tools.brightness.ConverterSetup;
 import bdv.util.BdvHandle;
 import bdv.util.BoundedRealTransform;
+import bdv.viewer.DisplayMode;
 import bdv.viewer.Interpolation;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.commands.RegistrationElastixSplineCommand;
@@ -301,6 +302,9 @@ public class Elastix2DSplineRegistration extends RealTransformSourceAndConverter
 
         bdvhP.getViewerPanel().state().setViewerTransform(BdvHandleHelper.getViewerTransformWithNewCenter(bdvhP, new double[]{0,0,0}));
         bdvhQ.getViewerPanel().state().setViewerTransform(BdvHandleHelper.getViewerTransformWithNewCenter(bdvhQ, new double[]{0,0,0}));
+
+        bdvhQ.getViewerPanel().state().setDisplayMode(DisplayMode.FUSED);
+        bdvhP.getViewerPanel().state().setDisplayMode(DisplayMode.FUSED);
 
         SourceAndConverterServices.getSourceAndConverterDisplayService().pairClosing(bdvhQ,bdvhP);
 
