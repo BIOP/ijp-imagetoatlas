@@ -107,7 +107,7 @@
 		<license.excludes>**/resources/**</license.excludes>
 		<main-class>ch.epfl.biop.ABBALaunch</main-class>
 
-		<bigdataviewer-biop-tools.version>0.2.14</bigdataviewer-biop-tools.version>
+		<bigdataviewer-biop-tools.version>0.2.15-SNAPSHOT</bigdataviewer-biop-tools.version>
 		<bigdataviewer-bioformats.version>0.2.15</bigdataviewer-bioformats.version>
 		<bigdataviewer-playground.version>0.2.13</bigdataviewer-playground.version>
 		<bigdataviewer-selector.version>0.1.8</bigdataviewer-selector.version>

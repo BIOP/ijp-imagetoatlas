@@ -15,10 +15,17 @@ public class RegistrationElastixAffineCommand extends SingleChannelRegistrationC
     @Parameter(label = "Show registration results as ImagePlus")
     boolean showImagePlusRegistrationResult;
 
+    @Parameter(label = "Background offset value")
+    double background_offset_value_moving = 0;
+
+    double background_offset_value_fixed = 0;
+
     public void runValidated() {
 
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("showImagePlusRegistrationResult", showImagePlusRegistrationResult);
+        parameters.put("background_offset_value_moving", background_offset_value_moving);
+        parameters.put("background_offset_value_fixed", background_offset_value_fixed);
 
         mp.register(this,
                 getFixedFilter(),

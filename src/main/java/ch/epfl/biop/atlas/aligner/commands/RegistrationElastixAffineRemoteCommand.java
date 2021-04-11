@@ -28,11 +28,18 @@ public class RegistrationElastixAffineRemoteCommand extends SingleChannelRegistr
     @Parameter(label = "I agree to share my registration data.")
     boolean userConsentForServerKeepingData = false;
 
+    @Parameter(label = "Background offset value")
+    double background_offset_value_moving = 0;
+
+    double background_offset_value_fixed = 0;
+
     public void runValidated() {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("serverURL", serverURL);
         parameters.put("taskInfo", "");
         parameters.put("userConsentForServerKeepingData", userConsentForServerKeepingData);
+        parameters.put("background_offset_value_moving", background_offset_value_moving);
+        parameters.put("background_offset_value_fixed", background_offset_value_fixed);
 
         mp.register(this,
                 getFixedFilter(),

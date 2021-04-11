@@ -15,6 +15,11 @@ public class RegistrationElastixSplineRemoteCommand extends SingleChannelRegistr
     @Parameter(label = "Number of control points along X, minimum 2.")
     int nbControlPointsX = 10;
 
+    @Parameter(label = "Background offset value")
+    double background_offset_value_moving = 0;
+
+    double background_offset_value_fixed = 0;
+
     @Parameter(label = "Registration Server URL")
     String serverURL = "https://snappy.epfl.ch";
 
@@ -39,6 +44,9 @@ public class RegistrationElastixSplineRemoteCommand extends SingleChannelRegistr
         }
 
         Map<String, Object> parameters = new HashMap<>();
+        parameters.put("background_offset_value_moving", background_offset_value_moving);
+        parameters.put("background_offset_value_fixed", background_offset_value_fixed);
+
         parameters.put("serverURL", serverURL);
         parameters.put("taskInfo", "");
         parameters.put("userConsentForServerKeepingData", userConsentForServerKeepingData);
