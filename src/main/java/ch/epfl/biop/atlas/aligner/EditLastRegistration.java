@@ -1,5 +1,6 @@
 package ch.epfl.biop.atlas.aligner;
 
+import ch.epfl.biop.atlas.aligner.sourcepreprocessors.SourcesProcessorHelper;
 import ch.epfl.biop.atlas.plugin.RegistrationPluginHelper;
 
 import java.util.ArrayList;
@@ -11,8 +12,11 @@ public class EditLastRegistration extends CancelableAction {
 
     final RegisterSlice rs;
 
-    public EditLastRegistration(MultiSlicePositioner mp, SliceSources slice) {
+    private final boolean editWithAllChannels;
+
+    public EditLastRegistration(MultiSlicePositioner mp, SliceSources slice, boolean editWithAllChannels) {
         super(mp);
+        this.editWithAllChannels = editWithAllChannels;
         this.slice = slice;
         List<CancelableAction> registrationActionsCompiled = new ArrayList<>();
         // One need to get the list of still active registrations i.e.
@@ -48,7 +52,13 @@ public class EditLastRegistration extends CancelableAction {
     protected boolean run() {
         mp.userActions.remove(this);
         mp.mso.cancelInfo(this);
-        slice.editLastRegistration(rs.preprocessFixed, rs.preprocessMoving);
+        if (editWithAllChannels) {
+            slice.editLastRegistration(
+                    SourcesProcessorHelper.removeChannelsSelect(rs.preprocessFixed),
+                    SourcesProcessorHelper.removeChannelsSelect(rs.preprocessMoving));
+        } else {
+            slice.editLastRegistration(rs.preprocessFixed, rs.preprocessMoving);
+        }
         return true;
     }
 

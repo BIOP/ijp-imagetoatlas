@@ -11,10 +11,12 @@ public class EditLastRegistrationCommand implements Command {
     @Parameter
     MultiSlicePositioner mp;
 
+    @Parameter(label = "Edit with all channels")
+    boolean editWithAllChannels;
+
     @Override
     public void run() {
-
         System.out.println("Edit last registration");
-        mp.editLastRegistration();
+        mp.editLastRegistration(editWithAllChannels);
     }
 }

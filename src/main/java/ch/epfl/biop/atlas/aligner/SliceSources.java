@@ -928,10 +928,10 @@ public class SliceSources {
                 this.removeRegistration(reg);
                 // preprocessFixed has an issue...
                 reg.setFixedImage(
-                        SourcesProcessorHelper.removeChannelsSelect(preprocessFixed).apply(mp.reslicedAtlas.nonExtendedSlicedSources)
+                        preprocessFixed.apply(mp.reslicedAtlas.nonExtendedSlicedSources)
                 ); // No filtering -> all channels
                 reg.setMovingImage(
-                        SourcesProcessorHelper.removeChannelsSelect(preprocessMoving).apply(registered_sacs)
+                        preprocessMoving.apply(registered_sacs)
                 ); // NO filtering -> all channels
 
                 // 0 - remove channel select from pre processor

@@ -56,9 +56,14 @@ public class SliceSourcesPopupMenu {
             addPopupLine();
 
             addPopupAction("Edit Last Registration", (slices) -> {
+                Object[] options = { "Yes", "No" };
+                int resp = JOptionPane.showOptionDialog(null,
+                        "Edit with all channels ?", "Edit options",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
                 if (slices.length>1) new MarkActionSequenceBatch(mp).runRequest();
                 for (SliceSources slice : slices) {
-                    new EditLastRegistration(mp, slice).runRequest();
+                    new EditLastRegistration(mp, slice, resp==0).runRequest();
                 }
                 if (slices.length>1) new MarkActionSequenceBatch(mp).runRequest();
             });
