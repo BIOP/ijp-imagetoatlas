@@ -98,7 +98,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     private final BdvHandle bdvh;
 
     // Behaviour (and linked overlay) that handles user rectangular selection of sources
-    private SourceSelectorBehaviour ssb;
+    // private SourceSelectorBehaviour ssb;
 
     /**
      * Slicing Model Properties
@@ -266,8 +266,8 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
         BdvFunctions.showOverlay(this, "MultiSlice Overlay", BdvOptions.options().addTo(bdvh));
 
-        ssb = (SourceSelectorBehaviour) SourceAndConverterServices.getSourceAndConverterDisplayService().getDisplayMetadata(
-                bdvh, SourceSelectorBehaviour.class.getSimpleName());
+        /*ssb = (SourceSelectorBehaviour) SourceAndConverterServices.getSourceAndConverterDisplayService().getDisplayMetadata(
+                bdvh, SourceSelectorBehaviour.class.getSimpleName());*/
         new EditorBehaviourUnInstaller(bdvh).run();
 
         // Disable edit mode by default
@@ -293,7 +293,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
         positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.toggleOverlap(), "toggle_superimpose", "O");
 
-        positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> {
+        /*positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> {
             if (ssb.isEnabled()) {
                 ssb.disable();
                 refreshBlockMap();
@@ -301,7 +301,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                 ssb.enable();
                 refreshBlockMap();
             }
-        }, "toggle_editormode", "E");
+        }, "toggle_editormode", "E");*/
 
         positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.equalSpacingSelectedSlices(), "equalSpacingSelectedSlices", "D");
         positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.stretchRightSelectedSlices(), "stretch_selectedslices_right", "ctrl RIGHT", "meta RIGHT");
@@ -541,7 +541,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                     this.common_behaviours = null;
                     this.positioning_behaviours = null;
                     this.review_behaviours = null;
-                    this.ssb = null;
+                    //this.ssb = null;
                     this.reslicedAtlas = null;
                     this.info = null;
                     rm.stop();

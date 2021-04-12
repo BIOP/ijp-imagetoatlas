@@ -161,34 +161,45 @@ public class SelectionLayer {
             this.mode = mode;
         }
 
+        boolean perform = true;
+
         @Override
         public void init(int x, int y) {
-            startCurrentSelection(x,y);
-            viewer.setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
-            switch(mode) {
-                case SourceSelectorBehaviour.SET :
-                    viewer.showMessage("Set Selection" );
-                    break;
-                case SourceSelectorBehaviour.ADD :
-                    viewer.showMessage("Add Selection" );
-                    break;
-                case SourceSelectorBehaviour.REMOVE :
-                    viewer.showMessage("Remove Selection" );
-                    break;
+
+            perform = perform && mp.startDragAction(); // ensure unicity of drag action
+            if (perform) {
+                startCurrentSelection(x, y);
+                viewer.setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
+                switch (mode) {
+                    case SourceSelectorBehaviour.SET:
+                        viewer.showMessage("Set Selection");
+                        break;
+                    case SourceSelectorBehaviour.ADD:
+                        viewer.showMessage("Add Selection");
+                        break;
+                    case SourceSelectorBehaviour.REMOVE:
+                        viewer.showMessage("Remove Selection");
+                        break;
+                }
             }
         }
 
         @Override
         public void drag(int x, int y) {
-            updateCurrentSelection(x,y);
-            viewer.getDisplay().repaint();
+            if (perform) {
+                updateCurrentSelection(x, y);
+                viewer.getDisplay().repaint();
+            }
         }
 
         @Override
         public void end(int x, int y) {
-            endCurrentSelection(x,y,mode);
-            viewer.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-            viewer.getDisplay().repaint();
+            if (perform) {
+                endCurrentSelection(x, y, mode);
+                viewer.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+                viewer.getDisplay().repaint();
+                mp.stopDragAction();
+            }
         }
     }
 
