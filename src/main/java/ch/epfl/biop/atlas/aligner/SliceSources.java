@@ -3,19 +3,16 @@ package ch.epfl.biop.atlas.aligner;
 import bdv.util.BoundedRealTransform;
 import bdv.util.QuPathBdvHelper;
 import bdv.util.RealTransformHelper;
-import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.sourcepreprocessors.*;
 import ch.epfl.biop.atlas.commands.ConstructROIsFromImgLabel;
 import ch.epfl.biop.atlas.plugin.RegistrationPluginHelper;
-import ch.epfl.biop.atlas.plugin.RegistrationTypeProperties;
 import ch.epfl.biop.bdv.command.exporter.ExportToImagePlusCommand;
 import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
 import ch.epfl.biop.java.utilities.roi.types.CompositeFloatPoly;
 import ch.epfl.biop.java.utilities.roi.types.IJShapeRoiArray;
 import ch.epfl.biop.java.utilities.roi.types.ImageJRoisFile;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
-import ch.epfl.biop.registration.sourceandconverter.spline.Elastix2DSplineRegistration;
 import ch.epfl.biop.registration.sourceandconverter.spline.RealTransformSourceAndConverterRegistration;
 import ch.epfl.biop.spimdata.qupath.QuPathEntryEntity;
 import ch.epfl.biop.registration.Registration;
@@ -47,7 +44,6 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
 
 import static ch.epfl.biop.atlas.aligner.CancelableAction.errlog;
 
@@ -732,7 +728,7 @@ public class SliceSources {
 
     }
 
-    private RealTransform getConcatenatedRealTransform() {
+    public RealTransform getSlicePixToCCFRealTransform() {
         RealTransformSequence rts = new RealTransformSequence();
         InvertibleRealTransformSequence irts = new InvertibleRealTransformSequence();
 
@@ -792,7 +788,7 @@ public class SliceSources {
                 writeOntotogyIfNotPresent(mp, projectFolderPath);
             }
 
-            RealTransform transform = getConcatenatedRealTransform();
+            RealTransform transform = getSlicePixToCCFRealTransform();
 
             if (transform!=null) {
                 File ftransform = new File(dataEntryFolder, "ABBA-Transform.json");
