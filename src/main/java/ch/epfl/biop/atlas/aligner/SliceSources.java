@@ -737,14 +737,11 @@ public class SliceSources {
         InvertibleRealTransformSequence irts = new InvertibleRealTransformSequence();
 
         AffineTransform3D at3D = new AffineTransform3D();
-        at3D.translate(-mp.nPixX / 2.0, -mp.nPixY / 2.0, 0);
-        at3D.scale(mp.sizePixX, mp.sizePixY, mp.sizePixZ);
-        at3D.translate(0, 0, slicingAxisPosition);
 
-        rts.add(at3D.inverse().copy());
-        irts.add(at3D.inverse().copy());
+        this.original_sacs[0].getSpimSource().getSourceTransform(0,0,at3D);
 
-        Collections.reverse(this.registrations);
+        rts.add(at3D.copy());
+        if (irts!=null) irts.add(at3D.copy());
 
         for (Registration reg : this.registrations) {
             RealTransform current = reg.getTransformAsRealTransform();
@@ -757,12 +754,10 @@ public class SliceSources {
             }
         }
 
-        Collections.reverse(this.registrations);
-
-        this.original_sacs[0].getSpimSource().getSourceTransform(0,0,at3D);
+        at3D = mp.getAffineTransformFormAlignerToAtlas();
 
         rts.add(at3D.copy());
-        if (irts!=null) irts.add(at3D.copy());
+        irts.add(at3D.copy());
 
         return (irts==null)?rts:irts;
     }
