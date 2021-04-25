@@ -1,13 +1,10 @@
-## [EXPERIMENTAL] ABBA - Allen Brain BIOP Aligner - a Fiji plugin for 2d slices to 3d atlas registration + QuPath associated tools
+## [EXPERIMENTAL] ABBA - Allen Brain BIOP Aligner
+
+A Fiji plugin for 2d slices to 3d atlas registration and QuPath associated tools.
 
 ---
 
-:warning:
-
-:+1:
-
-
-ABBA is still in experimental phase. It is provided as is. **Expect bugs** and **do not expect backward compatibility** when a more stable version will be released (all the code is versioned and stored in a worst case scenario, but do not count on it).
+:warning: ABBA is still in experimental phase. It is provided as is. **Expect bugs** and **do not expect backward compatibility** when a more stable version will be released (all the code is versioned and stored in a worst case scenario, but do not count on it).
 
 ---
 
@@ -17,9 +14,15 @@ It has been developed by the [BioImaging & Optics Platform](https://www.epfl.ch/
 
 To test this plugin, we provide a dataset that consists a several sections of a single animal, with two fluorescent channel : DAPI and a nearly autofluorescent one. This dataset has been kindly provided by Bianca A. Silva, from [Johannes Gräff lab](https://www.epfl.ch/labs/graefflab/) at EPFL.
 
-[Sample sections  (21 Gb) ](https://doi.org/10.5281/zenodo.4715656)
+* [Sample sections  (Zenodo repository, 21 Gb) ](https://doi.org/10.5281/zenodo.4715656)
+* [Downsampled sections  (GDrive, 0.4 Gb) ](https://drive.google.com/file/d/1OVb860hy-UZSSXa_u9drWiPKEunWT_a7/view?usp=sharing)
 
-[Downsampled sections  (0.4 Gb) ](https://drive.google.com/file/d/1OVb860hy-UZSSXa_u9drWiPKEunWT_a7/view?usp=sharing)
+
+## [Installation](installation.md)
+## [Using ABBA]()
+## [Developer documentation (TODO)]()
+
+<!---
 ### Markdown
 
 Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
@@ -51,3 +54,5 @@ Your Pages site will use the layout and styles from the Jekyll theme you have se
 ### Support or Contact
 
 Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
+
+-->
