@@ -15,7 +15,7 @@ Install the [latest QuPath version](https://qupath.github.io/).
 
 Install the QuPath biop extensions and its dependencies:
 * Download [jars](https://drive.google.com/file/d/1NzNu4U0c_9zwcp-gV2x3HD5lg5MJib6z/view?usp=sharing) files 
-* Extract the files and put its content them into a folder named `extensions` within another folder (for instance `C>QuPath Common Data>extensions`
+* Extract the files and put its content into a folder named `extensions` within another folder (for instance `C>QuPath Common Data>extensions`
 * In QuPath, go to `Edit>Preferences`, specify the location of the `QuPath Common Data` folder:
 
 ![Where to set QuPath extension folder](./assets/img/qupath_set_extension_folder.png)
@@ -69,15 +69,15 @@ Once elastix is installed, you can run [the following script](https://gist.githu
 
 ---
 
-:warning: If you can't get elastix working on your local computer ? Don't give up yet, you can try automated registration without a local elastix install. Go to the step 4 of the documentation.
+:warning: Can't get elastix to work on your local computer ? Don't give up yet, you can try automated registration without a local elastix install. Go to the step 4 of the documentation.
 
 ---
 
 #### 3b. Remote installation of Elastix
 
-It's possible to install elastix on a server, that can then be used as a central server. For the moment a public freely accessible registration server is available at the address `https://snappy.epfl.ch` and can be used for automated registration.
+It's possible to install elastix on a server, that can then be used as a central server. For the moment a public freely accessible registration server is available at the address [`https://snappy.epfl.ch`](https://snappy.epfl.ch) and can be used for automated registration.
 
-The procedure to install your own registration server will be detailed in the readme of the registration server github repo : https://github.com/NicoKiaru/elastix_registration_server ( TODO)
+The procedure to install your own registration server will be detailed in the readme of the registration server github repo : [https://github.com/NicoKiaru/elastix_registration_server](https://github.com/NicoKiaru/elastix_registration_server) ( TODO)
 
 ### 4. Setup ABBA in Fiji
 
@@ -91,7 +91,7 @@ You can let the first two fields empty. The Allen Brain dataset will then automa
 
 ![Allen atlas download progress bar](./assets/img/fiji_atlas_download_progress_bar.png)
 
-The allen brain atlas and associated files will be cached in your user folder under the directory `\cached_atlas`. These data are directly  downloaded from this Zenodo repository : https://zenodo.org/record/4173229#.YASj5RYo_BU . If you check `Store these settings for all users`, the data location for elastix and the atlas will be stored in a file `abbasettings.txt` stored in your hard drive in the folder `Fiji.app > plugins`. You can modify or delete this file if necessary. This is useful to avoid downloading multiple times the atlas in a multi user situation.
+The allen brain atlas and associated files will be cached in your user folder under the directory `\cached_atlas`. These data are directly  downloaded from a [Zenodo repository](https://zenodo.org/record/4173229#.YASj5RYo_BU). If you check `Store these settings for all users`, the data location for elastix and the atlas will be stored in a file `abbasettings.txt` stored in your hard drive in the folder `Fiji.app > plugins`. You can modify or delete this file if necessary. This is useful to avoid downloading multiple times the atlas in a multi user situation.
 If the initial atlas download failed, because you had no access to internet or for any other reason, you can restart the command and let empty fields to trigger again the download from Zenodo.
 
 The last two fields needs to be completed with the location of the executable file for elastix and transformix, if you manage to successfully install elastix and transformix on your computer. If you do not have a working local install, just let these fields empty.

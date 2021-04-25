@@ -12,7 +12,7 @@ Allen Brain BIOP Aligner or ABBA for short, is a [Fiji](https://fiji.sc/) plugin
 
 It has been developed by the [BioImaging & Optics Platform](https://www.epfl.ch/research/facilities/ptbiop/) at EPFL. This page contains the documentation of ABBA (installation and usage). If you require additional help, please post your question on the [image.sc](https://forum.image.sc) forum  and tag your question / issue with `#fiji` and `#abba`. If you are already a user of ABBA, you can also click on `Help > Ask for help in the forum` directly from the plugin.
 
-To test this plugin, we provide a dataset that consists a several sections of a single animal, with two fluorescent channels : DAPI and a nearly autofluorescent one. This dataset has been kindly provided by Bianca A. Silva, from [Johannes Gräff lab](https://www.epfl.ch/labs/graefflab/) at EPFL.
+To test this plugin, we provide a dataset that consists of several sections of a single animal, with two fluorescent channels : DAPI and a nearly autofluorescent one. This dataset has been kindly provided by Bianca A. Silva, from [Johannes Gräff lab](https://www.epfl.ch/labs/graefflab/) at EPFL.
 
 * [Sample sections  (Zenodo repository, 21 Gb) ](https://doi.org/10.5281/zenodo.4715656)
 * [Downsampled sections  (GDrive, 0.4 Gb) ](https://drive.google.com/file/d/1OVb860hy-UZSSXa_u9drWiPKEunWT_a7/view?usp=sharing)

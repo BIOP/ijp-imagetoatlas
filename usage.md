@@ -3,15 +3,28 @@
 It is highly recommended to use [QuPath](https://qupath.github.io/) in order to define the dataset of brain slices. It is possible to use only ImageJ/Fiji, but the analysis capabilities are then limited (no support of multiresolution files in vanilla ImageJ). This documentation will only detail the following recommended workflow:
 
 * For each animal:
-  * `<QuPath>` - define the dataset of this animal brain sections into a QuPath project
-  * `<Fiji>` - import sections by opening this QuPath project into Fiji's ABBA plugin
-  * `<Fiji>` - perform various steps of registration (manual, automated or semi automated) for all required slices
-  * `<Fiji>` - export registration results to the original QuPath project
-  * `<QuPath>` - import registration results as annotations into QuPath
-  * (Optional) after inspection, correct the registration for some slices into ABBA and re-export the new result to QuPath
-  * `<QuPath>` - detect cells and various measurements in QuPath
-  * `<QuPath>` - export a table containing, for all cells, their measurements as well as their location in the brain atlas CCF
-*  `<Your prefered data analysis software>` combine and or display these results for all your animals
+  * [`<QuPath>` - define the dataset of this animal brain sections into a QuPath project]()
+  * [`<Fiji>` - import sections by opening this QuPath project into Fiji's ABBA plugin]()
+  * [`<Fiji>` - perform various steps of registration (manual, automated or semi automated) for all required slices]()
+  * [`<Fiji>` - export registration results to the original QuPath project]()
+  * [`<QuPath>` - import registration results as annotations into QuPath]()
+  * [(Optional) after inspection, correct the registration for some slices into ABBA and re-export the new result to QuPath]()
+  * [`<QuPath>` - detect cells and various measurements in QuPath]()
+  * [`<QuPath>` - export a table containing, for all cells, their measurements as well as their location in the brain atlas CCF]()
+*  [`<Your prefered data analysis software>` combine and or display these results for all your animals]()
+
+You can click on each of the steps above to follow a typical workflow. The user interface is explained progressively through these steps. For convenience, here are links for the various controls which are covered:
+* [Atlas display]()
+* [Atlas slicing]()
+* [Slices selection]()
+* [Slices display]()
+* [Moving slices along the atlas]()
+* [Adjusting slices before registration (flip / rotate)]()
+* [Affine registration]()
+* [Spline registration]()
+* [Registration with BigWarp]()
+* [Editing a registration]()
+
 
 ## A few words about file formats
 ```
