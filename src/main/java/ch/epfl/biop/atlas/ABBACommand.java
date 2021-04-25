@@ -50,7 +50,7 @@ public class ABBACommand implements Command {
     @Parameter(type = ItemIO.OUTPUT)
     MultiSlicePositioner mp;
 
-    @Parameter(label = "Store these settings for all users")
+    @Parameter(label = "Store these settings for all users", persist=false)
     boolean storeAsGlobalSettings = false;
 
     @Override

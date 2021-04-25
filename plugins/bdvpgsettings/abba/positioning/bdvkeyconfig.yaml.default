@@ -1,0 +1,217 @@
+---
+- !mapping
+  action: 2d drag translate
+  contexts: [transform_bdv_2D]
+  triggers: [button2, button3]
+- !mapping
+  action: 2d rotate left
+  contexts: [transform_bdv_2D]
+  triggers: [LEFT]
+- !mapping
+  action: 2d zoom in
+  contexts: [transform_bdv_2D]
+  triggers: [UP]
+- !mapping
+  action: 2d rotate right
+  contexts: [transform_bdv_2D]
+  triggers: [RIGHT]
+- !mapping
+  action: 2d zoom out
+  contexts: [transform_bdv_2D]
+  triggers: [DOWN]
+- !mapping
+  action: 2d drag rotate
+  contexts: [transform_bdv_2D]
+  triggers: [button1]
+- !mapping
+  action: 2d scroll zoom
+  contexts: [transform_bdv_2D]
+  triggers: [meta scroll, scroll, shift ctrl scroll]
+- !mapping
+  action: 2d rotate right slow
+  contexts: [transform_bdv_2D]
+  triggers: [ctrl RIGHT]
+- !mapping
+  action: 2d zoom out slow
+  contexts: [transform_bdv_2D]
+  triggers: [ctrl DOWN]
+- !mapping
+  action: 2d zoom out fast
+  contexts: [transform_bdv_2D]
+  triggers: [shift DOWN]
+- !mapping
+  action: 2d rotate right fast
+  contexts: [transform_bdv_2D]
+  triggers: [shift RIGHT]
+- !mapping
+  action: 2d scroll zoom slow
+  contexts: [transform_bdv_2D]
+  triggers: [ctrl scroll]
+- !mapping
+  action: 2d zoom in fast
+  contexts: [transform_bdv_2D]
+  triggers: [shift UP]
+- !mapping
+  action: 2d rotate left fast
+  contexts: [transform_bdv_2D]
+  triggers: [shift LEFT]
+- !mapping
+  action: 2d scroll translate
+  contexts: [transform_bdv_2D]
+  triggers: [not mapped]
+- !mapping
+  action: 2d scroll rotate fast
+  contexts: [transform_bdv_2D]
+  triggers: [not mapped]
+- !mapping
+  action: 2d scroll translate slow
+  contexts: [transform_bdv_2D]
+  triggers: [not mapped]
+- !mapping
+  action: 2d scroll rotate
+  contexts: [transform_bdv_2D]
+  triggers: [not mapped]
+- !mapping
+  action: 2d scroll rotate slow
+  contexts: [transform_bdv_2D]
+  triggers: [not mapped]
+- !mapping
+  action: 2d scroll translate fast
+  contexts: [transform_bdv_2D]
+  triggers: [not mapped]
+- !mapping
+  action: 2d rotate left slow
+  contexts: [transform_bdv_2D]
+  triggers: [ctrl LEFT]
+- !mapping
+  action: 2d scroll zoom fast
+  contexts: [transform_bdv_2D]
+  triggers: [shift scroll]
+- !mapping
+  action: 2d zoom in slow
+  contexts: [transform_bdv_2D]
+  triggers: [ctrl UP]
+- !mapping
+  action: drag translate
+  contexts: [transform_bdv_3D]
+  triggers: [button2, button3]
+- !mapping
+  action: rotate left
+  contexts: [transform_bdv_3D]
+  triggers: [LEFT]
+- !mapping
+  action: zoom in
+  contexts: [transform_bdv_3D]
+  triggers: [UP]
+- !mapping
+  action: rotate right
+  contexts: [transform_bdv_3D]
+  triggers: [RIGHT]
+- !mapping
+  action: zoom out
+  contexts: [transform_bdv_3D]
+  triggers: [DOWN]
+- !mapping
+  action: forward z
+  contexts: [transform_bdv_3D]
+  triggers: [COMMA]
+- !mapping
+  action: drag rotate fast
+  contexts: [transform_bdv_3D]
+  triggers: [shift button1]
+- !mapping
+  action: backward z
+  contexts: [transform_bdv_3D]
+  triggers: [PERIOD]
+- !mapping
+  action: drag rotate
+  contexts: [transform_bdv_3D]
+  triggers: [button1]
+- !mapping
+  action: scroll zoom
+  contexts: [transform_bdv_3D]
+  triggers: [meta scroll, shift ctrl scroll]
+- !mapping
+  action: rotate right slow
+  contexts: [transform_bdv_3D]
+  triggers: [ctrl RIGHT]
+- !mapping
+  action: zoom out slow
+  contexts: [transform_bdv_3D]
+  triggers: [ctrl DOWN]
+- !mapping
+  action: backward z slow
+  contexts: [transform_bdv_3D]
+  triggers: [ctrl PERIOD]
+- !mapping
+  action: forward z slow
+  contexts: [transform_bdv_3D]
+  triggers: [ctrl COMMA]
+- !mapping
+  action: scroll browse z slow
+  contexts: [transform_bdv_3D]
+  triggers: [ctrl scroll]
+- !mapping
+  action: axis x
+  contexts: [transform_bdv_3D]
+  triggers: [X]
+- !mapping
+  action: axis y
+  contexts: [transform_bdv_3D]
+  triggers: [Y]
+- !mapping
+  action: axis z
+  contexts: [transform_bdv_3D]
+  triggers: [Z]
+- !mapping
+  action: rotate left slow
+  contexts: [transform_bdv_3D]
+  triggers: [ctrl LEFT]
+- !mapping
+  action: zoom in slow
+  contexts: [transform_bdv_3D]
+  triggers: [ctrl UP]
+- !mapping
+  action: scroll browse z
+  contexts: [transform_bdv_3D]
+  triggers: [scroll]
+- !mapping
+  action: drag rotate slow
+  contexts: [transform_bdv_3D]
+  triggers: [ctrl button1]
+- !mapping
+  action: forward z fast
+  contexts: [transform_bdv_3D]
+  triggers: [shift COMMA]
+- !mapping
+  action: backward z fast
+  contexts: [transform_bdv_3D]
+  triggers: [shift PERIOD]
+- !mapping
+  action: zoom out fast
+  contexts: [transform_bdv_3D]
+  triggers: [shift DOWN]
+- !mapping
+  action: rotate right fast
+  contexts: [transform_bdv_3D]
+  triggers: [shift RIGHT]
+- !mapping
+  action: zoom in fast
+  contexts: [transform_bdv_3D]
+  triggers: [shift UP]
+- !mapping
+  action: rotate left fast
+  contexts: [transform_bdv_3D]
+  triggers: [shift LEFT]
+- !mapping
+  action: scroll browse z fast
+  contexts: [transform_bdv_3D]
+  triggers: [shift scroll]
+- !mapping
+  action: BDV - Screenshot
+  contexts: [transform_bdv_2D, transform_bdv_3D, bdvpg]
+  triggers: [not mapped]
+- !mapping
+  action: Sources Context Menu
+  contexts: [transform_bdv_2D, transform_bdv_3D, bdvpg]
+  triggers: [not mapped]
