@@ -1,0 +1,11 @@
+/.settings/
+.project
+.classpath
+/.classpath
+/.project
+/target/
+/.idea/
+.iml
+*.iml
+*.releaseBackup
+*.tmp.bak
