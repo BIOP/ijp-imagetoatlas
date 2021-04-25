@@ -79,7 +79,7 @@ It's possible to install elastix on a server, that can then be used as a central
 
 The procedure to install your own registration server will be detailed in the readme of the registration server github repo : https://github.com/NicoKiaru/elastix_registration_server ( TODO)
 
-### 4. Setup ABBA in Fiji ==
+### 4. Setup ABBA in Fiji
 
 Execute Fiji, type `ABBA` in the command search bar or navigate and click `Plugins > BIOP > Atlas > ABBA`.
 

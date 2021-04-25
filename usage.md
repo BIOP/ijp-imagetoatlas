@@ -1,0 +1,1 @@
+![ABBA atlas display settings](./assets/gif/fiji_abba_atlas_display.gif)
