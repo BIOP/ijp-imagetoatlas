@@ -26,7 +26,7 @@ Install the QuPath biop extensions and its dependencies:
 
 ### 2. Enable Fiji's ABBA update site
 In Fiji:
-* Click {nav Help > Update... > Manage update sites > Add update site }
+* Click `Help > Update... > Manage update sites > Add update site`
 * Click `Add update site`
 * Then enter the following URL : `https://biop.epfl.ch/Fiji-ABBA/`,
 * Click `Close`
@@ -91,7 +91,7 @@ You can let the first two fields empty. The Allen Brain dataset will then automa
 
 ![Allen atlas download progress bar](./assets/img/fiji_atlas_download_progress_bar.png)
 
-The allen brain atlas and associated files will be cached in your user folder under the directory `\cached_atlas`. These data are directly  downloaded from this Zenodo repository : https://zenodo.org/record/4173229#.YASj5RYo_BU . If you check `Store these settings for all users`, the data location for elastix and the atlas will be stored in a file `abbasettings.txt` stored in your hard drive in the folder {nav Fiji.app > plugins}. You can modify or delete this file if necessary. This is useful to avoid downloading multiple times the atlas in a multi user situation.
+The allen brain atlas and associated files will be cached in your user folder under the directory `\cached_atlas`. These data are directly  downloaded from this Zenodo repository : https://zenodo.org/record/4173229#.YASj5RYo_BU . If you check `Store these settings for all users`, the data location for elastix and the atlas will be stored in a file `abbasettings.txt` stored in your hard drive in the folder `Fiji.app > plugins`. You can modify or delete this file if necessary. This is useful to avoid downloading multiple times the atlas in a multi user situation.
 If the initial atlas download failed, because you had no access to internet or for any other reason, you can restart the command and let empty fields to trigger again the download from Zenodo.
 
 The last two fields needs to be completed with the location of the executable file for elastix and transformix, if you manage to successfully install elastix and transformix on your computer. If you do not have a working local install, just let these fields empty.
