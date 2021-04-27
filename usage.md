@@ -3,11 +3,11 @@
 It is highly recommended to use [QuPath](https://qupath.github.io/) in order to define the dataset of brain slices. It is possible to use only ImageJ/Fiji, but the analysis capabilities are then limited (no support of multiresolution files in vanilla ImageJ). This documentation will only detail the following recommended workflow:
 
 * For each animal:
-  * [`<QuPath>` - define the dataset of this animal brain sections into a QuPath project]()
+  * [`<QuPath>` - define the dataset of this animal brain sections into a QuPath project](create_dataset_and_open.md)
   * [`<Fiji>` - import sections by opening this QuPath project into Fiji's ABBA plugin]()
   * [`<Fiji>` - perform various steps of registration (manual, automated or semi automated) for all required slices]()
   * [`<Fiji>` - export registration results to the original QuPath project]()
-  * [`<QuPath>` - import registration results as annotations into QuPath]()
+  * [`<QuPath>` - import registration results as QuPath annotations]()
   * [(Optional) after inspection, correct the registration for some slices into ABBA and re-export the new result to QuPath]()
   * [`<QuPath>` - detect cells and various measurements in QuPath]()
   * [`<QuPath>` - export a table containing, for all cells, their measurements as well as their location in the brain atlas CCF]()
@@ -43,7 +43,7 @@ First of all, all files need to be properly calibrated (microns, millimeters, et
 
 ---
 
-:warning: Because Fiji is used is the workflow, only Bio-Formats supported formats are correctly handled. You can check on  [the Bio-Formats documentation](https://docs.openmicroscopy.org/bio-formats/6.6.1/supported-formats.html) if your file formats will be correctly handled. This will be the case if `Pyramid` is checked. File which can be opened only via [`OpenSlide`](https://openslide.org/) are not supported.
+:warning: Because Fiji is used is the workflow, only Bio-Formats supported formats are correctly handled. You can check on  [the Bio-Formats documentation](https://docs.openmicroscopy.org/bio-formats/6.6.1/supported-formats.html) if your file formats will be correctly handled. This will be the case if `Pyramid` is checked. File which can be opened **only** via [`OpenSlide`](https://openslide.org/) are not supported.
 
 Tested file formats for ABBA :
 
