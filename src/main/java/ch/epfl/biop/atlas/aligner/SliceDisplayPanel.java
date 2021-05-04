@@ -4,7 +4,6 @@ import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.commands.DisplaySettingsCommand;
 import org.scijava.command.CommandService;
 import spimdata.util.Displaysettings;
-import spimdata.util.DisplaysettingsHelper;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -132,7 +131,7 @@ public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, Mul
                                     modelSelect.fireTableCellUpdated(row, col);};
                                 // ---- Just to have the correct parameters displayed (dirty hack)
                                 Displaysettings ds_in = new Displaysettings(-1);
-                                DisplaysettingsHelper.GetDisplaySettingsFromCurrentConverter(sacs[0], ds_in);
+                                Displaysettings.GetDisplaySettingsFromCurrentConverter(sacs[0], ds_in);
                                 DisplaySettingsCommand.IniValue = ds_in;
                                 mp.scijavaCtx
                                         .getService(CommandService.class)
@@ -184,7 +183,7 @@ public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, Mul
 
                             // ---- Just to have the correct parameters displayed (dirty hack)
                             Displaysettings ds_in = new Displaysettings(-1);
-                            DisplaysettingsHelper.GetDisplaySettingsFromCurrentConverter(sacs[0], ds_in);
+                            Displaysettings.GetDisplaySettingsFromCurrentConverter(sacs[0], ds_in);
                             DisplaySettingsCommand.IniValue = ds_in;
 
                             mp.scijavaCtx

@@ -5,7 +5,6 @@ import ch.epfl.biop.atlas.aligner.commands.DisplaySettingsCommand;
 import org.scijava.command.CommandService;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
 import spimdata.util.Displaysettings;
-import spimdata.util.DisplaysettingsHelper;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
@@ -90,7 +89,7 @@ public class AtlasDisplayPanel implements MultiSlicePositioner.ModeListener {
 
                             // ---- Just to have the correct parameters displayed (dirty hack)
                             Displaysettings ds_in = new Displaysettings(-1);
-                            DisplaysettingsHelper.GetDisplaySettingsFromCurrentConverter(sacs[0], ds_in);
+                            Displaysettings.GetDisplaySettingsFromCurrentConverter(sacs[0], ds_in);
                             DisplaySettingsCommand.IniValue = ds_in;
 
                             mp.scijavaCtx
@@ -220,7 +219,7 @@ public class AtlasDisplayPanel implements MultiSlicePositioner.ModeListener {
                 if (nChannels>iChannel) {
                     SourceAndConverter sac = getSources()[iChannel];
                     Displaysettings ds = new Displaysettings(-1);
-                    DisplaysettingsHelper.GetDisplaySettingsFromCurrentConverter(sac, ds);
+                    Displaysettings.GetDisplaySettingsFromCurrentConverter(sac, ds);
                     return ds;
                 } else {
                     return new Displaysettings(-1,"-");

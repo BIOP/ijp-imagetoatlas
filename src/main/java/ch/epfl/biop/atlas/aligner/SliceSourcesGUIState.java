@@ -10,7 +10,6 @@ import org.scijava.ui.behaviour.util.Behaviours;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
 import spimdata.util.Displaysettings;
-import spimdata.util.DisplaysettingsHelper;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -248,14 +247,14 @@ public class SliceSourcesGUIState {
         Displaysettings[] ds = new Displaysettings[nChannels];
         for (int idx = 0; idx<nChannels;idx++) {
             ds[idx] = new Displaysettings(-1); // we don't care about the number
-            DisplaysettingsHelper.GetDisplaySettingsFromCurrentConverter(sources_displayed_or_readyfordisplay[idx], ds[idx]);
+            Displaysettings.GetDisplaySettingsFromCurrentConverter(sources_displayed_or_readyfordisplay[idx], ds[idx]);
         }
         return ds;
     }
 
     public void setDisplaysettings(Displaysettings[] ds) {
         for (int idx = 0; idx<nChannels;idx++) {
-           DisplaysettingsHelper.applyDisplaysettings(sources_displayed_or_readyfordisplay[idx], ds[idx]);
+            Displaysettings.applyDisplaysettings(sources_displayed_or_readyfordisplay[idx], ds[idx]);
         }
     }
 

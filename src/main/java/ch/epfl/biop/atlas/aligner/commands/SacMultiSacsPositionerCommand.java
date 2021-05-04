@@ -13,8 +13,8 @@ import org.scijava.command.CommandService;
 import org.scijava.object.ObjectService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import sc.fiji.bdvpg.bdv.projector.Projection;
 import sc.fiji.bdvpg.scijava.command.bdv.BdvWindowCreatorCommand;
+import sc.fiji.bdvpg.scijava.services.SourceAndConverterBdvDisplayService;
 
 import javax.swing.*;
 
@@ -44,6 +44,9 @@ public class SacMultiSacsPositionerCommand implements Command {
     @Parameter(type = ItemIO.OUTPUT)
     MultiSlicePositioner mp;
 
+    @Parameter
+    SourceAndConverterBdvDisplayService bdvDisplayService;
+
     @Override
     public void run() {
 
@@ -67,13 +70,14 @@ public class SacMultiSacsPositionerCommand implements Command {
 
         try {
 
-            bdvMultiSlicer = (BdvHandle) cs.run(BdvWindowCreatorCommand.class, true,
+            bdvMultiSlicer = bdvDisplayService.getNewBdv();
+                    /*(BdvHandle) cs.run(BdvWindowCreatorCommand.class, true,
                     "is2D", false, //true,
                     "windowTitle", "Allen Brain BIOP Aligner",//"Multi Slice Positioner " + ba.toString(),
                     "interpolate", false,
                     "nTimepoints", 1,
                     "projector", Projection.SUM_PROJECTOR)
-                    .get().getOutput("bdvh");
+                    .get().getOutput("bdvh");*/
 
             JFrame frame = ((BdvHandleFrame)bdvMultiSlicer).getBigDataViewer().getViewerFrame();
             frame.setExtendedState(JFrame.MAXIMIZED_BOTH);

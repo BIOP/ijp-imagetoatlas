@@ -109,7 +109,7 @@
 
 		<bigdataviewer-biop-tools.version>0.2.15-SNAPSHOT</bigdataviewer-biop-tools.version>
 		<bigdataviewer-bioformats.version>0.2.15</bigdataviewer-bioformats.version>
-		<bigdataviewer-playground.version>0.2.13</bigdataviewer-playground.version>
+		<bigdataviewer-playground.version>0.3.0-SNAPSHOT</bigdataviewer-playground.version>
 		<bigdataviewer-selector.version>0.1.8</bigdataviewer-selector.version>
 		<scijava.app.directory>C:\Users\nicol\Desktop\fiji-win64-ABBA\Fiji.app</scijava.app.directory>
 
@@ -121,7 +121,7 @@
 		<ijl-utilities-wrappers.version>0.3.18</ijl-utilities-wrappers.version>
 		<json.version>20180813</json.version>
 
-		<bigdataviewer-spimdata-extras.version>0.1.0</bigdataviewer-spimdata-extras.version>
+		<bigdataviewer-spimdata-extras.version>0.1.1-SNAPSHOT</bigdataviewer-spimdata-extras.version>
 		<elastix_registration_server.version>0.1.3</elastix_registration_server.version>
 
 		<oshi-core.version>5.5.1</oshi-core.version>
