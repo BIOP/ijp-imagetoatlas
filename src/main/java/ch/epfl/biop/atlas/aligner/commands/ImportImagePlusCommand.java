@@ -2,13 +2,13 @@ package ch.epfl.biop.atlas.aligner.commands;
 
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
-import ch.epfl.biop.spimdata.imageplus.SpimDataFromImagePlusGetter;
 import ij.ImagePlus;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
+import spimdata.imageplus.SpimDataFromImagePlusGetter;
 
 @Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Import>Import Current IJ1 Image")
 public class ImportImagePlusCommand implements Command {

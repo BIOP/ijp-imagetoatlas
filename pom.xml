@@ -107,16 +107,17 @@
 		<license.excludes>**/resources/**</license.excludes>
 		<main-class>ch.epfl.biop.ABBALaunch</main-class>
 
-		<bigdataviewer-biop-tools.version>0.2.15-SNAPSHOT</bigdataviewer-biop-tools.version>
+		<bigdataviewer-biop-tools.version>0.2.15-SNAPSHOT-local</bigdataviewer-biop-tools.version>
 		<bigdataviewer-bioformats.version>0.2.15</bigdataviewer-bioformats.version>
-		<bigdataviewer-playground.version>0.3.0-SNAPSHOT</bigdataviewer-playground.version>
+		<bigdataviewer-playground.version>0.3.0-SNAPSHOT-local</bigdataviewer-playground.version>
 		<bigdataviewer-selector.version>0.1.8</bigdataviewer-selector.version>
+		<bigdataviewer_playground_display.version>0.1.0-SNAPSHOT</bigdataviewer_playground_display.version>
 		<scijava.app.directory>C:\Users\nicol\Desktop\fiji-win64-ABBA\Fiji.app</scijava.app.directory>
 
 		<bigdataviewer-core.version>10.2.0</bigdataviewer-core.version>
 		<bigdataviewer-vistools.version>1.0.0-beta-28</bigdataviewer-vistools.version>
 		<imglib2-cache.version>1.0.0-beta-16</imglib2-cache.version>
-		<bigwarp_fiji.version>6.1.0</bigwarp_fiji.version>
+		<bigwarp_fiji.version>7.0.1</bigwarp_fiji.version>
 
 		<ijl-utilities-wrappers.version>0.3.18</ijl-utilities-wrappers.version>
 		<json.version>20180813</json.version>
@@ -180,6 +181,12 @@
 			<groupId>sc.fiji</groupId>
 			<artifactId>bigdataviewer-playground</artifactId>
 			<version>${bigdataviewer-playground.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>sc.fiji.bigdataviewer</groupId>
+			<artifactId>bigdataviewer_playground_display</artifactId>
+			<version>${bigdataviewer_playground_display.version}</version>
 		</dependency>
 
 		<dependency>

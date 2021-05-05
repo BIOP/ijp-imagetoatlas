@@ -1,6 +1,5 @@
 package ch.epfl.biop.atlas.plugin;
 
-import ch.epfl.biop.bdv.BdvScijavaHelper;
 import ch.epfl.biop.registration.Registration;
 import org.scijava.Context;
 import org.scijava.command.Command;

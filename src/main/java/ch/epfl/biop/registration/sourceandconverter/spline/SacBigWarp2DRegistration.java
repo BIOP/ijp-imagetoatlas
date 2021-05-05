@@ -84,7 +84,7 @@ public class SacBigWarp2DRegistration extends RealTransformSourceAndConverterReg
 
             waitForUser.run();
 
-            rt = bwl.getBigWarp().getTransformation();
+            rt = bwl.getBigWarp().getBwTransform().getTransformation();
 
             bwl.getBigWarp().closeAll();
 

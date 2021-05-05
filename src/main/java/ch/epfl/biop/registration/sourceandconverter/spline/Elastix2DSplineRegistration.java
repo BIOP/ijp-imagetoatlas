@@ -316,7 +316,7 @@ public class Elastix2DSplineRegistration extends RealTransformSourceAndConverter
 
         waitForUser.run();
 
-        rt = bwl.getBigWarp().getTransformation();
+        rt = bwl.getBigWarp().getBwTransform().getTransformation();
 
         bwl.getBigWarp().closeAll();
 
