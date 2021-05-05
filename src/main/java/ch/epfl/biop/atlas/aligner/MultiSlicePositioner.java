@@ -237,6 +237,10 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
      * @param ctx a scijava context
      */
     public MultiSlicePositioner(BdvHandle bdvh, BiopAtlas biopAtlas, ReslicedAtlas reslicedAtlas, Context ctx) {
+
+        bdvh.getSplitPanel().setCollapsed(false);
+        bdvh.getSplitPanel().setDividerLocation(0.7);
+
         this.reslicedAtlas = reslicedAtlas;
         this.biopAtlas = biopAtlas;
         this.bdvh = bdvh;
@@ -521,8 +525,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         iniView = BdvHandleHelper.getViewerTransformWithNewCenter(bdvh, new double[]{center.getDoublePosition(0), center.getDoublePosition(1), 0});
         bdvh.getViewerPanel().state().setViewerTransform(iniView);
 
-        bdvh.getSplitPanel().setCollapsed(false);
-        bdvh.getSplitPanel().setDividerLocation(0.7);
+
 
         // Close hook to try to release as many resources as possible
         BdvHandleHelper.setBdvHandleCloseOperation(bdvh, ctx.getService(CacheService.class),
