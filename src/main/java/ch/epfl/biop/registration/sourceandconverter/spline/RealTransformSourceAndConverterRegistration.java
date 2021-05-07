@@ -8,6 +8,7 @@ import ch.epfl.biop.registration.sourceandconverter.SourceAndConverterRegistrati
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.RealTransform;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceRealTransformer;
+import sc.fiji.persist.ScijavaGsonHelper;
 
 import java.util.ArrayList;
 
@@ -57,12 +58,12 @@ abstract public class RealTransformSourceAndConverterRegistration extends Source
 
     @Override
     final public String getTransform() {
-        return RealTransformHelper.getRealTransformAdapter(context).toJson(rt);
+        return ScijavaGsonHelper.getGson(context).toJson(rt, RealTransform.class);
     }
 
     @Override
     final public void setTransform(String serialized_transform) {
-        setRealTransform(RealTransformHelper.getRealTransformAdapter(context).fromJson(serialized_transform, RealTransform.class));
+        setRealTransform(ScijavaGsonHelper.getGson(context).fromJson(serialized_transform, RealTransform.class));
         isDone = true;
     }
 

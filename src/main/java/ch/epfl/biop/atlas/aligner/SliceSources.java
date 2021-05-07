@@ -34,6 +34,7 @@ import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
 import sc.fiji.bdvpg.sourceandconverter.importer.EmptySourceAndConverterCreator;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceResampler;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
+import sc.fiji.persist.ScijavaGsonHelper;
 
 import java.awt.*;
 import java.io.*;
@@ -793,7 +794,7 @@ public class SliceSources {
             if (transform!=null) {
                 File ftransform = new File(dataEntryFolder, "ABBA-Transform.json");
                 mp.log.accept("Save transformation to quPath project " + ftransform.getAbsolutePath());
-                String transform_string = RealTransformHelper.getRealTransformAdapter(mp.scijavaCtx).toJson(transform);
+                String transform_string = ScijavaGsonHelper.getGson(mp.scijavaCtx).toJson(transform, RealTransform.class);
                 if (ftransform.exists()) {
                     if (erasePreviousFile) {
                         Files.delete(Paths.get(ftransform.getAbsolutePath()));

@@ -9,6 +9,7 @@ import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.realtransform.RealTransform;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterAndTimeRange;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
+import sc.fiji.persist.ScijavaGsonHelper;
 
 import java.util.ArrayList;
 
@@ -42,12 +43,12 @@ abstract public class AffineTransformSourceAndConverterRegistration extends Sour
 
     @Override
     public String getTransform() {
-        return RealTransformHelper.getRealTransformAdapter(context).toJson(at3d);
+        return ScijavaGsonHelper.getGson(context).toJson(at3d, AffineTransform3D.class);
     }
 
     @Override
     public void setTransform(String serialized_transform) {
-        at3d = RealTransformHelper.getRealTransformAdapter(context).fromJson(serialized_transform, AffineTransform3D.class);
+        at3d = ScijavaGsonHelper.getGson(context).fromJson(serialized_transform, AffineTransform3D.class);
         isDone = true;
     }
 

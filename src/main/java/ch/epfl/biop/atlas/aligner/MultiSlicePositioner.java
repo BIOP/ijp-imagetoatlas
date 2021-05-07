@@ -21,6 +21,7 @@ import mpicbg.spim.data.generic.sequence.BasicViewSetup;
 import mpicbg.spim.data.sequence.Tile;
 import net.imglib2.*;
 import net.imglib2.realtransform.AffineTransform3D;
+import net.imglib2.realtransform.RealTransform;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
@@ -46,6 +47,7 @@ import sc.fiji.bdvpg.services.SourceAndConverterServiceSaver;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
 import sc.fiji.persist.RuntimeTypeAdapterFactory;
+import sc.fiji.persist.ScijavaGsonHelper;
 
 import javax.swing.*;
 import java.awt.Point;
@@ -239,7 +241,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     public MultiSlicePositioner(BdvHandle bdvh, BiopAtlas biopAtlas, ReslicedAtlas reslicedAtlas, Context ctx) {
 
         bdvh.getSplitPanel().setCollapsed(false);
-        bdvh.getSplitPanel().setDividerLocation(0.7);
+        bdvh.getSplitPanel().setDividerLocation(0.4);
 
         this.reslicedAtlas = reslicedAtlas;
         this.biopAtlas = biopAtlas;
@@ -2384,7 +2386,9 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         // Now gets all custom serializers for RealTransform.class, using Scijava extensibility plugin
         // Most of the adapters comes from Bdv-Playground
 
-        RealTransformHelper.registerTransformAdapters(gsonbuilder, scijavaCtx);
+        ScijavaGsonHelper.getGsonBuilder(scijavaCtx, gsonbuilder, true);
+
+        //RealTransformHelper.registerTransformAdapters(gsonbuilder, scijavaCtx);
 
         gsonbuilder.registerTypeHierarchyAdapter(AlignerState.SliceSourcesState.class, new SliceSourcesStateDeserializer((slice) -> currentSerializedSlice = slice));
 
@@ -2502,6 +2506,10 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
         Gson gson = getGsonStateSerializer(serialized_sources);
 
+        System.out.println(gson.toJson(new AffineTransform3D()));
+
+        System.out.println(gson.toJson(new AffineTransform3D(), RealTransform.class));
+
         if (stateFile.exists()) {
             try {
                 FileReader fileReader = new FileReader(stateFile);
@@ -2534,13 +2542,13 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                 setDisplayMode(state.displayMode);
                 setOverlapMode(state.overlapMode);
 
-                bdvh.getViewerPanel().state().setViewerTransform(state.bdvView);
+                bdvh.getViewerPanel().state().setViewerTransform((AffineTransform3D) state.bdvView);
 
                 state.slices_state_list.forEach(sliceState -> {
                     sliceState.slice.waitForEndOfTasks();
                     sliceState.slice.getGUIState().setChannelsVisibility(sliceState.channelsVisibility); // TODO : restore
                     sliceState.slice.getGUIState().setDisplaysettings(sliceState.settings_per_channel);
-                    sliceState.slice.transformSourceOrigin(sliceState.preTransform);
+                    sliceState.slice.transformSourceOrigin((AffineTransform3D) (sliceState.preTransform));
                 });
 
                 this.iCurrentSlice = state.iCurrentSlice; // Does not work if multiple states are opened TODO : fix, but honestly not important enough
