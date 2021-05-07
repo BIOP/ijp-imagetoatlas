@@ -109,10 +109,10 @@
 
 		<bigdataviewer-bioformats.version>0.2.15</bigdataviewer-bioformats.version>
 
-		<bigdataviewer-playground.version>0.3.0-SNAPSHOT-loc</bigdataviewer-playground.version>
+		<bigdataviewer-playground.version>0.3.0</bigdataviewer-playground.version>
 		<bigdataviewer_playground_display.version>0.1.0-SNAPSHOT</bigdataviewer_playground_display.version>
-		<bigdataviewer-spimdata-extras.version>0.1.1-SNAPSHOT</bigdataviewer-spimdata-extras.version>
-		<bigdataviewer-biop-tools.version>0.2.15-SNAPSHOT-local</bigdataviewer-biop-tools.version>
+		<bigdataviewer-spimdata-extras.version>0.1.1</bigdataviewer-spimdata-extras.version>
+		<bigdataviewer-biop-tools.version>0.2.15</bigdataviewer-biop-tools.version>
 
 		<bigdataviewer-selector.version>0.1.8</bigdataviewer-selector.version>
 		<scijava.app.directory>C:\Users\nicol\Desktop\fiji-win64-ABBA\Fiji.app</scijava.app.directory>

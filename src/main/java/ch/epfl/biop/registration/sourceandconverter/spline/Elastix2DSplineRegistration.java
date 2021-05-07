@@ -282,9 +282,9 @@ public class Elastix2DSplineRegistration extends RealTransformSourceAndConverter
 
         List<SourceAndConverter> fixedSacs = Arrays.stream(fimg).collect(Collectors.toList());
 
-        List<ConverterSetup> converterSetups = Arrays.stream(mimg).map(src -> SourceAndConverterServices.getSourceAndConverterDisplayService().getConverterSetup(src)).collect(Collectors.toList());
+        List<ConverterSetup> converterSetups = Arrays.stream(mimg).map(src -> SourceAndConverterServices.getBdvDisplayService().getConverterSetup(src)).collect(Collectors.toList());
 
-        converterSetups.addAll(Arrays.stream(fimg).map(src -> SourceAndConverterServices.getSourceAndConverterDisplayService().getConverterSetup(src)).collect(Collectors.toList()));
+        converterSetups.addAll(Arrays.stream(fimg).map(src -> SourceAndConverterServices.getBdvDisplayService().getConverterSetup(src)).collect(Collectors.toList()));
 
         // Launch BigWarp
         BigWarpLauncher bwl = new BigWarpLauncher(movingSacs, fixedSacs, "Big Warp", converterSetups);
@@ -301,7 +301,7 @@ public class Elastix2DSplineRegistration extends RealTransformSourceAndConverter
         bdvhQ.getViewerPanel().state().setDisplayMode(DisplayMode.FUSED);
         bdvhP.getViewerPanel().state().setDisplayMode(DisplayMode.FUSED);
 
-        SourceAndConverterServices.getSourceAndConverterDisplayService().pairClosing(bdvhQ,bdvhP);
+        SourceAndConverterServices.getBdvDisplayService().pairClosing(bdvhQ,bdvhP);
 
         bdvhP.getViewerPanel().requestRepaint();
         bdvhQ.getViewerPanel().requestRepaint();

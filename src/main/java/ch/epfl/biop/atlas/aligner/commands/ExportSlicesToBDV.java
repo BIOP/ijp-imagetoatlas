@@ -58,7 +58,7 @@ public class ExportSlicesToBDV implements Command {
             });
 
             SourceAndConverterServices
-                    .getSourceAndConverterDisplayService()
+                    .getBdvDisplayService()
                     .show(bdvh[0], sacsToAppend.toArray(new SourceAndConverter[0]));
         }
     }

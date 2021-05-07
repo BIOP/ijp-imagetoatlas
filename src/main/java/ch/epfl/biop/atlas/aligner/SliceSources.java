@@ -992,6 +992,20 @@ public class SliceSources {
         return sliceInfo;
     }
 
+    boolean setAsKeySlice = false;
+
+    public void keySliceOn() {
+        setAsKeySlice = true;
+    }
+
+    public void keySliceOff() {
+        setAsKeySlice = false;
+    }
+
+    public boolean isKeySlice() {
+        return setAsKeySlice;
+    }
+
     public static class RegistrationAndSources {
 
         final Registration reg;

@@ -59,7 +59,7 @@ public class DisplaySettingsCommand extends DynamicCommand implements
         ds.color = new int[]{color.getRed(), color.getGreen(), color.getBlue(), 255};
 
         Displaysettings.applyDisplaysettings(sacs, ds);
-        SourceAndConverterServices.getSourceAndConverterDisplayService()
+        SourceAndConverterServices.getBdvDisplayService()
                 .updateDisplays(sacs);
 
         if (postrun!=null) {

@@ -49,9 +49,9 @@ public class SacBigWarp2DRegistration extends RealTransformSourceAndConverterReg
 
             List<SourceAndConverter> fixedSacs = Arrays.stream(fimg).collect(Collectors.toList());
 
-            List<ConverterSetup> converterSetups = Arrays.stream(mimg).map(src -> SourceAndConverterServices.getSourceAndConverterDisplayService().getConverterSetup(src)).collect(Collectors.toList());
+            List<ConverterSetup> converterSetups = Arrays.stream(mimg).map(src -> SourceAndConverterServices.getBdvDisplayService().getConverterSetup(src)).collect(Collectors.toList());
 
-            converterSetups.addAll(Arrays.stream(fimg).map(src -> SourceAndConverterServices.getSourceAndConverterDisplayService().getConverterSetup(src)).collect(Collectors.toList()));
+            converterSetups.addAll(Arrays.stream(fimg).map(src -> SourceAndConverterServices.getBdvDisplayService().getConverterSetup(src)).collect(Collectors.toList()));
 
             // Launch BigWarp
             bwl = new BigWarpLauncher(movingSacs, fixedSacs, "Big Warp", converterSetups);
@@ -68,7 +68,7 @@ public class SacBigWarp2DRegistration extends RealTransformSourceAndConverterReg
             bdvhP.getViewerPanel().state().setViewerTransform(BdvHandleHelper.getViewerTransformWithNewCenter(bdvhP, new double[]{0,0,0}));
             bdvhQ.getViewerPanel().state().setViewerTransform(BdvHandleHelper.getViewerTransformWithNewCenter(bdvhQ, new double[]{0,0,0}));
 
-            SourceAndConverterServices.getSourceAndConverterDisplayService().pairClosing(bdvhQ,bdvhP);
+            SourceAndConverterServices.getBdvDisplayService().pairClosing(bdvhQ,bdvhP);
 
             bdvhP.getViewerPanel().requestRepaint();
             bdvhQ.getViewerPanel().requestRepaint();

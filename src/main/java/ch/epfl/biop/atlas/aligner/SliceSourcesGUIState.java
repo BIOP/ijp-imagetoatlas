@@ -237,7 +237,7 @@ public class SliceSourcesGUIState {
                         .collect(Collectors.toList());
 
                 SourceAndConverterServices
-                        .getSourceAndConverterDisplayService()
+                        .getBdvDisplayService()
                         .show(mp.getBdvh(), sourcesToDisplay.toArray(new SourceAndConverter[sourcesToDisplay.size()]));
             }
         //}

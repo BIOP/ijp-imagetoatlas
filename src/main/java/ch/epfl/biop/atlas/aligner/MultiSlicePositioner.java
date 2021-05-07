@@ -322,7 +322,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
             sacsToAppend.add(reslicedAtlas.nonExtendedSlicedSources[i]);
         }
 
-        SourceAndConverterServices.getSourceAndConverterDisplayService()
+        SourceAndConverterServices.getBdvDisplayService()
                 .show(bdvh, sacsToAppend.toArray(new SourceAndConverter[0]));
 
         bdvh.getViewerPanel().getDisplay().addHandler(this);
@@ -531,7 +531,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
         // Close hook to try to release as many resources as possible
         BdvHandleHelper.setBdvHandleCloseOperation(bdvh, ctx.getService(CacheService.class),
-                SourceAndConverterServices.getSourceAndConverterDisplayService(), false,
+                SourceAndConverterServices.getBdvDisplayService(), false,
                 () -> {
                     if (mso!=null) this.mso.clear();
                     if (userActions!=null) this.userActions.clear();
