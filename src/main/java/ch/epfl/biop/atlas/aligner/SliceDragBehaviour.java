@@ -51,6 +51,7 @@ public class SliceDragBehaviour implements DragBehaviour {
             if (!affectedSlices.contains(sliceDragged)) {
                 mp.debuglog.accept("This should not happen : slice dragged is not selected!");
                 perform = false;
+                mp.stopDragAction();
             } else {
 
                 affectedSlices.forEach(s -> initialAxisPositions.put(s, s.getSlicingAxisPosition()));
@@ -102,6 +103,7 @@ public class SliceDragBehaviour implements DragBehaviour {
                 if (indexOfSliceInDraggedOnes == -1) {
                     mp.debuglog.accept("This should not happen : index of slice in dragged one not present");
                     perform = false;
+                    mp.stopDragAction();
                 } else {
                     rangeBefore = initialAxisPositions.get(affectedSlices.get(indexOfSliceInDraggedOnes)) - initialAxisPositions.get(affectedSlices.get(0));
                     rangeAfter = initialAxisPositions.get(affectedSlices.get(affectedSlices.size() - 1)) - initialAxisPositions.get(affectedSlices.get(indexOfSliceInDraggedOnes));
@@ -294,6 +296,7 @@ public class SliceDragBehaviour implements DragBehaviour {
             if (affectedSlices.size()>1) new MarkActionSequenceBatch(mp).runRequest();
 
             mp.updateDisplay();
+            perform = false;
             mp.stopDragAction();
         }
 
@@ -306,7 +309,7 @@ public class SliceDragBehaviour implements DragBehaviour {
         iniPointBdv = new RealPoint(3);
         iniSlicePointing = -1;
         iniSlicingAxisPosition = -1;
-        perform = false;
+
         keyLeft = false;
         keyRight = false;
         keySliceRight = null;

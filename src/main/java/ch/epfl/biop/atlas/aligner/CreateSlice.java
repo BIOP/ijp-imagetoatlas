@@ -108,4 +108,9 @@ public class CreateSlice extends CancelableAction {
     public void drawAction(Graphics2D g, double px, double py, double scale) {
         g.drawString("C", (int) px - 5, (int) py + 5);
     }
+
+    @Override
+    public boolean draw() {
+        return false;
+    }
 }

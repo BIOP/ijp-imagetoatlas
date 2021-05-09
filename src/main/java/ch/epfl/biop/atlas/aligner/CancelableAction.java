@@ -86,6 +86,10 @@ public abstract class CancelableAction {
 
     abstract protected boolean cancel();
 
+    public boolean draw() {
+        return true;
+    }
+
     public void draw(Graphics2D g, double px, double py, double scale) {
         if (mp.drawActions) {
             drawAction(g, px, py, scale);

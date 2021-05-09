@@ -90,20 +90,11 @@ public class MultiSliceObserver {
                             continue;
                         }
 
-                        if (action instanceof MoveSlice) {
-                            if (indexAction == sliceSortedActions.get(slice).size() - 1) {
+                        if (action.draw()) {
 
-                                action.draw(g, xP, yP, 1);
-                                yP += yInc;
+                            if (action instanceof MoveSlice) {
+                                if (indexAction == sliceSortedActions.get(slice).size() - 1) {
 
-                                if ((mp.iCurrentSlice >= 0) && (mp.iCurrentSlice < slices.size()))
-                                    if (slices.get(mp.iCurrentSlice).equals(slice)) {
-                                        action.draw(g, 50, yP - yP0 + 50, 1);
-                                    }
-                            } else {
-                                if (sliceSortedActions.get(slice).get(indexAction + 1) instanceof MoveSlice) {
-                                    // ignored action
-                                } else {
                                     action.draw(g, xP, yP, 1);
                                     yP += yInc;
 
@@ -111,15 +102,27 @@ public class MultiSliceObserver {
                                         if (slices.get(mp.iCurrentSlice).equals(slice)) {
                                             action.draw(g, 50, yP - yP0 + 50, 1);
                                         }
+                                } else {
+                                    if (sliceSortedActions.get(slice).get(indexAction + 1) instanceof MoveSlice) {
+                                        // ignored action
+                                    } else {
+                                        action.draw(g, xP, yP, 1);
+                                        yP += yInc;
+
+                                        if ((mp.iCurrentSlice >= 0) && (mp.iCurrentSlice < slices.size()))
+                                            if (slices.get(mp.iCurrentSlice).equals(slice)) {
+                                                action.draw(g, 50, yP - yP0 + 50, 1);
+                                            }
+                                    }
                                 }
+                            } else {
+                                action.draw(g, xP, yP, 1);
+                                yP += yInc;
+                                if ((mp.iCurrentSlice >= 0) && (mp.iCurrentSlice < slices.size()))
+                                    if (slices.get(mp.iCurrentSlice).equals(slice)) {
+                                        action.draw(g, 50, yP - yP0, 1);
+                                    }
                             }
-                        } else {
-                            action.draw(g, xP, yP, 1);
-                            yP += yInc;
-                            if ((mp.iCurrentSlice >= 0) && (mp.iCurrentSlice < slices.size()))
-                                if (slices.get(mp.iCurrentSlice).equals(slice)) {
-                                    action.draw(g, 50, yP - yP0, 1);
-                                }
                         }
                     }
                 }

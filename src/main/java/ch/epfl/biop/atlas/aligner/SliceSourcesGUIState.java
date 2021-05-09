@@ -104,20 +104,13 @@ public class SliceSourcesGUIState {
                 mp.getBdvh().getTriggerbindings(),
                 this.toString(), // pray for unicity ? TODO : do better than thoughts and prayers
                 () -> {
-                    //Integer[] coords = this.getBdvHandleCoords();
-                    //coords[1] = mp.
-
-
                     AffineTransform3D bdvAt3D = new AffineTransform3D();
                     mp.getBdvh().getViewerPanel().state().getViewerTransform(bdvAt3D);
 
                     RealPoint handlePoint = getCenterPositionPMode();
                     handlePoint.setPosition(+mp.sY/2.0, 1);
                     bdvAt3D.apply(handlePoint, handlePoint);
-
-
                     return new Integer[]{(int) handlePoint.getDoublePosition(0), (int) handlePoint.getDoublePosition(1), (int) handlePoint.getDoublePosition(2)};
-
                 },
                 () -> {
                     if (slice.isKeySlice()) {
@@ -313,10 +306,14 @@ public class SliceSourcesGUIState {
 
     public void drawGraphicalHandles(Graphics2D g) {
         ghs.forEach(gh -> gh.draw(g));
-        if (mp.getDisplayMode() == MultiSlicePositioner.POSITIONING_MODE_INT) {
-            if (mp.getSliceDisplayMode() == MultiSlicePositioner.ALL_SLICES_DISPLAY_MODE) {
-                tt.draw(g);
-            } else {
+        if (mp.getCurrentSlice().equals(slice)) {
+            tt.draw(g);
+        }
+        /*if (mp.getDisplayMode() == MultiSlicePositioner.POSITIONING_MODE_INT) {
+            //if (mp.getSliceDisplayMode() == MultiSlicePositioner.ALL_SLICES_DISPLAY_MODE) {
+            //    tt.draw(g);
+            //} else
+            {
                 if (mp.getCurrentSlice().equals(slice)) {
                     tt.draw(g);
                 }
@@ -325,7 +322,7 @@ public class SliceSourcesGUIState {
             if (mp.getCurrentSlice().equals(slice)) {
                 tt.draw(g);
             }
-        }
+        }*/
     }
 
     public void disableGraphicalHandles() {
