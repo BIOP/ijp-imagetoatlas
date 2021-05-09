@@ -74,6 +74,8 @@ public class AlignerState {
         serializableActions.add(CreateSlice.class);
         serializableActions.add(MoveSlice.class);
         serializableActions.add(RegisterSlice.class);
+        serializableActions.add(KeySliceOn.class);
+        serializableActions.add(KeySliceOff.class);
 
         Set<Class<? extends CancelableAction>> skipableActions = new HashSet<>();
         skipableActions.add(ExportSliceRegionsToFile.class);

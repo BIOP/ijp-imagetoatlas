@@ -35,7 +35,15 @@ public class SliceSourcesPopupMenu {
             addPopupAction("Set as Key Slice(s)", (slices) -> {
                 if (slices.length>1) new MarkActionSequenceBatch(mp).runRequest();
                 for (SliceSources slice : slices) {
-                    new SetAsKeySlice(mp, slice).runRequest();
+                    new KeySliceOn(mp, slice).runRequest();
+                }
+                if (slices.length>1) new MarkActionSequenceBatch(mp).runRequest();
+            });
+
+            addPopupAction("Remove Key Slice(s)", (slices) -> {
+                if (slices.length>1) new MarkActionSequenceBatch(mp).runRequest();
+                for (SliceSources slice : slices) {
+                    new KeySliceOff(mp, slice).runRequest();
                 }
                 if (slices.length>1) new MarkActionSequenceBatch(mp).runRequest();
             });
@@ -109,7 +117,7 @@ public class SliceSourcesPopupMenu {
 
         if (mp.getDisplayMode() != MultiSlicePositioner.REVIEW_MODE_INT) {
             addPopupAction("Registration mode", (slices) -> {
-                mp.setRegistrationMode();
+                mp.setReviewMode();
             });
         }
 

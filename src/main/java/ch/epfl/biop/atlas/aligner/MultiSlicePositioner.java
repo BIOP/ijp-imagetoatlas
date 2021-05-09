@@ -397,7 +397,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         });
 
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Positioning Mode",0, this::setPositioningMode);
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Review Mode",0, this::setRegistrationMode);
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Review Mode",0, this::setReviewMode);
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Change Slice Display Mode [S]",0, this::changeSliceDisplayMode);
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Change Overlap Mode [O]",0, this::toggleOverlap);
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Show mouse atlas Position",0, this::showAtlasPosition);
@@ -694,7 +694,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     public void nextMode() {
         switch (displayMode) {
             case POSITIONING_MODE_INT:
-                setRegistrationMode();
+                setReviewMode();
                 break;
             case REVIEW_MODE_INT:
                 setPositioningMode();
@@ -712,6 +712,9 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
             displayMode = POSITIONING_MODE_INT;
             ghs.forEach(GraphicalHandle::enable);
             slices.forEach(slice -> slice.getGUIState().enableGraphicalHandles());
+
+            //this.setSliceDisplayMode(storedSliceDisplayMode);
+
             getSortedSlices().forEach(slice -> slice.getGUIState().displayModeChanged());
 
             bdvh.getTriggerbindings().removeInputTriggerMap(REVIEW_BEHAVIOURS_KEY);
@@ -732,10 +735,12 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         slice.getGUIState().setSliceVisible();
     }
 
+    //int storedSliceDisplayMode = CURRENT_SLICE_DISPLAY_MODE;
+
     /**
      * Set the registration mode
      */
-    public void setRegistrationMode() {
+    public void setReviewMode() {
         if (!(displayMode == REVIEW_MODE_INT)) {
             int oldMode = REVIEW_MODE_INT;
             displayMode = POSITIONING_MODE_INT;
@@ -744,9 +749,9 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
             ghs.forEach(GraphicalHandle::disable);
 
-            //synchronized (slices) {
+            //storedSliceDisplayMode = this.getSliceDisplayMode();
+            this.setSliceDisplayMode(CURRENT_SLICE_DISPLAY_MODE);
             getSortedSlices().forEach(slice -> slice.getGUIState().displayModeChanged());
-            //}
 
             bdvh.getTriggerbindings().removeInputTriggerMap(POSITIONING_BEHAVIOURS_KEY);
             bdvh.getTriggerbindings().removeBehaviourMap(POSITIONING_BEHAVIOURS_KEY);
@@ -850,6 +855,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
         if (sortedSlices.size() > 0) {
             centerBdvViewOn(sortedSlices.get(iCurrentSlice));
+            sortedSlices.get(iCurrentSlice).getGUIState().isCurrent();
         }
     }
 
@@ -1291,7 +1297,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     public void setDisplayMode(int mode) {
         switch (mode) {
             case REVIEW_MODE_INT:
-                setRegistrationMode();
+                setReviewMode();
                 break;
             case POSITIONING_MODE_INT :
                 setPositioningMode();
@@ -2391,8 +2397,6 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
         ScijavaGsonHelper.getGsonBuilder(scijavaCtx, gsonbuilder, true);
 
-        //RealTransformHelper.registerTransformAdapters(gsonbuilder, scijavaCtx);
-
         gsonbuilder.registerTypeHierarchyAdapter(AlignerState.SliceSourcesState.class, new SliceSourcesStateDeserializer((slice) -> currentSerializedSlice = slice));
 
 
@@ -2402,13 +2406,15 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         factoryActions.registerSubtype(CreateSlice.class);
         factoryActions.registerSubtype(MoveSlice.class);
         factoryActions.registerSubtype(RegisterSlice.class);
-        factoryActions.registerSubtype(SetAsKeySlice.class);
+        factoryActions.registerSubtype(KeySliceOn.class);
+        factoryActions.registerSubtype(KeySliceOff.class);
 
         gsonbuilder.registerTypeAdapterFactory(factoryActions);
         gsonbuilder.registerTypeHierarchyAdapter(CreateSlice.class, new CreateSliceAdapter(this));
         gsonbuilder.registerTypeHierarchyAdapter(MoveSlice.class, new MoveSliceAdapter(this, this::currentSliceGetter));
         gsonbuilder.registerTypeHierarchyAdapter(RegisterSlice.class, new RegisterSliceAdapter(this, this::currentSliceGetter));
-        gsonbuilder.registerTypeHierarchyAdapter(SetAsKeySlice.class, new SetAsKeySliceAdapter(this, this::currentSliceGetter));
+        gsonbuilder.registerTypeHierarchyAdapter(KeySliceOn.class, new KeySliceOnAdapter(this, this::currentSliceGetter));
+        gsonbuilder.registerTypeHierarchyAdapter(KeySliceOff.class, new KeySliceOffAdapter(this, this::currentSliceGetter));
 
         // For registration registration
         RuntimeTypeAdapterFactory factoryRegistrations = RuntimeTypeAdapterFactory.of(Registration.class);
@@ -2440,7 +2446,6 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         gsonbuilder.registerTypeHierarchyAdapter(SourcesResampler.class, new SourcesResamplerAdapter());
         gsonbuilder.registerTypeHierarchyAdapter(SourcesProcessComposer.class, new SourcesComposerAdapter());
         gsonbuilder.registerTypeHierarchyAdapter(SourcesIdentity.class, new SourcesIdentityAdapter());
-
 
         return gsonbuilder.create();
     }
