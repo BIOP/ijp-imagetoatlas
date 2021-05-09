@@ -996,10 +996,12 @@ public class SliceSources {
 
     public void keySliceOn() {
         setAsKeySlice = true;
+        //mp.addKeySlice(this);
     }
 
     public void keySliceOff() {
         setAsKeySlice = false;
+        //mp.removeKeySlice(this);
     }
 
     public boolean isKeySlice() {

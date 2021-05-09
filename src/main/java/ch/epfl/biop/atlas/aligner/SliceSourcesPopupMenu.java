@@ -32,6 +32,14 @@ public class SliceSourcesPopupMenu {
 
             addPopupLine();
 
+            addPopupAction("Set as Key Slice(s)", (slices) -> {
+                if (slices.length>1) new MarkActionSequenceBatch(mp).runRequest();
+                for (SliceSources slice : slices) {
+                    new SetAsKeySlice(mp, slice).runRequest();
+                }
+                if (slices.length>1) new MarkActionSequenceBatch(mp).runRequest();
+            });
+
             addPopupAction("Hide Slices", (slices) -> {
                 for (SliceSources slice : slices) {
                     slice.getGUIState().setSliceInvisible();

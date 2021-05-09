@@ -211,7 +211,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         errorMessageForUser.accept("Error", message);
     };
 
-    public Consumer<String> debuglog = (message) -> {};//System.err.println("Multipositioner Debug : "+message);
+    public Consumer<String> debuglog = (message) -> System.err.println("Multipositioner Debug : "+message);
 
     /**
      * @return a copy of the array of current slices in this ABBA instance
@@ -327,22 +327,22 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
         bdvh.getViewerPanel().getDisplay().addHandler(this);
 
-        SquareGraphicalHandle ghRight = new SquareGraphicalHandle(this, new DragRight(), "drag_right", "button1", bdvh.getTriggerbindings(),
-                () -> new Integer[]{rightPosition[0]+25, rightPosition[1], rightPosition[2]}, () -> 25, () -> new Integer[]{255, 0, 255, 200});
+        //SquareGraphicalHandle ghRight = new SquareGraphicalHandle(this, new DragRight(), "drag_right", "button1", bdvh.getTriggerbindings(),
+        //        () -> new Integer[]{rightPosition[0]+25, rightPosition[1], rightPosition[2]}, () -> 25, () -> new Integer[]{255, 0, 255, 200});
 
-        GraphicalHandleToolTip ghRightToolTip = new GraphicalHandleToolTip(ghRight, "Ctrl + \u25C4 \u25BA ",0,20);
+        //GraphicalHandleToolTip ghRightToolTip = new GraphicalHandleToolTip(ghRight, "Ctrl + \u25C4 \u25BA ",0,20);
 
-        CircleGraphicalHandle ghCenter = new CircleGraphicalHandle(this, new SelectedSliceSourcesDrag(), "translate_selected", "button1", bdvh.getTriggerbindings(),
-                () -> new Integer[]{(leftPosition[0]+rightPosition[0])/2,(leftPosition[1]+rightPosition[1])/2, 0}, () -> 25, () -> new Integer[]{255, 0, 255, 200});
+        //CircleGraphicalHandle ghCenter = new CircleGraphicalHandle(this, new SelectedSliceSourcesDrag(), "translate_selected", "button1", bdvh.getTriggerbindings(),
+        //        () -> new Integer[]{(leftPosition[0]+rightPosition[0])/2,(leftPosition[1]+rightPosition[1])/2, 0}, () -> 25, () -> new Integer[]{255, 0, 255, 200});
 
-        GraphicalHandleToolTip ghCenterToolTip = new GraphicalHandleToolTip(ghCenter, "Ctrl + \u25B2 \u25BC ",0,0);
+        //GraphicalHandleToolTip ghCenterToolTip = new GraphicalHandleToolTip(ghCenter, "Ctrl + \u25B2 \u25BC ",0,0);
 
-        SquareGraphicalHandle ghLeft = new SquareGraphicalHandle(this, new DragLeft(), "drag_right", "button1", bdvh.getTriggerbindings(),
-                () -> new Integer[]{leftPosition[0]-25, leftPosition[1], leftPosition[2]}, () -> 25, () -> new Integer[]{255, 0, 255, 200});
+        //SquareGraphicalHandle ghLeft = new SquareGraphicalHandle(this, new DragLeft(), "drag_right", "button1", bdvh.getTriggerbindings(),
+        //        () -> new Integer[]{leftPosition[0]-25, leftPosition[1], leftPosition[2]}, () -> 25, () -> new Integer[]{255, 0, 255, 200});
 
-        GraphicalHandleToolTip ghLeftToolTip = new GraphicalHandleToolTip(ghLeft, "Ctrl + Shift + \u25C4 \u25BA ", 0,-20);
+        //GraphicalHandleToolTip ghLeftToolTip = new GraphicalHandleToolTip(ghLeft, "Ctrl + Shift + \u25C4 \u25BA ", 0,-20);
 
-        stretchRight = ghRight;
+        /*stretchRight = ghRight;
         stretchLeft = ghLeft;
         center = ghCenter;
 
@@ -351,7 +351,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         ghs_tool_tip.add(ghCenterToolTip);
         ghs_tool_tip.add(ghLeftToolTip);
         ghs.add(center);
-        ghs.add(stretchLeft);
+        ghs.add(stretchLeft);*/
 
         this.bdvh.getCardPanel().setCardExpanded("Sources", false);
         this.bdvh.getCardPanel().setCardExpanded("Groups", false);
@@ -1094,26 +1094,27 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                     rightPosition[0] = (int) handleRightPoint.getDoublePosition(0);
                     rightPosition[1] = (int) handleRightPoint.getDoublePosition(1);
                 }
+
             }
 
             if (sortedSelected.size() > 1) {
-                center.enable();
+                /*center.enable();
                 stretchLeft.enable();
-                stretchRight.enable();
+                stretchRight.enable();*/
                 ghs.forEach(GraphicalHandle::enable);
                 g.setColor(new Color(255, 0, 255, 200));
                 g.drawLine(leftPosition[0], leftPosition[1], rightPosition[0], rightPosition[1]);
             } else if (sortedSelected.size() == 1) {
-                center.enable();//ghs.forEach(GraphicalHandle::enable);
+                /*center.enable();//ghs.forEach(GraphicalHandle::enable);
                 stretchLeft.disable();
-                stretchRight.disable();
+                stretchRight.disable();*/
                 g.setColor(new Color(255, 0, 255, 200));
                 g.drawLine(leftPosition[0], leftPosition[1], rightPosition[0], rightPosition[1]);
             } else {
                 ghs.forEach(GraphicalHandle::disable);
             }
             ghs.forEach(gh -> gh.draw(g));
-            ghs_tool_tip.forEach(gh -> gh.draw(g));
+            //ghs_tool_tip.forEach(gh -> gh.draw(g));
         }
     }
 
@@ -1873,9 +1874,9 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
     Set<GraphicalHandle> ghs = new HashSet<>();
 
-    GraphicalHandle stretchLeft, center, stretchRight;
+    /*GraphicalHandle stretchLeft, center, stretchRight;
 
-    Set<GraphicalHandle> ghs_tool_tip = new HashSet<>();
+    Set<GraphicalHandle> ghs_tool_tip = new HashSet<>();*/
 
     Set<GraphicalHandle> gh_below_mouse = new HashSet<>();
 
@@ -1937,12 +1938,13 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     AtomicBoolean dragActionInProgress = new AtomicBoolean(false);
 
     synchronized boolean startDragAction() {
-        if (dragActionInProgress.get()) {
+        return dragActionInProgress.compareAndSet(false, true);
+        /*if (dragActionInProgress.get()) {
             return false;
         } else {
             dragActionInProgress.set(true);
             return true;
-        }
+        }*/
     }
 
     synchronized void stopDragAction() {
@@ -1952,7 +1954,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     /*
      * Stretching selected slices to the left
      */
-    class DragLeft implements DragBehaviour {
+   /* class DragLeft implements DragBehaviour {
         List<SliceSources> slicesDragged;
         Map<SliceSources, Double> initialAxisPositions = new HashMap<>();
         double range;
@@ -2046,9 +2048,10 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         }
     }
 
-    /*
-     * Stretching selected slices to the right
-     */
+
+    //Stretching selected slices to the right
+
+
     class DragRight implements DragBehaviour {
 
         List<SliceSources> slicesDragged;
@@ -2144,9 +2147,9 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         }
     }
 
-    /*
-     * Single slice dragging
-     */
+
+    //Single slice dragging
+
     class SliceSourcesDrag implements DragBehaviour {
 
         Map<SliceSources, Double> initialAxisPositions = new HashMap<>();
@@ -2240,9 +2243,9 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         return new SliceSourcesDrag(slice);
     }
 
-    /*
-     * Drag selected sources
-     */
+
+    // Drag selected sources
+
     class SelectedSliceSourcesDrag implements DragBehaviour {
 
         Map<SliceSources, Double> initialAxisPositions = new HashMap<>();
@@ -2336,7 +2339,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                 stopDragAction();
             }
         }
-    }
+    }*/
 
     // ------------------------------------------- Block map
 
@@ -2399,11 +2402,13 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         factoryActions.registerSubtype(CreateSlice.class);
         factoryActions.registerSubtype(MoveSlice.class);
         factoryActions.registerSubtype(RegisterSlice.class);
+        factoryActions.registerSubtype(SetAsKeySlice.class);
 
         gsonbuilder.registerTypeAdapterFactory(factoryActions);
         gsonbuilder.registerTypeHierarchyAdapter(CreateSlice.class, new CreateSliceAdapter(this));
         gsonbuilder.registerTypeHierarchyAdapter(MoveSlice.class, new MoveSliceAdapter(this, this::currentSliceGetter));
         gsonbuilder.registerTypeHierarchyAdapter(RegisterSlice.class, new RegisterSliceAdapter(this, this::currentSliceGetter));
+        gsonbuilder.registerTypeHierarchyAdapter(SetAsKeySlice.class, new SetAsKeySliceAdapter(this, this::currentSliceGetter));
 
         // For registration registration
         RuntimeTypeAdapterFactory factoryRegistrations = RuntimeTypeAdapterFactory.of(Registration.class);
