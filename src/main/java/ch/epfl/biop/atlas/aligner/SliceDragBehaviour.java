@@ -6,9 +6,11 @@ import org.scijava.ui.behaviour.DragBehaviour;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static ch.epfl.biop.atlas.aligner.MultiSlicePositioner.POSITIONING_MODE_INT;
+
 public class SliceDragBehaviour implements DragBehaviour {
 
-    List<SliceSources> affectedSlices;
+    List<SliceSources> affectedSlices = new ArrayList<>();
     final SliceSources sliceDragged;
     Map<SliceSources, Double> initialAxisPositions = new HashMap<>();
     double rangeBefore;
@@ -35,6 +37,10 @@ public class SliceDragBehaviour implements DragBehaviour {
         mp.debuglog.accept(" DragSlice start ("+x+":"+y+") "+ sliceDragged);
         perform = mp.startDragAction();
 
+        if ((perform)&&(mp.displayMode != POSITIONING_MODE_INT)) {
+            perform = false;
+            mp.stopDragAction();
+        }
 
         if (perform) {
             // Collect all selected sources
