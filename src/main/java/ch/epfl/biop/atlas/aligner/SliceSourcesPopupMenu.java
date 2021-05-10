@@ -60,7 +60,7 @@ public class SliceSourcesPopupMenu {
                 }
             });
 
-            addPopupAction("Delete Slices", (slices) -> {
+            addPopupAction("Remove Selected Slices ("+slices.length+")", (slices) -> {
                 if (slices.length>1) new MarkActionSequenceBatch(mp).runRequest();
                 for (SliceSources slice : slices) {
                     System.out.println("Slice delete +"+slice);
