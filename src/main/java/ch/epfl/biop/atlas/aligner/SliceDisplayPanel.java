@@ -20,69 +20,32 @@ import java.util.List;
 
 public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, MultiSlicePositioner.SliceChangeListener, ListSelectionListener {
 
-    final JPanel paneDisplay;
+    //final JPanel paneDisplay;
 
     final MultiSlicePositioner mp;
 
     final JTable table;
 
-    //final JTable tableSelectionControl;
-
     final SliceDisplayTableModel model;
-
-    //final SelectedSliceDisplayTableModel modelSelect;
 
     int maxChannels = 0;
 
-    //int nSlices = 0;
-
-    boolean globalFlagVisible = true;
-
-    List<Boolean> globalFlagPerChannel = new ArrayList<>();
-
-    List<Displaysettings> globalDisplaySettingsPerChannel = new ArrayList<>();
-
     List<SliceSources> sortedSlices = new ArrayList<>();
 
-    JButton toggleDisplayMode;
+    //JPanel panelDisplayOptions =new JPanel();
 
-    JButton changeOverlapMode;
-
-    JPanel panelDisplayOptions =new JPanel();
+    final JPanel paneDisplay;
 
     public SliceDisplayPanel(MultiSlicePositioner mp) {
         this.mp = mp;
+
         paneDisplay = new JPanel(new BorderLayout());
-
-        toggleDisplayMode = new JButton("Display One Slice Only (fast)");
-
-        changeOverlapMode = new JButton("Change Overlap Mode");
-
-        changeOverlapMode.addActionListener(e -> mp.toggleOverlap());
-
-        toggleDisplayMode.addActionListener(e -> {
-            if (mp.getSliceDisplayMode() == MultiSlicePositioner.ALL_SLICES_DISPLAY_MODE) {
-                mp.setSliceDisplayMode(MultiSlicePositioner.CURRENT_SLICE_DISPLAY_MODE);
-
-            } else if (mp.getSliceDisplayMode() == MultiSlicePositioner.CURRENT_SLICE_DISPLAY_MODE) {
-                mp.setSliceDisplayMode(MultiSlicePositioner.ALL_SLICES_DISPLAY_MODE);
-            }
-        });
-
-        panelDisplayOptions.add(toggleDisplayMode);
-        panelDisplayOptions.add(changeOverlapMode);
 
         mp.addSliceListener(this);
         mp.addModeListener(this);
 
         model = new SliceDisplayTableModel();
-        //modelSelect = new SelectedSliceDisplayTableModel();
         table = new JTable(model);
-        //tableSelectionControl = new JTable();
-
-        //tableSelectionControl.setModel( modelSelect );
-
-        //tableSelectionControl.setShowGrid(false);
         table.setShowGrid( false );
 
         table.setModel( model );
@@ -95,7 +58,7 @@ public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, Mul
 
         paneDisplay.add(new JLabel("Click table header to modify selected slices"), BorderLayout.NORTH);
         paneDisplay.add(new JScrollPane(table), BorderLayout.CENTER);
-        paneDisplay.add(panelDisplayOptions, BorderLayout.SOUTH);
+        //paneDisplay.add(panelDisplayOptions, BorderLayout.SOUTH);
 
         // listener
         table.getTableHeader().addMouseListener(new MouseAdapter() {
@@ -215,10 +178,6 @@ public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, Mul
                 // The number of channels diminished... full update
                 maxChannels = newMaxChannels;
                 model.fireTableStructureChanged();
-
-                globalFlagPerChannel.remove(globalFlagPerChannel.size()-1);
-                globalDisplaySettingsPerChannel.remove(globalDisplaySettingsPerChannel.size()-1);
-
             }
 
         } // else no change of number of channels
@@ -227,15 +186,10 @@ public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, Mul
 
     @Override
     public synchronized void sliceCreated(SliceSources slice) {
-        //nSlices++;
         sortSlices();
         int index = sortedSlices.indexOf(slice);
         model.fireTableRowsInserted(index, index);
         if (slice.nChannels>maxChannels) {
-            for (int i=maxChannels;i<slice.nChannels;i++) {
-                globalFlagPerChannel.add(Boolean.TRUE);
-                globalDisplaySettingsPerChannel.add(new Displaysettings(-1));
-            }
             maxChannels = slice.nChannels;
             model.fireTableStructureChanged(); // All changed!
         }
@@ -305,11 +259,9 @@ public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, Mul
                     currentSelection.add(i);
                     SliceSources slice = sortedSlices.get(i);
                     if (!slice.isSelected()) slice.select();
-                    //sortedSlices.get(i).select();
                 } else {
                     SliceSources slice = sortedSlices.get(i);
                     if (slice.isSelected()) slice.deSelect();
-                    //sortedSlices.get(i).deSelect();
                 }
             }
         }
@@ -328,13 +280,6 @@ public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, Mul
 
     @Override
     public void sliceDisplayModeChanged(MultiSlicePositioner mp, int oldmode, int newmode) {
-        if (newmode == MultiSlicePositioner.CURRENT_SLICE_DISPLAY_MODE) {
-            toggleDisplayMode.setText("Display All Slices");
-        }
-
-        if (newmode == MultiSlicePositioner.ALL_SLICES_DISPLAY_MODE) {
-            toggleDisplayMode.setText("Display Current Slice Only (fast)");
-        }
     }
 
     class SliceDisplayTableModel extends AbstractTableModel {
@@ -453,15 +398,15 @@ public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, Mul
 
     }
 
-    public static class DisplaySettingsRenderer extends JLabel
-            implements TableCellRenderer {
+    public static class DisplaySettingsRenderer implements TableCellRenderer {
         Border unselectedBorder = null;
         Border selectedBorder = null;
         boolean isBordered;
+        JLabel label = new JLabel();
 
         public DisplaySettingsRenderer(boolean isBordered) {
             this.isBordered = isBordered;
-            setOpaque(true); //MUST do this for background to show up.
+            label.setOpaque(true); //MUST do this for background to show up.
         }
 
         public Component getTableCellRendererComponent(
@@ -472,31 +417,32 @@ public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, Mul
 
             if (!ds.getName().equals("-")) {
                 Color newColor = new Color(ds.color[0], ds.color[1], ds.color[2]);
-                setBackground(newColor);
-                setForeground(new Color( (ds.color[0]+128) % 256, (ds.color[1]+128) % 256, (ds.color[2]+128)%256));
-                setText((int) ds.min + ":" + (int) ds.max);
+                label.setBackground(newColor);
+                label.setForeground(new Color( (ds.color[0]+128) % 256, (ds.color[1]+128) % 256, (ds.color[2]+128)%256));
+                label.setText((int) ds.min + ":" + (int) ds.max);
                 if (isBordered) {
                     if (isSelected) {
                         if (selectedBorder == null) {
                             selectedBorder = BorderFactory.createMatteBorder(2, 5, 2, 5,
                                     table.getSelectionBackground());
                         }
-                        setBorder(selectedBorder);
+                        label.setBorder(selectedBorder);
                     } else {
                         if (unselectedBorder == null) {
                             unselectedBorder = BorderFactory.createMatteBorder(2, 5, 2, 5,
                                     table.getBackground());
                         }
-                        setBorder(unselectedBorder);
+                        label.setBorder(unselectedBorder);
                     }
                 }
 
-                setToolTipText("RGB value: " + newColor.getRed() + ", "
+                label.setToolTipText("RGB value: " + newColor.getRed() + ", "
                         + newColor.getGreen() + ", "
                         + newColor.getBlue());
             }
-            return this;
+            return label;
         }
+
     }
 
     public static class VisibilityRenderer extends JLabel implements TableCellRenderer {

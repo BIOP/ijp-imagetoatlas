@@ -211,7 +211,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         errorMessageForUser.accept("Error", message);
     };
 
-    public Consumer<String> debuglog = (message) -> System.err.println("Multipositioner Debug : "+message);
+    public Consumer<String> debuglog = (message) -> {};// System.err.println("Multipositioner Debug : "+message);
 
     /**
      * @return a copy of the array of current slices in this ABBA instance
@@ -241,7 +241,12 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     public MultiSlicePositioner(BdvHandle bdvh, BiopAtlas biopAtlas, ReslicedAtlas reslicedAtlas, Context ctx) {
 
         bdvh.getSplitPanel().setCollapsed(false);
-        bdvh.getSplitPanel().setDividerLocation(0.4);
+
+        try {
+            Thread.sleep(2500);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         this.reslicedAtlas = reslicedAtlas;
         this.biopAtlas = biopAtlas;
@@ -405,22 +410,13 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ABBADocumentationCommand.class, hierarchyLevelsSkipped);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ABBAUserFeedbackCommand.class, hierarchyLevelsSkipped);
 
-        /* Obsolete
-        AtlasDisplayPanel adp = new AtlasDisplayPanel(this);
-        Hide useless channels on startup -
-        adp.getModel().setValueAt(Boolean.FALSE,0,8); // X Coord
-        adp.getModel().setValueAt(Boolean.FALSE,0,10);// Y Coord
-        adp.getModel().setValueAt(Boolean.FALSE,0,12);// Z Coord
-        adp.getModel().setValueAt(Boolean.FALSE,0,14);// Left Right
-        adp.getModel().setValueAt(Boolean.FALSE,0,16);// Label ?
-
-        bdvh.getCardPanel().addCard("Atlas Display Options", adp.getPanel(), true);*/
-
         bdvh.getCardPanel().addCard("Atlas Display", ScijavaSwingUI.getPanel(scijavaCtx, AllenAtlasDisplayCommand.class, "mp", this), true);
 
         bdvh.getCardPanel().addCard("Slices Display", new SliceDisplayPanel(this).getPanel(), true);
 
-        bdvh.getCardPanel().addCard("Edit Slices", new EditPanel(this).getPanel(), true);
+        bdvh.getCardPanel().addCard("Display & Navigation", new DisplayPanel(this).getPanel(), true);
+
+        bdvh.getCardPanel().addCard("Edit Selected Slices", new EditPanel(this).getPanel(), true);
 
         bdvh.getCardPanel().addCard("Atlas Slicing", ScijavaSwingUI.getPanel(scijavaCtx, SlicerAdjusterInteractiveCommand.class, "reslicedAtlas", reslicedAtlas), true);
 

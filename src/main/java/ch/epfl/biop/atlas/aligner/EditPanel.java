@@ -51,6 +51,10 @@ public class EditPanel {
         rotY.addActionListener(e -> mp.rotateSlices(1,Math.PI));
         paneEdit.add(rotY);
 
+        JButton distribute = new JButton("Distribute Spacing");
+        distribute.addActionListener((e) -> mp.equalSpacingSelectedSlices());
+        paneEdit.add(distribute);
+
     }
 
     public JPanel getPanel() {
