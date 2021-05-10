@@ -20,8 +20,6 @@ import java.util.List;
 
 public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, MultiSlicePositioner.SliceChangeListener, ListSelectionListener {
 
-    //final JPanel paneDisplay;
-
     final MultiSlicePositioner mp;
 
     final JTable table;
@@ -29,10 +27,6 @@ public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, Mul
     final SliceDisplayTableModel model;
 
     int maxChannels = 0;
-
-    List<SliceSources> sortedSlices = new ArrayList<>();
-
-    //JPanel panelDisplayOptions =new JPanel();
 
     final JPanel paneDisplay;
 
@@ -64,6 +58,7 @@ public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, Mul
         table.getTableHeader().addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
+                List<SliceSources> sortedSlices = mp.getSortedSlices();
                 int col = table.columnAtPoint(e.getPoint());
                 String name = table.getColumnName(col);
                 System.out.println("Column index selected " + col + " " + name);
@@ -155,9 +150,8 @@ public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, Mul
 
     @Override
     public synchronized void sliceDeleted(SliceSources slice) {
-
-        sortSlices();
-        List<SliceSources> slices = sortedSlices;
+        //sortSlices();
+        List<SliceSources> slices = mp.getSortedSlices();
         int index = slices.indexOf(slice);
         slices.remove(slice);
         model.fireTableRowsDeleted(index, index);
@@ -186,8 +180,8 @@ public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, Mul
 
     @Override
     public synchronized void sliceCreated(SliceSources slice) {
-        sortSlices();
-        int index = sortedSlices.indexOf(slice);
+        //sortSlices();
+        int index = mp.getSortedSlices().indexOf(slice);
         model.fireTableRowsInserted(index, index);
         if (slice.nChannels>maxChannels) {
             maxChannels = slice.nChannels;
@@ -197,18 +191,19 @@ public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, Mul
 
     @Override
     public void sliceZPositionChanged(SliceSources slice) {
-        sortSlices();
+        //sortSlices();
         model.fireTableDataChanged();
     }
 
     @Override
     public void sliceVisibilityChanged(SliceSources slice) {
-        int index = sortedSlices.indexOf(slice);
+        int index = mp.getSortedSlices().indexOf(slice);
         model.fireTableRowsUpdated(index,index);
     }
 
     @Override
     public void sliceSelected(SliceSources slice) {
+        List<SliceSources> sortedSlices = mp.getSortedSlices();
         int idx = sortedSlices.indexOf(slice);
         if (!sortedSlices.get(idx).isSelected()) {
             table.getSelectionModel().addSelectionInterval(idx, idx);
@@ -218,6 +213,7 @@ public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, Mul
 
     @Override
     public void sliceDeselected(SliceSources slice) {
+        List<SliceSources> sortedSlices = mp.getSortedSlices();
         int idx = sortedSlices.indexOf(slice);
         if (sortedSlices.get(idx).isSelected()) {
             table.getSelectionModel().removeSelectionInterval(idx, idx);
@@ -232,7 +228,7 @@ public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, Mul
         int oldIndex = currentIndex;
         currentIndex = -1;
         model.fireTableCellUpdated(oldIndex,0);
-        int idx = sortedSlices.indexOf(slice);
+        int idx = mp.getSortedSlices().indexOf(slice);
         currentIndex = idx;
         model.fireTableCellUpdated(idx,0);
     }
@@ -252,7 +248,7 @@ public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, Mul
         ListSelectionModel lsm = (ListSelectionModel)e.getSource();
 
         List<Integer> currentSelection = new ArrayList<>();
-
+        List<SliceSources> sortedSlices = mp.getSortedSlices();
         if (!lsm.isSelectionEmpty()) {
             for (int i = 0; i < sortedSlices.size(); i++) {
                 if (lsm.isSelectedIndex(i)) {
@@ -270,9 +266,9 @@ public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, Mul
         setCurrentlySelectedIndices(currentSelection);
     }
 
-    public void sortSlices() {
+    /*public void sortSlices() {
         sortedSlices = mp.getSortedSlices();
-    }
+    }*/
 
     @Override
     public void modeChanged(MultiSlicePositioner mp, int oldmode, int newmode) {
@@ -299,7 +295,7 @@ public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, Mul
 
         @Override
         public int getRowCount() {
-            return sortedSlices.size();
+            return mp.getSlices().size();
         }
 
         @Override
@@ -309,7 +305,7 @@ public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, Mul
 
         @Override
         public Object getValueAt(int rowIndex, int columnIndex) {
-            if (rowIndex>sortedSlices.size()-1) {
+            if (rowIndex>mp.getSlices().size()-1) {
                 if ((columnIndex == 0)) {
                     return "null";
                 } else if ((columnIndex) == 1) {
@@ -320,7 +316,7 @@ public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, Mul
                     return new Displaysettings(-1,"-");
                 }
             }
-            SliceSources slice =  sortedSlices.get(rowIndex);
+            SliceSources slice =  mp.getSortedSlices().get(rowIndex);
             if ((columnIndex == 0)) {
                 if (rowIndex == currentIndex) {
                     return "["+ rowIndex +"] - "+slice.getName();
@@ -352,7 +348,7 @@ public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, Mul
          *  @param  columnIndex  column of cell
          */
         public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-            SliceSources slice =  sortedSlices.get(rowIndex);
+            SliceSources slice =  mp.getSortedSlices().get(rowIndex);
             if (columnIndex != 0) { // column zero used for selecting
                 if ((columnIndex) == 1) {
                     Boolean flag = (Boolean) aValue;

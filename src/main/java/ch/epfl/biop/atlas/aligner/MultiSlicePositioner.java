@@ -487,13 +487,14 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         iniView = BdvHandleHelper.getViewerTransformWithNewCenter(bdvh, new double[]{center.getDoublePosition(0), center.getDoublePosition(1), 0});
         bdvh.getViewerPanel().state().setViewerTransform(iniView);
 
-        // Close hook to try to release as many resources as possible
+        // Close hook to try to release as many resources as possible -> proven avoiding mem leaks
         BdvHandleHelper.setBdvHandleCloseOperation(bdvh, ctx.getService(CacheService.class),
                 SourceAndConverterServices.getBdvDisplayService(), false,
                 () -> {
                     if (mso!=null) this.mso.clear();
                     if (userActions!=null) this.userActions.clear();
                     if (slices!=null) this.slices.clear();
+                    this.redoableUserActions.clear();
                     this.biopAtlas = null;
                     this.slices = null;
                     this.userActions = null;
@@ -505,6 +506,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                     this.review_behaviours = null;
                     this.reslicedAtlas = null;
                     this.info = null;
+                    currentSerializedSlice = null;
                     rm.stop();
                 }
         );
