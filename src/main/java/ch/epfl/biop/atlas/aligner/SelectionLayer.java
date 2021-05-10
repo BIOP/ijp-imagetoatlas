@@ -161,13 +161,14 @@ public class SelectionLayer {
             this.mode = mode;
         }
 
-        boolean perform = true;
+        boolean perform;
 
         @Override
         public void init(int x, int y) {
-
-            perform = perform && mp.startDragAction(); // ensure unicity of drag action
+            mp.debuglog.accept("Selection drag start ? Perform = "+perform);
+            perform = mp.startDragAction(); // ensure unicity of drag action
             if (perform) {
+                mp.debuglog.accept("Selection drag start !");
                 startCurrentSelection(x, y);
                 viewer.setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
                 switch (mode) {
@@ -181,6 +182,8 @@ public class SelectionLayer {
                         viewer.showMessage("Remove Selection");
                         break;
                 }
+            } else {
+                mp.debuglog.accept("Selection drag failed !");
             }
         }
 
@@ -199,10 +202,10 @@ public class SelectionLayer {
                 viewer.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
                 viewer.getDisplay().repaint();
                 mp.stopDragAction();
+                perform = false;
+                mp.debuglog.accept("Selection drag stopped.");
             }
         }
     }
-
-
 
 }

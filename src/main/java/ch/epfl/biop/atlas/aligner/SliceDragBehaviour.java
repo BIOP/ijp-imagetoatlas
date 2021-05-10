@@ -34,15 +34,18 @@ public class SliceDragBehaviour implements DragBehaviour {
 
     @Override
     public void init(int x, int y) {
-        mp.debuglog.accept(" DragSlice start ("+x+":"+y+") "+ sliceDragged);
+        mp.debuglog.accept(" DragSlice start ("+x+":"+y+")  ? "+ sliceDragged + " perform = "+perform);
         perform = mp.startDragAction();
 
         if ((perform)&&(mp.displayMode != POSITIONING_MODE_INT)) {
             perform = false;
             mp.stopDragAction();
+            mp.debuglog.accept(" DragSlice start ("+x+":"+y+")  Cancelled "+ sliceDragged + " perform = "+perform);
         }
 
         if (perform) {
+            mp.debuglog.accept(" DragSlice start ("+x+":"+y+")  ! "+ sliceDragged + " perform = "+perform);
+
             // Collect all selected sources
             affectedSlices = mp.getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
 
@@ -118,7 +121,7 @@ public class SliceDragBehaviour implements DragBehaviour {
     @Override
     public void drag(int x, int y) {
         if (perform) {
-            mp.debuglog.accept(" drag (" + x + ":" + y + ")");
+            //mp.debuglog.accept(" drag (" + x + ":" + y + ")");
             RealPoint currentMousePosition = new RealPoint(3);
             mp.getBdvh().getViewerPanel().getGlobalMouseCoordinates(currentMousePosition);
 
@@ -203,7 +206,7 @@ public class SliceDragBehaviour implements DragBehaviour {
     @Override
     public void end(int x, int y) {
         if (perform) {
-            mp.debuglog.accept(" DragSlice end (" + x + ":" + y + ")");
+            mp.debuglog.accept(" DragSlice end (" + x + ":" + y + ") "+sliceDragged);
             //RealPoint currentMousePosition = new RealPoint(3);
             //mp.getBdvh().getViewerPanel().getGlobalMouseCoordinates(currentMousePosition);
 

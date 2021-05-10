@@ -29,13 +29,13 @@ abstract public class GraphicalHandle extends MouseMotionAdapter {
         if (ghl!=null) ghl.created(this);
     }
 
-    public GraphicalHandle(Behaviours behaviours, TriggerBehaviourBindings bindings, String nameMap) {
+    /*public GraphicalHandle(Behaviours behaviours, TriggerBehaviourBindings bindings, String nameMap) {
         //addGraphicalHandleListener(ghl);
         this.behaviours = behaviours;
         this.bindings = bindings;
         this.nameMap = nameMap;
         //ghl.created(this);
-    }
+    }*/
 
     public void addGraphicalHandleListener(GraphicalHandleListener ghl) {
         if (ghl!=null) {ghls.add(ghl);}
@@ -102,11 +102,13 @@ abstract public class GraphicalHandle extends MouseMotionAdapter {
                 mouseAbove = true;
                 ghls.forEach(ghl -> ghl.hover_in(this));
                 behaviours.install(bindings, nameMap);
+                System.err.println("Installing "+nameMap+" from "+this);
             }
         } else {
             if ((mouseAbove)&&(!isDisabled)) {
                 mouseAbove = false;
                 ghls.forEach(ghl -> ghl.hover_out(this));
+                System.err.println("Removing "+nameMap+" from "+this);
                 bindings.removeBehaviourMap(nameMap);
                 bindings.removeInputTriggerMap(nameMap);
             }

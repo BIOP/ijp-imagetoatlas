@@ -88,7 +88,7 @@ public class SliceSourcesGUIState {
         }, "deselectedSources" + this.toString(), "button3", "ctrl button1");
 
         GraphicalHandle gh = new CircleGraphicalHandle(mp,
-                behavioursHandleSlice,
+                new Behaviours(new InputTriggerConfig()),
                 mp.getBdvh().getTriggerbindings(),
                 this.toString(), // pray for unicity ? TODO : do better than thoughts and prayers
                 this::getBdvHandleCoords,

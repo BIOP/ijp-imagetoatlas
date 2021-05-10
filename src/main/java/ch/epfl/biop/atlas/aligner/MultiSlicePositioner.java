@@ -211,7 +211,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         errorMessageForUser.accept("Error", message);
     };
 
-    public Consumer<String> debuglog = (message) -> {};// System.err.println("Multipositioner Debug : "+message);
+    public Consumer<String> debuglog = (message) -> System.err.println("Multipositioner Debug : "+message);
 
     /**
      * @return a copy of the array of current slices in this ABBA instance
@@ -1900,19 +1900,16 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
     //------------------------------------------ DRAG BEHAVIOURS
 
-    AtomicBoolean dragActionInProgress = new AtomicBoolean(false);
+    private AtomicBoolean dragActionInProgress = new AtomicBoolean(false);
 
     synchronized boolean startDragAction() {
-        return dragActionInProgress.compareAndSet(false, true);
-        /*if (dragActionInProgress.get()) {
-            return false;
-        } else {
-            dragActionInProgress.set(true);
-            return true;
-        }*/
+        boolean result = dragActionInProgress.compareAndSet(false, true);
+        debuglog.accept("Attempt to do a drag action : successful = "+result);
+        return result;
     }
 
     synchronized void stopDragAction() {
+        debuglog.accept("Stopping a drag action");
         dragActionInProgress.set(false);
     }
 

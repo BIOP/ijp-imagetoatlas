@@ -20,6 +20,8 @@ public class MultiSliceObserver {
 
     JPanel innerPanel = new JPanel();
 
+
+
     Thread animatorThread;
 
     volatile boolean animate = true;
