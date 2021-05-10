@@ -38,7 +38,10 @@ public class ImportQuPathProjectCommand implements Command {
     @Override
     public void run() {
         try {
-            AbstractSpimData spimdata = (AbstractSpimData) command_service.run(QuPathProjectToBDVDatasetCommand.class,true,"quPathProject", quPathProject ).get().getOutput("spimData");
+            AbstractSpimData spimdata = (AbstractSpimData) command_service
+                    .run(QuPathProjectToBDVDatasetCommand.class,true,
+                            "quPathProject", quPathProject,
+                            "unit", "MILLIMETER").get().getOutput("spimData");
             SourceAndConverter[] sacs =
                     sac_service.getSourceAndConverterFromSpimdata(spimdata)
                             .toArray(new SourceAndConverter[0]);
