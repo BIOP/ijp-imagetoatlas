@@ -10,9 +10,9 @@ import javax.swing.border.Border;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.TableCellRenderer;
+import javax.swing.table.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.net.URL;
 import java.util.ArrayList;
@@ -26,15 +26,15 @@ public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, Mul
 
     final JTable table;
 
-    final JTable tableSelectionControl;
+    //final JTable tableSelectionControl;
 
     final SliceDisplayTableModel model;
 
-    final SelectedSliceDisplayTableModel modelSelect;
+    //final SelectedSliceDisplayTableModel modelSelect;
 
     int maxChannels = 0;
 
-    int nSlices = 0;
+    //int nSlices = 0;
 
     boolean globalFlagVisible = true;
 
@@ -72,130 +72,118 @@ public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, Mul
         panelDisplayOptions.add(toggleDisplayMode);
         panelDisplayOptions.add(changeOverlapMode);
 
-
         mp.addSliceListener(this);
         mp.addModeListener(this);
 
         model = new SliceDisplayTableModel();
-        modelSelect = new SelectedSliceDisplayTableModel();
+        //modelSelect = new SelectedSliceDisplayTableModel();
         table = new JTable(model);
-        tableSelectionControl = new JTable();
+        //tableSelectionControl = new JTable();
 
-        tableSelectionControl.setModel( modelSelect );
+        //tableSelectionControl.setModel( modelSelect );
 
-        tableSelectionControl.setShowGrid(false);
+        //tableSelectionControl.setShowGrid(false);
         table.setShowGrid( false );
 
         table.setModel( model );
 
         table.getSelectionModel().addListSelectionListener(this);
 
-        table.setFillsViewportHeight(true);
+        table.setFillsViewportHeight(false);
         table.setDefaultRenderer(Displaysettings.class, new DisplaySettingsRenderer(true));
         table.setDefaultRenderer(Boolean.class, new VisibilityRenderer(true));
 
-        tableSelectionControl.setFillsViewportHeight(true);
-        tableSelectionControl.setShowHorizontalLines(true);
-        tableSelectionControl.setDefaultRenderer(Displaysettings.class, new DisplaySettingsRenderer(true));
-        tableSelectionControl.setDefaultRenderer(Boolean.class, new VisibilityRenderer(true));
-
-        JScrollPane scPane = new JScrollPane(tableSelectionControl);
-        Dimension d = new Dimension(tableSelectionControl.getPreferredSize());
-
-        tableSelectionControl.setPreferredScrollableViewportSize(d);
-
-        paneDisplay.add(scPane, BorderLayout.NORTH);
-        paneDisplay.add(table, BorderLayout.CENTER);
+        paneDisplay.add(new JLabel("Click table header to modify selected slices"), BorderLayout.NORTH);
+        paneDisplay.add(new JScrollPane(table), BorderLayout.CENTER);
         paneDisplay.add(panelDisplayOptions, BorderLayout.SOUTH);
 
-        tableSelectionControl.addMouseListener(new java.awt.event.MouseAdapter() {
+        // listener
+        table.getTableHeader().addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                int row = tableSelectionControl.rowAtPoint(evt.getPoint());
-                int col = tableSelectionControl.columnAtPoint(evt.getPoint());
-                if (row >= 0 && col >= 0) {
-                    if (row==0) {
-                        if ((col>1)&&(col%2 == 1)) {
-                            int iChannel = (col-3)/2;
+            public void mouseClicked(MouseEvent e) {
+                int col = table.columnAtPoint(e.getPoint());
+                String name = table.getColumnName(col);
+                System.out.println("Column index selected " + col + " " + name);
 
-                            SourceAndConverter<?>[] sacs = getSelectedIndices().stream()
-                                    .map(idx -> sortedSlices.get(idx))
-                                    .filter(slice -> slice.nChannels > iChannel)
-                                    .map(slice -> slice.getGUIState().getCurrentSources()[iChannel])
-                                    .toArray(SourceAndConverter<?>[]::new);
+                if (col==1) {
+                    // Let's gather whether most are visible or invisible
+                    long nVisible = getSelectedIndices().stream()
+                            .map(idx -> sortedSlices.get(idx).getGUIState())
+                            .filter(SliceSourcesGUIState::isSliceVisible)
+                            .count();
+                    long nInvisible = getSelectedIndices().size()-nVisible;
 
-                            if (sacs.length>0) {
-                                Runnable update = () -> {
-                                    model.fireTableChanged(new TableModelEvent(model, 0, nSlices, col,
-                                            TableModelEvent.UPDATE));
-                                    modelSelect.fireTableCellUpdated(row, col);};
-                                // ---- Just to have the correct parameters displayed (dirty hack)
-                                Displaysettings ds_in = new Displaysettings(-1);
-                                Displaysettings.GetDisplaySettingsFromCurrentConverter(sacs[0], ds_in);
-                                DisplaySettingsCommand.IniValue = ds_in;
-                                mp.scijavaCtx
-                                        .getService(CommandService.class)
-                                        .run(DisplaySettingsCommand.class, true,
-                                                "sacs", sacs,
-                                                "postrun", update);
-                            } else {
-                                mp.log.accept("Please select a slice with a valid channel in the tab.");
-                            }
-                        }
+                    if (nVisible<nInvisible) {
+                        getSelectedIndices().stream()
+                                .map(idx -> sortedSlices.get(idx).getGUIState())
+                                .forEach(SliceSourcesGUIState::setSliceVisible);
+                    } else {
+                        getSelectedIndices().stream()
+                                .map(idx -> sortedSlices.get(idx).getGUIState())
+                                .forEach(SliceSourcesGUIState::setSliceInvisible);
                     }
                 }
-            }
-        });
-        table.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                if (e.isPopupTrigger() && e.getComponent() instanceof JTable ) {
+                if ((col>1)&&(col%2 == 0)) {
 
-                    SliceSources[] slices = getSelectedIndices().stream()
+                    int iChannel = (col-2)/2;
+
+                    long nVisible = getSelectedIndices().stream()
+                            .filter(idx -> sortedSlices.get(idx).nChannels > iChannel)
+                            .map(idx -> sortedSlices.get(idx).getGUIState())
+                            .filter(guiState -> guiState.isChannelVisible(iChannel))
+                            .count();
+
+                    long nInvisible = getSelectedIndices().stream()
+                            .filter(idx -> sortedSlices.get(idx).nChannels > iChannel)
+                            .map(idx -> sortedSlices.get(idx).getGUIState())
+                            .filter(guiState -> !guiState.isChannelVisible(iChannel))
+                            .count();
+
+                    if (nVisible<nInvisible) {
+                        getSelectedIndices().stream()
+                                .filter(idx -> sortedSlices.get(idx).nChannels > iChannel)
+                                .map(idx -> sortedSlices.get(idx).getGUIState())
+                                .forEach(guiState -> guiState.setChannelVisibility(iChannel, true));
+                    } else {
+                        getSelectedIndices().stream()
+                                .filter(idx -> sortedSlices.get(idx).nChannels > iChannel)
+                                .map(idx -> sortedSlices.get(idx).getGUIState())
+                                .forEach(guiState -> guiState.setChannelVisibility(iChannel, false));
+                    }
+
+                }
+
+                if ((col>1)&&(col%2 == 1)) {
+                    int iChannel = (col-3)/2;
+
+                    SourceAndConverter<?>[] sacs = getSelectedIndices().stream()
                             .map(idx -> sortedSlices.get(idx))
-                            .toArray(SliceSources[]::new);
+                            .filter(slice -> slice.nChannels > iChannel)
+                            .map(slice -> slice.getGUIState().getCurrentSources()[iChannel])
+                            .toArray(SourceAndConverter<?>[]::new);
 
-                    JPopupMenu popup = new SliceSourcesPopupMenu(mp, slices).getPopup();
-                    popup.show(e.getComponent(), e.getX(), e.getY());
-                }
-                super.mouseReleased(e);
-            }
-
-            @Override
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                int row = table.rowAtPoint(evt.getPoint());
-                int col = table.columnAtPoint(evt.getPoint());
-                if (evt.getClickCount() == 2 && !evt.isConsumed()) {
-                    evt.consume();
-                    //handle double click event.
-                    mp.centerBdvViewOn(sortedSlices.get(row));
-                }
-                if (row >= 0 && col >= 0) {
-                    if ((col>1)&&(col%2 == 1)) {
-                        int iChannel = (col-3)/2;
-
-                        SourceAndConverter<?>[] sacs = new SourceAndConverter<?>[1];
-
-                        if (sortedSlices.get(row).nChannels>iChannel) {
-                            sacs[0] = sortedSlices.get(row).getGUIState().getCurrentSources()[iChannel];
-
-                            Runnable update = () -> model.fireTableCellUpdated(row, col);
-
-                            // ---- Just to have the correct parameters displayed (dirty hack)
-                            Displaysettings ds_in = new Displaysettings(-1);
-                            Displaysettings.GetDisplaySettingsFromCurrentConverter(sacs[0], ds_in);
-                            DisplaySettingsCommand.IniValue = ds_in;
-
-                            mp.scijavaCtx
-                                    .getService(CommandService.class)
-                                    .run(DisplaySettingsCommand.class, true, "sacs", sacs, "postrun", update);
-                        } else {
-                            mp.log.accept("This slice has no channel indexed "+iChannel);
-                        }
+                    if (sacs.length>0) {
+                        Runnable update = () -> {
+                            model.fireTableChanged(new TableModelEvent(model, 0, sortedSlices.size(), col,
+                                    TableModelEvent.UPDATE));
+                            //modelSelect.fireTableCellUpdated(row, col);
+                        };
+                        // ---- Just to have the correct parameters displayed (dirty hack)
+                        Displaysettings ds_in = new Displaysettings(-1);
+                        Displaysettings.GetDisplaySettingsFromCurrentConverter(sacs[0], ds_in);
+                        DisplaySettingsCommand.IniValue = ds_in;
+                        mp.scijavaCtx
+                                .getService(CommandService.class)
+                                .run(DisplaySettingsCommand.class, true,
+                                        "sacs", sacs,
+                                        "postrun", update);
+                    } else {
+                        mp.log.accept("Please select a slice with a valid channel in the tab.");
                     }
                 }
             }
         });
+
     }
 
     public JPanel getPanel() {
@@ -204,7 +192,7 @@ public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, Mul
 
     @Override
     public synchronized void sliceDeleted(SliceSources slice) {
-        nSlices--;
+
         sortSlices();
         List<SliceSources> slices = sortedSlices;
         int index = slices.indexOf(slice);
@@ -231,7 +219,6 @@ public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, Mul
                 globalFlagPerChannel.remove(globalFlagPerChannel.size()-1);
                 globalDisplaySettingsPerChannel.remove(globalDisplaySettingsPerChannel.size()-1);
 
-                modelSelect.fireTableStructureChanged();
             }
 
         } // else no change of number of channels
@@ -240,7 +227,7 @@ public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, Mul
 
     @Override
     public synchronized void sliceCreated(SliceSources slice) {
-        nSlices++;
+        //nSlices++;
         sortSlices();
         int index = sortedSlices.indexOf(slice);
         model.fireTableRowsInserted(index, index);
@@ -251,7 +238,6 @@ public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, Mul
             }
             maxChannels = slice.nChannels;
             model.fireTableStructureChanged(); // All changed!
-            modelSelect.fireTableStructureChanged();
         }
     }
 
@@ -270,13 +256,19 @@ public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, Mul
     @Override
     public void sliceSelected(SliceSources slice) {
         int idx = sortedSlices.indexOf(slice);
-        table.getSelectionModel().addSelectionInterval(idx, idx);
+        if (!sortedSlices.get(idx).isSelected()) {
+            table.getSelectionModel().addSelectionInterval(idx, idx);
+            table.repaint();
+        }
     }
 
     @Override
     public void sliceDeselected(SliceSources slice) {
         int idx = sortedSlices.indexOf(slice);
-        table.getSelectionModel().removeSelectionInterval(idx, idx);
+        if (sortedSlices.get(idx).isSelected()) {
+            table.getSelectionModel().removeSelectionInterval(idx, idx);
+            table.repaint();
+        }
     }
 
     int currentIndex = -1;
@@ -311,9 +303,13 @@ public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, Mul
             for (int i = 0; i < sortedSlices.size(); i++) {
                 if (lsm.isSelectedIndex(i)) {
                     currentSelection.add(i);
-                    sortedSlices.get(i).select();
+                    SliceSources slice = sortedSlices.get(i);
+                    if (!slice.isSelected()) slice.select();
+                    //sortedSlices.get(i).select();
                 } else {
-                    sortedSlices.get(i).deSelect();
+                    SliceSources slice = sortedSlices.get(i);
+                    if (slice.isSelected()) slice.deSelect();
+                    //sortedSlices.get(i).deSelect();
                 }
             }
         }
@@ -358,7 +354,7 @@ public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, Mul
 
         @Override
         public int getRowCount() {
-            return nSlices;
+            return sortedSlices.size();
         }
 
         @Override
@@ -368,12 +364,23 @@ public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, Mul
 
         @Override
         public Object getValueAt(int rowIndex, int columnIndex) {
+            if (rowIndex>sortedSlices.size()-1) {
+                if ((columnIndex == 0)) {
+                    return "null";
+                } else if ((columnIndex) == 1) {
+                    return false;
+                } else if (columnIndex%2 == 0) {
+                    return Boolean.FALSE;
+                } else {
+                    return new Displaysettings(-1,"-");
+                }
+            }
             SliceSources slice =  sortedSlices.get(rowIndex);
             if ((columnIndex == 0)) {
                 if (rowIndex == currentIndex) {
-                    return "["+ rowIndex +"]";
+                    return "["+ rowIndex +"] - "+slice.getName();
                 }
-                return " "+ rowIndex;
+                return " "+ rowIndex+"  - "+slice.getName();
             } else if ((columnIndex) == 1) {
                 return slice.getGUIState().isSliceVisible();
             } else if (columnIndex%2 == 0) {
@@ -444,75 +451,6 @@ public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, Mul
             return col>0;
         }
 
-    }
-
-    class SelectedSliceDisplayTableModel extends SliceDisplayTableModel {
-
-        public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-            if (columnIndex != 0) { // Column zero is not used
-                if ((columnIndex) == 1) {
-                    Boolean flag = (Boolean) aValue;
-                    globalFlagVisible = flag;
-                    getSelectedIndices().forEach(idx -> {
-                        SliceSources cSlice = sortedSlices.get(idx);
-                        if (flag) {
-                            if (!cSlice.getGUIState().isSliceVisible())
-                                cSlice.getGUIState().setSliceVisible();
-                        } else {
-                            if (cSlice.getGUIState().isSliceVisible()) {
-                                cSlice.getGUIState().setSliceInvisible();
-                            }
-                        }
-                    });
-                } else if (columnIndex%2 == 0) {
-                    int iChannel = (columnIndex-2)/2;
-                    Boolean flag = (Boolean) aValue;
-                    globalFlagPerChannel.set(iChannel, flag);
-                    getSelectedIndices().forEach(idx -> {
-                        SliceSources cSlice = sortedSlices.get(idx);
-                        if (cSlice.nChannels>iChannel) {
-                            if (cSlice.getGUIState().isChannelVisible(iChannel)) {
-                                if (!flag) {
-                                    cSlice.getGUIState().setChannelVisibility(iChannel, false);
-                                }
-                            } else {
-                                if (flag) {
-                                    cSlice.getGUIState().setChannelVisibility(iChannel, true);
-                                }
-                            }
-                        } //else Channel not available for this slice
-                    });
-                } // else dealt with in the mouse manager
-            }
-        }
-
-        @Override
-        public Object getValueAt(int rowIndex, int columnIndex) {
-            if ((columnIndex) == 0) {
-                return ".";
-            } else if ((columnIndex) == 1) {
-                return globalFlagVisible;
-            } if (columnIndex%2 == 0) {
-                int iChannel = (columnIndex-2)/2;
-                if (sortedSlices.size()>0) {
-                    return globalFlagPerChannel.get(iChannel);
-                } else {
-                    return Boolean.FALSE;
-                }
-            } else {
-                int iChannel = (columnIndex-3)/2;
-                if (sortedSlices.size()>0) {
-                    return globalDisplaySettingsPerChannel.get(iChannel);
-                } else {
-                    return new Displaysettings(-1,"-");
-                }
-            }
-        }
-
-        @Override
-        public int getRowCount() {
-            return 1;
-        }
     }
 
     public static class DisplaySettingsRenderer extends JLabel
@@ -623,6 +561,5 @@ public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, Mul
             return this;
         }
     }
-
 
 }

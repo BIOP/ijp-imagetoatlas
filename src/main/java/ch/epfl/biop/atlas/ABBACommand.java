@@ -76,7 +76,7 @@ public class ABBACommand implements Command {
             mp = (MultiSlicePositioner) (cm.getOutput("mp"));
 
             cs.run(SlicerAdjusterInteractiveCommand.class, true,
-                    "zSamplingSteps", 200,
+                    //"zSamplingSteps", 200,
                     "rotateX",0,
                     "rotateY",0,
                     "reslicedAtlas", mp.getReslicedAtlas(),

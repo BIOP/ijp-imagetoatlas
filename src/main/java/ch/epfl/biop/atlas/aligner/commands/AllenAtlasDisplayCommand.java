@@ -39,6 +39,9 @@ public class AllenAtlasDisplayCommand extends InteractiveCommand implements Mult
     @Parameter(style="slider", min="0", max="1", stepSize = "0.01", persist = false)
     double labelBorderSlider = 0.5;
 
+    @Parameter(min = "10", max = "500", stepSize = "10", style = "slider", label = "Displayed slicing [micron]", persist = false)
+    int zSamplingSteps = 200;
+
     @Parameter
     SourceAndConverterBdvDisplayService bdvDisplayService;
 
@@ -48,6 +51,9 @@ public class AllenAtlasDisplayCommand extends InteractiveCommand implements Mult
             mp.addModeListener(this);
             listenerRegistered=true;
         }
+
+        mp.getReslicedAtlas().setStep(zSamplingSteps/10);
+
         mp.getBdvh().getViewerPanel().state().setSourceActive(getSources()[0], showNissl);
         mp.getBdvh().getViewerPanel().state().setSourceActive(getSources()[1], showAutoFluo);
         mp.getBdvh().getViewerPanel().state().setSourceActive(getSources()[2], showLabelBorder);
