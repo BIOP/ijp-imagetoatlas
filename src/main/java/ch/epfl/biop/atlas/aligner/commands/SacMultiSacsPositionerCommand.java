@@ -21,7 +21,7 @@ import javax.swing.*;
 @Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Position Multiple Slices")
 public class SacMultiSacsPositionerCommand implements Command {
 
-    @Parameter(choices = {"coronal", "sagittal", "vertical"})//, "free"})
+    @Parameter(choices = {"coronal", "sagittal", "horizontal"})//, "free"})
     String slicingMode;
 
     @Parameter
