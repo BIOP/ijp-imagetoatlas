@@ -1,5 +1,8 @@
 package ch.epfl.biop.atlas.allen.adultmousebrain;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.net.HttpURLConnection;
@@ -11,6 +14,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 public class DownloadProgressBar {
+
+    protected static Logger logger = LoggerFactory.getLogger(DownloadProgressBar.class);
 
     public static void urlToFile(URL url, File file, String frameTitle, long fileSize) throws Exception {
 
@@ -25,7 +30,7 @@ public class DownloadProgressBar {
         RunnableWithException updatethread = () -> {
                 HttpURLConnection httpConnection = (HttpURLConnection) (url.openConnection());
                 long completeFileSize = httpConnection.getContentLength();
-                System.out.println("File Size : "+completeFileSize);
+                logger.info("File Size : "+completeFileSize);
 
                 if (completeFileSize == -1) completeFileSize = fileSize;
 

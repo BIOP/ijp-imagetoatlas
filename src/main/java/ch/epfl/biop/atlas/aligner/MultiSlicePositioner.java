@@ -237,8 +237,6 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     // Flag for overlaying the info of the slice under which the mouse is
     boolean showSliceInfo = true;
 
-    private static Logger logger = LoggerFactory.getLogger(MultiSlicePositioner.class);
-
     /**
      * Starts ABBA in a bigdataviewer window
      * @param bdvh a BdvHandle
@@ -309,6 +307,9 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.nextMode(), "change_mode", "R");
         common_behaviours.behaviour((ClickBehaviour) (x, y) -> {slices.forEach(SliceSources::select);bdvh.getViewerPanel().getDisplay().repaint();}, "selectAllSlices", "ctrl A", "meta A");
         common_behaviours.behaviour((ClickBehaviour) (x, y) -> {slices.forEach(SliceSources::deSelect);bdvh.getViewerPanel().getDisplay().repaint();}, "deselectAllSlices", "ctrl shift A", "meta shift A");
+
+
+        common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.printBindings(), "print_bindings", "K");
 
 
         bdvh.getTriggerbindings().addBehaviourMap(COMMON_BEHAVIOURS_KEY, common_behaviours.getBehaviourMap());
@@ -548,6 +549,10 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                 }
         );
         logger.info("Instance created");
+    }
+
+    private void printBindings() {
+        BdvHandleHelper.printBindings(bdvh, logger::debug);
     }
 
     public void showAtlasPosition() {
@@ -1563,18 +1568,26 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     }
 
     /**
-     * Equal spacing between selected slices
+     * Equal spacing between selected slices, respecting the location of key slices
+     * (key slices are not moved)
+     * Also the first and last selected slices are not moved
      */
     public void equalSpacingSelectedSlices() {
         List<SliceSources> sortedSelected = getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
         if (sortedSelected.size() > 2) {
-            SliceSources first = sortedSelected.get(0);
-            SliceSources last = sortedSelected.get(sortedSelected.size() - 1);
-            double totalSpacing = last.getSlicingAxisPosition() - first.getSlicingAxisPosition();
-            double delta = totalSpacing / (sortedSelected.size() - 1);
+            int indexPreviousKey = 0;
+            int indexNextKey = 1;
             new MarkActionSequenceBatch(this).runRequest();
-            for (int idx = 1; idx < sortedSelected.size() - 1; idx++) {
-                moveSlice(sortedSelected.get(idx), first.getSlicingAxisPosition() + ((double) idx) * delta);
+            while (indexNextKey<sortedSelected.size()) {
+                if ((sortedSelected.get(indexNextKey).isKeySlice())||(indexNextKey==getSortedSlices().size()-1)) {
+                    double totalSpacing = sortedSelected.get(indexNextKey).getSlicingAxisPosition()-sortedSelected.get(indexPreviousKey).getSlicingAxisPosition();
+                    double delta = totalSpacing / (double) (indexNextKey-indexPreviousKey);
+                    for (int i = indexPreviousKey + 1; i<indexNextKey; i++) {
+                        moveSlice(sortedSelected.get(i), sortedSelected.get(indexPreviousKey).getSlicingAxisPosition() + ((double) i-(indexPreviousKey)) * delta);
+                    }
+                    indexPreviousKey = indexNextKey;
+                }
+                indexNextKey++;
             }
             new MarkActionSequenceBatch(this).runRequest();
         }

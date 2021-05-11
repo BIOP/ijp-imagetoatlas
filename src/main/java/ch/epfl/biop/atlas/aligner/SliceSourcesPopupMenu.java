@@ -1,9 +1,14 @@
 package ch.epfl.biop.atlas.aligner;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.swing.*;
 import java.util.function.Consumer;
 
 public class SliceSourcesPopupMenu {
+
+    protected static Logger logger = LoggerFactory.getLogger(SliceSourcesPopupMenu.class);
 
     private JPopupMenu popup;
     private final SliceSources[] slices;

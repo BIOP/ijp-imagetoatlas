@@ -93,12 +93,12 @@ abstract public class SourceAndConverterRegistration implements IABBARegistratio
         this.parameters = parameters;
     }
 
-    protected Consumer<String> log = System.out::println;
+    //protected static Consumer<String> log = logger::info;//System.out::println;
 
-    @Override
-    public void setLogger(Consumer<String> logger) {
-        this.log = logger;
-    }
+    //@Override
+    //public void setLogger(Consumer<String> logger) {
+    //    this.log = logger;
+    //}
 
     protected MultiSlicePositioner.SliceInfo sliceInfo;
 

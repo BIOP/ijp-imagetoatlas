@@ -5,6 +5,7 @@ import bdv.util.BdvHandle;
 import bdv.viewer.DisplayMode;
 import bdv.viewer.Interpolation;
 import bdv.viewer.SourceAndConverter;
+import ch.epfl.biop.atlas.aligner.MultiSliceObserver;
 import ch.epfl.biop.atlas.aligner.commands.RegistrationElastixSplineCommand;
 import ch.epfl.biop.atlas.aligner.commands.RegistrationElastixSplineRemoteCommand;
 import ch.epfl.biop.atlas.plugin.IABBARegistrationPlugin;
@@ -23,6 +24,8 @@ import org.scijava.command.Command;
 import org.scijava.command.CommandModule;
 import org.scijava.command.CommandService;
 import org.scijava.plugin.Plugin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sc.fiji.bdvpg.bdv.BdvHandleHelper;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
@@ -46,15 +49,17 @@ import static bdv.util.RealTransformHelper.BigWarpFileFromRealTransform;
 
 public class Elastix2DSplineRegistration extends RealTransformSourceAndConverterRegistration {
 
+    protected static Logger logger = LoggerFactory.getLogger(Elastix2DSplineRegistration.class);
+
     Future<CommandModule> task;
 
     @Override
     public void setFixedImage(SourceAndConverter[] fimg) {
         if (fimg.length==0) {
-            System.err.println("Error, no fixed image set in class "+this.getClass().getSimpleName());
+            logger.error("Error, no fixed image set in class "+this.getClass().getSimpleName());
         }
         if (fimg.length>1) {
-            log.accept("Multichannel image registration not supported for class "+this.getClass().getSimpleName());
+            logger.warn("Multichannel image registration not supported for class "+this.getClass().getSimpleName());
         }
         super.setFixedImage(fimg);
     }
@@ -62,10 +67,10 @@ public class Elastix2DSplineRegistration extends RealTransformSourceAndConverter
     @Override
     public void setMovingImage(SourceAndConverter[] mimg) {
         if (mimg.length==0) {
-            System.err.println("Error, no fixed image set in class "+this.getClass().getSimpleName());
+            logger.error("Error, no fixed image set in class "+this.getClass().getSimpleName());
         }
         if (mimg.length>1) {
-            log.accept("Multichannel image registration not supported for class "+this.getClass().getSimpleName());
+            logger.warn("Multichannel image registration not supported for class "+this.getClass().getSimpleName());
         }
         super.setMovingImage(mimg);
     }

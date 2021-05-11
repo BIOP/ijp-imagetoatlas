@@ -1,11 +1,14 @@
 package ch.epfl.biop.atlas.allen.adultmousebrain;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 public class AllenBrainCCFv3Downloader {
+
+    protected static Logger logger = LoggerFactory.getLogger(AllenBrainCCFv3Downloader.class);
 
     final public static String allen_mouse_brain_CCFv3_hdf5_v1 = "https://zenodo.org/record/4486659/files/ccf2017-mod65000-border-centered-mm-bc.h5?download=1";
     final public static String allen_mouse_brain_CCFv3_xml_v1 = "https://zenodo.org/record/4486659/files/ccf2017-mod65000-border-centered-mm-bc.xml?download=1";
@@ -26,15 +29,15 @@ public class AllenBrainCCFv3Downloader {
 
         if (fileHdf5.exists()) {
             if (fileHdf5.length() != 3_089_344_351L) {
-                System.err.println("hdf5 file wrong size ... downloading again");
+                logger.warn("hdf5 file wrong size ... downloading again");
             } else {
-                System.out.println("hdf5 file already downloaded - skipping");
+                logger.info("hdf5 file already downloaded - skipping");
                 dlH5 = false;
             }
         }
 
         if (fileXml.exists()) {
-            System.out.println("xml file already downloaded - skipping");
+            logger.info("xml file already downloaded - skipping");
             dlXml = false;
         }
 
@@ -57,7 +60,7 @@ public class AllenBrainCCFv3Downloader {
         boolean dlOntology = true;
         if (ontologyFile.exists()) {
             dlOntology = false;
-            System.out.println("ontology file already downloaded - skipping");
+            logger.info("Ontology file already downloaded - skipping");
         }
         URL returned = null;
 

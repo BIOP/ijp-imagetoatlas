@@ -190,10 +190,10 @@ public class IdentityRegistrationPluginExample implements IABBARegistrationPlugi
         return null; // unsupported, but in fact in this case
     }
 
-    @Override
-    public void setLogger(Consumer<String> logger) {
-        log = logger;
-    }
+    //@Override
+    //public void setLogger(Consumer<String> logger) {
+    //    log = logger;
+    //}
 
     @Override
     public void setSliceInfo(MultiSlicePositioner.SliceInfo sliceInfo) {
