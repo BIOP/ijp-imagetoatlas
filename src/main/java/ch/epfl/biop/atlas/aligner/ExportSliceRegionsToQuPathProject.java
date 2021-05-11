@@ -1,8 +1,13 @@
 package ch.epfl.biop.atlas.aligner;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.awt.*;
 
 public class ExportSliceRegionsToQuPathProject extends CancelableAction {
+
+    protected static Logger logger = LoggerFactory.getLogger(ExportSliceRegionsToQuPathProject.class);
 
     final SliceSources slice;
     boolean erasePreviousFile;
@@ -15,7 +20,7 @@ public class ExportSliceRegionsToQuPathProject extends CancelableAction {
 
     @Override
     public boolean run() { //
-        System.out.println("Exporting slice registration");
+        logger.info("Exporting slice "+slice+" registration to QuPath");
         slice.exportToQuPathProject(erasePreviousFile);
         return true;
     }
@@ -43,7 +48,7 @@ public class ExportSliceRegionsToQuPathProject extends CancelableAction {
 
     @Override
     public boolean cancel() {
-        mp.log.accept("Export cancel : no action");
+        logger.debug("Export to QuPath cancel : no action");
         return false;
     }
 

@@ -5,7 +5,8 @@ import ch.epfl.biop.atlas.allen.adultmousebrain.AllenBrainAdultMouseAtlasCCF2017
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import ij.Prefs;
-import sc.fiji.bdvpg.bdv.config.BdvSettingsGUISetter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -18,6 +19,8 @@ import java.io.PrintWriter;
 import java.net.URL;
 
 public class ABBAHelper {
+
+    protected static Logger logger = LoggerFactory.getLogger(ABBAHelper.class);
 
     public static void displayABBALogo(int ms) {
         JFrame frameStart = new JFrame();
@@ -107,7 +110,7 @@ public class ABBAHelper {
             out.println(abbaSettings);
             out.close();
         } catch (FileNotFoundException e) {
-            System.err.println("Could not print abba settings file "+abbaSettingsFile.getAbsolutePath());
+            logger.warn("Could not print abba settings file "+abbaSettingsFile.getAbsolutePath());
             e.printStackTrace();
         }
     }

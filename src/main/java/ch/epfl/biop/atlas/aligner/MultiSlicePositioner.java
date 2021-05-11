@@ -92,6 +92,8 @@ import static sc.fiji.bdvpg.scijava.services.SourceAndConverterService.SPIM_DATA
 
 public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandleListener, MouseMotionListener { // SelectedSourcesListener,
 
+    protected static Logger logger = LoggerFactory.getLogger(MultiSlicePositioner.class);
+
     /**
      * Object which serves as a lock in order to allow
      * for executing one task at a time if the user feedback is going
@@ -188,7 +190,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
      * Non blocking log message for users
      */
     public Consumer<String> log = (message) -> {
-        System.out.println("Multipositioner : "+message);
+        logger.info("Multipositioner : "+message);
         getBdvh().getViewerPanel().showMessage(message);
     };
 
@@ -196,7 +198,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
      * Non blocking error message for users
      */
     public BiConsumer<String, String> nonBlockingErrorMessageForUser = (title, message) ->
-            System.err.println(title+":"+message);
+            logger.error(title+":"+message);
 
     /**
      * Blocking error message for users
@@ -211,7 +213,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
             JOptionPane.showMessageDialog(new JFrame(), message, title, JOptionPane.WARNING_MESSAGE);
 
     public Consumer<String> errlog = (message) -> {
-        System.err.println("Multipositioner : "+message);
+        logger.error("Multipositioner : "+message);
         errorMessageForUser.accept("Error", message);
     };
 
@@ -2092,7 +2094,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         File sacsFile = new File(fileNoExt+"_sources.json");
 
         if (sacsFile.exists()&&(!overwrite)) {
-            System.err.println("File "+sacsFile.getAbsolutePath()+" already exists. Abort command");
+            logger.error("File "+sacsFile.getAbsolutePath()+" already exists. Abort command");
             return;
         }
 
@@ -2101,7 +2103,6 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         List<SourceAndConverter> serialized_sources = new ArrayList<>();
 
         sacss.getSacToId().values().stream().sorted().forEach(i -> {
-            System.out.println(i);
             serialized_sources.add(sacss.getIdToSac().get(i));
         });
 
@@ -2134,10 +2135,6 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         sacsl.getSacToId().values().stream().sorted().forEach(i -> serialized_sources.add(sacsl.getIdToSac().get(i)));
 
         Gson gson = getGsonStateSerializer(serialized_sources);
-
-        System.out.println(gson.toJson(new AffineTransform3D()));
-
-        System.out.println(gson.toJson(new AffineTransform3D(), RealTransform.class));
 
         if (stateFile.exists()) {
             try {
@@ -2202,7 +2199,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     List<SliceChangeListener> listeners = new ArrayList<>();
 
     public void addSliceListener(SliceChangeListener listener) {
-        System.out.println("listener :"+listener);
+        logger.debug("Adding slice change listener :"+listener+" of class"+listener.getClass().getSimpleName());
         listeners.add(listener);
     }
 

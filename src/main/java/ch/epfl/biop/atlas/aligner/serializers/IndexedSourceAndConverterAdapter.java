@@ -2,12 +2,16 @@ package ch.epfl.biop.atlas.aligner.serializers;
 
 import bdv.viewer.SourceAndConverter;
 import com.google.gson.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Type;
 import java.util.List;
 
 public class IndexedSourceAndConverterAdapter implements JsonSerializer<SourceAndConverter>,
         JsonDeserializer<SourceAndConverter> {
+
+    protected static Logger logger = LoggerFactory.getLogger(IndexedSourceAndConverterAdapter.class);
 
     final List<SourceAndConverter> list_sacs;
 
@@ -24,8 +28,8 @@ public class IndexedSourceAndConverterAdapter implements JsonSerializer<SourceAn
     @Override
     public JsonElement serialize(SourceAndConverter sac, Type type, JsonSerializationContext jsonSerializationContext) {
         JsonObject obj = new JsonObject();
-        System.out.println("sac.getSpimSource().getName():"+sac.getSpimSource().getName());
-        System.out.println("size list = "+list_sacs.size());
+        logger.debug("sac.getSpimSource().getName():"+sac.getSpimSource().getName());
+        logger.debug("size list = "+list_sacs.size());
         obj.addProperty("source_index", list_sacs.indexOf(sac));
         return obj;
     }

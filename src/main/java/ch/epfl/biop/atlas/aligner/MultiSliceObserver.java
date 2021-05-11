@@ -1,5 +1,8 @@
 package ch.epfl.biop.atlas.aligner;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
@@ -10,6 +13,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class MultiSliceObserver {
 
+    protected static Logger logger = LoggerFactory.getLogger(MultiSliceObserver.class);
+
     MultiSlicePositioner mp;
 
     Map<SliceSources, List<CancelableAction>> sliceSortedActions = new ConcurrentHashMap<>();
@@ -19,8 +24,6 @@ public class MultiSliceObserver {
     Set<CancelableAction> hiddenActions = ConcurrentHashMap.newKeySet(); // For cancelled actions
 
     JPanel innerPanel = new JPanel();
-
-
 
     Thread animatorThread;
 
@@ -58,9 +61,11 @@ public class MultiSliceObserver {
                     //e.printStackTrace();
                 }
             }
-            //System.out.println("Animator thread stopped");
+            logger.info("Animator thread stopped");
         });
+
         animatorThread.start();
+        logger.info("Animator thread started");
 
     }
 
@@ -178,7 +183,7 @@ public class MultiSliceObserver {
     }
 
     public synchronized void updateInfoPanel(SliceSources slice) {
-        //System.out.println("updateInfoPanel called");
+        logger.debug("UpdateInfoPanel called");
         if (sliceSortedActions.containsKey(slice)
                 &&mp.getSlices().contains(slice)
                 &&sliceSortedActions.get(slice).size()!=0) {

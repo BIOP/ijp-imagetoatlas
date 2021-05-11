@@ -225,10 +225,6 @@ public class Elastix2DSplineRegistration extends RealTransformSourceAndConverter
                     at3D.inverse().apply(ptsTarget.get(i), ptsTarget.get(i));
                     at3D.inverse().apply(ptsSource.get(i), ptsSource.get(i));
 
-                    //System.out.println("Landmark "+i+" ["+mask.getAt(ptsSource.get(i)).get()+", "+mask.getAt(ptsTarget.get(i)).get()+"]");
-                    //System.out.println("Source:"+ptsSource.get(i));
-                    //System.out.println("Target:"+ptsTarget.get(i));
-
                     if ((mask.getAt(ptsSource.get(i)).get() == 0) && (mask.getAt(ptsTarget.get(i)).get() == 0)) {
 
                     } else {

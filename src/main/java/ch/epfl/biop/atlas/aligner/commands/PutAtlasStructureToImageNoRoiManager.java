@@ -1,12 +1,15 @@
 package ch.epfl.biop.atlas.aligner.commands;
 
 import ch.epfl.biop.atlas.BiopAtlas;
+import ch.epfl.biop.atlas.aligner.MultiSliceObserver;
 import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
 import ch.epfl.biop.java.utilities.roi.types.CompositeFloatPoly;
 import ch.epfl.biop.java.utilities.roi.types.IJShapeRoiArray;
 import ij.gui.Roi;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -15,6 +18,9 @@ import java.util.StringTokenizer;
 
 //TODO : adds a distinction between right and left ROI
 public class PutAtlasStructureToImageNoRoiManager implements Command {
+
+    protected static Logger logger = LoggerFactory.getLogger(PutAtlasStructureToImageNoRoiManager.class);
+
 	@Parameter
 	public BiopAtlas atlas; // To get the ontology
 
@@ -53,7 +59,7 @@ public class PutAtlasStructureToImageNoRoiManager implements Command {
 			//if (AtlasDataPreferences.ontologyIdentifierToStructureId.containsKey(structure_key)) {
                 //structureId = AtlasDataPreferences.ontologyIdentifierToStructureId.get(structure_key);
                 structureId = atlas.ontology.getIdFromPooledProperties(structure_key);
-				System.out.println("Fetching structure id = "+structureId);
+				logger.debug("Fetching structure id = "+structureId);
     	        ids.add(structureId);
     	        if (addDescendants) ids.addAll(atlas.ontology.getAllChildren(structureId));
     	        if (addAncestors) ids.addAll(atlas.ontology.getAllParents(structureId));
@@ -62,7 +68,7 @@ public class PutAtlasStructureToImageNoRoiManager implements Command {
     	        	ids.addAll(atlas.ontology.getAllLeaves(structureId));
     	        }*/
 			} else {
-                System.err.println("Structure key"+structure_key+" not found in ontology, abort command.");
+                logger.error("Structure key"+structure_key+" not found in ontology, abort command.");
             }   
 		}
 
@@ -92,8 +98,8 @@ public class PutAtlasStructureToImageNoRoiManager implements Command {
         output = new IJShapeRoiArray(listOut);
 
         for (int i=0;i<output.rois.size();i++) {
-            System.out.println("rename");
-            System.out.println(rois.rois.get(i).getRoi().getProperty("hierarchy"));
+            logger.debug("rename");
+            logger.debug(rois.rois.get(i).getRoi().getProperty("hierarchy"));
             output.rois.get(i).getRoi().setProperty("hierarchy", rois.rois.get(i).getRoi().getProperty("hierarchy"));
         }
 	}

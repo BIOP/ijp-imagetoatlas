@@ -4,6 +4,8 @@ import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.sourcepreprocessors.SourcesProcessor;
 import ch.epfl.biop.atlas.plugin.RegistrationPluginHelper;
 import ch.epfl.biop.registration.Registration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 
@@ -12,6 +14,9 @@ import java.awt.*;
  * a slice
  */
 public class RegisterSlice extends CancelableAction {
+
+    protected static Logger logger = LoggerFactory.getLogger(RegisterSlice.class);
+
     final SliceSources slice;
     Registration<SourceAndConverter<?>[]> registration;
     final SourcesProcessor preprocessFixed;
@@ -100,7 +105,7 @@ public class RegisterSlice extends CancelableAction {
     @Override
     public boolean cancel() {
         if (registration!=null) {
-           // System.out.println("---------------- Action "+this+" registration cancel");
+            logger.debug("Registration action "+this+" cancelled");
             registration.abort(); // Probably not necessary
         }
         return slice.removeRegistration(registration);

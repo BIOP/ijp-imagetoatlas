@@ -26,6 +26,8 @@ import mpicbg.spim.data.generic.sequence.BasicViewSetup;
 import net.imglib2.RealInterval;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
 import sc.fiji.bdvpg.scijava.services.ui.SourceAndConverterInspector;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
@@ -58,6 +60,8 @@ import static ch.epfl.biop.atlas.aligner.CancelableAction.errlog;
  */
 
 public class SliceSources {
+
+    protected static Logger logger = LoggerFactory.getLogger(SliceSources.class);
 
     final private SliceSourcesGUIState guiState; // in here ? GOod idea ?
 
@@ -477,9 +481,9 @@ public class SliceSources {
             tasks.add(startingPoint.thenApplyAsync((out) -> {
                 if (out) {
                     actionInProgress = action;
-                    //System.out.println("Action:"+action);
+                    logger.debug(this+": action "+action+" started");
                     boolean result = action.run();
-                    //System.out.println("Success:"+result);
+                    logger.debug(this+": action "+action+" result "+result);
                     if (result) {
                         actionInProgress = null;
                         postRun.run();
@@ -519,7 +523,7 @@ public class SliceSources {
                     if (action==actionInProgress) {
                         if (actionInProgress instanceof RegisterSlice) {
                             // Special case : let's abort ASAP the registration to avoid overloading the server
-                            //System.out.println("Abort registration");
+                            logger.debug("Aborting register slice action :  "+actionInProgress);
                             ((RegisterSlice) actionInProgress).registration.abort();
                             //postRun.run();
                             action.cancel();

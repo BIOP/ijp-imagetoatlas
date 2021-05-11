@@ -3,6 +3,7 @@ package ch.epfl.biop.atlas.aligner;
 import bdv.tools.transformation.TransformedSource;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.BiopAtlas;
+import ch.epfl.biop.atlas.aligner.serializers.AlignerState;
 import ch.epfl.biop.sourceandconverter.EmptyMultiResolutionSourceAndConverterCreator;
 import ch.epfl.biop.registration.sourceandconverter.affine.AffineTransformedSourceWrapperRegistration;
 import ch.epfl.biop.sourceandconverter.transform.SourceMosaicZSlicer;
@@ -11,6 +12,8 @@ import net.imglib2.RealInterval;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.util.LinAlgHelpers;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceAffineTransformer;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceResampler;
@@ -19,6 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ReslicedAtlas implements RealInterval {
+
+    protected static Logger logger = LoggerFactory.getLogger(ReslicedAtlas.class);
 
     final public BiopAtlas ba;
 
@@ -79,7 +84,7 @@ public class ReslicedAtlas implements RealInterval {
 
     void computeReslicedSources() {
         if ((slicingTransfom==null)||(slicingResolution<=0)) {
-            System.err.println("No slicing transform or slicing resolution specified");
+            logger.error("No slicing transform or slicing resolution specified");
             return;
         }
 

@@ -1,6 +1,8 @@
 package ch.epfl.biop.atlas.aligner;
 
 import bdv.viewer.SourceAndConverter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.text.DecimalFormat;
@@ -10,6 +12,8 @@ import java.util.List;
  * Creates a new Slice source
  */
 public class CreateSlice extends CancelableAction {
+
+    protected static Logger logger = LoggerFactory.getLogger(CreateSlice.class);
 
     final private List<SourceAndConverter<?>> sacs;
     private SliceSources sliceSource;
@@ -64,7 +68,7 @@ public class CreateSlice extends CancelableAction {
                 }
 
                 if (!exactMatch) {
-                    System.err.println("A source is already used in the positioner : slice not created.");
+                    logger.error("A source is already used in the positioner : slice not created.");
                     mp.log.accept("A source is already used in the positioner : slice not created.");
                     return false;
                 } else {

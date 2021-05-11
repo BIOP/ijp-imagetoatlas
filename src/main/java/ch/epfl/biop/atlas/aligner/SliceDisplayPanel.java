@@ -3,6 +3,8 @@ package ch.epfl.biop.atlas.aligner;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.commands.DisplaySettingsCommand;
 import org.scijava.command.CommandService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import spimdata.util.Displaysettings;
 
 import javax.swing.*;
@@ -19,6 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, MultiSlicePositioner.SliceChangeListener, ListSelectionListener {
+
+    protected static Logger logger = LoggerFactory.getLogger(SliceDisplayPanel.class);
 
     final MultiSlicePositioner mp;
 
@@ -61,7 +65,7 @@ public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, Mul
                 List<SliceSources> sortedSlices = mp.getSortedSlices();
                 int col = table.columnAtPoint(e.getPoint());
                 String name = table.getColumnName(col);
-                System.out.println("Column index selected " + col + " " + name);
+                logger.debug("Column index selected " + col + " " + name);
 
                 if (col==1) {
                     // Let's gather whether most are visible or invisible

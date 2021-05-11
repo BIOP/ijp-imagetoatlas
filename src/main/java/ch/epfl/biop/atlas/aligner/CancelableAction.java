@@ -24,7 +24,7 @@ public abstract class CancelableAction {
 
     final MultiSlicePositioner mp;
 
-    private static Logger logger = LoggerFactory.getLogger(CancelableAction.class);
+    protected static Logger logger = LoggerFactory.getLogger(CancelableAction.class);
 
     public static Consumer<String> errlog = logger::error;
 

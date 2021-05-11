@@ -1,6 +1,7 @@
 package ch.epfl.biop.atlas.aligner.commands;
 
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
+import ch.epfl.biop.atlas.aligner.serializers.IndexedSourceAndConverterAdapter;
 import ch.epfl.biop.bdv.command.userdefinedregion.GetUserRectangleCommand;
 import net.imglib2.RealPoint;
 import org.scijava.command.Command;
@@ -9,11 +10,15 @@ import org.scijava.command.InteractiveCommand;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.widget.Button;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
 @Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Define Rectangle")
 public class RectangleROIDefineInteractiveCommand extends InteractiveCommand {
+
+    protected static Logger logger = LoggerFactory.getLogger(RectangleROIDefineInteractiveCommand.class);
 
     @Parameter
     MultiSlicePositioner mp;
@@ -62,9 +67,9 @@ public class RectangleROIDefineInteractiveCommand extends InteractiveCommand {
             } else {
                 assert pts.size() == 2;
 
-                System.out.println("pts.get(0).getDoublePosition(0) = "+pts.get(0).getDoublePosition(0));
+                logger.debug("pts.get(0).getDoublePosition(0) = "+pts.get(0).getDoublePosition(0));
 
-                System.out.println("pts.get(1).getDoublePosition(0) = "+pts.get(1).getDoublePosition(0));
+                logger.debug("pts.get(1).getDoublePosition(0) = "+pts.get(1).getDoublePosition(0));
 
                 sx = Math.abs(pts.get(0).getDoublePosition(0)-pts.get(1).getDoublePosition(0));
                 sy = Math.abs(pts.get(0).getDoublePosition(1)-pts.get(1).getDoublePosition(1));
@@ -83,10 +88,10 @@ public class RectangleROIDefineInteractiveCommand extends InteractiveCommand {
                     py = miny;
                 }
 
-                System.out.println("px = "+px);
-                System.out.println("py = "+py);
-                System.out.println("sx = "+sx);
-                System.out.println("sy = "+sy);
+                logger.debug("px = "+px);
+                logger.debug("py = "+py);
+                logger.debug("sx = "+sx);
+                logger.debug("sy = "+sy);
 
                 run();
             }

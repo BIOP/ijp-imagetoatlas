@@ -1,8 +1,13 @@
 package ch.epfl.biop.atlas.aligner;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.awt.*;
 
 public class ExportSliceRegionsToRoiManager extends CancelableAction {
+
+    protected static Logger logger = LoggerFactory.getLogger(ExportSliceRegionsToRoiManager.class);
 
     final SliceSources slice;
     String namingChoice;
@@ -15,7 +20,7 @@ public class ExportSliceRegionsToRoiManager extends CancelableAction {
 
     @Override
     public boolean run() { //
-        System.out.println("Exporting slice registration");
+        logger.debug("Exporting slice ROI Manager registration");
         slice.exportRegionsToROIManager(namingChoice);
         return true;
     }
@@ -43,7 +48,7 @@ public class ExportSliceRegionsToRoiManager extends CancelableAction {
 
     @Override
     public boolean cancel() {
-        mp.log.accept("Export cancel : no action");
+        logger.debug("Export cancel : no action");
         return true;
     }
 

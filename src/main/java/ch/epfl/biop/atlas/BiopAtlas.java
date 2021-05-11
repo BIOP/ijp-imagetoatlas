@@ -1,6 +1,5 @@
 package ch.epfl.biop.atlas;
 
-import java.io.Closeable;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -11,6 +10,8 @@ import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.plugin.frame.RoiManager;
 import ij.process.FloatPolygon;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 abstract public class BiopAtlas {
 
@@ -23,6 +24,8 @@ abstract public class BiopAtlas {
     
     //--------------------------- Ontology
     public AtlasOntology ontology;
+
+    private static Logger logger = LoggerFactory.getLogger(BiopAtlas.class);
     
     abstract public void initialize(URL mapURL, URL ontologyURL);
     
@@ -67,7 +70,7 @@ abstract public class BiopAtlas {
 			if (ontology.getIdFromPooledProperties(structure_key)!=null) {
 			//if (AtlasDataPreferences.ontologyIdentifierToStructureId.containsKey(structure_key)) {
                 structureId = ontology.getIdFromPooledProperties(structure_key);
-                System.out.println("Fetching structure id = "+structureId);
+                logger.debug("Fetching structure id = "+structureId);
     	        ids.add(structureId);
     	        if (addDescendants) ids.addAll(ontology.getAllChildren(structureId));
     	        if (addAncestors) ids.addAll(ontology.getAllParents(structureId));
@@ -76,7 +79,7 @@ abstract public class BiopAtlas {
     	        	ids.addAll(ontology.getAllLeaves(structureId));
     	        }
 			} else {
-                System.err.println("Structure key"+structure_key+" not found in ontology, abort command.");
+                logger.error("Structure key"+structure_key+" not found in ontology, abort command.");
             }   
 		}
 

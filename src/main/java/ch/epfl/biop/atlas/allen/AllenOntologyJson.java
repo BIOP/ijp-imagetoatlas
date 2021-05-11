@@ -1,8 +1,11 @@
 package ch.epfl.biop.atlas.allen;
 
 import ch.epfl.biop.atlas.AtlasOntology;
+import ch.epfl.biop.atlas.aligner.DeleteSlice;
 import com.google.gson.Gson;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.io.*;
@@ -15,6 +18,9 @@ import java.util.Map;
 import java.util.Scanner;
 
 public class AllenOntologyJson implements AtlasOntology {
+
+    protected static Logger logger = LoggerFactory.getLogger(AllenOntologyJson.class);
+
     boolean success;
     int id;
     int start_row;
@@ -52,7 +58,7 @@ public class AllenOntologyJson implements AtlasOntology {
         }
         final String prefix = tabs;
         regions.forEach(region -> {
-            System.out.println(prefix+"- "+region.acronym+" ["+region.id+"]");
+            logger.debug(prefix+"- "+region.acronym+" ["+region.id+"]");
             writeRegions(region.children, level+1);
         });
     }

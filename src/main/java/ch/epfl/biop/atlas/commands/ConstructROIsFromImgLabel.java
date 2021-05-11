@@ -143,13 +143,6 @@ public class ConstructROIsFromImgLabel implements Command {
 					roi.setName(Integer.toString((int) (double) v));
 					roiArray.add(roi);
 
-					//roiManager.addRoi(roi);
-
-					/*if (monitored.contains(v)) {
-						System.out.println("id="+v+" step 0");
-						roiManager.addRoi(roi);
-					}*/
-
 					if (atlas.ontology.getParentToParentMap().containsKey((int) (double)v)) {
 
 						int parentId = atlas.ontology.getParentToParentMap().get((int) (double)v);

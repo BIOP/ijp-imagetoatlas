@@ -3,6 +3,8 @@ package ch.epfl.biop.atlas.aligner.serializers;
 import ch.epfl.biop.atlas.aligner.*;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.realtransform.RealTransform;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import spimdata.util.Displaysettings;
 
 import java.util.ArrayList;
@@ -10,8 +12,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-
 public class AlignerState {
+
+    protected static Logger logger = LoggerFactory.getLogger(AlignerState.class);
 
     public AlignerState(MultiSlicePositioner mp) {
 
@@ -83,11 +86,11 @@ public class AlignerState {
         skipableActions.add(ExportSliceRegionsToRoiManager.class);
 
         if ((ini_actions == null)||(ini_actions.size()==0)) {
-            System.err.println("Wrong number of actions to be serialized");
+            logger.error("Wrong number of actions to be serialized");
             return null;
         }
         if (!(ini_actions.get(0) instanceof CreateSlice)) {
-            System.err.println("Error : the first action is not a CreateSlice action");
+            logger.error("Error : the first action is not a CreateSlice action");
             return null;
         }
         List<CancelableAction> compiledActions = new ArrayList<>();
@@ -110,11 +113,11 @@ public class AlignerState {
                             idxCompiledActions--;
                             idxIniActions++;
                         } else {
-                            System.err.println("Error : issue with filtering serializable actions");
+                            logger.warn("Error : issue with filtering serializable actions");
                             idxIniActions++;
                         }
                     } else {
-                        System.err.println("Error : issue with filtering serializable actions. Action class = "+nextAction.getClass());
+                        logger.warn("Error : issue with filtering serializable actions. Action class = "+nextAction.getClass());
                         idxIniActions++;
                     }
                 }

@@ -1,9 +1,14 @@
 package ch.epfl.biop.atlas.aligner;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.awt.*;
 import java.io.File;
 
 public class ExportSliceRegionsToFile extends CancelableAction {
+
+    protected static Logger logger = LoggerFactory.getLogger(ExportSliceRegionsToFile.class);
 
     final SliceSources slice;
     String namingChoice;
@@ -20,7 +25,7 @@ public class ExportSliceRegionsToFile extends CancelableAction {
 
     @Override
     public boolean run() { //
-        System.out.println("Exporting slice registration");
+        logger.info("Exporting slice registration of slice "+slice);
         slice.exportRegionsToFile(namingChoice, dirOutput, erasePreviousFile);
         return true;
     }
@@ -48,7 +53,7 @@ public class ExportSliceRegionsToFile extends CancelableAction {
 
     @Override
     public boolean cancel() {
-        mp.log.accept("Export cancel : no action");
+        logger.debug("Cancelling export action : no action");
         return false;
     }
 

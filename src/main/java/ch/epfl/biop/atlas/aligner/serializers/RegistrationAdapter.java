@@ -5,12 +5,16 @@ import com.google.gson.*;
 import org.scijava.Context;
 import org.scijava.InstantiableException;
 import org.scijava.plugin.PluginService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Type;
 import java.util.Map;
 
 public class RegistrationAdapter implements JsonSerializer<Registration>,
         JsonDeserializer<Registration> {
+
+    protected static Logger logger = LoggerFactory.getLogger(RegistrationAdapter.class);
 
     Context scijavacontext;
 
@@ -37,10 +41,9 @@ public class RegistrationAdapter implements JsonSerializer<Registration>,
     public JsonElement serialize(Registration registration, Type typeOfSrc, JsonSerializationContext context) {
         JsonObject obj = new JsonObject();
 
-        /*System.out.println(registration.getClass().getSimpleName());
-        System.out.println(registration.getTransform());
-        System.out.println(registration.getRegistrationParameters());
-        System.out.println(context.serialize(registration.getRegistrationParameters()));*/
+        logger.debug("Serializing registrion of type "+registration.getClass().getSimpleName());
+        logger.debug("With transform "+registration.getTransform());
+        logger.debug("And parameters "+registration.getRegistrationParameters());
 
         obj.addProperty("type", registration.getClass().getSimpleName());
         obj.addProperty("transform", registration.getTransform());

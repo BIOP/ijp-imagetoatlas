@@ -11,10 +11,13 @@ import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import ch.epfl.biop.atlas.aligner.serializers.RegistrationAdapter;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import ch.epfl.biop.atlas.AtlasOntology;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * What a terrible mess, but ConstructROIsFromImgLabel has to be fixed
@@ -24,6 +27,8 @@ import ch.epfl.biop.atlas.AtlasOntology;
  */
 
 public class AllenOntology implements AtlasOntology {
+
+    protected static Logger logger = LoggerFactory.getLogger(AllenOntology.class);
 
 	static File cachedJSONFile;
 
@@ -73,13 +78,13 @@ public class AllenOntology implements AtlasOntology {
     public void fetchOntologyJSON() {
         // Could be in resources
        if (ontologyJSON==null) {
-           //System.out.print("Fetching ontology...");
+           logger.debug("Fetching ontology...");
     	   
            ontologyJSON = new JSONObject(jsonGetRequest(
         		   //"http://api.brain-map.org/api/v2/structure_graph_download/1.json"
         		   this.getDataSource().toString()
         		   ));
-           //System.out.println("Tidy names, acronym, id, into hash map");
+           logger.debug("Tidy names, acronym, id, into hash map");
            putOntologyIntoHashMaps();
        }
     }
@@ -89,7 +94,7 @@ public class AllenOntology implements AtlasOntology {
         try {
             URL url = new URL(urlQueryString);
             
-            URLConnection connection = (URLConnection) url.openConnection();
+            URLConnection connection = url.openConnection();
             connection.setDoOutput(true);
             if (connection instanceof HttpURLConnection) {
             	((HttpURLConnection) connection).setInstanceFollowRedirects(false);
@@ -108,7 +113,6 @@ public class AllenOntology implements AtlasOntology {
 
     static String streamToString(InputStream inputStream) {
         String text = new Scanner(inputStream, "UTF-8").useDelimiter("\\Z").next();
-        //System.out.println(text);
         return text;
     }
 	
@@ -202,19 +206,12 @@ public class AllenOntology implements AtlasOntology {
 
     }
 
-    HashSet<Float> occupiedIds = new HashSet<>();
-
     <T> Map<Integer, T> mutateMapKeysModulo(Map<Integer, T> map_in, int mod, T value) {
         Map<Integer,T> map_out = new HashMap<>();
         map_in.forEach((k,v) -> {
-            /*System.out.println(k);
-            if (occupiedIds.contains(k)) {
-                System.out.println("id : "+k+" has a duplicate with "+((float)k));
-                occupiedIds.add((float)k);
-            }*/
             Integer newKey = k % mod;
             if (map_out.containsKey(newKey)) {
-                System.err.println("Error: duplicate key k % "+mod+" = "+newKey+" k= "+k);
+                logger.error("Error: duplicate key k % "+mod+" = "+newKey+" k= "+k);
             } else {
                 map_out.put(newKey,v);
             }

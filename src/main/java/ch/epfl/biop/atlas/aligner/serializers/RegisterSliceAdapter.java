@@ -4,10 +4,13 @@ import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.RegisterSlice;
 import ch.epfl.biop.atlas.aligner.SliceSources;
+import ch.epfl.biop.atlas.aligner.commands.PutAtlasStructureToImageNoRoiManager;
 import ch.epfl.biop.atlas.aligner.sourcepreprocessors.SourcesProcessor;
 import ch.epfl.biop.registration.Registration;
 import ch.epfl.biop.registration.sourceandconverter.spline.Elastix2DSplineRegistration;
 import com.google.gson.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Type;
 import java.util.function.Supplier;
@@ -19,6 +22,8 @@ import java.util.function.Supplier;
 
 public class RegisterSliceAdapter implements JsonSerializer<RegisterSlice>,
         JsonDeserializer<RegisterSlice> {
+
+    protected static Logger logger = LoggerFactory.getLogger(RegisterSliceAdapter.class);
 
     final MultiSlicePositioner mp;
     Supplier<SliceSources> currentSliceGetter;
@@ -33,10 +38,6 @@ public class RegisterSliceAdapter implements JsonSerializer<RegisterSlice>,
         JsonObject obj = jsonElement.getAsJsonObject();
         Registration<SourceAndConverter<?>[]> reg = jsonDeserializationContext.deserialize(obj.get("registration"), Registration.class); // isDone should be true when deserialized
 
-        /*if (reg instanceof Elastix2DSplineRegistration) {
-            ((Elastix2DSplineRegistration)reg).setZPositioner(currentSliceGetter.get()::getZAxisPosition);
-        }*/
-
         SourcesProcessor fixed_sources_preprocess = jsonDeserializationContext.deserialize(obj.get("fixed_sources_preprocess"), SourcesProcessor.class);
         SourcesProcessor moving_souces_preprocess = jsonDeserializationContext.deserialize(obj.get("moving_sources_preprocess"), SourcesProcessor.class);
 
@@ -49,18 +50,19 @@ public class RegisterSliceAdapter implements JsonSerializer<RegisterSlice>,
     @Override
     public JsonElement serialize(RegisterSlice regSlice, Type type, JsonSerializationContext jsonSerializationContext) {
         JsonObject obj = new JsonObject();
-        System.out.println("Register RegisterSlice action start");
+        logger.debug("RegisterSlice serialization start, class "+RegisterSlice.class.getSimpleName());
         obj.addProperty("type", RegisterSlice.class.getSimpleName());
 
-        System.out.println("0");
+        logger.debug("Serializing moving sources preprocessing");
         obj.add("fixed_sources_preprocess", jsonSerializationContext.serialize(regSlice.getFixedSourcesProcessor()));
 
-        System.out.println("1");
+        logger.debug("Serializing fixed sources preprocessing");
         obj.add("moving_sources_preprocess", jsonSerializationContext.serialize(regSlice.getMovingSourcesProcessor()));
 
-        System.out.println("2");
+        logger.debug("Serializing registration");
         obj.add("registration", jsonSerializationContext.serialize(regSlice.getRegistration()));
-        System.out.println("Register RegisterSlice action end");
+
+        logger.debug("RegisterSlice serialization end");
         return obj;
     }
 }
