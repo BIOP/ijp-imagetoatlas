@@ -47,7 +47,6 @@ abstract public class GraphicalHandle extends MouseMotionAdapter {
         ghls.remove(ghl);
     }
 
-
     public void draw(Graphics2D g) {
         if (!isDisabled) {
             enabledDraw(g);
@@ -81,6 +80,9 @@ abstract public class GraphicalHandle extends MouseMotionAdapter {
             }
             isDisabled = true;
             ghls.forEach(ghl -> ghl.disabled(this));
+            logger.debug("Removing "+nameMap+" from "+this+" (disable called) ");
+            bindings.removeBehaviourMap(nameMap);
+            bindings.removeInputTriggerMap(nameMap);
         }
     }
 
@@ -104,13 +106,13 @@ abstract public class GraphicalHandle extends MouseMotionAdapter {
                 mouseAbove = true;
                 ghls.forEach(ghl -> ghl.hover_in(this));
                 behaviours.install(bindings, nameMap);
-                logger.debug("Installing "+nameMap+" from "+this);
+                logger.debug("Installing "+nameMap+" from "+this+" (x = "+x+" and y = "+y+")");
             }
         } else {
-            if ((mouseAbove)&&(!isDisabled)) {
+            if ((mouseAbove)){//&&(!isDisabled)) {
                 mouseAbove = false;
                 ghls.forEach(ghl -> ghl.hover_out(this));
-                logger.debug("Removing "+nameMap+" from "+this);
+                logger.debug("Removing "+nameMap+" from "+this+" (x = "+x+" and y = "+y+")");
                 bindings.removeBehaviourMap(nameMap);
                 bindings.removeInputTriggerMap(nameMap);
             }
