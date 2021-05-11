@@ -4,6 +4,8 @@ import bdv.viewer.ViewerPanel;
 import ch.epfl.biop.bdv.select.SourceSelectorBehaviour;
 import org.scijava.ui.behaviour.DragBehaviour;
 import org.scijava.ui.behaviour.util.Behaviours;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.util.HashSet;
@@ -11,6 +13,8 @@ import java.util.Set;
 import java.util.List;
 
 public class SelectionLayer {
+
+    private static Logger logger = LoggerFactory.getLogger(SelectionLayer.class);
 
     final MultiSlicePositioner mp;
 
@@ -165,10 +169,10 @@ public class SelectionLayer {
 
         @Override
         public void init(int x, int y) {
-            mp.debuglog.accept("Selection drag start ? Perform = "+perform);
+            logger.debug("Selection drag start ? Perform = "+perform);
             perform = mp.startDragAction(); // ensure unicity of drag action
             if (perform) {
-                mp.debuglog.accept("Selection drag start !");
+                logger.debug("Selection drag start !");
                 startCurrentSelection(x, y);
                 viewer.setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
                 switch (mode) {
@@ -183,7 +187,7 @@ public class SelectionLayer {
                         break;
                 }
             } else {
-                mp.debuglog.accept("Selection drag failed !");
+                logger.debug("Selection drag failed !");
             }
         }
 
@@ -203,7 +207,7 @@ public class SelectionLayer {
                 viewer.getDisplay().repaint();
                 mp.stopDragAction();
                 perform = false;
-                mp.debuglog.accept("Selection drag stopped.");
+                logger.debug("Selection drag stopped.");
             }
         }
     }

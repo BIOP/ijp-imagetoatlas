@@ -1,5 +1,8 @@
 package ch.epfl.biop.atlas.aligner;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.awt.*;
 import java.util.function.Consumer;
 
@@ -21,7 +24,9 @@ public abstract class CancelableAction {
 
     final MultiSlicePositioner mp;
 
-    public static Consumer<String> errlog = System.err::println;
+    private static Logger logger = LoggerFactory.getLogger(CancelableAction.class);
+
+    public static Consumer<String> errlog = logger::error;
 
     /**
      * Provides the reference to the MultiSlicePositioner
@@ -39,13 +44,18 @@ public abstract class CancelableAction {
 
     final public void runRequest() {
         if ((getSliceSources()!=null)) {
+            logger.debug("Action "+this +" on slice "+getSliceSources()+" requested (async).");
             getSliceSources().enqueueRunAction(this, () -> mp.mso.updateInfoPanel(getSliceSources()) );
         } else {
             // Not asynchronous
+            logger.debug("Action "+this +" on slice "+getSliceSources()+" run (non async).");
             run();
+            logger.debug("Action "+this +" on slice "+getSliceSources()+" done.");
         }
         if (isValid()) {
+            logger.debug("Action "+this+" on slice "+getSliceSources()+" is valid.");
             mp.userActions.add(this);
+            logger.debug("Action "+this+" on slice "+getSliceSources()+" added to userActions.");
             if (mp.redoableUserActions.size() > 0) {
                 if (mp.redoableUserActions.get(mp.redoableUserActions.size() - 1).equals(this)) {
                     mp.redoableUserActions.remove(mp.redoableUserActions.size() - 1);
@@ -54,9 +64,11 @@ public abstract class CancelableAction {
                     mp.redoableUserActions.clear();
                 }
             }
+            logger.debug("Action "+this+" on slice "+getSliceSources()+" info sending to MultiSliceObserver.");
             mp.mso.sendInfo(this);
+            logger.debug("Action "+this+" on slice "+getSliceSources()+" info sent to MultiSliceObserver!");
         } else {
-            errlog.accept("Invalid action "+this);
+            logger.error("Invalid action "+this+" on slice "+getSliceSources());
         }
     }
 
@@ -64,20 +76,22 @@ public abstract class CancelableAction {
         if (isValid()) {
             if ((getSliceSources() == null)) {
                 // Not asynchronous
-                System.out.println("Non Async cancel call : " + this.toString());
+                logger.debug("Non Async cancel call : " + this + " on slice "+getSliceSources());
                 cancel();
             } else {
-                System.out.println("Async cancel call : " + this.toString());
-                getSliceSources().enqueueCancelAction(this, () -> {
-                });
+                logger.debug("Async cancel call : " + this + " on slice "+getSliceSources());
+                getSliceSources().enqueueCancelAction(this, () -> { });
             }
             if (mp.userActions.get(mp.userActions.size() - 1).equals(this)) {
+
+                logger.debug(this.toString() + " cancelled on slice "+getSliceSources()+", updating useractions and redoable actions");
                 mp.userActions.remove(mp.userActions.size() - 1);
                 mp.redoableUserActions.add(this);
             } else {
-                errlog.accept("Error : cancel not called on the last action");
+                logger.error("Error : cancel not called on the last action");
                 return;
             }
+            logger.debug("Updating mso after action cancelled");
             mp.mso.cancelInfo(this);
         }
     }

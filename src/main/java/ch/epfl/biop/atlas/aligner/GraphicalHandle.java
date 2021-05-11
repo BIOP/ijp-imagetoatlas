@@ -2,6 +2,8 @@ package ch.epfl.biop.atlas.aligner;
 
 import org.scijava.ui.behaviour.util.Behaviours;
 import org.scijava.ui.behaviour.util.TriggerBehaviourBindings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
@@ -13,13 +15,13 @@ abstract public class GraphicalHandle extends MouseMotionAdapter {
 
     final List<GraphicalHandleListener> ghls = new ArrayList<>();
 
-    //final GraphicalHandleListener ghl;
-
     final Behaviours behaviours;
 
     final TriggerBehaviourBindings bindings;
 
     final String nameMap;
+
+    private static Logger logger = LoggerFactory.getLogger(GraphicalHandle.class);
 
     public GraphicalHandle(GraphicalHandleListener ghl, Behaviours behaviours, TriggerBehaviourBindings bindings, String nameMap) {
         addGraphicalHandleListener(ghl);
@@ -102,13 +104,13 @@ abstract public class GraphicalHandle extends MouseMotionAdapter {
                 mouseAbove = true;
                 ghls.forEach(ghl -> ghl.hover_in(this));
                 behaviours.install(bindings, nameMap);
-                System.err.println("Installing "+nameMap+" from "+this);
+                logger.debug("Installing "+nameMap+" from "+this);
             }
         } else {
             if ((mouseAbove)&&(!isDisabled)) {
                 mouseAbove = false;
                 ghls.forEach(ghl -> ghl.hover_out(this));
-                System.err.println("Removing "+nameMap+" from "+this);
+                logger.debug("Removing "+nameMap+" from "+this);
                 bindings.removeBehaviourMap(nameMap);
                 bindings.removeInputTriggerMap(nameMap);
             }

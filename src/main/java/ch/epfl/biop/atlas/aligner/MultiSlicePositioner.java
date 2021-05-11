@@ -31,11 +31,13 @@ import org.scijava.InstantiableException;
 import org.scijava.cache.CacheService;
 import org.scijava.command.Command;
 import org.scijava.convert.ConvertService;
+import org.scijava.log.LogService;
 import org.scijava.object.ObjectService;
 import org.scijava.plugin.PluginService;
 import org.scijava.ui.behaviour.*;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
+import org.slf4j.LoggerFactory;
 import sc.fiji.bdvpg.bdv.BdvHandleHelper;
 import sc.fiji.bdvpg.behaviour.EditorBehaviourUnInstaller;
 import sc.fiji.bdvpg.scijava.BdvScijavaHelper;
@@ -66,6 +68,8 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
 
 import static bdv.ui.BdvDefaultCards.*;
 import static sc.fiji.bdvpg.scijava.services.SourceAndConverterService.SPIM_DATA_INFO;
@@ -211,7 +215,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         errorMessageForUser.accept("Error", message);
     };
 
-    public Consumer<String> debuglog = (message) -> System.err.println("Multipositioner Debug : "+message);
+    //public Consumer<String> debuglog = (message) -> System.err.println("Multipositioner Debug : "+message);
 
     /**
      * @return a copy of the array of current slices in this ABBA instance
@@ -231,6 +235,8 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     // Flag for overlaying the info of the slice under which the mouse is
     boolean showSliceInfo = true;
 
+    private static Logger logger = LoggerFactory.getLogger(MultiSlicePositioner.class);
+
     /**
      * Starts ABBA in a bigdataviewer window
      * @param bdvh a BdvHandle
@@ -240,13 +246,16 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
      */
     public MultiSlicePositioner(BdvHandle bdvh, BiopAtlas biopAtlas, ReslicedAtlas reslicedAtlas, Context ctx) {
 
-        bdvh.getSplitPanel().setCollapsed(false);
+        logger.info("Creating instance");
 
+        bdvh.getSplitPanel().setCollapsed(false);
         try {
             Thread.sleep(2500);
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        logger.debug("SplitPanel Expanded");
 
         this.reslicedAtlas = reslicedAtlas;
         this.biopAtlas = biopAtlas;
@@ -276,6 +285,8 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
         BdvFunctions.showOverlay(this, "MultiSlice Overlay", BdvOptions.options().addTo(bdvh));
 
+        logger.debug("Multislice Overlay displayed");
+
         /*ssb = (SourceSelectorBehaviour) SourceAndConverterServices.getSourceAndConverterDisplayService().getDisplayMetadata(
                 bdvh, SourceSelectorBehaviour.class.getSimpleName());*/
         new EditorBehaviourUnInstaller(bdvh).run();
@@ -284,6 +295,8 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         bdvh.getTriggerbindings().removeInputTriggerMap(SourceSelectorBehaviour.SOURCES_SELECTOR_TOGGLE_MAP);
 
         setPositioningMode();
+
+        logger.debug("Installing behaviours : common");
 
         common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.changeSliceDisplayMode(), "toggle_single_source_mode", "S");
         common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.cancelLastAction(), "cancel_last_action", "ctrl Z", "meta Z");
@@ -299,8 +312,12 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         bdvh.getTriggerbindings().addBehaviourMap(COMMON_BEHAVIOURS_KEY, common_behaviours.getBehaviourMap());
         bdvh.getTriggerbindings().addInputTriggerMap(COMMON_BEHAVIOURS_KEY, common_behaviours.getInputTriggerMap()); // "transform", "bdv"
 
+
+        logger.debug("Overriding standard navigation commands : common");
+
         overrideStandardNavigation();
 
+        logger.debug("Installing behaviours : positioning");
         positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.toggleOverlap(), "toggle_superimpose", "O");
 
         positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.equalSpacingSelectedSlices(), "equalSpacingSelectedSlices", "D");
@@ -320,7 +337,11 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         SourceAndConverterServices.getBdvDisplayService()
                 .show(bdvh, sacsToAppend.toArray(new SourceAndConverter[0]));
 
+        logger.debug("Adding handler");
+
         bdvh.getViewerPanel().getDisplay().addHandler(this);
+
+        logger.debug("GUI customization");
 
         this.bdvh.getCardPanel().setCardExpanded("Sources", false);
         this.bdvh.getCardPanel().setCardExpanded("Groups", false);
@@ -345,6 +366,8 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         // And uses the rest to make the hierarchy of the top menu in the bdv window
 
         int hierarchyLevelsSkipped = 4;
+
+        logger.debug("Installing menu");
 
         // Load and Save state
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, MSPStateLoadCommand.class, hierarchyLevelsSkipped,"mp", this );
@@ -384,11 +407,14 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
         // Adds registration plugin commands : discovered via scijava plugin autodiscovery mechanism
 
+        logger.debug("Installing registration plugins");
+
         PluginService pluginService = ctx.getService(PluginService.class);
 
         pluginService.getPluginsOfType(IABBARegistrationPlugin.class).forEach(registrationPluginClass -> {
             IABBARegistrationPlugin plugin = pluginService.createInstance(registrationPluginClass);
             for (Class<? extends Command> commandUI: RegistrationPluginHelper.userInterfaces(plugin)) {
+                logger.info("Registration plugin "+commandUI.getSimpleName()+" discovered");
                 BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, commandUI, hierarchyLevelsSkipped,"mp", this);
             }
         });
@@ -410,6 +436,8 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ABBADocumentationCommand.class, hierarchyLevelsSkipped);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ABBAUserFeedbackCommand.class, hierarchyLevelsSkipped);
 
+        logger.debug("Adding bigdataviewer cards");
+
         bdvh.getCardPanel().addCard("Atlas Display", ScijavaSwingUI.getPanel(scijavaCtx, AllenAtlasDisplayCommand.class, "mp", this), true);
 
         bdvh.getCardPanel().addCard("Slices Display", new SliceDisplayPanel(this).getPanel(), true);
@@ -429,6 +457,8 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         final ResourcesMonitor rm = new ResourcesMonitor();
 
         bdvh.getCardPanel().addCard("Resources Monitor", rm, false);
+
+        logger.debug("Adding user ROI source");
 
         // Default registration region = full atlas size
         roiPX = -sX / 2.0;
@@ -469,10 +499,14 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
         //bss.setDisplayRangeBounds(0,1600);
         displayMode = REVIEW_MODE_INT; // For correct toggling
+
+        logger.debug("Set positioning mode");
         setPositioningMode();
 
+        logger.debug("Add right click actions");
         addRightClickActions();
 
+        logger.debug("Initializing bdv view");
         AffineTransform3D iniView = new AffineTransform3D();
 
         bdvh.getViewerPanel().state().getViewerTransform(iniView);
@@ -491,6 +525,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         BdvHandleHelper.setBdvHandleCloseOperation(bdvh, ctx.getService(CacheService.class),
                 SourceAndConverterServices.getBdvDisplayService(), false,
                 () -> {
+                    logger.info("Closing multipositioner bdv window, releasing some resources.");
                     if (mso!=null) this.mso.clear();
                     if (userActions!=null) this.userActions.clear();
                     if (slices!=null) this.slices.clear();
@@ -510,6 +545,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                     rm.stop();
                 }
         );
+        logger.info("Instance created");
     }
 
     public void showAtlasPosition() {
@@ -541,6 +577,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         modeListeners.forEach(l -> l.sliceDisplayModeChanged(this, this.sliceDisplayMode,newSliceDisplayMode));
         this.sliceDisplayMode = newSliceDisplayMode;
         getSlices().forEach(slice -> slice.getGUIState().sliceDisplayModeChanged());
+        logger.debug("Slice display mode changed from "+sliceDisplayMode+" to "+newSliceDisplayMode);
     }
 
     public ReslicedAtlas getReslicedAtlas() {
@@ -1281,12 +1318,14 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     }
 
     protected void removeSlice(SliceSources sliceSource) {
+        logger.info("Removing slice "+sliceSource+"...");
         listeners.forEach(listener -> {
-            System.out.println(listener);
+            logger.debug("Removing slice "+sliceSource+" - calling "+listener);
             listener.sliceDeleted(sliceSource);
         });
         slices.remove(sliceSource);
         sliceSource.getGUIState().sliceDeleted();
+        logger.info("Slice "+sliceSource+" removed!");
     }
 
     public boolean isCurrentSlice(SliceSources slice) {
@@ -1303,8 +1342,13 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     }
 
     protected void createSlice(SliceSources sliceSource) {
+        logger.info("Creating slice "+sliceSource+"...");
         slices.add(sliceSource);
-        listeners.forEach(listener -> listener.sliceCreated(sliceSource));
+        listeners.forEach(listener -> {
+            logger.debug("Creating slice "+sliceSource+" - calling "+listener);
+            listener.sliceCreated(sliceSource);
+        });
+        logger.info("Slice "+sliceSource+" created!");
     }
 
     public void positionZChanged(SliceSources slice) {
@@ -1904,12 +1948,12 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
     synchronized boolean startDragAction() {
         boolean result = dragActionInProgress.compareAndSet(false, true);
-        debuglog.accept("Attempt to do a drag action : successful = "+result);
+        logger.debug("Attempt to do a drag action : successful = "+result);
         return result;
     }
 
     synchronized void stopDragAction() {
-        debuglog.accept("Stopping a drag action");
+        logger.debug("Stopping a drag action");
         dragActionInProgress.set(false);
     }
 
@@ -1933,22 +1977,30 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     private static final String[] DRAG_TOGGLE_EDITOR_KEYS = new String[]{"button1"};
 
     private void refreshBlockMap() {
+        logger.debug("Refresh Block Map called");
         bdvh.getTriggerbindings().removeBehaviourMap(BLOCKING_MAP);
 
         final Set<InputTrigger> moveCornerTriggers = new HashSet<>();
-        for (final String s : DRAG_TOGGLE_EDITOR_KEYS)
+
+        for (final String s : DRAG_TOGGLE_EDITOR_KEYS) {
             moveCornerTriggers.add(InputTrigger.getFromString(s));
+        }
 
         final Map<InputTrigger, Set<String>> bindings = bdvh.getTriggerbindings().getConcatenatedInputTriggerMap().getAllBindings();
+
         final Set<String> behavioursToBlock = new HashSet<>();
-        for (final InputTrigger t : moveCornerTriggers)
+
+        for (final InputTrigger t : moveCornerTriggers) {
             behavioursToBlock.addAll(bindings.get(t));
+        }
 
         blockMap.clear();
-        final Behaviour block = new Behaviour() {
-        };
-        for (final String key : behavioursToBlock)
+
+        final Behaviour block = new Behaviour() {};
+
+        for (final String key : behavioursToBlock) {
             blockMap.put(key, block);
+        }
     }
 
     // ------------------------------------------------ Serialization / Deserialization

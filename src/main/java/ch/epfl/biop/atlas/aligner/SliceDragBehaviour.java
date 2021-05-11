@@ -2,6 +2,8 @@ package ch.epfl.biop.atlas.aligner;
 
 import net.imglib2.RealPoint;
 import org.scijava.ui.behaviour.DragBehaviour;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -9,6 +11,8 @@ import java.util.stream.Collectors;
 import static ch.epfl.biop.atlas.aligner.MultiSlicePositioner.POSITIONING_MODE_INT;
 
 public class SliceDragBehaviour implements DragBehaviour {
+
+    private static Logger logger = LoggerFactory.getLogger(SliceDragBehaviour.class);
 
     List<SliceSources> affectedSlices = new ArrayList<>();
     final SliceSources sliceDragged;
@@ -34,17 +38,17 @@ public class SliceDragBehaviour implements DragBehaviour {
 
     @Override
     public void init(int x, int y) {
-        mp.debuglog.accept(" DragSlice start ("+x+":"+y+")  ? "+ sliceDragged + " perform = "+perform);
+        logger.debug(" DragSlice start ("+x+":"+y+")  ? "+ sliceDragged + " perform = "+perform);
         perform = mp.startDragAction();
 
         if ((perform)&&(mp.displayMode != POSITIONING_MODE_INT)) {
             perform = false;
             mp.stopDragAction();
-            mp.debuglog.accept(" DragSlice start ("+x+":"+y+")  Cancelled "+ sliceDragged + " perform = "+perform);
+            logger.debug(" DragSlice start ("+x+":"+y+")  Cancelled "+ sliceDragged + " perform = "+perform);
         }
 
         if (perform) {
-            mp.debuglog.accept(" DragSlice start ("+x+":"+y+")  ! "+ sliceDragged + " perform = "+perform);
+            logger.debug(" DragSlice start ("+x+":"+y+")  ! "+ sliceDragged + " perform = "+perform);
 
             // Collect all selected sources
             affectedSlices = mp.getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
@@ -52,7 +56,7 @@ public class SliceDragBehaviour implements DragBehaviour {
             int indexKeySliceRight = -1;
             int indexKeySliceLeft = -1;
             if (!affectedSlices.contains(sliceDragged)) {
-                mp.debuglog.accept("This should not happen : slice dragged is not selected!");
+                logger.warn("This should not happen : slice dragged is not selected!");
                 perform = false;
                 mp.stopDragAction();
             } else {
@@ -68,22 +72,22 @@ public class SliceDragBehaviour implements DragBehaviour {
                 List<SliceSources> slicesSelected = new ArrayList<>();
                 // Is there any key slice to the Left ?
                 for (int i = indexCurrentSliceSelected - 1; i >= 0; i--) {
-                    mp.debuglog.accept("Testing Left " + i);
+                    //mp.debuglog.accept("Testing Left " + i);
                     if (affectedSlices.get(i).isKeySlice()&&(!keyLeft)) {
                         keyLeft = true;
                         keySliceLeft = affectedSlices.get(i);
                         indexKeySliceLeft = i;
-                        mp.debuglog.accept("Key Slice Left found : " + i + " keysliceleft = " + keySliceLeft + " at p = " + initialAxisPositions.get(keySliceLeft));
+                        logger.debug("Key Slice Left found : " + i + " keysliceleft = " + keySliceLeft + " at p = " + initialAxisPositions.get(keySliceLeft));
                     }
                 }
 
                 for (int i = indexCurrentSliceSelected + 1; i < affectedSlices.size(); i++) {
-                    mp.debuglog.accept("Testing Right " + i);
+                    //mp.debuglog.accept("Testing Right " + i);
                     if (affectedSlices.get(i).isKeySlice()&&(!keyRight)) {
                         keyRight = true;
                         keySliceRight = affectedSlices.get(i);
                         indexKeySliceRight = i;
-                        mp.debuglog.accept("Key Slice Right found : " + i + " keysliceright = " + keySliceRight + " at p = " + initialAxisPositions.get(keySliceRight));
+                        logger.debug("Key Slice Right found : " + i + " keysliceright = " + keySliceRight + " at p = " + initialAxisPositions.get(keySliceRight));
                     }
                 }
 
@@ -104,7 +108,7 @@ public class SliceDragBehaviour implements DragBehaviour {
                 indexOfSliceInDraggedOnes = affectedSlices.indexOf(sliceDragged);
 
                 if (indexOfSliceInDraggedOnes == -1) {
-                    mp.debuglog.accept("This should not happen : index of slice in dragged one not present");
+                    logger.debug("This should not happen : index of slice in dragged one not present");
                     perform = false;
                     mp.stopDragAction();
                 } else {
@@ -115,7 +119,7 @@ public class SliceDragBehaviour implements DragBehaviour {
             }
         }
 
-        mp.debuglog.accept(" DragSlice start ("+x+":"+y+") "+ sliceDragged +" Drag perform : ("+perform+")");
+        logger.debug(" DragSlice start ("+x+":"+y+") "+ sliceDragged +" Drag perform : ("+perform+")");
     }
 
     @Override
@@ -206,7 +210,7 @@ public class SliceDragBehaviour implements DragBehaviour {
     @Override
     public void end(int x, int y) {
         if (perform) {
-            mp.debuglog.accept(" DragSlice end (" + x + ":" + y + ") "+sliceDragged);
+            logger.debug(" DragSlice end (" + x + ":" + y + ") "+sliceDragged);
             //RealPoint currentMousePosition = new RealPoint(3);
             //mp.getBdvh().getViewerPanel().getGlobalMouseCoordinates(currentMousePosition);
 
