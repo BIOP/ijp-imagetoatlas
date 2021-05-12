@@ -151,4 +151,8 @@ public class Elastix2DAffineRegistration extends AffineTransformSourceAndConvert
         }
     }
 
+    public String toString() {
+        return "Elastix 2D Affine";
+    }
+
 }

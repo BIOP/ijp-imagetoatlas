@@ -23,4 +23,8 @@ public class SourcesAffineTransformer implements SourcesProcessor {
                 .collect(Collectors.toList())
                 .toArray(new SourceAndConverter[sourceAndConverters.length]);
     }
+
+    public String toString() {
+        return "M";
+    }
 }

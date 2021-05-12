@@ -107,4 +107,9 @@ public class SacBigWarp2DRegistration extends RealTransformSourceAndConverterReg
 
     }
 
+
+    public String toString() {
+        return "Big Warp";
+    }
+
 }

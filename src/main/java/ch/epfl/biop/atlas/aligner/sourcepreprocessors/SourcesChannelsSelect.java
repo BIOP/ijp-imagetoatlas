@@ -5,6 +5,7 @@ import bdv.viewer.SourceAndConverter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class SourcesChannelsSelect implements SourcesProcessor {
 
@@ -39,5 +40,9 @@ public class SourcesChannelsSelect implements SourcesProcessor {
             idx++;
         }
         return sourcesSelected;
+    }
+
+    public String toString() {
+        return "Ch["+channels_indices.stream().map(i -> i.toString()).collect(Collectors.joining(","))+"]";
     }
 }

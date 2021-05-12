@@ -7,4 +7,8 @@ public class SourcesIdentity implements SourcesProcessor {
     public SourceAndConverter[] apply(SourceAndConverter[] sourceAndConverters) {
         return sourceAndConverters;
     }
+
+    public String toString() {
+        return "Id";
+    }
 }

@@ -14,7 +14,6 @@ public class SourcesResampler implements SourcesProcessor {
         this.model = model;
     }
 
-
     @Override
     public SourceAndConverter[] apply(SourceAndConverter[] sourceAndConverters) {
         SourceResampler resampler = new SourceResampler(null,
@@ -24,5 +23,9 @@ public class SourcesResampler implements SourcesProcessor {
                 .map(resampler)
                 .collect(Collectors.toList())
                 .toArray(new SourceAndConverter[sourceAndConverters.length]);
+    }
+
+    public String toString() {
+        return "Resample().";
     }
 }

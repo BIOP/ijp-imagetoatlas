@@ -16,4 +16,8 @@ public class SourcesProcessComposer implements SourcesProcessor {
     public SourceAndConverter[] apply(SourceAndConverter[] sourceAndConverters) {
         return f2.apply(f1.apply(sourceAndConverters));
     }
+
+    public String toString() {
+        return "["+f2.toString()+"].["+f1.toString()+"]";
+    }
 }

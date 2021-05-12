@@ -334,4 +334,8 @@ public class Elastix2DSplineRegistration extends RealTransformSourceAndConverter
         }
     }
 
+    public String toString() {
+        return "Elastix 2D Spline";
+    }
+
 }

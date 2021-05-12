@@ -73,7 +73,7 @@ public class RegisterSlice extends CancelableAction {
     }
 
     public String toString() {
-        return "Registration [" + registration.getClass().getSimpleName() + "] " + slice.getActionState(this);//getRegistrationState(registration);
+        return registration.toString() + " "+preprocessFixed.toString()+".Fixed // "+preprocessMoving.toString()+".Moving)] " + slice.getActionState(this);
     }
 
     public void drawAction(Graphics2D g, double px, double py, double scale) {
