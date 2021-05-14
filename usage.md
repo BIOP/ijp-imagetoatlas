@@ -4,8 +4,8 @@ It is highly recommended to use [QuPath](https://qupath.github.io/) in order to 
 
 * For each animal:
   * [`<QuPath>` - define the dataset of this animal brain sections into a QuPath project](create_dataset_and_open.md)
-  * [`<Fiji>` - import sections by opening this QuPath project into Fiji's ABBA plugin]()
-  * [`<Fiji>` - perform various steps of registration (manual, automated or semi automated) for all required slices]()
+  * [`<Fiji>` - import sections by opening this QuPath project into Fiji's ABBA plugin](create_dataset_and_open.md#abba-navigation)
+  * [`<Fiji>` - perform various steps of registration (manual, automated or semi automated) for all required slices](registration.md)
   * [`<Fiji>` - export registration results to the original QuPath project]()
   * [`<QuPath>` - import registration results as QuPath annotations]()
   * [(Optional) after inspection, correct the registration for some slices into ABBA and re-export the new result to QuPath]()
