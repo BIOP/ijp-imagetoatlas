@@ -1,14 +1,11 @@
 package ch.epfl.biop.atlas.aligner.commands;
 
-import ch.epfl.biop.atlas.ExportSliceToImagePlus;
-import ch.epfl.biop.atlas.aligner.CancelableAction;
+import ch.epfl.biop.atlas.aligner.ExportSliceToImagePlus;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
-import ch.epfl.biop.atlas.aligner.sourcepreprocessors.SourcesProcessor;
 import ch.epfl.biop.atlas.aligner.sourcepreprocessors.SourcesProcessorHelper;
 import ij.ImagePlus;
 import ij.plugin.Concatenator;
-import ij.plugin.RGBStackMerge;
 import org.scijava.ItemIO;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
@@ -19,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>Export Slices to ImageJ Stack")
+@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>Export Slices as ImageJ Stack")
 public class ExportSlicesToImageJStack implements Command {
 
     @Parameter
@@ -27,9 +24,6 @@ public class ExportSlicesToImageJStack implements Command {
 
     @Parameter(label="Pixel Size in micron")
     double px_size_micron;
-
-    @Parameter(label="Export Atlas")
-    boolean export_atlas;
 
     @Parameter
     boolean interpolate;
@@ -68,9 +62,10 @@ public class ExportSlicesToImageJStack implements Command {
             boolean success = slice.waitForEndOfAction(tasks.get(slice));
             if (success) {
                 images[i] = tasks.get(slice).getImagePlus();
+                tasks.get(slice).clean();
                 mp.log.accept("Export to ImagePlus of slice "+slice+" done ("+(i+1)+"/"+images.length+")");
                 images[i].setTitle("Slice_"+i+"_"+slice);
-                //images[i].show();
+                images[i].show();
             } else {
                 mp.errorMessageForUser.accept("Export to ImageJ Stack error","Error in export of slice "+slice);
                 return;

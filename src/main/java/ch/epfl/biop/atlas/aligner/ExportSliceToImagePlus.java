@@ -1,4 +1,4 @@
-package ch.epfl.biop.atlas;
+package ch.epfl.biop.atlas.aligner;
 
 import bdv.tools.brightness.ConverterSetup;
 import bdv.util.BdvHandle;
@@ -7,6 +7,7 @@ import ch.epfl.biop.atlas.aligner.CancelableAction;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.atlas.aligner.sourcepreprocessors.SourcesProcessor;
+import ch.epfl.biop.atlas.plugin.RegistrationPluginHelper;
 import ij.ImagePlus;
 import net.imglib2.converter.Converter;
 import net.imglib2.display.RealARGBColorConverter;
@@ -18,6 +19,7 @@ import sc.fiji.bdvpg.sourceandconverter.importer.EmptySourceAndConverterCreator;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceResampler;
 import spimdata.imageplus.ImagePlusHelper;
 
+import java.awt.*;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -132,6 +134,23 @@ public class ExportSliceToImagePlus extends CancelableAction {
 
     public void clean() {
         resultImage = null;
+    }
+
+    public void drawAction(Graphics2D g, double px, double py, double scale) {
+        switch (slice.getActionState(this)) {
+            case "(done)":
+                g.setColor(new Color(0, 255, 0, 200));
+                break;
+            case "(locked)":
+                g.setColor(new Color(255, 0, 0, 200));
+                break;
+            case "(pending)":
+                g.setColor(new Color(255, 255, 0, 200));
+                break;
+        }
+        g.fillRect((int) (px - 7), (int) (py - 7), 14, 14);
+        g.setColor(new Color(255, 255, 255, 200));
+        g.drawString("E", (int) px - 4, (int) py + 5);
     }
 
 
