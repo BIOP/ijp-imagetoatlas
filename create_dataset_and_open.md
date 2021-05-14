@@ -33,7 +33,7 @@ You are done for now on the QuPath side. You can let QuPath open while performin
 
 Mac users : you will probably need a mouse.
 
-In Fiji, start the ABBA plugin (type `ABBA` in Fiji's search bar or go to ` Plugins › BIOP › Atlas › ABBA`). You will then need to chose between 3 ways of slicing the atlas : coronal, sagittal, or vertical. The documentation is made in the coronal sectioning orientation because it is probably the most frequent orientation, but ABBA works the same way in all orientations.
+In Fiji, start the ABBA plugin (type `ABBA` in Fiji's search bar or go to ` Plugins › BIOP › Atlas › ABBA`). You will then need to chose between 3 ways of slicing the atlas : coronal, sagittal, or horizontal. The documentation is made in the coronal sectioning orientation because it is probably the most frequent orientation, but ABBA works the same way in all orientations.
 
 #### ABBA Navigation
 ABBA uses [Fiji's BigDataViewer](https://imagej.github.io/plugins/bdv/index) in order to display multiresolution images in a responsive manner, this comes with a totally different way of visualizing your data than from the standard ImageJ. So let's first go through some basic navigation commands in ABBA:
@@ -41,8 +41,9 @@ ABBA uses [Fiji's BigDataViewer](https://imagej.github.io/plugins/bdv/index) in 
 * `hold and drag right-click` pan
 * `mouse wheel`  zoom control
 * `up / down key` zoom in / out
+* `shift + up / down key` fast zoom in / out
 
-Try to get familiar with these commands in order to go quickly from one end of the atlas to the other end. You can use the modifier key `shift` to zoom in and out faster when using the up and down keys ( modifier keys not working yet with the mouse wheel ).
+Try to get familiar with these commands in order to go quickly from one end of the atlas to the other end.
 
 #### Allen Brain Atlas display options
 
