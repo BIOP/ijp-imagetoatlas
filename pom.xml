@@ -110,9 +110,9 @@
 		<bigdataviewer-bioformats.version>0.2.15</bigdataviewer-bioformats.version>
 
 		<bigdataviewer-playground.version>0.3.1</bigdataviewer-playground.version>
-		<bigdataviewer_playground_display.version>0.1.0-SNAPSHOT</bigdataviewer_playground_display.version>
+		<bigdataviewer-playground-display.version>0.1.2</bigdataviewer-playground-display.version>
 		<bigdataviewer-spimdata-extras.version>0.1.1</bigdataviewer-spimdata-extras.version>
-		<bigdataviewer-biop-tools.version>0.2.15</bigdataviewer-biop-tools.version>
+		<bigdataviewer-biop-tools.version>0.2.16</bigdataviewer-biop-tools.version>
 
 		<bigdataviewer-selector.version>0.1.8</bigdataviewer-selector.version>
 		<scijava.app.directory>C:\Users\nicol\Desktop\fiji-win64-ABBA\Fiji.app</scijava.app.directory>
@@ -187,8 +187,8 @@
 
 		<dependency>
 			<groupId>sc.fiji.bigdataviewer</groupId>
-			<artifactId>bigdataviewer_playground_display</artifactId>
-			<version>${bigdataviewer_playground_display.version}</version>
+			<artifactId>bigdataviewer-playground-display</artifactId>
+			<version>${bigdataviewer-playground-display.version}</version>
 		</dependency>
 
 		<dependency>

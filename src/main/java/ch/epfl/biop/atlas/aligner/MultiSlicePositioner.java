@@ -20,8 +20,8 @@ import mpicbg.spim.data.generic.sequence.AbstractSequenceDescription;
 import mpicbg.spim.data.generic.sequence.BasicViewSetup;
 import mpicbg.spim.data.sequence.Tile;
 import net.imglib2.*;
+import net.imglib2.position.FunctionRealRandomAccessible;
 import net.imglib2.realtransform.AffineTransform3D;
-import net.imglib2.realtransform.RealTransform;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
@@ -31,7 +31,6 @@ import org.scijava.InstantiableException;
 import org.scijava.cache.CacheService;
 import org.scijava.command.Command;
 import org.scijava.convert.ConvertService;
-import org.scijava.log.LogService;
 import org.scijava.object.ObjectService;
 import org.scijava.plugin.PluginService;
 import org.scijava.ui.behaviour.*;
@@ -430,6 +429,8 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportRegionsToQuPathCommand.class, hierarchyLevelsSkipped,"mp", this);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportSlicesToBDVJsonDataset.class, hierarchyLevelsSkipped,"mp", this);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportSlicesToBDV.class, hierarchyLevelsSkipped,"mp", this);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportSlicesToImageJStack.class, hierarchyLevelsSkipped,"mp", this);
+
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, RotateSourcesCommand.class, hierarchyLevelsSkipped,"mp", this);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, EditSliceThicknessCommand.class, hierarchyLevelsSkipped,"mp", this);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, SliceThicknessMatchNeighborsCommand.class, hierarchyLevelsSkipped,"mp", this);
@@ -495,12 +496,12 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
         };
 
-        //FunctionRealRandomAccessible<UnsignedShortType> roiOverlay = new FunctionRealRandomAccessible<>(3, fun, UnsignedShortType::new);
+        FunctionRealRandomAccessible<UnsignedShortType> roiOverlay = new FunctionRealRandomAccessible<>(3, fun, UnsignedShortType::new);
 
-        //BdvStackSource<?> bss = BdvFunctions.show(roiOverlay,
-        //        new FinalInterval(new long[]{0, 0, 0}, new long[]{10, 10, 10}),"ROI", BdvOptions.options().addTo(bdvh));
+        BdvStackSource<?> bss = BdvFunctions.show(roiOverlay,
+                new FinalInterval(new long[]{0, 0, 0}, new long[]{10, 10, 10}),"ROI", BdvOptions.options().addTo(bdvh));
 
-        //bss.setDisplayRangeBounds(0,1600);
+        bss.setDisplayRangeBounds(0,1600);
         displayMode = REVIEW_MODE_INT; // For correct toggling
 
         logger.debug("Set positioning mode");
@@ -827,6 +828,10 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         roiSX = sx;
         roiSY = sy;
 
+    }
+
+    public double[] getROI() {
+        return new double[]{roiPX, roiPY, roiSX, roiSY};
     }
 
     public SliceSources getCurrentSlice() {

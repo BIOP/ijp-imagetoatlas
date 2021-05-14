@@ -47,6 +47,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import static ch.epfl.biop.atlas.aligner.CancelableAction.errlog;
 
@@ -355,6 +356,23 @@ public class SliceSources {
             } catch (Exception e) {
                 e.printStackTrace();
                 errlog.accept("Tasks were cancelled for slice "+this.toString());
+            }
+        }
+    }
+
+    public boolean waitForEndOfAction(CancelableAction action) {
+        if (!mapActionTask.keySet().contains(action)) {
+            logger.debug("(waitForEndOfAction) action "+action+" not found or unrelated to slice "+this);
+            return false;
+        } else {
+            try {
+                return mapActionTask.get(action).get();
+            } catch (InterruptedException e) {
+                logger.debug("(waitForEndOfAction) slice ["+this+"] interrupted action "+action+" "+e.getMessage());
+                return false;
+            } catch (ExecutionException e) {
+                logger.debug("(waitForEndOfAction) slice [\"+this+\"] execution exception for action "+action+" "+e.getMessage());
+                return false;
             }
         }
     }
