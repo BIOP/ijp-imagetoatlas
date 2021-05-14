@@ -21,25 +21,25 @@ public class AllenAtlasDisplayCommand extends InteractiveCommand implements Mult
     @Parameter
     MultiSlicePositioner mp;
 
-    @Parameter(persist = false)
+    @Parameter(label = "Nissl (Ch. 0)", persist = false)
     boolean showNissl = true;
 
-    @Parameter(style="slider", min="0", max="1", stepSize = "0.01", persist = false)
+    @Parameter(label=" ", style="slider", min="0", max="1", stepSize = "0.01", persist = false)
     double nisslSlider = 0.5;
 
-    @Parameter(persist = false)
+    @Parameter(label = "Autofluorescence (Ch. 1)", persist = false)
     boolean showAutoFluo = true;
 
-    @Parameter(style="slider", min="0", max="1", stepSize = "0.01", persist = false)
+    @Parameter(label = " ", style="slider", min="0", max="1", stepSize = "0.01", persist = false)
     double autofluoSlider = 0.5;
 
-    @Parameter(persist = false)
+    @Parameter(label = "Label Borders (Ch. 2)", persist = false)
     boolean showLabelBorder = true;
 
-    @Parameter(style="slider", min="0", max="1", stepSize = "0.01", persist = false)
+    @Parameter(label = " ", style="slider", min="0", max="1", stepSize = "0.01", persist = false)
     double labelBorderSlider = 0.5;
 
-    @Parameter(min = "10", max = "500", stepSize = "10", style = "slider", label = "Displayed slicing [micron]", persist = false)
+    @Parameter(label = "Displayed slicing [microns]", min = "10", max = "500", stepSize = "10", style = "slider", persist = false)
     int zSamplingSteps = 200;
 
     @Parameter
