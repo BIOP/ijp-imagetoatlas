@@ -5,17 +5,14 @@ import bdv.util.BdvHandleFrame;
 import ch.epfl.biop.atlas.BiopAtlas;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.ReslicedAtlas;
-import com.sun.media.jfxmedia.logging.Logger;
 import net.imglib2.realtransform.AffineTransform3D;
 import org.scijava.Context;
 import org.scijava.ItemIO;
 import org.scijava.command.Command;
 import org.scijava.command.CommandService;
-import org.scijava.log.LogService;
 import org.scijava.object.ObjectService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import sc.fiji.bdvpg.scijava.command.bdv.BdvWindowCreatorCommand;
 import sc.fiji.bdvpg.scijava.services.SourceAndConverterBdvDisplayService;
 
 import javax.swing.*;
