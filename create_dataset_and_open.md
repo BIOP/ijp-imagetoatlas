@@ -47,7 +47,12 @@ Try to get familiar with these commands in order to go quickly from one end of t
 
 #### Allen Brain Atlas display options
 
-The image you see when you start ABBA is the Allen Brain Atlas dataset, sliced regularly along Z. This data consists of a 3 channel image,  named (probably partly improperly)`Nissl`, `AutoFluo` and `LabelBorder`. You can activate or deactivate each of these channels with checkboxes and emphasize more or less their display with sliders.
+The image you see when you start ABBA is the Allen Brain Atlas dataset, sliced regularly along Z. This data consists of a 3 channel image:
+* `Nissl (Channel 0)`
+* `Auto Fluorescence (Channel 1)`
+* `Label Borders (Channel 2)` 
+  
+You can activate or deactivate each of these channels with checkboxes and emphasize more or less their display with sliders.
 
 ![Atlas display options](/assets/gif/fiji_abba_atlas_display.gif)
 
@@ -57,26 +62,20 @@ Once you are familiar with these controls, click, in the ABBA window menu bar: `
 
 ![Importing a QuPath Project in ABBA](assets/img/fiji_import_qupath.png)
 
-Select your project file, the initial position of the first slice, and the approximate spacing between slices in mm (the demo dataset has a spacing of 80 microns). Of course these positions are just initial guesses which will be adjusted later on.
+Select your project file, the initial position of the first slice, and the approximate spacing between slices in mm (the demo dataset has a spacing of 80 microns). These positions are just initial guesses which will be adjusted later on.
 
 ![Set initial positions of the slices in the atlas](assets/img/fiji_set_ini_position.png)
 
-A second window shows up which specifies some advanced opening parameters. The default values (shown below) will work in most cases:
-
----
-
-:warning: Make sure `MILLIMETER` is selected in `Physical units of the dataset` !
-
----
+A second window shows up which specifies some advanced opening parameters. The default values (shown below) will work in most cases. By default, all units will be converted to millimeters, which is the default unit for ABBA.
 
 ![Advanced import options](assets/img/fiji_advanced_import_options.png)
 
-It can take up to a minute for the first opening. And decreasing the size of the window makes the update of the display faster.
+It can take up to a minute for the first opening, due to bio-formats memoization.
 
 ### Slices selection and display options
 
 Hold and drag the left mouse button allows to draw rectangles and select the slices you want to operate on. Each slice has a round handle which serve to indicate if it is selected (green) or not (yellow). Drawing rectangle with the modifier keys allow to add or remove slices to the current selection:
-* `hold and left-click` select slices
+* `hold and left-click` draw a rectangle to select slices
 * `ctrl + hold and left-click` remove slices from the current selection
 * `shift + hold and left-click` add slices to the current selection
 
