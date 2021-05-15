@@ -1,8 +1,8 @@
-## Registration of mouse brain slices with ABBA
+# Registration of mouse brain slices with ABBA
 
 Once your dataset is opened in ABBA. You will be able to position slices first along the slicing axis (position multiple slices along "z"), then performing 2d adjustements for each slice (tilt and roll atlas slicing correction, affine transformations and spline transformations).
 
-### Slices selection
+## Slices selection
 
 The way ABBA works is by acting on selected slices and by performing actions on them. Each slice has a round handle which serve to indicate if it is selected (green) or not (yellow).
 
@@ -30,7 +30,7 @@ Gif below : adding selection with shift modifier key and rectangle, removing fro
 
 ![Selecting slices in bdv](assets/gif/fiji_select_slices_table.gif)
 
-### Slices display options
+## Slices display options
 
 It will be convenient for the registration to have your slices properly displayed. Depending on your use case, you may want to display a subset of the available channels, and adjust the min and max value displayed for a good contrast.
 
@@ -38,14 +38,40 @@ But first, in multi series files like vsi files it could happen that you end up 
 
 ![Removing slices](assets/gif/fiji_remove_slices.gif)
 
-Usually, slices will have multiple channels, autodetected by bio-formats, but while some channels will be useful for analysis, some will be useful just for the sake of registration to the atlas. In order to display only certain channels, you can activate to deactivate the display fo selected slices by clicking on the header of the slice display option table:
+Usually, slices will have multiple channels, autodetected by bio-formats, but while some channels will be useful for analysis, some will be useful just for the sake of registration to the atlas. In order to display only certain channels, you can activate to deactivate the display of selected slices by clicking on the header of the slice display table:
 
-Additionally, you can set the color and the min and max display values of these slices:
+You can set the color and the min and max display values of these slices:
 
-GIF TODO
+![Slices display options](assets/gif/fiji_slices_display_options.gif)
 
-Even if modify display option in batch is what you need, the display option of each slice can be modified individually by clicking on the proper line on the table:
+The display of each slice can be customised individually by modify a single line in the table.
 
-GIF TODO
+Once you have a correct display, you can start the registration.
+
+
+## Registration to Allen Brain Atlas (2017 CCF v3)
+
+This procedure starts first by a manual step, which has two goals:
+
+* Estimate the position of each slice along the atlas
+* Correct the atlas angles of slicing
+
+In order to position each slice approximately along the axis, ABBA tries to provides a conveninent interface to manipulate series of slices.
+
+### First coarse positioning
+
+#### Correct location of slices along the axis
+
+First of all, it may happen that your slices are not sorted correctly along the atlas axis. If this is the case, you can select slices which are not at their correct position and drag them along the axis. You can create some interval if necessary in between two slices in order to let others in between if needed.
+
+You can select one or several slices and then, by dragging the rectangles located below the atlas, you can shift selected slices along the slicing axis:
+
+![Drag slices along axis](assets/gif/fiji_slices_drag.gif)
+
+#### Rotate / flip slices
+
+normal way:
+
+more advanced way:
 
 [**Back to step by step tutorial**](usage.md)
