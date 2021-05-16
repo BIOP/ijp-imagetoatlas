@@ -111,5 +111,14 @@ Automatically, the position of the slices within the dataset will be adjusted to
 
 This coarse display allows, by dragging slices, to adjust approximately all slices along the atlas.
 
+Then, you can zoom in, drag slices until you find a corresponding slice between your dataset and the atlas.
+
+It's possible, once the correspondance is found, to select the slice of interest and set it as a Key Slice (right-click menu), as shown below:
+
+
+![Finding correspondance and key slice](assets/gif/fiji_atlas_drag_then_key.gif)
+
+When key slices are selected, they will keep their position along the axis when other slices are dragged ( you can still directly drag the key slice if you need to move it) . The other slices are stretched along the axis while maintaining their spacing ratio. 
+
 
 [**Back to step by step tutorial**](usage.md)
