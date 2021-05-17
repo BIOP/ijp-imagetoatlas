@@ -73,12 +73,12 @@ public class RegisterSlice extends CancelableAction {
     }
 
     public String toString() {
-        return registration.toString() + " "+preprocessFixed.toString()+".Fixed // "+preprocessMoving.toString()+".Moving)] " + slice.getActionState(this);
+        return registration.toString() + " "+preprocessFixed.toString()+".Atlas // "+preprocessMoving.toString()+".Section)] " + slice.getActionState(this);
     }
 
     public void drawAction(Graphics2D g, double px, double py, double scale) {
         if (isValid) {
-            switch (slice.getActionState(this)) {//.getRegistrationState(registration)) {
+            switch (slice.getActionState(this)) {
                 case "(done)":
                     g.setColor(new Color(0, 255, 0, 200));
                     break;
@@ -110,4 +110,7 @@ public class RegisterSlice extends CancelableAction {
         }
         return slice.removeRegistration(registration);
     }
+
+
+
 }

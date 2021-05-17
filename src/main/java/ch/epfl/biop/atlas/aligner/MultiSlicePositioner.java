@@ -379,7 +379,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Redo [Ctrl+Shift+Z]",0, this::redoAction);
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Select all slices [Ctrl+A]",0,() -> slices.forEach(SliceSources::select));
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Deselect all slices [Ctrl+Shift+A]",0,() -> slices.forEach(SliceSources::deSelect));
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Delete selected slices",0,() ->
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Remove selected slices",0,() ->
                 getSortedSlices()
                         .stream()
                         .filter(SliceSources::isSelected)
