@@ -120,5 +120,42 @@ It's possible, once the correspondance is found, to select the slice of interest
 
 When key slices are selected, they will keep their position along the axis when other slices are dragged ( you can still directly drag the key slice if you need to move it) . The other slices are stretched along the axis while maintaining their spacing ratio. 
 
+You can set multiple key slices in specific positions along your sections, usually the ones with the most recognizable features.
+
+2 or 3 key slices is usually sufficient for a correct positioning along the atlas. The `distribute` button or action will equalize spacing between selected slices while respecting the position of selected key slices ( and the position of the first and last selected slices ).
+
+##### Using the review mode to investigate the position of slices along the atlas
+
+In the positioning mode used so far, it is easy to move slices around, but it is not convenient to overlay the sections to the atlas. 
+
+It is possible to switch to a review mode by either:
+* pressing the shortcut key 'r'
+* clicking `Review`in the card `Display&Navigation > Modes`
+* in the menu bar `Display > Review Mode`
+
+![Review mode](assets/img/fiji_review_mode.png)
+
+In this mode, a single slice is displayed at a time overlaying the atlas. The slice which is being displayed is the **current slice**. The current slice is indicated by a white circle around the slice handle.
+
+You can navigate along the slices by pressing arrow keys or pushing `Previous` and `Next` in the `Display & Navigation` card.
+
+If you notice a problem in the review mode, you can switch back any time to the navigation mode in order to correct the slice position / orientation.
+
+--- 
+
+`Right` and `Left` key to change the current slice also works in the positioning mode. Brackets `[]` indicates the current slice in the `Slices Display` card table:
+
+![Current slice](assets/img/fiji_current_slice.png)
+
+--- 
+
+##### Correcting atlas slicing orientation
+
+A card named `Atlas Slicing` contains two sliders which allow to fine tune the atlas slicing orientation:
+
+![Atlas slicing adjustement](assets/gif/fiji_adjust_atlas_angle.gif)
+
+You can use slices with easily identifying features to orient the atlas slicing. The atlas slicing adjustment will the same all along the sections. It is not possible to "bend" the atlas.
+
 
 [**Back to step by step tutorial**](usage.md)
