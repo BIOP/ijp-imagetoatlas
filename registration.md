@@ -155,7 +155,121 @@ A card named `Atlas Slicing` contains two sliders which allow to fine tune the a
 
 ![Atlas slicing adjustement](assets/gif/fiji_adjust_atlas_angle.gif)
 
-You can use slices with easily identifying features to orient the atlas slicing. The atlas slicing adjustment will the same all along the sections. It is not possible to "bend" the atlas.
+You can use slices with recognizable features to orient the atlas slicing. The atlas slicing adjustment will the same for all sections. It is possible to tilt the atlas, but not to "bend" it.
 
+## Slices registration 
+
+Once the slices have been correctly oriented and positioned along the slicing axis, they can be registered to the atlas in 2D, linearly or in a non linear way.
+
+For automated registration, ABBA uses [elastix](https://github.com/SuperElastix/elastix) with pre-defined registration parameters and takes advantage of its knowledge of the sections calibration as well as on the atlas physical voxel size in order to have an almost parameter free registration.
+The metric used to measure the 'distance' between fixed and moving image is the [Mattes mutual information metric](https://doi.org/10.1109/TMI.2003.809072), which should allow for reasonable results when registering different imaging modalities.
+
+---
+
+:warning: If your image file format does not contain multiple resolution levels (LOD, pyramids, multiresolution), ABBA will not downsample cleanly the image and this could result in bad registration results.
+
+---
+
+For manual registration, ABBA calls Fiji's [BigWarp](https://imagej.github.io/plugins/bigwarp) plugin.
+
+When a registration 'job' is started for a slice, an indicator of the registration state is added below the slice handle. Its shape is round for an automated registration, and rectangular for a manual registration. This indicator is initially red when the job is not started, orange when it is being processed, and green when the registration is done.
+
+![Slice registration example](assets/gif/fiji_register_affine_spline.gif)
+
+You can start the registrations for all slices in parallel. Depending on your computer, between 4 and 32 registrations will be started in parallel (check the `Resources monitor` card to see how your CPU is busy). You can continue browsing ABBA during the registrations, which are processed asynchronously. As soon as any registration is done, its result is displayed in ABBA.
+
+It is possible (and advised) to perform several successive registration. You will usually start by an affine registration followed by one or several spline registrations. For 'difficult slices' where the automated registration result are bad, you can either start by a manual registration to facilitate a following automated registration, or, alternatively, you can directly edit the result of a spline transform, in order to improve it and even to add landmarks in regions in which you are more interested. 
+
+
+---
+
+:warning: If once or several slices are broken into pieces, achieving a good result over the whole slice could be really difficult or impossible. ABBA does not deal well with discontinuous deformations.
+
+---
+
+### Affine registration (Automated)
+
+You can select the slices you want to register and start an affine registration by clicking, in the top menu bar: 
+`Align > Elastix Registration (Affine)`, if you managed to install Elastix, or `Align > Elastix Registration (Affine) on Server`, if elastix is not locally installed.
+
+You will need to select the channels of both the atlas and the sections for this affine registration. Multichannel registration is not supported.
+
+![Affine elastix registration](assets/img/fiji_elastix_affine_registration.png)
+
+In a lot of cases, an affine registration on the DAPI channel of your sections vs the atlas Nissl atlas channel (0) is a good choice for a first registration.
+
+A few extra options are available:
+* `Show registration results as ImagePlus`, if checked, will display the raw data used by elastix registration
+* `Background offset value` can be left at zero in most cases. If your camera has a significant zero offset value in comparison to the channel intensities, this offset can be specified here for a better registration.
+
+### Spline registration (Automated)
+
+You can select the slices you want to register and start a spline registration by clicking, in the top menu bar:
+`Align > Elastix Registration (Spline)`, if you managed to install Elastix, or `Align > Elastix Registration (Spline) on Server`, if elastix is not locally installed.
+
+![Spline registration parameters](assets/img/fiji_elastix_spline_registration.png)
+
+In spline registration, a grid of size "`Number of control points along X`" is used to perform a spline registration between selected slice and the atlas. Again only a single channel registration is supported. 
+It is advised to use a value for control point between 10 (100 max total number of landmarks) to 20 (400 max total number of landmarks). 
+
+### BigWarp registration (Manual)
+
+[BigWarp](https://imagej.github.io/plugins/bigwarp) can be used if you want to have a full control over the registration. This method allows to place your own landmarks manually. Since this method is manual, each slice is processed by the user one at a time.
+
+### Editing a registration
+
+When the last registration of a slice is either a BigWarp registration or a spline registration, the result can be manually edited by selected the slice and then clicking in the top menu bar `Align > Edit Last Registration`.
+
+---
+
+:warning: if you select a lot of slices before clicking Edit Last Registration, each editing will be launched successively. If this is what you want, great! Otherwise, take care.
+
+---
+
+This editing will launch BigWarp interface in both cases, but with landmarks from the previous registration already put in place. Using BigWarp's standard commands, which are summarized below, you can move these landmarks or even add new ones. Click the window when you're done editing the transformation, and the new result should appear in ABBA window (take care, the editing cannot be canceled!).
+
+BigWarp commands summary:
+* `space` = toggle for landmark mode
+* `ctrl + left click` = pin a new landmark on both the fixed (atlas) and the moving (section) image.
+* `drag + left click` = in landmark mode, drag an existing landmark
+* `f` = display fused transform and fixed image (toggle)
+* `t` = transform the image or not (toggle)
+
+### Canceling / removing a registration
+
+If you are not happy with the result of a registration, you can select the slices where you want to remove the last registration, and:
+* click, top menu bar : `Align > Remove Last registration`
+* or right- click in ABBA's viewer : `Remove Last registration`
+
+This removal can be undone, which is also a way to investigate the quality of the last registration.
+
+### Development - adding a registration method of your own
+
+The registration methods (BigWarp, Elastix spline, affine...) are plugins automatically discovered by ABBA. While the documentation is lacking for the moment, it is possible to make a registration plugin of your own and use it in ABBA.
+
+### Registration workflow example
+
+A typical registration may been obtained using the following successive steps, performed on all slices:
+
+* affine registration on DAPI vs Atlas Nissl (Ch 0)
+* spline registration on an Autofluorescent channel vs Atlas Autofluorescent (Ch 1) (15 control points)
+* spline registration on DAPI vs Atlas Nissl (Ch 0) (15 control points)
+
+This takes about 10 minutes for 80 slices on a laptop.
+
+## Saving / opening registrations results
+
+At each step of the workflow, you can save the current state of your work (as long as no job is being processed).
+
+To save your project, you can click, in the top menu bar `File > Save State [Experimental]`, and specify a file with a `.json` extension. One or several extra files will be stored on top of the json file. All files are text files, which are fast to save and rather small (in comparison to the images...). So do not hesitate to save multiple successive files all along your workflow, especially because ABBA is experimental and has bugs... Also, do not count on backward compatibility. Consider your work done when you have obtained regions in QuPath, but the ABBA state file has no guarantee currently on the long term.
+
+
+To open a project where you left it, it is advised to restart Fiji and ABBA, and then click, in the top menu bar `File > Load State [Experimental]`, and select your previously saved `.json` file.
+
+---
+
+:warning: If you move your image files, ABBA won't be able to find your images because absolute file path are used. If you opened images from a QuPath project, fix URIs in QuPath first before reopening ABBA.
+
+---
 
 [**Back to step by step tutorial**](usage.md)
