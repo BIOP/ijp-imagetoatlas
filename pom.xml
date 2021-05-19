@@ -107,9 +107,13 @@
 		<license.excludes>**/resources/**</license.excludes>
 		<main-class>ch.epfl.biop.ABBALaunch</main-class>
 
-		<bigdataviewer-bioformats.version>0.2.15</bigdataviewer-bioformats.version>
 
-		<bigdataviewer-playground.version>0.3.1</bigdataviewer-playground.version>
+		<bigdataviewer-playground.version>0.3.2</bigdataviewer-playground.version>
+		<bigdataviewer-bioformats.version>0.2.16</bigdataviewer-bioformats.version>
+
+		<!--<bigdataviewer-bioformats.version>0.2.15</bigdataviewer-bioformats.version>
+
+		<bigdataviewer-playground.version>0.3.1</bigdataviewer-playground.version>-->
 		<bigdataviewer-playground-display.version>0.1.2</bigdataviewer-playground-display.version>
 		<bigdataviewer-spimdata-extras.version>0.1.1</bigdataviewer-spimdata-extras.version>
 		<bigdataviewer-biop-tools.version>0.2.16</bigdataviewer-biop-tools.version>

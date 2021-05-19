@@ -13,6 +13,7 @@ public class ABBALaunch {
         final ImageJ ij = new ImageJ();
         ij.ui().showUI();
 
+        DebugTools.setRootLevel("off");
         //DebugTools.setRootLevel();
 
         ij.command().run(ABBACommand.class, true).get();
