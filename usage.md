@@ -1,17 +1,31 @@
 ## Using ABBA
 
-It is highly recommended to use [QuPath](https://qupath.github.io/) in order to define the dataset of brain slices. It is possible to use only ImageJ/Fiji, but the analysis capabilities are then limited (no support of multiresolution files in vanilla ImageJ). This documentation will only detail the following recommended workflow:
+---
 
-* For each animal:
-  * [`<QuPath>` - define the dataset of this animal brain sections into a QuPath project](create_dataset_and_open.md)
-  * [`<Fiji>` - import sections by opening this QuPath project into Fiji's ABBA plugin](create_dataset_and_open.md#abba-navigation)
-  * [`<Fiji>` - perform various steps of registration (manual, automated or semi automated) for all required slices](registration.md)
-  * [`<Fiji>` - export registration results to the original QuPath project]()
-  * [`<QuPath>` - import registration results as QuPath annotations]()
-  * [(Optional) after inspection, correct the registration for some slices into ABBA and re-export the new result to QuPath]()
-  * [`<QuPath>` - detect cells and various measurements in QuPath]()
-  * [`<QuPath>` - export a table containing, for all cells, their measurements as well as their location in the brain atlas CCF]()
-*  [`<Your prefered data analysis software>` combine and or display these results for all your animals]()
+:warning: ABBA is still in experimental phase. It is provided as is. **Expect bugs** and **do not expect backward compatibility** when a more stable version will be released (all the code is versioned and stored in a worst case scenario, but do not count on it).
+
+---
+
+
+It is highly recommended to use [QuPath](https://qupath.github.io/) in order to define the dataset of brain slices. It is possible to use only ImageJ/Fiji, but the analysis capabilities are then limited (no support of multiresolution files in vanilla ImageJ). This documentation will only detail the recommended workflow that uses QuPath and Fiji's ABBA plugin.
+ 
+For each animal:
+* [**Define sections dataset:**](create_dataset_and_open.md)
+  * [Define the dataset of this animal brain sections into a QuPath project](create_dataset_and_open.md)
+  * [Import sections by opening this QuPath project into Fiji's ABBA plugin](create_dataset_and_open.md#abba-navigation)
+* [**Register sections to the Allen Brain Atlas:**](registration.md)
+  * [Basic slices manipulation and display in ABBA](registration.md)
+  * [Position slices along the atlas axis](registration.md#first-coarse-positioning)
+  * [Registering slices in 2D (manual, automated affine, automated spline)](registration.md#slices-registration)
+  * [Saving / opening an ABBA project](registration.md#saving--opening-registrations-results)
+* [**Reuse ABBA's registration results in QuPath:**](qupath_analysis.md)
+  * [From ABBA, export registration results to QuPath project](qupath_analysis.md)
+  * [Import registration results as QuPath annotations]()
+  * [(Optional) Correct the registration for some slices into ABBA and re-export the new result to QuPath]()
+  * [Detect cells in QuPath]()
+  * [Append cells CCF coordinates in QuPath detected cells]()
+  * [Export a table containing, for all cells, their measurements as well as their location in the brain atlas CCF]()
+* **In your prefered data analysis software, combine and or display these results for all your animals**
 
 You can click on each of the steps above to follow a typical workflow. The user interface is explained progressively through these steps. For convenience, here are links for the various controls which are covered:
 * [Atlas display]()
@@ -26,7 +40,14 @@ You can click on each of the steps above to follow a typical workflow. The user 
 * [Editing a registration]()
 
 
-## A few words about file formats
+If you have an issue with ABBA, there are 3 ways to hope get it solved:
+* Look if the answer is not in the documentation.
+* You can ask for help in the image.sc forum
+* You can open an issue in GitHub
+
+If you managed to install ABBA, these 3 options are better done directly from within the plugin (top menu bar `Help > Go to documentation` and `Help > Ask for help in the forum`). Asking for help from ABBA allows to pre-fill a form with some hardware and software specifications. There is also a user feedback from if you want to give your opinion about what should be improved or supported.
+
+## A few important words about file formats
 ```
 TL; DR: Use calibrated VSI, CZI, OME-TIFF, a few others (please read), 
 or convert to OME-TIFF.
@@ -50,6 +71,8 @@ Tested file formats for ABBA :
 * VSI (Olympus, +++)
 * CZI (Zeiss, +++, not fully tested)
 * LIF (Leica, +, no multiresolution support)
+
+RGB images as well as 8-bits and 16-bits images have been successfully.
 
 ---
 
