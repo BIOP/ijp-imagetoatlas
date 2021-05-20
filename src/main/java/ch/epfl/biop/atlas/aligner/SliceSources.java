@@ -20,6 +20,7 @@ import ch.epfl.biop.registration.sourceandconverter.affine.AffineTransformedSour
 import ch.epfl.biop.registration.sourceandconverter.affine.CenterZeroRegistration;
 import ij.ImagePlus;
 import ij.gui.Roi;
+import ij.gui.ShapeRoi;
 import ij.plugin.frame.RoiManager;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import mpicbg.spim.data.generic.sequence.BasicViewSetup;
@@ -699,6 +700,7 @@ public class SliceSources {
         Roi left = roiArray.rois.get(0).getRoi();
         left.setStrokeColor(new Color(0,255,0));
         left.setName("Left");
+
         roiList.rois.add(new CompositeFloatPoly(left));
 
         Roi right = roiArray.rois.get(1).getRoi();

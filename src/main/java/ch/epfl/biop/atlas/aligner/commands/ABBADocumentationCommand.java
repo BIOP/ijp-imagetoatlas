@@ -17,7 +17,7 @@ public class ABBADocumentationCommand implements Command {
     @Override
     public void run() {
         try {
-            ps.open(new URL("https://c4science.ch/w/bioimaging_and_optics_platform_biop/image-processing/image-to-atlas-registration/"));
+            ps.open(new URL("https://biop.github.io/ijp-imagetoatlas/"));
         } catch (IOException e) {
             e.printStackTrace();
         }
