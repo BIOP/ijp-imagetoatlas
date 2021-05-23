@@ -14,6 +14,8 @@ import net.imglib2.display.RealARGBColorConverter;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.ARGBType;
 import org.scijava.listeners.Listeners;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
 import sc.fiji.bdvpg.sourceandconverter.importer.EmptySourceAndConverterCreator;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceResampler;
@@ -27,6 +29,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ExportSliceToImagePlus extends CancelableAction {
+
+    Logger logger = LoggerFactory.getLogger(ExportSliceToImagePlus.class);
 
     final SliceSources slice;
     final SourcesProcessor preprocess;
@@ -72,7 +76,7 @@ public class ExportSliceToImagePlus extends CancelableAction {
                 .map(sac -> new SourceResampler(sac,model,true, false, interpolate).get())
                 .collect(Collectors.toList());
 
-        boolean ignoreSourceLut = true;
+        boolean ignoreSourceLut = false;
 
         if ((sourceList.size()>1)) {
 
@@ -83,7 +87,7 @@ public class ExportSliceToImagePlus extends CancelableAction {
             Map<SourceAndConverter, Integer> mapMipmap = new HashMap<>();
             sourceList.forEach(src -> {
                 int mipmapLevel = SourceAndConverterHelper.bestLevel(src, timepoint, pixel_size_mm);
-                System.out.println("Mipmap level chosen for source ["+src.getSpimSource().getName()+"] : "+mipmapLevel);
+                logger.debug("Mipmap level chosen for source ["+src.getSpimSource().getName()+"] : "+mipmapLevel);
                 mapMipmap.put(resampledSourceList.get(sourceList.indexOf(src)), mipmapLevel);
             });
 
@@ -101,7 +105,6 @@ public class ExportSliceToImagePlus extends CancelableAction {
         } else {
             resampledSourceList.forEach(source -> {
                 int mipmapLevel = SourceAndConverterHelper.bestLevel(sourceList.get(0), timepoint, pixel_size_mm);
-                BdvHandle bdv_h;
                 ImagePlus singleChannel = ImagePlusHelper.wrap(
                         source,
                         getConverterSetupFromConverter(source.getConverter()),

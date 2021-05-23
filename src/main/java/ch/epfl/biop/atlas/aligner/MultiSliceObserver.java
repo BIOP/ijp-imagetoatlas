@@ -154,7 +154,7 @@ public class MultiSliceObserver {
     public synchronized String getTextSlice(SliceSources slice) {
         String log = "slice #";
 
-        log+= slice.getName()+"\n";//mp.getSortedSlices().indexOf(slice)+"\n";
+        log+= slice.getName()+"\n";
 
         for (int indexAction = 0; indexAction<sliceSortedActions.get(slice).size();indexAction++) {
             CancelableAction action = sliceSortedActions.get(slice).get(indexAction);
