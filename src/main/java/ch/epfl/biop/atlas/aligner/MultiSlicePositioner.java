@@ -307,9 +307,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         common_behaviours.behaviour((ClickBehaviour) (x, y) -> {slices.forEach(SliceSources::select);bdvh.getViewerPanel().getDisplay().repaint();}, "selectAllSlices", "ctrl A", "meta A");
         common_behaviours.behaviour((ClickBehaviour) (x, y) -> {slices.forEach(SliceSources::deSelect);bdvh.getViewerPanel().getDisplay().repaint();}, "deselectAllSlices", "ctrl shift A", "meta shift A");
 
-
         common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.printBindings(), "print_bindings", "K");
-
 
         bdvh.getTriggerbindings().addBehaviourMap(COMMON_BEHAVIOURS_KEY, common_behaviours.getBehaviourMap());
         bdvh.getTriggerbindings().addInputTriggerMap(COMMON_BEHAVIOURS_KEY, common_behaviours.getInputTriggerMap()); // "transform", "bdv"
@@ -532,7 +530,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                     logger.info("Closing multipositioner bdv window, releasing some resources.");
                     if (mso!=null) this.mso.clear();
                     if (userActions!=null) this.userActions.clear();
-                    bdvh.getCardPanel().removeCard("Slices Display"); // Avoid NPE on exit
+                    //bdvh.getCardPanel().removeCard("Slices Display"); // Avoid NPE on exit
                     if (slices!=null) this.slices.clear();
                     this.redoableUserActions.clear();
                     this.biopAtlas = null;
@@ -718,16 +716,16 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
             ghs.forEach(GraphicalHandle::enable);
             slices.forEach(slice -> slice.getGUIState().enableGraphicalHandles());
 
-            //this.setSliceDisplayMode(storedSliceDisplayMode);
+            if (storedSliceDisplayMode!=-1) {
+                setSliceDisplayMode(storedSliceDisplayMode);
+            }
 
             getSortedSlices().forEach(slice -> slice.getGUIState().displayModeChanged());
-
             bdvh.getTriggerbindings().removeInputTriggerMap(REVIEW_BEHAVIOURS_KEY);
             bdvh.getTriggerbindings().removeBehaviourMap(REVIEW_BEHAVIOURS_KEY);
             positioning_behaviours.install(bdvh.getTriggerbindings(), POSITIONING_BEHAVIOURS_KEY);
             navigateCurrentSlice();
             refreshBlockMap();
-
             modeListeners.forEach(ml -> ml.modeChanged(this, oldMode, displayMode));
         }
     }
@@ -740,13 +738,14 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         slice.getGUIState().setSliceVisible();
     }
 
-    //int storedSliceDisplayMode = CURRENT_SLICE_DISPLAY_MODE;
+    int storedSliceDisplayMode = -1;
 
     /**
      * Set the registration mode
      */
     public void setReviewMode() {
         if (!(displayMode == REVIEW_MODE_INT)) {
+
             int oldMode = REVIEW_MODE_INT;
             displayMode = POSITIONING_MODE_INT;
             reslicedAtlas.lock();
@@ -754,8 +753,10 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
             ghs.forEach(GraphicalHandle::disable);
 
-            //storedSliceDisplayMode = this.getSliceDisplayMode();
-            this.setSliceDisplayMode(CURRENT_SLICE_DISPLAY_MODE);
+            if (getSliceDisplayMode()!= CURRENT_SLICE_DISPLAY_MODE) {
+                storedSliceDisplayMode = getSliceDisplayMode();
+            }
+            setSliceDisplayMode(CURRENT_SLICE_DISPLAY_MODE);
             getSortedSlices().forEach(slice -> slice.getGUIState().displayModeChanged());
 
             bdvh.getTriggerbindings().removeInputTriggerMap(POSITIONING_BEHAVIOURS_KEY);
@@ -1419,6 +1420,11 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
     public List<CancelableAction> getActionsFromSlice(SliceSources sliceSource) {
         return mso.getActionsFromSlice(sliceSource);
+    }
+
+    public int getNSlices() {
+        if (slices==null) return 0;
+        return slices.size();
     }
 
     /**
