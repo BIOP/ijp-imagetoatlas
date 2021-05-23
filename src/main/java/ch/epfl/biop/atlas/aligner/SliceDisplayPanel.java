@@ -54,6 +54,8 @@ public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, Mul
         table.setDefaultRenderer(Displaysettings.class, new DisplaySettingsRenderer(true));
         table.setDefaultRenderer(Boolean.class, new VisibilityRenderer(true));
 
+        table.setComponentPopupMenu(SliceSourcesPopupMenu.createFinalPopupMenu(mp));
+
         paneDisplay.add(new JLabel("Click table header to modify selected slices"), BorderLayout.NORTH);
         paneDisplay.add(new JScrollPane(table), BorderLayout.CENTER);
         //paneDisplay.add(panelDisplayOptions, BorderLayout.SOUTH);

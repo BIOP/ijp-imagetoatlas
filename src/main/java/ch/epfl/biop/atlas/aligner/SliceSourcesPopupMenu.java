@@ -20,6 +20,122 @@ public class SliceSourcesPopupMenu {
         createPopupMenu();
     }
 
+    /**
+     * Because SliceDisplayPanel does not allow to create conveniently a popupmenu on the fly
+     * @param mp
+     * @return
+     */
+    public static JPopupMenu createFinalPopupMenu(MultiSlicePositioner mp) {
+        JPopupMenu popup = new JPopupMenu();
+
+        addPopupAction(popup,"Show all Slices", () -> {
+            mp.showAllSlices();
+        });
+
+        addPopupAction(popup, "Show current slice", ()-> {
+            mp.showCurrentSlice();
+        });
+
+
+        if (true) {
+
+            popup.addSeparator();
+
+            addPopupAction(popup,"Set as Key Slice(s)", () -> {
+                SliceSources[] slices = mp.getSelectedSources().toArray(new SliceSources[0]);
+                if (slices.length>1) new MarkActionSequenceBatch(mp).runRequest();
+                for (SliceSources slice : slices) {
+                    new KeySliceOn(mp, slice).runRequest();
+                }
+                if (slices.length>1) new MarkActionSequenceBatch(mp).runRequest();
+            });
+
+            addPopupAction(popup,"Remove Key Slice(s)", () -> {
+                SliceSources[] slices = mp.getSelectedSources().toArray(new SliceSources[0]);
+                if (slices.length>1) new MarkActionSequenceBatch(mp).runRequest();
+                for (SliceSources slice : slices) {
+                    new KeySliceOff(mp, slice).runRequest();
+                }
+                if (slices.length>1) new MarkActionSequenceBatch(mp).runRequest();
+            });
+
+            addPopupAction(popup, "Hide Slices", () -> {
+                SliceSources[] slices = mp.getSelectedSources().toArray(new SliceSources[0]);
+                for (SliceSources slice : slices) {
+                    slice.getGUIState().setSliceInvisible();
+                }
+            });
+
+            addPopupAction(popup, "Show Slices", () -> {
+                SliceSources[] slices = mp.getSelectedSources().toArray(new SliceSources[0]);
+                for (SliceSources slice : slices) {
+                    slice.getGUIState().setSliceVisible();
+                }
+            });
+
+            addPopupAction(popup, "Remove Selected Slices ", () -> {
+                SliceSources[] slices = mp.getSelectedSources().toArray(new SliceSources[0]);
+                if (slices.length>1) new MarkActionSequenceBatch(mp).runRequest();
+                for (SliceSources slice : slices) {
+                    System.out.println("Slice delete +"+slice);
+                    new DeleteSlice(mp, slice).runRequest();
+                }
+                if (slices.length>1) new MarkActionSequenceBatch(mp).runRequest();
+            });
+
+            popup.addSeparator();
+
+            addPopupAction(popup, "Edit Last Registration", () -> {
+                SliceSources[] slices = mp.getSelectedSources().toArray(new SliceSources[0]);
+                Object[] options = { "Yes", "No" };
+                int resp = JOptionPane.showOptionDialog(null,
+                        "Edit with all channels ?", "Edit options",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+                if (slices.length>1) new MarkActionSequenceBatch(mp).runRequest();
+                for (SliceSources slice : slices) {
+                    new EditLastRegistration(mp, slice, resp==0).runRequest();
+                }
+                if (slices.length>1) new MarkActionSequenceBatch(mp).runRequest();
+            });
+
+            addPopupAction(popup, "Remove Last Registration", () -> {
+                SliceSources[] slices = mp.getSelectedSources().toArray(new SliceSources[0]);
+                if (slices.length>1) new MarkActionSequenceBatch(mp).runRequest();
+                for (SliceSources slice : slices) {
+                    new DeleteLastRegistration(mp, slice).runRequest();
+                }
+                if (slices.length>1) new MarkActionSequenceBatch(mp).runRequest();
+            });
+        }
+
+        popup.addSeparator();
+
+        addPopupAction(popup, "Undo Last Action", () -> {
+            mp.cancelLastAction();
+        });
+
+        addPopupAction(popup,"Redo Last Action", () -> {
+            mp.redoAction();
+        });
+
+        popup.addSeparator();
+
+        addPopupAction(popup,"Positioning mode", () -> {
+            mp.setPositioningMode();
+        });
+
+        addPopupAction(popup,"Registration mode", () -> {
+            mp.setReviewMode();
+        });
+
+        addPopupAction(popup, "Change overlap mode", () -> {
+            mp.toggleOverlap();
+        });
+
+        return popup;
+    }
+
     private JPopupMenu createPopupMenu()
     {
         popup = new JPopupMenu();
@@ -152,6 +268,12 @@ public class SliceSourcesPopupMenu {
         }
         JMenuItem menuItem = new JMenuItem(actionName);
         menuItem.addActionListener(e -> action.accept(slices));
+        popup.add(menuItem);
+    }
+
+    public static void addPopupAction( JPopupMenu popup, String actionName, Runnable runnable ) {
+        JMenuItem menuItem = new JMenuItem(actionName);
+        menuItem.addActionListener(e -> runnable.run());
         popup.add(menuItem);
     }
 
