@@ -532,6 +532,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                     logger.info("Closing multipositioner bdv window, releasing some resources.");
                     if (mso!=null) this.mso.clear();
                     if (userActions!=null) this.userActions.clear();
+                    bdvh.getCardPanel().removeCard("Slices Display"); // Avoid NPE on exit
                     if (slices!=null) this.slices.clear();
                     this.redoableUserActions.clear();
                     this.biopAtlas = null;

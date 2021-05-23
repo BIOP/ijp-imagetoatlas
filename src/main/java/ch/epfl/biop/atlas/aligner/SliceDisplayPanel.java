@@ -211,7 +211,8 @@ public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, Mul
     public void sliceSelected(SliceSources slice) {
         List<SliceSources> sortedSlices = mp.getSortedSlices();
         int idx = sortedSlices.indexOf(slice);
-        if (!sortedSlices.get(idx).isSelected()) {
+        //if (!sortedSlices.get(idx).isSelected()) {
+        if (!table.getSelectionModel().isSelectedIndex(idx)){//sortedSlices.get(idx).isSelected()) {
             table.getSelectionModel().addSelectionInterval(idx, idx);
             table.repaint();
         }
@@ -221,7 +222,7 @@ public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, Mul
     public void sliceDeselected(SliceSources slice) {
         List<SliceSources> sortedSlices = mp.getSortedSlices();
         int idx = sortedSlices.indexOf(slice);
-        if (sortedSlices.get(idx).isSelected()) {
+        if (table.getSelectionModel().isSelectedIndex(idx)){//sortedSlices.get(idx).isSelected()) {
             table.getSelectionModel().removeSelectionInterval(idx, idx);
             table.repaint();
         }
