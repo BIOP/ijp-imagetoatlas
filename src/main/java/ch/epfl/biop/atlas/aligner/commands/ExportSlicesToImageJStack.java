@@ -83,8 +83,7 @@ public class ExportSlicesToImageJStack implements Command {
         }
 
         ImagePlus[] images = new ImagePlus[slicesToExport.size()];
-        IntStream.range(0,slicesToExport.size()).parallel().forEach(i -> {//});
-        //for (int i = 0;i<slicesToExport.size();i++) {
+        IntStream.range(0,slicesToExport.size()).parallel().forEach(i -> {
             SliceSources slice = slicesToExport.get(i);
             boolean success = slice.waitForEndOfAction(tasks.get(slice));
             if (success) {
