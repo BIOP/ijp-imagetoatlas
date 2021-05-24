@@ -235,6 +235,8 @@ BigWarp commands summary:
 * `f` = display fused transform and fixed image (toggle)
 * `t` = transform the image or not (toggle)
 
+After editing a registration, you can export it again (to QuPath for instance), and reload it.
+
 ### Canceling / removing a registration
 
 If you are not happy with the result of a registration, you can select the slices where you want to remove the last registration, and:
@@ -271,5 +273,30 @@ To open a project where you left it, it is advised to restart Fiji and ABBA, and
 :warning: If you move your image files, ABBA won't be able to find your images because absolute file path are used. If you opened images from a QuPath project, fix URIs in QuPath first before reopening ABBA.
 
 ---
+
+## Exporting slices region as ImageJ stack
+
+At any point of the registration procedure, you can export a region of a subset of slices at the resolution of your choice:
+* select the slices to export
+* define the region you want to export:
+  * Click `Define interactively` in the card `Define region of interest`
+    
+![Define a region of interest in ABBA](assets/img/fiji_define_ROI.png)
+
+You can now draw a rectangle in the region of your choice, either in review mode or in positioning mode. You can click `Full Size` to restore the initial field of interest.
+
+---
+
+:warning: This region is also used to restrict registrations areas. Most probably you will want to restore the full size before starting a registration.
+
+---
+
+* Click, in the top menu bar: `Export > Export slices as ImageJ Stack`, and wait... All slices are exported in parallel. Each slice will appear once it is exported, and when all slices are exported, they will be concatenated into a single stack.
+
+![Export to ImageJ stack options](assets/img/fiji_export_imagej_stack_options.png)
+
+You can select the channels you want to export be separating them with commas, or type `*` to export all channels. Usually, 20 microns per pixel gives a fast and broad overview, while 2 microns per pixel can be pretty slow. It is not advised to export gigantic images this way. Processing big images will be faster by working on untransformed images in QuPath, but for a quick overview of the registration or details of the registration over several slices, this export method can be convenient.
+
+Also, do not forget to adjust B&C once the export is done!
 
 [**Back to step by step tutorial**](usage.md)
