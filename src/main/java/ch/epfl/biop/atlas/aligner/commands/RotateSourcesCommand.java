@@ -11,7 +11,7 @@ public class RotateSourcesCommand implements Command {
     @Parameter
     MultiSlicePositioner mp;
 
-    @Parameter(label = "Rotation axis", choices = {"X","Y","Z"})
+    @Parameter(label = "Rotation axis", choices = {"Z","Y","X"})
     String axis_string;
 
     @Parameter(label = "Angle (degrees)")

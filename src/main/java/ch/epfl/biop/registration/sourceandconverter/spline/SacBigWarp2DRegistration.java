@@ -33,7 +33,7 @@ public class SacBigWarp2DRegistration extends RealTransformSourceAndConverterReg
     BigWarpLauncher bwl;
 
     Runnable waitForUser = () -> {
-        WaitForUserDialog dialog = new WaitForUserDialog("Big Warp registration","Please perform carefully your registration then press ok.");
+        WaitForUserDialog dialog = new WaitForUserDialog("Big Warp registration","Please perform carefully your registration then press ok. Do not forget to press 't' when 4 landmarks are placed.");
         dialog.show();
     };
 
