@@ -59,6 +59,6 @@ abstract public class AffineTransformSourceAndConverterRegistration extends Sour
     }
 
     public RealTransform getTransformAsRealTransform() {
-        return at3d.copy();
+        return at3d.inverse().copy();
     }
 }

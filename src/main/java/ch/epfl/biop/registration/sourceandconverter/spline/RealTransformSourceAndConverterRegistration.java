@@ -28,7 +28,7 @@ abstract public class RealTransformSourceAndConverterRegistration extends Source
 
     @Override
     public RealPointList getTransformedPtsFixedToMoving(RealPointList pts) {
-        RealTransform innerRT = rt;
+        RealTransform innerRT = rt; // To unbox bounded realtransform
 
         // Unbox bounded transform
         if (rt instanceof BoundedRealTransform) {

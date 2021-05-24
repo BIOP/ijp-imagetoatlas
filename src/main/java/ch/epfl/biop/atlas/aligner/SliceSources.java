@@ -18,6 +18,7 @@ import ch.epfl.biop.spimdata.qupath.QuPathEntryEntity;
 import ch.epfl.biop.registration.Registration;
 import ch.epfl.biop.registration.sourceandconverter.affine.AffineTransformedSourceWrapperRegistration;
 import ch.epfl.biop.registration.sourceandconverter.affine.CenterZeroRegistration;
+import com.google.gson.Gson;
 import ij.ImagePlus;
 import ij.gui.Roi;
 import ij.gui.ShapeRoi;
@@ -757,28 +758,32 @@ public class SliceSources {
         RealTransformSequence rts = new RealTransformSequence();
         InvertibleRealTransformSequence irts = new InvertibleRealTransformSequence();
 
-        AffineTransform3D at3D = new AffineTransform3D();
+        AffineTransform3D at3D;
 
-        this.original_sacs[0].getSpimSource().getSourceTransform(0,0,at3D);
+        at3D = mp.getAffineTransformFormAlignerToAtlas();
 
-        rts.add(at3D.copy());
-        if (irts!=null) irts.add(at3D.copy());
+        rts.add(at3D.inverse().copy());
+        irts.add(at3D.inverse().copy());
+
+        Collections.reverse(this.registrations);
 
         for (Registration reg : this.registrations) {
             RealTransform current = reg.getTransformAsRealTransform();
-            if (current==null) return null;
+            if (current == null) return null;
             rts.add(reg.getTransformAsRealTransform().copy());
-            if ((current instanceof InvertibleRealTransform)&&(irts!=null)) {
-                irts.add((InvertibleRealTransform) reg.getTransformAsRealTransform().copy());
+            if ((current instanceof InvertibleRealTransform) && (irts != null)) {
+                irts.add(((InvertibleRealTransform) reg.getTransformAsRealTransform()).copy());
             } else {
                 irts = null;
             }
         }
 
-        at3D = mp.getAffineTransformFormAlignerToAtlas();
+        Collections.reverse(this.registrations);
 
-        rts.add(at3D.copy());
-        irts.add(at3D.copy());
+        this.original_sacs[0].getSpimSource().getSourceTransform(0,0,at3D);
+
+        rts.add(at3D.inverse().copy());
+        if (irts!=null) irts.add(at3D.inverse().copy());
 
         return (irts==null)?rts:irts;
     }
@@ -788,13 +793,12 @@ public class SliceSources {
         if (!QuPathBdvHelper.isSourceLinkedToQuPath(original_sacs[0])) {
             mp.errlog.accept("Slice"+toString()+" not linked to a QuPath dataset");
         }
+        File dataEntryFolder = null;
 
         try {
-            File dataEntryFolder = QuPathBdvHelper.getDataEntryFolder(original_sacs[0]);
+            dataEntryFolder = QuPathBdvHelper.getDataEntryFolder(original_sacs[0]);
 
             String projectFolderPath = QuPathBdvHelper.getQuPathProjectFile(original_sacs[0]).getParent();
-
-
 
             File f = new File(dataEntryFolder, "ABBA-RoiSet.zip");
             mp.log.accept("Save slice ROI to quPath project " + f.getAbsolutePath());
@@ -812,13 +816,22 @@ public class SliceSources {
                 Files.copy(Paths.get(ijroisfile.f.getAbsolutePath()),Paths.get(f.getAbsolutePath()));
                 writeOntotogyIfNotPresent(mp, projectFolderPath);
             }
+        } catch (Exception e) {
+            mp.errlog.accept("QuPath Entry data folder not found! ");
+        }
 
+        try {
             RealTransform transform = getSlicePixToCCFRealTransform();
 
             if (transform!=null) {
                 File ftransform = new File(dataEntryFolder, "ABBA-Transform.json");
                 mp.log.accept("Save transformation to quPath project " + ftransform.getAbsolutePath());
-                String transform_string = ScijavaGsonHelper.getGson(mp.scijavaCtx).toJson(transform, RealTransform.class);
+
+                Gson gson = ScijavaGsonHelper.getGsonBuilder(mp.scijavaCtx, false).setPrettyPrinting().create();
+
+                String transform_string = gson.toJson(transform, RealTransform.class);
+
+
                 if (ftransform.exists()) {
                     if (erasePreviousFile) {
                         Files.delete(Paths.get(ftransform.getAbsolutePath()));
@@ -836,10 +849,10 @@ public class SliceSources {
                     writer.close();
                 }
             }
-
         } catch (Exception e) {
-            mp.errlog.accept("QuPath Entry data folder not found! : ");
+            mp.errlog.accept("Error while saving transform file!");
         }
+
     }
 
     // statically synchronized to avoid race conditions in file writing
@@ -892,6 +905,9 @@ public class SliceSources {
         listRegions = getTransformedPtsFixedToMoving(listRegions, at3D.inverse());
 
         listLeftRight = getTransformedPtsFixedToMoving(listLeftRight, at3D.inverse());
+
+        // Reversing the transformations is somehow cheating...
+        // There's something weird in the fact that affine transforms and realtransforms do not behave the same way
 
         Collections.reverse(this.registrations);
 

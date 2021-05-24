@@ -1,6 +1,6 @@
 {
-  "pathToABBAAtlas": "file:/C:/Users/nicol/cached_atlas/mouse_brain_ccfv3.xml",
-  "pathToABBAOntology": "file:/C:/Users/nicol/cached_atlas/1.json",
+  "pathToABBAAtlas": "",
+  "pathToABBAOntology": "",
   "pathToElastixExeFile": "C:\\elastix-5.0.1-win64\\elastix.exe",
   "pathToTransformixExeFile": "C:\\elastix-5.0.1-win64\\transformix.exe"
 }
