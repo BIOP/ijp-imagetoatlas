@@ -42,7 +42,11 @@ public class ReslicedAtlas implements RealInterval {
     AffineTransformedSourceWrapperRegistration nonExtendedAffineTransform = new AffineTransformedSourceWrapperRegistration();
 
     private volatile int zStep = 1;
+
+    // rotation angle in radian
     private double rotx;
+
+    // rotation angle in radian
     private double roty;
 
     private double cX, cY, cZ;
@@ -317,6 +321,11 @@ public class ReslicedAtlas implements RealInterval {
         }
     }
 
+    /**
+     * Set slicing angle adjustement (rotation around x), in radian
+     * Listeners are called to update potential viewers, etc.
+     * @param rx angle in radian
+     */
     public void setRotateX(double rx) {
         if (!lock)
         if (rx!=this.rotx) {
@@ -334,6 +343,11 @@ public class ReslicedAtlas implements RealInterval {
         return roty;
     }
 
+    /**
+     * Set slicing angle adjustement (rotation around x), in radian
+     * Listeners are called to update potential viewers, etc.
+     * @param ry angle in radian
+     */
     public void setRotateY(double ry) {
         if (!lock)
         if (ry!=this.roty) {
@@ -385,19 +399,19 @@ public class ReslicedAtlas implements RealInterval {
         double normRx = Math.sqrt(m00*m00+m01*m01+m02*m02);
         m00/=normRx;m01/=normRx;m02/=normRx;
 
-        qx[0] = Math.cos(rotx /2.0);
-        qx[1] = Math.sin(rotx /2.0)*m00;
-        qx[2] = Math.sin(rotx /2.0)*m01;
-        qx[3] = Math.sin(rotx /2.0)*m02;
+        qx[0] = Math.cos(rotx / 2.0);
+        qx[1] = Math.sin(rotx / 2.0)*m00;
+        qx[2] = Math.sin(rotx / 2.0)*m01;
+        qx[3] = Math.sin(rotx / 2.0)*m02;
 
         double[] qy = new double[4];
         double normRy = Math.sqrt(m10*m10+m11*m11+m12*m12);
         m10/=normRy;m11/=normRy;m12/=normRy;
 
-        qy[0] = Math.cos(roty /2.0);
-        qy[1] = Math.sin(roty /2.0)*m10;
-        qy[2] = Math.sin(roty /2.0)*m11;
-        qy[3] = Math.sin(roty /2.0)*m12;
+        qy[0] = Math.cos(roty / 2.0);
+        qy[1] = Math.sin(roty / 2.0)*m10;
+        qy[2] = Math.sin(roty / 2.0)*m11;
+        qy[3] = Math.sin(roty / 2.0)*m12;
 
         double[] qXY = new double[4];
 

@@ -3,7 +3,7 @@ package ch.epfl.biop.atlas.aligner.commands;
 import bdv.BigDataViewer;
 import bdv.util.BdvHandle;
 import bigwarp.BigWarp;
-import ch.epfl.biop.ABBALaunch;
+import ch.epfl.biop.ABBAHelper;
 import ch.epfl.biop.bdv.bioformats.BioFormatsMetaDataHelper;
 import ch.epfl.biop.sourceandconverter.register.Elastix2DSplineRegister;
 import ch.epfl.biop.wrappers.elastix.ElastixTask;
@@ -41,7 +41,7 @@ public class ABBAForumHelpCommand implements Command {
             body +="OS "+ System.getProperty("os.name")+nl;
             body +="ImageJ "+ VersionUtils.getVersion(ImageJ.class)+nl;
             body +="IJ "+ VersionUtils.getVersion(IJ.class)+nl;
-            body +="ABBA "+ VersionUtils.getVersion(ABBALaunch.class)+nl;
+            body +="ABBA "+ VersionUtils.getVersion(ABBAHelper.class)+nl;
             body +="BigWarp "+VersionUtils.getVersion(BigWarp.class)+nl;
             body +="Bdv "+VersionUtils.getVersion(BigDataViewer.class)+nl;
             body +="Bdv Vistools "+VersionUtils.getVersion(BdvHandle.class)+nl;
