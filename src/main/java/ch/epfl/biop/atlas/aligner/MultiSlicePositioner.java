@@ -405,6 +405,10 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ImportImagePlusCommand.class, hierarchyLevelsSkipped,"mp", this );
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ImportImageCommand.class, hierarchyLevelsSkipped,"mp", this );
 
+        logger.debug("Installing DeepSlice command");
+        //DeepSliceCommand
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, DeepSliceCommand.class, hierarchyLevelsSkipped,"mp", this);
+
         // Adds registration plugin commands : discovered via scijava plugin autodiscovery mechanism
 
         logger.debug("Installing registration plugins");

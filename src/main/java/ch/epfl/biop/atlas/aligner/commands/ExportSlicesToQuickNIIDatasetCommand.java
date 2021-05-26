@@ -1,26 +1,19 @@
 package ch.epfl.biop.atlas.aligner.commands;
 
-import ch.epfl.biop.atlas.aligner.ExportSliceToImagePlus;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.atlas.aligner.sourcepreprocessors.SourcesChannelsSelect;
 import ch.epfl.biop.atlas.aligner.sourcepreprocessors.SourcesProcessor;
 import ch.epfl.biop.atlas.aligner.sourcepreprocessors.SourcesProcessorHelper;
-import ij.IJ;
-import ij.ImagePlus;
-import ij.process.ImageConverter;
+import ch.epfl.biop.quicknii.QuickNIIExporter;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
 import java.io.File;
-import java.text.DecimalFormat;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 
 @Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>Export Slices as Quick NII Dataset")
@@ -71,70 +64,24 @@ public class ExportSlicesToQuickNIIDatasetCommand implements Command {
             preprocess = new SourcesChannelsSelect(indices);
         }
 
-        // Creates
-        if (!datasetFolder.exists()) {
-            if (!datasetFolder.mkdir()) {
-                mp.errorMessageForUser.accept("QuickNII dataset export failure", "Cannot create folder "+datasetFolder.getAbsolutePath());
-            }
+        try {
+
+            QuickNIIExporter.builder()
+                    .roi(mp.getROI())
+                    .cvt8bits(convertTo8Bits)
+                    .jpeg(convertToJpg)
+                    .setProcessor(preprocess)
+                    .slices(slicesToExport)
+                    .name(imageName)
+                    .folder(datasetFolder)
+                    .pixelSizeMicron(px_size_micron)
+                    .interpolate(interpolate)
+                    .create()
+                    .export();
+
+        } catch (Exception e) {
+            mp.errorMessageForUser.accept("Export to Quick NII dataset error. ", e.getMessage());
         }
-
-        if (slicesToExport.size()==0) {
-            mp.log.accept("No slice selected");
-            mp.warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to export");
-            return;
-        }
-
-        double[] roi = mp.getROI();
-
-        Map<SliceSources, ExportSliceToImagePlus> tasks = new HashMap<>();
-
-        for (SliceSources slice : slicesToExport) {
-            ExportSliceToImagePlus export = new ExportSliceToImagePlus(mp, slice,
-                    preprocess,
-                    roi[0], roi[1], roi[2], roi[3],
-                    px_size_micron / 1000.0, 0,interpolate);
-
-            tasks.put(slice, export);
-            export.runRequest();
-        }
-
-        //ImagePlus[] images = new ImagePlus[slicesToExport.size()];
-
-        DecimalFormat df = new DecimalFormat("000");
-        IntStream.range(0,slicesToExport.size()).parallel().forEach(i -> {
-            SliceSources slice = slicesToExport.get(i);
-            boolean success = slice.waitForEndOfAction(tasks.get(slice));
-            if (success) {
-                ImagePlus imp = tasks.get(slice).getImagePlus();
-                tasks.get(slice).clean();
-                imp.setTitle(imageName+"_s"+df.format(i));
-
-                if (convertTo8Bits) {
-                    new ImageConverter(imp).convertToGray8();
-                }
-
-                if (convertToJpg) {
-
-                    IJ.saveAs(imp,"jpeg",
-                            datasetFolder.getAbsolutePath() + File.separator + // Folder
-                                    imageName + "_s" + df.format(i) + ".jpg" // image name, three digits, and underscore s
-                    );
-
-                } else {
-                    IJ.save(imp,
-                            datasetFolder.getAbsolutePath() + File.separator + // Folder
-                                    imageName + "_s" + df.format(i) + ".tif" // image name, three digits, and underscore s
-                    );
-                }
-
-                mp.log.accept("Export of slice "+slice+" done ("+(i+1)+"/"+slicesToExport.size()+")");
-            } else {
-                mp.errorMessageForUser.accept("Slice export error","Error in export of slice "+slice);
-                return;
-            }
-        });
-
-        mp.warningMessageForUser.accept("Export as QuickNii Dataset done", "Folder : "+datasetFolder.getAbsolutePath());
 
     }
 
