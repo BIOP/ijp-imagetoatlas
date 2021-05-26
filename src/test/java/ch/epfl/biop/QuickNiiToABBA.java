@@ -9,7 +9,6 @@ import ch.epfl.biop.quicknii.QuickNIISlice;
 import loci.common.DebugTools;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import net.imagej.ImageJ;
-import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterAndTimeRange;
@@ -61,13 +60,6 @@ public class QuickNiiToABBA {
         for (int nAdjust = 0;nAdjust<10;nAdjust++) { // Iterative rotation adjustement, because that's convenient
             AffineTransform3D toABBA = mp.getReslicedAtlas().getSlicingTransformToAtlas().inverse();
 
-        /*for (int i=0; i<sources.size(); i++) {
-            QuickNIISlice slice = series.slices[i];
-            SourceAndConverter source = sources.get(i);
-            SourceTransformHelper.append(
-                    transform, new SourceAndConverterAndTimeRange(source, 0));
-        }*/
-
             // Transform sources according to anchoring
             double[] rxs = new double[sources.size()];
             double[] rys = new double[sources.size()];
@@ -82,14 +74,7 @@ public class QuickNiiToABBA {
 
                 AffineTransform3D nonFlat = toCCFv3.preConcatenate(toABBA);
 
-                //AffineTransform3D flat = new AffineTransform3D();
-                //flat.set(nonFlat);
-
                 // Get the z vector to measure the angle of rotation compared to the actual one
-                // In resliced atlas, the rotation is applied first around
-                // Rotate first along Y then along X
-
-                // mp.getReslicedAtlas().setRotateY();
 
                 double zx = nonFlat.get(2, 0);
                 double zy = nonFlat.get(2, 1);
@@ -111,14 +96,6 @@ public class QuickNiiToABBA {
 
                 //System.out.println("rx = " + (int) (rx * 180.0 / Math.PI) + " ry = " + (int) (ry * 180.0 / Math.PI));
 
-
-
-                /*nonFlat.set(0,2,0);
-                nonFlat.set(0,2,1);
-                nonFlat.set(1,2,2);*/
-
-                /*SourceTransformHelper.append(nonFlat,
-                        new SourceAndConverterAndTimeRange(source, 0));**/
             }
 
             System.out.println("Round "+nAdjust);
@@ -134,7 +111,6 @@ public class QuickNiiToABBA {
 
         AffineTransform3D toABBA = mp.getReslicedAtlas().getSlicingTransformToAtlas().inverse();
 
-
         for (int i = 0; i < sources.size(); i++) {
             QuickNIISlice slice = series.slices[i];
             SourceAndConverter source = sources.get(i);
@@ -143,16 +119,44 @@ public class QuickNiiToABBA {
                     (double) source.getSpimSource().getSource(0, 0).dimension(0),
                     (double) source.getSpimSource().getSource(0, 0).dimension(1));
 
-            AffineTransform3D nonFlat = toCCFv3.preConcatenate(toABBA);
+            SourceTransformHelper.append(toCCFv3,
+                                new SourceAndConverterAndTimeRange(source, 0));
+
+            SourceTransformHelper.append(toABBA,
+                    new SourceAndConverterAndTimeRange(source, 0));
+
+            /*AffineTransform3D nonFlat = toCCFv3.preConcatenate(toABBA);
 
             AffineTransform3D flat = new AffineTransform3D();
             flat.set(nonFlat);
 
-            System.out.println("slice ["+i+"], zpos = "+nonFlat.get(2,3));
+            double zLocation = nonFlat.get(2,3);
 
-            mp.createSlice(new SourceAndConverter[]{source}, nonFlat.get(2,3) );
+            /*System.out.println("slice ["+i+"], zpos = "+nonFlat.get(2,3));
+
+            flat.set(0,2,0);
+            flat.set(0,2,1);
+            flat.set(1,2,2);
+            flat.set(0,2,3);
+
+            //AffineTransform3D toMm = new AffineTransform3D();
+            //toMm.scale(0.04); // 40 microns per pixel exported*/
+
+            //SourceTransformHelper.append(nonFlat,
+            //            new SourceAndConverterAndTimeRange(source, 0));
+
+            //mp.createSlice(new SourceAndConverter[]{source}, zLocation ); // This doesn't work because the slice is recentered on creation
 
         }
+
+
+
+                /*nonFlat.set(0,2,0);
+                nonFlat.set(0,2,1);
+                nonFlat.set(1,2,2);*/
+
+                /*SourceTransformHelper.append(nonFlat,
+                        new SourceAndConverterAndTimeRange(source, 0));**/
 
     }
 
