@@ -135,7 +135,6 @@ public class DeepSliceCommand implements Command {
             return;
         }
 
-
         exportDownsampledDataset(slicesToExport);
 
         IJ.log("Dataset exported in folder "+datasetFolder.getAbsolutePath());
@@ -162,7 +161,6 @@ public class DeepSliceCommand implements Command {
         }
 
         // Ok, now comes the big deal. First, real xml file
-
 
         try {
             JAXBContext context = JAXBContext.newInstance(QuickNIISeries.class);
@@ -389,10 +387,6 @@ public class DeepSliceCommand implements Command {
             AffineTransform3D inPlaneTransform = new AffineTransform3D();
             inPlaneTransform.set(flat);
             inPlaneTransform.concatenate(preTransform);
-
-            System.out.println("Flat : "+flat);
-            System.out.println("PreTransform : "+preTransform);
-            System.out.println("InPlaneTransform : "+inPlaneTransform);
 
             parameters.put("transform", AffineRegistration.affineTransform3DToString(inPlaneTransform));
             // Always set slice at zero position for registration
