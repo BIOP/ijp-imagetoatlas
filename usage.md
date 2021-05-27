@@ -10,15 +10,17 @@
 It is highly recommended to use [QuPath](https://qupath.github.io/) in order to define the dataset of brain slices. It is possible to use only ImageJ/Fiji, but the analysis capabilities are then limited (no support of multiresolution files in vanilla ImageJ). This documentation will only detail the recommended workflow that uses QuPath and Fiji's ABBA plugin.
  
 For each animal:
-* [**Define sections dataset:**](create_dataset_and_open.md)
+* [**Define sections dataset**](create_dataset_and_open.md)
   * [Define the dataset of this animal brain sections into a QuPath project](create_dataset_and_open.md)
   * [Import sections by opening this QuPath project into Fiji's ABBA plugin](create_dataset_and_open.md#abba-navigation)
-* [**Register sections to the Allen Brain Atlas:**](registration.md)
-  * [Basic slices manipulation and display in ABBA](registration.md)
+* [**Register sections to the Allen Brain Atlas**](registration.md)
+  * [Basic slices manipulation and display](registration.md)
   * [Position slices along the atlas axis](registration.md#first-coarse-positioning)
+  * [Correcting the slicing angle](registration.md#correcting-atlas-slicing-orientation)
   * [Registering slices in 2D (manual, automated affine, automated spline)](registration.md#slices-registration)
   * [Saving / opening an ABBA project](registration.md#saving--opening-registrations-results)
-* [**Reuse ABBA's registration results in QuPath:**](qupath_analysis.md)
+* [**Register sections to the Allen Brain Atlas using DeepSlice**](registration_with_deepslice.md)
+* [**Reuse ABBA's registration results in QuPath**](qupath_analysis.md)
   * [From ABBA, export registration results to QuPath project](qupath_analysis.md)
   * [Import registration results as QuPath annotations](qupath_analysis.md#importing-abba-registration-results-in-qupath)
   * [(Optional) Correct the registration for some slices into ABBA and re-export the new result to QuPath](registration.md#editing-a-registration)
