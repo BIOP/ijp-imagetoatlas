@@ -183,7 +183,7 @@ public class SliceSources {
         return registered_sacs;
     }
 
-    protected double getSlicingAxisPosition() {
+    public double getSlicingAxisPosition() {
         return slicingAxisPosition;
     }
 

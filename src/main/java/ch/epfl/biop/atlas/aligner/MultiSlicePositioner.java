@@ -1770,10 +1770,10 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         }
     }
 
-    Map<String,String> convertToString(Map<String, Object> params) {
+    public static Map<String,String> convertToString(Context ctx, Map<String, Object> params) {
         Map<String,String> convertedParams = new HashMap<>();
 
-        ConvertService cs = scijavaCtx.getService(ConvertService.class);
+        ConvertService cs = ctx.getService(ConvertService.class);
 
         params.keySet().forEach(k -> convertedParams.put(k, cs.convert(params.get(k), String.class)));
 
@@ -1841,10 +1841,10 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                         IABBARegistrationPlugin registration = (IABBARegistrationPlugin) ps.getPlugin(registrationClass).createInstance();
                         registration.setScijavaContext(scijavaCtx);
 
-                        registration.setSliceInfo(new SliceInfo(slice));
+                        registration.setSliceInfo(new SliceInfo(this,slice));
 
                         // Sends parameters to the registration
-                        registration.setRegistrationParameters(convertToString(parameters));
+                        registration.setRegistrationParameters(convertToString(scijavaCtx,parameters));
 
                         // Always set slice at zero position for registration
                         parameters.put("pz", 0);
@@ -2255,16 +2255,16 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
     /**
      * Informations sent to the registration server (provided the user agrees)
      */
-    public class SliceInfo {
+    public static class SliceInfo {
 
-        public SliceInfo(SliceSources slice) {
+        public SliceInfo(MultiSlicePositioner mp, SliceSources slice) {
             sliceAxisPosition = slice.getSlicingAxisPosition();
-            matrixAtlas = reslicedAtlas.getSlicingTransform().getRowPackedCopy();
-            matrixAlignerToAtlas = MultiSlicePositioner.this.getAffineTransformFormAlignerToAtlas().getRowPackedCopy();
-            rotX = reslicedAtlas.getRotateX();
-            rotY = reslicedAtlas.getRotateY();
+            matrixAtlas = mp.getReslicedAtlas().getSlicingTransform().getRowPackedCopy();
+            matrixAlignerToAtlas = mp.getAffineTransformFormAlignerToAtlas().getRowPackedCopy();
+            rotX = mp.getReslicedAtlas().getRotateX();
+            rotY = mp.getReslicedAtlas().getRotateY();
             sliceHashCode = slice.hashCode();
-            sessionHashcode = MultiSlicePositioner.this.hashCode();
+            sessionHashcode = mp.hashCode();
         }
 
         String type = "ABBA Registration"; // Tag to know where from which software this job comes from

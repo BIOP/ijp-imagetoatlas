@@ -1,7 +1,5 @@
 package ch.epfl.biop.atlas.aligner.commands;
 
-import ch.epfl.biop.atlas.aligner.sourcepreprocessors.SourcesAffineTransformer;
-import net.imglib2.realtransform.AffineTransform3D;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
