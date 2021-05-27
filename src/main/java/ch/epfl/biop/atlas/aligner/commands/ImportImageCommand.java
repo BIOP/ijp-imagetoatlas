@@ -29,7 +29,7 @@ public class ImportImageCommand implements Command {
     File[] files;
 
     @Parameter(label = "Split RGB channels")
-    boolean splitRGBChannels = false;
+    boolean splitrgbchannels = false;
 
     @Parameter(label = "Initial axis position (0 = front, mm units)")
     double sliceAxisInitial;
@@ -52,7 +52,7 @@ public class ImportImageCommand implements Command {
                                     BasicOpenFilesWithBigdataviewerBioformatsBridgeCommand.class,
                                     true, "files", new File[]{f},
                                     "unit", "MILLIMETER",
-                                    "splitRGBChannels", splitRGBChannels
+                                    "splitrgbchannels", splitrgbchannels
                                 )
                                 .get()
                                 .getOutput("spimData");
