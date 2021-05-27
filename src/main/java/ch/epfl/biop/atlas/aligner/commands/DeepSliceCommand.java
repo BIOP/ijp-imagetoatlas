@@ -155,8 +155,9 @@ public class DeepSliceCommand implements Command {
         File deepSliceResult = new File(datasetFolder, "results.xml");
 
         if (!deepSliceResult.exists()) {
-            mp.errorMessageForUser.accept("Could not find DeepSlice result file "+deepSliceResult.getAbsolutePath(),
-                    "Command aborted");
+            mp.errorMessageForUser.accept("Deep Slice registration aborted",
+                    "Could not find DeepSlice result file "+deepSliceResult.getAbsolutePath()
+                    );
             return;
         }
 
