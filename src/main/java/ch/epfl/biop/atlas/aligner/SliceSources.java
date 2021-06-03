@@ -39,6 +39,7 @@ import sc.fiji.bdvpg.sourceandconverter.importer.EmptySourceAndConverterCreator;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceResampler;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
 import sc.fiji.persist.ScijavaGsonHelper;
+import spimdata.util.Displaysettings;
 
 import java.awt.*;
 import java.io.*;
@@ -1048,6 +1049,12 @@ public class SliceSources {
 
     public boolean isKeySlice() {
         return setAsKeySlice;
+    }
+
+    public void setDisplaysettings(Displaysettings[] ds) {
+        for (int idx = 0; idx<nChannels;idx++) {
+            Displaysettings.applyDisplaysettings(registered_sacs[idx], ds[idx]);
+        }
     }
 
     public static class RegistrationAndSources {

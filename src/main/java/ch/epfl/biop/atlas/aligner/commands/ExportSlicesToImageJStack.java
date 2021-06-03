@@ -98,10 +98,27 @@ public class ExportSlicesToImageJStack implements Command {
             }
         });
 
-        image = Concatenator.run(images);
+        if (images.length>1) {
+            // Concatenate and restore min max display of first slice
+            int nChannels = images[0].getNChannels();
+
+            double[] min = new double[nChannels];
+            double[] max = new double[nChannels];
+            for (int iCh = 0; iCh<nChannels;iCh++) {
+                images[0].setC(iCh+1);
+                min[iCh] = images[0].getProcessor().getMin();
+                max[iCh] = images[0].getProcessor().getMax();
+            }
+            image = Concatenator.run(images);
+            for (int iCh = 0; iCh<nChannels; iCh++) {
+                image.setC(iCh+1);
+                image.setDisplayRange( min[iCh],  max[iCh]);
+            }
+        } else {
+            image = images[0];
+        }
         image.show();
         image.setTitle(imageName);
-
     }
 
 }

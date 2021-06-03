@@ -73,6 +73,7 @@ public class SliceToImagePlus {
             resultImage.setTitle(slice.getName()+"-["+px+":"+(px+sx)+" | "+py+":"+(py+sy)+"]");
             ImagePlusHelper.storeExtendedCalibrationToImagePlus(resultImage, at3D.inverse(), "mm", timepoint);
 
+
             return resultImage;
 
         } else {

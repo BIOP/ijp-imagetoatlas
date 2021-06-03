@@ -2,6 +2,7 @@ package ch.epfl.biop.atlas.aligner;
 
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.commands.DisplaySettingsCommand;
+import org.apache.commons.lang.ArrayUtils;
 import org.scijava.command.CommandService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -120,11 +121,19 @@ public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, Mul
                 if ((col>1)&&(col%2 == 1)) {
                     int iChannel = (col-3)/2;
 
-                    SourceAndConverter<?>[] sacs = getSelectedIndices().stream()
+                    SourceAndConverter<?>[] sacs_gui = getSelectedIndices().stream()
                             .map(idx -> sortedSlices.get(idx))
                             .filter(slice -> slice.nChannels > iChannel)
                             .map(slice -> slice.getGUIState().getCurrentSources()[iChannel])
                             .toArray(SourceAndConverter<?>[]::new);
+
+                    SourceAndConverter<?>[] sacs_original = getSelectedIndices().stream()
+                            .map(idx -> sortedSlices.get(idx))
+                            .filter(slice -> slice.nChannels > iChannel)
+                            .map(slice -> slice.getRegisteredSources()[iChannel])
+                            .toArray(SourceAndConverter<?>[]::new);
+
+                    SourceAndConverter<?>[] sacs = (SourceAndConverter<?>[]) ArrayUtils.addAll(sacs_gui,sacs_original);
 
                     if (sacs.length>0) {
                         Runnable update = () -> {

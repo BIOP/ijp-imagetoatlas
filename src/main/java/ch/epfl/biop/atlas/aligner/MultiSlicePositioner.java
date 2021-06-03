@@ -2204,6 +2204,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
                     sliceState.slice.waitForEndOfTasks();
                     sliceState.slice.getGUIState().setChannelsVisibility(sliceState.channelsVisibility); // TODO : restore
                     sliceState.slice.getGUIState().setDisplaysettings(sliceState.settings_per_channel);
+                    sliceState.slice.setDisplaysettings(sliceState.settings_per_channel);
                     sliceState.slice.transformSourceOrigin((AffineTransform3D) (sliceState.preTransform));
                 });
 
