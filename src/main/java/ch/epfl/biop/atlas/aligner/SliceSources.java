@@ -797,8 +797,10 @@ public class SliceSources {
 
         try {
             dataEntryFolder = QuPathBdvHelper.getDataEntryFolder(original_sacs[0]);
+            logger.debug("DataEntryFolder = "+dataEntryFolder);
 
             String projectFolderPath = QuPathBdvHelper.getQuPathProjectFile(original_sacs[0]).getParent();
+            logger.debug("QuPath Project Folder = "+projectFolderPath);
 
             File f = new File(dataEntryFolder, "ABBA-RoiSet.zip");
             mp.log.accept("Save slice ROI to quPath project " + f.getAbsolutePath());
