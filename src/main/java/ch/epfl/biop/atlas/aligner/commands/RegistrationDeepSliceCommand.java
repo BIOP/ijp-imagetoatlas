@@ -1,7 +1,5 @@
 package ch.epfl.biop.atlas.aligner.commands;
 
-import bdv.viewer.SourceAndConverter;
-import ch.epfl.biop.atlas.aligner.ExportSliceToImagePlus;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.RegisterSlice;
 import ch.epfl.biop.atlas.aligner.SliceSources;
@@ -14,11 +12,8 @@ import ch.epfl.biop.quicknii.QuickNIIExporter;
 import ch.epfl.biop.quicknii.QuickNIISeries;
 import ch.epfl.biop.quicknii.QuickNIISlice;
 import ch.epfl.biop.registration.sourceandconverter.affine.AffineRegistration;
-import ch.epfl.biop.registration.sourceandconverter.affine.AffineTransformedSourceWrapperRegistration;
 import ij.IJ;
-import ij.ImagePlus;
 import ij.gui.WaitForUserDialog;
-import ij.process.ImageConverter;
 import net.imglib2.realtransform.AffineTransform3D;
 import org.scijava.Context;
 import org.scijava.InstantiableException;
@@ -29,67 +24,63 @@ import org.scijava.plugin.Plugin;
 import org.scijava.plugin.PluginService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterAndTimeRange;
-import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
 
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
 import java.io.File;
 import java.io.FileReader;
-import java.io.IOException;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
- * Command which is using the amazing DeepSlice (https://researchers.mq.edu.au/en/publications/deepslice-a-deep-neural-network-for-fully-automatic-alignment-of-)
- * workflow by Harry Carey, Simon McMullan and William Redmond
- *
+ * Command which is using the amazing DeepSlice workflow by Harry Carey, and William Redmond, in Simon McMullan group
+ * (https://researchers.mq.edu.au/en/publications/deepslice-a-deep-neural-network-for-fully-automatic-alignment-of-)
  *
  * You will need an internet connection (https://www.deepslice.com.au/)
  * in order to use this command, and there's some manual interaction
- * required (but it's worth it!)
- * Contrary to other registration command, the slices are not registered independently:
- * * it's easier to drag many files at once
- * * in ABBA, there is less degree of freedom from what deepslice allows, because the atlas has to be slice
- * in one angle. Because of that, this command works in several steps, the first step being to determine what
- * is the most appropriate slicing angle for all slices. Each slice has a prefered angle, and ABBA takes
- * the median of all slices.
+ * required (but it's worth!)
+ * Contrary to other registration command, the slices are not registered independently, because
+ * it's easier to drag many files at once in the DeepSlice web interface.
  *
- * It is possible to forbid the angle adjustement, but in ABBA only. DeepSlice doesn't care. That could
- * result in worse results than the output of DeepSlice, but in fact, this is also positive in certain
- * cases because a single slicing angle leads to some 'regularisation'.
+ * It is possible to forbid the angle adjustement.
  *
- * Also, contrary to other registration methods, DeepSlice can help defining the location in Z of slices.
- * However, sometimes, DeepSlice is swapping slices incorrectly. So there should be an option to avoid swapping
- * slices position ( TODO ).
+ * Contrary to other registration methods, DeepSlice can help defining the location in Z of slices.
+ * However, sometimes, DeepSlice is swapping slices incorrectly. So there is an option that maintains the
+ * slices order in the process. Briefly, if this options is checked, the slice with the biggest difference
+ * of rank after DeepSlice registration is moved until no difference of rnak exist.
  *
  * DeepSlice provides the fastest way to have an initial:
- * * correct positioning in Z a
+ * * correct positioning in Z
  * * slicing angle
- * * a first affine in-plane registration
+ * * affine in-plane registration
  *
  * By default, ABBA downsamples to 30 microns per pixel for DeepSlice and saves as an 8 bit jpeg image.
- * Make sure you have multiresolution files if you don't want your downscaling to look bad!
+ * Make sure you have multiresolution files if you don't want your downscaling to look bad! Also
+ * this is currently the only registration method where the display settings matter for the registration.
  *
- * For now, only one channel can be used for the registration. (TODO : allow dual channel export)
+ * TODO : add a checkbox for optional conversion to 8 bit and jpeg
  *
  */
 
 @Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>DeepSlice Registration")
-public class DeepSliceCommand implements Command {
+public class RegistrationDeepSliceCommand implements Command {
 
-    static Logger logger = LoggerFactory.getLogger(DeepSliceCommand.class);
+    static Logger logger = LoggerFactory.getLogger(RegistrationDeepSliceCommand.class);
 
     @Parameter
     MultiSlicePositioner mp;
 
     @Parameter
     PlatformService ps;
+
+    @Parameter
+    Context ctx;
+
+    @Parameter
+    PluginService pluginService;
 
     @Parameter(label = "Slices channels, 0-based, comma separated, '*' for all channels", description = "'0,2' for channels 0 and 2")
     String slicesStringChannel = "*";
@@ -143,9 +134,10 @@ public class DeepSliceCommand implements Command {
                 .show();
         try {
             ps.open(new URL("https://www.deepslice.com.au/"));
+            ps.open(datasetFolder.toURI().toURL());
         } catch (Exception e) {
             mp.errorMessageForUser.accept("Couldn't open DeepSlice from Fiji, ",
-                    "please go to https://www.deepslice.com.au/ and drag and drop your images");
+                    "please go to https://www.deepslice.com.au/ and drag and drop your images located in "+datasetFolder.getAbsolutePath());
         }
 
         new WaitForUserDialog("DeepSlice result",
@@ -250,11 +242,12 @@ public class DeepSliceCommand implements Command {
 
         String angleUpdatedMessage = "";
 
-        angleUpdatedMessage+="Angle X : "+oldX+" has been updated to "+mp.getReslicedAtlas().getRotateX()+"\n";
+        DecimalFormat df = new DecimalFormat("#0.000");
+        angleUpdatedMessage+="Angle X : "+oldX+" has been updated to "+df.format(mp.getReslicedAtlas().getRotateX())+"\n";
 
-        angleUpdatedMessage+="Angle Y : "+oldY+" has been updated to "+mp.getReslicedAtlas().getRotateY()+"\n";
+        angleUpdatedMessage+="Angle Y : "+oldY+" has been updated to "+df.format(mp.getReslicedAtlas().getRotateY())+"\n";
 
-        mp.warningMessageForUser.accept("Slicing angle adjusted", angleUpdatedMessage);
+        mp.warningMessageForUser.accept("Slicing angle adjusted - ", angleUpdatedMessage);
 
     }
 
@@ -331,12 +324,6 @@ public class DeepSliceCommand implements Command {
             mp.moveSlice(slice, slicesNewPosition.get(slice));
         }
     }
-
-    @Parameter
-    Context ctx;
-
-    @Parameter
-    PluginService pluginService;
 
     private void affineTransformInPlane(final List<SliceSources> slices, double nPixX, double nPixY) throws InstantiableException {
         AffineTransform3D toABBA = mp.getReslicedAtlas().getSlicingTransformToAtlas().inverse();

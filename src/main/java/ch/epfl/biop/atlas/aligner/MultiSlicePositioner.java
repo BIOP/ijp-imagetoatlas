@@ -407,7 +407,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
 
         logger.debug("Installing DeepSlice command");
         //DeepSliceCommand
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, DeepSliceCommand.class, hierarchyLevelsSkipped,"mp", this);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, RegistrationDeepSliceCommand.class, hierarchyLevelsSkipped,"mp", this);
 
         // Adds registration plugin commands : discovered via scijava plugin autodiscovery mechanism
 
@@ -442,6 +442,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ABBAForumHelpCommand.class, hierarchyLevelsSkipped);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ABBADocumentationCommand.class, hierarchyLevelsSkipped);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ABBAUserFeedbackCommand.class, hierarchyLevelsSkipped);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, DeepSliceDocumentationCommand.class, hierarchyLevelsSkipped);
 
         logger.debug("Adding bigdataviewer cards");
 
