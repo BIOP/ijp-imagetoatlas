@@ -14,6 +14,7 @@ import ch.epfl.biop.java.utilities.roi.types.IJShapeRoiArray;
 import ch.epfl.biop.java.utilities.roi.types.ImageJRoisFile;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import ch.epfl.biop.registration.sourceandconverter.spline.RealTransformSourceAndConverterRegistration;
+import ch.epfl.biop.sourceandconverter.exporter.ImagePlusSampler;
 import ch.epfl.biop.spimdata.qupath.QuPathEntryEntity;
 import ch.epfl.biop.registration.Registration;
 import ch.epfl.biop.registration.sourceandconverter.affine.AffineTransformedSourceWrapperRegistration;
@@ -39,6 +40,7 @@ import sc.fiji.bdvpg.sourceandconverter.importer.EmptySourceAndConverterCreator;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceResampler;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
 import sc.fiji.persist.ScijavaGsonHelper;
+import spimdata.imageplus.ImagePlusHelper;
 import spimdata.util.Displaysettings;
 
 import java.awt.*;
@@ -51,6 +53,7 @@ import java.util.*;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 import static ch.epfl.biop.atlas.aligner.CancelableAction.errlog;
 
@@ -615,16 +618,36 @@ public class SliceSources {
         sac = resampler.apply(sac);
         sac = SourceTransformHelper.createNewTransformedSourceAndConverter(translateZ, new SourceAndConverterAndTimeRange(sac, 0));
 
-        ExportToImagePlusCommand export = new ExportToImagePlusCommand();
-
+        /*ExportToImagePlusCommand export = new ExportToImagePlusCommand();
         export.level=0;
         export.timepointBegin=0;
         export.timepointEnd=0;
         export.sacs = new SourceAndConverter[1];
         export.sacs[0] = sac;
-        export.run();
+        export.run();*/
 
-        impLabelImage = export.imp_out;
+        Map<SourceAndConverter, Integer> mapSacToMml = new HashMap<>();
+        mapSacToMml.put(sac, 0);
+
+        List<SourceAndConverter<?>> sourceList = new ArrayList<>();
+        sourceList.add(sac);
+        impLabelImage =
+                ImagePlusHelper.wrap(sourceList.stream().map(s -> (SourceAndConverter) s).collect(Collectors.toList()), mapSacToMml,
+                        0, 1, 1);
+
+        /*AffineTransform3D at3D = new AffineTransform3D();
+        sacs[0].getSpimSource().getSourceTransform(timepointbegin, level, at3D);
+        String unit = "px";
+        if (sacs[0].getSpimSource().getVoxelDimensions() != null) {
+            unit = sacs[0].getSpimSource().getVoxelDimensions().unit();
+            if (unit==null) {
+                unit = "px";
+            }
+        }
+        imp_out.setTitle(sourceList.get(0).getSpimSource().getName());
+        ImagePlusHelper.storeExtendedCalibrationToImagePlus(imp_out,at3D,unit, timepointbegin);*/
+
+        //impLabelImage = export.imp_out;
 
         ConstructROIsFromImgLabel labelToROIs = new ConstructROIsFromImgLabel();
         labelToROIs.atlas = mp.biopAtlas;
@@ -642,7 +665,7 @@ public class SliceSources {
         sac = resampler.apply(sac);
         sac = SourceTransformHelper.createNewTransformedSourceAndConverter(translateZ, new SourceAndConverterAndTimeRange(sac, 0));
 
-        export = new ExportToImagePlusCommand();
+        /*export = new ExportToImagePlusCommand();
 
         export.level=0;
         export.timepointBegin=0;
@@ -651,7 +674,17 @@ public class SliceSources {
         export.sacs[0] = sac;
         export.run();
 
-        ImagePlus leftRightImage = export.imp_out;
+        ImagePlus leftRightImage = export.imp_out;*/
+
+        mapSacToMml = new HashMap<>();
+        mapSacToMml.put(sac, 0);
+
+        sourceList = new ArrayList<>();
+        sourceList.add(sac);
+        ImagePlus leftRightImage =
+                ImagePlusHelper.wrap(sourceList.stream().map(s -> (SourceAndConverter) s).collect(Collectors.toList()), mapSacToMml,
+                        0, 1, 1);
+
 
         leftRightOrigin.set(ConvertibleRois.labelImageToRoiArrayKeepSinglePixelPrecision(leftRightImage));
     }
@@ -675,7 +708,7 @@ public class SliceSources {
 
         if (computeLabelImageNecessary) {
             computeLabelImage(at3D);
-        } else {
+        } /*else {
             while (labelImageBeingComputed) {
                 try {
                     Thread.sleep(100);
@@ -683,7 +716,7 @@ public class SliceSources {
 
                 }
             }
-        }
+        }*/
 
         computeTransformedRois();
 

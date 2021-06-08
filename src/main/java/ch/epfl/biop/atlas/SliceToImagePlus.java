@@ -64,11 +64,10 @@ public class SliceToImagePlus {
 
             ImagePlus resultImage = ImagePlusHelper.wrap(
                     resampledSourceList,
-                    mapCS,
                     mapMipmap,
                     timepoint,
-                    timepoint+1,
-                    ignoreSourceLut);
+                    1,
+                    1);
 
             resultImage.setTitle(slice.getName()+"-["+px+":"+(px+sx)+" | "+py+":"+(py+sy)+"]");
             ImagePlusHelper.storeExtendedCalibrationToImagePlus(resultImage, at3D.inverse(), "mm", timepoint);
@@ -81,11 +80,10 @@ public class SliceToImagePlus {
             int mipmapLevel = SourceAndConverterHelper.bestLevel(sourceList.get(0), timepoint, pixelSizeMillimeter);
             ImagePlus singleChannel = ImagePlusHelper.wrap(
                     source,
-                    getConverterSetupFromConverter(source.getConverter()),
                     mipmapLevel,
                     timepoint,
-                    timepoint+1,
-                    ignoreSourceLut);
+                    1,
+                    1);
             singleChannel.setTitle(source.getSpimSource().getName());
             ImagePlusHelper.storeExtendedCalibrationToImagePlus(singleChannel, at3D.inverse(), "mm", timepoint);
 

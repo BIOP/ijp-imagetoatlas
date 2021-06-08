@@ -5,6 +5,7 @@ import org.scijava.platform.PlatformService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 
