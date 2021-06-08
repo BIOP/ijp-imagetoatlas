@@ -1744,14 +1744,14 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         return new SourcesChannelsSelect(channels);
     }
 
-    public void editLastRegistration(boolean editWithAllChannels) {
+    public void editLastRegistration(boolean reuseOriginalChannels, SourcesProcessor preprocessSlice, SourcesProcessor preprocessAtlas) {
         if (getSelectedSources().size()==0) {
             warningMessageForUser.accept("No selected slice", "Please select the slice you want to edit");
             log.accept("Edit registration ignored : no slice selected");
         } else {
             for (SliceSources slice : slices) {
                 if (slice.isSelected()) {
-                    new EditLastRegistration(this, slice, editWithAllChannels).runRequest();
+                    new EditLastRegistration(this, slice, reuseOriginalChannels, preprocessSlice, preprocessAtlas ).runRequest();
                 }
             }
         }

@@ -1,5 +1,6 @@
 package ch.epfl.biop.atlas.aligner;
 
+import ch.epfl.biop.atlas.aligner.sourcepreprocessors.SourcesProcessor;
 import ch.epfl.biop.atlas.aligner.sourcepreprocessors.SourcesProcessorHelper;
 import ch.epfl.biop.atlas.plugin.RegistrationPluginHelper;
 
@@ -12,12 +13,16 @@ public class EditLastRegistration extends CancelableAction {
 
     final RegisterSlice rs;
 
-    private final boolean editWithAllChannels;
+    private final boolean reuseOriginalChannels;
 
-    public EditLastRegistration(MultiSlicePositioner mp, SliceSources slice, boolean editWithAllChannels) {
+    private final SourcesProcessor preprocessSlice, preprocessAtlas;
+
+    public EditLastRegistration(MultiSlicePositioner mp, SliceSources slice, boolean reuseOriginalChannels, SourcesProcessor preprocessSlice, SourcesProcessor preprocessAtlas) {
         super(mp);
-        this.editWithAllChannels = editWithAllChannels;
+        this.reuseOriginalChannels = reuseOriginalChannels;
         this.slice = slice;
+        this.preprocessAtlas = preprocessAtlas;
+        this.preprocessSlice = preprocessSlice;
         List<CancelableAction> registrationActionsCompiled = new ArrayList<>();
         // One need to get the list of still active registrations i.e.
         // All registrations minus the one already cancelled by a DeleteLastRegistration action
@@ -52,10 +57,12 @@ public class EditLastRegistration extends CancelableAction {
     protected boolean run() {
         mp.userActions.remove(this);
         mp.mso.cancelInfo(this);
-        if (editWithAllChannels) {
+        if (!reuseOriginalChannels) {
             slice.editLastRegistration(
-                    SourcesProcessorHelper.removeChannelsSelect(rs.preprocessFixed),
-                    SourcesProcessorHelper.removeChannelsSelect(rs.preprocessMoving));
+                    SourcesProcessorHelper.compose(preprocessAtlas,
+                    SourcesProcessorHelper.removeChannelsSelect(rs.preprocessFixed)),
+                    SourcesProcessorHelper.compose(preprocessSlice,
+                    SourcesProcessorHelper.removeChannelsSelect(rs.preprocessMoving)));
         } else {
             slice.editLastRegistration(rs.preprocessFixed, rs.preprocessMoving);
         }

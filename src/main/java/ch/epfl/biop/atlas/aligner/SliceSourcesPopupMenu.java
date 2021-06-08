@@ -1,5 +1,7 @@
 package ch.epfl.biop.atlas.aligner;
 
+import ch.epfl.biop.atlas.aligner.commands.EditLastRegistrationCommand;
+import org.scijava.command.CommandService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,17 +88,18 @@ public class SliceSourcesPopupMenu {
             popup.addSeparator();
 
             addPopupAction(popup, "Edit Last Registration", () -> {
-                SliceSources[] slices = mp.getSelectedSources().toArray(new SliceSources[0]);
-                Object[] options = { "Yes", "No" };
-                int resp = JOptionPane.showOptionDialog(null,
+                //SliceSources[] slices = mp.getSelectedSources().toArray(new SliceSources[0]);
+                //Object[] options = { "Yes", "No" };
+                /*int resp = JOptionPane.showOptionDialog(null,
                         "Edit with all channels ?", "Edit options",
                         JOptionPane.YES_NO_OPTION,
-                        JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
-                if (slices.length>1) new MarkActionSequenceBatch(mp).runRequest();
+                        JOptionPane.QUESTION_MESSAGE, null, options, options[0]);*/
+                /*if (slices.length>1) new MarkActionSequenceBatch(mp).runRequest();
                 for (SliceSources slice : slices) {
                     new EditLastRegistration(mp, slice, resp==0).runRequest();
                 }
-                if (slices.length>1) new MarkActionSequenceBatch(mp).runRequest();
+                if (slices.length>1) new MarkActionSequenceBatch(mp).runRequest();*/
+                mp.scijavaCtx.getService(CommandService.class).run(EditLastRegistrationCommand.class,true, "mp", mp);
             });
 
             addPopupAction(popup, "Remove Last Registration", () -> {
@@ -193,7 +196,7 @@ public class SliceSourcesPopupMenu {
             addPopupLine();
 
             addPopupAction("Edit Last Registration", (slices) -> {
-                Object[] options = { "Yes", "No" };
+                /*Object[] options = { "Yes", "No" };
                 int resp = JOptionPane.showOptionDialog(null,
                         "Edit with all channels ?", "Edit options",
                         JOptionPane.YES_NO_OPTION,
@@ -202,7 +205,8 @@ public class SliceSourcesPopupMenu {
                 for (SliceSources slice : slices) {
                     new EditLastRegistration(mp, slice, resp==0).runRequest();
                 }
-                if (slices.length>1) new MarkActionSequenceBatch(mp).runRequest();
+                if (slices.length>1) new MarkActionSequenceBatch(mp).runRequest();*/
+                mp.scijavaCtx.getService(CommandService.class).run(EditLastRegistrationCommand.class,true, "mp", mp);
             });
 
             addPopupAction("Remove Last Registration", (slices) -> {
