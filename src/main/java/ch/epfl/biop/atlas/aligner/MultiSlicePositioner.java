@@ -432,6 +432,7 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportSlicesToBDVJsonDataset.class, hierarchyLevelsSkipped,"mp", this);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportSlicesToBDV.class, hierarchyLevelsSkipped,"mp", this);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportSlicesToImageJStack.class, hierarchyLevelsSkipped,"mp", this);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportAtlasToImageJStack.class, hierarchyLevelsSkipped,"mp", this);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportSlicesToQuickNIIDatasetCommand.class, hierarchyLevelsSkipped,"mp", this);
 
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, RotateSourcesCommand.class, hierarchyLevelsSkipped,"mp", this);
@@ -731,8 +732,8 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
             bdvh.getTriggerbindings().removeBehaviourMap(REVIEW_BEHAVIOURS_KEY);
             positioning_behaviours.install(bdvh.getTriggerbindings(), POSITIONING_BEHAVIOURS_KEY);
             navigateCurrentSlice();
-            refreshBlockMap();
             modeListeners.forEach(ml -> ml.modeChanged(this, oldMode, displayMode));
+            refreshBlockMap();
         }
     }
 
@@ -769,8 +770,8 @@ public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandle
             bdvh.getTriggerbindings().removeBehaviourMap(POSITIONING_BEHAVIOURS_KEY);
             review_behaviours.install(bdvh.getTriggerbindings(), REVIEW_BEHAVIOURS_KEY);
             navigateCurrentSlice();
-            refreshBlockMap();
             modeListeners.forEach(ml -> ml.modeChanged(this, oldMode, displayMode));
+            refreshBlockMap();
         }
     }
 

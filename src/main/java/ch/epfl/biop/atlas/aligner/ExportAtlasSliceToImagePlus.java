@@ -7,7 +7,7 @@ import ij.ImagePlus;
 
 import java.awt.*;
 
-public class ExportSliceToImagePlus extends CancelableAction {
+public class ExportAtlasSliceToImagePlus extends CancelableAction {
 
     final SliceSources slice;
     final SourcesProcessor preprocess;
@@ -17,12 +17,12 @@ public class ExportSliceToImagePlus extends CancelableAction {
 
     ImagePlus resultImage = null;
 
-    public ExportSliceToImagePlus(MultiSlicePositioner mp,
-                         SliceSources slice,
-                         SourcesProcessor preprocess,
-                                  double px, double py, double sx, double sy,
-                                  double pixel_size_millimeter, int timepoint,
-                                  boolean interpolate) {
+    public ExportAtlasSliceToImagePlus(MultiSlicePositioner mp,
+                                       SliceSources slice,
+                                       SourcesProcessor preprocess,
+                                       double px, double py, double sx, double sy,
+                                       double pixel_size_millimeter, int timepoint,
+                                       boolean interpolate) {
         super(mp);
         this.slice = slice;
         this.preprocess = preprocess;
@@ -42,7 +42,7 @@ public class ExportSliceToImagePlus extends CancelableAction {
 
     @Override
     protected boolean run() {
-        resultImage = SliceToImagePlus.export(slice,preprocess,px,py,sx,sy,pixel_size_mm,timepoint,interpolate);
+        resultImage = SliceToImagePlus.exportAtlas(mp,slice,preprocess,px,py,sx,sy,pixel_size_mm,timepoint,interpolate);
         return resultImage!=null;
     }
 

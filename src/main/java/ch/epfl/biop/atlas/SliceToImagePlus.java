@@ -29,15 +29,12 @@ public class SliceToImagePlus {
 
     static Logger logger = LoggerFactory.getLogger(SliceToImagePlus.class);
 
-    public static ImagePlus export(SliceSources slice,
+    public static ImagePlus export(List<SourceAndConverter> sourceList,
+                                   SliceSources slice,
                                    SourcesProcessor preprocess,
                                    double px, double py, double sx, double sy,
                                    double pixelSizeMillimeter, int timepoint,
                                    boolean interpolate) {
-
-
-        List<SourceAndConverter> sourceList = Arrays.asList(preprocess.apply(slice.getRegisteredSources()));
-
         AffineTransform3D at3D = new AffineTransform3D();
 
         SourceAndConverter model = createModelSource(slice, px, py, sx, sy, pixelSizeMillimeter, at3D);
@@ -47,13 +44,7 @@ public class SliceToImagePlus {
                 .map(sac -> new SourceResampler(sac,model,true, false, interpolate).get())
                 .collect(Collectors.toList());
 
-        boolean ignoreSourceLut = false;
-
         if ((sourceList.size()>1)) {
-
-            Map<SourceAndConverter, ConverterSetup> mapCS = new HashMap<>();
-            sourceList.forEach(src -> mapCS.put(resampledSourceList.get(sourceList.indexOf(src)),
-                    getConverterSetupFromConverter(src.getConverter())));
 
             Map<SourceAndConverter, Integer> mapMipmap = new HashMap<>();
             sourceList.forEach(src -> {
@@ -72,6 +63,117 @@ public class SliceToImagePlus {
             resultImage.setTitle(slice.getName()+"-["+px+":"+(px+sx)+" | "+py+":"+(py+sy)+"]");
             ImagePlusHelper.storeExtendedCalibrationToImagePlus(resultImage, at3D.inverse(), "mm", timepoint);
 
+            return resultImage;
+
+        } else {
+            SourceAndConverter source = resampledSourceList.get(0);
+            int mipmapLevel = SourceAndConverterHelper.bestLevel(sourceList.get(0), timepoint, pixelSizeMillimeter);
+            ImagePlus singleChannel = ImagePlusHelper.wrap(
+                    source,
+                    mipmapLevel,
+                    timepoint,
+                    1,
+                    1);
+            singleChannel.setTitle(source.getSpimSource().getName());
+            ImagePlusHelper.storeExtendedCalibrationToImagePlus(singleChannel, at3D.inverse(), "mm", timepoint);
+
+            return singleChannel;
+        }
+    }
+
+    public static ImagePlus export(SliceSources slice,
+                                   SourcesProcessor preprocess,
+                                   double px, double py, double sx, double sy,
+                                   double pixelSizeMillimeter, int timepoint,
+                                   boolean interpolate) {
+
+
+        List<SourceAndConverter> sourceList = Arrays.asList(preprocess.apply(slice.getRegisteredSources()));
+
+        AffineTransform3D at3D = new AffineTransform3D();
+
+        SourceAndConverter model = createModelSource(slice, px, py, sx, sy, pixelSizeMillimeter, at3D);
+
+        List<SourceAndConverter> resampledSourceList = sourceList
+                .stream()
+                .map(sac -> new SourceResampler(sac,model,true, false, interpolate).get())
+                .collect(Collectors.toList());
+
+        if ((sourceList.size()>1)) {
+
+            Map<SourceAndConverter, Integer> mapMipmap = new HashMap<>();
+            sourceList.forEach(src -> {
+                int mipmapLevel = SourceAndConverterHelper.bestLevel(src, timepoint, pixelSizeMillimeter);
+                logger.debug("Mipmap level chosen for source ["+src.getSpimSource().getName()+"] : "+mipmapLevel);
+                mapMipmap.put(resampledSourceList.get(sourceList.indexOf(src)), mipmapLevel);
+            });
+
+            ImagePlus resultImage = ImagePlusHelper.wrap(
+                    resampledSourceList,
+                    mapMipmap,
+                    timepoint,
+                    1,
+                    1);
+
+            resultImage.setTitle(slice.getName()+"-["+px+":"+(px+sx)+" | "+py+":"+(py+sy)+"]");
+            ImagePlusHelper.storeExtendedCalibrationToImagePlus(resultImage, at3D.inverse(), "mm", timepoint);
+
+
+            return resultImage;
+
+        } else {
+            SourceAndConverter source = resampledSourceList.get(0);
+            int mipmapLevel = SourceAndConverterHelper.bestLevel(sourceList.get(0), timepoint, pixelSizeMillimeter);
+            ImagePlus singleChannel = ImagePlusHelper.wrap(
+                    source,
+                    mipmapLevel,
+                    timepoint,
+                    1,
+                    1);
+            singleChannel.setTitle(source.getSpimSource().getName());
+            ImagePlusHelper.storeExtendedCalibrationToImagePlus(singleChannel, at3D.inverse(), "mm", timepoint);
+
+            return singleChannel;
+        }
+
+    }
+
+    public static ImagePlus exportAtlas(MultiSlicePositioner mp, SliceSources slice,
+                                   SourcesProcessor preprocess,
+                                   double px, double py, double sx, double sy,
+                                   double pixelSizeMillimeter, int timepoint,
+                                   boolean interpolate) {
+
+        List<SourceAndConverter> sourceList = Arrays.asList(preprocess.apply(mp.getReslicedAtlas().nonExtendedSlicedSources));//slice.getRegisteredSources()));
+
+        AffineTransform3D at3D = new AffineTransform3D();
+
+        SourceAndConverter model = createModelSource(slice, px, py, sx, sy, pixelSizeMillimeter, at3D);
+
+        List<SourceAndConverter> resampledSourceList = sourceList
+                .stream()
+                .map(sac -> new SourceResampler(sac,model,true, false, interpolate).get())
+                .collect(Collectors.toList());
+
+        if ((sourceList.size()>1)) {
+
+            Map<SourceAndConverter, Integer> mapMipmap = new HashMap<>();
+            sourceList.forEach(src -> {
+                int mipmapLevel = SourceAndConverterHelper.bestLevel(src, timepoint, pixelSizeMillimeter);
+                if (!interpolate) mipmapLevel = 0; // For labels
+                logger.debug("Mipmap level chosen for source ["+src.getSpimSource().getName()+"] : "+mipmapLevel);
+                mapMipmap.put(resampledSourceList.get(sourceList.indexOf(src)), mipmapLevel);
+            });
+
+            ImagePlus resultImage = ImagePlusHelper.wrap(
+                    resampledSourceList,
+                    mapMipmap,
+                    timepoint,
+                    1,
+                    1);
+
+            resultImage.setTitle(slice.getName()+"-["+px+":"+(px+sx)+" | "+py+":"+(py+sy)+"]");
+            ImagePlusHelper.storeExtendedCalibrationToImagePlus(resultImage, at3D.inverse(), "mm", timepoint);
 
             return resultImage;
 
