@@ -1,7 +1,7 @@
 [
   "BDV - Set Number Of Timepoints",
   "BDV - Show Sources (new Bdv window)",
-  "Show Sources (split) (IJ1)",
+  "Export Sources To ImageJ1",
   "BDV - Screenshot",
   "PopupLine",
   "Manual Sources Transformation",
