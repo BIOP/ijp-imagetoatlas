@@ -1,26 +1,34 @@
 ## [EXPERIMENTAL] ABBA - Allen Brain BIOP Aligner
 
-A Fiji plugin for 2d slices to 3d atlas registration and QuPath associated tools.
+A [Fiji](https://fiji.sc/) plugin for the registration of thin mouse brain slices to the [3D mouse Allen Brain atlas](http://atlas.brain-map.org/atlas?atlas=602630314) + [QuPath](https://qupath.github.io) associated tools.
 
 ---
 
-:warning: ABBA is still in experimental phase. It is provided as is. **Expect bugs** and **do not expect backward compatibility** when a more stable version will be released (all the code is versioned and stored in a worst case scenario, but do not count on it).
+:warning: ABBA is still in experimental phase. **Expect bugs** and **do not expect backward compatibility** when a more stable version will be released (all the code is versioned and stored in a worst case scenario, but do not count on it).
 
 ---
 
-Allen Brain BIOP Aligner or ABBA for short, is a [Fiji](https://fiji.sc/) plugin which allows to register adult mouse brain serial sections to the [adult mouse brain atlas by the Allen Institute](http://atlas.brain-map.org/atlas?atlas=602630314).
+Allen Brain BIOP Aligner or ABBA for short, is a Fiji plugin which allows to register adult mouse brain serial sections to the [adult mouse brain atlas by the Allen Institute](http://atlas.brain-map.org/atlas?atlas=602630314).
 
-It has been developed by the [BioImaging & Optics Platform](https://www.epfl.ch/research/facilities/ptbiop/) at EPFL. This page contains the documentation of ABBA (installation and usage). If you require additional help, please post your question on the [image.sc](https://forum.image.sc) forum  and tag your question / issue with `#fiji` and `#abba`. If you are already a user of ABBA, you can also click on `Help > Ask for help in the forum` directly from the plugin.
+It uses [BigDataViewer](https://imagej.net/plugins/bdv/index) and [BigWarp](https://imagej.net/plugins/bigwarp) for the display and on-the-fly computation of spline-transformed multiresolution images (typical output of Whole Slide Imaging).
 
-To test this plugin, we provide a dataset that consists of several sections of a single animal, with two fluorescent channels : DAPI and a nearly autofluorescent one. This dataset has been kindly provided by Bianca A. Silva, from [Johannes Gräff lab](https://www.epfl.ch/labs/graefflab/) at EPFL.
+It has been developed by the [BioImaging & Optics Platform](https://www.epfl.ch/research/facilities/ptbiop/) at EPFL. This page contains the documentation of ABBA (installation and usage). If you require additional help, please post your question on the [image.sc](https://forum.image.sc) forum  and tag your question / issue with `abba` and `fiji` or `qupath`. If you have already installed ABBA, you can also click on `Help > Ask for help in the forum` from the plugin.
 
-* [Sample sections  (Zenodo repository, 21 Gb) ](https://doi.org/10.5281/zenodo.4715656)
+If you want to test this plugin, you can download one of the following test dataset: 
+
+#### Dataset 1, provided by Lucie Dixsaut, [Johannes Gräff lab](https://www.epfl.ch/labs/graefflab/), EPFL
+One animal, 85 serial sections, 3 fluorescent channels (DAPI - nuclei, FITC - autofluorescence, mCherry - labelled sparse cells)
+* [Direct download (8Gb zip file)]() - multiresolution Olympus VSI files  
+* [Zenodo repository]() 
+
+#### Dataset 2, provided by Bianca A. Silva, [Johannes Gräff lab](https://www.epfl.ch/labs/graefflab/), EPFL
+One animal, 87 serial sections, 2 fluorescent channels (nuclei and autofluorescence)
+* [Sample sections  (Zenodo repository, 21 Gb) ](https://doi.org/10.5281/zenodo.4715656) - each section has to be downloaded individually (multiresolution ome.tiff file)
 * [Downsampled sections  (GDrive, 0.4 Gb) ](https://drive.google.com/file/d/1OVb860hy-UZSSXa_u9drWiPKEunWT_a7/view?usp=sharing)
-
 
 ## [Installation](installation.md)
 ## [Using ABBA](usage.md)
-## [Developer documentation (TODO)]()
+## [Developer documentation (In progress...)]()
 
 <!---
 ### Markdown

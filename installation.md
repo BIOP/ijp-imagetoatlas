@@ -2,7 +2,7 @@
 
 The installation consists of four steps detailed in the paragraphs below:
 
-1. Install QuPath and BIOP QuPath extensions (the use of QuPath is highly recommended),
+1. Install QuPath and BIOP QuPath extensions,
 2. Enable Fiji's ABBA update site,
 3. Install the additional programs required for automated registration (Elastix / Transformix),
 4. Setup ABBA in Fiji:
@@ -14,7 +14,7 @@ The installation consists of four steps detailed in the paragraphs below:
 Install the [latest QuPath version](https://qupath.github.io/).
 
 Install the QuPath biop extensions and its dependencies:
-* Download [jars](https://drive.google.com/file/d/1NzNu4U0c_9zwcp-gV2x3HD5lg5MJib6z/view?usp=sharing) files 
+* Download [jars](TODO) files 
 * Extract the files and put its content into a folder named `extensions` within another folder (for instance `C>QuPath Common Data>extensions`
 * In QuPath, go to `Edit>Preferences`, specify the location of the `QuPath Common Data` folder:
 
@@ -35,18 +35,18 @@ In Fiji:
 
 ### 3. Install of Elastix / Transformix
 
-For automated registration, ABBA uses the [elastix](https://github.com/SuperElastix/elastix) software, which is independent of Fiji. Elastix (and its companion transformix) should be made available to ABBA for automated registration. The best way is thus to install elastix and transformix on your local machine, as explained in 2a.
+For automated registration, ABBA uses the [elastix](https://github.com/SuperElastix/elastix) software, which is independent of Fiji. The location of Elastix (and of its companion transformix) should be specified in Fiji in order for ABBA to use it. The best way is thus to install elastix and transformix on your local machine, as [explained below](installation.md#3a-local-installation-of-elastix).
 
-If you do not manage to install elastix and transformix, don't give up yet! We provide a free public server [snappy.epfl.ch](https://snappy.epfl.ch/) which can perform automated registrations remotely. However, if your registration tests are successful, it is strongly advised to install elastix on your local computer in order to get stable performance for your registrations.
+If you do not manage to install elastix and transformix, don't give up yet! We provide a free public server [snappy.epfl.ch](https://snappy.epfl.ch/) which can perform automated registrations remotely. However, if your registration tests are successful, it is strongly advised to install elastix on your local computer.
 
 #### 3a. Local installation of elastix
 
-* Download the [latest release of elastix for your OS](https://github.com/SuperElastix/elastix/releases/tag/5.0.1). This documentation has been tested for elastix 5.0.1.
+* Download the [latest release of elastix for your OS](https://github.com/SuperElastix/elastix/releases/tag/5.0.1). This documentation has been tested for elastix 5.0.1, a later version should also work.
 * Unzip it somewhere convenient ( `C` drive on windows; `Applications` for Mac )
 
 ##### Windows
 
-For windows users, you also need to install [Visual C++ redistributable](https://support.microsoft.com/en-us/topic/the-latest-supported-visual-c-downloads-2647da03-1eea-4433-9aff-95f26a218cc0), (`vc_redist.x64.exe` for a 64 bits system).
+For windows users, you also need to install [Visual C++ redistributable](https://support.microsoft.com/en-us/topic/the-latest-supported-visual-c-downloads-2647da03-1eea-4433-9aff-95f26a218cc0), (choose `vc_redist.x64.exe` for a 64-bit system).
 
 ##### Mac
 
@@ -77,24 +77,24 @@ Once elastix is installed, you can run [the following script](https://gist.githu
 
 It's possible to install elastix on a server, that can then be used as a central server. For the moment a public freely accessible registration server is available at the address [`https://snappy.epfl.ch`](https://snappy.epfl.ch) and can be used for automated registration.
 
-The procedure to install your own registration server will be detailed in the readme of the registration server github repo : [https://github.com/NicoKiaru/elastix_registration_server](https://github.com/NicoKiaru/elastix_registration_server) ( TODO)
+The procedure to install your own registration server will be detailed in the readme of the registration server github repo : [https://github.com/NicoKiaru/elastix_registration_server](https://github.com/NicoKiaru/elastix_registration_server) (TODO)
 
 ### 4. Setup ABBA in Fiji
 
-Execute Fiji, type `ABBA` in the command search bar or navigate and click `Plugins > BIOP > Atlas > ABBA`.
+Start Fiji, type `ABBA` in the command search bar or navigate and click `Plugins > BIOP > Atlas > ABBA`.
 
 You will get the following window on startup:
 
 ![ABBA settings startup window](./assets/img/fiji_abba_startup_settings.png)
 
-You can let the first two fields empty. The Allen Brain dataset will then automatically be downloaded and monitored by a progress bar:
+You can let the first two fields empty. The Allen Brain dataset will then automatically be downloaded (approx 3Gb.):
 
 ![Allen atlas download progress bar](./assets/img/fiji_atlas_download_progress_bar.png)
 
 The allen brain atlas and associated files will be cached in your user folder under the directory `\cached_atlas`. These data are directly  downloaded from a [Zenodo repository](https://zenodo.org/record/4173229#.YASj5RYo_BU). If you check `Store these settings for all users`, the data location for elastix and the atlas will be stored in a file `abbasettings.txt` stored in your hard drive in the folder `Fiji.app > plugins`. You can modify or delete this file if necessary. This is useful to avoid downloading multiple times the atlas in a multi user situation.
 If the initial atlas download failed, because you had no access to internet or for any other reason, you can restart the command and let empty fields to trigger again the download from Zenodo.
 
-The last two fields needs to be completed with the location of the executable file for elastix and transformix, if you manage to successfully install elastix and transformix on your computer. If you do not have a working local install, just let these fields empty.
+The last two field needs to be completed with the location of the executable file for elastix and transformix, if you managed to successfully install elastix and transformix on your computer. If you do not have a working local install, just let these fields empty.
 * On windows:
   * `elastix.exe`
   * `transformix.exe`
@@ -102,4 +102,4 @@ The last two fields needs to be completed with the location of the executable fi
   * `elastix` or `elastix.sh`
   * `transformix` or `transformix.sh`
 
-On following startups, you normally won't need to change anything in this window.
+On following startups, you normally won't need to change anything in this window. The cached atlas data will be detected, preventing a new download.

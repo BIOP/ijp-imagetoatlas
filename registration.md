@@ -1,8 +1,15 @@
 # Registration of mouse brain slices with ABBA
 
-Once your dataset is opened in ABBA. You will be able to position slices first along the slicing axis (position multiple slices along "z"), then performing 2d adjustements for each slice (tilt and roll atlas slicing correction, 2d affine and spline registrations).
+Once your dataset is opened in ABBA. You will be able to position slices first along the slicing axis (position multiple slices along "z"), then to performing 2d adjustement for each slice (tilt and roll atlas slicing correction, 2d affine and spline in-plane registrations).
 
 When you start ABBA, you will be in the `Positioning mode`, where the allen brain atlas is displayed with slices regularly spaced on top of the slices present on your dataset. 
+
+----
+
+:warning: trackpad
+aficionado, the interface is much easier to use with a mouse
+
+----
 
 ## Slices selection
 
@@ -18,7 +25,7 @@ There are two ways of selecting slices:
 
 ---
 
-:warning:  you need to hold the modifier keys BEFORE drawing the rectangle in order to take their effect into account. This is in contrast to a lot of other software and a limitation of the UI of BigDataViewer
+:warning:  you need to hold the modifier keys BEFORE drawing the rectangle in order to take their effect into account. This is in contrast to a lot of other software.
 
 ---
 
@@ -53,9 +60,9 @@ If needed, the display of each slice can be customised by modifying the correspo
 This procedure starts first by a manual step, which has two goals:
 
 * Estimate the position of each slice along the atlas
-* Correct the atlas angles of slicing
+* Adjust the atlas slicing angles
 
-In order to position each slice approximately along the axis, ABBA tries to provide a convenient interface to manipulate series of slices.
+In order to position each slice approximately along the slicing axis, ABBA tries to provide a convenient interface to manipulate series of slices.
 
 ### First coarse positioning
 
@@ -101,19 +108,20 @@ Generally, to align the position of slices along the atlas, a convenient workflo
 * display the atlas sliced with the largest slices thickness ( one slice every 500 microns ):
 * approximately shift slices along the atlas
 * match precisely a slice of your choice (usually one with easily recognizable features) with the atlas by zooming in
-* set this slice as `key slice`. As long as you don't drag this slice, each slice which is a key slice has its z position locked in the atlas
+* set this slice as `key slice` (select this slice only, right click and select `Set as key slice` in the popup menu). As long as you don't drag this slice, each key slice has its z position locked in the atlas: `Distribute Spacing` won't affect the position of key slices.
 * set a few others slices precisely and set them as key slices
 * adjust the angles of the atlas slicing and check all slices
+* for set a regular spacing between key slices, click `Distribute spacing` 
 
 ![Coarsening atlas slicing](assets/gif/fiji_atlas_coarse_slicing.gif)
 
-Automatically, the position of the slices within the dataset will be adjusted to the new atlas slicing. It's important to understand that the slicing being displayed does not affect the registration in any way. Internally, all slices all positioned with 10 microns precision, corresponding to the atlas highest resolution.
+Automatically, the position of the slices within the dataset will be adjusted to the new atlas slicing. It's important to understand that the slicing spacing currently displayed does not affect the registration in any way. Internally, all slices all positioned with 10 microns precision, corresponding to the atlas highest resolution.
 
 This coarse display allows, by dragging slices, to adjust approximately all slices along the atlas.
 
 Then, you can zoom in, drag slices until you find a corresponding slice between your dataset and the atlas.
 
-It's possible, once the correspondance is found, to select the slice of interest and set it as a Key Slice (right-click menu), as shown below:
+It's possible, once a matching atlas slice is found, to select the slice of interest and set it as a Key Slice (right-click menu), as shown below:
 
 
 ![Finding correspondance and key slice](assets/gif/fiji_atlas_drag_then_key.gif)
@@ -139,7 +147,7 @@ In this mode, a single slice is displayed at a time overlaying the atlas. The sl
 
 You can navigate along the slices by pressing arrow keys or pushing `Previous` and `Next` in the `Display & Navigation` card.
 
-If you notice a problem in the review mode, you can switch back any time to the navigation mode in order to correct the slice position / orientation.
+If you notice a problem in the review mode, you can switch back any time to the `positioning mode` in order to correct the slice position or the atlas slicing angle.
 
 --- 
 
@@ -151,11 +159,11 @@ If you notice a problem in the review mode, you can switch back any time to the 
 
 ##### Correcting atlas slicing orientation
 
-A card named `Atlas Slicing` contains two sliders which allow to fine tune the atlas slicing orientation:
+A card named `Atlas Slicing` contains two sliders which allow to tune the atlas slicing angles:
 
 ![Atlas slicing adjustement](assets/gif/fiji_adjust_atlas_angle.gif)
 
-You can use slices with recognizable features to orient the atlas slicing. The atlas slicing adjustment will the same for all sections. It is possible to tilt the atlas, but not to "bend" it.
+You can use slices with recognizable features to orient the atlas slicing. The atlas slicing angles will identical for all sections. It is possible to tilt the atlas, but not to "bend" it.
 
 ## Slices registration 
 
@@ -166,7 +174,7 @@ The metric used to measure the 'distance' between fixed and moving image is the 
 
 ---
 
-:warning: If your image file format does not contain multiple resolution levels (LOD, pyramids, multiresolution), ABBA will not downsample cleanly the image and this could result in bad registration results.
+:warning: If your image file format does not contain multiple resolution levels (level of details (LOD), pyramids, multiresolution), ABBA will not downsample cleanly the image and this could result in bad registration results. You can click `show registration results as ImagePlus` in order to visualize how the slice and the atlas are downsampled for registration.
 
 ---
 
@@ -177,6 +185,15 @@ When a registration 'job' is started for a slice, an indicator of the registrati
 ![Slice registration example](assets/gif/fiji_register_affine_spline.gif)
 
 You can start the registrations for all slices in parallel. Depending on your computer, between 4 and 32 registrations will be started in parallel (check the `Resources monitor` card to see how your CPU is busy). You can continue browsing ABBA during the registrations, which are processed asynchronously. As soon as any registration is done, its result is displayed in ABBA.
+
+Below: registration of 80 sections, with, for each slice the following registration sequence:
+1. auto affine registration DAPI vs Nissl
+2. auto spline registration (16 points DAPI vs NISSL)
+3. auto spline registration (16 points autofluorescence vs autofluorescence)
+
+![Multi slice registration sequence](assets/gif/fiji_progression_registration.gif)
+
+(real time ~ 10 min)
 
 It is possible (and advised) to perform several successive registration. You will usually start by an affine registration followed by one or several spline registrations. For 'difficult slices' where the automated registration result are bad, you can either start by a manual registration to facilitate a following automated registration, or, alternatively, you can directly edit the result of a spline transform, in order to improve it and even to add landmarks in regions in which you are more interested. 
 
@@ -192,14 +209,14 @@ It is possible (and advised) to perform several successive registration. You wil
 You can select the slices you want to register and start an affine registration by clicking, in the top menu bar: 
 `Align > Elastix Registration (Affine)`, if you managed to install Elastix, or `Align > Elastix Registration (Affine) on Server`, if elastix is not locally installed.
 
-You will need to select the channels of both the atlas and the sections for this affine registration. Multichannel registration is not supported.
+You will need to select a single channel for both the atlas and the sections for this affine registration. Multichannel registration is not supported for automated registrations.
 
 ![Affine elastix registration](assets/img/fiji_elastix_affine_registration.png)
 
 In a lot of cases, an affine registration on the DAPI channel of your sections vs the atlas Nissl atlas channel (0) is a good choice for a first registration.
 
 A few extra options are available:
-* `Show registration results as ImagePlus`, if checked, will display the raw data used by elastix registration
+* `Show registration results as ImagePlus`, if checked, will display the raw data used for elastix registration
 * `Background offset value` can be left at zero in most cases. If your camera has a significant zero offset value in comparison to the channel intensities, this offset can be specified here for a better registration.
 
 ### Spline registration (Automated)
@@ -210,7 +227,7 @@ You can select the slices you want to register and start a spline registration b
 ![Spline registration parameters](assets/img/fiji_elastix_spline_registration.png)
 
 In spline registration, a grid of size "`Number of control points along X`" is used to perform a spline registration between selected slice and the atlas. Again only a single channel registration is supported. 
-It is advised to use a value for control point between 10 (100 max total number of landmarks) to 20 (400 max total number of landmarks). 
+It is advised to use a value for control point between 5 (25 max total number of landmarks) to 20 (400 max total number of landmarks). 
 
 ### BigWarp registration (Manual)
 
@@ -235,7 +252,11 @@ BigWarp commands summary:
 * `f` = display fused transform and fixed image (toggle)
 * `t` = transform the image or not (toggle)
 
+You can check [BigWarp documentation](https://imagej.net/plugins/bigwarp) for more information about its interface.
+
 After editing a registration, you can export it again (to QuPath for instance), and reload it.
+
+![Bigwarp transform](assets/gif/fiji_bigwarp_edit.gif)
 
 ### Canceling / removing a registration
 
