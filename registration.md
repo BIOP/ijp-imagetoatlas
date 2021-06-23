@@ -264,7 +264,7 @@ If you are not happy with the result of a registration, you can select the slice
 * click, top menu bar : `Align > Remove Last registration`
 * or right- click in ABBA's viewer : `Remove Last registration`
 
-This removal can be undone, which is also a way to investigate the quality of the last registration.
+This removal can be cancelled, which is also a way to investigate the quality of the last registration.
 
 ### Development - adding a registration method of your own
 
@@ -278,7 +278,7 @@ A typical registration may been obtained using the following successive steps, p
 * spline registration on an Autofluorescent channel vs Atlas Autofluorescent (Ch 1) (15 control points)
 * spline registration on DAPI vs Atlas Nissl (Ch 0) (15 control points)
 
-This takes about 10 minutes for 80 slices on a laptop.
+This takes about 10 minutes for 50 slices on a laptop.
 
 ## Saving / opening registrations results
 
@@ -316,8 +316,16 @@ You can now draw a rectangle in the region of your choice, either in review mode
 
 ![Export to ImageJ stack options](assets/img/fiji_export_imagej_stack_options.png)
 
-You can select the channels you want to export be separating them with commas, or type `*` to export all channels. Usually, 20 microns per pixel gives a fast and broad overview, while 2 microns per pixel can be pretty slow. It is not advised to export gigantic images this way. Processing big images will be faster by working on untransformed images in QuPath, but for a quick overview of the registration or details of the registration over several slices, this export method can be convenient.
+You can select the channels you want to export be separating them with commas, or type `*` to export all channels. Usually, 20 microns per pixel gives a fast and broad overview. It is not advised to export gigantic images this way. Processing big images will be faster by working on untransformed images in QuPath.
 
 Also, do not forget to adjust B&C once the export is done!
+
+## Exporting slices region as ImageJ stack
+
+You can export the atlas the same way as the slices above. Click in the top menu bar `Export > Export Atlas as ImageJ stack`.
+
+![Export Atlas to ImageJ stack options](assets/img/fiji_export_atlas.png)
+
+This exported stack can be combined with the exported slices in a multi-channel stack, if the pixel size is the same.
 
 [**Back to step by step tutorial**](usage.md)

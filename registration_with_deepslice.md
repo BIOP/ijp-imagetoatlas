@@ -9,9 +9,9 @@ It is working primarily with [QuickNII](https://www.nitrc.org/projects/quicknii)
 
 This procedure gives very fast results and automates many steps of the alignement:
 
-* atlas slicing angle correction
+* atlas cutting angle estimation
 * initial positioning of slices along the axis
-* in plane affine transformation
+* in-plane affine registration
 
 ---
 
@@ -30,11 +30,11 @@ You get the following window:
 
 * `Slices channels, 0-based` - used to select the channels you want to export to DeepSlice. You can for instance export a nuclear channel only (DAPI).
 * `Section Name Prefix` - prefix of the image name when exported
-* `QuickNII dataset folder` - choose an empty folder: exported sections will be put in this empty folder. At the end of the procedure, you will need to put back in this folder the resulting xml file given by DeepSlice web interface
+* `QuickNII dataset folder` - choose an empty folder: exported sections will be put in this empty folder. At the end of the procedure, you will need to put back in this folder the resulting xml file given by DeepSlice web interface (it has to be named **exactly** `results.xml`)
 * `Allow change of atlas slicing angle` - When checked, ABBA will adapt the atlas slicing angle based on the median slicing angles given by DeepSlice. If you don't want to modify the atlas slicing angle, you can uncheck this box.
 * `Allow change of position along the slicing axis` - you probably want to let this box checked. If not, the slices will stay at their location along the axis.
 * `Maintain the rank of the slices` - if you allow to change the position of slices along the axis (checkbox above), it may occur that deepslice swap some slices position (Slices 1-2-3-4-5 might be reordered  1-2-4-3-5 for instance). If you are sure of your slice order, you may want to avoid such change and let this box checked.
-* `Affine transform in plane` - allow to transform the slices in plane. There may be rare cases where you want to avoid it, but I don't know which ones.
+* `Affine transform in plane` - allow to transform the slices in plane. There may be rare cases where you want to avoid it, but I don't know which ones, so let it checked.
 
 After pressing ok, you get this window:
 
@@ -50,9 +50,9 @@ When the registration is done, you can download the result xml file:
 
 ![DeepSlice result file](assets/img/deepslice_result.png)
 
-Put back the xml file in the result folder (and name it `result.xml` if that's not the case).
+Put back the xml file in the result folder (and name it `results.xml` if that's not the case).
 
-Then click ok in the small DeepSlice result window. You will see, if you selected the option, a window stating the slicing angle has been adjusted. After pressing ok again, the slices will be moved and transformed to their new position.
+Then click ok in the small DeepSlice result window. You will see, if you selected the option, a window stating that slicing angles have been adjusted. After pressing ok again, the slices will be moved and transformed to their new position.
 
 **Before**
 
@@ -62,6 +62,6 @@ Then click ok in the small DeepSlice result window. You will see, if you selecte
 
 ![After deepslice](assets/img/fiji_after_deepslice.png)
 
-You can adjust then, review, smoothen the positions and perform non linear registrations with the rest of ABBA functionalities.
+You can adjust then, review, regularly space the slices position and perform non linear registrations with the rest of ABBA functionalities.
 
 [**Back to step by step tutorial**](usage.md)
