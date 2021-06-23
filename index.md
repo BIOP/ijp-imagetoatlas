@@ -18,8 +18,8 @@ If you want to test this plugin, you can download one of the following test data
 
 #### Dataset 1, provided by Lucie Dixsaut, [Johannes Gräff lab](https://www.epfl.ch/labs/graefflab/), EPFL
 One animal, 85 serial sections, 3 fluorescent channels (DAPI - nuclei, FITC - autofluorescence, mCherry - labelled sparse cells)
-* [Direct download (8Gb zip file)]() - multiresolution Olympus VSI files  
-* [Zenodo repository]() 
+* [Direct download (8Gb zip file)](https://zenodo.org/record/5018719/files/MouseBrainCoronalSerialSections.zip?download=1) - multiresolution Olympus VSI files  
+* [Zenodo repository](https://zenodo.org/record/5018719#.YNNYJEzRYuU) 
 
 #### Dataset 2, provided by Bianca A. Silva, [Johannes Gräff lab](https://www.epfl.ch/labs/graefflab/), EPFL
 One animal, 87 serial sections, 2 fluorescent channels (nuclei and autofluorescence)
