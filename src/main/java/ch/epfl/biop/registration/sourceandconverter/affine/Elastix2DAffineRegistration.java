@@ -133,14 +133,26 @@ public class Elastix2DAffineRegistration extends AffineTransformSourceAndConvert
              }
              if (success) {
                 at3d = (AffineTransform3D) module.getOutput("at3D");
+             } else {
+                 if (module.getOutputs().containsKey("error")) {
+                     errorMessage = (String) module.getOutput("error");
+                 }
              }
 
              isDone = true;
              return success;
         } catch (Exception e) {
+            errorMessage = e.getMessage();
             e.printStackTrace();
             return false;
         }
+    }
+
+    String errorMessage = "";
+
+    @Override
+    public String getExceptionMessage() {
+        return errorMessage;
     }
 
     @Override

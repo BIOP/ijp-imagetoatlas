@@ -82,6 +82,15 @@ public interface Registration<T> {
     boolean register();
 
     /**
+     * Can be called after register() return false in order to get
+     * a more meaningful explanation
+     * @return an error message for a failed registration
+     */
+    default String getExceptionMessage() {
+        return "Unspecified error";
+    }
+
+    /**
      * Blocking function which is called when the user wants
      * to manually edit the result of the registration
      * @return true is the transform is been edited successfully. If not,

@@ -55,7 +55,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-import static ch.epfl.biop.atlas.aligner.CancelableAction.errlog;
+//import static ch.epfl.biop.atlas.aligner.CancelableAction.errlog;
 
 /**
  * Class which contains the current registered SourceAndConverter array
@@ -199,11 +199,11 @@ public class SliceSources {
 
     public void setSliceThickness(double zBeginInMm, double zEndInMm) {
         if ((this.slicingAxisPosition<zBeginInMm)||(this.slicingAxisPosition>zEndInMm)) {
-            errlog.accept("Wrong slice position. Cannot set slice bounds");
+            mp.errlog.accept("Wrong slice position. Cannot set slice bounds");
             return;
         }
         if (zBeginInMm>zEndInMm) {
-            errlog.accept("z(End) inferior to z(Begin). Cannot set slice bounds");
+            mp.errlog.accept("z(End) inferior to z(Begin). Cannot set slice bounds");
             return;
         }
         setSliceThickness(zEndInMm-zBeginInMm);
@@ -241,7 +241,7 @@ public class SliceSources {
         double currentZSliceOccupancy = Math.abs(pt1.getDoublePosition(2)-pt2.getDoublePosition(2));
 
         if (currentZSliceOccupancy == 0) {
-            errlog.accept("Error : slice thickness is 0! Cannot set slice thickness");
+            mp.errlog.accept("Error : slice thickness is 0! Cannot set slice thickness");
             return;
         }
 
@@ -361,7 +361,7 @@ public class SliceSources {
                 lastTask.get();
             } catch (Exception e) {
                 e.printStackTrace();
-                errlog.accept("Tasks were cancelled for slice "+this.toString());
+                mp.errlog.accept("Tasks were cancelled for slice "+this.toString());
             }
         }
     }
@@ -409,26 +409,18 @@ public class SliceSources {
         }
 
         registered_sacs = reg.getTransformedImageMovingToFixed(registered_sacs);
-
         registered_sacs_sequence.add(new RegistrationAndSources(reg, registered_sacs));
-
         registrations.add(reg);
-
         mp.mso.updateInfoPanel(this);
-
         guiState.sourcesChanged();
 
     }
 
-    // public : enqueueRegistration
     private boolean performRegistration(Registration<SourceAndConverter<?>[]> reg,
-                                       //Function<SourceAndConverter[], SourceAndConverter[]>
                                        SourcesProcessor
                                                preprocessFixed,
-                                       //Function<SourceAndConverter[], SourceAndConverter[]>
                                        SourcesProcessor
                                                 preprocessMoving) {
-
         reg.setFixedImage(preprocessFixed.apply(mp.reslicedAtlas.nonExtendedSlicedSources));
         reg.setMovingImage(preprocessMoving.apply(registered_sacs));
 
@@ -441,7 +433,7 @@ public class SliceSources {
 
         boolean out = reg.register();
         if (!out) {
-            errlog.accept("Issue during registration of class "+reg.getClass().getSimpleName());
+            mp.errlog.accept(reg.getClass().getSimpleName()+": "+reg.getExceptionMessage());
         } else {
             appendRegistration(reg);
         }
@@ -618,14 +610,6 @@ public class SliceSources {
         sac = resampler.apply(sac);
         sac = SourceTransformHelper.createNewTransformedSourceAndConverter(translateZ, new SourceAndConverterAndTimeRange(sac, 0));
 
-        /*ExportToImagePlusCommand export = new ExportToImagePlusCommand();
-        export.level=0;
-        export.timepointBegin=0;
-        export.timepointEnd=0;
-        export.sacs = new SourceAndConverter[1];
-        export.sacs[0] = sac;
-        export.run();*/
-
         Map<SourceAndConverter, Integer> mapSacToMml = new HashMap<>();
         mapSacToMml.put(sac, 0);
 
@@ -634,20 +618,6 @@ public class SliceSources {
         impLabelImage =
                 ImagePlusHelper.wrap(sourceList.stream().map(s -> (SourceAndConverter) s).collect(Collectors.toList()), mapSacToMml,
                         0, 1, 1);
-
-        /*AffineTransform3D at3D = new AffineTransform3D();
-        sacs[0].getSpimSource().getSourceTransform(timepointbegin, level, at3D);
-        String unit = "px";
-        if (sacs[0].getSpimSource().getVoxelDimensions() != null) {
-            unit = sacs[0].getSpimSource().getVoxelDimensions().unit();
-            if (unit==null) {
-                unit = "px";
-            }
-        }
-        imp_out.setTitle(sourceList.get(0).getSpimSource().getName());
-        ImagePlusHelper.storeExtendedCalibrationToImagePlus(imp_out,at3D,unit, timepointbegin);*/
-
-        //impLabelImage = export.imp_out;
 
         ConstructROIsFromImgLabel labelToROIs = new ConstructROIsFromImgLabel();
         labelToROIs.atlas = mp.biopAtlas;
@@ -664,17 +634,6 @@ public class SliceSources {
 
         sac = resampler.apply(sac);
         sac = SourceTransformHelper.createNewTransformedSourceAndConverter(translateZ, new SourceAndConverterAndTimeRange(sac, 0));
-
-        /*export = new ExportToImagePlusCommand();
-
-        export.level=0;
-        export.timepointBegin=0;
-        export.timepointEnd=0;
-        export.sacs = new SourceAndConverter[1];
-        export.sacs[0] = sac;
-        export.run();
-
-        ImagePlus leftRightImage = export.imp_out;*/
 
         mapSacToMml = new HashMap<>();
         mapSacToMml.put(sac, 0);
@@ -775,7 +734,7 @@ public class SliceSources {
                     // Save in user specified folder
                     Files.copy(Paths.get(ijroisfile.f.getAbsolutePath()),Paths.get(f.getAbsolutePath()));
                 } else {
-                    errlog.accept("ROI File already exists!");
+                    mp.errlog.accept("ROI File already exists!");
                 }
             } else {
                 // Save in user specified folder
@@ -846,7 +805,7 @@ public class SliceSources {
                     Files.copy(Paths.get(ijroisfile.f.getAbsolutePath()),Paths.get(f.getAbsolutePath()));
                     writeOntotogyIfNotPresent(mp, projectFolderPath);
                 } else {
-                    errlog.accept("Error : QuPath ROI file already exists");
+                    mp.errlog.accept("Error : QuPath ROI file already exists");
                 }
             } else {
                 Files.copy(Paths.get(ijroisfile.f.getAbsolutePath()),Paths.get(f.getAbsolutePath()));
@@ -876,7 +835,7 @@ public class SliceSources {
                         writer.flush();
                         writer.close();
                     } else {
-                        errlog.accept("Error : Transformation file already exists");
+                        mp.errlog.accept("Error : Transformation file already exists");
                     }
                 } else {
                     FileWriter writer = new FileWriter(ftransform.getAbsolutePath());

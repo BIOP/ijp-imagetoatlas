@@ -83,7 +83,7 @@ public class RegisterSlice extends CancelableAction {
                     g.setColor(new Color(0, 255, 0, 200));
                     break;
                 case "(locked)":
-                    g.setColor(new Color(255, 0, 0, 200));
+                    g.setColor(new Color(205, 1, 106, 200));
                     break;
                 case "(pending)":
                     g.setColor(new Color(255, 255, 0, 200));
@@ -97,7 +97,7 @@ public class RegisterSlice extends CancelableAction {
             g.setColor(new Color(255, 255, 255, 200));
             g.drawString("R", (int) px - 4, (int) py + 5);
         } else {
-            g.setColor(new Color(255, 0, 0, 200));
+            g.setColor(new Color(205, 1, 106, 199));
             g.drawString("X", (int) px - 4, (int) py + 5);
         }
     }

@@ -143,14 +143,27 @@ public class Elastix2DSplineRegistration extends RealTransformSourceAndConverter
             if (success) {
                 rt = (RealTransform) module.getOutput("rt");
                 rt = pruneLandMarksOutsideAtlas(rt);
+            } else {
+                if (module.getOutputs().containsKey("error")) {
+                    errorMessage = (String) module.getOutput("error");
+                }
             }
+
 
             isDone = true;
             return success;
         } catch (Exception e) {
+            errorMessage = e.getMessage();
             e.printStackTrace();
             return false;
         }
+    }
+
+    String errorMessage = "";
+
+    @Override
+    public String getExceptionMessage() {
+        return errorMessage;
     }
 
     /**
