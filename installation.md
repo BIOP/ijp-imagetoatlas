@@ -14,7 +14,7 @@ The installation consists of four steps detailed in the paragraphs below:
 Install the [latest QuPath version](https://qupath.github.io/).
 
 Install the QuPath biop extensions and its dependencies:
-* Download [jars](TODO) files 
+* Download the latest released [jars](https://github.com/BIOP/qupath-biop-extensions/releases) files 
 * Extract the files and put its content into a folder named `extensions` within another folder (for instance `C>QuPath Common Data>extensions`
 * In QuPath, go to `Edit>Preferences`, specify the location of the `QuPath Common Data` folder:
 

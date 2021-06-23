@@ -1,6 +1,6 @@
 # Using DeepSlice in ABBA
 
-DeepSlice is a deep learning based tool for automatic alignment of whole mouse brain histological sections. It is developed in the McMullan lab group by [Harry Carey](harry.carey@hdr.mq.edu.au) at [Macquarie University](https://www.mq.edu.au/), Sydney, Australia.
+[DeepSlice](https://researchers.mq.edu.au/en/publications/deepslice-a-deep-neural-network-for-fully-automatic-alignment-of--2) is a deep learning based tool for automatic alignment of whole mouse brain histological sections. It is developed in the McMullan lab group by [Harry Carey](harry.carey@hdr.mq.edu.au) at [Macquarie University](https://www.mq.edu.au/), Sydney, Australia.
 
 
 The tool is currently accessible via a web interface at https://www.deepslice.com.au/.

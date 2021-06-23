@@ -96,5 +96,5 @@ This script can also be run in batch.
 
 ## Display results in 3D
 
-To be done... combining [PaQuo](TODO) and [BrainRender](TODO) looks like the best option for this task. 
+To be done... combining [PaQuo](https://paquo.readthedocs.io/en/latest/quickstart.html) and [BrainRender](https://github.com/brainglobe/brainrender) looks like the best option for this task. 
 

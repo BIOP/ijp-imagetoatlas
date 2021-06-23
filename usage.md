@@ -47,8 +47,8 @@ In order to be fast, ABBA's workflow is designed to avoid time-expensive computa
 ### Troubleshooting
 If you have an issue with ABBA:
 * Look if the answer is not in the documentation.
-* You can ask for help in the [image.sc forum](TODO) (add `abba` and `fiji` or `qupath` tags)
-* You can [open an issue in GitHub](TODO)
+* You can ask for help in the [image.sc forum](forum.image.sc/) (add `abba` and `fiji` or `qupath` tags)
+* You can [open an issue in GitHub](https://github.com/BIOP/ijp-imagetoatlas/issues)
 
 If you managed to install ABBA, these 3 options are better done directly from the plugin (top menu bar `Help > Go to documentation` and `Help > Ask for help in the forum`). Asking for help from ABBA allows to pre-fill a form with some hardware and software information. There is also a user feedback from if you want to give your opinion about what should be improved or supported.
 
