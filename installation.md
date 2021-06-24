@@ -14,8 +14,10 @@ The installation consists of four steps detailed in the paragraphs below:
 Install the [latest QuPath version](https://qupath.github.io/).
 
 Install the QuPath biop extensions and its dependencies:
-* Download the latest released [jars](https://github.com/BIOP/qupath-biop-extensions/releases) files 
-* Extract the files and put its content into a folder named `extensions` within another folder (for instance `C>QuPath Common Data>extensions`
+* Go to the [latest release](https://github.com/BIOP/qupath-biop-extensions/releases)
+  * Download `biop-tools-2.0.8.jar`
+  * Download `WSI-dependencies.zip` and unzip it  
+* Put the jar file and the `WSI-dependencies` folder into a folder named `extensions` within another folder (for instance `C>QuPath Common Data>extensions`
 * In QuPath, go to `Edit>Preferences`, specify the location of the `QuPath Common Data` folder:
 
 ![Where to set QuPath extension folder](./assets/img/qupath_set_extension_folder.png)
