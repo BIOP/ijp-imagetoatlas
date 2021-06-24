@@ -12,6 +12,11 @@ import org.scijava.util.ColorRGB;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import spimdata.util.Displaysettings;
 
+/**
+ * Command triggered by the user when he is clicking on the the table header of the slice
+ * display card. It allows to set common display settings to all sources {@link DisplaySettingsCommand#sacs}
+ * given as input of this command
+ */
 @Plugin(type = Command.class)
 public class DisplaySettingsCommand extends DynamicCommand implements
         Initializable {
@@ -28,7 +33,7 @@ public class DisplaySettingsCommand extends DynamicCommand implements
     ColorRGB color;
 
     @Parameter
-    SourceAndConverter[] sacs;
+    public SourceAndConverter[] sacs;
 
     @Parameter(type = ItemIO.OUTPUT)
     Displaysettings ds;

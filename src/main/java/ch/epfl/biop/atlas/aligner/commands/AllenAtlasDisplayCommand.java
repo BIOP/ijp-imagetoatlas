@@ -3,7 +3,6 @@ package ch.epfl.biop.atlas.aligner.commands;
 import bdv.tools.brightness.ConverterSetup;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
-import ch.epfl.biop.atlas.aligner.ReslicedAtlas;
 import org.scijava.command.Command;
 import org.scijava.command.InteractiveCommand;
 import org.scijava.plugin.Parameter;
@@ -11,8 +10,8 @@ import org.scijava.plugin.Plugin;
 import sc.fiji.bdvpg.scijava.services.SourceAndConverterBdvDisplayService;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
 
-/** less general but more convenient way of controlling the display settings of the Allen Brain Atlas
- *
+/** Convenient way of controlling the display settings of the Allen Brain Atlas
+ *  This Command is added as a Panel in ABBA's bdv window
  */
 
 @Plugin(type = Command.class)
@@ -52,6 +51,7 @@ public class AllenAtlasDisplayCommand extends InteractiveCommand implements Mult
             listenerRegistered=true;
         }
 
+        assert mp != null;
         mp.getReslicedAtlas().setStep(zSamplingSteps/10);
 
         mp.getBdvh().getViewerPanel().state().setSourceActive(getSources()[0], showNissl);
@@ -88,10 +88,10 @@ public class AllenAtlasDisplayCommand extends InteractiveCommand implements Mult
             SourceAndConverterHelper.transferColorConverters(mp.getReslicedAtlas().nonExtendedSlicedSources, mp.getReslicedAtlas().extendedSlicedSources);
         }
 
-        for (SourceAndConverter sac : mp.getReslicedAtlas().extendedSlicedSources) {
+        for (SourceAndConverter<?> sac : mp.getReslicedAtlas().extendedSlicedSources) {
             mp.getBdvh().getViewerPanel().state().setSourceActive(sac, false);
         }
-        for (SourceAndConverter sac : mp.getReslicedAtlas().nonExtendedSlicedSources) {
+        for (SourceAndConverter<?> sac : mp.getReslicedAtlas().nonExtendedSlicedSources) {
             mp.getBdvh().getViewerPanel().state().setSourceActive(sac, false);
         }
 

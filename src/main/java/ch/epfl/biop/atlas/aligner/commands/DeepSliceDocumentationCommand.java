@@ -8,7 +8,9 @@ import org.scijava.plugin.Plugin;
 import java.io.IOException;
 import java.net.URL;
 
-@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Help>DeepSlice Info")
+@Plugin(type = Command.class,
+        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Help>DeepSlice Info",
+        description = "Open deep slice information webpage.")
 public class DeepSliceDocumentationCommand implements Command {
 
     @Parameter
@@ -17,7 +19,7 @@ public class DeepSliceDocumentationCommand implements Command {
     @Override
     public void run() {
         try {
-            ps.open(new URL("https://researchers.mq.edu.au/en/publications/deepslice-a-deep-neural-network-for-fully-automatic-alignment-of-"));
+            ps.open(new URL("https://researchers.mq.edu.au/en/publications/deepslice-a-deep-neural-network-for-fully-automatic-alignment-of--2"));
         } catch (IOException e) {
             e.printStackTrace();
         }

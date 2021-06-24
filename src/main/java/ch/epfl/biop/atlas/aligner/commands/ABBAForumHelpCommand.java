@@ -20,7 +20,9 @@ import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import java.io.IOException;
 import java.net.URL;
 
-@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Help>ABBA - Ask for help in the forum")
+@Plugin(type = Command.class,
+        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Help>ABBA - Ask for help in the forum",
+        description = "Open a new post in image sc forum with local information")
 public class ABBAForumHelpCommand implements Command {
 
     @Parameter

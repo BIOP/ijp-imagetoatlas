@@ -4,7 +4,6 @@ import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.sourcepreprocessors.SourcesChannelsSelect;
 import ch.epfl.biop.atlas.aligner.sourcepreprocessors.SourcesProcessor;
 import ch.epfl.biop.atlas.aligner.sourcepreprocessors.SourcesProcessorHelper;
-import ch.epfl.biop.registration.sourceandconverter.spline.Elastix2DSplineRegistration;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
@@ -15,7 +14,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>Edit Last Registration")
+@Plugin(type = Command.class,
+        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>Edit Last Registration",
+        description = "Edit the last registration of the current selected slices, displays an error" +
+                "if the last registration  is not editable.")
 public class EditLastRegistrationCommand implements Command {
 
     protected static Logger logger = LoggerFactory.getLogger(EditLastRegistrationCommand.class);
@@ -23,7 +25,7 @@ public class EditLastRegistrationCommand implements Command {
     @Parameter
     MultiSlicePositioner mp;
 
-    @Parameter(label = "Reuse original channels")
+    @Parameter(label = "Reuse original channels used for the first registration")
     boolean reuseOriginalChannels;
 
     @Parameter(label = "Atlas channels, 0-based, comma separated, '*' for all channels", description = "'0,2' for channels 0 and 2")
@@ -41,7 +43,7 @@ public class EditLastRegistrationCommand implements Command {
         SourcesProcessor preprocessAtlas = SourcesProcessorHelper.Identity();
 
         if (!slicesStringChannel.trim().equals("*")) {
-            List<Integer> indices = Arrays.asList(slicesStringChannel.trim().split(",")).stream().mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
+            List<Integer> indices = Arrays.stream(slicesStringChannel.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
             int maxIndex = indices.stream().mapToInt(e -> e).max().getAsInt();
             if (maxIndex>=mp.getChannelBoundForSelectedSlices()) {
                 mp.log.accept("Missing channel in selected slice(s).");
@@ -52,7 +54,7 @@ public class EditLastRegistrationCommand implements Command {
         }
 
         if (!atlasStringChannel.trim().equals("*")) {
-            List<Integer> indices = Arrays.asList(atlasStringChannel.trim().split(",")).stream().mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
+            List<Integer> indices = Arrays.stream(atlasStringChannel.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
 
             int maxIndex = indices.stream().mapToInt(e -> e).max().getAsInt();
 

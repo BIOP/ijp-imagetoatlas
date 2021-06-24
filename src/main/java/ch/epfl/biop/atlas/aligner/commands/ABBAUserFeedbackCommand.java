@@ -8,7 +8,10 @@ import org.scijava.plugin.Plugin;
 import java.io.IOException;
 import java.net.URL;
 
-@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Help>ABBA - Give your feedback")
+@Plugin(type = Command.class,
+        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Help>ABBA - Give your feedback",
+        description = "Open a webpage with a user feedback form")
+
 public class ABBAUserFeedbackCommand implements Command {
     @Parameter
     PlatformService ps;
