@@ -26,15 +26,8 @@ Install the QuPath biop extensions and its dependencies:
 
 ### 2. Enable Fiji's ABBA update site
 In Fiji:
-* Click `Help > Update... > Manage update sites > Add update site`
+* Click `Help > Update... > Manage update sites
 * Tick the checkbox `ABBA (experimental)` 
-* Click `Close`
-* Click `Apply changes`
-* Restart Fiji
-
-If `ABBA (experimental)` is not yet in the list of update sites:
-* Click `Add update site`
-* Then enter the following URL : `https://biop.epfl.ch/Fiji-ABBA/`,
 * Click `Close`
 * Click `Apply changes`
 * Restart Fiji
