@@ -73,6 +73,7 @@ All files need to be properly calibrated (microns, millimeters, etc, but not pix
 
 Tested file formats for ABBA :
 
+* CZI (Zeiss, ++, you may have to tick `Split RGB channels` for 16-bits RGB images)
 * VSI (Olympus, +++)
 * LIF (Leica, +, no multiresolution support in bio-formats)
 

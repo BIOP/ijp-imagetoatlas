@@ -70,6 +70,13 @@ A second window shows up which specifies some advanced opening parameters. The d
 
 ![Advanced import options](assets/img/fiji_advanced_import_options.png)
 
+----
+
+:warning: if your dataset contains 16-bits RGB channels (as it is the case for some CZI files), you have to check the `Split RGB channels` checkbox.
+
+----
+
+
 It can take up to a minute for the first opening, due to bio-formats memoization.
 
 With the downsampled demo dataset, you will get an image similar to this:
