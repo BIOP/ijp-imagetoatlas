@@ -58,7 +58,7 @@ public class SacMultiSacsPositionerCommand implements Command {
             case "sagittal" :
                 // No Change
                 break;
-            case "vertical" :
+            case "horizontal" :
                 slicingTransfom.rotate(0,-Math.PI/2);
                 break;
         }
