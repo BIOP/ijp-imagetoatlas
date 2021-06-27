@@ -1,12 +1,23 @@
 package ch.epfl.biop;
 
-
 import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
 import oshi.hardware.HardwareAbstractionLayer;
 
 import javax.swing.*;
 import java.awt.*;
+
+/**
+ * Makes a JPanel which monitors:
+ * - current Memory usage
+ * - current CPU usage
+ *
+ * This panel is updated every second
+ *
+ * The monitoring has be stopped 'manually' by calling {@link ResourcesMonitor#stop()}
+ *
+ * And a button which can trigger a garbage collection (gc) request
+ */
 
 public class ResourcesMonitor extends JPanel {
 
@@ -17,7 +28,7 @@ public class ResourcesMonitor extends JPanel {
     final JProgressBar memBar;
 
     final JButton gcButton;
-    Thread monitor;
+    final Thread monitor;
 
     public ResourcesMonitor() {
         this.setLayout(new GridLayout(8, 1));
@@ -63,12 +74,12 @@ public class ResourcesMonitor extends JPanel {
 
     }
 
-    private final SystemInfo si = new SystemInfo();
-    private final HardwareAbstractionLayer hal = si.getHardware();
-    private final CentralProcessor cpu = hal.getProcessor();
+    final SystemInfo si = new SystemInfo();
+    final HardwareAbstractionLayer hal = si.getHardware();
+    final CentralProcessor cpu = hal.getProcessor();
     long[] prevTicks = new long[CentralProcessor.TickType.values().length];
 
-    public double getCPU() {
+    double getCPU() {
         double cpuLoad = cpu.getSystemCpuLoadBetweenTicks(prevTicks) * 100;
         prevTicks = cpu.getSystemCpuLoadTicks();
         return cpuLoad;
