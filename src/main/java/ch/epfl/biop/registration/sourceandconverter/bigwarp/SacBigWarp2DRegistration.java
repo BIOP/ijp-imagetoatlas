@@ -1,5 +1,6 @@
-package ch.epfl.biop.registration.sourceandconverter.spline;
+package ch.epfl.biop.registration.sourceandconverter.bigwarp;
 
+import bdv.gui.TransformTypeSelectDialog;
 import bdv.tools.brightness.ConverterSetup;
 import bdv.util.BdvHandle;
 import bdv.viewer.DisplayMode;
@@ -7,6 +8,7 @@ import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.commands.RegistrationBigWarpCommand;
 import ch.epfl.biop.atlas.plugin.IABBARegistrationPlugin;
 import ch.epfl.biop.atlas.plugin.RegistrationTypeProperties;
+import ch.epfl.biop.registration.sourceandconverter.spline.RealTransformSourceAndConverterRegistration;
 import ij.gui.WaitForUserDialog;
 import org.scijava.plugin.Plugin;
 import sc.fiji.bdvpg.bdv.BdvHandleHelper;
@@ -77,14 +79,25 @@ public class SacBigWarp2DRegistration extends RealTransformSourceAndConverterReg
 
             // Restores landmarks if some were already defined
             if (rt!=null) {
-                bwl.getBigWarp().loadLandmarks(BigWarpFileFromRealTransform(rt));
-                bwl.getBigWarp().setInLandmarkMode(true);
-                bwl.getBigWarp().setIsMovingDisplayTransformed(true);
+                String bigWarpFile = BigWarpFileFromRealTransform(rt);
+                if (bigWarpFile!=null) { // If the transform is not a spline, no landmarks are saved, the user has to redo his job
+                    bwl.getBigWarp().loadLandmarks(bigWarpFile);
+                    bwl.getBigWarp().setInLandmarkMode(true);
+                    bwl.getBigWarp().setIsMovingDisplayTransformed(true);
+                }
             }
 
             waitForUser.run();
 
-            rt = bwl.getBigWarp().getBwTransform().getTransformation();
+            switch (bwl.getBigWarp().getBwTransform().getTransformType()) {
+                case (TransformTypeSelectDialog.TPS) :
+                    // Thin plate spline transform
+                    rt = bwl.getBigWarp().getBwTransform().getTransformation();
+                    break;
+                default:
+                    // Any other transform, currently Affine 3D
+                    rt = bwl.getBigWarp().getBwTransform().affine3d();
+            }
 
             bwl.getBigWarp().closeAll();
 

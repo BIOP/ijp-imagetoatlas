@@ -1,18 +1,23 @@
 package ch.epfl.biop.registration.sourceandconverter.spline;
 
 import bdv.util.BoundedRealTransform;
+import bdv.util.BoundedRealTransformAdapter;
 import bdv.util.RealTransformHelper;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import ch.epfl.biop.registration.sourceandconverter.SourceAndConverterRegistration;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.RealTransform;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceRealTransformer;
 import sc.fiji.persist.ScijavaGsonHelper;
 
 import java.util.ArrayList;
 
 abstract public class RealTransformSourceAndConverterRegistration extends SourceAndConverterRegistration {
+
+    final static Logger logger = LoggerFactory.getLogger(RealTransformSourceAndConverterRegistration.class);
 
     protected RealTransform rt;
 
@@ -58,7 +63,10 @@ abstract public class RealTransformSourceAndConverterRegistration extends Source
 
     @Override
     final public String getTransform() {
-        return ScijavaGsonHelper.getGson(context).toJson(rt, RealTransform.class);
+        logger.debug("Serializing transform of class "+rt.getClass().getSimpleName());
+        String transform = ScijavaGsonHelper.getGson(context).toJson(rt, RealTransform.class);
+        logger.debug("Serialization result = "+transform);
+        return transform;
     }
 
     @Override

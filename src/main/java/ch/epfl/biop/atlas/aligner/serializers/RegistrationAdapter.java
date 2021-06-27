@@ -41,7 +41,7 @@ public class RegistrationAdapter implements JsonSerializer<Registration>,
     public JsonElement serialize(Registration registration, Type typeOfSrc, JsonSerializationContext context) {
         JsonObject obj = new JsonObject();
 
-        logger.debug("Serializing registrion of type "+registration.getClass().getSimpleName());
+        logger.debug("Serializing registration of type "+registration.getClass().getSimpleName());
         logger.debug("With transform "+registration.getTransform());
         logger.debug("And parameters "+registration.getRegistrationParameters());
 
