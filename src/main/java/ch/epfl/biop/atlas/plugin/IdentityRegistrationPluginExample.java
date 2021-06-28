@@ -21,6 +21,7 @@ import java.util.function.Consumer;
  * is an array of SourceAndConverter, each element of the array being a single channel.
  *
  * TODO : explain how to obtain a simple data image from a SourceAndConverter object
+ * TODO : finish this example
  *
  */
 @Plugin(type = IABBARegistrationPlugin.class)
@@ -77,13 +78,13 @@ public class IdentityRegistrationPluginExample implements IABBARegistrationPlugi
      */
     @Override
     public void setFixedImage(SourceAndConverter<?>[] fimg) {
-        log.accept("Fixed images set, there are "+fimg.length+" images.");
+        log.accept("Fixed images set, there are "+fimg.length+" channels.");
         fixed_images = fimg;
     }
 
     @Override
     public void setMovingImage(SourceAndConverter<?>[] mimg) {
-        log.accept("Moving images set, there are "+mimg.length+" images.");
+        log.accept("Moving images set, there are "+mimg.length+" channels.");
         moving_images = mimg;
     }
 

@@ -7,7 +7,9 @@ import org.scijava.plugin.Plugin;
 
 import java.io.File;
 
-@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>Export Regions To File")
+@Plugin(type = Command.class,
+        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>Export Regions To File",
+        description = "Export the transformed atlas regions of currently selected slices as ImageJ roi zip files.")
 public class ExportRegionsToFileCommand implements Command {
 
     @Parameter

@@ -10,7 +10,7 @@ import java.net.URL;
 
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Help>DeepSlice Info",
-        description = "Open deep slice information webpage.")
+        description = "Open deep slice reference webpage.")
 public class DeepSliceDocumentationCommand implements Command {
 
     @Parameter

@@ -16,8 +16,7 @@ import java.util.stream.Collectors;
 
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>Edit Last Registration",
-        description = "Edit the last registration of the current selected slices, displays an error" +
-                "if the last registration  is not editable.")
+        description = "Edit the last registration of the current selected slices, if possible.")
 public class EditLastRegistrationCommand implements Command {
 
     protected static Logger logger = LoggerFactory.getLogger(EditLastRegistrationCommand.class);
@@ -25,7 +24,7 @@ public class EditLastRegistrationCommand implements Command {
     @Parameter
     MultiSlicePositioner mp;
 
-    @Parameter(label = "Reuse original channels used for the first registration")
+    @Parameter(label = "Reuse original channels of the registration")
     boolean reuseOriginalChannels;
 
     @Parameter(label = "Atlas channels, 0-based, comma separated, '*' for all channels", description = "'0,2' for channels 0 and 2")

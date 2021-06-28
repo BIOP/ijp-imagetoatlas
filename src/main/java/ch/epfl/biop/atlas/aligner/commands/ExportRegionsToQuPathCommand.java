@@ -5,7 +5,9 @@ import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
-@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>Export Regions To QuPath project")
+@Plugin(type = Command.class,
+        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>Export Regions To QuPath project",
+        description = "Export the transformed atlas regions of currently selected slices to their original QuPath project.")
 public class ExportRegionsToQuPathCommand implements Command {
 
     @Parameter

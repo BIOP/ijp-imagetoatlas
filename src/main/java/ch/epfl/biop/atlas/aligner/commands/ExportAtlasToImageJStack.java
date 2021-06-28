@@ -20,7 +20,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>Export Atlas as ImageJ Stack")
+@Plugin(type = Command.class,
+        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>Export Atlas as ImageJ Stack",
+        description = "Export Atlas regions of selected slices as a standard ImageJ1 stack.")
 public class ExportAtlasToImageJStack implements Command {
 
     @Parameter
