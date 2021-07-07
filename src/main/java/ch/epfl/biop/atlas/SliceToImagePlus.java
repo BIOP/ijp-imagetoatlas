@@ -41,7 +41,7 @@ public class SliceToImagePlus {
 
         List<SourceAndConverter> resampledSourceList = sourceList
                 .stream()
-                .map(sac -> new SourceResampler(sac,model,true, false, interpolate).get())
+                .map(sac -> new SourceResampler(sac,model,true, false, interpolate,0).get())
                 .collect(Collectors.toList());
 
         if ((sourceList.size()>1)) {
@@ -96,7 +96,7 @@ public class SliceToImagePlus {
 
         List<SourceAndConverter> resampledSourceList = sourceList
                 .stream()
-                .map(sac -> new SourceResampler(sac,model,true, false, interpolate).get())
+                .map(sac -> new SourceResampler(sac,model,true, false, interpolate,0).get())
                 .collect(Collectors.toList());
 
         if ((sourceList.size()>1)) {
@@ -152,7 +152,7 @@ public class SliceToImagePlus {
 
         List<SourceAndConverter> resampledSourceList = sourceList
                 .stream()
-                .map(sac -> new SourceResampler(sac,model,true, false, interpolate).get())
+                .map(sac -> new SourceResampler(sac,model,true, false, interpolate,0).get())
                 .collect(Collectors.toList());
 
         if ((sourceList.size()>1)) {

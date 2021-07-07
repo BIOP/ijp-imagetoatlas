@@ -29,6 +29,7 @@ import mpicbg.spim.data.generic.sequence.BasicViewSetup;
 import net.imglib2.RealInterval;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.*;
+import net.imglib2.realtransform.inverse.WrappedIterativeInvertibleRealTransform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
@@ -598,7 +599,7 @@ public class SliceSources {
         ).get();
 
         SourceResampler resampler = new SourceResampler(null,
-                singleSliceModel, false, false, false
+                singleSliceModel, false, false, false, 0
         );
 
         AffineTransform3D translateZ = new AffineTransform3D();
@@ -748,6 +749,42 @@ public class SliceSources {
     }
 
     public RealTransform getSlicePixToCCFRealTransform() {
+        return getSlicePixToCCFRealTransform(0,0.002, 200);
+    }
+
+    boolean isWrapped(RealTransform rt) {
+        return (rt instanceof BoundedRealTransform)
+              ||(rt instanceof WrappedIterativeInvertibleRealTransform)
+              ||(rt instanceof Wrapped2DTransformAs3D);
+    }
+
+    RealTransform getWrapped(RealTransform rt) {
+        if (rt instanceof BoundedRealTransform) {
+            return ((BoundedRealTransform)rt).getTransform();
+        }
+        if (rt instanceof WrappedIterativeInvertibleRealTransform) {
+            return ((WrappedIterativeInvertibleRealTransform)rt).getTransform();
+        }
+        if (rt instanceof Wrapped2DTransformAs3D) {
+            return ((Wrapped2DTransformAs3D)rt).getTransform();
+        }
+        return rt;
+    }
+
+    void fixOptimizer(RealTransform rt, double tolerance, int maxIteration) {
+        RealTransform transform = rt;
+        while (isWrapped(transform)) {
+            transform = getWrapped(transform);
+            if (transform instanceof WrappedIterativeInvertibleRealTransform) {
+                ((WrappedIterativeInvertibleRealTransform<?>) transform).getOptimzer().setTolerance(tolerance);
+                ((WrappedIterativeInvertibleRealTransform<?>) transform).getOptimzer().setMaxIters(maxIteration);
+                break;
+            }
+            System.out.println(transform.getClass());
+        }
+    }
+
+    public RealTransform getSlicePixToCCFRealTransform(int resolutionLevel, double tolerance, int maxIteration) {
         RealTransformSequence rts = new RealTransformSequence();
         InvertibleRealTransformSequence irts = new InvertibleRealTransformSequence();
 
@@ -763,9 +800,11 @@ public class SliceSources {
         for (Registration reg : this.registrations) {
             RealTransform current = reg.getTransformAsRealTransform();
             if (current == null) return null;
-            rts.add(reg.getTransformAsRealTransform().copy());
-            if ((current instanceof InvertibleRealTransform) && (irts != null)) {
-                irts.add(((InvertibleRealTransform) reg.getTransformAsRealTransform()).copy());
+            RealTransform copied = current.copy();
+            fixOptimizer(copied, tolerance, maxIteration);
+            rts.add(copied);
+            if ((copied instanceof InvertibleRealTransform) && (irts != null)) {
+                irts.add((InvertibleRealTransform) copied);
             } else {
                 irts = null;
             }
@@ -773,7 +812,7 @@ public class SliceSources {
 
         Collections.reverse(this.registrations);
 
-        this.original_sacs[0].getSpimSource().getSourceTransform(0,0,at3D);
+        this.original_sacs[0].getSpimSource().getSourceTransform(0,resolutionLevel,at3D);
 
         rts.add(at3D.inverse().copy());
         if (irts!=null) irts.add(at3D.inverse().copy());
