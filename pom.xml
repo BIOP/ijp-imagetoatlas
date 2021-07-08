@@ -107,12 +107,12 @@
 		<license.excludes>**/resources/**</license.excludes>
 		<main-class>ch.epfl.biop.ABBALaunch</main-class>
 
-		<bigdataviewer-playground.version>0.3.6</bigdataviewer-playground.version>
+		<bigdataviewer-playground.version>0.3.7</bigdataviewer-playground.version>
 		<bigdataviewer-bioformats.version>0.2.18</bigdataviewer-bioformats.version>
 
-		<bigdataviewer-playground-display.version>0.1.6</bigdataviewer-playground-display.version>
+		<bigdataviewer-playground-display.version>0.1.7</bigdataviewer-playground-display.version>
 		<bigdataviewer-spimdata-extras.version>0.1.2</bigdataviewer-spimdata-extras.version>
-		<bigdataviewer-biop-tools.version>0.2.26</bigdataviewer-biop-tools.version>
+		<bigdataviewer-biop-tools.version>0.2.27</bigdataviewer-biop-tools.version>
 
 		<bigdataviewer-selector.version>0.1.8</bigdataviewer-selector.version>
 		<scijava.app.directory>C:\Users\nicol\Desktop\fiji-win64-ABBA\Fiji.app</scijava.app.directory>
@@ -121,6 +121,7 @@
 		<bigdataviewer-vistools.version>1.0.0-beta-28</bigdataviewer-vistools.version>
 		<imglib2-cache.version>1.0.0-beta-16</imglib2-cache.version>
 		<bigwarp_fiji.version>7.0.1</bigwarp_fiji.version>
+		<!--<bigwarp_fiji.version>7.0.2-SNAPSHOT-CATCHSINGULAR</bigwarp_fiji.version>-->
 
 		<ijl-utilities-wrappers.version>0.3.20</ijl-utilities-wrappers.version>
 		<json.version>20180813</json.version>
