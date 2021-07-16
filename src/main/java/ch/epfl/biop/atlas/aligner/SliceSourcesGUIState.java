@@ -1,6 +1,10 @@
 package ch.epfl.biop.atlas.aligner;
 
 import bdv.viewer.SourceAndConverter;
+import ch.epfl.biop.bdv.gui.CircleGraphicalHandle;
+import ch.epfl.biop.bdv.gui.GraphicalHandle;
+import ch.epfl.biop.bdv.gui.GraphicalHandleToolTip;
+import ch.epfl.biop.bdv.gui.SquareGraphicalHandle;
 import ch.epfl.biop.registration.sourceandconverter.affine.AffineTransformedSourceWrapperRegistration;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;

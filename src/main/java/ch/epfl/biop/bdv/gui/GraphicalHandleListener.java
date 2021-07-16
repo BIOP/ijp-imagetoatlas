@@ -1,6 +1,6 @@
-package ch.epfl.biop.atlas.aligner;
+package ch.epfl.biop.bdv.gui;
 
-interface GraphicalHandleListener {
+public interface GraphicalHandleListener {
 
         void disabled(GraphicalHandle gh);
 

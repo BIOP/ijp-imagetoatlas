@@ -1,4 +1,4 @@
-package ch.epfl.biop.atlas.aligner;
+package ch.epfl.biop.bdv.gui;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;

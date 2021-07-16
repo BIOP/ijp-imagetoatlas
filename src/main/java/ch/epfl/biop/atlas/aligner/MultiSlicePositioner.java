@@ -10,6 +10,8 @@ import ch.epfl.biop.atlas.aligner.serializers.*;
 import ch.epfl.biop.atlas.aligner.sourcepreprocessors.*;
 import ch.epfl.biop.atlas.plugin.IABBARegistrationPlugin;
 import ch.epfl.biop.atlas.plugin.RegistrationPluginHelper;
+import ch.epfl.biop.bdv.gui.GraphicalHandle;
+import ch.epfl.biop.bdv.gui.GraphicalHandleListener;
 import ch.epfl.biop.bdv.select.SourceSelectorBehaviour;
 import ch.epfl.biop.registration.Registration;
 import com.google.gson.Gson;
@@ -89,7 +91,7 @@ import static sc.fiji.bdvpg.scijava.services.SourceAndConverterService.SPIM_DATA
  *      The atlas is fully displayed
  */
 
-public class MultiSlicePositioner extends BdvOverlay implements  GraphicalHandleListener, MouseMotionListener { // SelectedSourcesListener,
+public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleListener, MouseMotionListener { // SelectedSourcesListener,
 
     protected static Logger logger = LoggerFactory.getLogger(MultiSlicePositioner.class);
 

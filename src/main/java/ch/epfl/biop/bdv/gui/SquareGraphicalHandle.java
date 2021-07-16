@@ -1,4 +1,4 @@
-package ch.epfl.biop.atlas.aligner;
+package ch.epfl.biop.bdv.gui;
 
 import org.scijava.ui.behaviour.Behaviour;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;

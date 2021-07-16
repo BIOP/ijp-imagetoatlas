@@ -1,4 +1,4 @@
-package ch.epfl.biop.atlas.aligner;
+package ch.epfl.biop.bdv.gui;
 
 import org.scijava.ui.behaviour.Behaviour;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
@@ -9,7 +9,8 @@ import java.awt.*;
 import java.util.function.Supplier;
 
 /**
- * Circular Graphical Handle
+ * Circular Graphical Handle {@link GraphicalHandle}, which radius, position, and color is defined by
+ * functional interfaces.
  */
 
 public class CircleGraphicalHandle extends GraphicalHandle{
