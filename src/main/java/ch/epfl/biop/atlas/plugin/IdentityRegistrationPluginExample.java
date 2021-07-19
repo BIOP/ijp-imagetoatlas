@@ -6,7 +6,6 @@ import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import net.imglib2.realtransform.RealTransform;
 import org.scijava.Context;
 import org.scijava.plugin.Plugin;
-import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
 import sc.fiji.bdvpg.sourceandconverter.importer.SourceAndConverterDuplicator;
 
 import java.util.HashMap;
@@ -53,7 +52,6 @@ public class IdentityRegistrationPluginExample implements IABBARegistrationPlugi
     boolean isRegistrationDone = false;
 
     /**
-     *
      * @param context scijava context being send by ABBA to the registration plugin
      */
     @Override
@@ -61,11 +59,21 @@ public class IdentityRegistrationPluginExample implements IABBARegistrationPlugi
         log.accept("Scijava context for registration class"+this.getClass().getSimpleName()+" has been set");
     }
 
+    /**
+     * Any parameter of a registration method has to be set as a String to String dictionnary
+     * this same dictionnary needs to be returned in {@link IABBARegistrationPlugin#getRegistrationParameters()}
+     * for a correct serialization
+     * @param parameters dictionary of parameters
+     */
     @Override
     public void setRegistrationParameters(Map<String, String> parameters) {
         log.accept("Registration parameters set : "+parameters);
     }
 
+    /**
+     * see {@link IABBARegistrationPlugin#setRegistrationParameters(Map)}
+     * @return the dictionnary containing the parameters for this registration
+     */
     @Override
     public Map<String, String> getRegistrationParameters() {
         return new HashMap<>();
@@ -121,12 +129,14 @@ public class IdentityRegistrationPluginExample implements IABBARegistrationPlugi
             Thread.sleep(1000+(int)(Math.random()*2000));
         } catch (InterruptedException e) {
             e.printStackTrace();
+            errorMessage = "The registration has been interrupted!";
             log.accept("The registration has been interrupted!");
             return false;
         }
 
         if (Math.random()<0.1) {
             // Something went wrong in 10% of the case
+            errorMessage = "Did you try to turn it off and on again ?";
             log.accept("Error in registration!");
             return false;
         } else {
@@ -199,6 +209,13 @@ public class IdentityRegistrationPluginExample implements IABBARegistrationPlugi
     @Override
     public void setSliceInfo(MultiSlicePositioner.SliceInfo sliceInfo) {
         // Can be used to retrieve some info about the slice being registered
+    }
+
+    String errorMessage = "No error";
+
+    @Override
+    public String getExceptionMessage() {
+        return errorMessage;
     }
 
     public static class MyTransform {

@@ -7,9 +7,6 @@ import org.scijava.plugin.SciJavaPlugin;
 
 public interface IABBARegistrationPlugin extends SciJavaPlugin, Registration<SourceAndConverter<?>[]> {
 
-    //void setLogger(Consumer<String> logger);
-
     void setSliceInfo(MultiSlicePositioner.SliceInfo sliceInfo);
-
 
 }
