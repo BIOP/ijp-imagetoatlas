@@ -141,7 +141,11 @@ public class SliceSources {
         zPositioner = new AffineTransformedSourceWrapperRegistration();
         preTransform = new AffineTransformedSourceWrapperRegistration();
 
-        guiState = new SliceSourcesGUIState(this, mp);
+        if (mp.hasGUI()) {
+            guiState = new SliceSourcesGUIState(this, mp);
+        } else {
+            guiState = new SliceSourcesNoGUIState(this, mp);
+        }
 
         runRegistration(centerPositioner, new SourcesIdentity(), new SourcesIdentity());
         runRegistration(preTransform, new SourcesIdentity(), new SourcesIdentity());

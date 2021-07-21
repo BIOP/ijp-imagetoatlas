@@ -1,6 +1,8 @@
 package ch.epfl.biop;
 
 import bdv.viewer.SourceAndConverter;
+import ch.epfl.biop.atlas.aligner.commands.RegistrationElastixAffineCommand;
+import ch.epfl.biop.atlas.aligner.commands.RegistrationElastixSplineCommand;
 import ch.epfl.biop.atlas.allen.adultmousebrain.AllenBrainAdultMouseAtlasCCF2017;
 import ch.epfl.biop.atlas.aligner.commands.SacMultiSacsPositionerCommand;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
@@ -9,6 +11,9 @@ import ch.epfl.biop.bdv.command.importer.SourceFromImagePlusCommand;
 import ij.IJ;
 import ij.ImagePlus;
 import net.imagej.ImageJ;
+import org.jruby.RubyProcess;
+
+import java.io.File;
 
 public class DemoRegistrationIJ1 {
 
@@ -29,17 +34,35 @@ public class DemoRegistrationIJ1 {
 
         mp.createSlice(sac,4.5);
 
+        mp.waitForTasks();
+
         SliceSources slice = mp.getSortedSlices().get(0);
 
         mp.centerBdvViewOn(slice);
         mp.selectSlice(slice);
 
-        //mp.registerElastixAffineRemote("localhost:8090",1,0);
+        ij.command().run(RegistrationElastixAffineCommand.class, true,
+                "mp", mp,
+                        "showImagePlusRegistrationResult", true,
+                        "background_offset_value_moving", 0,
+                        "atlasImageChannel",0,
+                        "sliceImageChannel",0
+                ).get();
 
-        //mp.registerElastixAffine(1,0, false);
-        //mp.registerElastixSpline(0,0, 15,false);
+        /*ij.command().run(RegistrationElastixSplineCommand.class, true,
+                    "mp", mp,
+                    "nbControlPointsX", 10,
+                    "showImagePlusRegistrationResult", true,
+                    "background_offset_value_moving", 0,
+                    "atlasImageChannel",0,
+                    "sliceImageChannel",0
+            ).get();*/
 
-        //mp.exportSelectedSlicesRegionsToRoiManager("name");
+        System.out.println("Waiting for registration tasks to be finished...");
+        mp.waitForTasks();
+        System.out.println("Saving...");
+        mp.saveState(new File("src/test/resources/output/reg_demoregistrationij1.json"), true);
+        System.out.println("Done");
 
 	}
 

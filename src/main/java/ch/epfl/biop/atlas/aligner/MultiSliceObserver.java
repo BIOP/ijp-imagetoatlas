@@ -19,7 +19,9 @@ public class MultiSliceObserver {
 
     Map<SliceSources, List<CancelableAction>> sliceSortedActions = new ConcurrentHashMap<>();
 
-    Map<SliceSources, JTextArea> actionPerSlice = new ConcurrentHashMap<>();
+    Map<SliceSources, String> actionPerSlice = new ConcurrentHashMap<>();
+
+    Map<SliceSources, JTextArea> textAreaPerSlice = new ConcurrentHashMap<>();
 
     Set<CancelableAction> hiddenActions = ConcurrentHashMap.newKeySet(); // For cancelled actions
 
@@ -45,27 +47,29 @@ public class MultiSliceObserver {
 
     public MultiSliceObserver(MultiSlicePositioner mp) {
         this.mp = mp;
+        if (mp.hasGUI()) {
 
-        innerPanel.setLayout(new BoxLayout(innerPanel, BoxLayout.Y_AXIS));
+            innerPanel.setLayout(new BoxLayout(innerPanel, BoxLayout.Y_AXIS));
 
-        animatorThread = new Thread(() -> {
-            while (animate) {
+            animatorThread = new Thread(() -> {
+                while (animate) {
 
-                if (repaintNeeded) {
-                    mp.getBdvh().getViewerPanel().getDisplay().repaint();
+                    if (repaintNeeded) {
+                        mp.getBdvh().getViewerPanel().getDisplay().repaint();
+                    }
+                    repaintNeeded = false;
+                    try {
+                        Thread.sleep(300);
+                    } catch (InterruptedException e) {
+                        //e.printStackTrace();
+                    }
                 }
-                repaintNeeded = false;
-                try {
-                    Thread.sleep(300);
-                } catch (InterruptedException e) {
-                    //e.printStackTrace();
-                }
-            }
-            logger.info("Animator thread stopped");
-        });
+                logger.info("Animator thread stopped");
+            });
 
-        animatorThread.start();
-        logger.info("Animator thread started");
+            animatorThread.start();
+            logger.info("Animator thread started");
+        }
 
     }
 
@@ -188,19 +192,32 @@ public class MultiSliceObserver {
                 &&mp.getSlices().contains(slice)
                 &&sliceSortedActions.get(slice).size()!=0) {
 
+            logger.debug("UpdateInfoPanel called 0");
             if (!actionPerSlice.containsKey(slice)) {
+
+                logger.debug("UpdateInfoPanel called a");
                 JTextArea textArea = new JTextArea();
                 textArea.setEditable(false);
-                actionPerSlice.put(slice, textArea);
-                innerPanel.add(actionPerSlice.get(slice));
+                innerPanel.add(textArea);
+                textAreaPerSlice.put(slice, textArea);
             }
 
-            actionPerSlice.get(slice).setText(getTextSlice(slice));
+            logger.debug("UpdateInfoPanel called 1");
+            String infoSlice = getTextSlice(slice);
+
+            actionPerSlice.put(slice, infoSlice);
+
+            logger.debug("UpdateInfoPanel called 2");
+            textAreaPerSlice.get(slice).setText(getTextSlice(slice));
+
+            logger.debug("UpdateInfoPanel called 3");
 
         } else {
             // Slice has been removed
+
+            logger.debug("UpdateInfoPanel called 4");
             if (actionPerSlice.containsKey(slice)) {
-                innerPanel.remove(actionPerSlice.get(slice));
+                innerPanel.remove(textAreaPerSlice.get(slice));
                 actionPerSlice.remove(slice);
                 sliceSortedActions.remove(slice);
             }

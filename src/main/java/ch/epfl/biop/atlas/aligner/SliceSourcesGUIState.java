@@ -75,64 +75,70 @@ public class SliceSourcesGUIState {
         this.mp = mp;
         this.nChannels = slice.getRegisteredSources().length;
         this.slice = slice;
-        channelVisible = new boolean[nChannels];
-        for (int i=0;i<nChannels;i++) {
-            channelVisible[i] = true;
+
+        if (mp.hasGUI()) {
+            channelVisible = new boolean[nChannels];
+            for (int i = 0; i < nChannels; i++) {
+                channelVisible[i] = true;
+            }
+
+            sources_displayed_or_readyfordisplay = slice.original_sacs;
+            SourceAndConverterHelper.transferColorConverters(slice.original_sacs, sources_displayed_or_readyfordisplay);
+
+            behavioursHandleSlice = new Behaviours(new InputTriggerConfig());
+            behavioursHandleSlice.behaviour(new SliceDragBehaviour(mp, slice),//mp.getSelectedSourceDragBehaviour(slice),
+                    "dragSelectedSources" + this.toString(), "button1");
+            behavioursHandleSlice.behaviour((ClickBehaviour) (x, y) -> {
+                slice.deSelect();
+                mp.getBdvh().getViewerPanel().requestRepaint();
+            }, "deselectedSources" + this.toString(), "button3", "ctrl button1");
+
+            GraphicalHandle gh = new CircleGraphicalHandle(mp,
+                    new Behaviours(new InputTriggerConfig()),
+                    mp.getBdvh().getTriggerbindings(),
+                    this.toString(), // pray for unicity ? TODO : do better than thoughts and prayers
+                    this::getBdvHandleCoords,
+                    this::getBdvHandleRadius,
+                    this::getBdvHandleColor
+            );
+
+            tt = new GraphicalHandleToolTip(gh, slice::toString, -20, -10);
+            ghs.add(gh);
+
+            keyHandle = new SquareGraphicalHandle(mp,
+                    behavioursHandleSlice,
+                    mp.getBdvh().getTriggerbindings(),
+                    this.toString(), // pray for unicity ? TODO : do better than thoughts and prayers
+                    () -> {
+                        AffineTransform3D bdvAt3D = new AffineTransform3D();
+                        mp.getBdvh().getViewerPanel().state().getViewerTransform(bdvAt3D);
+
+                        RealPoint handlePoint = getCenterPositionPMode();
+                        handlePoint.setPosition(+mp.sY / 2.0, 1);
+                        bdvAt3D.apply(handlePoint, handlePoint);
+                        return new Integer[]{(int) handlePoint.getDoublePosition(0), (int) handlePoint.getDoublePosition(1), (int) handlePoint.getDoublePosition(2)};
+                    },
+                    () -> {
+                        if (slice.isKeySlice()) {
+                            return getBdvHandleRadius();
+                        } else {
+                            return getBdvHandleRadius() / 2;
+                        }
+                    },
+                    () -> {
+                        if (slice.isKeySlice() && slice.isSelected()) {
+                            return new Integer[]{255, 0, 255, 200};
+                        } else {
+                            return getBdvHandleColor();
+                        }
+                    }
+            );
+
+            ghs.add(keyHandle);
+        } else {
+            behavioursHandleSlice = null;
+            channelVisible = null;
         }
-
-        sources_displayed_or_readyfordisplay = slice.original_sacs;
-        SourceAndConverterHelper.transferColorConverters(slice.original_sacs, sources_displayed_or_readyfordisplay);
-
-        behavioursHandleSlice = new Behaviours(new InputTriggerConfig());
-        behavioursHandleSlice.behaviour(new SliceDragBehaviour(mp, slice),//mp.getSelectedSourceDragBehaviour(slice),
-                "dragSelectedSources" + this.toString(), "button1");
-        behavioursHandleSlice.behaviour((ClickBehaviour) (x, y) -> {
-            slice.deSelect();
-            mp.getBdvh().getViewerPanel().requestRepaint();
-        }, "deselectedSources" + this.toString(), "button3", "ctrl button1");
-
-        GraphicalHandle gh = new CircleGraphicalHandle(mp,
-                new Behaviours(new InputTriggerConfig()),
-                mp.getBdvh().getTriggerbindings(),
-                this.toString(), // pray for unicity ? TODO : do better than thoughts and prayers
-                this::getBdvHandleCoords,
-                this::getBdvHandleRadius,
-                this::getBdvHandleColor
-        );
-
-        tt = new GraphicalHandleToolTip(gh, slice::toString, -20, -10);
-        ghs.add(gh);
-
-        keyHandle = new SquareGraphicalHandle(mp,
-                behavioursHandleSlice,
-                mp.getBdvh().getTriggerbindings(),
-                this.toString(), // pray for unicity ? TODO : do better than thoughts and prayers
-                () -> {
-                    AffineTransform3D bdvAt3D = new AffineTransform3D();
-                    mp.getBdvh().getViewerPanel().state().getViewerTransform(bdvAt3D);
-
-                    RealPoint handlePoint = getCenterPositionPMode();
-                    handlePoint.setPosition(+mp.sY/2.0, 1);
-                    bdvAt3D.apply(handlePoint, handlePoint);
-                    return new Integer[]{(int) handlePoint.getDoublePosition(0), (int) handlePoint.getDoublePosition(1), (int) handlePoint.getDoublePosition(2)};
-                },
-                () -> {
-                    if (slice.isKeySlice()) {
-                        return getBdvHandleRadius();
-                    } else {
-                        return getBdvHandleRadius()/2;
-                    }
-                },
-                () -> {
-                    if (slice.isKeySlice()&&slice.isSelected()) {
-                        return new Integer[]{255, 0, 255, 200};
-                    } else {
-                        return getBdvHandleColor();
-                    }
-                }
-                );
-
-        ghs.add(keyHandle);
 
     }
 

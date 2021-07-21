@@ -4,6 +4,7 @@ import bdv.util.BdvHandle;
 import bdv.util.BdvHandleFrame;
 import ch.epfl.biop.atlas.BiopAtlas;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
+import ch.epfl.biop.atlas.aligner.MultiSlicePositionerNoGUI;
 import ch.epfl.biop.atlas.aligner.ReslicedAtlas;
 import net.imglib2.realtransform.AffineTransform3D;
 import org.scijava.Context;
@@ -39,6 +40,9 @@ public class SacMultiSacsPositionerCommand implements Command {
     @Parameter(type = ItemIO.OUTPUT)
     MultiSlicePositioner mp;
 
+    @Parameter(label = "No Graphical User Interface")
+    boolean nogui = false;
+
     @Override
     public void run() {
 
@@ -62,19 +66,22 @@ public class SacMultiSacsPositionerCommand implements Command {
 
         try {
 
-            bdvMultiSlicer = new DefaultBdvSupplier(new SerializableBdvOptions()).get(); // Get a default supplier
+            if (nogui) {
+                mp = new MultiSlicePositionerNoGUI(ba, ra, context);
+            } else {
+                bdvMultiSlicer = new DefaultBdvSupplier(new SerializableBdvOptions()).get(); // Get a default supplier
 
-            // Set ABBA Icon in Window
-            JFrame frame = ((BdvHandleFrame)bdvMultiSlicer).getBigDataViewer().getViewerFrame();
-            frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-            frame.setIconImage((new ImageIcon(MultiSlicePositioner.class.getResource("/graphics/ABBAFrame.jpg"))).getImage());
+                // Set ABBA Icon in Window
+                JFrame frame = ((BdvHandleFrame)bdvMultiSlicer).getBigDataViewer().getViewerFrame();
+                frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+                frame.setIconImage((new ImageIcon(MultiSlicePositioner.class.getResource("/graphics/ABBAFrame.jpg"))).getImage());
 
-            if (bdvMultiSlicer==null) {
-                System.err.println("Error : bdv multislicer null");
-                return;
+                if (bdvMultiSlicer==null) {
+                    System.err.println("Error : bdv multislicer null");
+                    return;
+                }
+                mp = new MultiSlicePositioner(bdvMultiSlicer, ba, ra, context);
             }
-
-            mp = new MultiSlicePositioner(bdvMultiSlicer, ba, ra, context);
 
             os.addObject(mp);
 

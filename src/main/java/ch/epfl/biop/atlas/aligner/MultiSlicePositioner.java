@@ -119,7 +119,7 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
     final public double sizePixX, sizePixY, sizePixZ;
 
     // List of slices contained in multislicepositioner - publicly accessible through getSlices() method
-    private List<SliceSources> slices = Collections.synchronizedList(new ArrayList<>());
+    private List<SliceSources> slices = new ArrayList<>();//Collections.synchronizedList(new ArrayList<>());
 
     // Stack of actions that have been performed by the user - used for undo
     protected List<CancelableAction> userActions = new ArrayList<>();
@@ -218,13 +218,17 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
         errorMessageForUser.accept("Error", message);
     };
 
-    //public Consumer<String> debuglog = (message) -> System.err.println("Multipositioner Debug : "+message);
+    Object slicesLock = new Object();
 
     /**
      * @return a copy of the array of current slices in this ABBA instance
      */
-    public List<SliceSources> getSlices() {
-        return new ArrayList<>(slices);
+    public List<SliceSources> getSlices() { // synchronized ??
+        ArrayList<SliceSources> out;
+        synchronized (slicesLock) {
+            out = new ArrayList<>(slices);
+        }
+        return out;
     }
 
     // Used for CreateSlice action
@@ -238,6 +242,10 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
     // Flag for overlaying the info of the slice under which the mouse is
     boolean showSliceInfo = true;
 
+    public boolean hasGUI() {
+        return bdvh!=null;
+    }
+
     /**
      * Starts ABBA in a bigdataviewer window
      * @param bdvh a BdvHandle
@@ -247,25 +255,16 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
      */
     public MultiSlicePositioner(BdvHandle bdvh, BiopAtlas biopAtlas, ReslicedAtlas reslicedAtlas, Context ctx) {
 
+        this.bdvh = bdvh;
+
         logger.info("Creating instance");
-
-        bdvh.getSplitPanel().setCollapsed(false);
-        try {
-            Thread.sleep(2500);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        logger.debug("SplitPanel Expanded");
-
         this.reslicedAtlas = reslicedAtlas;
         this.biopAtlas = biopAtlas;
-        this.bdvh = bdvh;
         this.scijavaCtx = ctx;
 
-        iSliceNoStep = (int) (reslicedAtlas.getStep());
-
-        this.bdvh.getViewerPanel().setTransferHandler(new MultiSlicePositioner.TransferHandler());
+        reslicedAtlas.setStep(50);
+        reslicedAtlas.setRotateX(0);
+        reslicedAtlas.setRotateY(0);
 
         nPixX = (int) reslicedAtlas.slicingModel.getSpimSource().getSource(0, 0).dimension(0);
         nPixY = (int) reslicedAtlas.slicingModel.getSpimSource().getSource(0, 0).dimension(1);
@@ -284,258 +283,268 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
         sY = nPixY * sizePixY;
         sZ = nPixZ * sizePixZ;
 
-        BdvFunctions.showOverlay(this, "MultiSlice Overlay", BdvOptions.options().addTo(bdvh));
+        iSliceNoStep = (int) (reslicedAtlas.getStep());
 
-        logger.debug("Multislice Overlay displayed");
-
-        /*ssb = (SourceSelectorBehaviour) SourceAndConverterServices.getSourceAndConverterDisplayService().getDisplayMetadata(
-                bdvh, SourceSelectorBehaviour.class.getSimpleName());*/
-        new EditorBehaviourUnInstaller(bdvh).run();
-
-        // Disable edit mode by default
-        bdvh.getTriggerbindings().removeInputTriggerMap(SourceSelectorBehaviour.SOURCES_SELECTOR_TOGGLE_MAP);
-
-        setPositioningMode();
-
-        logger.debug("Installing behaviours : common");
-
-        common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.changeSliceDisplayMode(), "toggle_single_source_mode", "S");
-        common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.cancelLastAction(), "cancel_last_action", "ctrl Z", "meta Z");
-        common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.redoAction(), "redo_last_action", "ctrl Y", "ctrl shift Z", "meta Y", "ctrl meta Z");
-        common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.navigateNextSlice(), "navigate_next_slice", "RIGHT");
-        common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.navigatePreviousSlice(), "navigate_previous_slice",  "LEFT"); // P taken for panel
-        common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.navigateCurrentSlice(), "navigate_current_slice", "C");
-        common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.nextMode(), "change_mode", "R");
-        common_behaviours.behaviour((ClickBehaviour) (x, y) -> {slices.forEach(SliceSources::select);bdvh.getViewerPanel().getDisplay().repaint();}, "selectAllSlices", "ctrl A", "meta A");
-        common_behaviours.behaviour((ClickBehaviour) (x, y) -> {slices.forEach(SliceSources::deSelect);bdvh.getViewerPanel().getDisplay().repaint();}, "deselectAllSlices", "ctrl shift A", "meta shift A");
-
-        common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.printBindings(), "print_bindings", "K");
-
-        bdvh.getTriggerbindings().addBehaviourMap(COMMON_BEHAVIOURS_KEY, common_behaviours.getBehaviourMap());
-        bdvh.getTriggerbindings().addInputTriggerMap(COMMON_BEHAVIOURS_KEY, common_behaviours.getInputTriggerMap()); // "transform", "bdv"
-
-
-        logger.debug("Overriding standard navigation commands : common");
-
-        overrideStandardNavigation();
-
-        logger.debug("Installing behaviours : positioning");
-        positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.toggleOverlap(), "toggle_superimpose", "O");
-
-        positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.equalSpacingSelectedSlices(), "equalSpacingSelectedSlices", "D");
-        positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.stretchRightSelectedSlices(), "stretch_selectedslices_right", "ctrl RIGHT", "meta RIGHT");
-        positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.shrinkRightSelectedSlices(), "shrink_selectedslices_right", "ctrl LEFT", "meta LEFT");
-        positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.stretchLeftSelectedSlices(), "stretch_selectedslices_left", "ctrl shift LEFT", "meta shift LEFT");
-        positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.shrinkLeftSelectedSlices(), "shrink_selectedslices_left", "ctrl shift RIGHT", "meta shift RIGHT");
-        positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.shiftUpSelectedSlices(), "shift_selectedslices_up", "ctrl UP", "meta UP");
-        positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.shiftDownSelectedSlices(), "shift_selectedslices_down", "ctrl DOWN", "meta DOWN");
-
-        List<SourceAndConverter<?>> sacsToAppend = new ArrayList<>();
-        for (int i = 0; i < biopAtlas.map.getStructuralImages().size(); i++) {
-            sacsToAppend.add(reslicedAtlas.extendedSlicedSources[i]);
-            sacsToAppend.add(reslicedAtlas.nonExtendedSlicedSources[i]);
+        if (hasGUI()) {
+            mso = new MultiSliceObserver(this);
+        } else {
+            mso = new MultiSliceObserverNoGUI(this);
         }
 
-        SourceAndConverterServices.getBdvDisplayService()
-                .show(bdvh, sacsToAppend.toArray(new SourceAndConverter[0]));
+        try {
+            Thread.sleep(2500);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-        logger.debug("Adding handler");
+        if (bdvh!=null) {
+            bdvh.getSplitPanel().setCollapsed(false);
 
-        bdvh.getViewerPanel().getDisplay().addHandler(this);
 
-        logger.debug("GUI customization");
+            logger.debug("SplitPanel Expanded");
 
-        this.bdvh.getCardPanel().setCardExpanded("Sources", false);
-        this.bdvh.getCardPanel().setCardExpanded("Groups", false);
+            this.bdvh.getViewerPanel().setTransferHandler(new MultiSlicePositioner.TransferHandler());
 
-        reslicedAtlas.addListener(() -> {
-            recenterBdvh();
-            updateDisplay();
-        });
+            BdvFunctions.showOverlay(this, "MultiSlice Overlay", BdvOptions.options().addTo(bdvh));
 
-        previouszStep = (int) reslicedAtlas.getStep();
+            logger.debug("Multislice Overlay displayed");
 
-        mso = new MultiSliceObserver(this);
+            /*ssb = (SourceSelectorBehaviour) SourceAndConverterServices.getSourceAndConverterDisplayService().getDisplayMetadata(
+                    bdvh, SourceSelectorBehaviour.class.getSimpleName());*/
+            new EditorBehaviourUnInstaller(bdvh).run();
 
-        //bdvh.getCardPanel().removeCard(DEFAULT_SOURCES_CARD); // Cannot do this : errors
-        bdvh.getCardPanel().removeCard(DEFAULT_SOURCEGROUPS_CARD);
-        bdvh.getCardPanel().removeCard(DEFAULT_VIEWERMODES_CARD);
-        bdvh.getCardPanel().setCardExpanded(DEFAULT_SOURCES_CARD, false);
+            // Disable edit mode by default
+            bdvh.getTriggerbindings().removeInputTriggerMap(SourceSelectorBehaviour.SOURCES_SELECTOR_TOGGLE_MAP);
 
-        BdvScijavaHelper.clearBdvHandleMenuBar(bdvh);
+            setPositioningMode();
 
-        // Skips 4 levels of hierarchy in scijava command path (Plugins>BIOP>Atlas>Multi Image To Atlas>)
-        // And uses the rest to make the hierarchy of the top menu in the bdv window
+            logger.debug("Installing behaviours : common");
 
-        int hierarchyLevelsSkipped = 4;
+            common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.changeSliceDisplayMode(), "toggle_single_source_mode", "S");
+            common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.cancelLastAction(), "cancel_last_action", "ctrl Z", "meta Z");
+            common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.redoAction(), "redo_last_action", "ctrl Y", "ctrl shift Z", "meta Y", "ctrl meta Z");
+            common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.navigateNextSlice(), "navigate_next_slice", "RIGHT");
+            common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.navigatePreviousSlice(), "navigate_previous_slice",  "LEFT"); // P taken for panel
+            common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.navigateCurrentSlice(), "navigate_current_slice", "C");
+            common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.nextMode(), "change_mode", "R");
+            common_behaviours.behaviour((ClickBehaviour) (x, y) -> {slices.forEach(SliceSources::select);bdvh.getViewerPanel().getDisplay().repaint();}, "selectAllSlices", "ctrl A", "meta A");
+            common_behaviours.behaviour((ClickBehaviour) (x, y) -> {slices.forEach(SliceSources::deSelect);bdvh.getViewerPanel().getDisplay().repaint();}, "deselectAllSlices", "ctrl shift A", "meta shift A");
 
-        logger.debug("Installing menu");
+            common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.printBindings(), "print_bindings", "K");
 
-        // Load and Save state
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, MSPStateLoadCommand.class, hierarchyLevelsSkipped,"mp", this );
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, MSPStateSaveCommand.class, hierarchyLevelsSkipped,"mp", this);
+            bdvh.getTriggerbindings().addBehaviourMap(COMMON_BEHAVIOURS_KEY, common_behaviours.getBehaviourMap());
+            bdvh.getTriggerbindings().addInputTriggerMap(COMMON_BEHAVIOURS_KEY, common_behaviours.getInputTriggerMap()); // "transform", "bdv"
 
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Undo [Ctrl+Z]",0, this::cancelLastAction);
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Redo [Ctrl+Shift+Z]",0, this::redoAction);
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Select all slices [Ctrl+A]",0,() -> slices.forEach(SliceSources::select));
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Deselect all slices [Ctrl+Shift+A]",0,() -> slices.forEach(SliceSources::deSelect));
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Remove selected slices",0,() ->
-                getSortedSlices()
-                        .stream()
-                        .filter(SliceSources::isSelected)
-                        .forEach(slice -> new DeleteSlice(this, slice).runRequest())
-        );
 
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Distribute spacing [D]",0,() -> {
-            if (this.displayMode == POSITIONING_MODE_INT) this.equalSpacingSelectedSlices();
-        });
+            logger.debug("Overriding standard navigation commands : common");
 
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Positioning Mode",0, this::setPositioningMode);
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Review Mode",0, this::setReviewMode);
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Change Slice Display Mode [S]",0, this::changeSliceDisplayMode);
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Change Overlap Mode [O]",0, this::toggleOverlap);
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Show mouse atlas Position",0, this::showAtlasPosition);
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Hide mouse atlas Position",0, this::hideAtlasPosition);
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Show slice info at mouse position",0, this::showSliceInfo);
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Hide slice info at mouse position",0, this::hideSliceInfo);
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Navigate>Next Slice [Right]",0, this::navigateNextSlice);
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Navigate>Previous Slice [Left]",0, this::navigatePreviousSlice);
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Navigate>Center On Current Slice [C]",0, this::navigateCurrentSlice);
+            overrideStandardNavigation();
 
-        // Slice importer
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ImportQuPathProjectCommand.class, hierarchyLevelsSkipped,"mp", this );
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ImportImagePlusCommand.class, hierarchyLevelsSkipped,"mp", this );
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ImportImageCommand.class, hierarchyLevelsSkipped,"mp", this );
+            logger.debug("Installing behaviours : positioning");
+            positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.toggleOverlap(), "toggle_superimpose", "O");
 
-        logger.debug("Installing DeepSlice command");
-        //DeepSliceCommand
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, RegistrationDeepSliceCommand.class, hierarchyLevelsSkipped,"mp", this);
+            positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.equalSpacingSelectedSlices(), "equalSpacingSelectedSlices", "D");
+            positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.stretchRightSelectedSlices(), "stretch_selectedslices_right", "ctrl RIGHT", "meta RIGHT");
+            positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.shrinkRightSelectedSlices(), "shrink_selectedslices_right", "ctrl LEFT", "meta LEFT");
+            positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.stretchLeftSelectedSlices(), "stretch_selectedslices_left", "ctrl shift LEFT", "meta shift LEFT");
+            positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.shrinkLeftSelectedSlices(), "shrink_selectedslices_left", "ctrl shift RIGHT", "meta shift RIGHT");
+            positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.shiftUpSelectedSlices(), "shift_selectedslices_up", "ctrl UP", "meta UP");
+            positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.shiftDownSelectedSlices(), "shift_selectedslices_down", "ctrl DOWN", "meta DOWN");
 
-        // Adds registration plugin commands : discovered via scijava plugin autodiscovery mechanism
-
-        logger.debug("Installing registration plugins");
-
-        PluginService pluginService = ctx.getService(PluginService.class);
-
-        pluginService.getPluginsOfType(IABBARegistrationPlugin.class).forEach(registrationPluginClass -> {
-            IABBARegistrationPlugin plugin = pluginService.createInstance(registrationPluginClass);
-            for (Class<? extends Command> commandUI: RegistrationPluginHelper.userInterfaces(plugin)) {
-                logger.info("Registration plugin "+commandUI.getSimpleName()+" discovered");
-                BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, commandUI, hierarchyLevelsSkipped,"mp", this);
-            }
-        });
-
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, EditLastRegistrationCommand.class, hierarchyLevelsSkipped,"mp", this);
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Align>Remove Last Registration",0, this::removeLastRegistration );
-
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportRegionsToFileCommand.class, hierarchyLevelsSkipped,"mp", this);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportRegionsToRoiManagerCommand.class, hierarchyLevelsSkipped,"mp", this);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportRegionsToQuPathCommand.class, hierarchyLevelsSkipped,"mp", this);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportSlicesToBDVJsonDataset.class, hierarchyLevelsSkipped,"mp", this);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportSlicesToBDV.class, hierarchyLevelsSkipped,"mp", this);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportSlicesToImageJStack.class, hierarchyLevelsSkipped,"mp", this);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportSlicesOriginalDataToImageJ.class, hierarchyLevelsSkipped,"mp", this);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportDeformationFieldToImageJ.class, hierarchyLevelsSkipped,"mp", this);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportAtlasToImageJStack.class, hierarchyLevelsSkipped,"mp", this);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportSlicesToQuickNIIDatasetCommand.class, hierarchyLevelsSkipped,"mp", this);
-
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, RotateSourcesCommand.class, hierarchyLevelsSkipped,"mp", this);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, EditSliceThicknessCommand.class, hierarchyLevelsSkipped,"mp", this);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, SliceThicknessMatchNeighborsCommand.class, hierarchyLevelsSkipped,"mp", this);
-
-        // Help commands
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ABBAForumHelpCommand.class, hierarchyLevelsSkipped);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ABBADocumentationCommand.class, hierarchyLevelsSkipped);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ABBAUserFeedbackCommand.class, hierarchyLevelsSkipped);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, DeepSliceDocumentationCommand.class, hierarchyLevelsSkipped);
-
-        logger.debug("Adding bigdataviewer cards");
-
-        bdvh.getCardPanel().addCard("Atlas Display", ScijavaSwingUI.getPanel(scijavaCtx, AllenAtlasDisplayCommand.class, "mp", this), true);
-
-        bdvh.getCardPanel().addCard("Slices Display", new SliceDisplayPanel(this).getPanel(), true);
-
-        bdvh.getCardPanel().addCard("Display & Navigation", new DisplayPanel(this).getPanel(), true);
-
-        bdvh.getCardPanel().addCard("Edit Selected Slices", new EditPanel(this).getPanel(), true);
-
-        bdvh.getCardPanel().addCard("Atlas Slicing", ScijavaSwingUI.getPanel(scijavaCtx, SlicerAdjusterInteractiveCommand.class, "reslicedAtlas", reslicedAtlas), true);
-
-        bdvh.getCardPanel().addCard("Define region of interest",
-                ScijavaSwingUI.getPanel(scijavaCtx, RectangleROIDefineInteractiveCommand.class, "mp", this),
-                false);
-
-        bdvh.getCardPanel().addCard("Tasks Info", mso.getJPanel(), false);
-
-        final ResourcesMonitor rm = new ResourcesMonitor();
-
-        bdvh.getCardPanel().addCard("Resources Monitor", rm, false);
-
-        logger.debug("Adding user ROI source");
-
-        // Default registration region = full atlas size
-        roiPX = -sX / 2.0;
-        roiPY = -sY / 2.0;
-        roiSX = sX;
-        roiSY = sY;
-
-        BiConsumer<RealLocalizable, UnsignedShortType> fun = (loc,val) -> {
-            double px = loc.getFloatPosition(0);
-            double py = loc.getFloatPosition(1);
-
-            if (py<-sY/1.9) {val.set(0); return;}
-            if (py>sY/1.9) {val.set(0); return;}
-
-            if (displayMode == POSITIONING_MODE_INT) {
-                final double v = Math.IEEEremainder(px + sX * 0.5, sX);
-                if (v < roiPX) {val.set(255); return;}
-                if (v > roiPX+roiSX) {val.set(255); return;}
-                if (py<roiPY) {val.set(255); return;}
-                if (py>roiPY+roiSY) {val.set(255); return;}
-                val.set(0);
+            List<SourceAndConverter<?>> sacsToAppend = new ArrayList<>();
+            for (int i = 0; i < biopAtlas.map.getStructuralImages().size(); i++) {
+                sacsToAppend.add(reslicedAtlas.extendedSlicedSources[i]);
+                sacsToAppend.add(reslicedAtlas.nonExtendedSlicedSources[i]);
             }
 
-            if (displayMode == REVIEW_MODE_INT) {
-                if (loc.getFloatPosition(0) < roiPX) {val.set(255); return;}
-                if (loc.getFloatPosition(0) > roiPX+roiSX) {val.set(255); return;}
-                if (loc.getFloatPosition(1)<roiPY) {val.set(255); return;}
-                if (loc.getFloatPosition(1)>roiPY+roiSY) {val.set(255); return;}
-                val.set(0);
-            }
+            SourceAndConverterServices.getBdvDisplayService()
+                    .show(bdvh, sacsToAppend.toArray(new SourceAndConverter[0]));
 
-        };
+            logger.debug("Adding handler");
 
-        FunctionRealRandomAccessible<UnsignedShortType> roiOverlay = new FunctionRealRandomAccessible<>(3, fun, UnsignedShortType::new);
+            bdvh.getViewerPanel().getDisplay().addHandler(this);
 
-        BdvStackSource<?> bss = BdvFunctions.show(roiOverlay,
-                new FinalInterval(new long[]{0, 0, 0}, new long[]{10, 10, 10}),"ROI", BdvOptions.options().addTo(bdvh));
+            logger.debug("GUI customization");
 
-        bss.setDisplayRangeBounds(0,1600);
-        displayMode = REVIEW_MODE_INT; // For correct toggling
+            this.bdvh.getCardPanel().setCardExpanded("Sources", false);
+            this.bdvh.getCardPanel().setCardExpanded("Groups", false);
 
-        logger.debug("Set positioning mode");
-        setPositioningMode();
+            reslicedAtlas.addListener(() -> {
+                recenterBdvh();
+                updateDisplay();
+            });
 
-        logger.debug("Add right click actions");
-        addRightClickActions();
+            previouszStep = (int) reslicedAtlas.getStep();
 
-        logger.debug("Initializing bdv view");
-        AffineTransform3D iniView = new AffineTransform3D();
+            //bdvh.getCardPanel().removeCard(DEFAULT_SOURCES_CARD); // Cannot do this : errors
+            bdvh.getCardPanel().removeCard(DEFAULT_SOURCEGROUPS_CARD);
+            bdvh.getCardPanel().removeCard(DEFAULT_VIEWERMODES_CARD);
+            bdvh.getCardPanel().setCardExpanded(DEFAULT_SOURCES_CARD, false);
 
-        bdvh.getViewerPanel().state().getViewerTransform(iniView);
-        iniView.scale(15);
-        bdvh.getViewerPanel().state().setViewerTransform(iniView);
+            BdvScijavaHelper.clearBdvHandleMenuBar(bdvh);
 
-        reslicedAtlas.setStep(50);
-        reslicedAtlas.setRotateX(0);
-        reslicedAtlas.setRotateY(0);
+            // Skips 4 levels of hierarchy in scijava command path (Plugins>BIOP>Atlas>Multi Image To Atlas>)
+            // And uses the rest to make the hierarchy of the top menu in the bdv window
 
-        RealPoint center = SourceAndConverterHelper.getSourceAndConverterCenterPoint(reslicedAtlas.extendedSlicedSources[0]);
-        iniView = BdvHandleHelper.getViewerTransformWithNewCenter(bdvh, new double[]{center.getDoublePosition(0), center.getDoublePosition(1), 0});
-        bdvh.getViewerPanel().state().setViewerTransform(iniView);
+            int hierarchyLevelsSkipped = 4;
 
-        // Close hook to try to release as many resources as possible -> proven avoiding mem leaks
-        BdvHandleHelper.setBdvHandleCloseOperation(bdvh, ctx.getService(CacheService.class),
+            logger.debug("Installing menu");
+
+            // Load and Save state
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, MSPStateLoadCommand.class, hierarchyLevelsSkipped,"mp", this );
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, MSPStateSaveCommand.class, hierarchyLevelsSkipped,"mp", this);
+
+            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Undo [Ctrl+Z]",0, this::cancelLastAction);
+            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Redo [Ctrl+Shift+Z]",0, this::redoAction);
+            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Select all slices [Ctrl+A]",0,() -> slices.forEach(SliceSources::select));
+            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Deselect all slices [Ctrl+Shift+A]",0,() -> slices.forEach(SliceSources::deSelect));
+            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Remove selected slices",0,() ->
+                    getSortedSlices()
+                            .stream()
+                            .filter(SliceSources::isSelected)
+                            .forEach(slice -> new DeleteSlice(this, slice).runRequest())
+            );
+
+            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Distribute spacing [D]",0,() -> {
+                if (this.displayMode == POSITIONING_MODE_INT) this.equalSpacingSelectedSlices();
+            });
+
+            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Positioning Mode",0, this::setPositioningMode);
+            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Review Mode",0, this::setReviewMode);
+            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Change Slice Display Mode [S]",0, this::changeSliceDisplayMode);
+            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Change Overlap Mode [O]",0, this::toggleOverlap);
+            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Show mouse atlas Position",0, this::showAtlasPosition);
+            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Hide mouse atlas Position",0, this::hideAtlasPosition);
+            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Show slice info at mouse position",0, this::showSliceInfo);
+            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Hide slice info at mouse position",0, this::hideSliceInfo);
+            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Navigate>Next Slice [Right]",0, this::navigateNextSlice);
+            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Navigate>Previous Slice [Left]",0, this::navigatePreviousSlice);
+            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Navigate>Center On Current Slice [C]",0, this::navigateCurrentSlice);
+
+            // Slice importer
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ImportQuPathProjectCommand.class, hierarchyLevelsSkipped,"mp", this );
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ImportImagePlusCommand.class, hierarchyLevelsSkipped,"mp", this );
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ImportImageCommand.class, hierarchyLevelsSkipped,"mp", this );
+
+            logger.debug("Installing DeepSlice command");
+            //DeepSliceCommand
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, RegistrationDeepSliceCommand.class, hierarchyLevelsSkipped,"mp", this);
+
+            // Adds registration plugin commands : discovered via scijava plugin autodiscovery mechanism
+
+            logger.debug("Installing registration plugins");
+
+            PluginService pluginService = ctx.getService(PluginService.class);
+
+            pluginService.getPluginsOfType(IABBARegistrationPlugin.class).forEach(registrationPluginClass -> {
+                IABBARegistrationPlugin plugin = pluginService.createInstance(registrationPluginClass);
+                for (Class<? extends Command> commandUI: RegistrationPluginHelper.userInterfaces(plugin)) {
+                    logger.info("Registration plugin "+commandUI.getSimpleName()+" discovered");
+                    BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, commandUI, hierarchyLevelsSkipped,"mp", this);
+                }
+            });
+
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, EditLastRegistrationCommand.class, hierarchyLevelsSkipped,"mp", this);
+            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Align>Remove Last Registration",0, this::removeLastRegistration );
+
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportRegionsToFileCommand.class, hierarchyLevelsSkipped,"mp", this);
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportRegionsToRoiManagerCommand.class, hierarchyLevelsSkipped,"mp", this);
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportRegionsToQuPathCommand.class, hierarchyLevelsSkipped,"mp", this);
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportSlicesToBDVJsonDataset.class, hierarchyLevelsSkipped,"mp", this);
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportSlicesToBDV.class, hierarchyLevelsSkipped,"mp", this);
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportSlicesToImageJStack.class, hierarchyLevelsSkipped,"mp", this);
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportSlicesOriginalDataToImageJ.class, hierarchyLevelsSkipped,"mp", this);
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportDeformationFieldToImageJ.class, hierarchyLevelsSkipped,"mp", this);
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportAtlasToImageJStack.class, hierarchyLevelsSkipped,"mp", this);
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportSlicesToQuickNIIDatasetCommand.class, hierarchyLevelsSkipped,"mp", this);
+
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, RotateSourcesCommand.class, hierarchyLevelsSkipped,"mp", this);
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, EditSliceThicknessCommand.class, hierarchyLevelsSkipped,"mp", this);
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, SliceThicknessMatchNeighborsCommand.class, hierarchyLevelsSkipped,"mp", this);
+
+            // Help commands
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ABBAForumHelpCommand.class, hierarchyLevelsSkipped);
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ABBADocumentationCommand.class, hierarchyLevelsSkipped);
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ABBAUserFeedbackCommand.class, hierarchyLevelsSkipped);
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, DeepSliceDocumentationCommand.class, hierarchyLevelsSkipped);
+
+            logger.debug("Adding bigdataviewer cards");
+
+            bdvh.getCardPanel().addCard("Atlas Display", ScijavaSwingUI.getPanel(scijavaCtx, AllenAtlasDisplayCommand.class, "mp", this), true);
+
+            bdvh.getCardPanel().addCard("Slices Display", new SliceDisplayPanel(this).getPanel(), true);
+
+            bdvh.getCardPanel().addCard("Display & Navigation", new DisplayPanel(this).getPanel(), true);
+
+            bdvh.getCardPanel().addCard("Edit Selected Slices", new EditPanel(this).getPanel(), true);
+
+            bdvh.getCardPanel().addCard("Atlas Slicing", ScijavaSwingUI.getPanel(scijavaCtx, SlicerAdjusterInteractiveCommand.class, "reslicedAtlas", reslicedAtlas), true);
+
+            bdvh.getCardPanel().addCard("Define region of interest",
+                    ScijavaSwingUI.getPanel(scijavaCtx, RectangleROIDefineInteractiveCommand.class, "mp", this),
+                    false);
+
+            bdvh.getCardPanel().addCard("Tasks Info", mso.getJPanel(), false);
+
+            final ResourcesMonitor rm = new ResourcesMonitor();
+
+            bdvh.getCardPanel().addCard("Resources Monitor", rm, false);
+
+            logger.debug("Adding user ROI source");
+
+            BiConsumer<RealLocalizable, UnsignedShortType> fun = (loc,val) -> {
+                double px = loc.getFloatPosition(0);
+                double py = loc.getFloatPosition(1);
+
+                if (py<-sY/1.9) {val.set(0); return;}
+                if (py>sY/1.9) {val.set(0); return;}
+
+                if (displayMode == POSITIONING_MODE_INT) {
+                    final double v = Math.IEEEremainder(px + sX * 0.5, sX);
+                    if (v < roiPX) {val.set(255); return;}
+                    if (v > roiPX+roiSX) {val.set(255); return;}
+                    if (py<roiPY) {val.set(255); return;}
+                    if (py>roiPY+roiSY) {val.set(255); return;}
+                    val.set(0);
+                }
+
+                if (displayMode == REVIEW_MODE_INT) {
+                    if (loc.getFloatPosition(0) < roiPX) {val.set(255); return;}
+                    if (loc.getFloatPosition(0) > roiPX+roiSX) {val.set(255); return;}
+                    if (loc.getFloatPosition(1)<roiPY) {val.set(255); return;}
+                    if (loc.getFloatPosition(1)>roiPY+roiSY) {val.set(255); return;}
+                    val.set(0);
+                }
+
+            };
+
+            FunctionRealRandomAccessible<UnsignedShortType> roiOverlay = new FunctionRealRandomAccessible<>(3, fun, UnsignedShortType::new);
+
+            BdvStackSource<?> bss = BdvFunctions.show(roiOverlay,
+                    new FinalInterval(new long[]{0, 0, 0}, new long[]{10, 10, 10}),"ROI", BdvOptions.options().addTo(bdvh));
+
+            bss.setDisplayRangeBounds(0,1600);
+            displayMode = REVIEW_MODE_INT; // For correct toggling
+
+            logger.debug("Set positioning mode");
+            setPositioningMode();
+
+            logger.debug("Add right click actions");
+            addRightClickActions();
+
+            logger.debug("Initializing bdv view");
+            AffineTransform3D iniView = new AffineTransform3D();
+
+            bdvh.getViewerPanel().state().getViewerTransform(iniView);
+            iniView.scale(15);
+            bdvh.getViewerPanel().state().setViewerTransform(iniView);
+
+            RealPoint center = SourceAndConverterHelper.getSourceAndConverterCenterPoint(reslicedAtlas.extendedSlicedSources[0]);
+            iniView = BdvHandleHelper.getViewerTransformWithNewCenter(bdvh, new double[]{center.getDoublePosition(0), center.getDoublePosition(1), 0});
+            bdvh.getViewerPanel().state().setViewerTransform(iniView);
+
+            // Close hook to try to release as many resources as possible -> proven avoiding mem leaks
+            BdvHandleHelper.setBdvHandleCloseOperation(bdvh, ctx.getService(CacheService.class),
                 SourceAndConverterServices.getBdvDisplayService(), false,
                 () -> {
                     logger.info("Closing multipositioner bdv window, releasing some resources.");
@@ -558,7 +567,15 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
                     currentSerializedSlice = null;
                     rm.stop();
                 }
-        );
+            );
+        }
+
+        // Default registration region = full atlas size
+        roiPX = -sX / 2.0;
+        roiPY = -sY / 2.0;
+        roiSX = sX;
+        roiSY = sY;
+
         logger.info("Instance created");
     }
 
@@ -639,7 +656,7 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
         RealPoint centerScreenGlobalCoord = new RealPoint(3);
 
         AffineTransform3D at3D = new AffineTransform3D();
-        bdvh.getBdvHandle().getViewerPanel().state().getViewerTransform(at3D);
+        bdvh.getViewerPanel().state().getViewerTransform(at3D);
 
         at3D.inverse().apply(centerScreenCurrentBdv, centerScreenGlobalCoord);
 
@@ -681,7 +698,7 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
         nextAffineTransform.set(shiftMatrix.getDoublePosition(1), 1, 3);
         nextAffineTransform.set(shiftMatrix.getDoublePosition(2), 2, 3);
 
-        bdvh.getBdvHandle().getViewerPanel().state().setViewerTransform(nextAffineTransform);
+        bdvh.getViewerPanel().state().setViewerTransform(nextAffineTransform);
         previouszStep = (int) reslicedAtlas.getStep();
     }
 

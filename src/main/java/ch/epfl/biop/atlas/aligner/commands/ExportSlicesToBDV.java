@@ -33,7 +33,7 @@ public class ExportSlicesToBDV implements Command {
 
     @Override
     public void run() {
-        if (bdvh[0].equals(mp.getBdvh())) {
+        if ((mp.hasGUI())&&(bdvh[0].equals(mp.getBdvh()))) {
             mp.errorMessageForUser.accept("Error","Do not use the same window as ABBA!");
             return;
         }

@@ -53,6 +53,9 @@ public class ABBACommand implements Command {
     @Parameter(label = "Store these settings for all users", persist=false)
     boolean storeAsGlobalSettings = false;
 
+    @Parameter(label = "No Graphical User Interface")
+    boolean nogui = false;
+
     @Override
     public void run() {
         try {
@@ -71,7 +74,9 @@ public class ABBACommand implements Command {
                 BiopWrappersCheck.isTransformixSet();
             }
 
-            CommandModule cm = cs.run(SacMultiSacsPositionerCommand.class, true, "ba", ba).get();
+            CommandModule cm = cs.run(SacMultiSacsPositionerCommand.class, true,
+                    "ba", ba,
+                    "nogui", nogui).get();
 
             mp = (MultiSlicePositioner) (cm.getOutput("mp"));
 
