@@ -1,4 +1,4 @@
-## [EXPERIMENTAL] ABBA - Allen Brain BIOP Aligner
+## [EXPERIMENTAL] ABBA - Aligning Big Brains & Atlases
 
 A [Fiji](https://fiji.sc/) plugin for the registration of thin mouse brain slices to the [3D mouse Allen Brain atlas](http://atlas.brain-map.org/atlas?atlas=602630314) + [QuPath](https://qupath.github.io) associated tools.
 
@@ -8,7 +8,7 @@ A [Fiji](https://fiji.sc/) plugin for the registration of thin mouse brain slice
 
 ---
 
-Allen Brain BIOP Aligner or ABBA for short, is a Fiji plugin which allows to register adult mouse brain serial sections to the [adult mouse brain atlas by the Allen Institute](http://atlas.brain-map.org/atlas?atlas=602630314).
+Aligning Big Brains & Atlases or ABBA for short, is a Fiji plugin which allows to register adult mouse brain serial sections to the [adult mouse brain atlas by the Allen Institute](http://atlas.brain-map.org/atlas?atlas=602630314).
 
 It uses [BigDataViewer](https://imagej.net/plugins/bdv/index) and [BigWarp](https://imagej.net/plugins/bigwarp) for the display and on-the-fly computation of spline-transformed multiresolution images (typical output of Whole Slide Imaging).
 
