@@ -177,10 +177,6 @@ public class RegistrationDeepSliceCommand implements Command {
             adjustSlicesZPosition(slicesToExport, nPixX, nPixY);
         }
 
-        if (allowChangeSlicingPosition) {
-            adjustSlicesZPosition(slicesToExport, nPixX, nPixY);
-        }
-
         if (affineTransform) {
             try {
                 affineTransformInPlane(slicesToExport, nPixX, nPixY);
