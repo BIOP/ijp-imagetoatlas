@@ -4,9 +4,6 @@ import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.bdv.bioformats.command.BasicOpenFilesWithBigdataviewerBioformatsBridgeCommand;
-import ch.epfl.biop.bdv.bioformats.command.OpenFilesWithBigdataviewerBioformatsBridgeCommand;
-import ch.epfl.biop.bdv.command.importer.QuPathProjectToBDVDatasetCommand;
-import ch.epfl.biop.spimdata.qupath.QuPathEntryEntity;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import mpicbg.spim.data.sequence.Tile;
 import org.scijava.command.Command;
@@ -47,7 +44,7 @@ public class ImportImageCommand implements Command {
     public void run() {
         try {
             for (File f : files) {
-                AbstractSpimData spimdata = (AbstractSpimData)
+                AbstractSpimData<?> spimdata = (AbstractSpimData<?>)
                         command_service.run(
                                     BasicOpenFilesWithBigdataviewerBioformatsBridgeCommand.class,
                                     true, "files", new File[]{f},

@@ -10,7 +10,8 @@ import org.scijava.plugin.Plugin;
 import sc.fiji.bdvpg.scijava.services.SourceAndConverterBdvDisplayService;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
 
-/** Convenient way of controlling the display settings of the Allen Brain Atlas
+/**
+ * Convenient way of controlling the display settings of the Allen Brain Atlas
  *  This Command is added as a Panel in ABBA's bdv window
  */
 

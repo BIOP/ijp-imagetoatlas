@@ -22,7 +22,7 @@ import java.net.URL;
 
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Help>ABBA - Ask for help in the forum",
-        description = "Open a new post in image sc forum with current install information")
+        description = "Open a new post in the image.sc forum with current install information")
 public class ABBAForumHelpCommand implements Command {
 
     @Parameter

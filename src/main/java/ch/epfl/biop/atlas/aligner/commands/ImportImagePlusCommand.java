@@ -10,13 +10,15 @@ import org.scijava.plugin.Plugin;
 import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
 import spimdata.imageplus.SpimDataFromImagePlusGetter;
 
-@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Import>Import Current IJ1 Image")
+@Plugin(type = Command.class,
+        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Import>Import Current IJ1 Image",
+        description = " Import the current ImageJ image as a slice into ABBA")
 public class ImportImagePlusCommand implements Command {
 
     @Parameter
     MultiSlicePositioner mp;
 
-    @Parameter
+    @Parameter(label = "Initial axis position (0 = front, mm units)")
     double sliceAxis;
 
     @Parameter
@@ -28,7 +30,7 @@ public class ImportImagePlusCommand implements Command {
     @Override
     public void run() {
 
-        AbstractSpimData asd = (new SpimDataFromImagePlusGetter()).apply(imagePlus);
+        AbstractSpimData<?> asd = (new SpimDataFromImagePlusGetter()).apply(imagePlus);
         sac_service.register(asd);
         sac_service.setSpimDataName(asd, imagePlus.getTitle());
 

@@ -312,7 +312,7 @@ public class RegistrationDeepSliceCommand implements Command {
                 }
 
                 // Moving slice indexOfSliceWithBiggestRankDifference to a new rank targetIndex
-                double targetLocation = slicesNewPosition.get(mapNewRankToSlices.get(targetIndex));
+                double targetLocation = slicesNewPosition.get(mapNewRankToSlices.get(targetIndex)); // NPE
                 if (direction<0) targetLocation+=0.01;
                 if (direction>0) targetLocation-=0.01;
                 slicesNewPosition.put(slices.get(indexOfSliceWithBiggestRankDifference), targetLocation);

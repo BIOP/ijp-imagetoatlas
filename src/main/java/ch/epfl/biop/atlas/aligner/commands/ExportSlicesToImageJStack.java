@@ -55,7 +55,7 @@ public class ExportSlicesToImageJStack implements Command {
         SourcesProcessor preprocess = SourcesProcessorHelper.Identity();
 
         if (!slicesStringChannel.trim().equals("*")) {
-            List<Integer> indices = Arrays.asList(slicesStringChannel.trim().split(",")).stream().mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
+            List<Integer> indices = Arrays.stream(slicesStringChannel.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
 
             int maxIndex = indices.stream().mapToInt(e -> e).max().getAsInt();
 

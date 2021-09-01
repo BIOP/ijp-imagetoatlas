@@ -54,9 +54,7 @@ public class EditLastRegistrationCommand implements Command {
 
         if (!atlasStringChannel.trim().equals("*")) {
             List<Integer> indices = Arrays.stream(atlasStringChannel.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
-
             int maxIndex = indices.stream().mapToInt(e -> e).max().getAsInt();
-
             int maxChannelInAtlas = mp.getReslicedAtlas().nonExtendedSlicedSources.length;
             if (maxIndex>=maxChannelInAtlas) {
                 mp.log.accept("Missing channels in atlas.");
@@ -66,7 +64,6 @@ public class EditLastRegistrationCommand implements Command {
 
             preprocessAtlas = new SourcesChannelsSelect(indices);
         }
-
 
         mp.editLastRegistration(reuseOriginalChannels, preprocessSlice, preprocessAtlas);
     }

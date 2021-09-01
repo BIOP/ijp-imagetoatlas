@@ -14,7 +14,8 @@ import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
 import java.io.File;
 import java.util.concurrent.ExecutionException;
 
-@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Import>Import QuPath Project")
+@Plugin(type = Command.class,
+        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Import>Import QuPath Project")
 public class ImportQuPathProjectCommand implements Command {
 
     @Parameter

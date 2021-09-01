@@ -62,7 +62,7 @@ public class ExportAtlasToImageJStack implements Command {
         SourcesProcessor preprocess = SourcesProcessorHelper.Identity();
 
         if (!atlasStringChannel.trim().equals("*")) {
-            List<Integer> indices = Arrays.asList(atlasStringChannel.trim().split(",")).stream().mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
+            List<Integer> indices = Arrays.stream(atlasStringChannel.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
 
             int maxIndex = indices.stream().mapToInt(e -> e).max().getAsInt();
 

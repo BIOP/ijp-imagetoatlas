@@ -32,9 +32,6 @@ public class ExportDeformationFieldToImageJ implements Command {
     @Parameter(label = "Max iterations in invertible transform computation (default 200)")
     int maxNumberOfIterations = 200;
 
-    @Parameter(label = "verbose")
-    boolean verbose = false;
-
     @Parameter(type = ItemIO.OUTPUT)
     ImagePlus[] images;
 
