@@ -246,6 +246,8 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
         return bdvh!=null;
     }
 
+    ResourcesMonitor rm = null;
+
     /**
      * Starts ABBA in a bigdataviewer window
      * @param bdvh a BdvHandle
@@ -486,9 +488,14 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
 
             bdvh.getCardPanel().addCard("Tasks Info", mso.getJPanel(), false);
 
-            final ResourcesMonitor rm = new ResourcesMonitor();
-
-            bdvh.getCardPanel().addCard("Resources Monitor", rm, false);
+            /*
+            try {
+                rm = new ResourcesMonitor();
+                bdvh.getCardPanel().addCard("Resources Monitor", rm, false);
+            } catch (Exception e) {
+                rm = null;
+                logger.debug("Could not start Resources Monitor");
+            }*/
 
             logger.debug("Adding user ROI source");
 
@@ -565,7 +572,9 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
                     this.reslicedAtlas = null;
                     this.info = null;
                     currentSerializedSlice = null;
-                    rm.stop();
+                    if (rm !=null) {
+                        rm.stop();
+                    }
                 }
             );
         }

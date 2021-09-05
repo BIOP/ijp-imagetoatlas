@@ -17,7 +17,7 @@ public class ABBALaunch {
         //DebugTools.setRootLevel();
 
         ij.command().run(ABBACommand.class, true).get();
-
+        //ij.object().getObjects()
 
     }
 }
