@@ -12,7 +12,6 @@ import ij.IJ;
 import ij.ImagePlus;
 import net.imagej.ImageJ;
 import org.scijava.command.PyCommandBuilder;
-import org.scijava.module.ModuleRunner;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,11 +22,8 @@ public class TestPyRegistrationPlugin {
         final ImageJ ij = new ImageJ();
         ij.ui().showUI();
 
-
         MultiSlicePositioner
                 .registerRegistrationPlugin(PyIdentityRegistrationPlugin.typeName, () -> new PyIdentityRegistrationPlugin());
-
-        ModuleRunner mr;
 
         new PyCommandBuilder().name("pyreg")
                 .input("fixed_channel", Integer.class)

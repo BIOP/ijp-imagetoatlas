@@ -83,8 +83,7 @@ public class PyIdentityRegistrationPlugin implements PyABBARegistrationPlugin {
 
     @Override
     public void resetRegistration() {
-        this.fimg = null;
-        this.mimg = null;
+        isDone = false;
     }
 
     int timepoint = 0;
@@ -93,6 +92,8 @@ public class PyIdentityRegistrationPlugin implements PyABBARegistrationPlugin {
     public void setTimePoint(int timePoint) {
         this.timepoint = timePoint;
     }
+
+    protected boolean isDone = false;
 
     @Override
     public boolean register() {
@@ -103,17 +104,18 @@ public class PyIdentityRegistrationPlugin implements PyABBARegistrationPlugin {
             e.printStackTrace();
         }
         System.out.println("Done");
+        isDone = true;
         return true;
     }
 
     @Override
     public boolean edit() {
-        return false;
+        throw new UnsupportedOperationException("PyIdentity registration plugin is not editable");
     }
 
     @Override
     public boolean isRegistrationDone() {
-        return (fimg!=null)&&(mimg!=null);
+        return isDone;
     }
 
     @Override
@@ -138,7 +140,7 @@ public class PyIdentityRegistrationPlugin implements PyABBARegistrationPlugin {
 
     @Override
     public void setTransform(String serialized_transform) {
-
+        isDone = true;
     }
 
     @Override
