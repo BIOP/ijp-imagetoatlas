@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>Edit Last Registration",
         description = "Edit the last registration of the current selected slices, if possible.")
-public class EditLastRegistrationCommand implements Command {
+public class  EditLastRegistrationCommand implements Command {
 
     protected static Logger logger = LoggerFactory.getLogger(EditLastRegistrationCommand.class);
 

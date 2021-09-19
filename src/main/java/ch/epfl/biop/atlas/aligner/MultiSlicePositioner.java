@@ -9,6 +9,7 @@ import ch.epfl.biop.atlas.aligner.commands.*;
 import ch.epfl.biop.atlas.aligner.serializers.*;
 import ch.epfl.biop.atlas.aligner.sourcepreprocessors.*;
 import ch.epfl.biop.atlas.plugin.IABBARegistrationPlugin;
+import ch.epfl.biop.atlas.plugin.PyABBARegistrationPlugin;
 import ch.epfl.biop.atlas.plugin.RegistrationPluginHelper;
 import ch.epfl.biop.bdv.gui.GraphicalHandle;
 import ch.epfl.biop.bdv.gui.GraphicalHandleListener;
@@ -32,6 +33,7 @@ import org.scijava.Context;
 import org.scijava.InstantiableException;
 import org.scijava.cache.CacheService;
 import org.scijava.command.Command;
+import org.scijava.command.CommandService;
 import org.scijava.convert.ConvertService;
 import org.scijava.object.ObjectService;
 import org.scijava.plugin.PluginService;
@@ -68,6 +70,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -219,6 +222,7 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
     };
 
     Object slicesLock = new Object();
+
 
     /**
      * @return a copy of the array of current slices in this ABBA instance
@@ -444,6 +448,17 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
                     logger.info("Registration plugin "+commandUI.getSimpleName()+" discovered");
                     BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, commandUI, hierarchyLevelsSkipped,"mp", this);
                 }
+            });
+
+            externalRegistrationPluginsUI.keySet().forEach(externalRegistrationType -> {
+                externalRegistrationPluginsUI.get(externalRegistrationType).forEach( ui -> {
+                        logger.info("External registration plugin "+ui+" discovered");
+                        //BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, commandUI, hierarchyLevelsSkipped,"mp", this);
+                        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh, "Align>"+ui, 0, () -> {
+                            (ctx.getService(CommandService.class)).run(ui, true, "mp", this);
+                        });
+                    }
+                );
             });
 
             BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, EditLastRegistrationCommand.class, hierarchyLevelsSkipped,"mp", this);
@@ -1855,40 +1870,87 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
                          SourcesProcessor preprocessFixed,
                          SourcesProcessor preprocessMoving,
                          Map<String,Object> parameters) {
+
+        PluginService ps = scijavaCtx.getService(PluginService.class);
+        Supplier<? extends IABBARegistrationPlugin> pluginSupplier =
+                () -> {
+                    try {
+                        return (IABBARegistrationPlugin) ps.getPlugin(registrationClass).createInstance();
+                    } catch (InstantiableException e) {
+                        e.printStackTrace();
+                        return null;
+                    }
+                };
+
+        register(pluginSupplier, preprocessFixed, preprocessMoving, parameters);
+    }
+
+    /**
+     * Main function which triggers registration of the selected slices
+     * @param registrationPluginName name of the registration plugin - external
+     * @param preprocessFixed how fixed sources need to be preprocessed before being registered
+     * @param preprocessMoving how moving sources need to be preprocessed before being registered
+     * @param parameters parameters used for the registration - all objects will be converted
+     *                   to String using the scijava {@link ConvertService}. They need to be strings
+     *                   to be serialized
+     */
+    public void register(String registrationPluginName,
+                         SourcesProcessor preprocessFixed,
+                         SourcesProcessor preprocessMoving,
+                         Map<String,Object> parameters) {
+        if (externalRegistrationPlugins.containsKey(registrationPluginName)) {
+            register(externalRegistrationPlugins.get(registrationPluginName),
+                    preprocessFixed, preprocessMoving, parameters);
+        } else {
+            this.errlog.accept("Registration type:"+registrationPluginName+" not found!");
+        }
+    }
+
+
+    /**
+     * Main function which triggers registration of the selected slices
+     * @param registrationPluginSupplier a supplier of registration plugins
+     * @param preprocessFixed how fixed sources need to be preprocessed before being registered
+     * @param preprocessMoving how moving sources need to be preprocessed before being registered
+     * @param parameters parameters used for the registration - all objects will be converted
+     *                   to String using the scijava {@link ConvertService}. They need to be strings
+     *                   to be serialized
+     */
+    public void register(Supplier<? extends IABBARegistrationPlugin> registrationPluginSupplier,
+                         SourcesProcessor preprocessFixed,
+                         SourcesProcessor preprocessMoving,
+                         Map<String,Object> parameters) {
         if (getSelectedSources().size()==0) {
             warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to register");
             log.accept("Registration ignored : no slice selected");
         } else {
-            try {
 
-                // Putting user defined ROIs
-                parameters.put("px", roiPX);
-                parameters.put("py", roiPY);
-                parameters.put("sx", roiSX);
-                parameters.put("sy", roiSY);
+            // Putting user defined ROIs
+            parameters.put("px", roiPX);
+            parameters.put("py", roiPY);
+            parameters.put("sx", roiSX);
+            parameters.put("sy", roiSY);
 
-                PluginService ps = scijavaCtx.getService(PluginService.class);
-                for (SliceSources slice : slices) {
-                    if (slice.isSelected()) {
-                        IABBARegistrationPlugin registration = (IABBARegistrationPlugin) ps.getPlugin(registrationClass).createInstance();
+            for (SliceSources slice : slices) {
+                if (slice.isSelected()) {
+                    IABBARegistrationPlugin registration = registrationPluginSupplier.get();
+                    if (registration!=null) {
                         registration.setScijavaContext(scijavaCtx);
 
-                        registration.setSliceInfo(new SliceInfo(this,slice));
+                        registration.setSliceInfo(new SliceInfo(this, slice));
 
                         // Sends parameters to the registration
-                        registration.setRegistrationParameters(convertToString(scijavaCtx,parameters));
+                        registration.setRegistrationParameters(convertToString(scijavaCtx, parameters));
 
                         // Always set slice at zero position for registration
                         parameters.put("pz", 0);
                         AffineTransform3D at3d = new AffineTransform3D();
-                        at3d.translate(0,0,-slice.getSlicingAxisPosition());
+                        at3d.translate(0, 0, -slice.getSlicingAxisPosition());
                         SourcesAffineTransformer z_zero = new SourcesAffineTransformer(at3d);
 
                         new RegisterSlice(this, slice, registration, SourcesProcessorHelper.compose(z_zero, preprocessFixed), SourcesProcessorHelper.compose(z_zero, preprocessMoving)).runRequest();
                     }
                 }
-            } catch (InstantiableException e) {
-                e.printStackTrace();
             }
         }
     }
@@ -2106,12 +2168,15 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
         PluginService pluginService = scijavaCtx.getService(PluginService.class);
 
         // Creates adapter for all registration plugins
-        RegistrationAdapter registrationAdapter = new RegistrationAdapter(scijavaCtx);
+        RegistrationAdapter registrationAdapter = new RegistrationAdapter(scijavaCtx, this);
         pluginService.getPluginsOfType(IABBARegistrationPlugin.class).forEach(registrationPluginClass -> {
             IABBARegistrationPlugin plugin = pluginService.createInstance(registrationPluginClass);
             factoryRegistrations.registerSubtype(plugin.getClass());
             gsonbuilder.registerTypeHierarchyAdapter(plugin.getClass(), registrationAdapter);
         });
+
+        factoryRegistrations.registerSubtype(PyABBARegistrationPlugin.class);
+        gsonbuilder.registerTypeHierarchyAdapter(PyABBARegistrationPlugin.class, registrationAdapter);
 
         // For sources processor
 
@@ -2318,6 +2383,37 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
 
         double rotX, rotY; // Rotation x and y slicing correction
 
+    }
+
+    //---------------------- For PyImageJ extensions
+
+    static Map<String, Supplier<? extends IABBARegistrationPlugin>> externalRegistrationPlugins = new HashMap<>();
+
+    /**
+     * Register an external registration plugin, for instance performed by a python function
+     * through PyImageJ
+     * @param name of the registration plugin
+     * @param pluginSupplier the thing that makes a new plugin of this kind
+     */
+    public static void registerRegistrationPlugin(String name, Supplier<? extends IABBARegistrationPlugin> pluginSupplier) {
+        externalRegistrationPlugins.put(name, pluginSupplier);
+    }
+
+    public static boolean isExternalRegistrationPlugin(String name) {
+        return externalRegistrationPlugins.keySet().contains(name);
+    }
+
+    public static Supplier<? extends IABBARegistrationPlugin> getExternalRegistrationPluginSupplier(String name) {
+        return externalRegistrationPlugins.get(name);
+    }
+
+    static Map<String, List<String>> externalRegistrationPluginsUI = new HashMap<>();
+
+    public static void registerRegistrationPluginUI(String registrationTypeName, String registrationUICommandName) {
+        if (!externalRegistrationPluginsUI.containsKey(registrationTypeName)) {
+            externalRegistrationPluginsUI.put(registrationTypeName, new ArrayList<>());
+        }
+        externalRegistrationPluginsUI.get(registrationTypeName).add(registrationUICommandName);
     }
 
 }

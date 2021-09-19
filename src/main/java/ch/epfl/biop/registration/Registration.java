@@ -165,4 +165,11 @@ public interface Registration<T> {
      */
     RealTransform getTransformAsRealTransform();
 
+    /**
+     * Used for serialisation
+     * @return
+     */
+    default String getTypeName() {
+      return this.getClass().getSimpleName();
+    };
 }

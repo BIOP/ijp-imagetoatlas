@@ -21,7 +21,11 @@ public class RegistrationPluginHelper {
                     .getAnnotation(RegistrationTypeProperties.class);
             return annotation.isManual();
         } else {
-            return false; // Default value if no annotation is present
+            if (reg instanceof PyABBARegistrationPlugin) {
+                return ((PyABBARegistrationPlugin) reg).isManual();
+            } else {
+                return false; // Default value if no annotation is present
+            }
         }
     }
 
@@ -35,7 +39,11 @@ public class RegistrationPluginHelper {
                     .getAnnotation(RegistrationTypeProperties.class);
             return annotation.isEditable();
         } else {
-            return false; // Default value if no annotation is present
+            if (reg instanceof PyABBARegistrationPlugin) {
+                return ((PyABBARegistrationPlugin) reg).isEditable();
+            } else {
+                return false; // Default value if no annotation is present
+            }
         }
     }
 
@@ -49,7 +57,11 @@ public class RegistrationPluginHelper {
                     .getAnnotation(RegistrationTypeProperties.class);
             return annotation.userInterface();
         } else {
-            return new Class[0]; // Default value if no annotation is present
+            if (reg instanceof PyABBARegistrationPlugin) {
+                return ((PyABBARegistrationPlugin) reg).userInterface();
+            } else {
+                return new Class[0]; // Default value if no annotation is present
+            }
         }
     }
 

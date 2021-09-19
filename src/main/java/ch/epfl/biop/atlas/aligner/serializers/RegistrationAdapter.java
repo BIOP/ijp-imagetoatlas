@@ -1,5 +1,7 @@
 package ch.epfl.biop.atlas.aligner.serializers;
 
+import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
+import ch.epfl.biop.atlas.plugin.PyABBARegistrationPlugin;
 import ch.epfl.biop.registration.Registration;
 import com.google.gson.*;
 import org.scijava.Context;
@@ -18,20 +20,37 @@ public class RegistrationAdapter implements JsonSerializer<Registration>,
 
     Context scijavacontext;
 
-    public RegistrationAdapter(Context context) {
+    MultiSlicePositioner msp;
+    public RegistrationAdapter(Context context, MultiSlicePositioner mp) {
         this.scijavacontext = context;
+        this.msp = mp;
     }
 
     @Override
     public Registration deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
         try {
-            Registration registration = (Registration) scijavacontext.getService(PluginService.class)
-            .getPlugin(typeOfT.getTypeName()).createInstance();
+            Registration registration;
+
+            logger.debug("Fetching registration plugin "+typeOfT.getTypeName());
+            if (typeOfT.getTypeName().equals(PyABBARegistrationPlugin.class.getName())) {
+                String registrationTypeName = json
+                        .getAsJsonObject()
+                        .get("external_type")
+                        .getAsString();
+                logger.debug("Generating registration object, type "+registrationTypeName);
+                registration = msp
+                        .getExternalRegistrationPluginSupplier(registrationTypeName)
+                        .get();
+            } else {
+                logger.debug("Looking in scijava plugins");
+                registration=(Registration) scijavacontext.getService(PluginService.class).getPlugin(typeOfT.getTypeName()).createInstance();
+            }
             registration.setScijavaContext(scijavacontext);
             registration.setTransform(json.getAsJsonObject().get("transform").getAsString());
             registration.setRegistrationParameters(context.deserialize(json.getAsJsonObject().get("parameters"), Map.class));
             return registration;
         } catch (InstantiableException e) {
+            msp.errlog.accept("Unrecognized registration plugin "+typeOfT.getTypeName());
             e.printStackTrace();
             return null;
         }
@@ -41,11 +60,15 @@ public class RegistrationAdapter implements JsonSerializer<Registration>,
     public JsonElement serialize(Registration registration, Type typeOfSrc, JsonSerializationContext context) {
         JsonObject obj = new JsonObject();
 
-        logger.debug("Serializing registration of type "+registration.getClass().getSimpleName());
+        logger.debug("Serializing registration of type "+registration.getClass().getSimpleName()+" which type is named "+registration.getTypeName());
         logger.debug("With transform "+registration.getTransform());
         logger.debug("And parameters "+registration.getRegistrationParameters());
-
-        obj.addProperty("type", registration.getClass().getSimpleName());
+        if (MultiSlicePositioner.isExternalRegistrationPlugin(registration.getTypeName())) {
+            obj.addProperty("type", PyABBARegistrationPlugin.class.getSimpleName());
+            obj.addProperty("external_type", registration.getTypeName());
+        } else {
+            obj.addProperty("type", registration.getTypeName());
+        }
         obj.addProperty("transform", registration.getTransform());
         obj.add("parameters", context.serialize(registration.getRegistrationParameters()));
 
