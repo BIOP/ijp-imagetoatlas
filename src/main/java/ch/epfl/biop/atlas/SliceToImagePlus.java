@@ -118,7 +118,6 @@ public class SliceToImagePlus {
             resultImage.setTitle(slice.getName()+"-["+px+":"+(px+sx)+" | "+py+":"+(py+sy)+"]");
             ImagePlusHelper.storeExtendedCalibrationToImagePlus(resultImage, at3D.inverse(), "mm", timepoint);
 
-
             return resultImage;
 
         } else {
@@ -232,51 +231,6 @@ public class SliceToImagePlus {
         transform.set(at3D);
 
         return new EmptySourceAndConverterCreator("model", at3D.inverse(), nPx, nPy, nPz).get();
-    }
-
-
-    public static ConverterSetup getConverterSetupFromConverter(final Converter converter) {
-        return new ConverterSetup() {
-            @Override
-            public Listeners<SetupChangeListener> setupChangeListeners() {
-                return null;
-            }
-
-            @Override
-            public int getSetupId() {
-                return 0;
-            }
-
-            @Override
-            public void setDisplayRange(double min, double max) {
-
-            }
-
-            @Override
-            public void setColor(ARGBType color) {
-
-            }
-
-            @Override
-            public boolean supportsColor() {
-                return converter instanceof RealARGBColorConverter;
-            }
-
-            @Override
-            public double getDisplayRangeMin() {
-                return ((RealARGBColorConverter) converter).getMin();
-            }
-
-            @Override
-            public double getDisplayRangeMax() {
-                return ((RealARGBColorConverter) converter).getMax();
-            }
-
-            @Override
-            public ARGBType getColor() {
-                return ((RealARGBColorConverter) converter).getColor();
-            }
-        };
     }
 
 }

@@ -7,10 +7,13 @@ import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.atlas.aligner.sourcepreprocessors.SourcesChannelsSelect;
 import ch.epfl.biop.atlas.aligner.sourcepreprocessors.SourcesProcessorHelper;
 import ch.epfl.biop.atlas.plugin.PyIdentityRegistrationPlugin;
+import ch.epfl.biop.atlas.plugin.PySimpleRegistrationWrapper;
+import ch.epfl.biop.atlas.plugin.SimpleRotationDemo;
 import ch.epfl.biop.bdv.command.importer.SourceFromImagePlusCommand;
 import ij.IJ;
 import ij.ImagePlus;
 import net.imagej.ImageJ;
+import org.scijava.Context;
 import org.scijava.command.PyCommandBuilder;
 
 import java.util.HashMap;
@@ -22,28 +25,18 @@ public class TestPyRegistrationPlugin {
         final ImageJ ij = new ImageJ();
         ij.ui().showUI();
 
+        // Fully flexible registration plugin
         MultiSlicePositioner
                 .registerRegistrationPlugin(PyIdentityRegistrationPlugin.typeName, () -> new PyIdentityRegistrationPlugin());
 
-        new PyCommandBuilder().name("pyreg")
-                .input("fixed_channel", Integer.class)
-                .input("moving_channel", Integer.class)
-                .input("mp", MultiSlicePositioner.class)
-                .menuPath("Plugins>BIOP>Atlas>Multi Image To Atlas>Align>pyreg")
-                .function((inputs) -> {
-                    System.out.println("Inside run");
-                    Map<String, Object> params = new HashMap<>();
-                    ((MultiSlicePositioner) inputs.get("mp")).register(PyIdentityRegistrationPlugin.typeName,
-                            new SourcesChannelsSelect((Integer) inputs.get("fixed_channel")),
-                            new SourcesChannelsSelect((Integer) inputs.get("moving_channel")),
-                            params);
+        addDefaultUI("PyIdentity", PyIdentityRegistrationPlugin.typeName, ij.context());
 
-                    Map<String, Object> out = new HashMap<>();
-                    return out;
-                }).create(ij.context());
 
+        // Simple registration plugin
         MultiSlicePositioner
-                .registerRegistrationPluginUI(PyIdentityRegistrationPlugin.typeName, "pyreg");
+                .registerRegistrationPlugin("PyRot1", () -> new PySimpleRegistrationWrapper("PyRot1", new SimpleRotationDemo()));
+
+        addDefaultUI("PyRot1Command", "PyRot1", ij.context());
 
         MultiSlicePositioner mp = (MultiSlicePositioner) ij.command().run(ABBACommand.class, true).get().getOutput("mp");
 
@@ -69,4 +62,27 @@ public class TestPyRegistrationPlugin {
                 new HashMap<>());
 
     }
+
+    public static void addDefaultUI(String commandName, String registrationTypeName, Context ctx) {
+        new PyCommandBuilder().name(commandName)
+                .input("fixed_channel", Integer.class)
+                .input("moving_channel", Integer.class)
+                .input("mp", MultiSlicePositioner.class)
+                .menuPath("Plugins>BIOP>Atlas>Multi Image To Atlas>Align>pyreg")
+                .function((inputs) -> {
+                    System.out.println("Inside run");
+                    Map<String, Object> params = new HashMap<>();
+                    ((MultiSlicePositioner) inputs.get("mp")).register(registrationTypeName,
+                            new SourcesChannelsSelect((Integer) inputs.get("fixed_channel")),
+                            new SourcesChannelsSelect((Integer) inputs.get("moving_channel")),
+                            params);
+
+                    Map<String, Object> out = new HashMap<>();
+                    return out;
+                }).create(ctx);
+
+        MultiSlicePositioner
+                .registerRegistrationPluginUI(registrationTypeName, commandName);
+    }
+
 }
