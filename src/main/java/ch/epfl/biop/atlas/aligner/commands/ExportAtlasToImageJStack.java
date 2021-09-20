@@ -21,8 +21,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Plugin(type = Command.class,
-        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>Export Atlas as ImageJ Stack",
-        description = "Export Atlas regions of selected slices as a standard ImageJ1 stack.")
+        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>ABBA - Export Atlas to ImageJ",
+        description = "Export atlas properties as an ImageJ stack (for each selected slice).")
 public class ExportAtlasToImageJStack implements Command {
 
     @Parameter
@@ -31,14 +31,11 @@ public class ExportAtlasToImageJStack implements Command {
     @Parameter(label="Pixel Size in micron")
     double px_size_micron = 20;
 
-    //@Parameter(label = "Slices channels, 0-based, comma separated, '*' for all channels", description = "'0,2' for channels 0 and 2")
-    String atlasStringChannel;// = "*";
-
     @Parameter(choices = {"Structural Images", "Border only", "Coordinates", "Left / Right", "Labels % 65000" })
-    String exportType;
+    String export_type;
 
     @Parameter(label = "Exported image name")
-    String imageName = "Atlas";
+    String image_name = "Atlas";
 
     @Parameter
     boolean interpolate;
@@ -51,7 +48,8 @@ public class ExportAtlasToImageJStack implements Command {
         // TODO : check if tasks are done
         List<SliceSources> slicesToExport = mp.getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
 
-        switch (exportType) {
+        String atlasStringChannel = "*";
+        switch (export_type) {
             case "Structural Images": atlasStringChannel = "0,1,2"; break;
             case "Border only": atlasStringChannel = "2"; break;
             case "Coordinates": atlasStringChannel = "3,4,5"; break;
@@ -126,7 +124,7 @@ public class ExportAtlasToImageJStack implements Command {
             image = images[0];
         }
         image.show();
-        image.setTitle(imageName);
+        image.setTitle(image_name);
     }
 
 }

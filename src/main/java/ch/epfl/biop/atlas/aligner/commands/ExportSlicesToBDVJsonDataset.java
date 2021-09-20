@@ -17,11 +17,13 @@ import java.util.List;
 import java.io.File;
 import java.util.stream.Collectors;
 
-@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>Export Slices to BDV Json Dataset (Experimental)")
+@Plugin(type = Command.class,
+        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>ABBA - Export Registered Slices to BDV Json Dataset (Experimental)",
+        description = "Export registered slices as a BigDataViewer json dataset (very experimental).")
 public class ExportSlicesToBDVJsonDataset implements Command {
 
     @Parameter(label = "Please specify a json file to store the reconstructed data")
-    File datasetFile;
+    File dataset_file;
 
     @Parameter(label = "Enter a tag to identify the registered sources (metadata key = \"ABBA\")" )
     String tag;
@@ -56,7 +58,7 @@ public class ExportSlicesToBDVJsonDataset implements Command {
                     sacs.add(source);
                 }
             });
-            new SourceAndConverterServiceSaver(datasetFile, ctx, sacs).run();
+            new SourceAndConverterServiceSaver(dataset_file, ctx, sacs).run();
 
             mp.log.accept("Saved!");
         }

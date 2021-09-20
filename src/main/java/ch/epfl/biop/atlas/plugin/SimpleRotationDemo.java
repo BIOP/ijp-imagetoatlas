@@ -3,7 +3,6 @@ package ch.epfl.biop.atlas.plugin;
 import ij.ImagePlus;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.realtransform.InvertibleRealTransform;
-import net.imglib2.realtransform.RealTransform;
 
 import java.util.Map;
 

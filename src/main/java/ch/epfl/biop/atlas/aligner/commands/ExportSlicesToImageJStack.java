@@ -20,7 +20,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>Export Slices as ImageJ Stack")
+@Plugin(type = Command.class,
+        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>ABBA - Export Registered Slices to ImageJ",
+        description = "Export registered (deformed) slices in the atlas coordinates. "+
+                      "A pixel size should be specified to resample the registered images.")
 public class ExportSlicesToImageJStack implements Command {
 
     @Parameter
@@ -30,10 +33,10 @@ public class ExportSlicesToImageJStack implements Command {
     double px_size_micron = 20;
 
     @Parameter(label = "Slices channels, 0-based, comma separated, '*' for all channels", description = "'0,2' for channels 0 and 2")
-    String slicesStringChannel = "*";
+    String slices_string_channels = "*";
 
     @Parameter(label = "Exported image name")
-    String imageName = "Untitled";
+    String image_name = "Untitled";
 
     @Parameter
     boolean interpolate;
@@ -54,8 +57,8 @@ public class ExportSlicesToImageJStack implements Command {
 
         SourcesProcessor preprocess = SourcesProcessorHelper.Identity();
 
-        if (!slicesStringChannel.trim().equals("*")) {
-            List<Integer> indices = Arrays.stream(slicesStringChannel.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
+        if (!slices_string_channels.trim().equals("*")) {
+            List<Integer> indices = Arrays.stream(slices_string_channels.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
 
             int maxIndex = indices.stream().mapToInt(e -> e).max().getAsInt();
 
@@ -118,7 +121,7 @@ public class ExportSlicesToImageJStack implements Command {
             image = images[0];
         }
         image.show();
-        image.setTitle(imageName);
+        image.setTitle(image_name);
     }
 
 }

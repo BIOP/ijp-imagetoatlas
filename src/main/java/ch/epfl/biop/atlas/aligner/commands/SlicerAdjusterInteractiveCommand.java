@@ -5,7 +5,7 @@ import org.scijava.command.InteractiveCommand;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
-@Plugin(type = InteractiveCommand.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Adjust Slicing")
+@Plugin(type = InteractiveCommand.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>ABBA - Adjust Slicing")
 public class SlicerAdjusterInteractiveCommand extends InteractiveCommand {
 
     @Parameter(label = "Lock rotations")

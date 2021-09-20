@@ -9,11 +9,11 @@ import org.scijava.widget.TextWidget;
 import java.util.HashMap;
 import java.util.Map;
 
-@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>Elastix Registration (Spline) on Server")
+@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>ABBA - Elastix Registration (Spline) on Server")
 public class RegistrationElastixSplineRemoteCommand extends SingleChannelRegistrationCommand {
 
     @Parameter(label = "Number of control points along X, minimum 2.")
-    int nbControlPointsX = 10;
+    int nb_control_points_x = 10;
 
     @Parameter(label = "Background offset value")
     double background_offset_value_moving = 0;
@@ -21,10 +21,10 @@ public class RegistrationElastixSplineRemoteCommand extends SingleChannelRegistr
     double background_offset_value_fixed = 0;
 
     @Parameter(label = "Registration Server URL")
-    String serverURL = "https://snappy.epfl.ch";
+    String server_url = "https://snappy.epfl.ch";
 
     @Parameter(visibility = ItemVisibility.MESSAGE, style = TextWidget.AREA_STYLE )
-    String userConsentMessage =
+    String user_consent_message =
             "<html>By clicking the checkbox below, you agree <br/>" +
                    "that the downsampled images sent to the <br/>" +
                    "server as well as their positions in the<br/>" +
@@ -34,10 +34,10 @@ public class RegistrationElastixSplineRemoteCommand extends SingleChannelRegistr
                    "This will not affect the registration processing time.</html>";
 
     @Parameter(label = "I agree to share my registration data.")
-    boolean userConsentForServerKeepingData = false;
+    boolean user_consent_for_server_keeping_data = false;
 
     public void runValidated() {
-        if (nbControlPointsX<2) {
+        if (nb_control_points_x <2) {
             mp.errorMessageForUser.accept("Cannot start registration", "Number of control points too low.");
             validationError = true;
             return;
@@ -47,12 +47,12 @@ public class RegistrationElastixSplineRemoteCommand extends SingleChannelRegistr
         parameters.put("background_offset_value_moving", background_offset_value_moving);
         parameters.put("background_offset_value_fixed", background_offset_value_fixed);
 
-        parameters.put("serverURL", serverURL);
+        parameters.put("serverURL", server_url);
         parameters.put("taskInfo", "");
-        parameters.put("userConsentForServerKeepingData", userConsentForServerKeepingData);
+        parameters.put("userConsentForServerKeepingData", user_consent_for_server_keeping_data);
 
         parameters.put("showImagePlusRegistrationResult", false);
-        parameters.put("nbControlPointsX", nbControlPointsX);
+        parameters.put("nbControlPointsX", nb_control_points_x);
 
         mp.register(this,
                 getFixedFilter(),

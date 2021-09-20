@@ -400,32 +400,32 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
             BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, MSPStateLoadCommand.class, hierarchyLevelsSkipped,"mp", this );
             BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, MSPStateSaveCommand.class, hierarchyLevelsSkipped,"mp", this);
 
-            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Undo [Ctrl+Z]",0, this::cancelLastAction);
-            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Redo [Ctrl+Shift+Z]",0, this::redoAction);
-            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Select all slices [Ctrl+A]",0,() -> slices.forEach(SliceSources::select));
-            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Deselect all slices [Ctrl+Shift+A]",0,() -> slices.forEach(SliceSources::deSelect));
-            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Remove selected slices",0,() ->
+            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>ABBA - Undo [Ctrl+Z]",0, this::cancelLastAction);
+            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>ABBA - Redo [Ctrl+Shift+Z]",0, this::redoAction);
+            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>ABBA - Select all slices [Ctrl+A]",0,() -> slices.forEach(SliceSources::select));
+            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>ABBA - Deselect all slices [Ctrl+Shift+A]",0,() -> slices.forEach(SliceSources::deSelect));
+            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>ABBA - Remove selected slices",0,() ->
                     getSortedSlices()
                             .stream()
                             .filter(SliceSources::isSelected)
                             .forEach(slice -> new DeleteSlice(this, slice).runRequest())
             );
 
-            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Distribute spacing [D]",0,() -> {
+            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>ABBA - Distribute spacing [D]",0,() -> {
                 if (this.displayMode == POSITIONING_MODE_INT) this.equalSpacingSelectedSlices();
             });
 
-            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Positioning Mode",0, this::setPositioningMode);
-            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Review Mode",0, this::setReviewMode);
-            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Change Slice Display Mode [S]",0, this::changeSliceDisplayMode);
-            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Change Overlap Mode [O]",0, this::toggleOverlap);
-            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Show mouse atlas Position",0, this::showAtlasPosition);
-            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Hide mouse atlas Position",0, this::hideAtlasPosition);
-            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Show slice info at mouse position",0, this::showSliceInfo);
-            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>Hide slice info at mouse position",0, this::hideSliceInfo);
-            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Navigate>Next Slice [Right]",0, this::navigateNextSlice);
-            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Navigate>Previous Slice [Left]",0, this::navigatePreviousSlice);
-            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Navigate>Center On Current Slice [C]",0, this::navigateCurrentSlice);
+            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>ABBA - Positioning Mode",0, this::setPositioningMode);
+            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>ABBA - Review Mode",0, this::setReviewMode);
+            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>ABBA - Change Slice Display Mode [S]",0, this::changeSliceDisplayMode);
+            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>ABBA - Change Overlap Mode [O]",0, this::toggleOverlap);
+            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>ABBA - Show mouse atlas Position",0, this::showAtlasPosition);
+            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>ABBA - Hide mouse atlas Position",0, this::hideAtlasPosition);
+            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>ABBA - Show slice info at mouse position",0, this::showSliceInfo);
+            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>ABBA - Hide slice info at mouse position",0, this::hideSliceInfo);
+            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Navigate>ABBA - Next Slice [Right]",0, this::navigateNextSlice);
+            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Navigate>ABBA - Previous Slice [Left]",0, this::navigatePreviousSlice);
+            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Navigate>ABBA - Center On Current Slice [C]",0, this::navigateCurrentSlice);
 
             // Slice importer
             BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ImportQuPathProjectCommand.class, hierarchyLevelsSkipped,"mp", this );
@@ -462,11 +462,11 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
             });
 
             BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, EditLastRegistrationCommand.class, hierarchyLevelsSkipped,"mp", this);
-            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Align>Remove Last Registration",0, this::removeLastRegistration );
+            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Align>ABBA - Remove Last Registration",0, this::removeLastRegistration );
 
             BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportRegionsToFileCommand.class, hierarchyLevelsSkipped,"mp", this);
             BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportRegionsToRoiManagerCommand.class, hierarchyLevelsSkipped,"mp", this);
-            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportRegionsToQuPathCommand.class, hierarchyLevelsSkipped,"mp", this);
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportToQuPathProjectCommand.class, hierarchyLevelsSkipped,"mp", this);
             BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportSlicesToBDVJsonDataset.class, hierarchyLevelsSkipped,"mp", this);
             BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportSlicesToBDV.class, hierarchyLevelsSkipped,"mp", this);
             BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportSlicesToImageJStack.class, hierarchyLevelsSkipped,"mp", this);

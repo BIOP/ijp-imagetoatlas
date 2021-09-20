@@ -16,7 +16,7 @@ import java.io.File;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Import>Import With Bio-Formats")
+@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Import>ABBA - Import With Bio-Formats")
 public class ImportImageCommand implements Command {
 
     @Parameter
@@ -26,13 +26,13 @@ public class ImportImageCommand implements Command {
     File[] files;
 
     @Parameter(label = "Split RGB channels")
-    boolean splitrgbchannels = false;
+    boolean split_rgb_channels = false;
 
     @Parameter(label = "Initial axis position (0 = front, mm units)")
-    double sliceAxisInitial;
+    double slice_axis_initial;
 
     @Parameter(label = "Axis increment between slices (mm, can be negative for reverse order)")
-    double incrementBetweenSlices;
+    double increment_between_slices;
 
     @Parameter
     CommandService command_service;
@@ -49,7 +49,7 @@ public class ImportImageCommand implements Command {
                                     BasicOpenFilesWithBigdataviewerBioformatsBridgeCommand.class,
                                     true, "files", new File[]{f},
                                     "unit", "MILLIMETER",
-                                    "splitrgbchannels", splitrgbchannels
+                                    "splitrgbchannels", split_rgb_channels
                                 )
                                 .get()
                                 .getOutput("spimData");
@@ -58,9 +58,9 @@ public class ImportImageCommand implements Command {
                         sac_service.getSourceAndConverterFromSpimdata(spimdata)
                                 .toArray(new SourceAndConverter[0]);
 
-                List<SliceSources> slices = mp.createSlice(sacs, sliceAxisInitial, incrementBetweenSlices, Tile.class, new Tile(-1));
+                List<SliceSources> slices = mp.createSlice(sacs, slice_axis_initial, increment_between_slices, Tile.class, new Tile(-1));
 
-                sliceAxisInitial+= (slices.size()+1)*incrementBetweenSlices;
+                slice_axis_initial += (slices.size()+1)* increment_between_slices;
 
             }
             mp.selectSlice(mp.getSortedSlices());

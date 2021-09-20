@@ -7,11 +7,11 @@ import org.scijava.plugin.Plugin;
 import java.util.HashMap;
 import java.util.Map;
 
-@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>Elastix Registration (Spline)")
+@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>ABBA - Elastix Registration (Spline)")
 public class RegistrationElastixSplineCommand extends SingleChannelRegistrationCommand {
 
     @Parameter(label = "Number of control points along X, minimum 2.")
-    int nbControlPointsX = 10;
+    int nb_control_points_x = 10;
 
     @Parameter(label = "Background offset value")
     double background_offset_value_moving = 0;
@@ -19,10 +19,10 @@ public class RegistrationElastixSplineCommand extends SingleChannelRegistrationC
     double background_offset_value_fixed = 0;
 
     @Parameter(label = "Show registration results as ImagePlus")
-    boolean showImagePlusRegistrationResult;
+    boolean show_imageplus_registration_result;
 
     public void runValidated() {
-        if (nbControlPointsX<2) {
+        if (nb_control_points_x <2) {
             mp.errorMessageForUser.accept("Cannot start registration", "Number of control points too low.");
             validationError = true;
             return;
@@ -30,8 +30,8 @@ public class RegistrationElastixSplineCommand extends SingleChannelRegistrationC
 
         //mp.registerElastixSpline(getFixedFilter(), getMovingFilter(), nbControlPointsX, showIJ1Result);
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put("showImagePlusRegistrationResult", showImagePlusRegistrationResult);
-        parameters.put("nbControlPointsX", nbControlPointsX);
+        parameters.put("showImagePlusRegistrationResult", show_imageplus_registration_result);
+        parameters.put("nbControlPointsX", nb_control_points_x);
         parameters.put("background_offset_value_moving", background_offset_value_moving);
         parameters.put("background_offset_value_fixed", background_offset_value_fixed);
 

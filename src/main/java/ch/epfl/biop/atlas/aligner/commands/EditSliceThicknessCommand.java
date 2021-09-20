@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Plugin(type = Command.class,
-        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Edit>Set Slices Thickness",
+        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Edit>ABBA - Set Slices Thickness",
         description = "Set the selected slices thickness - useful for a fully reconstructed brain display.")
 public class EditSliceThicknessCommand implements Command {
 
@@ -18,7 +18,7 @@ public class EditSliceThicknessCommand implements Command {
     MultiSlicePositioner mp;
 
     @Parameter(label = "Slice thickness in micrometer")
-    double thicknessInMicrometer;
+    double thickness_in_micrometer;
 
     @Override
     public void run() {
@@ -27,7 +27,7 @@ public class EditSliceThicknessCommand implements Command {
             mp.errorMessageForUser.accept("No slice selected", "You did not select any slice to edit");
         } else {
             for (SliceSources slice : slices) {
-                slice.setSliceThickness(thicknessInMicrometer/1000.);
+                slice.setSliceThickness(thickness_in_micrometer /1000.);
             }
         }
         mp.updateDisplay();

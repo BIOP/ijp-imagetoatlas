@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Plugin(type = Command.class,
-        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>Edit Last Registration",
+        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>ABBA - Edit Last Registration",
         description = "Edit the last registration of the current selected slices, if possible.")
 public class  EditLastRegistrationCommand implements Command {
 
@@ -25,13 +25,13 @@ public class  EditLastRegistrationCommand implements Command {
     MultiSlicePositioner mp;
 
     @Parameter(label = "Reuse original channels of the registration")
-    boolean reuseOriginalChannels;
+    boolean reuse_original_channels;
 
     @Parameter(label = "Atlas channels, 0-based, comma separated, '*' for all channels", description = "'0,2' for channels 0 and 2")
-    String atlasStringChannel = "*";
+    String atlas_string_channels = "*";
 
     @Parameter(label = "Slices channels, 0-based, comma separated, '*' for all channels", description = "'0,2' for channels 0 and 2")
-    String slicesStringChannel = "*";
+    String slices_string_channels = "*";
 
     @Override
     public void run() {
@@ -41,8 +41,8 @@ public class  EditLastRegistrationCommand implements Command {
 
         SourcesProcessor preprocessAtlas = SourcesProcessorHelper.Identity();
 
-        if (!slicesStringChannel.trim().equals("*")) {
-            List<Integer> indices = Arrays.stream(slicesStringChannel.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
+        if (!slices_string_channels.trim().equals("*")) {
+            List<Integer> indices = Arrays.stream(slices_string_channels.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
             int maxIndex = indices.stream().mapToInt(e -> e).max().getAsInt();
             if (maxIndex>=mp.getChannelBoundForSelectedSlices()) {
                 mp.log.accept("Missing channel in selected slice(s).");
@@ -52,8 +52,8 @@ public class  EditLastRegistrationCommand implements Command {
             preprocessSlice = new SourcesChannelsSelect(indices);
         }
 
-        if (!atlasStringChannel.trim().equals("*")) {
-            List<Integer> indices = Arrays.stream(atlasStringChannel.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
+        if (!atlas_string_channels.trim().equals("*")) {
+            List<Integer> indices = Arrays.stream(atlas_string_channels.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
             int maxIndex = indices.stream().mapToInt(e -> e).max().getAsInt();
             int maxChannelInAtlas = mp.getReslicedAtlas().nonExtendedSlicedSources.length;
             if (maxIndex>=maxChannelInAtlas) {
@@ -65,6 +65,6 @@ public class  EditLastRegistrationCommand implements Command {
             preprocessAtlas = new SourcesChannelsSelect(indices);
         }
 
-        mp.editLastRegistration(reuseOriginalChannels, preprocessSlice, preprocessAtlas);
+        mp.editLastRegistration(reuse_original_channels, preprocessSlice, preprocessAtlas);
     }
 }

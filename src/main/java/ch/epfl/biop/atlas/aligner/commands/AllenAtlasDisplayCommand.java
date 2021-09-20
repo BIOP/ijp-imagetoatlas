@@ -63,6 +63,7 @@ public class AllenAtlasDisplayCommand extends InteractiveCommand implements Mult
         ConverterSetup autoFluoBC = bdvDisplayService.getConverterSetup(getSources()[1]);
         ConverterSetup labelBorderBC = bdvDisplayService.getConverterSetup(getSources()[2]);
 
+        // Hardcoded!
         nisslBC.setDisplayRange(0,2*28000*(1-nisslSlider));
         autoFluoBC.setDisplayRange(0,2*512*(1-autofluoSlider));
         labelBorderBC.setDisplayRange(0,1024*(1-labelBorderSlider));

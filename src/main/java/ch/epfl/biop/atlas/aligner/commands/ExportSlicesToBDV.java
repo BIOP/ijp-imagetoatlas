@@ -16,7 +16,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>Export Slices to BDV window")
+@Plugin(type = Command.class,
+        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>ABBA - Export Registered Slices to BDV",
+        description = "Export registered slices to a BigDataViewer window.")
 public class ExportSlicesToBDV implements Command {
 
     @Parameter(label = "Select the bdv to append the file - only one")

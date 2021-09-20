@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.net.URL;
 
 @Plugin(type = Command.class,
-        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Help>DeepSlice Info",
+        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Help>ABBA - DeepSlice Info",
         description = "Open deep slice reference webpage.")
 public class DeepSliceDocumentationCommand implements Command {
 

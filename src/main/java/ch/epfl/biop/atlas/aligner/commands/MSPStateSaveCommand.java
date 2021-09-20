@@ -7,17 +7,17 @@ import org.scijava.plugin.Plugin;
 
 import java.io.File;
 
-@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>File>Save State [Experimental]")
+@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>File>ABBA - Save State [Experimental]")
 public class MSPStateSaveCommand implements Command {
 
     @Parameter
     MultiSlicePositioner mp;
 
     @Parameter(style = "save")
-    File stateFile;
+    File state_file;
 
     @Override
     public void run() {
-        mp.saveState(stateFile, true);
+        mp.saveState(state_file, true);
     }
 }

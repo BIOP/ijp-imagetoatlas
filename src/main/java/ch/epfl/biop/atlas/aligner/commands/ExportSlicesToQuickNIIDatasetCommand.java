@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 
-@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>Export Slices as Quick NII Dataset")
+@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>ABBA - Export Registered Slices to Quick NII Dataset")
 public class ExportSlicesToQuickNIIDatasetCommand implements Command {
 
     @Parameter
@@ -26,19 +26,19 @@ public class ExportSlicesToQuickNIIDatasetCommand implements Command {
     double px_size_micron = 40;
 
     @Parameter(label = "Slices channels, 0-based, comma separated, '*' for all channels", description = "'0,2' for channels 0 and 2")
-    String slicesStringChannel = "*";
+    String slices_string_channels = "*";
 
     @Parameter(label = "Section Name Prefix")
-    String imageName = "Section";
+    String image_name = "Section";
 
     @Parameter(label = "QuickNII dataset folder", style="directory")
-    File datasetFolder;
+    File dataset_folder;
 
     @Parameter(label = "Convert to 8 bit image")
-    boolean convertTo8Bits = true;
+    boolean convert_to_8_bits = true;
 
     @Parameter(label = "Convert to jpg (single channel recommended)")
-    boolean convertToJpg = true;
+    boolean convert_to_jpg = true;
 
     @Parameter
     boolean interpolate;
@@ -50,8 +50,8 @@ public class ExportSlicesToQuickNIIDatasetCommand implements Command {
 
         SourcesProcessor preprocess = SourcesProcessorHelper.Identity();
 
-        if (!slicesStringChannel.trim().equals("*")) {
-            List<Integer> indices = Arrays.stream(slicesStringChannel.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
+        if (!slices_string_channels.trim().equals("*")) {
+            List<Integer> indices = Arrays.stream(slices_string_channels.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
 
             int maxIndex = indices.stream().mapToInt(e -> e).max().getAsInt();
 
@@ -68,12 +68,12 @@ public class ExportSlicesToQuickNIIDatasetCommand implements Command {
 
             QuickNIIExporter.builder()
                     .roi(mp.getROI())
-                    .cvt8bits(convertTo8Bits)
-                    .jpeg(convertToJpg)
+                    .cvt8bits(convert_to_8_bits)
+                    .jpeg(convert_to_jpg)
                     .setProcessor(preprocess)
                     .slices(slicesToExport)
-                    .name(imageName)
-                    .folder(datasetFolder)
+                    .name(image_name)
+                    .folder(dataset_folder)
                     .pixelSizeMicron(px_size_micron)
                     .interpolate(interpolate)
                     .create()

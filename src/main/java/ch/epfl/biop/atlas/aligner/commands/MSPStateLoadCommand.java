@@ -7,17 +7,17 @@ import org.scijava.plugin.Plugin;
 
 import java.io.File;
 
-@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>File>Load State [Experimental]")
+@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>File>ABBA - Load State [Experimental]")
 public class MSPStateLoadCommand implements Command {
 
     @Parameter
     MultiSlicePositioner mp;
 
     @Parameter(style = "open")
-    File stateFile;
+    File state_file;
 
     @Override
     public void run() {
-        mp.loadState(stateFile);
+        mp.loadState(state_file);
     }
 }

@@ -9,7 +9,7 @@ import org.scijava.plugin.Plugin;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Edit>Set Slices Thickness (fill gaps)")
+@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Edit>ABBA - Set Slices Thickness (fill gaps)")
 public class SliceThicknessMatchNeighborsCommand implements Command {
 
     @Parameter

@@ -12,17 +12,17 @@ abstract public class SingleChannelRegistrationCommand implements Command {
     MultiSlicePositioner mp;
 
     @Parameter(label = "Atlas channels", min = "0")
-    int atlasImageChannel;
+    int atlas_image_channel;
 
     @Parameter(label = "Slices channels", min = "0")
-    int sliceImageChannel;
+    int slice_image_channel;
 
     protected boolean validationError = false;
 
     @Override
     final public void run() {
         if (!validationError) {
-            if (atlasImageChannel>=mp.getNumberOfAtlasChannels()) {
+            if (atlas_image_channel >=mp.getNumberOfAtlasChannels()) {
                 mp.log.accept("The atlas has only "+mp.getNumberOfAtlasChannels()+" channels!");
                 mp.errlog.accept("The atlas has only "+mp.getNumberOfAtlasChannels()+" channels !\n Maximum index : "+(mp.getNumberOfAtlasChannels()-1));
                 return;
@@ -32,7 +32,7 @@ abstract public class SingleChannelRegistrationCommand implements Command {
                 mp.warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to register");
                 return;
             }
-            if (sliceImageChannel>=mp.getChannelBoundForSelectedSlices()) {
+            if (slice_image_channel >=mp.getChannelBoundForSelectedSlices()) {
                 mp.log.accept("Missing channel in selected slice(s).");
                 mp.errlog.accept("Missing channel in selected slice(s)\n One selected slice only has "+mp.getChannelBoundForSelectedSlices()+" channel(s).\n Maximum index : "+(mp.getChannelBoundForSelectedSlices()-1) );
                 return;
@@ -44,11 +44,11 @@ abstract public class SingleChannelRegistrationCommand implements Command {
     abstract public void runValidated();
 
     public SourcesProcessor getFixedFilter() {
-        return new SourcesChannelsSelect(atlasImageChannel);
+        return new SourcesChannelsSelect(atlas_image_channel);
     }
 
     public SourcesProcessor getMovingFilter() {
-        return new SourcesChannelsSelect(sliceImageChannel);
+        return new SourcesChannelsSelect(slice_image_channel);
     }
 
 }

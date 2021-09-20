@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Define Rectangle")
+@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>ABBA - Define Rectangular ROI")
 public class RectangleROIDefineInteractiveCommand extends InteractiveCommand {
 
     protected static Logger logger = LoggerFactory.getLogger(RectangleROIDefineInteractiveCommand.class);

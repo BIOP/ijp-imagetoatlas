@@ -23,7 +23,7 @@ import javax.swing.ImageIcon;
 public class SacMultiSacsPositionerCommand implements Command {
 
     @Parameter(choices = {"coronal", "sagittal", "horizontal"})
-    String slicingMode;
+    String slicing_mode;
 
     @Parameter
     public BiopAtlas ba;
@@ -48,7 +48,7 @@ public class SacMultiSacsPositionerCommand implements Command {
 
         AffineTransform3D slicingTransfom = new AffineTransform3D();
 
-        switch(slicingMode) {
+        switch(slicing_mode) {
             case "coronal" :
                 slicingTransfom.rotate(1,Math.PI/2);
                 break;

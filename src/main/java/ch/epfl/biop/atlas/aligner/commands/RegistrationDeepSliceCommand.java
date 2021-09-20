@@ -65,7 +65,7 @@ import java.util.stream.Collectors;
  *
  */
 
-@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>DeepSlice Registration")
+@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>ABBA - DeepSlice Registration")
 public class RegistrationDeepSliceCommand implements Command {
 
     static Logger logger = LoggerFactory.getLogger(RegistrationDeepSliceCommand.class);
@@ -83,34 +83,34 @@ public class RegistrationDeepSliceCommand implements Command {
     PluginService pluginService;
 
     @Parameter(label = "Slices channels, 0-based, comma separated, '*' for all channels", description = "'0,2' for channels 0 and 2")
-    String slicesStringChannel = "*";
+    String slices_string_channels = "*";
 
     @Parameter(label = "Section Name Prefix")
-    String imageName = "Section";
+    String image_name_prefix = "Section";
 
     @Parameter(label = "QuickNII dataset folder", style="directory")
-    File datasetFolder;
+    File dataset_folder;
 
     @Parameter(label = "Allow change of atlas slicing angle")
-    boolean allowSlicingAngleChange = true;
+    boolean allow_slicing_angle_change = true;
 
     @Parameter(label = "Allow change of position along the slicing axis")
-    boolean allowChangeSlicingPosition = true;
+    boolean allow_change_slicing_position = true;
 
     @Parameter(label = "Maintain the rank of the slices")
-    boolean maintainSlicesOrder = true;
+    boolean maintain_slices_order = true;
 
     @Parameter(label = "Affine transform in plane")
-    boolean affineTransform = true;
+    boolean affine_transform = true;
 
     //@Parameter(label = "pixel size in micrometer")
     double px_size_micron = 30;
 
     //@Parameter(label = "Convert to 8 bit image")
-    boolean convertTo8Bits = false;
+    boolean convert_to_8_bits = false;
 
     //@Parameter(label = "Convert to jpg (single channel recommended)")
-    boolean convertToJpg = true;
+    boolean convert_to_jpg = true;
 
     //@Parameter
     boolean interpolate = false;
@@ -128,23 +128,23 @@ public class RegistrationDeepSliceCommand implements Command {
 
         exportDownsampledDataset(slicesToExport);
 
-        IJ.log("Dataset exported in folder "+datasetFolder.getAbsolutePath());
+        IJ.log("Dataset exported in folder "+ dataset_folder.getAbsolutePath());
         new WaitForUserDialog("Now opening DeepSlice webpage",
                 "Drag and drop all slices into the webpage.")
                 .show();
         try {
             ps.open(new URL("https://www.deepslice.com.au/"));
-            ps.open(datasetFolder.toURI().toURL());
+            ps.open(dataset_folder.toURI().toURL());
         } catch (Exception e) {
             mp.errorMessageForUser.accept("Couldn't open DeepSlice from Fiji, ",
-                    "please go to https://www.deepslice.com.au/ and drag and drop your images located in "+datasetFolder.getAbsolutePath());
+                    "please go to https://www.deepslice.com.au/ and drag and drop your images located in "+ dataset_folder.getAbsolutePath());
         }
 
         new WaitForUserDialog("DeepSlice result",
-                "Put the 'results.xml' file into "+datasetFolder.getAbsolutePath()+" then press ok.")
+                "Put the 'results.xml' file into "+ dataset_folder.getAbsolutePath()+" then press ok.")
                 .show();
 
-        File deepSliceResult = new File(datasetFolder, "results.xml");
+        File deepSliceResult = new File(dataset_folder, "results.xml");
 
         if (!deepSliceResult.exists()) {
             mp.errorMessageForUser.accept("Deep Slice registration aborted",
@@ -168,16 +168,16 @@ public class RegistrationDeepSliceCommand implements Command {
         double nPixX = 1000.0 * mp.getROI()[2] / px_size_micron;
         double nPixY = 1000.0 * mp.getROI()[3] / px_size_micron;
 
-        if (allowSlicingAngleChange) {
+        if (allow_slicing_angle_change) {
             logger.debug("Slices pixel number = "+nPixX+" : "+nPixY);
             adjustSlicingAngle(10, slicesToExport, nPixX, nPixY); //
         }
 
-        if (allowChangeSlicingPosition) {
+        if (allow_change_slicing_position) {
             adjustSlicesZPosition(slicesToExport, nPixX, nPixY);
         }
 
-        if (affineTransform) {
+        if (affine_transform) {
             try {
                 affineTransformInPlane(slicesToExport, nPixX, nPixY);
             } catch (InstantiableException e) {
@@ -249,7 +249,7 @@ public class RegistrationDeepSliceCommand implements Command {
 
     private void adjustSlicesZPosition(final List<SliceSources> slices, double nPixX, double nPixY) {
 
-        final String regex = imageName+"_s([0-9]+).*";
+        final String regex = image_name_prefix +"_s([0-9]+).*";
         final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
 
         Map<SliceSources, Double> slicesNewPosition = new HashMap<>();
@@ -276,7 +276,7 @@ public class RegistrationDeepSliceCommand implements Command {
             slicesNewPosition.put(slices.get(iSliceSource), zLocation);
         }
 
-        if (maintainSlicesOrder) {
+        if (maintain_slices_order) {
             // We should swap the position of the one slice with the biggest rank difference until there's no rank difference
             int biggestRankDifference = -1;
             int indexOfSliceWithBiggestRankDifference = -1;
@@ -325,7 +325,7 @@ public class RegistrationDeepSliceCommand implements Command {
         AffineTransform3D toABBA = mp.getReslicedAtlas().getSlicingTransformToAtlas().inverse();
 
         // Transform sources according to anchoring
-        final String regex = imageName+"_s([0-9]+).*";
+        final String regex = image_name_prefix +"_s([0-9]+).*";
         final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
 
 
@@ -392,8 +392,8 @@ public class RegistrationDeepSliceCommand implements Command {
 
         SourcesProcessor preprocess = SourcesProcessorHelper.Identity();
 
-        if (!slicesStringChannel.trim().equals("*")) {
-            List<Integer> indices = Arrays.asList(slicesStringChannel.trim().split(",")).stream().mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
+        if (!slices_string_channels.trim().equals("*")) {
+            List<Integer> indices = Arrays.asList(slices_string_channels.trim().split(",")).stream().mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
 
             int maxIndex = indices.stream().mapToInt(e -> e).max().getAsInt();
 
@@ -410,12 +410,12 @@ public class RegistrationDeepSliceCommand implements Command {
 
             QuickNIIExporter.builder()
                     .roi(mp.getROI())
-                    .cvt8bits(convertTo8Bits)
-                    .jpeg(convertToJpg)
+                    .cvt8bits(convert_to_8_bits)
+                    .jpeg(convert_to_jpg)
                     .setProcessor(preprocess)
                     .slices(slices)
-                    .name(imageName)
-                    .folder(datasetFolder)
+                    .name(image_name_prefix)
+                    .folder(dataset_folder)
                     .pixelSizeMicron(px_size_micron)
                     .interpolate(interpolate)
                     .create()

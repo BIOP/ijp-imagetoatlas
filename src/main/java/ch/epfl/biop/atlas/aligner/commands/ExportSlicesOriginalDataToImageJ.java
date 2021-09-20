@@ -18,17 +18,21 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>Export Original Slices to ImageJ")
+@Plugin(type = Command.class,
+        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>ABBA - Export Original Slices to ImageJ",
+        description = "Export to ImageJ the original unregistered slice data (for each selected slice)." +
+                "If the image has more than 2GPixels, this will fail. "+
+                "Resolution levels can be specified.")
 public class ExportSlicesOriginalDataToImageJ implements Command {
 
     @Parameter
     MultiSlicePositioner mp;
 
     @Parameter(label = "Slices channels, 0-based, comma separated, '*' for all channels", description = "'0,2' for channels 0 and 2")
-    String slicesStringChannel = "*";
+    String slices_string_channels = "*";
 
     @Parameter(label = "Resolution level (0 = max resolution)")
-    int resolutionLevel = 0;
+    int resolution_level = 0;
 
     @Parameter(label = "verbose")
     boolean verbose = false;
@@ -49,8 +53,8 @@ public class ExportSlicesOriginalDataToImageJ implements Command {
 
         SourcesProcessor preprocess = SourcesProcessorHelper.Identity();
 
-        if (!slicesStringChannel.trim().equals("*")) {
-            List<Integer> indices = Arrays.stream(slicesStringChannel.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
+        if (!slices_string_channels.trim().equals("*")) {
+            List<Integer> indices = Arrays.stream(slices_string_channels.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
 
             int maxIndex = indices.stream().mapToInt(e -> e).max().getAsInt();
 
@@ -70,8 +74,8 @@ public class ExportSlicesOriginalDataToImageJ implements Command {
             for (SliceSources slice : slicesToExport) {
 
                 List<SourceAndConverter> sliceSources = Arrays.asList(preprocess.apply(slice.getOriginalSources()));
-                CZTRange range = ImagePlusGetter.fromSources(sliceSources, 0, resolutionLevel);
-                images[index] = ImagePlusGetter.getImagePlus(sliceSources.get(0).getSpimSource().getName(), sliceSources, resolutionLevel, range, verbose);
+                CZTRange range = ImagePlusGetter.fromSources(sliceSources, 0, resolution_level);
+                images[index] = ImagePlusGetter.getImagePlus(sliceSources.get(0).getSpimSource().getName(), sliceSources, resolution_level, range, verbose);
                 images[index].show();
                 index++;
             }

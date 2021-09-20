@@ -8,7 +8,7 @@ import org.scijava.plugin.Plugin;
 import java.io.File;
 
 @Plugin(type = Command.class,
-        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>Export Regions To File",
+        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>ABBA - Export Regions To File",
         description = "Export the transformed atlas regions of currently selected slices as ImageJ roi zip files.")
 public class ExportRegionsToFileCommand implements Command {
 
@@ -16,18 +16,18 @@ public class ExportRegionsToFileCommand implements Command {
     MultiSlicePositioner mp;
 
     @Parameter(label="Roi Naming",choices={"name","acronym","id","Roi Manager Index (no suffix)"})
-    String namingChoice;
+    String naming_choice;
 
     @Parameter(label="Directory for ROI Saving", style = "directory")
-    File dirOutput;
+    File dir_output;
 
     @Parameter(label="Erase Previous ROIs")
-    boolean erasePreviousFile;
+    boolean erase_previous_file;
 
     @Override
     public void run() {
         // Cannot be accessed
-        mp.exportSelectedSlicesRegionsToFile(namingChoice, dirOutput, erasePreviousFile);
+        mp.exportSelectedSlicesRegionsToFile(naming_choice, dir_output, erase_previous_file);
     }
 
 }

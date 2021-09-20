@@ -20,7 +20,6 @@ public class ABBAUserFeedbackCommand implements Command {
     public void run() {
         try {
             ps.open(new URL("https://docs.google.com/forms/d/e/1FAIpQLSfpDNp7nW6SlAhQMhVCRbAQ03lxx7pdIFErx0-INx2e68TaiQ/viewform"));
-
         } catch (IOException e) {
             e.printStackTrace();
         }

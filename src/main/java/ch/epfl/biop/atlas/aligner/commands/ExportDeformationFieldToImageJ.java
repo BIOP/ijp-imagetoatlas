@@ -14,14 +14,21 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>Export Deformation Field to ImageJ")
+@Plugin(type = Command.class,
+        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>ABBA - Export Original Slices Atlas Coordinates to ImageJ",
+        description =
+                "Exports physical coordinates of the atlas in a " +
+                "3 channel (x,y,z) image that matches pixels of the "+
+                "initial unregistered slice (for each selected slice). "+
+                "Resolution levels can be specified."
+)
 public class ExportDeformationFieldToImageJ implements Command {
 
     @Parameter
     MultiSlicePositioner mp;
 
     @Parameter(label = "Resolution level (0 = max resolution)")
-    int resolutionlevel = 0;
+    int resolution_level = 0;
 
     @Parameter(label = "Extra DownSampling")
     int downsampling = 1;
@@ -30,7 +37,7 @@ public class ExportDeformationFieldToImageJ implements Command {
     double tolerance = 10;
 
     @Parameter(label = "Max iterations in invertible transform computation (default 200)")
-    int maxNumberOfIterations = 200;
+    int max_number_of_iterations = 200;
 
     @Parameter(type = ItemIO.OUTPUT)
     ImagePlus[] images;
@@ -52,7 +59,7 @@ public class ExportDeformationFieldToImageJ implements Command {
 
         for (SliceSources slice : slicesToExport) {
             ExportDeformationFieldToImagePlus export = new ExportDeformationFieldToImagePlus(mp, slice,
-                    resolutionlevel, downsampling, 0, tolerance, maxNumberOfIterations);
+                    resolution_level, downsampling, 0, tolerance, max_number_of_iterations);
 
             tasks.put(slice, export);
             export.runRequest();
