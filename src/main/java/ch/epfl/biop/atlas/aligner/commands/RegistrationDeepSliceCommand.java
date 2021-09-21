@@ -248,12 +248,12 @@ public class RegistrationDeepSliceCommand implements Command {
     }
 
     private void adjustSlicesZPosition(final List<SliceSources> slices, double nPixX, double nPixY) {
+        // The "slices" list is sorted according to the z axis, before deepslice action
 
         final String regex = image_name_prefix +"_s([0-9]+).*";
         final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
 
         Map<SliceSources, Double> slicesNewPosition = new HashMap<>();
-        Map<Integer, SliceSources> mapNewRankToSlices = new HashMap<>();
 
         AffineTransform3D toABBA = mp.getReslicedAtlas().getSlicingTransformToAtlas().inverse();
         for (int i = 0; i < slices.size(); i++) {
@@ -276,6 +276,7 @@ public class RegistrationDeepSliceCommand implements Command {
             slicesNewPosition.put(slices.get(iSliceSource), zLocation);
         }
 
+        Map<Integer, SliceSources> mapNewRankToSlices = new HashMap<>();
         if (maintain_slices_order) {
             // We should swap the position of the one slice with the biggest rank difference until there's no rank difference
             int biggestRankDifference = -1;
@@ -309,7 +310,7 @@ public class RegistrationDeepSliceCommand implements Command {
 
                 // Moving slice indexOfSliceWithBiggestRankDifference to a new rank targetIndex
                 double targetLocation = slicesNewPosition.get(mapNewRankToSlices.get(targetIndex)); // NPE !!
-                if (direction<0) targetLocation+=0.01;
+                if (direction<0) targetLocation+=0.01; // TODO : get proper minimal resolution, not hardcoded!
                 if (direction>0) targetLocation-=0.01;
                 slicesNewPosition.put(slices.get(indexOfSliceWithBiggestRankDifference), targetLocation);
             }
@@ -327,7 +328,6 @@ public class RegistrationDeepSliceCommand implements Command {
         // Transform sources according to anchoring
         final String regex = image_name_prefix +"_s([0-9]+).*";
         final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
-
 
         for (int i = 0; i < slices.size(); i++) {
             QuickNIISlice slice = series.slices[i];
