@@ -6,6 +6,11 @@ import ch.epfl.biop.atlas.aligner.sourcepreprocessors.SourcesProcessor;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 
+/**
+ * Abstract class which can be extended for all registration uis which
+ * support only a single channel for the registration.
+ * Validation of the user inputs is performed before the registration is started
+ */
 abstract public class SingleChannelRegistrationCommand implements Command {
 
     @Parameter

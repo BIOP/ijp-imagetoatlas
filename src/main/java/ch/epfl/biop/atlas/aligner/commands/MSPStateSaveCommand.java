@@ -7,7 +7,9 @@ import org.scijava.plugin.Plugin;
 
 import java.io.File;
 
-@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>File>ABBA - Save State [Experimental]")
+@Plugin(type = Command.class,
+        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>File>ABBA - Save State [Experimental]",
+        description = "Saves the current registration state")
 public class MSPStateSaveCommand implements Command {
 
     @Parameter

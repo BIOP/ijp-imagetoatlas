@@ -15,7 +15,8 @@ import java.io.File;
 import java.util.concurrent.ExecutionException;
 
 @Plugin(type = Command.class,
-        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Import>ABBA - Import QuPath Project")
+        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Import>ABBA - Import QuPath Project",
+        description = "Import images of a QuPath project as slices into ABBA")
 public class ImportQuPathProjectCommand implements Command {
 
     @Parameter

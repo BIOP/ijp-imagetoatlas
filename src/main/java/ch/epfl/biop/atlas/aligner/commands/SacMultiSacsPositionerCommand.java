@@ -19,7 +19,9 @@ import sc.fiji.bdvpg.bdv.supplier.SerializableBdvOptions;
 import javax.swing.JFrame;
 import javax.swing.ImageIcon;
 
-@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Position Multiple Slices")
+@Plugin(type = Command.class,
+        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Position Multiple Slices",
+        description = "Starts ABBA from an Atlas")
 public class SacMultiSacsPositionerCommand implements Command {
 
     @Parameter(choices = {"coronal", "sagittal", "horizontal"})

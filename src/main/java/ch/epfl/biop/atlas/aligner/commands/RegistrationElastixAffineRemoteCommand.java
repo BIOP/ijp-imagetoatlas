@@ -9,7 +9,9 @@ import org.scijava.widget.TextWidget;
 import java.util.HashMap;
 import java.util.Map;
 
-@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>ABBA - Elastix Registration (Affine) on Server")
+@Plugin(type = Command.class,
+        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>ABBA - Elastix Registration (Affine) on Server",
+        description = "Uses an Elastix server for affine in plane registration of selected slices")
 public class RegistrationElastixAffineRemoteCommand extends SingleChannelRegistrationCommand {
 
     @Parameter(label = "Registration Server URL")

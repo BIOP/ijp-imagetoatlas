@@ -65,7 +65,9 @@ import java.util.stream.Collectors;
  *
  */
 
-@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>ABBA - DeepSlice Registration")
+@Plugin(type = Command.class,
+        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>ABBA - DeepSlice Registration",
+        description = "Uses Deepslice Web interface for affine in plane and axial registration of selected slices")
 public class RegistrationDeepSliceCommand implements Command {
 
     static Logger logger = LoggerFactory.getLogger(RegistrationDeepSliceCommand.class);

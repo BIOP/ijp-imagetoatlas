@@ -16,7 +16,9 @@ import java.io.File;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Import>ABBA - Import With Bio-Formats")
+@Plugin(type = Command.class,
+        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Import>ABBA - Import With Bio-Formats",
+        description = "Import a Bio-Formats compatible file as brain slices")
 public class ImportImageCommand implements Command {
 
     @Parameter
