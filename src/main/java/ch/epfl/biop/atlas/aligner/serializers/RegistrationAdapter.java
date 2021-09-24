@@ -1,7 +1,7 @@
 package ch.epfl.biop.atlas.aligner.serializers;
 
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
-import ch.epfl.biop.atlas.plugin.PyABBARegistrationPlugin;
+import ch.epfl.biop.atlas.plugin.ExternalABBARegistrationPlugin;
 import ch.epfl.biop.registration.Registration;
 import com.google.gson.*;
 import org.scijava.Context;
@@ -32,7 +32,7 @@ public class RegistrationAdapter implements JsonSerializer<Registration>,
             Registration registration;
 
             logger.debug("Fetching registration plugin "+typeOfT.getTypeName());
-            if (typeOfT.getTypeName().equals(PyABBARegistrationPlugin.class.getName())) {
+            if (typeOfT.getTypeName().equals(ExternalABBARegistrationPlugin.class.getName())) {
                 String registrationTypeName = json
                         .getAsJsonObject()
                         .get("external_type")
@@ -60,14 +60,14 @@ public class RegistrationAdapter implements JsonSerializer<Registration>,
     public JsonElement serialize(Registration registration, Type typeOfSrc, JsonSerializationContext context) {
         JsonObject obj = new JsonObject();
 
-        logger.debug("Serializing registration of type "+registration.getClass().getSimpleName()+" which type is named "+registration.getTypeName());
+        logger.debug("Serializing registration of type "+registration.getClass().getSimpleName()+" which type is named "+registration.getRegistrationTypeName());
         logger.debug("With transform "+registration.getTransform());
         logger.debug("And parameters "+registration.getRegistrationParameters());
-        if (MultiSlicePositioner.isExternalRegistrationPlugin(registration.getTypeName())) {
-            obj.addProperty("type", PyABBARegistrationPlugin.class.getSimpleName());
-            obj.addProperty("external_type", registration.getTypeName());
+        if (MultiSlicePositioner.isExternalRegistrationPlugin(registration.getRegistrationTypeName())) {
+            obj.addProperty("type", ExternalABBARegistrationPlugin.class.getSimpleName());
+            obj.addProperty("external_type", registration.getRegistrationTypeName());
         } else {
-            obj.addProperty("type", registration.getTypeName());
+            obj.addProperty("type", registration.getRegistrationTypeName());
         }
         obj.addProperty("transform", registration.getTransform());
         obj.add("parameters", context.serialize(registration.getRegistrationParameters()));

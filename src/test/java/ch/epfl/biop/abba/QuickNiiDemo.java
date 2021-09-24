@@ -1,4 +1,4 @@
-package ch.epfl.biop;
+package ch.epfl.biop.abba;
 
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.BiopAtlas;

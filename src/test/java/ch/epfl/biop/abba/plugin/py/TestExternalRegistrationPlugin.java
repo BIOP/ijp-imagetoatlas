@@ -1,4 +1,4 @@
-package ch.epfl.biop;
+package ch.epfl.biop.abba.plugin.py;
 
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.ABBACommand;
@@ -6,9 +6,7 @@ import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.atlas.aligner.sourcepreprocessors.SourcesChannelsSelect;
 import ch.epfl.biop.atlas.aligner.sourcepreprocessors.SourcesProcessorHelper;
-import ch.epfl.biop.atlas.plugin.PyIdentityRegistrationPlugin;
-import ch.epfl.biop.atlas.plugin.PySimpleRegistrationWrapper;
-import ch.epfl.biop.atlas.plugin.SimpleRotationDemo;
+import ch.epfl.biop.atlas.plugin.SimpleRegistrationWrapper;
 import ch.epfl.biop.bdv.command.importer.SourceFromImagePlusCommand;
 import ij.IJ;
 import ij.ImagePlus;
@@ -19,25 +17,31 @@ import org.scijava.command.PyCommandBuilder;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TestPyRegistrationPlugin {
+public class TestExternalRegistrationPlugin {
 
     public static void main (String... args) throws Error, Exception{
         final ImageJ ij = new ImageJ();
         ij.ui().showUI();
 
+        String identityRegName = "ext.IdentityRegistration";
+
+        // ----------------- DEMO PROGRAMMATICALLY ADDING REGISTRATION PLUGIN (Statically added)
         // Fully flexible registration plugin
         MultiSlicePositioner
-                .registerRegistrationPlugin(PyIdentityRegistrationPlugin.typeName, () -> new PyIdentityRegistrationPlugin());
+                .registerRegistrationPlugin(identityRegName, () -> new ExternalIdentityRegistrationPlugin());
 
-        addDefaultUI("PyIdentity", PyIdentityRegistrationPlugin.typeName, ij.context());
+        addDefaultUI("External - Identity Registration", identityRegName, ij.context());
 
+        String rotationRegName = "ext.RotationRegistration";
 
         // Simple registration plugin
         MultiSlicePositioner
-                .registerRegistrationPlugin("PyRot1", () -> new PySimpleRegistrationWrapper("PyRot1", new SimpleRotationDemo()));
+                .registerRegistrationPlugin(rotationRegName, () -> new SimpleRegistrationWrapper(rotationRegName, new ExternalSimpleRotationRegistrationPlugin()));
 
-        addDefaultUI("PyRot1Command", "PyRot1", ij.context());
+        addDefaultUI("External - Rotation Registration", rotationRegName, ij.context());
 
+
+        // --------------- Starting ABBA
         MultiSlicePositioner mp = (MultiSlicePositioner) ij.command().run(ABBACommand.class, true).get().getOutput("mp");
 
         ImagePlus demoSlice = IJ.openImage("src/test/resources/demoSlice.tif");
@@ -56,7 +60,7 @@ public class TestPyRegistrationPlugin {
         mp.centerBdvViewOn(slice);
         mp.selectSlice(slice);
 
-        mp.register(PyIdentityRegistrationPlugin.typeName,
+        mp.register(rotationRegName,
                 SourcesProcessorHelper.Identity(),
                 SourcesProcessorHelper.Identity(),
                 new HashMap<>());
@@ -68,7 +72,7 @@ public class TestPyRegistrationPlugin {
                 .input("fixed_channel", Integer.class)
                 .input("moving_channel", Integer.class)
                 .input("mp", MultiSlicePositioner.class)
-                .menuPath("Plugins>BIOP>Atlas>Multi Image To Atlas>Align>pyreg")
+                .menuPath("Plugins>BIOP>Atlas>Multi Image To Atlas>Align>"+commandName)
                 .function((inputs) -> {
                     System.out.println("Inside run");
                     Map<String, Object> params = new HashMap<>();
@@ -76,7 +80,6 @@ public class TestPyRegistrationPlugin {
                             new SourcesChannelsSelect((Integer) inputs.get("fixed_channel")),
                             new SourcesChannelsSelect((Integer) inputs.get("moving_channel")),
                             params);
-
                     Map<String, Object> out = new HashMap<>();
                     return out;
                 }).create(ctx);

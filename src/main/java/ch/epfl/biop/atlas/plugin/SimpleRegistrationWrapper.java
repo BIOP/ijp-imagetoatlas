@@ -22,19 +22,19 @@ import spimdata.imageplus.ImagePlusHelper;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class PySimpleRegistrationWrapper implements PyABBARegistrationPlugin {
+public class SimpleRegistrationWrapper implements ExternalABBARegistrationPlugin {
 
-    public String getTypeName() {
+    public String getRegistrationTypeName() {
         return registrationTypeName;
     }
 
-    public PySimpleRegistrationWrapper(String registrationTypeName, final SimplePyABBARegistrationPlugin simpleRegistration) {
+    public SimpleRegistrationWrapper(String registrationTypeName, final SimpleABBARegistrationPlugin simpleRegistration) {
         this.registration = simpleRegistration;
         this.registrationTypeName = registrationTypeName;
     }
 
     final String registrationTypeName;
-    final SimplePyABBARegistrationPlugin registration;
+    final SimpleABBARegistrationPlugin registration;
 
     Context context;
 

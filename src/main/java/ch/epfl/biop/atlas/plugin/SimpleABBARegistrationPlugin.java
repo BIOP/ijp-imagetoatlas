@@ -6,7 +6,7 @@ import net.imglib2.realtransform.RealTransform;
 
 import java.util.Map;
 
-public interface SimplePyABBARegistrationPlugin {
+public interface SimpleABBARegistrationPlugin {
 
     /**
      * @return Sampling required for the registration, in micrometer

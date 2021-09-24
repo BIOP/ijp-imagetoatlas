@@ -3,10 +3,9 @@ import org.scijava.command.Command;
 
 /**
  * An registration plugin interface without any annotation - useful
- * in order to add a plugin from PyImageJ
+ * mostly useful in order to add a plugin from PyImageJ
  */
-public interface PyABBARegistrationPlugin extends IABBARegistrationPlugin {
-
+public interface ExternalABBARegistrationPlugin extends IABBARegistrationPlugin {
 
     /**
      * Does the registration required an user input ?

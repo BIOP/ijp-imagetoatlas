@@ -1,7 +1,8 @@
-package ch.epfl.biop.atlas.plugin;
+package ch.epfl.biop.abba.plugin.py;
 
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
+import ch.epfl.biop.atlas.plugin.ExternalABBARegistrationPlugin;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.realtransform.RealTransform;
@@ -11,14 +12,12 @@ import org.scijava.command.Command;
 import java.util.HashMap;
 import java.util.Map;
 
-public class PyIdentityRegistrationPlugin implements PyABBARegistrationPlugin {
-
-    final public static String typeName = "PyIdentity";
+public class ExternalIdentityRegistrationPlugin implements ExternalABBARegistrationPlugin {
 
     Map<String, String> params = new HashMap<>();
 
-    public String getTypeName() {
-        return typeName;
+    public String getRegistrationTypeName() {
+        return "PyIdentity";
     }
 
     @Override

@@ -1,4 +1,4 @@
-package ch.epfl.biop;
+package ch.epfl.biop.abba;
 
 import bdv.util.BdvFunctions;
 import bdv.util.BdvHandle;

@@ -11,7 +11,6 @@ import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import ch.epfl.biop.atlas.aligner.serializers.RegistrationAdapter;
 import org.json.JSONArray;
 import org.json.JSONObject;
 

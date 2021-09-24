@@ -105,7 +105,7 @@
 		<package-name>ch.epfl.biop</package-name>
 		<scijava.deleteOtherVersions>true</scijava.deleteOtherVersions>
 		<license.excludes>**/resources/**</license.excludes>
-		<main-class>ch.epfl.biop.ABBALaunch</main-class>
+		<main-class>ch.epfl.biop.abba.ABBALaunch</main-class>
 
 		<bigdataviewer-playground.version>0.3.7</bigdataviewer-playground.version>
 		<bigdataviewer-bioformats.version>0.2.18</bigdataviewer-bioformats.version>

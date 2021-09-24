@@ -169,7 +169,7 @@ public interface Registration<T> {
      * Used for serialisation
      * @return
      */
-    default String getTypeName() {
+    default String getRegistrationTypeName() {
       return this.getClass().getSimpleName();
     };
 }

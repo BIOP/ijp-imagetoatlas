@@ -9,7 +9,7 @@ import ch.epfl.biop.atlas.aligner.commands.*;
 import ch.epfl.biop.atlas.aligner.serializers.*;
 import ch.epfl.biop.atlas.aligner.sourcepreprocessors.*;
 import ch.epfl.biop.atlas.plugin.IABBARegistrationPlugin;
-import ch.epfl.biop.atlas.plugin.PyABBARegistrationPlugin;
+import ch.epfl.biop.atlas.plugin.ExternalABBARegistrationPlugin;
 import ch.epfl.biop.atlas.plugin.RegistrationPluginHelper;
 import ch.epfl.biop.bdv.gui.GraphicalHandle;
 import ch.epfl.biop.bdv.gui.GraphicalHandleListener;
@@ -2175,8 +2175,8 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
             gsonbuilder.registerTypeHierarchyAdapter(plugin.getClass(), registrationAdapter);
         });
 
-        factoryRegistrations.registerSubtype(PyABBARegistrationPlugin.class);
-        gsonbuilder.registerTypeHierarchyAdapter(PyABBARegistrationPlugin.class, registrationAdapter);
+        factoryRegistrations.registerSubtype(ExternalABBARegistrationPlugin.class);
+        gsonbuilder.registerTypeHierarchyAdapter(ExternalABBARegistrationPlugin.class, registrationAdapter);
 
         // For sources processor
 

@@ -5,7 +5,6 @@ import org.scijava.Context;
 import org.scijava.command.Command;
 import org.scijava.plugin.PluginService;
 
-import java.lang.reflect.Method;
 import java.util.Arrays;
 
 // Facilitates accessing annotation values
@@ -21,8 +20,8 @@ public class RegistrationPluginHelper {
                     .getAnnotation(RegistrationTypeProperties.class);
             return annotation.isManual();
         } else {
-            if (reg instanceof PyABBARegistrationPlugin) {
-                return ((PyABBARegistrationPlugin) reg).isManual();
+            if (reg instanceof ExternalABBARegistrationPlugin) {
+                return ((ExternalABBARegistrationPlugin) reg).isManual();
             } else {
                 return false; // Default value if no annotation is present
             }
@@ -39,8 +38,8 @@ public class RegistrationPluginHelper {
                     .getAnnotation(RegistrationTypeProperties.class);
             return annotation.isEditable();
         } else {
-            if (reg instanceof PyABBARegistrationPlugin) {
-                return ((PyABBARegistrationPlugin) reg).isEditable();
+            if (reg instanceof ExternalABBARegistrationPlugin) {
+                return ((ExternalABBARegistrationPlugin) reg).isEditable();
             } else {
                 return false; // Default value if no annotation is present
             }
@@ -57,8 +56,8 @@ public class RegistrationPluginHelper {
                     .getAnnotation(RegistrationTypeProperties.class);
             return annotation.userInterface();
         } else {
-            if (reg instanceof PyABBARegistrationPlugin) {
-                return ((PyABBARegistrationPlugin) reg).userInterface();
+            if (reg instanceof ExternalABBARegistrationPlugin) {
+                return ((ExternalABBARegistrationPlugin) reg).userInterface();
             } else {
                 return new Class[0]; // Default value if no annotation is present
             }

@@ -1,7 +1,9 @@
-package ch.epfl.biop.atlas.plugin;
+package ch.epfl.biop.abba.plugin;
 
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
+import ch.epfl.biop.atlas.plugin.IABBARegistrationPlugin;
+import ch.epfl.biop.atlas.plugin.RegistrationTypeProperties;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import net.imglib2.realtransform.RealTransform;
 import org.scijava.Context;
