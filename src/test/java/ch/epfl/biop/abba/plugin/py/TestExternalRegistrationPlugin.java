@@ -60,10 +60,10 @@ public class TestExternalRegistrationPlugin {
         mp.centerBdvViewOn(slice);
         mp.selectSlice(slice);
 
-        mp.register(rotationRegName,
+        /*mp.register(rotationRegName,
                 SourcesProcessorHelper.Identity(),
                 SourcesProcessorHelper.Identity(),
-                new HashMap<>());
+                new HashMap<>());*/
 
     }
 
