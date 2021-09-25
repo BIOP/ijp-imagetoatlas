@@ -66,12 +66,17 @@ public class ConstructROIsFromImgLabel implements Command {
 		Map<Integer, Set<Integer>> childrenContained = new HashMap<>();
 		possibleValues.forEach(labelValue -> {
 			AtlasNode node = atlas.ontology.getNodeFromLabelMap(labelValue);
-			Set<Integer> valuesMetTheImage = node.children().stream()
-					.map(n -> (AtlasNode)n)
-					.map(AtlasNode::getLabelValue)
-					.filter(possibleValues::contains)
-					.collect(Collectors.toSet());
-			childrenContained.put(labelValue, valuesMetTheImage);
+			if (node == null) {
+				// Get rid of background (0 -1, whatever)
+				// childrenContained.put(labelValue, new HashSet<>());
+			} else {
+				Set<Integer> valuesMetInTheImage = node.children().stream()
+						.map(n -> (AtlasNode) n)
+						.map(AtlasNode::getLabelValue)
+						.filter(possibleValues::contains)
+						.collect(Collectors.toSet());
+				childrenContained.put(labelValue, valuesMetInTheImage);
+			}
 		});
 
 		HashSet<Integer> isLeaf = new HashSet<>();
@@ -120,10 +125,6 @@ public class ConstructROIsFromImgLabel implements Command {
 		boolean containsLeaf=true;
 		HashSet<Float> monitored = new HashSet<>();
 
-		while (possibleValues.size()>1) {
-
-		}
-
 		while (containsLeaf) {
 			List<Float> leavesValues = existingPixelValues
 				.stream()
@@ -137,26 +138,24 @@ public class ConstructROIsFromImgLabel implements Command {
 					roiArray.add(roi);
 
 					//if (atlas.ontology.getParentToParentMap().containsKey((int) (double)v)) {
-					AtlasNode parent = (AtlasNode) atlas.ontology.getNodeFromLabelMap((int) (double)v).parent();
-				    if (parent!=null) {
+				    if (atlas.ontology.getNodeFromLabelMap((int) (double)v)!=null) {
+						AtlasNode parent = (AtlasNode) atlas.ontology.getNodeFromLabelMap((int) (double)v).parent();
+						if (parent!=null) {
 
-						int parentId = parent.getLabelValue();
-						if (monitored.contains(v)) {
-							//System.out.println("id="+v+" has a parent : "+parentId);
-						}
-						fp.setColor(parentId);
-						fp.fill(roi);
-						if (childrenContained.get(parentId)!=null) {
-							if (childrenContained.get(new Integer((int) (float)v)).size()==0) {
-								childrenContained.get(parentId).remove(new Integer((int) (float) v));
+							int parentId = parent.getLabelValue();
+							if (monitored.contains(v)) {
+								//System.out.println("id="+v+" has a parent : "+parentId);
 							}
-							existingPixelValues.add((float)parentId);
+							fp.setColor(parentId);
+							fp.fill(roi);
+							if (childrenContained.get(parentId)!=null) {
+								if (childrenContained.get(new Integer((int) (float)v)).size()==0) {
+									childrenContained.get(parentId).remove(new Integer((int) (float) v));
+								}
+								existingPixelValues.add((float)parentId);
+							}
 						}
-					} else {
-						if (monitored.contains(v)) {
-							//System.out.println("id="+v+" has no parent!");
-						}
-					}
+				    }
 				}
 			);
 			existingPixelValues.removeAll(leavesValues);
@@ -190,7 +189,10 @@ public class ConstructROIsFromImgLabel implements Command {
 
 	private void putOriginalId(Roi roi, String name) {
 		int idRoi = Integer.valueOf(name);
-		roi.setName(Integer.toString(atlas.ontology.getNodeFromLabelMap(idRoi).getId()));//.getOriginalId(idRoi)));
+		AtlasNode node = atlas.ontology.getNodeFromLabelMap(idRoi);
+		if (node != null) {
+			roi.setName(Integer.toString(atlas.ontology.getNodeFromLabelMap(idRoi).getId()));//.getOriginalId(idRoi)));
+		}
 	}
 
 }

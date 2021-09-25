@@ -27,7 +27,7 @@ public class AtlasOntologyHelper {
         AtlasNode p = (AtlasNode) origin.parent();
         while (p!=null) {
             listOfParentLabels.add(p.getLabelValue());
-            p = (AtlasNode) origin.parent();
+            p = (AtlasNode) p.parent();
         }
         return listOfParentLabels;
     }
