@@ -2,14 +2,12 @@ package ch.epfl.biop.atlas.allen.adultmousebrain;
 
 import ch.epfl.biop.atlas.BiopAtlas;
 import ch.epfl.biop.atlas.allen.AllenAtlas;
-import ch.epfl.biop.atlas.allen.AllenOntology;
 import ij.Prefs;
 import org.scijava.ItemIO;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
-import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -24,15 +22,10 @@ public class AllenBrainAdultMouseAtlasCCF2017 extends AllenAtlas implements Comm
 	
 	public static String keyPrefix = AllenBrainAdultMouseAtlasCCF2017.class.getName()+".";
 
-	public static File cachedSampleDir = new File(System.getProperty("user.home"),"cached_atlas");
-
-	// AWS server : http://ec2-18-222-96-84.us-east-2.compute.amazonaws.com:8081/ccf_2017/
-	//static String defaultMapUrl = System.getProperty("user.home")+File.separator+"cached_atlas"+File.separator+"mouse_brain_ccfv3.xml";//"http://ec2-18-222-96-84.us-east-2.compute.amazonaws.com:8081/ccf_2017/";//"file:/home/nico/Dropbox/BIOP/ABA/Data/new/ccf2017-mod65000.xml";
 	@Parameter(label = "URL path to allen brain map data, leave empty for downloading and caching", persist = false)
 	String mapUrl = Prefs.get(keyPrefix+"mapUrl","");
 
-	//static String defaultOntologyUrl = ;//"http://ec2-18-222-96-84.us-east-2.compute.amazonaws.com/1.json";//file:/home/nico/Dropbox/BIOP/ABA/BrainServerTest/1.json";
-    @Parameter(label = "URL path to allen brain ontology data, leave empty for downloading and caching", persist = false)
+	@Parameter(label = "URL path to allen brain ontology data, leave empty for downloading and caching", persist = false)
     String ontologyUrl = Prefs.get(keyPrefix+"ontologyUrl","");
 
 	@Parameter(type= ItemIO.OUTPUT)
@@ -51,8 +44,6 @@ public class AllenBrainAdultMouseAtlasCCF2017 extends AllenAtlas implements Comm
 			}
 
 			this.initialize(mapURL, ontologyURL);
-
-			((AllenOntology)this.ontology).mutateToModulo(65000); // Solves issue of very big indexes in allen brain ontology. The map has also been moduloed.
 
 	        Prefs.set(keyPrefix + "mapUrl", mapURL.toString());
 	        Prefs.set(keyPrefix + "ontologyUrl", ontologyURL.toString());

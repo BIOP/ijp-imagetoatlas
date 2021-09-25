@@ -4,6 +4,7 @@ import bdv.util.*;
 import bdv.viewer.Interpolation;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.ResourcesMonitor;
+import ch.epfl.biop.atlas.AtlasNode;
 import ch.epfl.biop.atlas.BiopAtlas;
 import ch.epfl.biop.atlas.aligner.commands.*;
 import ch.epfl.biop.atlas.aligner.serializers.*;
@@ -1231,14 +1232,16 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
             coordinates += "(L)";
         }
         StringBuilder ontologyLocation = null;
-        if (labelValue!=0) {
-            ontologyLocation = new StringBuilder(biopAtlas.ontology.getProperties(labelValue).get("acronym"));
-            while (labelValue!=biopAtlas.ontology.getRootIndex()) {
-                labelValue = biopAtlas.ontology.getParent(labelValue);
-                if (labelValue!=biopAtlas.ontology.getRootIndex())
-                    ontologyLocation.append("<").append(biopAtlas.ontology.getProperties(labelValue).get("acronym"));
-            }
 
+        AtlasNode node = biopAtlas.ontology.getNodeFromLabelMap(labelValue);
+        if (node!=null) {
+            ontologyLocation = new StringBuilder(node.toString());
+            while (node.parent()!=null) {
+                node = (AtlasNode) node.parent();
+                if (node!=null) {
+                    ontologyLocation.append("<").append(node.toString());
+                }
+            }
         }
 
         g.setFont(new Font("TimesRoman", Font.BOLD, 16));
