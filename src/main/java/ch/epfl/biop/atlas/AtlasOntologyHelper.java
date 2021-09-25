@@ -31,4 +31,15 @@ public class AtlasOntologyHelper {
         }
         return listOfParentLabels;
     }
+
+    public static Map<Integer, AtlasNode> buildIdToAtlasNodeMap(AtlasNode root) {
+        Map<Integer, AtlasNode> result = new HashMap<>();
+        return appendToIdToAtlasNodeMap(result, root);
+    }
+
+    private static Map<Integer, AtlasNode> appendToIdToAtlasNodeMap(Map<Integer, AtlasNode> map, AtlasNode node) {
+        map.put(node.getId(), node);
+        node.children().forEach(child -> appendToIdToAtlasNodeMap(map, (AtlasNode) child));
+        return map;
+    }
 }

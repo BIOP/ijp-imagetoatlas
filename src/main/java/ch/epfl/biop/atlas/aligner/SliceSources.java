@@ -4,6 +4,7 @@ import bdv.util.BoundedRealTransform;
 import bdv.util.QuPathBdvHelper;
 import bdv.util.RealTransformHelper;
 import bdv.viewer.SourceAndConverter;
+import ch.epfl.biop.atlas.AtlasNode;
 import ch.epfl.biop.atlas.aligner.sourcepreprocessors.*;
 import ch.epfl.biop.atlas.commands.ConstructROIsFromImgLabel;
 import ch.epfl.biop.atlas.plugin.RegistrationPluginHelper;
@@ -672,15 +673,7 @@ public class SliceSources {
 
         if (computeLabelImageNecessary) {
             computeLabelImage(at3D);
-        } /*else {
-            while (labelImageBeingComputed) {
-                try {
-                    Thread.sleep(100);
-                } catch (Exception e) {
-
-                }
-            }
-        }*/
+        }
 
         computeTransformedRois();
 
@@ -689,9 +682,9 @@ public class SliceSources {
         for (int i=0;i<roiList.rois.size();i++) {
             CompositeFloatPoly roi = roiList.rois.get(i);
             int atlasId = Integer.valueOf(roi.name );
-            String name = "TODO"; // TODO mp.biopAtlas.ontology.getProperties(atlasId).get(namingChoice);
-            roi.name = name;
-            // TODO roi.color = mp.biopAtlas.ontology.getColor(atlasId);
+            AtlasNode node = mp.biopAtlas.ontology.getNodeFromId(atlasId);
+            roi.name = node.data().get(namingChoice);
+            roi.color = mp.biopAtlas.ontology.getColor(node);
         }
 
         IJShapeRoiArray roiArray = (IJShapeRoiArray) leftRightTranformed.to(IJShapeRoiArray.class);

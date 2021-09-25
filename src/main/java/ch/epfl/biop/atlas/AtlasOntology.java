@@ -13,8 +13,10 @@ public interface AtlasOntology {
 	URL getDataSource();
 
 	AtlasNode getRoot();
+
 	Color getColor(AtlasNode node);
 
 	AtlasNode getNodeFromLabelMap(int mapValue);
+	AtlasNode getNodeFromId(int id);
 
 }

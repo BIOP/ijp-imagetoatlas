@@ -23,6 +23,7 @@ public class AllenOntology implements AtlasOntology {
     AllenOntologyJson ontology;
     AtlasNode root;
     Map<Integer, AtlasNode> labelToAtlasNodeMap;
+    Map<Integer, AtlasNode> idToAtlasNodeMap;
 
     @Override
     public void initialize() throws Exception {
@@ -33,8 +34,9 @@ public class AllenOntology implements AtlasOntology {
             Gson gson = new Gson();
             ontology = gson.fromJson(fileReader, AllenOntologyJson.class);
         }
-        root = new AllenOntologyJson.AllenBrainRegionsNode(ontology.msg.get(0), null);
+        root = new AllenBrainRegionsNode(ontology.msg.get(0), null);
         labelToAtlasNodeMap = AtlasOntologyHelper.buildLabelToAtlasNodeMap(root);
+        idToAtlasNodeMap = AtlasOntologyHelper.buildIdToAtlasNodeMap(root);
         // The hierarchy is fully set thanks to the way the tree is constructed in
         // AllenOntologyJson.AllenBrainRegionsNode
     }
@@ -68,12 +70,17 @@ public class AllenOntology implements AtlasOntology {
 
     @Override
     public Color getColor(AtlasNode node) {
-        return hex2Rgb(((AllenOntologyJson.AllenBrainRegionsNode) node).properties.get("color_hex_triplet"));
+        return hex2Rgb(((AllenBrainRegionsNode) node).properties.get("color_hex_triplet"));
     }
 
     @Override
     public AtlasNode getNodeFromLabelMap(int mapValue) {
         return labelToAtlasNodeMap.get(mapValue);
+    }
+
+    @Override
+    public AtlasNode getNodeFromId(int id) {
+        return idToAtlasNodeMap.get(id);
     }
 
 }
