@@ -1,19 +1,16 @@
 package ch.epfl.biop.atlas.commands;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import ch.epfl.biop.atlas.AtlasNode;
+import ch.epfl.biop.atlas.AtlasOntologyHelper;
 import ch.epfl.biop.java.utilities.roi.types.IJShapeRoiArray;
 import org.scijava.ItemIO;
 import org.scijava.command.Command;
 import org.scijava.object.ObjectService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-
-import java.util.List;
 
 import ch.epfl.biop.atlas.BiopAtlas;
 import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
@@ -40,8 +37,6 @@ public class ConstructROIsFromImgLabel implements Command {
 	@Parameter
 	public ObjectService os;
 
-	//RoiManager roiManager;
-
 	@Override
 	public void run() {
 		// Gets pixel array and convert them to Float -> no loss of precision for int 16 or
@@ -62,20 +57,23 @@ public class ConstructROIsFromImgLabel implements Command {
 		// keep a list of possible values encountered in the tree
 		HashSet<Integer> possibleValues = new HashSet<>();
 		existingPixelValues.forEach(id -> {
-			possibleValues.addAll(atlas.ontology.getAllParents((int)(float)id));
+			possibleValues.addAll(AtlasOntologyHelper.getAllParentLabels(atlas.ontology, (int)(float) id));
 			possibleValues.add((int)(float)id);
 		});
 
-		// Goes opposite
-		// List all the values of the children that will be encountered for each label
-		// For instance some children node will never be met because they are not part of the slice
-		Map<Integer, List<Integer>> childrenContained = new HashMap<>();
-		atlas.ontology.getParentToChildrenMap().forEach((k,v) -> {
-			ArrayList<Integer> filtered = new ArrayList<>();
-			filtered.addAll(v.stream().filter(id -> possibleValues.contains(id)).collect(Collectors.toList()));
-			childrenContained.put(k, filtered);
+		// We should keep, for each possible values, a way to know
+		// if their are some labels which belong to children labels in the image.
+		Map<Integer, Set<Integer>> childrenContained = new HashMap<>();
+		possibleValues.forEach(labelValue -> {
+			AtlasNode node = atlas.ontology.getNodeFromLabelMap(labelValue);
+			Set<Integer> valuesMetTheImage = node.children().stream()
+					.map(n -> (AtlasNode)n)
+					.map(AtlasNode::getLabelValue)
+					.filter(possibleValues::contains)
+					.collect(Collectors.toSet());
+			childrenContained.put(labelValue, valuesMetTheImage);
 		});
-		
+
 		HashSet<Integer> isLeaf = new HashSet<>();
 		childrenContained.forEach((k,v) -> {
 			if (v.size()==0) {
@@ -121,15 +119,10 @@ public class ConstructROIsFromImgLabel implements Command {
 		}
 		boolean containsLeaf=true;
 		HashSet<Float> monitored = new HashSet<>();
-		/*monitored.add(945f);
-		monitored.add(369f);
-		monitored.add(322f);*/
 
-		/*roiManager = RoiManager.getRoiManager();
-		if (roiManager==null) {
-			roiManager = new RoiManager();
+		while (possibleValues.size()>1) {
+
 		}
-		roiManager.reset();*/
 
 		while (containsLeaf) {
 			List<Float> leavesValues = existingPixelValues
@@ -143,11 +136,13 @@ public class ConstructROIsFromImgLabel implements Command {
 					roi.setName(Integer.toString((int) (double) v));
 					roiArray.add(roi);
 
-					if (atlas.ontology.getParentToParentMap().containsKey((int) (double)v)) {
+					//if (atlas.ontology.getParentToParentMap().containsKey((int) (double)v)) {
+					AtlasNode parent = (AtlasNode) atlas.ontology.getNodeFromLabelMap((int) (double)v).parent();
+				    if (parent!=null) {
 
-						int parentId = atlas.ontology.getParentToParentMap().get((int) (double)v);
+						int parentId = parent.getLabelValue();
 						if (monitored.contains(v)) {
-							System.out.println("id="+v+" has a parent : "+parentId);
+							//System.out.println("id="+v+" has a parent : "+parentId);
 						}
 						fp.setColor(parentId);
 						fp.fill(roi);
@@ -159,7 +154,7 @@ public class ConstructROIsFromImgLabel implements Command {
 						}
 					} else {
 						if (monitored.contains(v)) {
-							System.out.println("id="+v+" has no parent!");
+							//System.out.println("id="+v+" has no parent!");
 						}
 					}
 				}
@@ -195,19 +190,7 @@ public class ConstructROIsFromImgLabel implements Command {
 
 	private void putOriginalId(Roi roi, String name) {
 		int idRoi = Integer.valueOf(name);
-		roi.setName(Integer.toString(atlas.ontology.getOriginalId(idRoi)));
+		roi.setName(Integer.toString(atlas.ontology.getNodeFromLabelMap(idRoi).getId()));//.getOriginalId(idRoi)));
 	}
-
-	/*void addHierarchyInName(Roi roi, String idNumber) {
-		int idRoi = Integer.valueOf(idNumber);
-		String hierarchy = Integer.toString(atlas.ontology.getOriginalId(idRoi));
-		while (atlas.ontology.getParent(idRoi)!=null) {
-			hierarchy+=">"+atlas.ontology.getOriginalId(atlas.ontology.getParent(idRoi));
-			idRoi = atlas.ontology.getParent(idRoi);
-		}
-		// roi.setName(hierarchy);
-		/*System.out.println("roi = "+idNumber);
-		System.out.println("hierarchy = "+hierarchy);*/
-	//}
 
 }

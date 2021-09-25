@@ -1,23 +1,16 @@
 package ch.epfl.biop.atlas.allen;
 
-import ch.epfl.biop.atlas.AtlasOntology;
-import ch.epfl.biop.atlas.aligner.DeleteSlice;
+import ch.epfl.biop.atlas.AtlasNode;
 import com.google.gson.Gson;
-import org.json.JSONObject;
+import org.scijava.util.TreeNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.*;
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
 
-public class AllenOntologyJson implements AtlasOntology {
+public class AllenOntologyJson {
 
     protected static Logger logger = LoggerFactory.getLogger(AllenOntologyJson.class);
 
@@ -47,173 +40,67 @@ public class AllenOntologyJson implements AtlasOntology {
                 new FileReader(new File("src/main/resources/AllenBrainData/1.json")))){
             Gson gson = new Gson();
             AllenOntologyJson ontology = gson.fromJson(fileReader, AllenOntologyJson.class);
-            writeRegions(ontology.msg, 0);
         }
     }
 
-    public static void writeRegions(List<AllenBrainRegion> regions, int level) {
-        String tabs = "";
-        for (int i=0;i<level;i++) {
-            tabs+="\t";
+    public static class AllenBrainRegionsNode implements AtlasNode {
+        final AllenBrainRegion abr;
+        final AllenBrainRegionsNode parent;
+        final Map<String, String> properties;
+        final List<TreeNode<?>> children;
+
+        public AllenBrainRegionsNode(AllenBrainRegion abr, AllenBrainRegionsNode parent) {
+            this.abr = abr;
+            this.parent = parent;
+            //System.out.println("id = "+abr.id);
+            Map<String, String> mutableMap = new HashMap<>();
+            mutableMap.put("id", Integer.toString(abr.id));
+            mutableMap.put("atlas_id", Integer.toString(abr.atlas_id));
+            mutableMap.put("ontology_id", Integer.toString(abr.ontology_id));
+            mutableMap.put("acronym", abr.acronym);
+            mutableMap.put("name", abr.name);
+            mutableMap.put("color_hex_triplet", abr.color_hex_triplet);
+            mutableMap.put("graph_order", Integer.toString(abr.graph_order));
+            mutableMap.put("st_level", Integer.toString(abr.st_level));
+            mutableMap.put("hemisphere_id", Integer.toString(abr.hemisphere_id));
+            mutableMap.put("parent_structure_id", Integer.toString(abr.parent_structure_id));
+            properties = Collections.unmodifiableMap(mutableMap);
+            children = new ArrayList<>(abr.children.size());
+            abr.children.forEach(child_abr -> {
+                children.add(new AllenBrainRegionsNode(child_abr, this));
+            });
         }
-        final String prefix = tabs;
-        regions.forEach(region -> {
-            logger.debug(prefix+"- "+region.acronym+" ["+region.id+"]");
-            writeRegions(region.children, level+1);
-        });
-    }
 
-    void fillIdMap(List<AllenBrainRegion> regions) {
-        regions.forEach(region -> {
-            this.idToRegion.put(region.id, region);
-            fillIdMap(region.children);
-        });
-    }
-
-   /* public static AllenOntologyJson getOntologyFromFile(File f) {
-        try (Reader fileReader = new BufferedReader(new FileReader(f))){
-            AllenOntologyJson ontology = new Gson().fromJson(fileReader, AllenOntologyJson.class);
-            ontology.fillIdMap(ontology.msg);
-            return ontology;
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+        @Override
+        public int getId() {
+            return abr.id;
         }
-        return null;
-    }*/
 
-    Map<Integer, AllenBrainRegion > idToRegion = new HashMap<>();
-
-    public AllenBrainRegion getRegionFromId(int id) {
-        return idToRegion.get(id);
-    }
-
-    URL dataSource;
-    AllenOntologyJson ontology;
-
-    @Override
-    public void initialize() {
-        ontology = new Gson().fromJson(jsonGetRequest(
-                //"http://api.brain-map.org/api/v2/structure_graph_download/1.json"
-                this.getDataSource().toString()
-        ), AllenOntologyJson.class);
-
-        fillIdMap(ontology.msg);
-    }
-
-    public static String jsonGetRequest(String urlQueryString) {
-        String json = null;
-        try {
-            URL url = new URL(urlQueryString);
-
-            URLConnection connection = (URLConnection) url.openConnection();
-            connection.setDoOutput(true);
-            if (connection instanceof HttpURLConnection) {
-                ((HttpURLConnection) connection).setInstanceFollowRedirects(false);
-                ((HttpURLConnection) connection).setRequestMethod("GET");
-            }
-            connection.setRequestProperty("Content-Type", "application/json");
-            connection.setRequestProperty("charset", "utf-8");
-            connection.connect();
-            InputStream inStream = connection.getInputStream();
-            json = streamToString(inStream); // input stream to string
-        } catch (IOException ex) {
-            ex.printStackTrace();
+        @Override
+        public int getLabelValue() {
+            return abr.id % 65000; // Problem of labels above 65535.. still bijective with mod 65000
         }
-        return json;
-    }
 
-    static String streamToString(InputStream inputStream) {
-        String text = new Scanner(inputStream, "UTF-8").useDelimiter("\\Z").next();
-        //System.out.println(text);
-        return text;
-    }
+        @Override
+        public Map<String, String> data() {
+            return properties;
+        }
 
-    @Override
-    public void setDataSource(URL dataSource) {
-        this.dataSource = dataSource;
-    }
+        @Override
+        public AllenBrainRegionsNode parent() {
+            return parent;
+        }
 
-    @Override
-    public URL getDataSource() {
-        return dataSource;
-    }
+        @Override
+        public void setParent(TreeNode<?> parent) {
+            // Done in the constructor
+            throw new UnsupportedOperationException("Cannot set parent, it is already set");
+        }
 
-    @Override
-    public Map<Integer, List<Integer>> getParentToChildrenMap() {
-
-        return null;
-    }
-
-    @Override
-    public Map<Integer, Integer> getParentToParentMap() {
-        return null;
-    }
-
-    @Override
-    public List<Integer> getAllIds() {
-        return null;
-    }
-
-    @Override
-    public List<Integer> getAllLeaves(int id) {
-        return null;
-    }
-
-    @Override
-    public List<Integer> getAllChildren(int id) {
-        return null;
-    }
-
-    @Override
-    public List<Integer> getAllParents(int id) {
-        return null;
-    }
-
-    @Override
-    public Integer getParent(int id) {
-        return null;
-    }
-
-    @Override
-    public List<Integer> getChildren(int id) {
-        return null;
-    }
-
-    @Override
-    public List<String> getKeys(String key) {
-        return null;
-    }
-
-    @Override
-    public Map<String, String> getProperties(int id) {
-        return null;
-    }
-
-    @Override
-    public Integer getIdFromPooledProperties(String prop) {
-        return null;
-    }
-
-    @Override
-    public Integer getRootIndex() {
-        return 997;
-    }
-
-    @Override
-    public Color getColor(int id) {
-        return null;
-    }
-
-    @Override
-    public String getNamingDisplayProperty() {
-        return null;
-    }
-
-    @Override
-    public Integer getOriginalId(int id) {
-        return null;
+        @Override
+        public List<TreeNode<?>> children() {
+            return children;
+        }
     }
 
 }

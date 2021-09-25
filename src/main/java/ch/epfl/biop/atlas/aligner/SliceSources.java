@@ -689,9 +689,9 @@ public class SliceSources {
         for (int i=0;i<roiList.rois.size();i++) {
             CompositeFloatPoly roi = roiList.rois.get(i);
             int atlasId = Integer.valueOf(roi.name );
-            String name = mp.biopAtlas.ontology.getProperties(atlasId).get(namingChoice);
+            String name = "TODO"; // TODO mp.biopAtlas.ontology.getProperties(atlasId).get(namingChoice);
             roi.name = name;
-            roi.color = mp.biopAtlas.ontology.getColor(atlasId);
+            // TODO roi.color = mp.biopAtlas.ontology.getColor(atlasId);
         }
 
         IJShapeRoiArray roiArray = (IJShapeRoiArray) leftRightTranformed.to(IJShapeRoiArray.class);

@@ -1231,6 +1231,7 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
             coordinates += "(L)";
         }
         StringBuilder ontologyLocation = null;
+        /* TODO
         if (labelValue!=0) {
             ontologyLocation = new StringBuilder(biopAtlas.ontology.getProperties(labelValue).get("acronym"));
             while (labelValue!=biopAtlas.ontology.getRootIndex()) {
@@ -1238,8 +1239,9 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
                 if (labelValue!=biopAtlas.ontology.getRootIndex())
                     ontologyLocation.append("<").append(biopAtlas.ontology.getProperties(labelValue).get("acronym"));
             }
-
         }
+        */
+
 
         g.setFont(new Font("TimesRoman", Font.BOLD, 16));
         g.setColor(new Color(255, 255, 100, 250));
