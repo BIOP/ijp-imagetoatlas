@@ -2,20 +2,17 @@ package ch.epfl.biop.atlas.aligner;
 
 import bdv.util.BoundedRealTransform;
 import bdv.util.QuPathBdvHelper;
-import bdv.util.RealTransformHelper;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.AtlasNode;
 import ch.epfl.biop.atlas.aligner.sourcepreprocessors.*;
 import ch.epfl.biop.atlas.commands.ConstructROIsFromImgLabel;
 import ch.epfl.biop.atlas.plugin.RegistrationPluginHelper;
-import ch.epfl.biop.bdv.command.exporter.ExportToImagePlusCommand;
 import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
 import ch.epfl.biop.java.utilities.roi.types.CompositeFloatPoly;
 import ch.epfl.biop.java.utilities.roi.types.IJShapeRoiArray;
 import ch.epfl.biop.java.utilities.roi.types.ImageJRoisFile;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import ch.epfl.biop.registration.sourceandconverter.spline.RealTransformSourceAndConverterRegistration;
-import ch.epfl.biop.sourceandconverter.exporter.ImagePlusSampler;
 import ch.epfl.biop.spimdata.qupath.QuPathEntryEntity;
 import ch.epfl.biop.registration.Registration;
 import ch.epfl.biop.registration.sourceandconverter.affine.AffineTransformedSourceWrapperRegistration;
@@ -23,7 +20,6 @@ import ch.epfl.biop.registration.sourceandconverter.affine.CenterZeroRegistratio
 import com.google.gson.Gson;
 import ij.ImagePlus;
 import ij.gui.Roi;
-import ij.gui.ShapeRoi;
 import ij.plugin.frame.RoiManager;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import mpicbg.spim.data.generic.sequence.BasicViewSetup;
@@ -57,7 +53,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-//import static ch.epfl.biop.atlas.aligner.CancelableAction.errlog;
 
 /**
  * Class which contains the current registered SourceAndConverter array
