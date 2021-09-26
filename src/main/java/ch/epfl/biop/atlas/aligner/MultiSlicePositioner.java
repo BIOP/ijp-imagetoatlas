@@ -1646,7 +1646,7 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
             int indexNextKey = 1;
             new MarkActionSequenceBatch(this).runRequest();
             while (indexNextKey<sortedSelected.size()) {
-                if ((sortedSelected.get(indexNextKey).isKeySlice())||(indexNextKey==getSortedSlices().size()-1)) {
+                if ((sortedSelected.get(indexNextKey).isKeySlice())||(indexNextKey==sortedSelected.size()-1)) {
                     double totalSpacing = sortedSelected.get(indexNextKey).getSlicingAxisPosition()-sortedSelected.get(indexPreviousKey).getSlicingAxisPosition();
                     double delta = totalSpacing / (double) (indexNextKey-indexPreviousKey);
                     for (int i = indexPreviousKey + 1; i<indexNextKey; i++) {
