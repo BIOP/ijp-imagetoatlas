@@ -1,4 +1,4 @@
-[![](https://travis-ci.com/BIOP/ijp-imagetoatlas.svg?branch=master)](https://travis-ci.com/BIOP/ijp-imagetoatlas)
+[![](https://github.com/BIOP/ijp-imagetoatlas/actions/workflows/build-main.yml/badge.svg)](https://github.com/BIOP/ijp-imagetoatlas/actions/workflows/build-main.yml)
 
 # Aligning Big Brains & Atlases
 
