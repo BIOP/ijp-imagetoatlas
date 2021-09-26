@@ -87,8 +87,8 @@
 	</issueManagement>
 
 	<ciManagement>
-		<system>Travis CI</system>
-		<url>https://travis-ci.com/BIOP/ijp-imagetoatlas</url>
+		<system>GitHub Actions</system>
+		<url>https://github.com/BIOP/ijp-imagetoatlas/actions</url>
 	</ciManagement>
 
 	<repositories>
