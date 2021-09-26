@@ -92,10 +92,9 @@
 	</ciManagement>
 
 	<repositories>
-		<!-- NB: for project parent -->
 		<repository>
 			<id>scijava.public</id>
-			<url>http://maven.scijava.org/content/groups/public</url>
+			<url>https://maven.scijava.org/content/groups/public</url>
 		</repository>
 	</repositories>
 	
@@ -124,7 +123,6 @@
 		<!--<bigwarp_fiji.version>7.0.2-SNAPSHOT-CATCHSINGULAR</bigwarp_fiji.version>-->
 
 		<ijl-utilities-wrappers.version>0.3.20</ijl-utilities-wrappers.version>
-		<json.version>20180813</json.version>
 
 		<elastix_registration_server.version>0.1.4</elastix_registration_server.version>
 		<bigvolumeviewer.version>0.2.0</bigvolumeviewer.version>
@@ -137,21 +135,15 @@
 
 	<dependencies>
         <!-- ImageJ dependencies -->
+		<dependency>
+			<groupId>net.imagej</groupId>
+			<artifactId>imagej-legacy</artifactId>
+		</dependency>
+
         <dependency>
             <groupId>net.imagej</groupId>
             <artifactId>imagej</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>net.imagej</groupId>
-            <artifactId>imagej-legacy</artifactId>
-        </dependency>
-
-		<dependency>
-			<groupId>org.json</groupId>
-			<artifactId>json</artifactId>
-			<version>${json.version}</version>
-		</dependency>
 
 		<dependency>
 			<groupId>ch.epfl.biop</groupId>
