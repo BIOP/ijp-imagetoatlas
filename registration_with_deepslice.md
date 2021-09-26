@@ -1,6 +1,6 @@
 # Using DeepSlice in ABBA
 
-[DeepSlice](https://researchers.mq.edu.au/en/publications/deepslice-a-deep-neural-network-for-fully-automatic-alignment-of--2) is a deep learning based tool for automatic alignment of whole mouse brain histological sections. It is developed in the McMullan lab group by [Harry Carey](harry.carey@hdr.mq.edu.au) at [Macquarie University](https://www.mq.edu.au/), Sydney, Australia.
+[DeepSlice](https://www.deepslice.com.au/open-guide) is a deep learning based tool for automatic alignment of whole mouse brain histological sections. It is developed in the McMullan lab group by [Harry Carey](harry.carey@hdr.mq.edu.au) at [Macquarie University](https://www.mq.edu.au/), Sydney, Australia.
 
 
 The tool is currently accessible via a web interface at https://www.deepslice.com.au/.
@@ -40,11 +40,15 @@ After pressing ok, you get this window:
 
 ![DeepSlice step 0](assets/img/fiji_deepslice_0.png)
 
-After clicking it, a web page should open at DeepSlice web interface:
+After clicking it, a web page will open in your browser with the DeepSlice interface:
 
 ![DeepSlice web interface](assets/img/deepslice_web.png)
 
 You can drag and drop the content of your dataset folder into this page, and then submit the task.
+
+---
+warning: Checking `Slower but more accurate results` is strongly adivsed because DeepSlice is very fast anyway. If your slices are regularly evenly spaced, you can click `Use section numbers`. Check `Normalise section angles` because ABBA forces this normalization anyway afterwards (only one cutting angle allowed).
+---
 
 When the registration is done, you can download the result xml file:
 
