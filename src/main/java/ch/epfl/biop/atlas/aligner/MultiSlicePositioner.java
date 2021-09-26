@@ -477,6 +477,8 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
             BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportSlicesToQuickNIIDatasetCommand.class, hierarchyLevelsSkipped,"mp", this);
 
             BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, RotateSourcesCommand.class, hierarchyLevelsSkipped,"mp", this);
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, TransformSourcesInteractiveCommand.class, hierarchyLevelsSkipped,"mp", this);
+
             BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, EditSliceThicknessCommand.class, hierarchyLevelsSkipped,"mp", this);
             BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, SliceThicknessMatchNeighborsCommand.class, hierarchyLevelsSkipped,"mp", this);
 
