@@ -77,7 +77,7 @@
 	<scm>
 		<connection>scm:git:git://github.com/BIOP/ijp-imagetoatlas</connection>
 		<developerConnection>scm:git:git@github.com:BIOP/ijp-imagetoatlas</developerConnection>
-		<url>https://github.com/BIOP/ijp-imagetoatlas/</url>
+		<url>https://github.com/BIOP/ijp-imagetoatlas</url>
 		<tag>HEAD</tag>
 	</scm>
 
