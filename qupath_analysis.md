@@ -94,7 +94,12 @@ getDetectionObjects().forEach(detection -> {
 
 This script can also be run in batch.
 
+## Analysis in QuPath
+
+You can use the scripts developed by [@enassar](https://github.com/enassar) and [@nickdelgrosso](https://github.com/nickdelgrosso) in this repository: https://github.com/nickdelgrosso/ABBA-QuPath-utility-scripts in order to automate cell detection and export.
+
 ## Display results in 3D
 
 To be done... combining [PaQuo](https://paquo.readthedocs.io/en/latest/quickstart.html) and [BrainRender](https://github.com/brainglobe/brainrender) looks like the best option for this task. 
 
+## 
