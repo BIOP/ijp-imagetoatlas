@@ -47,7 +47,7 @@ But first, in multi series files like vsi files it could happen that you end up 
 
 ![Removing slices](assets/gif/fiji_remove_slices.gif)
 
-Usually, slices will have multiple channels, autodetected by bio-formats, but while some channels will be useful for analysis, some will be useful just for the sake of registration to the atlas. In order to display only certain channels, you can activate to deactivate the display of selected slices by clicking on the header of the slice display table:
+Usually, slices will have multiple channels, autodetected by bio-formats, but while some channels will be useful for analysis, some will be useful just for the sake of registration to the atlas. In order to display only certain channels, you can activate or deactivate the display of selected slices by clicking on the header of the slice display table:
 
 You can set the color and the min and max display values of these slices:
 
@@ -62,6 +62,12 @@ This procedure starts first by a manual step, which has two goals:
 * Estimate the position of each slice along the atlas
 * Adjust the atlas slicing angles
 
+---
+
+warning: If your slices are of sufficient quality, do not forget to check [**ABBA's DeepSlice integration**](registration_with_deepslice.md) in order to skip the initial manual registration steps.
+
+---
+
 In order to position each slice approximately along the slicing axis, ABBA tries to provide a convenient interface to manipulate series of slices.
 
 ### First coarse positioning
@@ -74,9 +80,19 @@ It could happen that the acquired slices were flipped or rotated compared to the
 
 The first two buttons rotate selected slices by 90 degrees CW or CCW. The next two buttons flip slices vertically or horizontally.
 
-In the top menu bar `Edit>Rotate` can also be used to rotate selected slices along any XYZ axis and with a custom angle in degree (you'll most probably need Z axis rotation).
+In the top menu bar `Edit>ABBA - Rotate` can be used to rotate selected slices along any XYZ axis and with a custom angle in degree (you'll most probably need Z axis rotation).
 
 Contrary to a lot of other actions in ABBA, these actions (flip rotate) are not undone with `ctrl+Z` (and redone with `ctrl+shift+z`). These actions can be easily reversed by applying an opposite rotation / flip.
+
+#### Manual interactive transformation of slices (Scale, Translate, Rotate)
+
+In the top menu bar `Edit>ABBA - Interactive Transform` can be used to apply a transformation on the selected slices. You can rotate, translate and scale anisotropically the slides (slices are often shrunk in Y by about 20 % because of the slicing).
+
+![Interactive slice transformation](assets/gif/fiji-interactivetransform.gif)
+
+This can be convenient if you need a fast visual feedback to the transformations you are applying. Simply close the `Interactive transform` window when you are satisfied with the result. This also works in review mode or with a different overlap mode, if you want to be more precise.
+
+Contrary to a lot of other actions in ABBA, this interactive command cannot be undone with `ctrl+Z` (and redone with `ctrl+shift+z`). However, you can restore the original transformation if you click the `Restore initial settings` button.
 
 #### Correct location of slices along the axis
 
