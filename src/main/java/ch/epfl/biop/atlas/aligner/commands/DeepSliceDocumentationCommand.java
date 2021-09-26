@@ -19,7 +19,7 @@ public class DeepSliceDocumentationCommand implements Command {
     @Override
     public void run() {
         try {
-            ps.open(new URL("https://researchers.mq.edu.au/en/publications/deepslice-a-deep-neural-network-for-fully-automatic-alignment-of--2"));
+            ps.open(new URL("https://www.deepslice.com.au/open-guide"));
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -310,11 +310,13 @@ public class RegistrationDeepSliceCommand implements Command {
                     }
                 }
 
-                // Moving slice indexOfSliceWithBiggestRankDifference to a new rank targetIndex
-                double targetLocation = slicesNewPosition.get(mapNewRankToSlices.get(targetIndex)); // NPE !!
-                if (direction<0) targetLocation+=0.01; // TODO : get proper minimal resolution, not hardcoded!
-                if (direction>0) targetLocation-=0.01;
-                slicesNewPosition.put(slices.get(indexOfSliceWithBiggestRankDifference), targetLocation);
+                if (biggestRankDifference!=0) { // Why move anything if everything is alright ?
+                    // Moving slice indexOfSliceWithBiggestRankDifference to a new rank targetIndex
+                    double targetLocation = slicesNewPosition.get(mapNewRankToSlices.get(targetIndex)); // NPE !!
+                    if (direction < 0) targetLocation += 0.01; // TODO : get proper minimal resolution, not hardcoded!
+                    if (direction > 0) targetLocation -= 0.01;
+                    slicesNewPosition.put(slices.get(indexOfSliceWithBiggestRankDifference), targetLocation);
+                }
             }
 
         }
