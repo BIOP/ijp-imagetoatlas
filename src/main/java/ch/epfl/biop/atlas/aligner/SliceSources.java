@@ -398,6 +398,10 @@ public class SliceSources {
         preTransform.setAffineTransform(at3d);
     }
 
+    public int getNumberOfRegistrations() {
+        return registrations.size()-3;
+    }
+
     public void appendRegistration(Registration<SourceAndConverter<?>[]> reg) {
 
         if (reg instanceof RealTransformSourceAndConverterRegistration) {
