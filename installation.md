@@ -1,5 +1,18 @@
 ## Installation
 
+---
+
+warning:ABBA Currently only works with QuPath 0.2.3
+
+---
+
+## Download all necessary software (windows only)
+
+If you want to gain time, you can run on windows the download_all.bat file from [@enassar](https://github.com/enassar) and [@nickdelgrosso](https://github.com/nickdelgrosso) present in this repository: https://github.com/nickdelgrosso/ABBA-QuPath-utility-scripts 
+
+This script file will download all what's needed for the setup detailed below.
+
+## Step by step standard installation
 The installation consists of four steps detailed in the paragraphs below:
 
 1. Install QuPath and BIOP QuPath extensions,
@@ -11,7 +24,7 @@ The installation consists of four steps detailed in the paragraphs below:
 
 ### 1.  Install BIOP QuPath extensions
 
-Install the [latest QuPath version](https://qupath.github.io/).
+Install the [QuPath version 0.2.3](https://github.com/qupath/qupath/releases/tag/v0.2.3).
 
 Install the QuPath biop extensions and its dependencies:
 * Go to the [latest release](https://github.com/BIOP/qupath-biop-extensions/releases)
@@ -104,3 +117,4 @@ The last two field needs to be completed with the location of the executable fil
   * `transformix` or `transformix.sh`
 
 On following startups, you normally won't need to change anything in this window. The cached atlas data will be detected, preventing a new download.
+

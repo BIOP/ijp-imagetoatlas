@@ -27,6 +27,7 @@ For each animal:
   * [Detect cells in QuPath](qupath_analysis.md#analysis-in-qupath)
   * [Append CCF coordinates in QuPath detected cells measurements](qupath_analysis.md#export-result-into-common-coordinates-of-the-allen-brain-atlas-ccfv3)
   * [Export a table containing, for all cells, their measurements as well as their location in the brain atlas CCF](qupath_analysis.md#display-results)
+* [**Other export modalities (warped slices, etc.)**](export.md)
 * **In your prefered data analysis software, combine and/or display these results for all animals**
 
 You can click on each of the steps above to follow a typical workflow. The user interface is explained progressively through these steps. For convenience, here are links for the various controls which are covered:
