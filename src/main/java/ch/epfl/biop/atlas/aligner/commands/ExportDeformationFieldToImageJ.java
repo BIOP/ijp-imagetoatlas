@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Plugin(type = Command.class,
-        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>ABBA - Export Original Slices Atlas Coordinates to ImageJ",
+        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>ABBA - Export Atlas Coordinates of Original Slices to ImageJ",
         description =
                 "Exports physical coordinates of the atlas in a " +
                 "3 channel (x,y,z) image that matches pixels of the "+
