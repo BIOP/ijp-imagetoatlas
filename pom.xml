@@ -119,7 +119,7 @@
 		<bigdataviewer-core.version>10.2.1</bigdataviewer-core.version>
 		<bigdataviewer-vistools.version>1.0.0-beta-29</bigdataviewer-vistools.version>
 		<imglib2-cache.version>1.0.0-beta-16</imglib2-cache.version>
-		<bigwarp_fiji.version>7.0.2</bigwarp_fiji.version>
+		<bigwarp_fiji.version>7.0.2-SNAPSHOT</bigwarp_fiji.version>
 		<!--<bigwarp_fiji.version>7.0.2-SNAPSHOT-CATCHSINGULAR</bigwarp_fiji.version>-->
 
 		<ijl-utilities-wrappers.version>0.3.20</ijl-utilities-wrappers.version>
