@@ -258,7 +258,7 @@ public class SimpleRegistrationWrapper implements ExternalABBARegistrationPlugin
 
         List<SourceAndConverter> resampledSourceList = sourceList
                 .stream()
-                .map(sac -> new SourceResampler(sac,model,true, false, interpolate,0).get())
+                .map(sac -> new SourceResampler(sac,model,sac.getSpimSource().getName()+"_ResampledLike_"+model.getSpimSource().getName(), true, false, interpolate,0).get())
                 .collect(Collectors.toList());
 
         if ((sourceList.size()>1)) {

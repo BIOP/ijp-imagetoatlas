@@ -599,7 +599,7 @@ public class SliceSources {
         ).get();
 
         SourceResampler resampler = new SourceResampler(null,
-                singleSliceModel, false, false, false, 0
+                singleSliceModel, toString()+"_Model", false, false, false, 0
         );
 
         AffineTransform3D translateZ = new AffineTransform3D();

@@ -17,7 +17,7 @@ public class SourcesResampler implements SourcesProcessor {
     @Override
     public SourceAndConverter[] apply(SourceAndConverter[] sourceAndConverters) {
         SourceResampler resampler = new SourceResampler(null,
-                model, false, false, false, 0
+                model,model.getSpimSource().getName(), false, false, false, 0
         );
         return Arrays.stream(sourceAndConverters)
                 .map(resampler)

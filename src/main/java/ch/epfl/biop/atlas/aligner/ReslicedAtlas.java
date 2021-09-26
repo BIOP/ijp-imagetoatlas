@@ -225,7 +225,7 @@ public class ReslicedAtlas implements RealInterval {
         SourceMosaicZSlicer mosaic = new SourceMosaicZSlicer(null, slicingModel, true, false, false,
                 () -> getStep());
 
-        SourceResampler resampler = new SourceResampler(null, slicingModel, true, false, false, 0);
+        SourceResampler resampler = new SourceResampler(null, slicingModel,slicingModel.getSpimSource().getName(), true, false, false, 0);
 
         centerTransform = null;
 

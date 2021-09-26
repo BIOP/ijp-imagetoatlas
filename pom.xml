@@ -232,7 +232,7 @@
 		<dependency>
 			<groupId>ch.epfl.biop</groupId>
 			<artifactId>pyimagej-scijava-command</artifactId>
-			<version>0.1.3-SNAPSHOT2</version>
+			<version>0.1.2</version>
 		</dependency>
 
 	</dependencies>
