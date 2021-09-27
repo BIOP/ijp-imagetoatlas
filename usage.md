@@ -47,7 +47,7 @@ In order to be fast, ABBA's workflow is designed to avoid time-expensive computa
 
 ### Allen Brain CCFv3
 
-The common coordinate is like this [(source)](http://help.brain-map.org/download/attachments/5308472/3DOrientation.png?version=1&modificationDate=1368132564812&api=v2):
+The common coordinates framework is like this [(source)](http://help.brain-map.org/download/attachments/5308472/3DOrientation.png?version=1&modificationDate=1368132564812&api=v2):
 
 ![img.png](assets/img/ccfv3.png)
 
