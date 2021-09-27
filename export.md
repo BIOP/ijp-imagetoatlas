@@ -88,3 +88,34 @@ This exported stack can be combined with the exported slices in a multi-channel 
 This feature is not implemented yet, but it is not complicated to add. Make sure that you do not prefer the other options mentioned below, but if not, please contact the authors or use the feedback form of ABBA (`Help> ABBA - Give your feedback`) to request this feature.
 
 
+## 3. Export an image of the atlas coordinates onto the slice
+
+Using the backward transform, the command `Export > ABBA - Export Atlas Coordinates of Original Slices to ImageJ` will output, for each slice, a three channel image where each channel correspond to one coordinate in the atlas (3 channels = X, Y, Z coordinates).
+
+![Export atlas coordinates image](assets/img/fiji_export_atlas_coordinates_image.png)
+
+Options:
+
+* `Resolution level (0 = max resolution)`: because the original slice image can be multiscale, you may want to export the atlas coordinate image for subresolution only.
+* `Extra Down Sampling`: downsamples the exported atlas coordinates image to fasten computation
+ `Deformation error tolerance` and `max iterations` can be let to their default values.
+  
+The output is a 32 bit image, which can be saved as a regular imagej image. 
+
+Thanks to this image, you can for instance detect cells in ImageJ on the original slice, and find their corresponding atlas coordinates thanks to this exported image. 
+
+---
+
+:warning: It is possible to export the original slice data as an imagej stack thanks to the command `Export > ABBA - Export Original Slices to ImageJ`.
+
+---
+
+## 4. Export atlas regions in the Roi Manager
+
+Besides [exporting regions in QuPath](qupath_analysis.md), it is possible to export regions to the ROI manager (`export > ABBA - Export Regions to ROI Manager`). However, since images are pretty big, it is not the most recommended workflow.
+
+Here a gif demoing this possibility:
+
+![Exporting regions to the ROI Manager](assets/gif/fiji_export_ij1_roi_manager.gif)
+
+[**Back to step by step tutorial**](usage.md)
