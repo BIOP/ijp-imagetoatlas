@@ -110,6 +110,12 @@ Thanks to this image, you can for instance detect cells in ImageJ on the origina
 
 ---
 
+After adjusting the B&C of the exported image you may get an image looking like the one below:
+
+![Atlas coordinates image](assets/img/fiji_atlas_coordinates_image.png)
+
+A periodic LUT is applied for each channel which allows to easily visualize the warping. What really matters is the value of each pixel in each channel which correpond to the atlas coordinates position in millimeter.
+
 ## 4. Export atlas regions in the Roi Manager
 
 Besides [exporting regions in QuPath](qupath_analysis.md), it is possible to export regions to the ROI manager (`export > ABBA - Export Regions to ROI Manager`). However, since images are pretty big, it is not the most recommended workflow.
