@@ -311,37 +311,4 @@ To open a project where you left it, it is advised to restart Fiji and ABBA, and
 
 ---
 
-## Exporting slices region as ImageJ stack
-
-At any point of the registration procedure, you can export a region of a subset of slices at the resolution of your choice:
-* select the slices to export
-* define the region you want to export:
-  * Click `Define interactively` in the card `Define region of interest`
-    
-![Define a region of interest in ABBA](assets/img/fiji_define_ROI.png)
-
-You can now draw a rectangle in the region of your choice, either in review mode or in positioning mode. You can click `Full Size` to restore the initial field of interest.
-
----
-
-:warning: This region is also used to restrict registrations areas. Most probably you will want to restore the full size before starting a registration.
-
----
-
-* Click, in the top menu bar: `Export > Export slices as ImageJ Stack`, and wait... All slices are exported in parallel. Each slice will appear once it is exported, and when all slices are exported, they will be concatenated into a single stack.
-
-![Export to ImageJ stack options](assets/img/fiji_export_imagej_stack_options.png)
-
-You can select the channels you want to export be separating them with commas, or type `*` to export all channels. Usually, 20 microns per pixel gives a fast and broad overview. It is not advised to export gigantic images this way. Processing big images will be faster by working on untransformed images in QuPath.
-
-Also, do not forget to adjust B&C once the export is done!
-
-## Exporting slices region as ImageJ stack
-
-You can export the atlas the same way as the slices above. Click in the top menu bar `Export > Export Atlas as ImageJ stack`.
-
-![Export Atlas to ImageJ stack options](assets/img/fiji_export_atlas.png)
-
-This exported stack can be combined with the exported slices in a multi-channel stack, if the pixel size is the same.
-
 [**Back to step by step tutorial**](usage.md)

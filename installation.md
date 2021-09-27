@@ -8,7 +8,7 @@
 
 ## Download all necessary software (windows only)
 
-If you want to gain time, you can run on windows the download_all.bat file from [@enassar](https://github.com/enassar) and [@nickdelgrosso](https://github.com/nickdelgrosso) present in this repository: https://github.com/nickdelgrosso/ABBA-QuPath-utility-scripts 
+If you want to gain time, you can run on windows the download_all.bat file from [@enassar](https://github.com/enassar) and [@nickdelgrosso](https://github.com/nickdelgrosso) present in this repository: [https://github.com/nickdelgrosso/ABBA-QuPath-utility-scripts](https://github.com/nickdelgrosso/ABBA-QuPath-utility-scripts) 
 
 This script file will download all what's needed for the setup detailed below.
 
