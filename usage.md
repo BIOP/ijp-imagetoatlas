@@ -45,6 +45,14 @@ You can click on each of the steps above to follow a typical workflow. The user 
 In order to be fast, ABBA's workflow is designed to avoid time-expensive computations. To achieve this, the transformed slices are never fully computed. At the end of the workflow, it is the regions of the atlas which are transformed into the original slices coordinates. This has the extra advantage of avoiding any interpolation of the original data for its analysis. Nonetheless, it can be useful to compute the transformed imaged into the atlas coordinates for display purpose. ABBA thus provides a way to export the transformed images into the atlas coordinates:
 * [Export transformed registered images](registration.md#exporting-slices-region-as-imagej-stack)
 
+### Allen Brain CCFv3
+
+The common coordinate is like this [(source)](http://help.brain-map.org/download/attachments/5308472/3DOrientation.png?version=1&modificationDate=1368132564812&api=v2):
+
+![img.png](assets/img/ccfv3.png)
+
+Mind the axes names and orientations!
+
 ### Troubleshooting
 If you have an issue with ABBA:
 * Look if the answer is not in the documentation.
