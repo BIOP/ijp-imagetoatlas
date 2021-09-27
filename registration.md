@@ -88,7 +88,7 @@ Contrary to a lot of other actions in ABBA, these actions (flip rotate) are not 
 
 In the top menu bar `Edit>ABBA - Interactive Transform` can be used to apply a transformation on the selected slices. You can rotate, translate and scale anisotropically the slides (slices are often shrunk in Y by about 20 % because of the slicing).
 
-![Interactive slice transformation](assets/gif/fiji-interactivetransform.gif)
+![Interactive slice transformation](assets/gif/fiji_interactivetransform.gif)
 
 This can be convenient if you need a fast visual feedback to the transformations you are applying. Simply close the `Interactive transform` window when you are satisfied with the result. This also works in review mode or with a different overlap mode, if you want to be more precise.
 
