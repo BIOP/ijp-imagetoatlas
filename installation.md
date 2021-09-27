@@ -2,7 +2,7 @@
 
 ---
 
-warning:ABBA Currently only works with QuPath 0.2.3
+:warning: ABBA Currently only works with QuPath 0.2.3!
 
 ---
 
