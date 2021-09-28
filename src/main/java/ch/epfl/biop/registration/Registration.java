@@ -15,8 +15,6 @@ public interface Registration<T> {
     /**
      * Is called just after the Registration object creation to pass
      * the current scijava context
-     *
-     * TODO : replace this by an Annotation parameter once this interface
      * is adopted by all registrations
      * @param context
      */
@@ -63,7 +61,7 @@ public interface Registration<T> {
     /**
      * Sets the state of the registration to not done
      * Called when the registration needs to be rerun for real
-     * instead of just restored (TODO : find if this is really useful)
+     * instead of just restored
      *
      */
     void resetRegistration();

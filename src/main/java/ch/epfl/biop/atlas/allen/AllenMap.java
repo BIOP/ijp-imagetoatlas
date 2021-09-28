@@ -144,6 +144,11 @@ public class AllenMap implements AtlasMap {
 	}
 
 	@Override
+	public double getAtlasPrecisionInMillimeter() {
+		return 0.010; // 10 micrometer
+	}
+
+	@Override
 	public String toString() {
 		return name;
 	}

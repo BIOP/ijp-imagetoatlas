@@ -175,8 +175,6 @@ abstract public class GraphicalHandle extends MouseMotionAdapter {
      * install and remove input and action maps according to
      * {@link GraphicalHandle#isPresentAt(int, int)} result of the new mouse movement
      *
-     * TODO : this means that a movement of a graphical element below the mouse is not detected
-     *
      * @param e MouseEvent event
      */
     @Override

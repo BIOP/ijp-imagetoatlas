@@ -45,5 +45,7 @@ public interface AtlasMap {
 
 	SourceAndConverter getLabelImage();
 
+	double getAtlasPrecisionInMillimeter();
+
 	
 }

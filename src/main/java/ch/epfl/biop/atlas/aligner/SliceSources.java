@@ -160,9 +160,9 @@ public class SliceSources {
         }
     }
 
-    protected double zThicknessCorrection = 1;
+    protected double zThicknessCorrection;
 
-    protected double zShiftCorrection = 0;
+    protected double zShiftCorrection;
 
     public double getZThicknessCorrection() {
         return zThicknessCorrection;
@@ -368,7 +368,7 @@ public class SliceSources {
     }
 
     public boolean waitForEndOfAction(CancelableAction action) {
-        if (!mapActionTask.keySet().contains(action)) {
+        if (!mapActionTask.containsKey(action)) {
             logger.debug("(waitForEndOfAction) action "+action+" not found or unrelated to slice "+this);
             return false;
         } else {
@@ -680,7 +680,7 @@ public class SliceSources {
         IJShapeRoiArray roiList = (IJShapeRoiArray) cvtRoisTransformed.to(IJShapeRoiArray.class);
         for (int i=0;i<roiList.rois.size();i++) {
             CompositeFloatPoly roi = roiList.rois.get(i);
-            int atlasId = Integer.valueOf(roi.name );
+            int atlasId = Integer.parseInt(roi.name);
             AtlasNode node = mp.biopAtlas.ontology.getNodeFromId(atlasId);
             roi.name = node.data().get(namingChoice);
             roi.color = mp.biopAtlas.ontology.getColor(node);
@@ -1034,7 +1034,7 @@ public class SliceSources {
 
             if (datasetKeys!=null) {
                 StringBuilder sb = new StringBuilder();
-                datasetKeys.stream().forEach(key -> {
+                datasetKeys.forEach(key -> {
                     String value = "";
                     Object v = SourceAndConverterServices.getSourceAndConverterService().getMetadata(asd,key);
                     if (v!=null) value = v.toString();
@@ -1053,10 +1053,8 @@ public class SliceSources {
                 QuPathEntryEntity qpent = bvs.getAttribute(QuPathEntryEntity.class);
                 sliceInfo+="QuPath project:"+qpent.getQuPathProjectionLocation()+"\n";
                 sliceInfo+=qpent.getName()+" ["+qpent.getId()+"]";
-                //sliceInfo+=QuPathEntryEntity.getUri(qpent.getName())+"]\n";
-                ;
             } else {
-                //QuPathEntryEntity not found"
+                //QuPathEntryEntity not found
             }
         }
         return sliceInfo;
@@ -1066,12 +1064,10 @@ public class SliceSources {
 
     public void keySliceOn() {
         setAsKeySlice = true;
-        //mp.addKeySlice(this);
     }
 
     public void keySliceOff() {
         setAsKeySlice = false;
-        //mp.removeKeySlice(this);
     }
 
     public boolean isKeySlice() {
@@ -1083,8 +1079,6 @@ public class SliceSources {
             Displaysettings.applyDisplaysettings(registered_sacs[idx], ds[idx]);
         }
     }
-
-
 
     public static class RegistrationAndSources {
 

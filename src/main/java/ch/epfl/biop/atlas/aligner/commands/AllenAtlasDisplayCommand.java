@@ -13,6 +13,8 @@ import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
 /**
  * Convenient way of controlling the display settings of the Allen Brain Atlas
  *  This Command is added as a Panel in ABBA's bdv window
+ *
+ *  TODO : Make this command atlas agnostic
  */
 
 @Plugin(type = Command.class)

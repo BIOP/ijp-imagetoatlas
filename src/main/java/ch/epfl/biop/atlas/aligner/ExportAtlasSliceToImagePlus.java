@@ -1,6 +1,5 @@
 package ch.epfl.biop.atlas.aligner;
 
-
 import ch.epfl.biop.atlas.SliceToImagePlus;
 import ch.epfl.biop.atlas.aligner.sourcepreprocessors.SourcesProcessor;
 import ij.ImagePlus;

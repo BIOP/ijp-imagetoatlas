@@ -20,6 +20,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+// TODO : make this command atlas agnostic
+
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>ABBA - Export Atlas to ImageJ",
         description = "Export atlas properties as an ImageJ stack (for each selected slice).")

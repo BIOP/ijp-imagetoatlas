@@ -1,6 +1,5 @@
 package ch.epfl.biop.atlas.aligner;
 
-import net.imglib2.RealPoint;
 import spimdata.util.Displaysettings;
 
 import java.awt.*;

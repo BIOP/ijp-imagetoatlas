@@ -33,9 +33,6 @@ public class ExportDeformationFieldToImageJ implements Command {
     @Parameter(label = "Extra DownSampling")
     int downsampling = 1;
 
-    @Parameter(label = "Deformation error tolerance in microns (default 10)")
-    double tolerance = 10;
-
     @Parameter(label = "Max iterations in invertible transform computation (default 200)")
     int max_number_of_iterations = 200;
 
@@ -46,7 +43,7 @@ public class ExportDeformationFieldToImageJ implements Command {
     public void run() {
         // TODO : check if tasks are done
         List<SliceSources> slicesToExport = mp.getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
-        tolerance = tolerance/1000.0; // micron to mm
+        double tolerance = mp.getAtlas().map.getAtlasPrecisionInMillimeter();
         if (slicesToExport.size()==0) {
             mp.log.accept("No slice selected");
             mp.warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to operate on.");
@@ -73,7 +70,6 @@ public class ExportDeformationFieldToImageJ implements Command {
                 images[i] = tasks.get(slice).getImagePlus();
                 tasks.get(slice).clean();
                 mp.log.accept("Export deformation field to ImagePlus of slice "+slice+" done ("+(i+1)+"/"+images.length+")");
-                //images[i].setTitle("Slice_"+i+"_"+slice);
                 images[i].show();
             } else {
                 mp.errorMessageForUser.accept("Export to ImageJ Stack error","Error in export of slice "+slice);

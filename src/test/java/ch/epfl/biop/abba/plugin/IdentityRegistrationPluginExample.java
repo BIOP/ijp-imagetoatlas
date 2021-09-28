@@ -21,9 +21,6 @@ import java.util.function.Consumer;
  * since potentially multiple channels can be used for registration, each being send to the plugin
  * is an array of SourceAndConverter, each element of the array being a single channel.
  *
- * TODO : explain how to obtain a simple data image from a SourceAndConverter object
- * TODO : finish this example
- *
  */
 @Plugin(type = IABBARegistrationPlugin.class)
 @RegistrationTypeProperties(
@@ -110,7 +107,6 @@ public class IdentityRegistrationPluginExample implements IABBARegistrationPlugi
 
     @Override
     public void resetRegistration() {
-        // TODO : document what that means
         log.accept("Registration has been reset");
     }
 

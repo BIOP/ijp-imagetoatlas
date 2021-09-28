@@ -7,6 +7,7 @@ import org.scijava.plugin.Plugin;
 
 import java.io.File;
 
+// TODO: make this command atlas agnostic
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>ABBA - Export Regions To File",
         description = "Export the transformed atlas regions of currently selected slices as ImageJ roi zip files.")

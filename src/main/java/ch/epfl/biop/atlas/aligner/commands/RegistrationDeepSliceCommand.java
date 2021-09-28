@@ -65,6 +65,8 @@ import java.util.stream.Collectors;
  *
  */
 
+// TODO: allow only in coronal and AB atlas
+
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>ABBA - DeepSlice Registration",
         description = "Uses Deepslice Web interface for affine in plane and axial registration of selected slices")

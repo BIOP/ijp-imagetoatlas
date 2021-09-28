@@ -3,7 +3,6 @@ package ch.epfl.biop.atlas.aligner;
 import bdv.tools.transformation.TransformedSource;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.BiopAtlas;
-import ch.epfl.biop.atlas.aligner.serializers.AlignerState;
 import ch.epfl.biop.sourceandconverter.EmptyMultiResolutionSourceAndConverterCreator;
 import ch.epfl.biop.registration.sourceandconverter.affine.AffineTransformedSourceWrapperRegistration;
 import ch.epfl.biop.sourceandconverter.transform.SourceMosaicZSlicer;
@@ -50,8 +49,6 @@ public class ReslicedAtlas implements RealInterval {
     private double roty;
 
     private double cX, cY, cZ;
-
-    private double cXinSlicingRef, cYinSlicingRef, cZinSlicingRef;
 
     List<Runnable> listeners = new ArrayList<>();
 
@@ -174,10 +171,6 @@ public class ReslicedAtlas implements RealInterval {
         minXAxis = cX-dX*1.15;
         minYAxis = cY-dY*1.15;
 
-        cXinSlicingRef = cX;
-        cYinSlicingRef = cY;
-        cZinSlicingRef = cZ;
-
         RealPoint realCenter = new RealPoint(cX, cY, cZ);
 
         slicingTransfom.inverse().apply(realCenter, realCenter);
@@ -185,10 +178,6 @@ public class ReslicedAtlas implements RealInterval {
         cX = realCenter.getDoublePosition(0);
         cY = realCenter.getDoublePosition(1);
         cZ = realCenter.getDoublePosition(2);
-
-        // Gets slicing resolution
-        // TODO : check null pointer exception if getvoxel not present
-        //double slicingResolution = 0.01;
 
         slicingTransfom.scale(slicingResolution);
 
@@ -223,7 +212,7 @@ public class ReslicedAtlas implements RealInterval {
         SourceAndConverter[] tempNonExtendedSlicedSources = new SourceAndConverter[ba.map.getStructuralImages().size()+1];
 
         SourceMosaicZSlicer mosaic = new SourceMosaicZSlicer(null, slicingModel, true, false, false,
-                () -> getStep());
+                this::getStep);
 
         SourceResampler resampler = new SourceResampler(null, slicingModel,slicingModel.getSpimSource().getName(), true, false, false, 0);
 
@@ -317,7 +306,7 @@ public class ReslicedAtlas implements RealInterval {
         if ((zStep > 0)&&(zStep!=this.zStep)) {
             this.zStep = zStep;
             slicingUpdate();
-            listeners.forEach(r -> r.run());
+            listeners.forEach(Runnable::run);
         }
     }
 
@@ -331,7 +320,7 @@ public class ReslicedAtlas implements RealInterval {
         if (rx!=this.rotx) {
             this.rotx = rx;
             slicingUpdate();
-            listeners.forEach(r -> r.run());
+            listeners.forEach(Runnable::run);
         }
     }
 
@@ -353,7 +342,7 @@ public class ReslicedAtlas implements RealInterval {
         if (ry!=this.roty) {
             this.roty = ry;
             slicingUpdate();
-            listeners.forEach(r -> r.run());
+            listeners.forEach(Runnable::run);
         }
     }
 
@@ -431,9 +420,6 @@ public class ReslicedAtlas implements RealInterval {
             slicingTransfom.preConcatenate(rotMatrix);
         }
 
-        //slicingTransfom.rotate(0,rx);//180.0*Math.PI);
-        //slicingTransfom.rotate(1,ry);///180.0*Math.PI);
-
         // Restore Z axis
         slicingTransfom.set(m20, 0,2 );
         slicingTransfom.set(m21, 1,2 );
@@ -466,7 +452,7 @@ public class ReslicedAtlas implements RealInterval {
 
         centerTr.translate(-centerTransform.get(0,3)/2,0,0);
 
-        at3d = at3d.preConcatenate(centerTr);
+        at3d.preConcatenate(centerTr);
 
         atlasToSlicingTransform = atToInvert.inverse().preConcatenate(at3d);
         nonExtendedAffineTransform.setAffineTransform(atlasToSlicingTransform);

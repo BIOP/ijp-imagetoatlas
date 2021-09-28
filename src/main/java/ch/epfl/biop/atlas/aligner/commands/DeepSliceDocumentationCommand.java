@@ -8,6 +8,8 @@ import org.scijava.plugin.Plugin;
 import java.io.IOException;
 import java.net.URL;
 
+// TODO: link this command to Allen Brain Atlas Coronal only
+
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Help>ABBA - DeepSlice Info",
         description = "Open deep slice reference webpage.")

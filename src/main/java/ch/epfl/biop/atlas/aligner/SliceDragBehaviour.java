@@ -12,7 +12,7 @@ import static ch.epfl.biop.atlas.aligner.MultiSlicePositioner.POSITIONING_MODE_I
 
 public class SliceDragBehaviour implements DragBehaviour {
 
-    private static Logger logger = LoggerFactory.getLogger(SliceDragBehaviour.class);
+    private static final Logger logger = LoggerFactory.getLogger(SliceDragBehaviour.class);
 
     List<SliceSources> affectedSlices = new ArrayList<>();
     final SliceSources sliceDragged;

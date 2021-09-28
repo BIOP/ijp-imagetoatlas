@@ -31,10 +31,6 @@ public class RegistrationElastixAffineCommand extends SingleChannelRegistrationC
                 getFixedFilter(),
                 getMovingFilter(),
                 parameters);
-
-
-
-        //mp.registerElastixAffine(getFixedFilter(), getMovingFilter(), showIJ1Result);
     }
 
 }

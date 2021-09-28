@@ -56,8 +56,6 @@ abstract public class SourceAndConverterRegistration implements IABBARegistratio
     /**
      * Is called just after the Registration object creation to pass
      * the current scijava context
-     *
-     * TODO : replace this by an Annotation parameter once this interface
      * is adopted by all registrations
      * @param context
      */

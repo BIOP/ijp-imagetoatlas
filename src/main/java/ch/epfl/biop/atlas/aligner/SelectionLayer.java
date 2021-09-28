@@ -14,17 +14,13 @@ import java.util.List;
 
 public class SelectionLayer {
 
-    private static Logger logger = LoggerFactory.getLogger(SelectionLayer.class);
+    private static final Logger logger = LoggerFactory.getLogger(SelectionLayer.class);
 
     final MultiSlicePositioner mp;
 
     boolean isCurrentlySelecting = false;
 
     int xCurrentSelectStart, yCurrentSelectStart, xCurrentSelectEnd, yCurrentSelectEnd;
-
-    private int canvasWidth;
-
-    private int canvasHeight;
 
     final ViewerPanel viewer;
 
@@ -34,9 +30,9 @@ public class SelectionLayer {
     }
 
     protected void addSelectionBehaviours(Behaviours behaviours) {
-        behaviours.behaviour( new SelectionLayer.RectangleSelectSourcesBehaviour( SourceSelectorBehaviour.SET ), "select-set-sources", new String[] { "button1" });
-        behaviours.behaviour( new SelectionLayer.RectangleSelectSourcesBehaviour( SourceSelectorBehaviour.ADD ), "select-add-sources", new String[] { "shift button1" });
-        behaviours.behaviour( new SelectionLayer.RectangleSelectSourcesBehaviour( SourceSelectorBehaviour.REMOVE ), "select-remove-sources", new String[] { "ctrl button1" });
+        behaviours.behaviour( new SelectionLayer.RectangleSelectSourcesBehaviour( SourceSelectorBehaviour.SET ), "select-set-sources", "button1");
+        behaviours.behaviour( new SelectionLayer.RectangleSelectSourcesBehaviour( SourceSelectorBehaviour.ADD ), "select-add-sources", "shift button1");
+        behaviours.behaviour( new SelectionLayer.RectangleSelectSourcesBehaviour( SourceSelectorBehaviour.REMOVE ), "select-remove-sources", "ctrl button1");
         // Ctrl + A : select all sources
         // behaviours.behaviour((ClickBehaviour) (x, y) -> ssb.selectedSourceAdd(viewer.state().getVisibleSources()), "select-all-visible-sources", new String[] { "ctrl A" } );
     }
@@ -57,55 +53,47 @@ public class SelectionLayer {
         xCurrentSelectEnd = x;
         yCurrentSelectEnd = y;
         isCurrentlySelecting = false;
-        // Selection is done : but we need to access the trigger keys to understand what's happening
-        Set<SliceSources> currentSelection = this.getLastSelectedSources();
 
-        processSelectionModificationEvent(getLastSelectedSources(), mode, "SelectorOverlay");
+        processSelectionModificationEvent(getLastSelectedSources(), mode);
     }
-
-    //protected Set<SliceSources> selectedSources = ConcurrentHashMap.newKeySet(); // Makes a concurrent set
 
     /**
      * Main function coordinating events : it is called by all the other functions to process the modifications
      * of the selected sources
      * @param currentSources set of sources involved in the current modification
      * @param mode  see SET ADD REMOVE
-     * @param eventSource a String which can indicate the origin of the modification
      */
-    public void processSelectionModificationEvent(Set<SliceSources> currentSources, String mode, String eventSource) {
-        //synchronized (mp.slices) {
+    public void processSelectionModificationEvent(Set<SliceSources> currentSources, String mode) {
         List<SliceSources> slices = mp.getSlices();
-            switch(mode) {
-                case SourceSelectorBehaviour.SET :
-                    for (SliceSources slice : slices) {
+        switch(mode) {
+            case SourceSelectorBehaviour.SET :
+                for (SliceSources slice : slices) {
+                    slice.deSelect();
+                    if (currentSources.contains(slice)&&!slice.isSelected()) {
+                        slice.select();
+                    }
+                }
+                break;
+            case SourceSelectorBehaviour.ADD :
+                for (SliceSources slice : slices) {
+                    // Sanity check : only visible sources can be selected
+                    if (currentSources.contains(slice) && !slice.isSelected()) {
+                        slice.select();
+                    }
+                }
+                break;
+            case SourceSelectorBehaviour.REMOVE :
+                for (SliceSources slice : slices) {
+                    // Sanity check : only visible sources can be selected
+                    if (currentSources.contains(slice) && slice.isSelected()) {
                         slice.deSelect();
-                        if (currentSources.contains(slice)&&!slice.isSelected()) {
-                            slice.select();
-                        }
                     }
-                    break;
-                case SourceSelectorBehaviour.ADD :
-                    for (SliceSources slice : slices) {
-                        // Sanity check : only visible sources can be selected
-                        if (currentSources.contains(slice) && !slice.isSelected()) {
-                            slice.select();
-                        }
-                    }
-                    break;
-                case SourceSelectorBehaviour.REMOVE :
-                    for (SliceSources slice : slices) {
-                        // Sanity check : only visible sources can be selected
-                        if (currentSources.contains(slice) && slice.isSelected()) {
-                            slice.deSelect();
-                        }
-                    }
-                    break;
-                default:
-                    System.err.println("Unhandled "+mode+" selected source modification event");
-                    break;
-            }
-            //viewer.getDisplay().repaint();
-        //}
+                }
+                break;
+            default:
+                System.err.println("Unhandled "+mode+" selected source modification event");
+                break;
+        }
     }
 
     Stroke normalStroke = new BasicStroke();

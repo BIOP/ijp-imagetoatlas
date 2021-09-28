@@ -122,13 +122,13 @@ public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, Mul
                     int iChannel = (col-3)/2;
 
                     SourceAndConverter<?>[] sacs_gui = getSelectedIndices().stream()
-                            .map(idx -> sortedSlices.get(idx))
+                            .map(sortedSlices::get)
                             .filter(slice -> slice.nChannels > iChannel)
                             .map(slice -> slice.getGUIState().getCurrentSources()[iChannel])
                             .toArray(SourceAndConverter<?>[]::new);
 
                     SourceAndConverter<?>[] sacs_original = getSelectedIndices().stream()
-                            .map(idx -> sortedSlices.get(idx))
+                            .map(sortedSlices::get)
                             .filter(slice -> slice.nChannels > iChannel)
                             .map(slice -> slice.getRegisteredSources()[iChannel])
                             .toArray(SourceAndConverter<?>[]::new);
@@ -281,10 +281,6 @@ public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, Mul
         mp.getBdvh().getViewerPanel().getDisplay().repaint(); // To update current selection state
         setCurrentlySelectedIndices(currentSelection);
     }
-
-    /*public void sortSlices() {
-        sortedSlices = mp.getSortedSlices();
-    }*/
 
     @Override
     public void modeChanged(MultiSlicePositioner mp, int oldmode, int newmode) {

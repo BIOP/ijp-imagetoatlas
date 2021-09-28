@@ -34,7 +34,6 @@ public class CenterZeroRegistration extends AffineTransformSourceAndConverterReg
     }
 
     /**
-     * TODO : find a way to remove this function and use the one of the super class
      * @param img image
      * @return transformed images (new source created)
      */

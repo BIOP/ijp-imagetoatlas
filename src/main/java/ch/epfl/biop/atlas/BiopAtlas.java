@@ -14,7 +14,6 @@ abstract public class BiopAtlas {
     //--------------------------- Ontology
     public AtlasOntology ontology;
 
-    
     abstract public void initialize(URL mapURL, URL ontologyURL);
 
 }

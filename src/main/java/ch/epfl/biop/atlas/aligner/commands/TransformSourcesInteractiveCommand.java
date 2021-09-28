@@ -15,6 +15,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+// TODO : makes bounds atlas agnostic
+
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Edit>ABBA - Interactive Transform",
         description = "To use at the beginning of the registration process only! Rotates, scales, translate the original unregistered selected slices")
