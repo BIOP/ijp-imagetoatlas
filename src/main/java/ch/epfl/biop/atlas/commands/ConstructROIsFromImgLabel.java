@@ -66,10 +66,7 @@ public class ConstructROIsFromImgLabel implements Command {
 		Map<Integer, Set<Integer>> childrenContained = new HashMap<>();
 		possibleValues.forEach(labelValue -> {
 			AtlasNode node = atlas.ontology.getNodeFromLabelMap(labelValue);
-			if (node == null) {
-				// Get rid of background (0 -1, whatever)
-				// childrenContained.put(labelValue, new HashSet<>());
-			} else {
+			if (node != null) {
 				Set<Integer> valuesMetInTheImage = node.children().stream()
 						.map(n -> (AtlasNode) n)
 						.map(AtlasNode::getLabelValue)
@@ -123,7 +120,6 @@ public class ConstructROIsFromImgLabel implements Command {
 			}
 		}
 		boolean containsLeaf=true;
-		HashSet<Float> monitored = new HashSet<>();
 
 		while (containsLeaf) {
 			List<Float> leavesValues = existingPixelValues
@@ -143,14 +139,11 @@ public class ConstructROIsFromImgLabel implements Command {
 						if (parent!=null) {
 
 							int parentId = parent.getLabelValue();
-							if (monitored.contains(v)) {
-								//System.out.println("id="+v+" has a parent : "+parentId);
-							}
 							fp.setColor(parentId);
 							fp.fill(roi);
 							if (childrenContained.get(parentId)!=null) {
-								if (childrenContained.get(new Integer((int) (float)v)).size()==0) {
-									childrenContained.get(parentId).remove(new Integer((int) (float) v));
+								if (childrenContained.get((int) (float) v).size()==0) {
+									childrenContained.get(parentId).remove((int) (float) v);
 								}
 								existingPixelValues.add((float)parentId);
 							}
@@ -159,7 +152,7 @@ public class ConstructROIsFromImgLabel implements Command {
 				}
 			);
 			existingPixelValues.removeAll(leavesValues);
-			leavesValues.stream().map(v -> new Integer((int)(float)v)).forEach(e -> childrenContained.remove(e));
+			leavesValues.stream().map(v -> (int) (float) v).forEach(childrenContained::remove);
 			isLeaf.clear();
 			childrenContained.forEach((k,v) -> {
 					if (v.size()==0) {
@@ -188,7 +181,7 @@ public class ConstructROIsFromImgLabel implements Command {
 	}
 
 	private void putOriginalId(Roi roi, String name) {
-		int idRoi = Integer.valueOf(name);
+		int idRoi = Integer.parseInt(name);
 		AtlasNode node = atlas.ontology.getNodeFromLabelMap(idRoi);
 		if (node != null) {
 			roi.setName(Integer.toString(atlas.ontology.getNodeFromLabelMap(idRoi).getId()));//.getOriginalId(idRoi)));

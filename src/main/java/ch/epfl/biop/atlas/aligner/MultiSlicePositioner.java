@@ -1515,7 +1515,7 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
             Optional<BdvHandle> bdvh = getBdvHandleFromViewerPanel(((bdv.viewer.ViewerPanel) support.getComponent()));
             if (bdvh.isPresent()) {
                 double slicingAxisPosition = iSliceNoStep * sizePixX * (int) reslicedAtlas.getStep();
-                createSlice(sacs.toArray(new SourceAndConverter[0]), slicingAxisPosition, 0.01, Tile.class, new Tile(-1));
+                createSlice(sacs.toArray(new SourceAndConverter[0]), slicingAxisPosition, biopAtlas.map.getAtlasPrecisionInMillimeter(), Tile.class, new Tile(-1));
             }
         }
     }

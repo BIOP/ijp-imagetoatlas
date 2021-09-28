@@ -1,17 +1,11 @@
 package ch.epfl.biop.atlas;
 
-import bdv.tools.brightness.ConverterSetup;
 import bdv.viewer.SourceAndConverter;
-import ch.epfl.biop.atlas.aligner.ExportSliceToImagePlus;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.atlas.aligner.sourcepreprocessors.SourcesProcessor;
 import ij.ImagePlus;
-import net.imglib2.converter.Converter;
-import net.imglib2.display.RealARGBColorConverter;
 import net.imglib2.realtransform.AffineTransform3D;
-import net.imglib2.type.numeric.ARGBType;
-import org.scijava.listeners.Listeners;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
