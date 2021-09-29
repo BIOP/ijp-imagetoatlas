@@ -2,6 +2,7 @@ package ch.epfl.biop.atlas.aligner;
 
 import bdv.tools.transformation.TransformedSource;
 import bdv.viewer.SourceAndConverter;
+import ch.epfl.biop.atlas.AtlasMap;
 import ch.epfl.biop.atlas.BiopAtlas;
 import ch.epfl.biop.sourceandconverter.EmptyMultiResolutionSourceAndConverterCreator;
 import ch.epfl.biop.registration.sourceandconverter.affine.AffineTransformedSourceWrapperRegistration;
@@ -93,7 +94,7 @@ public class ReslicedAtlas implements RealInterval {
 
         // No let's check for bounds along the z axis
         // Pick the first SourceAndConverter
-        SourceAndConverter sacForBoundsTesting = ba.map.getStructuralImages().get(ba.map.getImagesKeys().get(0));
+        SourceAndConverter sacForBoundsTesting = ba.getMap().getStructuralImages().get(ba.getMap().getImagesKeys().get(0));
 
         // Gets level 0 (and timepoint 0) and source transform
         AffineTransform3D sacTransform = new AffineTransform3D();
@@ -207,9 +208,11 @@ public class ReslicedAtlas implements RealInterval {
 
         SourceAndConverterServices.getSourceAndConverterService().register(slicingModel);
 
+        AtlasMap map = ba.getMap();
+
         // 1 -
-        extendedSlicedSources = new SourceAndConverter[ba.map.getStructuralImages().size()+1];
-        SourceAndConverter[] tempNonExtendedSlicedSources = new SourceAndConverter[ba.map.getStructuralImages().size()+1];
+        extendedSlicedSources = new SourceAndConverter[map.getStructuralImages().size()+1];
+        SourceAndConverter[] tempNonExtendedSlicedSources = new SourceAndConverter[map.getStructuralImages().size()+1];
 
         SourceMosaicZSlicer mosaic = new SourceMosaicZSlicer(null, slicingModel, true, false, false,
                 this::getStep);
@@ -218,14 +221,14 @@ public class ReslicedAtlas implements RealInterval {
 
         centerTransform = null;
 
-        List<String> keys = ba.map.getImagesKeys();
+        List<String> keys = map.getImagesKeys();
 
-        for (int index = 0; index<ba.map.getStructuralImages().size()+1;index++) {
+        for (int index = 0; index<map.getStructuralImages().size()+1;index++) {
             SourceAndConverter sac;
-            if (index<ba.map.getStructuralImages().size()) {
-                sac = ba.map.getStructuralImages().get(keys.get(index));
+            if (index<map.getStructuralImages().size()) {
+                sac = map.getStructuralImages().get(keys.get(index));
             } else {
-                sac = ba.map.getLabelImage();
+                sac = map.getLabelImage();
             }
 
             SourceAndConverter reslicedSac = mosaic.apply(sac);

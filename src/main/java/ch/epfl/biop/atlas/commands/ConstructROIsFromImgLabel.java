@@ -57,7 +57,7 @@ public class ConstructROIsFromImgLabel implements Command {
 		// keep a list of possible values encountered in the tree
 		HashSet<Integer> possibleValues = new HashSet<>();
 		existingPixelValues.forEach(id -> {
-			possibleValues.addAll(AtlasOntologyHelper.getAllParentLabels(atlas.ontology, (int)(float) id));
+			possibleValues.addAll(AtlasOntologyHelper.getAllParentLabels(atlas.getOntology(), (int)(float) id));
 			possibleValues.add((int)(float)id);
 		});
 
@@ -65,7 +65,7 @@ public class ConstructROIsFromImgLabel implements Command {
 		// if their are some labels which belong to children labels in the image.
 		Map<Integer, Set<Integer>> childrenContained = new HashMap<>();
 		possibleValues.forEach(labelValue -> {
-			AtlasNode node = atlas.ontology.getNodeFromLabelMap(labelValue);
+			AtlasNode node = atlas.getOntology().getNodeFromLabelMap(labelValue);
 			if (node != null) {
 				Set<Integer> valuesMetInTheImage = node.children().stream()
 						.map(n -> (AtlasNode) n)
@@ -134,8 +134,8 @@ public class ConstructROIsFromImgLabel implements Command {
 					roiArray.add(roi);
 
 					//if (atlas.ontology.getParentToParentMap().containsKey((int) (double)v)) {
-				    if (atlas.ontology.getNodeFromLabelMap((int) (double)v)!=null) {
-						AtlasNode parent = (AtlasNode) atlas.ontology.getNodeFromLabelMap((int) (double)v).parent();
+				    if (atlas.getOntology().getNodeFromLabelMap((int) (double)v)!=null) {
+						AtlasNode parent = (AtlasNode) atlas.getOntology().getNodeFromLabelMap((int) (double)v).parent();
 						if (parent!=null) {
 
 							int parentId = parent.getLabelValue();
@@ -182,9 +182,9 @@ public class ConstructROIsFromImgLabel implements Command {
 
 	private void putOriginalId(Roi roi, String name) {
 		int idRoi = Integer.parseInt(name);
-		AtlasNode node = atlas.ontology.getNodeFromLabelMap(idRoi);
+		AtlasNode node = atlas.getOntology().getNodeFromLabelMap(idRoi);
 		if (node != null) {
-			roi.setName(Integer.toString(atlas.ontology.getNodeFromLabelMap(idRoi).getId()));//.getOriginalId(idRoi)));
+			roi.setName(Integer.toString(atlas.getOntology().getNodeFromLabelMap(idRoi).getId()));//.getOriginalId(idRoi)));
 		}
 	}
 

@@ -63,7 +63,7 @@ public class SacMultiSacsPositionerCommand implements Command {
         }
 
         ReslicedAtlas ra = new ReslicedAtlas(ba);
-        ra.setResolution(ba.map.getAtlasPrecisionInMillimeter());
+        ra.setResolution(ba.getMap().getAtlasPrecisionInMillimeter());
         ra.setSlicingTransform(slicingTransfom);
 
         try {

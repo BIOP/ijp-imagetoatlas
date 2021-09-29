@@ -359,7 +359,7 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
             positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.shiftDownSelectedSlices(), "shift_selectedslices_down", "ctrl DOWN", "meta DOWN");
 
             List<SourceAndConverter<?>> sacsToAppend = new ArrayList<>();
-            for (int i = 0; i < biopAtlas.map.getStructuralImages().size(); i++) {
+            for (int i = 0; i < biopAtlas.getMap().getStructuralImages().size(); i++) {
                 sacsToAppend.add(reslicedAtlas.extendedSlicedSources[i]);
                 sacsToAppend.add(reslicedAtlas.nonExtendedSlicedSources[i]);
             }
@@ -1235,7 +1235,7 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
         }
         StringBuilder ontologyLocation = null;
 
-        AtlasNode node = biopAtlas.ontology.getNodeFromLabelMap(labelValue);
+        AtlasNode node = biopAtlas.getOntology().getNodeFromLabelMap(labelValue);
         if (node!=null) {
             ontologyLocation = new StringBuilder(node.toString());
             while (node.parent()!=null) {
@@ -1515,7 +1515,7 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
             Optional<BdvHandle> bdvh = getBdvHandleFromViewerPanel(((bdv.viewer.ViewerPanel) support.getComponent()));
             if (bdvh.isPresent()) {
                 double slicingAxisPosition = iSliceNoStep * sizePixX * (int) reslicedAtlas.getStep();
-                createSlice(sacs.toArray(new SourceAndConverter[0]), slicingAxisPosition, biopAtlas.map.getAtlasPrecisionInMillimeter(), Tile.class, new Tile(-1));
+                createSlice(sacs.toArray(new SourceAndConverter[0]), slicingAxisPosition, biopAtlas.getMap().getAtlasPrecisionInMillimeter(), Tile.class, new Tile(-1));
             }
         }
     }

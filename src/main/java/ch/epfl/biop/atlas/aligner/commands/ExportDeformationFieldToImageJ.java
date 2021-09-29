@@ -43,7 +43,7 @@ public class ExportDeformationFieldToImageJ implements Command {
     public void run() {
         // TODO : check if tasks are done
         List<SliceSources> slicesToExport = mp.getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
-        double tolerance = mp.getAtlas().map.getAtlasPrecisionInMillimeter();
+        double tolerance = mp.getAtlas().getMap().getAtlasPrecisionInMillimeter();
         if (slicesToExport.size()==0) {
             mp.log.accept("No slice selected");
             mp.warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to operate on.");

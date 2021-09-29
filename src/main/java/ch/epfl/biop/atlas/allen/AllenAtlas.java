@@ -2,10 +2,15 @@ package ch.epfl.biop.atlas.allen;
 
 import java.net.URL;
 
+import ch.epfl.biop.atlas.AtlasMap;
+import ch.epfl.biop.atlas.AtlasOntology;
 import ch.epfl.biop.atlas.BiopAtlas;
 
-abstract public class AllenAtlas extends BiopAtlas {
+abstract public class AllenAtlas implements BiopAtlas {
 	// http://download.alleninstitute.org/informatics-archive/current-release/mouse_ccf/
+
+	AllenOntology ontology;
+	AllenMap map;
 
 	@Override
 	public void initialize(URL mapURL, URL ontologyURL) {
@@ -22,5 +27,14 @@ abstract public class AllenAtlas extends BiopAtlas {
 		}
 	}
 
+	@Override
+	public AtlasOntology getOntology() {
+		return ontology;
+	}
+
+	@Override
+	public AtlasMap getMap() {
+		return map;
+	}
 
 }
