@@ -14,13 +14,13 @@ import java.net.URL;
 // Take ply files from : http://download.alleninstitute.org/informatics-archive/current-release/mouse_ccf/annotation/ccf_2017/structure_meshes/ply/
 
 @Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Allen Brain Adult Mouse Brain CCF 2017")
-public class AllenBrainAdultMouseAtlasCCF2017 extends AllenAtlas implements Command {
+public class AllenBrainAdultMouseAtlasCCF2017Command extends AllenAtlas implements Command {
 
 	public String toString() {
 		return "Adult Mouse Brain - Allen Brain Atlas V3";
 	}
 	
-	public static String keyPrefix = AllenBrainAdultMouseAtlasCCF2017.class.getName()+".";
+	public static String keyPrefix = AllenBrainAdultMouseAtlasCCF2017Command.class.getName()+".";
 
 	@Parameter(label = "URL path to allen brain map data, leave empty for downloading and caching", persist = false)
 	String mapUrl = Prefs.get(keyPrefix+"mapUrl","");

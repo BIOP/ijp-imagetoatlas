@@ -1,7 +1,7 @@
 package ch.epfl.biop;
 
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
-import ch.epfl.biop.atlas.allen.adultmousebrain.AllenBrainAdultMouseAtlasCCF2017;
+import ch.epfl.biop.atlas.allen.adultmousebrain.AllenBrainAdultMouseAtlasCCF2017Command;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import ij.Prefs;
@@ -44,7 +44,7 @@ public class ABBAHelper {
         }
     }
 
-    public static String keyPrefix = AllenBrainAdultMouseAtlasCCF2017.class.getName()+".";
+    public static String keyPrefix = AllenBrainAdultMouseAtlasCCF2017Command.class.getName()+".";
 
     public static String getMapUrl() {
         ABBASettings settings = getFromLocalFiji();

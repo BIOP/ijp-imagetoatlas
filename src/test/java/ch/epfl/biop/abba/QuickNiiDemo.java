@@ -2,7 +2,7 @@ package ch.epfl.biop.abba;
 
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.BiopAtlas;
-import ch.epfl.biop.atlas.allen.adultmousebrain.AllenBrainAdultMouseAtlasCCF2017;
+import ch.epfl.biop.atlas.allen.adultmousebrain.AllenBrainAdultMouseAtlasCCF2017Command;
 import ch.epfl.biop.bdv.bioformats.command.BasicOpenFilesWithBigdataviewerBioformatsBridgeCommand;
 import ch.epfl.biop.quicknii.QuickNIISeries;
 import ch.epfl.biop.quicknii.QuickNIISlice;
@@ -59,7 +59,7 @@ public class QuickNiiDemo {
                     (double) source.getSpimSource().getSource(0,0).dimension(1)), new SourceAndConverterAndTimeRange(source, 0));
         }
 
-        BiopAtlas ba = (BiopAtlas) ij.command().run(AllenBrainAdultMouseAtlasCCF2017.class, true
+        BiopAtlas ba = (BiopAtlas) ij.command().run(AllenBrainAdultMouseAtlasCCF2017Command.class, true
                 //"mapUrl", mapUrl,//xmlDatasetFile.toURI().toURL().toString(),
                 //"ontologyUrl", ontologyUrl //jsonFile.toURI().toURL().toString()
         ).get().getOutput("ba");

@@ -104,7 +104,7 @@
 		<package-name>ch.epfl.biop</package-name>
 		<scijava.deleteOtherVersions>true</scijava.deleteOtherVersions>
 		<license.excludes>**/resources/**</license.excludes>
-		<main-class>ch.epfl.biop.abba.ABBALaunch</main-class>
+		<main-class>ch.epfl.biop.abba.ABBALaunchMouse</main-class>
 
 		<bigdataviewer-playground.version>0.3.10</bigdataviewer-playground.version>
 		<bigdataviewer-bioformats.version>0.2.22</bigdataviewer-bioformats.version>

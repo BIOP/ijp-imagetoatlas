@@ -1,15 +1,13 @@
 package ch.epfl.biop.atlas;
 
 import ch.epfl.biop.ABBAHelper;
-import ch.epfl.biop.atlas.BiopAtlas;
 import ch.epfl.biop.atlas.aligner.commands.SacMultiSacsPositionerCommand;
 import ch.epfl.biop.atlas.aligner.commands.SlicerAdjusterInteractiveCommand;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
-import ch.epfl.biop.atlas.allen.adultmousebrain.AllenBrainAdultMouseAtlasCCF2017;
+import ch.epfl.biop.atlas.allen.adultmousebrain.AllenBrainAdultMouseAtlasCCF2017Command;
 import ch.epfl.biop.wrappers.BiopWrappersCheck;
 import ch.epfl.biop.wrappers.elastix.Elastix;
 import ch.epfl.biop.wrappers.transformix.Transformix;
-import ij.Prefs;
 import org.scijava.ItemIO;
 import org.scijava.command.Command;
 import org.scijava.command.CommandModule;
@@ -18,18 +16,15 @@ import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
 import java.io.File;
-import java.net.MalformedURLException;
 import java.util.concurrent.ExecutionException;
-
-import static ch.epfl.biop.atlas.allen.adultmousebrain.AllenBrainAdultMouseAtlasCCF2017.keyPrefix;
 
 /**
  * Allen Brain BIOP Aligner entry command
  */
 
 
-@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>ABBA", initializer = "showlogo")
-public class ABBACommand implements Command {
+@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>ABBA (Allen Adult Mouse Brain)", initializer = "showlogo")
+public class ABBACommandAdultMouseAllenBrainCCFv3 implements Command {
 
     @Parameter
     CommandService cs;
@@ -59,7 +54,7 @@ public class ABBACommand implements Command {
     @Override
     public void run() {
         try {
-            BiopAtlas ba = (BiopAtlas) cs.run(AllenBrainAdultMouseAtlasCCF2017.class, true,
+            BiopAtlas ba = (BiopAtlas) cs.run(AllenBrainAdultMouseAtlasCCF2017Command.class, true,
                     "mapUrl", mapUrl,//xmlDatasetFile.toURI().toURL().toString(),
                             "ontologyUrl", ontologyUrl //jsonFile.toURI().toURL().toString()
                     ).get().getOutput("ba");

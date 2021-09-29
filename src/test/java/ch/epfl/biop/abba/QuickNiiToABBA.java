@@ -1,7 +1,7 @@
 package ch.epfl.biop.abba;
 
 import bdv.viewer.SourceAndConverter;
-import ch.epfl.biop.atlas.ABBACommand;
+import ch.epfl.biop.atlas.ABBACommandAdultMouseAllenBrainCCFv3;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.bdv.bioformats.command.BasicOpenFilesWithBigdataviewerBioformatsBridgeCommand;
 import ch.epfl.biop.quicknii.QuickNIISeries;
@@ -29,7 +29,7 @@ public class QuickNiiToABBA {
         DebugTools.setRootLevel("off");
         //DebugTools.setRootLevel();
 
-        MultiSlicePositioner mp = (MultiSlicePositioner) ij.command().run(ABBACommand.class, true).get().getOutput("mp");
+        MultiSlicePositioner mp = (MultiSlicePositioner) ij.command().run(ABBACommandAdultMouseAllenBrainCCFv3.class, true).get().getOutput("mp");
 
         String path = "src/test/resources/quicknii/";
 

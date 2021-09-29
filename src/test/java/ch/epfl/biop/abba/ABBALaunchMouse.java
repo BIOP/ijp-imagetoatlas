@@ -1,11 +1,10 @@
 package ch.epfl.biop.abba;
 
-import ch.epfl.biop.atlas.ABBACommand;
-import loci.common.DebugTools;
+import ch.epfl.biop.atlas.ABBACommandAdultMouseAllenBrainCCFv3;
 import net.imagej.ImageJ;
 import net.imagej.patcher.LegacyInjector;
 
-public class ABBALaunch {
+public class ABBALaunchMouse {
     static {
         LegacyInjector.preinit();
     }
@@ -16,7 +15,7 @@ public class ABBALaunch {
         //DebugTools.setRootLevel("off");
         //DebugTools.setRootLevel();
 
-        ij.command().run(ABBACommand.class, true).get();
+        ij.command().run(ABBACommandAdultMouseAllenBrainCCFv3.class, true).get();
         //ij.object().getObjects()
 
     }

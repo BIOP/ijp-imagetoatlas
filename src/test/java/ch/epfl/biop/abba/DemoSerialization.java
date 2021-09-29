@@ -1,7 +1,7 @@
 package ch.epfl.biop.abba;
 
 import bdv.viewer.SourceAndConverter;
-import ch.epfl.biop.atlas.ABBACommand;
+import ch.epfl.biop.atlas.ABBACommandAdultMouseAllenBrainCCFv3;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.bdv.command.importer.SourceFromImagePlusCommand;
@@ -20,7 +20,7 @@ public class DemoSerialization {
         ImagePlus demoSlice = IJ.openImage("src/test/resources/demoSlice.tif");
         demoSlice.show();
 
-        MultiSlicePositioner mp = (MultiSlicePositioner) ij.command().run(ABBACommand.class, true).get().getOutput("mp");
+        MultiSlicePositioner mp = (MultiSlicePositioner) ij.command().run(ABBACommandAdultMouseAllenBrainCCFv3.class, true).get().getOutput("mp");
 
         ij.command().run(SourceFromImagePlusCommand.class, true, "imagePlus", demoSlice).get();
 

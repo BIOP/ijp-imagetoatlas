@@ -1,11 +1,7 @@
 package ch.epfl.biop.abba;
 
-import bdv.util.BdvFunctions;
-import bdv.util.BdvHandle;
-import bdv.util.BdvOptions;
-import bdv.util.BdvStackSource;
 import bdv.viewer.SourceAndConverter;
-import ch.epfl.biop.atlas.ABBACommand;
+import ch.epfl.biop.atlas.ABBACommandAdultMouseAllenBrainCCFv3;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import mpicbg.spim.data.sequence.Tile;
 import net.imagej.ImageJ;
@@ -40,7 +36,7 @@ public class DemoRegistrationQuPath {
                             ij.script().run("test.ijm", scriptTest, true).get();
                             System.out.println("Import done.");
 
-        MultiSlicePositioner mp = (MultiSlicePositioner) ij.command().run(ABBACommand.class, true).get().getOutput("mp");
+        MultiSlicePositioner mp = (MultiSlicePositioner) ij.command().run(ABBACommandAdultMouseAllenBrainCCFv3.class, true).get().getOutput("mp");
 
         //MultiSlicePositioner mp = (MultiSlicePositioner) (ij.command().run(SacMultiSacsPositionerCommand.class, true).get().getOutput("mp"));
 
