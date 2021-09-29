@@ -149,6 +149,11 @@ public class AllenMap implements AtlasMap {
 	}
 
 	@Override
+	public AffineTransform3D getPreSlicingTransform() {
+		return new AffineTransform3D();
+	}
+
+	@Override
 	public String toString() {
 		return name;
 	}

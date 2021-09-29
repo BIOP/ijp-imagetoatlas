@@ -72,7 +72,6 @@ public class WaxholmSpragueDawleyRatV2Map implements AtlasMap {
         FunctionRealRandomAccessible leftRightSource = new FunctionRealRandomAccessible(3,
                 leftRightIndicator,	UnsignedShortType::new);
 
-
         final Source< UnsignedShortType > s = new RealRandomAccessibleIntervalSource<>( leftRightSource,
                 FinalInterval.createMinMax( 0, 0, 0, 1000, 1000, 0),
                 new UnsignedShortType(), new AffineTransform3D(), "Left_Right" );
@@ -120,6 +119,12 @@ public class WaxholmSpragueDawleyRatV2Map implements AtlasMap {
     @Override
     public double getAtlasPrecisionInMillimeter() {
         return 0.040;
+    }
+
+    @Override
+    public AffineTransform3D getPreSlicingTransform() {
+        AffineTransform3D at3d = new AffineTransform3D();
+        return at3d;
     }
 
     @Override

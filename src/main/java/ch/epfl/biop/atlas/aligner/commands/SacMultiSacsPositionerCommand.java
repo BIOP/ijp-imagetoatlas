@@ -48,7 +48,7 @@ public class SacMultiSacsPositionerCommand implements Command {
     @Override
     public void run() {
 
-        AffineTransform3D slicingTransfom = new AffineTransform3D();
+        AffineTransform3D slicingTransfom = ba.getMap().getPreSlicingTransform();
 
         switch(slicing_mode) {
             case "coronal" :

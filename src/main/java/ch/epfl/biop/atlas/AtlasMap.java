@@ -6,6 +6,7 @@ import java.util.Map;
 
 import bdv.viewer.SourceAndConverter;
 import ij.ImagePlus;
+import net.imglib2.realtransform.AffineTransform3D;
 
 /**
  * Interface to define an AtlasMap
@@ -47,5 +48,5 @@ public interface AtlasMap {
 
 	double getAtlasPrecisionInMillimeter();
 
-	
+	AffineTransform3D getPreSlicingTransform();
 }
