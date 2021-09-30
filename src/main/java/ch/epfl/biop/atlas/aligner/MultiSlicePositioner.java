@@ -489,8 +489,9 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
             BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, DeepSliceDocumentationCommand.class, hierarchyLevelsSkipped);
 
             logger.debug("Adding bigdataviewer cards");
+            //bdvh.getCardPanel().addCard("Atlas Display", ScijavaSwingUI.getPanel(scijavaCtx, AllenAtlasDisplayCommand.class, "mp", this), true);
 
-            bdvh.getCardPanel().addCard("Atlas Display", ScijavaSwingUI.getPanel(scijavaCtx, AllenAtlasDisplayCommand.class, "mp", this), true);
+            bdvh.getCardPanel().addCard("Atlas Display", ScijavaSwingUI.getPanel(scijavaCtx, AtlasDisplayDynamicCommand.class, "mp", this), true);
 
             bdvh.getCardPanel().addCard("Slices Display", new SliceDisplayPanel(this).getPanel(), true);
 

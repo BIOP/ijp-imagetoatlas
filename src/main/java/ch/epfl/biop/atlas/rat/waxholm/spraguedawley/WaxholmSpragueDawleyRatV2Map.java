@@ -128,6 +128,14 @@ public class WaxholmSpragueDawleyRatV2Map implements AtlasMap {
     }
 
     @Override
+    public double getImageMax(String key) {
+        switch (key) {
+            case "Structure": return 35000;
+            default: return 65535;
+        }
+    }
+
+    @Override
     public String toString() {
         return name;
     }

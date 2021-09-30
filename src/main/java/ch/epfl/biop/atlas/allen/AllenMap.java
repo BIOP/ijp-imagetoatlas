@@ -28,9 +28,9 @@ public class AllenMap implements AtlasMap {
 	public String name;
 
 	// Original source order in xml / hdf5 file
-	final static private int AraSetupId = 0;
+	final static private int NisslSetupId = 0;
 	final static private int LabelBorberSetupId = 1;
-	final static private int NisslSetupId = 2;
+	final static private int AraSetupId = 2;
 	final static private int LabelSetupId = 3;
 
 	final Map<String,SourceAndConverter> atlasSources = new HashMap<>();
@@ -56,7 +56,6 @@ public class AllenMap implements AtlasMap {
 		atlasSources.put("Ara", sacs.get(AraSetupId));
 		atlasSources.put("Nissl", sacs.get(NisslSetupId));
 		atlasSources.put("Label Borders", sacs.get(AllenMap.LabelBorberSetupId));
-		//atlasSources.put("Label", sacs.get(AllenMap.LabelSetupId));
 		labelSource = sacs.get(AllenMap.LabelSetupId);
 
 		BiConsumer<RealLocalizable, UnsignedShortType > leftRightIndicator = (l, t ) -> {
@@ -69,7 +68,6 @@ public class AllenMap implements AtlasMap {
 
 		FunctionRealRandomAccessible leftRightSource = new FunctionRealRandomAccessible(3,
 				leftRightIndicator,	UnsignedShortType::new);
-
 
 		final Source< UnsignedShortType > s = new RealRandomAccessibleIntervalSource<>( leftRightSource,
 				FinalInterval.createMinMax( 0, 0, 0, 1000, 1000, 0),
@@ -89,9 +87,9 @@ public class AllenMap implements AtlasMap {
 		atlasSources.put("Y", ySource);
 		atlasSources.put("Z", zSource);
 
-		SourceAndConverterServices.getSourceAndConverterService().register(xSource);
+		/*SourceAndConverterServices.getSourceAndConverterService().register(xSource);
 		SourceAndConverterServices.getSourceAndConverterService().register(ySource);
-		SourceAndConverterServices.getSourceAndConverterService().register(zSource);
+		SourceAndConverterServices.getSourceAndConverterService().register(zSource);*/
 
 	}
 
@@ -128,8 +126,8 @@ public class AllenMap implements AtlasMap {
 	@Override
 	public List<String> getImagesKeys() {
 		List<String> keys = new ArrayList<>();
-		keys.add("Ara");
 		keys.add("Nissl");
+		keys.add("Ara");
 		keys.add("Label Borders");
 		keys.add("X");
 		keys.add("Y");
@@ -140,7 +138,7 @@ public class AllenMap implements AtlasMap {
 
 	@Override
 	public SourceAndConverter getLabelImage() {
-		return labelSource;//atlasSources.get("Label");
+		return labelSource;
 	}
 
 	@Override
@@ -151,6 +149,16 @@ public class AllenMap implements AtlasMap {
 	@Override
 	public AffineTransform3D getPreSlicingTransform() {
 		return new AffineTransform3D();
+	}
+
+	@Override
+	public double getImageMax(String key) {
+		switch (key) {
+			case "Nissl": return 56000;
+			case "Ara": return 1024;
+			case "Label Borders": return 1024;
+			default: return 65535;
+		}
 	}
 
 	@Override

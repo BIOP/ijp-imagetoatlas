@@ -49,4 +49,6 @@ public interface AtlasMap {
 	double getAtlasPrecisionInMillimeter();
 
 	AffineTransform3D getPreSlicingTransform();
+
+    double getImageMax(String key);
 }
