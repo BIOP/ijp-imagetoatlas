@@ -48,7 +48,6 @@ public class RegistrationPluginHelper {
 
     /**
      * @return the command class the user has to call in order to start a registration
-     * // TODO : restrict a bit the Command to facilitate ui writing
      */
     public static Class<? extends Command>[] userInterfaces(Registration reg) {
         if (reg.getClass().isAnnotationPresent(RegistrationTypeProperties.class)) {

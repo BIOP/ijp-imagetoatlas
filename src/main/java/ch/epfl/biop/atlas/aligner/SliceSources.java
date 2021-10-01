@@ -432,8 +432,8 @@ public class SliceSources {
         // For the mask : we set it as the label image, pre processed identically
         // 0 - remove channel select from pre processor
         SourcesProcessor fixedProcessor = SourcesProcessorHelper.removeChannelsSelect(preprocessFixed);
-        // 1 - adds a channel select for the atlas (indexed 3) TODO : improve way to select indexing
-        fixedProcessor = new SourcesProcessComposer(fixedProcessor, new SourcesChannelsSelect(mp.reslicedAtlas.nonExtendedSlicedSources.length-1));
+        // 1 - adds a channel select for the atlas
+        fixedProcessor = new SourcesProcessComposer(fixedProcessor, new SourcesChannelsSelect(mp.reslicedAtlas.getLabelSourceIndex()));
         reg.setFixedMask(fixedProcessor.apply(mp.reslicedAtlas.nonExtendedSlicedSources));
 
         boolean out = reg.register();
@@ -998,8 +998,8 @@ public class SliceSources {
 
                 // 0 - remove channel select from pre processor
                 SourcesProcessor fixedProcessor = SourcesProcessorHelper.removeChannelsSelect(preprocessFixed);
-                // 1 - adds a channel select for the atlas (indexed 3) TODO : improve way to select indexing
-                fixedProcessor = new SourcesProcessComposer(fixedProcessor, new SourcesChannelsSelect(mp.reslicedAtlas.nonExtendedSlicedSources.length-1));
+                // 1 - adds a channel select for the atlas
+                fixedProcessor = new SourcesProcessComposer(fixedProcessor, new SourcesChannelsSelect(mp.reslicedAtlas.getLabelSourceIndex()));
                 reg.setFixedMask(fixedProcessor.apply(mp.reslicedAtlas.nonExtendedSlicedSources));
 
                 reg.edit();

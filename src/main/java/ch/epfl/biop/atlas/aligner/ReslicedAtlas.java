@@ -230,7 +230,7 @@ public class ReslicedAtlas implements RealInterval {
                 sac = map.getStructuralImages().get(keys.get(index));
                 System.out.println(sac.getSpimSource().getName());
             } else {
-
+                labelIndex = index;
                 System.out.println("index = "+index+"| LABELS");
                 sac = map.getLabelImage();
                 System.out.println(sac.getSpimSource().getName());
@@ -506,6 +506,20 @@ public class ReslicedAtlas implements RealInterval {
 
     public AffineTransform3D getSlicingTransformToAtlas() {
         return atlasToSlicingTransform.inverse().copy();
+    }
+
+    private int labelIndex = -1;
+
+    public int getLabelSourceIndex() {
+        return labelIndex;
+    }
+
+    public int getCoordinateSourceIndex(int coordinates) {
+        return getLabelSourceIndex()-(2-coordinates)-2;
+    }
+
+    public int getLeftRightSourceIndex() {
+        return getLabelSourceIndex()-1;
     }
 
 }

@@ -1198,7 +1198,8 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
         int leftRight;
         float[] coords = new float[3];
         if (displayMode==POSITIONING_MODE_INT) {
-            SourceAndConverter label = reslicedAtlas.extendedSlicedSources[reslicedAtlas.extendedSlicedSources.length-1]; // By convention the label image is the last one
+
+            SourceAndConverter label = reslicedAtlas.extendedSlicedSources[reslicedAtlas.extendedSlicedSources.length-1]; // By convention the label image is the last one (OK)
             labelValue = ((UnsignedShortType) getSourceValueAt(label, globalMouseCoordinates)).get();
             SourceAndConverter lrSource = reslicedAtlas.extendedSlicedSources[reslicedAtlas.extendedSlicedSources.length-2]; // By convention the left right indicator image is the next to last one
             leftRight = ((UnsignedShortType) getSourceValueAt(lrSource, globalMouseCoordinates)).get();
@@ -1212,14 +1213,14 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
             coords[2] = ((FloatType) getSourceValueAt(zSource, globalMouseCoordinates)).get();
         } else {
             assert displayMode == REVIEW_MODE_INT;
-            SourceAndConverter label = reslicedAtlas.nonExtendedSlicedSources[reslicedAtlas.nonExtendedSlicedSources.length-1]; // By convention the label image is the last one
+            SourceAndConverter label = reslicedAtlas.nonExtendedSlicedSources[reslicedAtlas.getLabelSourceIndex()]; // By convention the label image is the last one
             labelValue = ((UnsignedShortType) getSourceValueAt(label, globalMouseCoordinates)).get();
-            SourceAndConverter lrSource = reslicedAtlas.nonExtendedSlicedSources[reslicedAtlas.nonExtendedSlicedSources.length-2]; // By convention the left right indicator image is the next to last one
+            SourceAndConverter lrSource = reslicedAtlas.nonExtendedSlicedSources[reslicedAtlas.getLeftRightSourceIndex()]; // By convention the left right indicator image is the next to last one
             leftRight = ((UnsignedShortType) getSourceValueAt(lrSource, globalMouseCoordinates)).get();
 
-            SourceAndConverter xSource = reslicedAtlas.nonExtendedSlicedSources[reslicedAtlas.nonExtendedSlicedSources.length-5]; // (bad) convention TODO : safer indexing
-            SourceAndConverter ySource = reslicedAtlas.nonExtendedSlicedSources[reslicedAtlas.nonExtendedSlicedSources.length-4]; // By convention the left right indicator image is the next to last one
-            SourceAndConverter zSource = reslicedAtlas.nonExtendedSlicedSources[reslicedAtlas.nonExtendedSlicedSources.length-3]; // By convention the left right indicator image is the next to last one
+            SourceAndConverter xSource = reslicedAtlas.nonExtendedSlicedSources[reslicedAtlas.getCoordinateSourceIndex(0)]; // 0 = X
+            SourceAndConverter ySource = reslicedAtlas.nonExtendedSlicedSources[reslicedAtlas.getCoordinateSourceIndex(1)]; // By convention the left right indicator image is the next to last one
+            SourceAndConverter zSource = reslicedAtlas.nonExtendedSlicedSources[reslicedAtlas.getCoordinateSourceIndex(2)]; // By convention the left right indicator image is the next to last one
 
             coords[0] = ((FloatType) getSourceValueAt(xSource, globalMouseCoordinates)).get();
             coords[1] = ((FloatType) getSourceValueAt(ySource, globalMouseCoordinates)).get();
