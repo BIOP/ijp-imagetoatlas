@@ -465,7 +465,6 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
             BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, EditLastRegistrationCommand.class, hierarchyLevelsSkipped,"mp", this);
             BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Align>ABBA - Remove Last Registration",0, this::removeLastRegistration );
 
-            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportRegionsToFileCommand.class, hierarchyLevelsSkipped,"mp", this);
             BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportRegionsToRoiManagerCommand.class, hierarchyLevelsSkipped,"mp", this);
             BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportToQuPathProjectCommand.class, hierarchyLevelsSkipped,"mp", this);
             BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportSlicesToBDVJsonDataset.class, hierarchyLevelsSkipped,"mp", this);
