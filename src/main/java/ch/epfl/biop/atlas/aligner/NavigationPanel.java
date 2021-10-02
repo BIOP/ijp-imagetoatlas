@@ -3,7 +3,7 @@ package ch.epfl.biop.atlas.aligner;
 import javax.swing.*;
 import java.awt.*;
 
-public class DisplayPanel {
+public class NavigationPanel {
 
     final JPanel paneDisplay;
 
@@ -19,7 +19,7 @@ public class DisplayPanel {
 
     final JButton changeOverlapMode;
 
-    public DisplayPanel(MultiSlicePositioner mp) {
+    public NavigationPanel(MultiSlicePositioner mp) {
         paneDisplay = new JPanel();
 
         paneDisplay.setLayout(new BoxLayout(paneDisplay, BoxLayout.X_AXIS));

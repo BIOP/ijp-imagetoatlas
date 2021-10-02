@@ -178,7 +178,7 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
     ReslicedAtlas reslicedAtlas;
 
     // Original biop atlas
-    BiopAtlas biopAtlas;
+    private BiopAtlas biopAtlas;
 
     // Selection layer : responsible to listen to mouse drawing events that select sources
     SelectionLayer selectionLayer;
@@ -482,6 +482,11 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
             BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, EditSliceThicknessCommand.class, hierarchyLevelsSkipped,"mp", this);
             BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, SliceThicknessMatchNeighborsCommand.class, hierarchyLevelsSkipped,"mp", this);
 
+            // Cards commands
+            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Cards>Expand Card Panel",0, () -> bdvh.getSplitPanel().setCollapsed(false));
+            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Cards>Collapse Card Panel",0, () -> bdvh.getSplitPanel().setCollapsed(true));
+            BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Cards>Add Resources Monitor",0, this::addResourcesMonitor);
+
             // Help commands
             BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ABBAForumHelpCommand.class, hierarchyLevelsSkipped);
             BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ABBADocumentationCommand.class, hierarchyLevelsSkipped);
@@ -489,13 +494,13 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
             BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, DeepSliceDocumentationCommand.class, hierarchyLevelsSkipped);
 
             logger.debug("Adding bigdataviewer cards");
-            //bdvh.getCardPanel().addCard("Atlas Display", ScijavaSwingUI.getPanel(scijavaCtx, AllenAtlasDisplayCommand.class, "mp", this), true);
+            bdvh.getCardPanel().addCard("Atlas Information", new AtlasInfoPanel(this).getPanel(), true);
 
             bdvh.getCardPanel().addCard("Atlas Display", ScijavaSwingUI.getPanel(scijavaCtx, AtlasDisplayDynamicCommand.class, "mp", this), true);
 
             bdvh.getCardPanel().addCard("Slices Display", new SliceDisplayPanel(this).getPanel(), true);
 
-            bdvh.getCardPanel().addCard("Display & Navigation", new DisplayPanel(this).getPanel(), true);
+            bdvh.getCardPanel().addCard("Display & Navigation", new NavigationPanel(this).getPanel(), true);
 
             bdvh.getCardPanel().addCard("Edit Selected Slices", new EditPanel(this).getPanel(), true);
 
@@ -506,15 +511,6 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
                     false);
 
             bdvh.getCardPanel().addCard("Tasks Info", mso.getJPanel(), false);
-
-            /*
-            try {
-                rm = new ResourcesMonitor();
-                bdvh.getCardPanel().addCard("Resources Monitor", rm, false);
-            } catch (Exception e) {
-                rm = null;
-                logger.debug("Could not start Resources Monitor");
-            }*/
 
             logger.debug("Adding user ROI source");
 
@@ -625,6 +621,25 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
 
     public void hideSliceInfo() {
         showSliceInfo = false;
+    }
+
+    public void addResourcesMonitor() {
+        if ((rm == null) && (bdvh!=null)) {
+            try {
+                rm = new ResourcesMonitor();
+                bdvh.getCardPanel().addCard("Resources Monitor", rm, false);
+            } catch (Exception e) {
+                rm = null;
+                logger.debug("Could not start Resources Monitor");
+            }
+        } else {
+            if (bdvh == null) {
+                errlog.accept("No Graphical User Interface.");
+            }
+            if (rm!=null) {
+                warningMessageForUser.accept("Warning", "Resource Monitor is already present");
+            }
+        }
     }
 
     void addRightClickActions() {

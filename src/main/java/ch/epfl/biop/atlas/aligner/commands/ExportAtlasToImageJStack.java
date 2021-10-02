@@ -20,8 +20,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-// TODO : make this command atlas agnostic
-
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>ABBA - Export Atlas to ImageJ",
         description = "Export atlas properties as an ImageJ stack (for each selected slice).")
@@ -33,8 +31,8 @@ public class ExportAtlasToImageJStack implements Command {
     @Parameter(label="Pixel Size in micron")
     double px_size_micron = 20;
 
-    @Parameter(choices = {"Structural Images", "Border only", "Coordinates", "Left / Right", "Labels % 65000" })
-    String export_type;
+    @Parameter(label = "Channels to export, '*' for all channels")//choices = {"Structural Images", "Border only", "Coordinates", "Left / Right", "Labels % 65000" })
+    String atlasStringChannel = "*";//String export_type;
 
     @Parameter(label = "Exported image name")
     String image_name = "Atlas";
@@ -49,15 +47,6 @@ public class ExportAtlasToImageJStack implements Command {
     public void run() {
         // TODO : check if tasks are done
         List<SliceSources> slicesToExport = mp.getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
-
-        String atlasStringChannel = "*";
-        switch (export_type) {
-            case "Structural Images": atlasStringChannel = "0,1,2"; break;
-            case "Border only": atlasStringChannel = "2"; break;
-            case "Coordinates": atlasStringChannel = "3,4,5"; break;
-            case "Left / Right": atlasStringChannel = "6"; break;
-            case "Labels % 65000": atlasStringChannel = "7"; interpolate = false; break;
-        }
 
         SourcesProcessor preprocess = SourcesProcessorHelper.Identity();
 

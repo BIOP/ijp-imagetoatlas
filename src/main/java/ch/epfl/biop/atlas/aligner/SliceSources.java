@@ -625,7 +625,7 @@ public class SliceSources {
                         0, 1, 1);
 
         ConstructROIsFromImgLabel labelToROIs = new ConstructROIsFromImgLabel();
-        labelToROIs.atlas = mp.biopAtlas;
+        labelToROIs.atlas = mp.getAtlas();
         labelToROIs.labelImg = impLabelImage;
         labelToROIs.smoothen = false;
         labelToROIs.run();
@@ -681,9 +681,9 @@ public class SliceSources {
         for (int i=0;i<roiList.rois.size();i++) {
             CompositeFloatPoly roi = roiList.rois.get(i);
             int atlasId = Integer.parseInt(roi.name);
-            AtlasNode node = mp.biopAtlas.getOntology().getNodeFromId(atlasId);
+            AtlasNode node = mp.getAtlas().getOntology().getNodeFromId(atlasId);
             roi.name = node.data().get(namingChoice);
-            roi.color = mp.biopAtlas.getOntology().getColor(node);
+            roi.color = mp.getAtlas().getOntology().getColor(node);
         }
 
         IJShapeRoiArray roiArray = (IJShapeRoiArray) leftRightTranformed.to(IJShapeRoiArray.class);
@@ -890,7 +890,7 @@ public class SliceSources {
         File ontology = new File(quPathFilePath, "AllenMouseBrainOntology.json");
         if (!ontology.exists()) {
             try {
-                URL ontologyURL = mp.biopAtlas.getOntology().getDataSource();
+                URL ontologyURL = mp.getAtlas().getOntology().getDataSource();
                 if (ontologyURL.getFile()==null) {
                     mp.errlog.accept("No ontology file found at location "+ontologyURL);
                     return;

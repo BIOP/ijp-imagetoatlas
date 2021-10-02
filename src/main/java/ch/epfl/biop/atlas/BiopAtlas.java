@@ -1,6 +1,7 @@
 package ch.epfl.biop.atlas;
 
 import java.net.URL;
+import java.util.List;
 
 public interface BiopAtlas {
 
@@ -16,4 +17,7 @@ public interface BiopAtlas {
 
     void initialize(URL mapURL, URL ontologyURL);
 
+    List<String> getDOIs();
+
+    String getURL();
 }

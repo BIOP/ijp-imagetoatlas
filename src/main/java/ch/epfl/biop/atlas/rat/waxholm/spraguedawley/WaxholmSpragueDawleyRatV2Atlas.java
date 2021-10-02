@@ -5,6 +5,8 @@ import ch.epfl.biop.atlas.AtlasOntology;
 import ch.epfl.biop.atlas.BiopAtlas;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 public class WaxholmSpragueDawleyRatV2Atlas implements BiopAtlas {
 
@@ -35,4 +37,22 @@ public class WaxholmSpragueDawleyRatV2Atlas implements BiopAtlas {
             e.printStackTrace();
         }
     }
+
+    //https://www.nitrc.org/citation/?group_id=1081
+    @Override
+    public List<String> getDOIs() {
+        List<String> dois = new ArrayList<>();
+        dois.add("10.1016/j.neuroimage.2014.04.001");
+        dois.add("10.1016/j.neuroimage.2014.10.017");
+        dois.add("10.1016/j.neuroimage.2014.12.080");
+        dois.add("10.1016/j.neuroimage.2019.05.016");
+        return dois;
+    }
+
+    @Override
+    public String getURL() {
+        return "https://www.nitrc.org/projects/whs-sd-atlas";
+    }
+
+
 }

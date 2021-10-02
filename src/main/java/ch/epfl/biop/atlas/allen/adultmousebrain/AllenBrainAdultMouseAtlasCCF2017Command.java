@@ -10,6 +10,8 @@ import org.scijava.plugin.Plugin;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 // Take ply files from : http://download.alleninstitute.org/informatics-archive/current-release/mouse_ccf/annotation/ccf_2017/structure_meshes/ply/
 
@@ -54,5 +56,15 @@ public class AllenBrainAdultMouseAtlasCCF2017Command extends AllenAtlas implemen
 			e.printStackTrace();
 		}
 	}
+	@Override
+	public List<String> getDOIs() {
+		List<String> dois = new ArrayList<>();
+		dois.add("10.1016/j.cell.2020.04.007");
+		return dois;
+	}
 
+	@Override
+	public String getURL() {
+		return "https://community.brain-map.org/t/allen-mouse-ccf-accessing-and-using-related-data-and-tools/359";
+	}
 }
