@@ -1,6 +1,6 @@
 package ch.epfl.biop.abba;
 
-import ch.epfl.biop.atlas.ABBACommandAdultMouseAllenBrainCCFv3;
+import ch.epfl.biop.atlas.allen.adultmousebrain.ABBACommandAdultMouseAllenBrainCCFv3;
 import net.imagej.ImageJ;
 import net.imagej.patcher.LegacyInjector;
 

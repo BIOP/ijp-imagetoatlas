@@ -1,6 +1,7 @@
-package ch.epfl.biop.atlas;
+package ch.epfl.biop.atlas.allen.adultmousebrain;
 
 import ch.epfl.biop.ABBAHelper;
+import ch.epfl.biop.atlas.BiopAtlas;
 import ch.epfl.biop.atlas.aligner.commands.SacMultiSacsPositionerCommand;
 import ch.epfl.biop.atlas.aligner.commands.SlicerAdjusterInteractiveCommand;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;

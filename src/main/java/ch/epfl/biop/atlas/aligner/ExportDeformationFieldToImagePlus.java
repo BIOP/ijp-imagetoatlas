@@ -1,6 +1,5 @@
 package ch.epfl.biop.atlas.aligner;
 
-import ch.epfl.biop.atlas.DeformationFieldToImagePlus;
 import ij.ImagePlus;
 
 import java.awt.*;

@@ -1,8 +1,6 @@
-package ch.epfl.biop.atlas;
+package ch.epfl.biop.atlas.aligner;
 
 import bdv.viewer.SourceAndConverter;
-import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
-import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.atlas.aligner.sourcepreprocessors.SourcesProcessor;
 import ij.ImagePlus;
 import net.imglib2.realtransform.AffineTransform3D;

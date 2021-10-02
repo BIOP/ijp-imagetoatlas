@@ -1,6 +1,5 @@
-package ch.epfl.biop.atlas;
+package ch.epfl.biop.atlas.aligner;
 
-import ch.epfl.biop.atlas.aligner.SliceSources;
 import ij.CompositeImage;
 import ij.ImagePlus;
 import ij.ImageStack;

@@ -11,7 +11,8 @@ import org.scijava.ui.UIService;
 import org.scijava.Priority;
 
 /**
- * Enables Atlas to be garbage collected if the Big Data Viewer window is closed by the user
+ * Enables Atlas to be added to the object service when declared as an output
+ * of a command
  */
 
 @Plugin(type = PostprocessorPlugin.class, priority = Priority.VERY_LOW - 1)

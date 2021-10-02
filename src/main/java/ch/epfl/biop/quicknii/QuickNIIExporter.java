@@ -1,6 +1,6 @@
 package ch.epfl.biop.quicknii;
 
-import ch.epfl.biop.atlas.SliceToImagePlus;
+import ch.epfl.biop.atlas.aligner.SliceToImagePlus;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.atlas.aligner.sourcepreprocessors.SourcesProcessor;
 import ch.epfl.biop.atlas.aligner.sourcepreprocessors.SourcesProcessorHelper;
@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class QuickNIIExporter {
@@ -101,7 +100,7 @@ public class QuickNIIExporter {
 
         logger.accept("Export as QuickNii Dataset done - Folder : "+datasetFolder.getAbsolutePath());
 
-    };
+    }
 
     public static class Builder {
         File datasetFolder;

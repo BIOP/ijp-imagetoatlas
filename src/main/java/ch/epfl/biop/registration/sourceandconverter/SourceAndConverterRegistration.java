@@ -10,8 +10,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 abstract public class SourceAndConverterRegistration implements IABBARegistrationPlugin {
 
@@ -91,13 +89,6 @@ abstract public class SourceAndConverterRegistration implements IABBARegistratio
         this.parameters = parameters;
     }
 
-    //protected static Consumer<String> log = logger::info;//System.out::println;
-
-    //@Override
-    //public void setLogger(Consumer<String> logger) {
-    //    this.log = logger;
-    //}
-
     protected MultiSlicePositioner.SliceInfo sliceInfo;
 
     public void setSliceInfo(MultiSlicePositioner.SliceInfo sliceInfo){
@@ -107,11 +98,5 @@ abstract public class SourceAndConverterRegistration implements IABBARegistratio
     protected static void addToFlatParameters(List<Object> flatParameters, Object... args) {
         flatParameters.addAll(Arrays.asList(args));
     }
-
-    /*protected Supplier<Double> zPosition;
-
-    public void setZPositioner(Supplier<Double> zPosition) {
-        this.zPosition = zPosition;
-    }*/
 
 }

@@ -1,7 +1,7 @@
 package ch.epfl.biop.abba;
 
 import bdv.viewer.SourceAndConverter;
-import ch.epfl.biop.atlas.ABBACommandAdultMouseAllenBrainCCFv3;
+import ch.epfl.biop.atlas.allen.adultmousebrain.ABBACommandAdultMouseAllenBrainCCFv3;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import mpicbg.spim.data.sequence.Tile;
 import net.imagej.ImageJ;

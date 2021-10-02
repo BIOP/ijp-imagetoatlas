@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Static atlas ontology helper functions
+ */
 public class AtlasOntologyHelper {
 
     public static Map<Integer, AtlasNode> buildLabelToAtlasNodeMap(AtlasNode rootNode) {
