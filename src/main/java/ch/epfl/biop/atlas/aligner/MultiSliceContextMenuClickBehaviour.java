@@ -23,8 +23,7 @@ public class MultiSliceContextMenuClickBehaviour implements ClickBehaviour {
     }
 
     private void showPopupMenu(int x, int y) {
-        final List<SliceSources> slices = new ArrayList<>();
-        slices.addAll(slicesSupplier.get());
+        final List<SliceSources> slices = new ArrayList<>(slicesSupplier.get());
 
         SliceSources[] sliceArray = new SliceSources[slices.size()];
         sliceArray = slices.toArray(sliceArray);

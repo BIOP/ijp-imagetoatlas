@@ -4,6 +4,8 @@ import bdv.util.BoundedRealTransform;
 import bdv.util.QuPathBdvHelper;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.AtlasNode;
+import ch.epfl.biop.atlas.AtlasOntology;
+import ch.epfl.biop.atlas.BiopAtlas;
 import ch.epfl.biop.atlas.aligner.sourcepreprocessors.*;
 import ch.epfl.biop.atlas.commands.ConstructROIsFromImgLabel;
 import ch.epfl.biop.atlas.plugin.RegistrationPluginHelper;
@@ -886,8 +888,10 @@ public class SliceSources {
     }
 
     // statically synchronized to avoid race conditions in file writing
+    // TODO : make this atlas agnostic!
     static public synchronized void writeOntotogyIfNotPresent(MultiSlicePositioner mp, String quPathFilePath) {
-        File ontology = new File(quPathFilePath, "AllenMouseBrainOntology.json");
+        File ontology = new File(quPathFilePath, "Ontology.json");
+        //new Gson().toJson(mp.getAtlas().getOntologyFileName().getOntology(), AtlasOntology.class);
         if (!ontology.exists()) {
             try {
                 URL ontologyURL = mp.getAtlas().getOntology().getDataSource();
