@@ -1,25 +1,42 @@
 package ch.epfl.biop.atlas.aligner.commands;
 
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
+import org.scijava.Initializable;
 import org.scijava.command.Command;
+import org.scijava.command.DynamicCommand;
+import org.scijava.command.InteractiveCommand;
+import org.scijava.module.MutableModuleItem;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 // TODO : make this command atlas agnostic
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>ABBA - Export Regions To Roi Manager",
         description = "Export atlas regions to ROI Manager (for each selected slice).")
-public class ExportRegionsToRoiManagerCommand implements Command {
+public class ExportRegionsToRoiManagerCommand extends DynamicCommand implements
+        Initializable {
 
     @Parameter
     MultiSlicePositioner mp;
 
-    @Parameter(label="Roi Naming",choices={"name","acronym","id","Roi Manager Index (no suffix)"})
+    @Parameter(label="Roi Naming")
     String naming_choice;
 
     @Override
     public void run() {
-        mp.exportSelectedSlicesRegionsToRoiManager(naming_choice);
+        mp.exportSelectedSlicesRegionsToRoiManager((String) getInput("naming_choice"));
+    }
+
+
+    @Override
+    public void initialize() {
+        final MutableModuleItem<String> naming_choice = //
+                getInfo().getMutableInput("naming_choice", String.class);
+        List<String> names = mp.getAtlas().getOntology().getRoot().data().keySet().stream().collect(Collectors.toList());
+        naming_choice.setChoices(names);
     }
 
 }

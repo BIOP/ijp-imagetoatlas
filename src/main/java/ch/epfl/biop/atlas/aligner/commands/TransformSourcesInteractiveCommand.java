@@ -15,8 +15,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-// TODO : makes bounds atlas agnostic
-
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Edit>ABBA - Interactive Transform",
         description = "To use at the beginning of the registration process only! Rotates, scales, translate the original unregistered selected slices")
@@ -37,10 +35,10 @@ public class TransformSourcesInteractiveCommand extends InteractiveCommand {
     @Parameter(label = "Scale Y", style = "slider,format:0.00", min = "0.5", max = "2.0", stepSize = "0.01", persist = false)
     double scale_Y = 1.0f;
 
-    @Parameter(label = "Translation X (mm)", style = "slider,format:0.00", min = "-5.0", max = "5.0", stepSize = "0.025", persist = false)
+    @Parameter(label = "Translation X (mm)", style = "slider,format:0.00", min = "-10.0", max = "10.0", stepSize = "0.025", persist = false)
     double translate_X = Double.MIN_VALUE; // otherwise the slider is not properly initialized...
 
-    @Parameter(label = "Translation Y (mm)", style = "slider,format:0.00", min = "-5.0", max = "5.0", stepSize = "0.025", persist = false)
+    @Parameter(label = "Translation Y (mm)", style = "slider,format:0.00", min = "-10.0", max = "10.0", stepSize = "0.025", persist = false)
     double translate_Y = Double.MIN_VALUE; // otherwise the slider is not properly initialized...
 
     @Parameter(label = "Restore initial settings", callback = "reset")

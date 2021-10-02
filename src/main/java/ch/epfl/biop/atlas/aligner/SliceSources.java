@@ -1110,7 +1110,6 @@ public class SliceSources {
 
         @Override
         public double realMin(int i) {
-            // TODO : fix X and Y issues
             return ptMin.getDoublePosition(i);
         }
 

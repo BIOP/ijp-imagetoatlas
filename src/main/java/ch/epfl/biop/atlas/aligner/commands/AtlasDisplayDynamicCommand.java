@@ -2,20 +2,16 @@ package ch.epfl.biop.atlas.aligner.commands;
 
 import bdv.tools.brightness.ConverterSetup;
 import bdv.viewer.SourceAndConverter;
-import ch.epfl.biop.atlas.BiopAtlas;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
-import net.imagej.ImageJ;
 import org.scijava.Initializable;
 import org.scijava.command.Command;
 import org.scijava.command.InteractiveCommand;
 import org.scijava.module.MutableModuleItem;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import sc.fiji.bdvpg.scijava.ScijavaSwingUI;
 import sc.fiji.bdvpg.scijava.services.SourceAndConverterBdvDisplayService;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
 
-import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 
