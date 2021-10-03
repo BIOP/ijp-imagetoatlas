@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
+import static ch.epfl.biop.atlas.BiopAtlasHelper.getCoordinateSac;
+
 public class WaxholmSpragueDawleyRatV2Map implements AtlasMap {
 
     URL dataSource;
@@ -140,19 +142,4 @@ public class WaxholmSpragueDawleyRatV2Map implements AtlasMap {
         return name;
     }
 
-
-    SourceAndConverter<FloatType> getCoordinateSac(final int axis, String name) {
-        BiConsumer<RealLocalizable, FloatType > coordIndicator = (l, t ) -> {
-            t.set(l.getFloatPosition(axis));
-        };
-
-        FunctionRealRandomAccessible coordSource = new FunctionRealRandomAccessible(3,
-                coordIndicator,	FloatType::new);
-
-        final Source< UnsignedShortType > s = new RealRandomAccessibleIntervalSource<>( coordSource,
-                FinalInterval.createMinMax( 0, 0, 0, 1320, 800, 1140),
-                new FloatType(), new AffineTransform3D(), name );
-
-        return SourceAndConverterHelper.createSourceAndConverter(s);
-    }
 }

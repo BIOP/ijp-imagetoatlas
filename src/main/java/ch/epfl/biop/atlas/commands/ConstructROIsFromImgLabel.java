@@ -4,7 +4,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import ch.epfl.biop.atlas.AtlasNode;
-import ch.epfl.biop.atlas.AtlasOntologyHelper;
+import ch.epfl.biop.atlas.BiopAtlasHelper;
 import ch.epfl.biop.java.utilities.roi.types.IJShapeRoiArray;
 import org.scijava.ItemIO;
 import org.scijava.command.Command;
@@ -57,7 +57,7 @@ public class ConstructROIsFromImgLabel implements Command {
 		// keep a list of possible values encountered in the tree
 		HashSet<Integer> possibleValues = new HashSet<>();
 		existingPixelValues.forEach(id -> {
-			possibleValues.addAll(AtlasOntologyHelper.getAllParentLabels(atlas.getOntology(), (int)(float) id));
+			possibleValues.addAll(BiopAtlasHelper.getAllParentLabels(atlas.getOntology(), (int)(float) id));
 			possibleValues.add((int)(float)id);
 		});
 

@@ -6,7 +6,7 @@ import java.net.URL;
 import java.util.Map;
 
 import ch.epfl.biop.atlas.AtlasNode;
-import ch.epfl.biop.atlas.AtlasOntologyHelper;
+import ch.epfl.biop.atlas.BiopAtlasHelper;
 import com.google.gson.Gson;
 
 import ch.epfl.biop.atlas.AtlasOntology;
@@ -35,8 +35,8 @@ public class AllenOntology implements AtlasOntology {
             ontology = gson.fromJson(fileReader, AllenOntologyJson.class);
         }
         root = new AllenBrainRegionsNode(ontology.msg.get(0), null);
-        labelToAtlasNodeMap = AtlasOntologyHelper.buildLabelToAtlasNodeMap(root);
-        idToAtlasNodeMap = AtlasOntologyHelper.buildIdToAtlasNodeMap(root);
+        labelToAtlasNodeMap = BiopAtlasHelper.buildLabelToAtlasNodeMap(root);
+        idToAtlasNodeMap = BiopAtlasHelper.buildIdToAtlasNodeMap(root);
         // The hierarchy is fully set thanks to the way the tree is constructed in
         // AllenOntologyJson.AllenBrainRegionsNode
     }

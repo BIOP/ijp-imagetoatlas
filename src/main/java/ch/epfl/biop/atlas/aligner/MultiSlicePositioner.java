@@ -27,6 +27,7 @@ import net.imglib2.*;
 import net.imglib2.position.FunctionRealRandomAccessible;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.ARGBType;
+import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
 import org.apache.commons.io.FilenameUtils;
@@ -513,7 +514,7 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
 
             logger.debug("Adding user ROI source");
 
-            BiConsumer<RealLocalizable, UnsignedShortType> fun = (loc,val) -> {
+            BiConsumer<RealLocalizable, UnsignedShortType> fun = (loc, val) -> {
                 double px = loc.getFloatPosition(0);
                 double py = loc.getFloatPosition(1);
 
@@ -1214,9 +1215,9 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
         if (displayMode==POSITIONING_MODE_INT) {
 
             SourceAndConverter label = reslicedAtlas.extendedSlicedSources[reslicedAtlas.extendedSlicedSources.length-1]; // By convention the label image is the last one (OK)
-            labelValue = ((UnsignedShortType) getSourceValueAt(label, globalMouseCoordinates)).get();
+            labelValue = ((IntegerType) getSourceValueAt(label, globalMouseCoordinates)).getInteger();
             SourceAndConverter lrSource = reslicedAtlas.extendedSlicedSources[reslicedAtlas.extendedSlicedSources.length-2]; // By convention the left right indicator image is the next to last one
-            leftRight = ((UnsignedShortType) getSourceValueAt(lrSource, globalMouseCoordinates)).get();
+            leftRight = ((IntegerType) getSourceValueAt(lrSource, globalMouseCoordinates)).getInteger();
 
             SourceAndConverter xSource = reslicedAtlas.extendedSlicedSources[reslicedAtlas.extendedSlicedSources.length-5]; // (bad) convention TODO : safer indexing
             SourceAndConverter ySource = reslicedAtlas.extendedSlicedSources[reslicedAtlas.extendedSlicedSources.length-4]; // By convention the left right indicator image is the next to last one
@@ -1228,9 +1229,9 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
         } else {
             assert displayMode == REVIEW_MODE_INT;
             SourceAndConverter label = reslicedAtlas.nonExtendedSlicedSources[reslicedAtlas.getLabelSourceIndex()]; // By convention the label image is the last one
-            labelValue = ((UnsignedShortType) getSourceValueAt(label, globalMouseCoordinates)).get();
+            labelValue = ((IntegerType) getSourceValueAt(label, globalMouseCoordinates)).getInteger();
             SourceAndConverter lrSource = reslicedAtlas.nonExtendedSlicedSources[reslicedAtlas.getLeftRightSourceIndex()]; // By convention the left right indicator image is the next to last one
-            leftRight = ((UnsignedShortType) getSourceValueAt(lrSource, globalMouseCoordinates)).get();
+            leftRight = ((IntegerType) getSourceValueAt(lrSource, globalMouseCoordinates)).getInteger();
 
             SourceAndConverter xSource = reslicedAtlas.nonExtendedSlicedSources[reslicedAtlas.getCoordinateSourceIndex(0)]; // 0 = X
             SourceAndConverter ySource = reslicedAtlas.nonExtendedSlicedSources[reslicedAtlas.getCoordinateSourceIndex(1)]; // By convention the left right indicator image is the next to last one

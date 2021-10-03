@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
+import static ch.epfl.biop.atlas.BiopAtlasHelper.getCoordinateSac;
+
 public class AllenMap implements AtlasMap {
 
 	URL dataSource;
@@ -87,25 +89,6 @@ public class AllenMap implements AtlasMap {
 		atlasSources.put("Y", ySource);
 		atlasSources.put("Z", zSource);
 
-		/*SourceAndConverterServices.getSourceAndConverterService().register(xSource);
-		SourceAndConverterServices.getSourceAndConverterService().register(ySource);
-		SourceAndConverterServices.getSourceAndConverterService().register(zSource);*/
-
-	}
-
-	SourceAndConverter<FloatType> getCoordinateSac(final int axis, String name) {
-		BiConsumer<RealLocalizable, FloatType > coordIndicator = (l, t ) -> {
-			t.set(l.getFloatPosition(axis));
-		};
-
-		FunctionRealRandomAccessible coordSource = new FunctionRealRandomAccessible(3,
-				coordIndicator,	FloatType::new);
-
-		final Source< UnsignedShortType > s = new RealRandomAccessibleIntervalSource<>( coordSource,
-				FinalInterval.createMinMax( 0, 0, 0, 1320, 800, 1140),
-				new FloatType(), new AffineTransform3D(), name );
-
-		return SourceAndConverterHelper.createSourceAndConverter(s);
 	}
 
 	@Override
