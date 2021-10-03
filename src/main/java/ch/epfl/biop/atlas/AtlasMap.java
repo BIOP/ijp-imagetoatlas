@@ -46,9 +46,9 @@ public interface AtlasMap {
 
 	SourceAndConverter getLabelImage();
 
-	double getAtlasPrecisionInMillimeter();
+	Double getAtlasPrecisionInMillimeter();
 
 	AffineTransform3D getPreSlicingTransform();
 
-    double getImageMax(String key);
+    Double getImageMax(String key);
 }

@@ -142,7 +142,7 @@ public class AllenMap implements AtlasMap {
 	}
 
 	@Override
-	public double getAtlasPrecisionInMillimeter() {
+	public Double getAtlasPrecisionInMillimeter() {
 		return 0.010; // 10 micrometer
 	}
 
@@ -152,12 +152,12 @@ public class AllenMap implements AtlasMap {
 	}
 
 	@Override
-	public double getImageMax(String key) {
+	public Double getImageMax(String key) {
 		switch (key) {
-			case "Nissl": return 56000;
-			case "Ara": return 1024;
-			case "Label Borders": return 1024;
-			default: return 65535;
+			case "Nissl": return (double) 56000;
+			case "Ara": return (double) 1024;
+			case "Label Borders": return (double) 1024;
+			default: return (double) 65535;
 		}
 	}
 

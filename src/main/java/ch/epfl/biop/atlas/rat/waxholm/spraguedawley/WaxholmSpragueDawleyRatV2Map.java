@@ -117,7 +117,7 @@ public class WaxholmSpragueDawleyRatV2Map implements AtlasMap {
     }
 
     @Override
-    public double getAtlasPrecisionInMillimeter() {
+    public Double getAtlasPrecisionInMillimeter() {
         return 0.040;
     }
 
@@ -128,10 +128,10 @@ public class WaxholmSpragueDawleyRatV2Map implements AtlasMap {
     }
 
     @Override
-    public double getImageMax(String key) {
+    public Double getImageMax(String key) {
         switch (key) {
-            case "Structure": return 35000;
-            default: return 65535;
+            case "Structure": return (double) 35000;
+            default: return (double) 65535;
         }
     }
 
