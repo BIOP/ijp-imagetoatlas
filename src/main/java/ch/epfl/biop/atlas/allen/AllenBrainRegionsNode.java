@@ -1,6 +1,8 @@
 package ch.epfl.biop.atlas.allen;
 
 import ch.epfl.biop.atlas.AtlasNode;
+import net.imagej.ImageJ;
+import org.scijava.Context;
 import org.scijava.util.TreeNode;
 
 import java.util.*;
@@ -16,7 +18,6 @@ public class AllenBrainRegionsNode implements AtlasNode {
     public AllenBrainRegionsNode(AllenOntologyJson.AllenBrainRegion abr, AllenBrainRegionsNode parent) {
         this.abr = abr;
         this.parent = parent;
-        //System.out.println("id = "+abr.id);
         Map<String, String> mutableMap = new HashMap<>();
         mutableMap.put("id", Integer.toString(abr.id));
         mutableMap.put("atlas_id", Integer.toString(abr.atlas_id));
@@ -36,12 +37,12 @@ public class AllenBrainRegionsNode implements AtlasNode {
     }
 
     @Override
-    public int getId() {
+    public Integer getId() {
         return abr.id;
     }
 
     @Override
-    public int getLabelValue() {
+    public Integer getLabelValue() {
         return abr.id % 65000; // Problem of labels above 65535.. still bijective with mod 65000
     }
 

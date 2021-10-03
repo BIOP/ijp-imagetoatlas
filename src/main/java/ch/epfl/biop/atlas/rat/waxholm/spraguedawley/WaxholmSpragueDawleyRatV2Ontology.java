@@ -25,12 +25,12 @@ public class WaxholmSpragueDawleyRatV2Ontology implements AtlasOntology {
 
         root = new AtlasNode() {
             @Override
-            public int getId() {
+            public Integer getId() {
                 return 1;
             }
 
             @Override
-            public int getLabelValue() {
+            public Integer getLabelValue() {
                 return 1;
             }
 
