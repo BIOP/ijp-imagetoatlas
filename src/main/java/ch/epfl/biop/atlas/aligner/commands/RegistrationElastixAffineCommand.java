@@ -12,6 +12,9 @@ import java.util.Map;
         description = "Uses Elastix for affine in plane registration of selected slices")
 public class RegistrationElastixAffineCommand extends SingleChannelRegistrationCommand {
 
+    @Parameter(label = "Registration re-sampling (micrometers)")
+    double pxSizeInCurrentUnit = 40;
+
     @Parameter(label = "Show registration results as ImagePlus")
     boolean show_imageplus_registration_result;
 
@@ -26,6 +29,7 @@ public class RegistrationElastixAffineCommand extends SingleChannelRegistrationC
         parameters.put("showImagePlusRegistrationResult", show_imageplus_registration_result);
         parameters.put("background_offset_value_moving", background_offset_value_moving);
         parameters.put("background_offset_value_fixed", background_offset_value_fixed);
+        parameters.put("pxSizeInCurrentUnit", pxSizeInCurrentUnit/1000.0);
 
         mp.register(this,
                 getFixedFilter(),

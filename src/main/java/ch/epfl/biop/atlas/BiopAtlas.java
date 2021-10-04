@@ -20,4 +20,6 @@ public interface BiopAtlas {
     List<String> getDOIs();
 
     String getURL();
+
+    String getName();
 }

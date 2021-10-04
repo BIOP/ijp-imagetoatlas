@@ -19,7 +19,7 @@ import java.util.List;
 public class AllenBrainAdultMouseAtlasCCF2017Command extends AllenAtlas implements Command {
 
 	public String toString() {
-		return "Adult Mouse Brain - Allen Brain Atlas V3";
+		return getName();
 	}
 	
 	public static String keyPrefix = AllenBrainAdultMouseAtlasCCF2017Command.class.getName()+".";
@@ -66,5 +66,10 @@ public class AllenBrainAdultMouseAtlasCCF2017Command extends AllenAtlas implemen
 	@Override
 	public String getURL() {
 		return "https://community.brain-map.org/t/allen-mouse-ccf-accessing-and-using-related-data-and-tools/359";
+	}
+
+	@Override
+	public String getName() {
+		return "Adult Mouse Brain - Allen Brain Atlas V3";
 	}
 }

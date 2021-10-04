@@ -96,6 +96,8 @@ public class Elastix2DSplineRegistration extends RealTransformSourceAndConverter
             // Necessary for CommandService
             List<Object> flatParameters = new ArrayList<>(parameters.size()*2+4);
 
+            double voxSizeInMm = Double.parseDouble(parameters.get("pxSizeInCurrentUnit"));
+
             parameters.keySet().forEach(k -> {
                 flatParameters.add(k);
                 flatParameters.add(parameters.get(k));
@@ -119,13 +121,11 @@ public class Elastix2DSplineRegistration extends RealTransformSourceAndConverter
                     // Atlas image : a single timepoint
                     "tpFixed", 0,
                     // Level 2 for the atlas
-                    "levelFixedSource", 1,
+                    "levelFixedSource", SourceAndConverterHelper.bestLevel(fimg[0], timePoint, voxSizeInMm),
                     // Timepoint moving source (normally 0)
                     "tpMoving", timePoint,
                     // Tries to be clever for the moving source sampling
-                    "levelMovingSource", SourceAndConverterHelper.bestLevel(fimg[0], timePoint, 0.02),
-                    // 40 microns per pixel for the initial registration
-                    "pxSizeInCurrentUnit", 0.02
+                    "levelMovingSource", SourceAndConverterHelper.bestLevel(mimg[0], timePoint, voxSizeInMm)
                     );
 
              task = context

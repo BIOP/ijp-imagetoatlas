@@ -54,5 +54,15 @@ public class WaxholmSpragueDawleyRatV2Atlas implements BiopAtlas {
         return "https://www.nitrc.org/projects/whs-sd-atlas";
     }
 
+    @Override
+    public String getName() {
+        return "Waxholm Sprague-Dawley Rat Atlas V2";
+    }
+
+    @Override
+    public String toString() {
+        return getName();
+    }
+
 
 }

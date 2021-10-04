@@ -17,6 +17,9 @@ public class RegistrationElastixSplineRemoteCommand extends SingleChannelRegistr
     @Parameter(label = "Number of control points along X, minimum 2.")
     int nb_control_points_x = 10;
 
+    @Parameter(label = "Registration re-sampling (micrometers)")
+    double pxSizeInCurrentUnit = 20;
+
     @Parameter(label = "Background offset value")
     double background_offset_value_moving = 0;
 
@@ -55,6 +58,7 @@ public class RegistrationElastixSplineRemoteCommand extends SingleChannelRegistr
 
         parameters.put("showImagePlusRegistrationResult", false);
         parameters.put("nbControlPointsX", nb_control_points_x);
+        parameters.put("pxSizeInCurrentUnit", pxSizeInCurrentUnit/1000.0);
 
         mp.register(this,
                 getFixedFilter(),
