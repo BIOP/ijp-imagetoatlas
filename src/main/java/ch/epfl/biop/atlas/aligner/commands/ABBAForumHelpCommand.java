@@ -3,7 +3,7 @@ package ch.epfl.biop.atlas.aligner.commands;
 import bdv.BigDataViewer;
 import bdv.util.BdvHandle;
 import bigwarp.BigWarp;
-import ch.epfl.biop.ABBAHelper;
+import ch.epfl.biop.atlas.aligner.ABBAHelper;
 import ch.epfl.biop.bdv.bioformats.BioFormatsMetaDataHelper;
 import ch.epfl.biop.sourceandconverter.register.Elastix2DSplineRegister;
 import ch.epfl.biop.wrappers.elastix.ElastixTask;

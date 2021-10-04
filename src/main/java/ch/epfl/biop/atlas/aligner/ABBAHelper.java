@@ -1,6 +1,5 @@
-package ch.epfl.biop;
+package ch.epfl.biop.atlas.aligner;
 
-import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.allen.adultmousebrain.AllenBrainAdultMouseAtlasCCF2017Command;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
