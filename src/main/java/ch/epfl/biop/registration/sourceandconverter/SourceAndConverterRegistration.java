@@ -2,7 +2,7 @@ package ch.epfl.biop.registration.sourceandconverter;
 
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
-import ch.epfl.biop.atlas.plugin.IABBARegistrationPlugin;
+import ch.epfl.biop.atlas.aligner.plugin.IABBARegistrationPlugin;
 import org.scijava.Context;
 import org.scijava.plugin.Parameter;
 

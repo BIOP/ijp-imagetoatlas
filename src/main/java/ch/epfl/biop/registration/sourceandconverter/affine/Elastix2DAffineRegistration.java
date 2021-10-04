@@ -1,11 +1,10 @@
 package ch.epfl.biop.registration.sourceandconverter.affine;
 
 import bdv.viewer.SourceAndConverter;
-import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.commands.RegistrationElastixAffineCommand;
 import ch.epfl.biop.atlas.aligner.commands.RegistrationElastixAffineRemoteCommand;
-import ch.epfl.biop.atlas.plugin.IABBARegistrationPlugin;
-import ch.epfl.biop.atlas.plugin.RegistrationTypeProperties;
+import ch.epfl.biop.atlas.aligner.plugin.IABBARegistrationPlugin;
+import ch.epfl.biop.atlas.aligner.plugin.RegistrationTypeProperties;
 import ch.epfl.biop.bdv.command.register.Elastix2DAffineRegisterCommand;
 import ch.epfl.biop.bdv.command.register.Elastix2DAffineRegisterServerCommand;
 import com.google.gson.Gson;

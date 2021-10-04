@@ -1,8 +1,7 @@
-package ch.epfl.biop.atlas.plugin;
+package ch.epfl.biop.atlas.aligner.plugin;
 
 import ij.ImagePlus;
 import net.imglib2.realtransform.InvertibleRealTransform;
-import net.imglib2.realtransform.RealTransform;
 
 import java.util.Map;
 

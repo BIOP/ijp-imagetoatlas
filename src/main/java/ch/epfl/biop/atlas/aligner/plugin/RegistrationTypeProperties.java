@@ -1,7 +1,6 @@
-package ch.epfl.biop.atlas.plugin;
+package ch.epfl.biop.atlas.aligner.plugin;
 
 import org.scijava.command.Command;
-import org.scijava.plugin.Plugin;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

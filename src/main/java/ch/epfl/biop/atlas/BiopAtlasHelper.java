@@ -3,6 +3,8 @@ package ch.epfl.biop.atlas;
 import bdv.util.RealRandomAccessibleIntervalSource;
 import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import net.imglib2.FinalInterval;
 import net.imglib2.RealLocalizable;
 import net.imglib2.position.FunctionRealRandomAccessible;
@@ -11,6 +13,7 @@ import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -72,4 +75,43 @@ public class BiopAtlasHelper {
 
         return SourceAndConverterHelper.createSourceAndConverter(s);
     }
+
+    public static boolean saveOntologyToJsonFile(AtlasOntology ontology, String path) {
+        try {
+
+            FileWriter fw = new FileWriter(path);
+
+            new GsonBuilder()
+                .setPrettyPrinting()
+                .create()
+                .toJson(ontology, fw);
+
+            fw.close();
+            return true;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static AtlasOntology openOntologyFromJsonFile(String path) {
+        File ontologyFile = new File(path);
+        if (ontologyFile.exists()) {
+            Gson gson = new Gson();
+            try {
+                FileReader fr = new FileReader(ontologyFile.getAbsoluteFile());
+                AtlasOntology ontology = gson.fromJson(new FileReader(ontologyFile.getAbsoluteFile()), AtlasOntology.class);
+                fr.close();
+                return ontology;
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                return null;
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
+        } else return null;
+    }
+
 }

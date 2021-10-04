@@ -2,7 +2,7 @@ package ch.epfl.biop.atlas.aligner;
 
 import ch.epfl.biop.atlas.aligner.sourcepreprocessors.SourcesProcessor;
 import ch.epfl.biop.atlas.aligner.sourcepreprocessors.SourcesProcessorHelper;
-import ch.epfl.biop.atlas.plugin.RegistrationPluginHelper;
+import ch.epfl.biop.atlas.aligner.plugin.RegistrationPluginHelper;
 
 import java.util.ArrayList;
 import java.util.List;

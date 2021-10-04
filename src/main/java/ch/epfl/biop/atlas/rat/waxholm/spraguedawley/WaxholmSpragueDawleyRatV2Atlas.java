@@ -1,7 +1,5 @@
 package ch.epfl.biop.atlas.rat.waxholm.spraguedawley;
 
-import bdv.util.BdvFunctions;
-import bdv.util.BdvOptions;
 import ch.epfl.biop.atlas.AtlasMap;
 import ch.epfl.biop.atlas.AtlasOntology;
 import ch.epfl.biop.atlas.BiopAtlas;
@@ -43,7 +41,6 @@ public class WaxholmSpragueDawleyRatV2Atlas implements BiopAtlas {
     //https://www.nitrc.org/citation/?group_id=1081
     @Override
     public List<String> getDOIs() {
-        BdvOptions
         List<String> dois = new ArrayList<>();
         dois.add("10.1016/j.neuroimage.2014.04.001");
         dois.add("10.1016/j.neuroimage.2014.10.017");

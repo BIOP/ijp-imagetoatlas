@@ -12,9 +12,7 @@ import com.google.gson.Gson;
 import ch.epfl.biop.atlas.AtlasOntology;
 
 /**
- * What a terrible mess, but ConstructROIsFromImgLabel has to be fixed
- * before we can simplify this and the {@link AtlasOntology} interface
- *
+ * TODO : make this directly serializable
  */
 
 public class AllenOntology implements AtlasOntology {

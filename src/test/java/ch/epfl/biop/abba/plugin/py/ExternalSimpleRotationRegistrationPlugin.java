@@ -1,6 +1,6 @@
 package ch.epfl.biop.abba.plugin.py;
 
-import ch.epfl.biop.atlas.plugin.SimpleABBARegistrationPlugin;
+import ch.epfl.biop.atlas.aligner.plugin.SimpleABBARegistrationPlugin;
 import ij.ImagePlus;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.realtransform.InvertibleRealTransform;

@@ -1,7 +1,7 @@
 package ch.epfl.biop.atlas.aligner.serializers;
 
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
-import ch.epfl.biop.atlas.plugin.ExternalABBARegistrationPlugin;
+import ch.epfl.biop.atlas.aligner.plugin.ExternalABBARegistrationPlugin;
 import ch.epfl.biop.registration.Registration;
 import com.google.gson.*;
 import org.scijava.Context;

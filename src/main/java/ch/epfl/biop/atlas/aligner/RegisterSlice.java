@@ -2,7 +2,7 @@ package ch.epfl.biop.atlas.aligner;
 
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.sourcepreprocessors.SourcesProcessor;
-import ch.epfl.biop.atlas.plugin.RegistrationPluginHelper;
+import ch.epfl.biop.atlas.aligner.plugin.RegistrationPluginHelper;
 import ch.epfl.biop.registration.Registration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

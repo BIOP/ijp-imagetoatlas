@@ -7,7 +7,7 @@ import ch.epfl.biop.atlas.aligner.sourcepreprocessors.SourcesAffineTransformer;
 import ch.epfl.biop.atlas.aligner.sourcepreprocessors.SourcesChannelsSelect;
 import ch.epfl.biop.atlas.aligner.sourcepreprocessors.SourcesProcessor;
 import ch.epfl.biop.atlas.aligner.sourcepreprocessors.SourcesProcessorHelper;
-import ch.epfl.biop.atlas.plugin.IABBARegistrationPlugin;
+import ch.epfl.biop.atlas.aligner.plugin.IABBARegistrationPlugin;
 import ch.epfl.biop.quicknii.QuickNIIExporter;
 import ch.epfl.biop.quicknii.QuickNIISeries;
 import ch.epfl.biop.quicknii.QuickNIISlice;

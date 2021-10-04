@@ -5,7 +5,7 @@ import ch.epfl.biop.atlas.allen.adultmousebrain.ABBACommandAdultMouseAllenBrainC
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.atlas.aligner.sourcepreprocessors.SourcesChannelsSelect;
-import ch.epfl.biop.atlas.plugin.SimpleRegistrationWrapper;
+import ch.epfl.biop.atlas.aligner.plugin.SimpleRegistrationWrapper;
 import ch.epfl.biop.bdv.command.importer.SourceFromImagePlusCommand;
 import ij.IJ;
 import ij.ImagePlus;

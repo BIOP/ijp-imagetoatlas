@@ -1,4 +1,4 @@
-package ch.epfl.biop.atlas.plugin;
+package ch.epfl.biop.atlas.aligner.plugin;
 
 import ch.epfl.biop.registration.Registration;
 import org.scijava.Context;

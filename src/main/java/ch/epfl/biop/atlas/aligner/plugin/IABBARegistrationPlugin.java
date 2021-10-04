@@ -1,4 +1,4 @@
-package ch.epfl.biop.atlas.plugin;
+package ch.epfl.biop.atlas.aligner.plugin;
 
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;

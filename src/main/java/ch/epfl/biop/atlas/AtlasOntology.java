@@ -1,7 +1,6 @@
 package ch.epfl.biop.atlas;
 
 import java.awt.*;
-import java.io.FileNotFoundException;
 import java.net.URL;
 
 public interface AtlasOntology {
@@ -17,6 +16,7 @@ public interface AtlasOntology {
 	Color getColor(AtlasNode node);
 
 	AtlasNode getNodeFromLabelMap(int mapValue);
+
 	AtlasNode getNodeFromId(int id);
 
 }

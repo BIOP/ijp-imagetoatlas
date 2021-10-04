@@ -2,7 +2,7 @@ package ch.epfl.biop.abba.plugin.py;
 
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
-import ch.epfl.biop.atlas.plugin.ExternalABBARegistrationPlugin;
+import ch.epfl.biop.atlas.aligner.plugin.ExternalABBARegistrationPlugin;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.realtransform.RealTransform;
