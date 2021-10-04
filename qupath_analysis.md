@@ -30,6 +30,55 @@ ImageData imageData = getCurrentImageData();
 AtlasTools.loadWarpedAtlasAnnotations(imageData, true); // true means regions are split between left and right hemi brain
 ```
 
+If you need to keep only certain regions, you can modify and reuse the script below:
+
+```
+// Modify the sequence of functions according to your need:
+// - reImportAbbaRegions()
+// - clearAllExcept(['Left: TH', 'Left: MB']) 
+// - clearRight()
+// - clearLeft()
+//
+
+reImportAbbaRegions() // Erase and re import regions
+clearAllExcept(['Left: TH', 'Left: MB']) // Modify and or expand the list according to your needs
+ 
+
+// ------------- FUNCTIONS ------------------------
+// 0 - Re-import regions
+// Necessary import, requires biop-tools-2.0.7, see: https://github.com/BIOP/qupath-biop-extensions
+def reImportAbbaRegions() {
+    clearAllObjects();
+    ImageData imageData = getCurrentImageData();
+    AtlasTools.loadWarpedAtlasAnnotations(imageData, true);
+}
+
+// 1 - Remove right region
+def clearRight() {
+    removeObjects(getAnnotationObjects().findAll{it.getName().equals('Root')}, true) 
+    removeObjects(getAnnotationObjects().findAll{it.getPathClass().toString().contains('Right:')}, false) 
+}
+
+// 2 - Remove left region
+def clearLeft() {
+    removeObjects(getAnnotationObjects().findAll{it.getName().equals('Root')}, true) 
+    removeObjects(getAnnotationObjects().findAll{it.getPathClass().toString().contains('Left:')}, false) 
+}
+
+// 3 - Delete All Regions except the ones on the list
+def clearAllExcept(regionsToKeep) {
+    removeObjects(
+        getAnnotationObjects()
+        .findAll{!(regionsToKeep.contains(it.getPathClass().toString()))}, true) 
+}
+  
+// 4 - Print all regions
+//getAnnotationObjects().each{println(it.getPathClass().toString())}   
+
+import ch.epfl.biop.qupath.atlas.allen.api.AtlasTools
+import qupath.lib.images.ImageData
+```
+
 ## Analysis in QuPath
 
 A typical workflow will consist of detecting cells in a particular region of the brain and exporting these results for all slices.
