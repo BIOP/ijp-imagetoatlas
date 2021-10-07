@@ -4,7 +4,7 @@ import bdv.util.BoundedRealTransform;
 import bdv.util.QuPathBdvHelper;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.AtlasNode;
-import ch.epfl.biop.atlas.BiopAtlas;
+import ch.epfl.biop.atlas.AtlasOntology;
 import ch.epfl.biop.atlas.BiopAtlasHelper;
 import ch.epfl.biop.atlas.aligner.sourcepreprocessors.*;
 import ch.epfl.biop.atlas.aligner.plugin.RegistrationPluginHelper;
@@ -27,10 +27,16 @@ import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import mpicbg.spim.data.generic.sequence.BasicViewSetup;
+import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealInterval;
 import net.imglib2.RealPoint;
+import net.imglib2.converter.Converter;
+import net.imglib2.converter.Converters;
+import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.realtransform.*;
 import net.imglib2.realtransform.inverse.WrappedIterativeInvertibleRealTransform;
+import net.imglib2.type.numeric.IntegerType;
+import net.imglib2.type.numeric.real.FloatType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
@@ -47,9 +53,7 @@ import spimdata.util.Displaysettings;
 
 import java.awt.*;
 import java.io.*;
-import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.List;
@@ -615,11 +619,19 @@ public class SliceSources {
 
         List<SourceAndConverter<?>> sourceList = new ArrayList<>();
         sourceList.add(sac);
-        impLabelImage =
-                ImagePlusHelper.wrap(sourceList.stream().map(s -> (SourceAndConverter) s).collect(Collectors.toList()), mapSacToMml,
-                        0, 1, 1);
 
-        cvtRoisOrigin = constructROIsFromImgLabel(mp.getAtlas(), impLabelImage, false);
+        if (!(sourceList.get(0).getSpimSource().getType() instanceof IntegerType)) {
+            logger.error("Label image is not integer typed! Type = "+sourceList.get(0).getSpimSource().getType().getClass().getSimpleName());
+            return;
+        }
+
+        RandomAccessibleInterval<IntegerType<?>> raiLabel = (RandomAccessibleInterval<IntegerType<?>>) sourceList.get(0).getSpimSource().getSource(0,0);
+
+        RandomAccessibleInterval<FloatType> cvtRai = convertedRai(raiLabel);
+
+        impLabelImage = ImageJFunctions.wrap(cvtRai, "Labels");
+
+        cvtRoisOrigin = constructROIsFromImgLabel(mp.getAtlas().getOntology(), impLabelImage);
 
         at3DLastLabelImage = at3D;
         labelImageBeingComputed = false;
@@ -638,7 +650,18 @@ public class SliceSources {
         ImagePlus leftRightImage =
                 ImagePlusHelper.wrap(sourceList.stream().map(s -> (SourceAndConverter) s).collect(Collectors.toList()), mapSacToMml,
                         0, 1, 1);
+
         leftRightOrigin.set(ConvertibleRois.labelImageToRoiArrayKeepSinglePixelPrecision(leftRightImage));
+    }
+
+    private RandomAccessibleInterval<FloatType> convertedRai(RandomAccessibleInterval<IntegerType<?>> raiLabel) {
+        Converter<IntegerType<?>, FloatType> cvt = new Converter<IntegerType<?>, FloatType>() {
+            @Override
+            public void convert(IntegerType<?> integerType, FloatType floatType) {
+                floatType.set(Float.intBitsToFloat(integerType.getInteger()));
+            }
+        };
+        return Converters.convert(raiLabel, cvt, new FloatType());
     }
 
     void prepareExport(String namingChoice) {
@@ -1090,54 +1113,10 @@ public class SliceSources {
         }
     }
 
-    private static ConvertibleRois constructROIsFromImgLabel(BiopAtlas atlas, ImagePlus labelImg, boolean smoothen) {
-        // Gets pixel array and convert them to Float -> no loss of precision for int 16 or
-        // even RGB 24
-        ArrayList<Roi> roiArray = new ArrayList<>();
+    private static ConvertibleRois constructROIsFromImgLabel(AtlasOntology ontology, ImagePlus labelImg) {
+
         ImageProcessor ip = labelImg.getProcessor();
         float[][] pixels = ip.getFloatArray();
-
-        // Gets all existing values in the image
-        HashSet<Float> existingPixelValues = new HashSet<>();
-        for (int x=0;x<ip.getWidth();x++) {
-            for (int y=0;y<ip.getHeight();y++) {
-                existingPixelValues.add((pixels[x][y]));
-            }
-        }
-
-        // All the parents of the existing label will be met at some point
-        // keep a list of possible values encountered in the tree
-        HashSet<Integer> possibleValues = new HashSet<>();
-        existingPixelValues.forEach(id -> {
-            possibleValues.addAll(BiopAtlasHelper.getAllParentLabels(atlas.getOntology(), (int)(float) id));
-            possibleValues.add((int)(float)id);
-        });
-
-        // We should keep, for each possible values, a way to know
-        // if their are some labels which belong to children labels in the image.
-        Map<Integer, Set<Integer>> childrenContained = new HashMap<>();
-        possibleValues.forEach(labelValue -> {
-            AtlasNode node = atlas.getOntology().getNodeFromLabelMap(labelValue);
-            if (node != null) {
-                Set<Integer> valuesMetInTheImage = node.children().stream()
-                        .map(n -> (AtlasNode) n)
-                        .map(AtlasNode::getLabelValue)
-                        .filter(possibleValues::contains)
-                        .collect(Collectors.toSet());
-                childrenContained.put(labelValue, valuesMetInTheImage);
-            }
-        });
-
-        HashSet<Integer> isLeaf = new HashSet<>();
-        childrenContained.forEach((k,v) -> {
-            if (v.size()==0) {
-                isLeaf.add(k);
-            }
-        });
-
-        FloatProcessor fp = new FloatProcessor(ip.getWidth(), ip.getHeight());
-        fp.setFloatArray(pixels);
-        ImagePlus imgFloatCopy = new ImagePlus("FloatLabel",fp);
 
         boolean[][] movablePx = new boolean[ip.getWidth()+1][ip.getHeight()+1];
         for (int x=1;x<ip.getWidth();x++) {
@@ -1171,40 +1150,98 @@ public class SliceSources {
                 movablePx[x][y]=(!is3Colored)&&(!isCrossed);
             }
         }
+
+        // Hack: re set the label image according to the real id ( Mouse Allen Brain Hack )
+        // Gets all existing values in the image
+        HashSet<Integer> existingLabelValues = new HashSet<>();
+        for (int x=0;x<ip.getWidth();x++) {
+            for (int y=0;y<ip.getHeight();y++) {
+                existingLabelValues.add(Float.floatToRawIntBits(pixels[x][y]));
+            }
+        }
+
+        FloatProcessor fp = new FloatProcessor(ip.getWidth(), ip.getHeight());
+        fp.setFloatArray(pixels);
+        ImagePlus imgFloatCopy = new ImagePlus("FloatLabel",fp);
+
+        HashSet<Integer> existingIdValues = new HashSet<>();
+        existingLabelValues.forEach(v -> {
+            fp.setThreshold( Float.intBitsToFloat(v), Float.intBitsToFloat(v), ImageProcessor.NO_LUT_UPDATE);
+            Roi roi = SelectToROIKeepLines.run(imgFloatCopy, movablePx, true);
+            AtlasNode node = ontology.getNodeFromId(v);
+            if (node!=null) {
+                int correctedId = node.getId();
+                existingIdValues.add(correctedId);
+                fp.setColor(Float.intBitsToFloat(correctedId));
+                fp.fill(roi);
+            }
+        });
+
+        // All the parents of the existing label will be met at some point
+        // keep a list of possible values encountered in the tree
+        HashSet<Integer> possibleIdValues = new HashSet<>();
+        existingIdValues.forEach(id -> {
+            possibleIdValues.addAll(BiopAtlasHelper.getAllParentIds(ontology, id));
+            possibleIdValues.add(id);
+        });
+
+        // We should keep, for each possible values, a way to know
+        // if their are some labels which belong to children labels in the image.
+        Map<Integer, Set<Integer>> childrenContained = new HashMap<>();
+        possibleIdValues.forEach(idValue -> {
+            AtlasNode node = ontology.getNodeFromId(idValue);
+            if (node != null) {
+                Set<Integer> valuesMetInTheImage = node.children().stream()
+                        .map(n -> (AtlasNode) n)
+                        .map(AtlasNode::getId)
+                        .filter(possibleIdValues::contains)
+                        .collect(Collectors.toSet());
+                childrenContained.put(idValue, valuesMetInTheImage);
+            }
+        });
+
+        HashSet<Integer> isLeaf = new HashSet<>();
+        childrenContained.forEach((k,v) -> {
+            if (v.size()==0) {
+                isLeaf.add(k);
+            }
+        });
+
         boolean containsLeaf=true;
 
+        ArrayList<Roi> roiArray = new ArrayList<>();
+
         while (containsLeaf) {
-            List<Float> leavesValues = existingPixelValues
+            List<Integer> leavesValues = existingIdValues
                     .stream()
-                    .filter(v -> isLeaf.contains((int) (float) v))
+                    .filter(v -> isLeaf.contains(v))
                     .collect(Collectors.toList());
             leavesValues.forEach(v -> {
-                        fp.setThreshold( v,v,ImageProcessor.NO_LUT_UPDATE);
-                        Roi roi = SelectToROIKeepLines.run(imgFloatCopy, movablePx, true);//ThresholdToSelection.run(imgFloatCopy);
+                        fp.setThreshold( Float.intBitsToFloat(v), Float.intBitsToFloat(v), ImageProcessor.NO_LUT_UPDATE);
+                        Roi roi = SelectToROIKeepLines.run(imgFloatCopy, movablePx, true);
 
-                        roi.setName(Integer.toString((int) (double) v));
+                        roi.setName(Integer.toString(v));
                         roiArray.add(roi);
 
-                        //if (atlas.ontology.getParentToParentMap().containsKey((int) (double)v)) {
-                        if (atlas.getOntology().getNodeFromLabelMap((int) (double)v)!=null) {
-                            AtlasNode parent = (AtlasNode) atlas.getOntology().getNodeFromLabelMap((int) (double)v).parent();
+                        if (ontology.getNodeFromId(v)!=null) {
+                            AtlasNode parent = (AtlasNode) ontology.getNodeFromId(v).parent();
                             if (parent!=null) {
 
-                                int parentId = parent.getLabelValue();
-                                fp.setColor(parentId);
+                                int parentId = parent.getId();
+                                fp.setColor(Float.intBitsToFloat(parentId));
                                 fp.fill(roi);
                                 if (childrenContained.get(parentId)!=null) {
-                                    if (childrenContained.get((int) (float) v).size()==0) {
-                                        childrenContained.get(parentId).remove((int) (float) v);
+                                    if (childrenContained.get(v).size()==0) {
+                                        childrenContained.get(parentId).remove(v);
                                     }
-                                    existingPixelValues.add((float)parentId);
+                                    existingIdValues.add(parentId);
                                 }
                             }
                         }
                     }
             );
-            existingPixelValues.removeAll(leavesValues);
-            leavesValues.stream().map(v -> (int) (float) v).forEach(childrenContained::remove);
+            existingIdValues.removeAll(leavesValues);
+            leavesValues.forEach(childrenContained::remove);
             isLeaf.clear();
             childrenContained.forEach((k,v) -> {
                         if (v.size()==0) {
@@ -1212,27 +1249,15 @@ public class SliceSources {
                         }
                     }
             );
-            containsLeaf = existingPixelValues.stream().anyMatch(v -> isLeaf.contains((int) (float) v));
+            containsLeaf = existingIdValues.stream().anyMatch(v -> isLeaf.contains(v));
         }
 
         ConvertibleRois cr_out = new ConvertibleRois();
-
-        roiArray.forEach(roi -> putOriginalId(atlas, roi, roi.getName()));
-
         IJShapeRoiArray output = new IJShapeRoiArray(roiArray);
-
         output.smoothenWithConstrains(movablePx);
         output.smoothenWithConstrains(movablePx);
-
         cr_out.set(output);
         return cr_out;
     }
 
-    private static void putOriginalId(BiopAtlas atlas, Roi roi, String name) {
-        int idRoi = Integer.parseInt(name);
-        AtlasNode node = atlas.getOntology().getNodeFromLabelMap(idRoi);
-        if (node != null) {
-            roi.setName(Integer.toString(atlas.getOntology().getNodeFromLabelMap(idRoi).getId()));//.getOriginalId(idRoi)));
-        }
-    }
 }

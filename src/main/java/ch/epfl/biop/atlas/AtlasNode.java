@@ -7,5 +7,4 @@ import java.util.Map;
 
 public interface AtlasNode extends TreeNode<Map<String, String>> {
     Integer getId();
-    Integer getLabelValue();
 }

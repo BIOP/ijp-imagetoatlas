@@ -25,26 +25,15 @@ import java.util.function.BiConsumer;
  */
 public class BiopAtlasHelper {
 
-    public static Map<Integer, AtlasNode> buildLabelToAtlasNodeMap(AtlasNode rootNode) {
-        Map<Integer, AtlasNode> result = new HashMap<>();
-        return appendToLabelToAtlasNodeMap(result, rootNode);
-    }
-
-    private static Map<Integer, AtlasNode> appendToLabelToAtlasNodeMap(Map<Integer, AtlasNode> map, AtlasNode node) {
-        map.put(node.getLabelValue(), node);
-        node.children().forEach(child -> appendToLabelToAtlasNodeMap(map, (AtlasNode) child));
-        return map;
-    }
-
-    public static List<Integer> getAllParentLabels(AtlasOntology ontology, int label) {
-        AtlasNode origin = ontology.getNodeFromLabelMap(label);
+    public static List<Integer> getAllParentIds(AtlasOntology ontology, int label) {
+        AtlasNode origin = ontology.getNodeFromId(label);
         ArrayList listOfParentLabels = new ArrayList();
         if (origin == null) {
             return listOfParentLabels;
         }
         AtlasNode p = (AtlasNode) origin.parent();
         while (p!=null) {
-            listOfParentLabels.add(p.getLabelValue());
+            listOfParentLabels.add(p.getId());
             p = (AtlasNode) p.parent();
         }
         return listOfParentLabels;

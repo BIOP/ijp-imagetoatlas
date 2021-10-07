@@ -15,8 +15,6 @@ public interface AtlasOntology {
 
 	Color getColor(AtlasNode node);
 
-	AtlasNode getNodeFromLabelMap(int mapValue);
-
 	AtlasNode getNodeFromId(int id);
 
 }

@@ -1,8 +1,6 @@
 package ch.epfl.biop.atlas.allen;
 
 import ch.epfl.biop.atlas.AtlasNode;
-import net.imagej.ImageJ;
-import org.scijava.Context;
 import org.scijava.util.TreeNode;
 
 import java.util.*;
@@ -39,11 +37,6 @@ public class AllenBrainRegionsNode implements AtlasNode {
     @Override
     public Integer getId() {
         return abr.id;
-    }
-
-    @Override
-    public Integer getLabelValue() {
-        return abr.id % 65000; // Problem of labels above 65535.. still bijective with mod 65000
     }
 
     @Override

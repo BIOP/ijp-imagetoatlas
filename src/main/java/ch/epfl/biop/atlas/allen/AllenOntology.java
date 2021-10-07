@@ -3,6 +3,7 @@ package ch.epfl.biop.atlas.allen;
 import java.awt.*;
 import java.io.*;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Map;
 
 import ch.epfl.biop.atlas.AtlasNode;
@@ -20,7 +21,6 @@ public class AllenOntology implements AtlasOntology {
     URL dataSource;
     AllenOntologyJson ontology;
     AtlasNode root;
-    Map<Integer, AtlasNode> labelToAtlasNodeMap;
     Map<Integer, AtlasNode> idToAtlasNodeMap;
 
     @Override
@@ -33,8 +33,12 @@ public class AllenOntology implements AtlasOntology {
             ontology = gson.fromJson(fileReader, AllenOntologyJson.class);
         }
         root = new AllenBrainRegionsNode(ontology.msg.get(0), null);
-        labelToAtlasNodeMap = BiopAtlasHelper.buildLabelToAtlasNodeMap(root);
         idToAtlasNodeMap = BiopAtlasHelper.buildIdToAtlasNodeMap(root);
+        Map<Integer, AtlasNode> moduloAdd = new HashMap<>();
+        idToAtlasNodeMap.forEach((id,v) ->
+            moduloAdd.put(id % 65000, v) // because the map is modulo 65000
+        );
+        idToAtlasNodeMap.putAll(moduloAdd);
         // The hierarchy is fully set thanks to the way the tree is constructed in
         // AllenOntologyJson.AllenBrainRegionsNode
     }
@@ -69,11 +73,6 @@ public class AllenOntology implements AtlasOntology {
     @Override
     public Color getColor(AtlasNode node) {
         return hex2Rgb(((AllenBrainRegionsNode) node).properties.get("color_hex_triplet"));
-    }
-
-    @Override
-    public AtlasNode getNodeFromLabelMap(int mapValue) {
-        return labelToAtlasNodeMap.get(mapValue);
     }
 
     @Override

@@ -18,6 +18,8 @@ import net.imglib2.RealPoint;
 import net.imglib2.RealRandomAccessible;
 import net.imglib2.realtransform.*;
 import net.imglib2.realtransform.inverse.WrappedIterativeInvertibleRealTransform;
+import net.imglib2.type.numeric.IntegerType;
+import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import org.scijava.command.Command;
 import org.scijava.command.CommandModule;
@@ -232,7 +234,7 @@ public class Elastix2DSplineRegistration extends RealTransformSourceAndConverter
                 }
 
                 // Beurk - Unsigned short type : TODO removes this type specificity
-                RealRandomAccessible<UnsignedShortType> mask = fimg_mask[0].getSpimSource().getInterpolatedSource(timePoint,0, Interpolation.NEARESTNEIGHBOR);
+                RealRandomAccessible<IntegerType> mask = fimg_mask[0].getSpimSource().getInterpolatedSource(timePoint,0, Interpolation.NEARESTNEIGHBOR);
 
                 AffineTransform3D at3D = new AffineTransform3D();
                 fimg_mask[0].getSpimSource().getSourceTransform(timePoint,0,at3D);
@@ -242,7 +244,7 @@ public class Elastix2DSplineRegistration extends RealTransformSourceAndConverter
                     at3D.inverse().apply(ptsTarget.get(i), ptsTarget.get(i));
                     at3D.inverse().apply(ptsSource.get(i), ptsSource.get(i));
 
-                    if ((mask.getAt(ptsSource.get(i)).get() == 0) && (mask.getAt(ptsTarget.get(i)).get() == 0)) {
+                    if ((mask.getAt(ptsSource.get(i)).getInteger() == 0) && (mask.getAt(ptsTarget.get(i)).getInteger() == 0)) {
 
                     } else {
                         landMarksToKeep.add(i);
@@ -323,7 +325,6 @@ public class Elastix2DSplineRegistration extends RealTransformSourceAndConverter
 
         if (rt!=null) {
             bwl.getBigWarp().loadLandmarks(BigWarpFileFromRealTransform(rt));
-            //bwl.getBigWarp().setInLandmarkMode(true);
             bwl.getBigWarp().setIsMovingDisplayTransformed(true);
         }
 

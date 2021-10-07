@@ -30,11 +30,6 @@ public class WaxholmSpragueDawleyRatV2Ontology implements AtlasOntology {
             }
 
             @Override
-            public Integer getLabelValue() {
-                return 1;
-            }
-
-            @Override
             public Map<String, String> data() {
                 return props;
             }
@@ -74,12 +69,6 @@ public class WaxholmSpragueDawleyRatV2Ontology implements AtlasOntology {
     @Override
     public Color getColor(AtlasNode node) {
         return new Color(255,128, 50);
-    }
-
-    @Override
-    public AtlasNode getNodeFromLabelMap(int mapValue) {
-        if (mapValue == 1) return root;
-        return null;
     }
 
     @Override

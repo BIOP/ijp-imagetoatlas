@@ -86,7 +86,7 @@ import static sc.fiji.bdvpg.scijava.services.SourceAndConverterService.SPIM_DATA
  * There is:
  *
  * - a positioning mode
- *      This is mosly useful at the beginning of the registration
+ *      This is mostly useful at the beginning of the registration
  *      Slices can be moved along the axis / stretched and shrunk
  *      Only certain sections of the atlas are shown to improve global overview, based on the user need
  *
@@ -1252,13 +1252,13 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
         }
         StringBuilder ontologyLocation = null;
 
-        AtlasNode node = biopAtlas.getOntology().getNodeFromLabelMap(labelValue);
+        AtlasNode node = biopAtlas.getOntology().getNodeFromId(labelValue);
         if (node!=null) {
-            ontologyLocation = new StringBuilder(node.toString());
+            ontologyLocation = new StringBuilder(node.getId());//.toString());
             while (node.parent()!=null) {
                 node = (AtlasNode) node.parent();
                 if (node!=null) {
-                    ontologyLocation.append("<").append(node.toString());
+                    ontologyLocation.append("<").append(node.getId());//.toString());
                 }
             }
         }
