@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.*;
-import java.util.function.Consumer;
 
 /**
  * Backbone of a cancelable action used for Bdv Slice Positioner

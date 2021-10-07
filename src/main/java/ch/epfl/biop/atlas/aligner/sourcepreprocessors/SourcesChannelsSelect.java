@@ -43,6 +43,6 @@ public class SourcesChannelsSelect implements SourcesProcessor {
     }
 
     public String toString() {
-        return "Ch["+channels_indices.stream().map(i -> i.toString()).collect(Collectors.joining(","))+"]";
+        return "Ch["+channels_indices.stream().map(Object::toString).collect(Collectors.joining(","))+"]";
     }
 }

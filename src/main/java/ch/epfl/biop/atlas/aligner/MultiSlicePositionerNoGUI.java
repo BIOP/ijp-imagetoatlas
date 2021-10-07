@@ -31,9 +31,7 @@ public class MultiSlicePositionerNoGUI extends MultiSlicePositioner {
      */
     public MultiSlicePositionerNoGUI(BiopAtlas biopAtlas, ReslicedAtlas reslicedAtlas, Context ctx) {
         super(null, biopAtlas, reslicedAtlas, ctx);
-        this.log = (message) -> {
-            logger.info("Multipositioner : "+message);
-        };
+        this.log = (message) -> logger.info("Multipositioner : "+message);
     }
 
     public void updateDisplay() {}

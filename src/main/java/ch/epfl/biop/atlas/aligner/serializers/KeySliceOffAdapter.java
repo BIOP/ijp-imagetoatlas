@@ -1,7 +1,6 @@
 package ch.epfl.biop.atlas.aligner.serializers;
 
 import ch.epfl.biop.atlas.aligner.KeySliceOff;
-import ch.epfl.biop.atlas.aligner.KeySliceOn;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import com.google.gson.*;

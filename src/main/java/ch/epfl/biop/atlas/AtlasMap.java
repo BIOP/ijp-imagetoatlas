@@ -51,4 +51,8 @@ public interface AtlasMap {
 	AffineTransform3D getPreSlicingTransform();
 
     Double getImageMax(String key);
+
+    int labelRight();
+
+	int labelLeft();
 }

@@ -38,7 +38,7 @@ public class RegistrationAdapter implements JsonSerializer<Registration>,
                         .get("external_type")
                         .getAsString();
                 logger.debug("Generating registration object, type "+registrationTypeName);
-                registration = msp
+                registration = MultiSlicePositioner
                         .getExternalRegistrationPluginSupplier(registrationTypeName)
                         .get();
             } else {

@@ -12,9 +12,9 @@ public class RegistrationPluginHelper {
 
     /**
      * Does the registration required an user input ?
-     * @return
+     * @return true if user input is required
      */
-    public static boolean isManual(Registration reg) {
+    public static boolean isManual(Registration<?> reg) {
         if (reg.getClass().isAnnotationPresent(RegistrationTypeProperties.class)) {
             final RegistrationTypeProperties annotation = reg.getClass()
                     .getAnnotation(RegistrationTypeProperties.class);
@@ -32,7 +32,7 @@ public class RegistrationPluginHelper {
      * Can the registration be edited after it has run ?
      * Considered a manual task by default
      */
-    public static boolean isEditable(Registration reg) {
+    public static boolean isEditable(Registration<?> reg) {
         if (reg.getClass().isAnnotationPresent(RegistrationTypeProperties.class)) {
             final RegistrationTypeProperties annotation = reg.getClass()
                     .getAnnotation(RegistrationTypeProperties.class);
@@ -49,7 +49,7 @@ public class RegistrationPluginHelper {
     /**
      * @return the command class the user has to call in order to start a registration
      */
-    public static Class<? extends Command>[] userInterfaces(Registration reg) {
+    public static Class<? extends Command>[] userInterfaces(Registration<?> reg) {
         if (reg.getClass().isAnnotationPresent(RegistrationTypeProperties.class)) {
             final RegistrationTypeProperties annotation = reg.getClass()
                     .getAnnotation(RegistrationTypeProperties.class);
@@ -65,7 +65,7 @@ public class RegistrationPluginHelper {
 
     /**
      * Assumes unicity! Find the registration class from a UI class
-     * @param queryUIClass
+     * @param queryUIClass the ui class from which the registration is supposed to be found
      * @return null is nothing is found
      */
     public static Class<? extends IABBARegistrationPlugin> registrationFromUI (Context ctx, Class<? extends Command> queryUIClass) {
@@ -75,8 +75,7 @@ public class RegistrationPluginHelper {
         return pluginService
                 .getPluginsOfType(IABBARegistrationPlugin.class)
                 .stream().map(pluginService::createInstance)
-                .filter(plugin -> Arrays.stream(RegistrationPluginHelper.userInterfaces(plugin))
-                .anyMatch(commandUI -> commandUI.equals(queryUIClass)))
+                .filter(plugin -> Arrays.asList(RegistrationPluginHelper.userInterfaces(plugin)).contains(queryUIClass))
                 .findFirst()
                 .map(IABBARegistrationPlugin::getClass)
                 .orElse(null);

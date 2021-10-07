@@ -10,13 +10,14 @@ public @interface RegistrationTypeProperties {
 
     /**
      * Does the registration required an user input ?
-     * @return
+     * @return true if the registration requires user input
      */
     boolean isManual();
 
     /**
      * Can the registration be edited after it has run ?
      * Considered a manual task by default
+     * @return true if the registration can be edited a posteriori
      */
     boolean isEditable();
 

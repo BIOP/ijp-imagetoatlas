@@ -73,7 +73,6 @@ public class ExportDeformationFieldToImageJ implements Command {
                 images[i].show();
             } else {
                 mp.errorMessageForUser.accept("Export to ImageJ Stack error","Error in export of slice "+slice);
-                return;
             }
         });
 

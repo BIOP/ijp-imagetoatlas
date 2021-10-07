@@ -9,13 +9,14 @@ public interface ExternalABBARegistrationPlugin extends IABBARegistrationPlugin 
 
     /**
      * Does the registration required an user input ?
-     * @return
+     * @return true if some user action is required
      */
     boolean isManual();
 
     /**
      * Can the registration be edited after it has run ?
      * Considered a manual task by default
+     * @return true if the registration can be edited a posteriori
      */
     boolean isEditable();
 

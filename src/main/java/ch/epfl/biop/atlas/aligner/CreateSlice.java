@@ -34,10 +34,6 @@ public class CreateSlice extends CancelableAction {
         return sliceSource;
     }
 
-    protected void setSliceSource(SliceSources slice) {
-        this.sliceSource = slice;
-    }
-
     @Override
     public boolean run() {
         synchronized (CreateSlice.class) { // only one slice addition at a time

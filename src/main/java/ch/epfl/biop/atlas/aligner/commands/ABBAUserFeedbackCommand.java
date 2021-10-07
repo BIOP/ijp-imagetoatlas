@@ -1,7 +1,6 @@
 package ch.epfl.biop.atlas.aligner.commands;
 
 import org.scijava.command.Command;
-import org.scijava.command.DefaultCommandService;
 import org.scijava.platform.PlatformService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;

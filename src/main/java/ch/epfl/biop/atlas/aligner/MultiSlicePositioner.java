@@ -42,6 +42,7 @@ import org.scijava.plugin.PluginService;
 import org.scijava.ui.behaviour.*;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
+import org.scijava.util.VersionUtils;
 import org.slf4j.LoggerFactory;
 import sc.fiji.bdvpg.bdv.BdvHandleHelper;
 import sc.fiji.bdvpg.behaviour.EditorBehaviourUnInstaller;
@@ -223,7 +224,7 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
         errorMessageForUser.accept("Error", message);
     };
 
-    Object slicesLock = new Object();
+    final Object slicesLock = new Object();
 
 
     /**
@@ -1215,13 +1216,13 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
         if (displayMode==POSITIONING_MODE_INT) {
 
             SourceAndConverter label = reslicedAtlas.extendedSlicedSources[reslicedAtlas.getLabelSourceIndex()]; // By convention the label image is the last one (OK)
-            labelValue = ((IntegerType) getSourceValueAt(label, globalMouseCoordinates)).getInteger();
+            labelValue = ((IntegerType<?>) getSourceValueAt(label, globalMouseCoordinates)).getInteger();
             SourceAndConverter lrSource = reslicedAtlas.extendedSlicedSources[reslicedAtlas.getLeftRightSourceIndex()]; // By convention the left right indicator image is the next to last one
-            leftRight = ((IntegerType) getSourceValueAt(lrSource, globalMouseCoordinates)).getInteger();
+            leftRight = ((IntegerType<?>) getSourceValueAt(lrSource, globalMouseCoordinates)).getInteger();
 
-            SourceAndConverter xSource = reslicedAtlas.extendedSlicedSources[reslicedAtlas.getCoordinateSourceIndex(0)]; // 0 = X
-            SourceAndConverter ySource = reslicedAtlas.extendedSlicedSources[reslicedAtlas.getCoordinateSourceIndex(1)]; // By convention the left right indicator image is the next to last one
-            SourceAndConverter zSource = reslicedAtlas.extendedSlicedSources[reslicedAtlas.getCoordinateSourceIndex(2)]; // By convention the left right indicator image is the next to last one
+            SourceAndConverter<FloatType> xSource = reslicedAtlas.extendedSlicedSources[reslicedAtlas.getCoordinateSourceIndex(0)]; // 0 = X
+            SourceAndConverter<FloatType> ySource = reslicedAtlas.extendedSlicedSources[reslicedAtlas.getCoordinateSourceIndex(1)]; // By convention the left right indicator image is the next to last one
+            SourceAndConverter<FloatType> zSource = reslicedAtlas.extendedSlicedSources[reslicedAtlas.getCoordinateSourceIndex(2)]; // By convention the left right indicator image is the next to last one
 
             coords[0] = ((FloatType) getSourceValueAt(xSource, globalMouseCoordinates)).get();
             coords[1] = ((FloatType) getSourceValueAt(ySource, globalMouseCoordinates)).get();
@@ -1233,9 +1234,9 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
             SourceAndConverter lrSource = reslicedAtlas.nonExtendedSlicedSources[reslicedAtlas.getLeftRightSourceIndex()]; // By convention the left right indicator image is the next to last one
             leftRight = ((IntegerType) getSourceValueAt(lrSource, globalMouseCoordinates)).getInteger();
 
-            SourceAndConverter xSource = reslicedAtlas.nonExtendedSlicedSources[reslicedAtlas.getCoordinateSourceIndex(0)]; // 0 = X
-            SourceAndConverter ySource = reslicedAtlas.nonExtendedSlicedSources[reslicedAtlas.getCoordinateSourceIndex(1)]; // By convention the left right indicator image is the next to last one
-            SourceAndConverter zSource = reslicedAtlas.nonExtendedSlicedSources[reslicedAtlas.getCoordinateSourceIndex(2)]; // By convention the left right indicator image is the next to last one
+            SourceAndConverter<FloatType> xSource = reslicedAtlas.nonExtendedSlicedSources[reslicedAtlas.getCoordinateSourceIndex(0)]; // 0 = X
+            SourceAndConverter<FloatType> ySource = reslicedAtlas.nonExtendedSlicedSources[reslicedAtlas.getCoordinateSourceIndex(1)]; // By convention the left right indicator image is the next to last one
+            SourceAndConverter<FloatType> zSource = reslicedAtlas.nonExtendedSlicedSources[reslicedAtlas.getCoordinateSourceIndex(2)]; // By convention the left right indicator image is the next to last one
 
             coords[0] = ((FloatType) getSourceValueAt(xSource, globalMouseCoordinates)).get();
             coords[1] = ((FloatType) getSourceValueAt(ySource, globalMouseCoordinates)).get();
@@ -1244,10 +1245,10 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
 
         DecimalFormat df = new DecimalFormat("#0.00");
         String coordinates = "["+df.format(coords[0])+";"+df.format(coords[1])+";"+df.format(coords[2])+"]";
-        if (leftRight == 255) {
+        if (leftRight == getAtlas().getMap().labelRight()) {
             coordinates += "(R)";
         }
-        if (leftRight == 0) {
+        if (leftRight == getAtlas().getMap().labelLeft()) {
             coordinates += "(L)";
         }
         StringBuilder ontologyLocation = null;
@@ -1807,10 +1808,6 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
         return overlapMode;
     }
 
-    public static SourcesProcessor getChannel(int... channels) {
-        return new SourcesChannelsSelect(channels);
-    }
-
     public void editLastRegistration(boolean reuseOriginalChannels, SourcesProcessor preprocessSlice, SourcesProcessor preprocessAtlas) {
         if (getSelectedSources().size()==0) {
             warningMessageForUser.accept("No selected slice", "Please select the slice you want to edit");
@@ -2092,7 +2089,7 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
 
     //------------------------------------------ DRAG BEHAVIOURS
 
-    private AtomicBoolean dragActionInProgress = new AtomicBoolean(false);
+    private final AtomicBoolean dragActionInProgress = new AtomicBoolean(false);
 
     synchronized boolean startDragAction() {
         boolean result = dragActionInProgress.compareAndSet(false, true);
@@ -2168,7 +2165,7 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
 
 
         // For actions serialization
-        RuntimeTypeAdapterFactory factoryActions = RuntimeTypeAdapterFactory.of(CancelableAction.class);
+        RuntimeTypeAdapterFactory<CancelableAction> factoryActions = RuntimeTypeAdapterFactory.of(CancelableAction.class);
 
         factoryActions.registerSubtype(CreateSlice.class);
         factoryActions.registerSubtype(MoveSlice.class);
@@ -2184,7 +2181,7 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
         gsonbuilder.registerTypeHierarchyAdapter(KeySliceOff.class, new KeySliceOffAdapter(this, this::currentSliceGetter));
 
         // For registration registration
-        RuntimeTypeAdapterFactory factoryRegistrations = RuntimeTypeAdapterFactory.of(Registration.class);
+        RuntimeTypeAdapterFactory<Registration> factoryRegistrations = RuntimeTypeAdapterFactory.of(Registration.class);
         gsonbuilder.registerTypeAdapterFactory(factoryRegistrations);
 
         PluginService pluginService = scijavaCtx.getService(PluginService.class);
@@ -2202,7 +2199,7 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
 
         // For sources processor
 
-        RuntimeTypeAdapterFactory factorySourcesProcessor = RuntimeTypeAdapterFactory.of(SourcesProcessor.class);
+        RuntimeTypeAdapterFactory<SourcesProcessor> factorySourcesProcessor = RuntimeTypeAdapterFactory.of(SourcesProcessor.class);
 
         factorySourcesProcessor.registerSubtype(SourcesAffineTransformer.class);
         factorySourcesProcessor.registerSubtype(SourcesChannelsSelect.class);
@@ -2251,9 +2248,7 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
         sacss.run();
         List<SourceAndConverter> serialized_sources = new ArrayList<>();
 
-        sacss.getSacToId().values().stream().sorted().forEach(i -> {
-            serialized_sources.add(sacss.getIdToSac().get(i));
-        });
+        sacss.getSacToId().values().stream().sorted().forEach(i -> serialized_sources.add(sacss.getIdToSac().get(i)));
 
         try {
             FileWriter writer = new FileWriter(stateFile.getAbsolutePath());
@@ -2317,7 +2312,7 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
                 setDisplayMode(state.displayMode);
                 setOverlapMode(state.overlapMode);
 
-                bdvh.getViewerPanel().state().setViewerTransform((AffineTransform3D) state.bdvView);
+                bdvh.getViewerPanel().state().setViewerTransform(state.bdvView);
 
                 state.slices_state_list.forEach(sliceState -> {
                     sliceState.slice.waitForEndOfTasks();
@@ -2385,13 +2380,15 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
             rotY = mp.getReslicedAtlas().getRotateY();
             sliceHashCode = slice.hashCode();
             sessionHashcode = mp.hashCode();
+            abbaInfoVersion = VersionUtils.getVersion(MultiSlicePositioner.class);
+            atlas = mp.getAtlas().getName();
         }
 
         String type = "ABBA Registration"; // Tag to know where from which software this job comes from
 
-        String TaskInfoVersion = "0.1"; // To handle future versions
+        String abbaInfoVersion; // To handle future versions
 
-        String Atlas = "Allen Adult Mouse Brain CCFv3"; // Could be made modular later - for now ABBA only uses this
+        String atlas; // Could be made modular later - for now ABBA only uses this
 
         int sliceHashCode; // Provide a way to know if the same slice was registered several times
 
@@ -2422,7 +2419,7 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
     }
 
     public static boolean isExternalRegistrationPlugin(String name) {
-        return externalRegistrationPlugins.keySet().contains(name);
+        return externalRegistrationPlugins.containsKey(name);
     }
 
     public static Supplier<? extends IABBARegistrationPlugin> getExternalRegistrationPluginSupplier(String name) {

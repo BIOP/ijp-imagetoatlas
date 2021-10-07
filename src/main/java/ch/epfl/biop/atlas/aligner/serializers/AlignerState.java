@@ -32,9 +32,7 @@ public class AlignerState {
 
         mp.getSortedSlices().forEach(sliceSource -> {
             SliceSourcesState slice_state = new SliceSourcesState();
-            filterSerializedActions(mp.getActionsFromSlice(sliceSource))
-                    .forEach(action -> slice_state.actions.add(action));
-
+            slice_state.actions.addAll(filterSerializedActions(mp.getActionsFromSlice(sliceSource)));
             slice_state.channelsVisibility = sliceSource.getGUIState().getChannelsVisibility();
             slice_state.settings_per_channel = sliceSource.getGUIState().getDisplaysettings();
             slice_state.preTransform = sliceSource.getTransformSourceOrigin();

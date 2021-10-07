@@ -35,8 +35,8 @@ public class SourcesProcessorHelper {
      *
      * Limitation : does not work in a general manner...
      *
-     * @param processor
-     * @return
+     * @param processor the source processor to modify
+     * @return an identical processor which do not remove any channel
      */
     public static SourcesProcessor removeChannelsSelect(SourcesProcessor processor) {
         if (processor instanceof SourcesChannelsSelect) {

@@ -61,8 +61,6 @@ import java.util.stream.Collectors;
  * Make sure you have multiresolution files if you don't want your downscaling to look bad! Also
  * this is currently the only registration method where the display settings matter for the registration.
  *
- * TODO : add a checkbox for optional conversion to 8 bit and jpeg
- *
  */
 
 // TODO: allow only in coronal and AB atlas
@@ -361,7 +359,9 @@ public class RegistrationDeepSliceCommand implements Command {
             // if pixel size is 1000 micron -> scaling factor = 1
 
             final Matcher matcher = pattern.matcher(slice.filename);
+
             matcher.find();
+
             int iSliceSource = Integer.parseInt(matcher.group(1));
 
             logger.debug("Slice QuickNii "+i+" correspond to initial slice "+iSliceSource);
@@ -398,7 +398,7 @@ public class RegistrationDeepSliceCommand implements Command {
         SourcesProcessor preprocess = SourcesProcessorHelper.Identity();
 
         if (!slices_string_channels.trim().equals("*")) {
-            List<Integer> indices = Arrays.asList(slices_string_channels.trim().split(",")).stream().mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
+            List<Integer> indices = Arrays.stream(slices_string_channels.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
 
             int maxIndex = indices.stream().mapToInt(e -> e).max().getAsInt();
 

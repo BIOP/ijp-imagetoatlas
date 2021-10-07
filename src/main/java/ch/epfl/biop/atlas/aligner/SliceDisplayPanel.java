@@ -339,6 +339,7 @@ public class SliceDisplayPanel implements MultiSlicePositioner.ModeListener, Mul
             } else if (columnIndex%2 == 0) {
                 int iChannel = (columnIndex-2)/2;
                 if (slice.nChannels>iChannel) {
+                    assert slice.getGUIState().channelVisible != null;
                     return slice.getGUIState().channelVisible[iChannel];
                 } else {
                     return Boolean.FALSE;

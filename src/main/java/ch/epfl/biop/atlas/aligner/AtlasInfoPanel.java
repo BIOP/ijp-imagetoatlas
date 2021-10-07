@@ -25,7 +25,6 @@ public class AtlasInfoPanel {
             modalities += "["+key+"]";
         }
 
-        int nPx, nPy, nPz;
         long[] dimensions = {0,0,0};
         mp.getAtlas().getMap().getLabelImage().getSpimSource().getSource(0,0).dimensions(dimensions);
 

@@ -4,13 +4,12 @@ import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import org.scijava.Initializable;
 import org.scijava.command.Command;
 import org.scijava.command.DynamicCommand;
-import org.scijava.command.InteractiveCommand;
 import org.scijava.module.MutableModuleItem;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 // TODO : make this command atlas agnostic
 @Plugin(type = Command.class,
@@ -23,7 +22,7 @@ public class ExportRegionsToRoiManagerCommand extends DynamicCommand implements
     MultiSlicePositioner mp;
 
     @Parameter(label="Roi Naming")
-    String naming_choice;
+    String naming_choice; // Intellij claims it's not used. but it's wrong. It's use through scijava reflection
 
     @Override
     public void run() {
@@ -35,7 +34,7 @@ public class ExportRegionsToRoiManagerCommand extends DynamicCommand implements
     public void initialize() {
         final MutableModuleItem<String> naming_choice = //
                 getInfo().getMutableInput("naming_choice", String.class);
-        List<String> names = mp.getAtlas().getOntology().getRoot().data().keySet().stream().collect(Collectors.toList());
+        List<String> names = new ArrayList<>(mp.getAtlas().getOntology().getRoot().data().keySet());
         naming_choice.setChoices(names);
     }
 

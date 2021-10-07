@@ -39,7 +39,7 @@ public class DeformationFieldToImagePlus {
         stack.setBitDepth(32);
 
         RealPoint pt = new RealPoint(3);
-        float[] pos = new float[]{0,0,downsample/2};
+        float[] pos = new float[]{0,0,(float) (downsample/2.0)};
 
         int nPix = sx*sy;
         float[] posX = new float[nPix];
@@ -49,8 +49,8 @@ public class DeformationFieldToImagePlus {
         int index = 0;
         for (int py = 0; py<sy; py++)
         for (int px = 0; px<sx; px++){
-            pos[0] = px*downsample+downsample/2;
-            pos[1] = py*downsample+downsample/2;
+            pos[0] = (int)(px*downsample+downsample/2.0);
+            pos[1] = (int)(py*downsample+downsample/2.0);
             pt.setPosition(pos);
             rt.apply(pt,pt);
             if (index<nPix) {

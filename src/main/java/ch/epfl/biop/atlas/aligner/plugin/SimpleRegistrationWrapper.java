@@ -84,10 +84,10 @@ public class SimpleRegistrationWrapper implements ExternalABBARegistrationPlugin
     @Override
     public void setFixedImage(SourceAndConverter<?>[] fimg) {
         fixedImage = export("Fixed-", Arrays.asList(fimg),
-                (Double.valueOf(parameters.get("px"))),
-                (Double.valueOf(parameters.get("py"))),
-                (Double.valueOf(parameters.get("sx"))),
-                (Double.valueOf(parameters.get("sy"))),
+                (Double.parseDouble(parameters.get("px"))),
+                (Double.parseDouble(parameters.get("py"))),
+                (Double.parseDouble(parameters.get("sx"))),
+                (Double.parseDouble(parameters.get("sy"))),
                 registration.getVoxelSizeInMicron()/1000.0,
                 0,
                 false
@@ -97,10 +97,10 @@ public class SimpleRegistrationWrapper implements ExternalABBARegistrationPlugin
     @Override
     public void setMovingImage(SourceAndConverter<?>[] mimg) {
         movingImage = export("Moving-", Arrays.asList(mimg),
-                (Double.valueOf(parameters.get("px"))),
-                (Double.valueOf(parameters.get("py"))),
-                (Double.valueOf(parameters.get("sx"))),
-                (Double.valueOf(parameters.get("sy"))),
+                (Double.parseDouble(parameters.get("px"))),
+                (Double.parseDouble(parameters.get("py"))),
+                (Double.parseDouble(parameters.get("sx"))),
+                (Double.parseDouble(parameters.get("sy"))),
                 registration.getVoxelSizeInMicron()/1000.0,
                 0,
                 false
@@ -110,10 +110,10 @@ public class SimpleRegistrationWrapper implements ExternalABBARegistrationPlugin
     @Override
     public void setFixedMask(SourceAndConverter<?>[] fimg_mask) {
         fixedMask = export("FixedMask-", Arrays.asList(fimg_mask),
-                (Double.valueOf(parameters.get("px"))),
-                (Double.valueOf(parameters.get("py"))),
-                (Double.valueOf(parameters.get("sx"))),
-                (Double.valueOf(parameters.get("sy"))),
+                (Double.parseDouble(parameters.get("px"))),
+                (Double.parseDouble(parameters.get("py"))),
+                (Double.parseDouble(parameters.get("sx"))),
+                (Double.parseDouble(parameters.get("sy"))),
                 registration.getVoxelSizeInMicron()/1000.0,
                 0,
                 false
@@ -123,10 +123,10 @@ public class SimpleRegistrationWrapper implements ExternalABBARegistrationPlugin
     @Override
     public void setMovingMask(SourceAndConverter<?>[] mimg_mask) {
         movingMask = export("MovingMask-", Arrays.asList(mimg_mask),
-                (Double.valueOf(parameters.get("px"))),
-                (Double.valueOf(parameters.get("py"))),
-                (Double.valueOf(parameters.get("sx"))),
-                (Double.valueOf(parameters.get("sy"))),
+                (Double.parseDouble(parameters.get("px"))),
+                (Double.parseDouble(parameters.get("py"))),
+                (Double.parseDouble(parameters.get("sx"))),
+                (Double.parseDouble(parameters.get("sy"))),
                 registration.getVoxelSizeInMicron()/1000.0,
                 0,
                 false
@@ -153,8 +153,8 @@ public class SimpleRegistrationWrapper implements ExternalABBARegistrationPlugin
         InvertibleRealTransformSequence irts = new InvertibleRealTransformSequence();
         AffineTransform3D m = new AffineTransform3D();
 
-        double px = (Double.valueOf(parameters.get("px")));
-        double py = (Double.valueOf(parameters.get("py")));
+        double px = (Double.parseDouble(parameters.get("px")));
+        double py = (Double.parseDouble(parameters.get("py")));
         double voxSize = registration.getVoxelSizeInMicron();
 
         // We work in millimeters
