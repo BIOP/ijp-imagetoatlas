@@ -310,24 +310,14 @@ public class SimpleRegistrationWrapper implements ExternalABBARegistrationPlugin
         AffineTransform3D at3D = new AffineTransform3D(); // Empty Transform
         // viewer transform
         // Center on the display center of the viewer ...
-        // Center on the display center of the viewer ...
-
-        //at3D.scale(1/pixel_size_mm);
-
         at3D.translate(-px, -py, 0);
 
         at3D.scale(1/pixel_size_mm);
-        // Getting an image independent of the view scaling unit (not sure)
 
+        // Getting an image independent of the view scaling unit (not sure)
         long nPx = (long)(sx / pixel_size_mm);
         long nPy = (long)(sy / pixel_size_mm);
         long nPz = 1;
-
-        //if (samplingZInPhysicalUnit==0) {
-        //    nPz = 1;
-        //} else {
-        //    nPz = 1+(long)(zSize / (samplingZInPhysicalUnit/2.0)); // TODO : check div by 2
-        //}
 
         // At least a pixel in all directions
         if (nPz == 0) nPz = 1;

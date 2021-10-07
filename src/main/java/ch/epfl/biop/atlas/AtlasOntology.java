@@ -4,7 +4,9 @@ import java.awt.*;
 import java.net.URL;
 
 public interface AtlasOntology {
-	
+
+	String getName();
+
 	void initialize() throws Exception;
 
 	void setDataSource(URL dataSource);

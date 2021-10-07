@@ -16,6 +16,11 @@ public class WaxholmSpragueDawleyRatV2Ontology implements AtlasOntology {
     AtlasNode root;
 
     @Override
+    public String getName() {
+        return  "waxholm_sprague_dawley_rat_v2";
+    }
+
+    @Override
     public void initialize() throws Exception {
 
         Map<String, String> props = new HashMap<>();

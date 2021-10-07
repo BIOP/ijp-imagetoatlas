@@ -12,16 +12,17 @@ import com.google.gson.Gson;
 
 import ch.epfl.biop.atlas.AtlasOntology;
 
-/**
- * TODO : make this directly serializable
- */
-
 public class AllenOntology implements AtlasOntology {
 
     URL dataSource;
-    AllenOntologyJson ontology;
-    AtlasNode root;
-    Map<Integer, AtlasNode> idToAtlasNodeMap;
+    transient AllenOntologyJson ontology;
+    transient AtlasNode root;
+    transient Map<Integer, AtlasNode> idToAtlasNodeMap;
+
+    @Override
+    public String getName() {
+        return null;
+    }
 
     @Override
     public void initialize() throws Exception {
@@ -39,8 +40,6 @@ public class AllenOntology implements AtlasOntology {
             moduloAdd.put(id % 65000, v) // because the map is modulo 65000
         );
         idToAtlasNodeMap.putAll(moduloAdd);
-        // The hierarchy is fully set thanks to the way the tree is constructed in
-        // AllenOntologyJson.AllenBrainRegionsNode
     }
 
     @Override

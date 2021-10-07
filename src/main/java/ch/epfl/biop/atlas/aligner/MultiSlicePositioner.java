@@ -1214,14 +1214,14 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
         float[] coords = new float[3];
         if (displayMode==POSITIONING_MODE_INT) {
 
-            SourceAndConverter label = reslicedAtlas.extendedSlicedSources[reslicedAtlas.extendedSlicedSources.length-1]; // By convention the label image is the last one (OK)
+            SourceAndConverter label = reslicedAtlas.extendedSlicedSources[reslicedAtlas.getLabelSourceIndex()]; // By convention the label image is the last one (OK)
             labelValue = ((IntegerType) getSourceValueAt(label, globalMouseCoordinates)).getInteger();
-            SourceAndConverter lrSource = reslicedAtlas.extendedSlicedSources[reslicedAtlas.extendedSlicedSources.length-2]; // By convention the left right indicator image is the next to last one
+            SourceAndConverter lrSource = reslicedAtlas.extendedSlicedSources[reslicedAtlas.getLeftRightSourceIndex()]; // By convention the left right indicator image is the next to last one
             leftRight = ((IntegerType) getSourceValueAt(lrSource, globalMouseCoordinates)).getInteger();
 
-            SourceAndConverter xSource = reslicedAtlas.extendedSlicedSources[reslicedAtlas.extendedSlicedSources.length-5]; // (bad) convention TODO : safer indexing
-            SourceAndConverter ySource = reslicedAtlas.extendedSlicedSources[reslicedAtlas.extendedSlicedSources.length-4]; // By convention the left right indicator image is the next to last one
-            SourceAndConverter zSource = reslicedAtlas.extendedSlicedSources[reslicedAtlas.extendedSlicedSources.length-3]; // By convention the left right indicator image is the next to last one
+            SourceAndConverter xSource = reslicedAtlas.extendedSlicedSources[reslicedAtlas.getCoordinateSourceIndex(0)]; // 0 = X
+            SourceAndConverter ySource = reslicedAtlas.extendedSlicedSources[reslicedAtlas.getCoordinateSourceIndex(1)]; // By convention the left right indicator image is the next to last one
+            SourceAndConverter zSource = reslicedAtlas.extendedSlicedSources[reslicedAtlas.getCoordinateSourceIndex(2)]; // By convention the left right indicator image is the next to last one
 
             coords[0] = ((FloatType) getSourceValueAt(xSource, globalMouseCoordinates)).get();
             coords[1] = ((FloatType) getSourceValueAt(ySource, globalMouseCoordinates)).get();

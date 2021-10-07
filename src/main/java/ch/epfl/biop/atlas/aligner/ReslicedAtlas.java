@@ -268,14 +268,7 @@ public class ReslicedAtlas implements RealInterval {
         //slicingUpdate();
     }
 
-    /*
-     * ?? TODO : doc
-     * @param slicingTransfom
-     * @param nX
-     * @param nY
-     * @param nZ
-     */
-    public static void adjustShiftSlicingTransform(AffineTransform3D slicingTransfom, double cx, double cy, double cz, long nX, long nY, long nZ) {
+     static void adjustShiftSlicingTransform(AffineTransform3D slicingTransfom, double cx, double cy, double cz, long nX, long nY, long nZ) {
         AffineTransform3D notShifted = new AffineTransform3D();
         notShifted.set(slicingTransfom);
         notShifted.set(0,0,3);

@@ -96,7 +96,7 @@ public class SliceSourcesGUIState {
             GraphicalHandle gh = new CircleGraphicalHandle(mp,
                     new Behaviours(new InputTriggerConfig()),
                     mp.getBdvh().getTriggerbindings(),
-                    this.toString(), // pray for unicity ? TODO : do better than thoughts and prayers
+                    this.toString(), // assumes unicity
                     this::getBdvHandleCoords,
                     this::getBdvHandleRadius,
                     this::getBdvHandleColor
@@ -108,7 +108,7 @@ public class SliceSourcesGUIState {
             keyHandle = new SquareGraphicalHandle(mp,
                     behavioursHandleSlice,
                     mp.getBdvh().getTriggerbindings(),
-                    this.toString(), // pray for unicity ? TODO : do better than thoughts and prayers
+                    this.toString(), // assumes unicity
                     () -> {
                         AffineTransform3D bdvAt3D = new AffineTransform3D();
                         mp.getBdvh().getViewerPanel().state().getViewerTransform(bdvAt3D);

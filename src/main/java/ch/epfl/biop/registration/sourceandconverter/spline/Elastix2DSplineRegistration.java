@@ -233,7 +233,6 @@ public class Elastix2DSplineRegistration extends RealTransformSourceAndConverter
                     ptsTarget.add(ptTarget);
                 }
 
-                // Beurk - Unsigned short type : TODO removes this type specificity
                 RealRandomAccessible<IntegerType> mask = fimg_mask[0].getSpimSource().getInterpolatedSource(timePoint,0, Interpolation.NEARESTNEIGHBOR);
 
                 AffineTransform3D at3D = new AffineTransform3D();
