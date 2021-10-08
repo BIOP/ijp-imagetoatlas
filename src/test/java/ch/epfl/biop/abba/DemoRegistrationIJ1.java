@@ -2,7 +2,7 @@ package ch.epfl.biop.abba;
 
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.commands.RegistrationElastixAffineCommand;
-import ch.epfl.biop.atlas.aligner.commands.SacMultiSacsPositionerCommand;
+import ch.epfl.biop.atlas.aligner.commands.ABBAStartCommand;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.bdv.command.importer.SourceFromImagePlusCommand;
@@ -21,11 +21,11 @@ public class DemoRegistrationIJ1 {
         ImagePlus demoSlice = IJ.openImage("src/test/resources/demoSlice.tif");
         demoSlice.show();
 
-        ij.command().run(SacMultiSacsPositionerCommand.class, true).get();
+        ij.command().run(ABBAStartCommand.class, true).get();
 
         ij.command().run(SourceFromImagePlusCommand.class, true, "imagePlus", demoSlice).get();
 
-        MultiSlicePositioner mp = (MultiSlicePositioner) (ij.command().run(SacMultiSacsPositionerCommand.class, true).get().getOutput("mp"));
+        MultiSlicePositioner mp = (MultiSlicePositioner) (ij.command().run(ABBAStartCommand.class, true).get().getOutput("mp"));
 
         SourceAndConverter[] sac = ij.convert().convert(demoSlice.getTitle(), SourceAndConverter[].class);
 

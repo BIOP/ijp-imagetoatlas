@@ -20,9 +20,9 @@ import javax.swing.JFrame;
 import javax.swing.ImageIcon;
 
 @Plugin(type = Command.class,
-        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Position Multiple Slices",
+        menuPath = "Plugins>BIOP>Atlas>ABBA - Align Big Brains and Atlases",
         description = "Starts ABBA from an Atlas")
-public class SacMultiSacsPositionerCommand implements Command {
+public class ABBAStartCommand implements Command {
 
     @Parameter(choices = {"coronal", "sagittal", "horizontal"})
     String slicing_mode;

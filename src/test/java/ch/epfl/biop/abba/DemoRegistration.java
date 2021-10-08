@@ -2,7 +2,7 @@ package ch.epfl.biop.abba;
 
 import bdv.viewer.SourceAndConverter;
 import bigwarp.BigWarp;
-import ch.epfl.biop.atlas.aligner.commands.SacMultiSacsPositionerCommand;
+import ch.epfl.biop.atlas.aligner.commands.ABBAStartCommand;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import mpicbg.spim.data.sequence.Tile;
 import net.imagej.ImageJ;
@@ -24,7 +24,7 @@ public class DemoRegistration {
 
         ij.script().run("test.ijm",scriptTest,true).get();
 
-        MultiSlicePositioner mp = (MultiSlicePositioner) (ij.command().run(SacMultiSacsPositionerCommand.class, true).get().getOutput("mp"));
+        MultiSlicePositioner mp = (MultiSlicePositioner) (ij.command().run(ABBAStartCommand.class, true).get().getOutput("mp"));
 
         SourceAndConverter[] sacs =
                 //Arrays.concat(

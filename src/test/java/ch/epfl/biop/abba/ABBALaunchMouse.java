@@ -1,6 +1,6 @@
 package ch.epfl.biop.abba;
 
-import ch.epfl.biop.atlas.aligner.commands.SacMultiSacsPositionerCommand;
+import ch.epfl.biop.atlas.aligner.commands.ABBAStartCommand;
 import net.imagej.ImageJ;
 import net.imagej.patcher.LegacyInjector;
 
@@ -15,7 +15,7 @@ public class ABBALaunchMouse {
         //DebugTools.setRootLevel("off");
         //DebugTools.setRootLevel();
 
-        ij.command().run(SacMultiSacsPositionerCommand.class, true).get();
+        ij.command().run(ABBAStartCommand.class, true).get();
         //ij.object().getObjects()
 
     }

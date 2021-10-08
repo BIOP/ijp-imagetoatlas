@@ -3,7 +3,7 @@ package ch.epfl.biop.abba.plugin.py;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
-import ch.epfl.biop.atlas.aligner.commands.SacMultiSacsPositionerCommand;
+import ch.epfl.biop.atlas.aligner.commands.ABBAStartCommand;
 import ch.epfl.biop.atlas.aligner.sourcepreprocessors.SourcesChannelsSelect;
 import ch.epfl.biop.atlas.aligner.plugin.SimpleRegistrationWrapper;
 import ch.epfl.biop.bdv.command.importer.SourceFromImagePlusCommand;
@@ -41,7 +41,7 @@ public class TestExternalRegistrationPlugin {
 
 
         // --------------- Starting ABBA
-        MultiSlicePositioner mp = (MultiSlicePositioner) ij.command().run(SacMultiSacsPositionerCommand.class, true).get().getOutput("mp");
+        MultiSlicePositioner mp = (MultiSlicePositioner) ij.command().run(ABBAStartCommand.class, true).get().getOutput("mp");
 
         ImagePlus demoSlice = IJ.openImage("src/test/resources/demoSlice.tif");
         demoSlice.show();
