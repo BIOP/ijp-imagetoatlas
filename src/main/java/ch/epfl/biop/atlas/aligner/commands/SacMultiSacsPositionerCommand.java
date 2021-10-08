@@ -2,7 +2,7 @@ package ch.epfl.biop.atlas.aligner.commands;
 
 import bdv.util.BdvHandle;
 import bdv.util.BdvHandleFrame;
-import ch.epfl.biop.atlas.BiopAtlas;
+import ch.epfl.biop.atlas.struct.Atlas;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositionerNoGUI;
 import ch.epfl.biop.atlas.aligner.ReslicedAtlas;
@@ -28,7 +28,7 @@ public class SacMultiSacsPositionerCommand implements Command {
     String slicing_mode;
 
     @Parameter
-    public BiopAtlas ba;
+    public Atlas ba;
 
     @Parameter
     Context context;

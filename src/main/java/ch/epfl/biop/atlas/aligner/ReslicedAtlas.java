@@ -2,8 +2,8 @@ package ch.epfl.biop.atlas.aligner;
 
 import bdv.tools.transformation.TransformedSource;
 import bdv.viewer.SourceAndConverter;
-import ch.epfl.biop.atlas.AtlasMap;
-import ch.epfl.biop.atlas.BiopAtlas;
+import ch.epfl.biop.atlas.struct.AtlasMap;
+import ch.epfl.biop.atlas.struct.Atlas;
 import ch.epfl.biop.sourceandconverter.EmptyMultiResolutionSourceAndConverterCreator;
 import ch.epfl.biop.registration.sourceandconverter.affine.AffineTransformedSourceWrapperRegistration;
 import ch.epfl.biop.sourceandconverter.transform.SourceMosaicZSlicer;
@@ -25,7 +25,7 @@ public class ReslicedAtlas implements RealInterval {
 
     protected static Logger logger = LoggerFactory.getLogger(ReslicedAtlas.class);
 
-    final public BiopAtlas ba;
+    final public Atlas ba;
 
     AffineTransform3D slicingTransfom = new AffineTransform3D();
 
@@ -53,7 +53,7 @@ public class ReslicedAtlas implements RealInterval {
 
     List<Runnable> listeners = new ArrayList<>();
 
-    public ReslicedAtlas(BiopAtlas ba) {
+    public ReslicedAtlas(Atlas ba) {
         this.ba = ba;
     }
 

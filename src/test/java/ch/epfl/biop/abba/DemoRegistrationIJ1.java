@@ -2,7 +2,6 @@ package ch.epfl.biop.abba;
 
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.commands.RegistrationElastixAffineCommand;
-import ch.epfl.biop.atlas.allen.adultmousebrain.AllenBrainAdultMouseAtlasCCF2017Command;
 import ch.epfl.biop.atlas.aligner.commands.SacMultiSacsPositionerCommand;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
@@ -22,7 +21,7 @@ public class DemoRegistrationIJ1 {
         ImagePlus demoSlice = IJ.openImage("src/test/resources/demoSlice.tif");
         demoSlice.show();
 
-        ij.command().run(AllenBrainAdultMouseAtlasCCF2017Command.class, true).get();
+        ij.command().run(SacMultiSacsPositionerCommand.class, true).get();
 
         ij.command().run(SourceFromImagePlusCommand.class, true, "imagePlus", demoSlice).get();
 

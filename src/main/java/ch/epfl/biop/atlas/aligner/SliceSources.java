@@ -3,9 +3,9 @@ package ch.epfl.biop.atlas.aligner;
 import bdv.util.BoundedRealTransform;
 import bdv.util.QuPathBdvHelper;
 import bdv.viewer.SourceAndConverter;
-import ch.epfl.biop.atlas.AtlasNode;
-import ch.epfl.biop.atlas.AtlasOntology;
-import ch.epfl.biop.atlas.BiopAtlasHelper;
+import ch.epfl.biop.atlas.struct.AtlasNode;
+import ch.epfl.biop.atlas.struct.AtlasOntology;
+import ch.epfl.biop.atlas.struct.AtlasHelper;
 import ch.epfl.biop.atlas.aligner.sourcepreprocessors.*;
 import ch.epfl.biop.atlas.aligner.plugin.RegistrationPluginHelper;
 import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
@@ -897,7 +897,7 @@ public class SliceSources {
     static public synchronized void writeOntotogyIfNotPresent(MultiSlicePositioner mp, String quPathFilePath) {
         File ontology = new File(quPathFilePath, mp.getAtlas().getName()+"-Ontology.json");
         if (!ontology.exists()) {
-            BiopAtlasHelper.saveOntologyToJsonFile(mp.getAtlas().getOntology(), ontology.getAbsolutePath());
+            AtlasHelper.saveOntologyToJsonFile(mp.getAtlas().getOntology(), ontology.getAbsolutePath());
         }
     }
 
@@ -1181,7 +1181,7 @@ public class SliceSources {
         // keep a list of possible values encountered in the tree
         HashSet<Integer> possibleIdValues = new HashSet<>();
         existingIdValues.forEach(id -> {
-            possibleIdValues.addAll(BiopAtlasHelper.getAllParentIds(ontology, id));
+            possibleIdValues.addAll(AtlasHelper.getAllParentIds(ontology, id));
             possibleIdValues.add(id);
         });
 

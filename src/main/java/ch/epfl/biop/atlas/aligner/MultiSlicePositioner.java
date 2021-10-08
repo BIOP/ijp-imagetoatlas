@@ -4,8 +4,8 @@ import bdv.util.*;
 import bdv.viewer.Interpolation;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.ResourcesMonitor;
-import ch.epfl.biop.atlas.AtlasNode;
-import ch.epfl.biop.atlas.BiopAtlas;
+import ch.epfl.biop.atlas.struct.AtlasNode;
+import ch.epfl.biop.atlas.struct.Atlas;
 import ch.epfl.biop.atlas.aligner.commands.*;
 import ch.epfl.biop.atlas.aligner.serializers.*;
 import ch.epfl.biop.atlas.aligner.sourcepreprocessors.*;
@@ -180,7 +180,7 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
     ReslicedAtlas reslicedAtlas;
 
     // Original biop atlas
-    private BiopAtlas biopAtlas;
+    private Atlas biopAtlas;
 
     // Selection layer : responsible to listen to mouse drawing events that select sources
     SelectionLayer selectionLayer;
@@ -262,7 +262,7 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
      * @param reslicedAtlas a resliced atlas
      * @param ctx a scijava context
      */
-    public MultiSlicePositioner(BdvHandle bdvh, BiopAtlas biopAtlas, ReslicedAtlas reslicedAtlas, Context ctx) {
+    public MultiSlicePositioner(BdvHandle bdvh, Atlas biopAtlas, ReslicedAtlas reslicedAtlas, Context ctx) {
 
         this.bdvh = bdvh;
 
@@ -1466,7 +1466,7 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
         modeListeners.remove(modeListener);
     }
 
-    public BiopAtlas getAtlas() {
+    public Atlas getAtlas() {
         return biopAtlas;
     }
 

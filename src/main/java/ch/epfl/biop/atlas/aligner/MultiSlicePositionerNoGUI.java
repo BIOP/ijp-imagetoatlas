@@ -1,6 +1,6 @@
 package ch.epfl.biop.atlas.aligner;
 
-import ch.epfl.biop.atlas.BiopAtlas;
+import ch.epfl.biop.atlas.struct.Atlas;
 import org.scijava.Context;
 
 import java.awt.*;
@@ -29,7 +29,7 @@ public class MultiSlicePositionerNoGUI extends MultiSlicePositioner {
      * @param reslicedAtlas a resliced atlas
      * @param ctx           a scijava context
      */
-    public MultiSlicePositionerNoGUI(BiopAtlas biopAtlas, ReslicedAtlas reslicedAtlas, Context ctx) {
+    public MultiSlicePositionerNoGUI(Atlas biopAtlas, ReslicedAtlas reslicedAtlas, Context ctx) {
         super(null, biopAtlas, reslicedAtlas, ctx);
         this.log = (message) -> logger.info("Multipositioner : "+message);
     }
