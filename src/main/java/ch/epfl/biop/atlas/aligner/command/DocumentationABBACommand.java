@@ -11,7 +11,7 @@ import java.net.URL;
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Help>ABBA - Go to documentation",
         description = "Open ABBA documentation webpage.")
-public class ABBADocumentationCommand implements Command {
+public class DocumentationABBACommand implements Command {
 
     @Parameter
     PlatformService ps;

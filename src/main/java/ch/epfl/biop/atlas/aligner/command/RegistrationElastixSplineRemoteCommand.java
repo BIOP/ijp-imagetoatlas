@@ -12,7 +12,7 @@ import java.util.Map;
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>ABBA - Elastix Registration (Spline) on Server",
         description = "Uses an Elastix server for spline in plane registration of selected slices")
-public class RegistrationElastixSplineRemoteCommand extends SingleChannelRegistrationCommand {
+public class RegistrationElastixSplineRemoteCommand extends RegistrationSingleChannelCommand {
 
     @Parameter(label = "Number of control points along X, minimum 2.")
     int nb_control_points_x = 10;

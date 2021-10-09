@@ -16,10 +16,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Plugin(type = Command.class)
-public class AtlasDisplayDynamicCommand extends InteractiveCommand implements
+public class AtlasAdjustDisplayCommand extends InteractiveCommand implements
         Initializable, MultiSlicePositioner.ModeListener {
 
-    public AtlasDisplayDynamicCommand(){
+    public AtlasAdjustDisplayCommand(){
         excludedKeys.add("X");
         excludedKeys.add("Y");
         excludedKeys.add("Z");

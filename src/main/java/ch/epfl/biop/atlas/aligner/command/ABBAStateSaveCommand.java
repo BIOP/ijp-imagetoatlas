@@ -10,7 +10,7 @@ import java.io.File;
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>File>ABBA - Save State [Experimental]",
         description = "Saves the current registration state")
-public class MSPStateSaveCommand implements Command {
+public class ABBAStateSaveCommand implements Command {
 
     @Parameter
     MultiSlicePositioner mp;

@@ -402,8 +402,8 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
             logger.debug("Installing menu");
 
             // Load and Save state
-            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, MSPStateLoadCommand.class, hierarchyLevelsSkipped,"mp", this );
-            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, MSPStateSaveCommand.class, hierarchyLevelsSkipped,"mp", this);
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ABBAStateLoadCommand.class, hierarchyLevelsSkipped,"mp", this );
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ABBAStateSaveCommand.class, hierarchyLevelsSkipped,"mp", this);
 
             BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>ABBA - Undo [Ctrl+Z]",0, this::cancelLastAction);
             BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>ABBA - Redo [Ctrl+Shift+Z]",0, this::redoAction);
@@ -466,7 +466,7 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
                 );
             });
 
-            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, EditLastRegistrationCommand.class, hierarchyLevelsSkipped,"mp", this);
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, RegistrationEditLastCommand.class, hierarchyLevelsSkipped,"mp", this);
             BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Align>ABBA - Remove Last Registration",0, this::removeLastRegistration );
 
             BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportRegionsToRoiManagerCommand.class, hierarchyLevelsSkipped,"mp", this);
@@ -479,10 +479,10 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
             BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportAtlasToImageJStackCommand.class, hierarchyLevelsSkipped,"mp", this);
             BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ExportSlicesToQuickNIIDatasetCommand.class, hierarchyLevelsSkipped,"mp", this);
 
-            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, RotateSourcesCommand.class, hierarchyLevelsSkipped,"mp", this);
-            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, TransformSourcesInteractiveCommand.class, hierarchyLevelsSkipped,"mp", this);
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, SliceRotateCommand.class, hierarchyLevelsSkipped,"mp", this);
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, SliceAffineTransformCommand.class, hierarchyLevelsSkipped,"mp", this);
 
-            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, EditSliceThicknessCommand.class, hierarchyLevelsSkipped,"mp", this);
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, SliceThicknessCommand.class, hierarchyLevelsSkipped,"mp", this);
             BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, SliceThicknessMatchNeighborsCommand.class, hierarchyLevelsSkipped,"mp", this);
 
             // Cards commands
@@ -492,14 +492,14 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
 
             // Help commands
             BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ABBAForumHelpCommand.class, hierarchyLevelsSkipped);
-            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ABBADocumentationCommand.class, hierarchyLevelsSkipped);
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, DocumentationABBACommand.class, hierarchyLevelsSkipped);
             BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, ABBAUserFeedbackCommand.class, hierarchyLevelsSkipped);
-            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, DeepSliceDocumentationCommand.class, hierarchyLevelsSkipped);
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, DocumentationDeepSliceCommand.class, hierarchyLevelsSkipped);
 
             logger.debug("Adding bigdataviewer cards");
             bdvh.getCardPanel().addCard("Atlas Information", new AtlasInfoPanel(this).getPanel(), true);
 
-            bdvh.getCardPanel().addCard("Atlas Display", ScijavaSwingUI.getPanel(scijavaCtx, AtlasDisplayDynamicCommand.class, "mp", this), true);
+            bdvh.getCardPanel().addCard("Atlas Display", ScijavaSwingUI.getPanel(scijavaCtx, AtlasAdjustDisplayCommand.class, "mp", this), true);
 
             bdvh.getCardPanel().addCard("Slices Display", new SliceDisplayPanel(this).getPanel(), true);
 
@@ -507,10 +507,10 @@ public class MultiSlicePositioner extends BdvOverlay implements GraphicalHandleL
 
             bdvh.getCardPanel().addCard("Edit Selected Slices", new EditPanel(this).getPanel(), true);
 
-            bdvh.getCardPanel().addCard("Atlas Slicing", ScijavaSwingUI.getPanel(scijavaCtx, SlicerAdjusterInteractiveCommand.class, "reslicedAtlas", reslicedAtlas), true);
+            bdvh.getCardPanel().addCard("Atlas Slicing", ScijavaSwingUI.getPanel(scijavaCtx, AtlasSlicingAdjusterCommand.class, "reslicedAtlas", reslicedAtlas), true);
 
             bdvh.getCardPanel().addCard("Define region of interest",
-                    ScijavaSwingUI.getPanel(scijavaCtx, RectangleROIDefineInteractiveCommand.class, "mp", this),
+                    ScijavaSwingUI.getPanel(scijavaCtx, SliceDefineROICommand.class, "mp", this),
                     false);
 
             bdvh.getCardPanel().addCard("Tasks Info", mso.getJPanel(), false);

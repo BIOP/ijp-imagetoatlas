@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Edit>ABBA - Set Slices Thickness",
         description = "Set the selected slices thickness - useful for a fully reconstructed brain display.")
-public class EditSliceThicknessCommand implements Command {
+public class SliceThicknessCommand implements Command {
 
     @Parameter
     MultiSlicePositioner mp;

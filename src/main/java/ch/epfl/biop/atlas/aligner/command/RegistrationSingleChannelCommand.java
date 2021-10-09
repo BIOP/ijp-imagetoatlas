@@ -11,7 +11,7 @@ import org.scijava.plugin.Parameter;
  * support only a single channel for the registration.
  * Validation of the user inputs is performed before the registration is started
  */
-abstract public class SingleChannelRegistrationCommand implements Command {
+abstract public class RegistrationSingleChannelCommand implements Command {
 
     @Parameter
     MultiSlicePositioner mp;

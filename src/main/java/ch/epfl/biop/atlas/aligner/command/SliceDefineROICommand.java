@@ -17,9 +17,9 @@ import java.util.List;
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>ABBA - Define Rectangular ROI",
         description = "Defines a rectangular ROI that will be considered for registrations")
-public class RectangleROIDefineInteractiveCommand extends InteractiveCommand {
+public class SliceDefineROICommand extends InteractiveCommand {
 
-    protected static Logger logger = LoggerFactory.getLogger(RectangleROIDefineInteractiveCommand.class);
+    protected static Logger logger = LoggerFactory.getLogger(SliceDefineROICommand.class);
 
     @Parameter
     MultiSlicePositioner mp;
