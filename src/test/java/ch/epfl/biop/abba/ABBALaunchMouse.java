@@ -1,6 +1,6 @@
 package ch.epfl.biop.abba;
 
-import ch.epfl.biop.atlas.aligner.commands.ABBAStartCommand;
+import ch.epfl.biop.atlas.aligner.command.ABBAStartCommand;
 import net.imagej.ImageJ;
 import net.imagej.patcher.LegacyInjector;
 

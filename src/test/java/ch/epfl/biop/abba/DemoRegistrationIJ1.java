@@ -1,8 +1,8 @@
 package ch.epfl.biop.abba;
 
 import bdv.viewer.SourceAndConverter;
-import ch.epfl.biop.atlas.aligner.commands.RegistrationElastixAffineCommand;
-import ch.epfl.biop.atlas.aligner.commands.ABBAStartCommand;
+import ch.epfl.biop.atlas.aligner.command.RegistrationElastixAffineCommand;
+import ch.epfl.biop.atlas.aligner.command.ABBAStartCommand;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.bdv.command.importer.SourceFromImagePlusCommand;

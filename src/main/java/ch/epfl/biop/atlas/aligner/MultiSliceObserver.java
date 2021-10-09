@@ -1,5 +1,7 @@
 package ch.epfl.biop.atlas.aligner;
 
+import ch.epfl.biop.atlas.aligner.action.CancelableAction;
+import ch.epfl.biop.atlas.aligner.action.MoveSliceAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -103,7 +105,7 @@ public class MultiSliceObserver {
 
                         if (action.draw()) {
 
-                            if (action instanceof MoveSlice) {
+                            if (action instanceof MoveSliceAction) {
                                 if (indexAction == sliceSortedActions.get(slice).size() - 1) {
 
                                     action.draw(g, xP, yP, 1);
@@ -114,7 +116,7 @@ public class MultiSliceObserver {
                                             action.draw(g, 50, yP - yP0 + 50, 1);
                                         }
                                 } else {
-                                    if (sliceSortedActions.get(slice).get(indexAction + 1) instanceof MoveSlice) {
+                                    if (sliceSortedActions.get(slice).get(indexAction + 1) instanceof MoveSliceAction) {
                                         // ignored action
                                     } else {
                                         action.draw(g, xP, yP, 1);
@@ -168,11 +170,11 @@ public class MultiSliceObserver {
                 continue;
             }
 
-            if (action instanceof MoveSlice) {
+            if (action instanceof MoveSliceAction) {
                 if (indexAction == sliceSortedActions.get(slice).size()-1) {
                     log += action.toString() + "\n";
                 } else {
-                    if (sliceSortedActions.get(slice).get(indexAction+1) instanceof MoveSlice) {
+                    if (sliceSortedActions.get(slice).get(indexAction+1) instanceof MoveSliceAction) {
                         // ignored action
                     } else {
                         log += action.toString() + "\n";

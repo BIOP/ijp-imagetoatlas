@@ -3,10 +3,13 @@ package ch.epfl.biop.atlas.aligner;
 import bdv.util.BoundedRealTransform;
 import bdv.util.QuPathBdvHelper;
 import bdv.viewer.SourceAndConverter;
+import ch.epfl.biop.atlas.aligner.action.CancelableAction;
+import ch.epfl.biop.atlas.aligner.action.CreateSliceAction;
+import ch.epfl.biop.atlas.aligner.action.RegisterSliceAction;
 import ch.epfl.biop.atlas.struct.AtlasNode;
 import ch.epfl.biop.atlas.struct.AtlasOntology;
 import ch.epfl.biop.atlas.struct.AtlasHelper;
-import ch.epfl.biop.atlas.aligner.sourcepreprocessors.*;
+import ch.epfl.biop.atlas.aligner.sourcepreprocessor.*;
 import ch.epfl.biop.atlas.aligner.plugin.RegistrationPluginHelper;
 import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
 import ch.epfl.biop.java.utilities.roi.SelectToROIKeepLines;
@@ -200,7 +203,7 @@ public class SliceSources {
         return slicingAxisPosition;
     }
 
-    protected void setSlicingAxisPosition(double newSlicingAxisPosition) {
+    public void setSlicingAxisPosition(double newSlicingAxisPosition) {
         slicingAxisPosition = newSlicingAxisPosition;
         updateZPosition();
         guiState.positionChanged();
@@ -326,7 +329,7 @@ public class SliceSources {
         currentSliceIndex = idx;
     }
 
-    protected String getActionState(CancelableAction action) {
+    public String getActionState(CancelableAction action) {
         if ((action!=null)&&(action == actionInProgress)) {
             return "(pending)";
         }
@@ -454,9 +457,9 @@ public class SliceSources {
      *
      * @param reg the registration to perform
      */
-    protected boolean runRegistration(Registration<SourceAndConverter<?>[]> reg,
-                                SourcesProcessor preprocessFixed,
-                                SourcesProcessor preprocessMoving) {
+    public boolean runRegistration(Registration<SourceAndConverter<?>[]> reg,
+                                   SourcesProcessor preprocessFixed,
+                                   SourcesProcessor preprocessMoving) {
         if (RegistrationPluginHelper.isManual(reg)) {
             //Waiting for manual lock release...
             synchronized (MultiSlicePositioner.manualActionLock) {
@@ -468,7 +471,7 @@ public class SliceSources {
         }
     }
 
-    protected synchronized boolean removeRegistration(Registration reg) {
+    public synchronized boolean removeRegistration(Registration reg) {
         if (registrations.contains(reg)) {
             int idx = registrations.indexOf(reg);
             if (idx == registrations.size() - 1) {
@@ -541,10 +544,10 @@ public class SliceSources {
                 if (mapActionTask.get(action).isDone() || ((action!=null)&&(action == this.actionInProgress))) {
 
                     if (action==actionInProgress) {
-                        if (actionInProgress instanceof RegisterSlice) {
+                        if (actionInProgress instanceof RegisterSliceAction) {
                             // Special case : let's abort ASAP the registration to avoid overloading the server
                             logger.debug("Aborting register slice action :  "+actionInProgress);
-                            ((RegisterSlice) actionInProgress).registration.abort();
+                            ((RegisterSliceAction) actionInProgress).getRegistration().abort();
                             //postRun.run();
                             action.cancel();
                             if (mapActionTask.containsKey(action)) {
@@ -582,7 +585,7 @@ public class SliceSources {
                     mapActionTask.remove(action);
                     postRun.run();
                 }
-            } else if (action instanceof CreateSlice) {
+            } else if (action instanceof CreateSliceAction) {
                 waitForEndOfTasks();
                 action.cancel();
             } else {
@@ -711,12 +714,12 @@ public class SliceSources {
         roiList.rois.add(new CompositeFloatPoly(right));
     }
 
-    protected synchronized void exportRegionsToROIManager(String namingChoice) {
+    public synchronized void exportRegionsToROIManager(String namingChoice) {
         prepareExport(namingChoice);
         cvtRoisTransformed.to(RoiManager.class);
     }
 
-    protected synchronized void exportToQuPathProject(boolean erasePreviousFile) {
+    public synchronized void exportToQuPathProject(boolean erasePreviousFile) {
         prepareExport("id");
 
         ImageJRoisFile ijroisfile = (ImageJRoisFile) cvtRoisTransformed.to(ImageJRoisFile.class);
@@ -724,7 +727,7 @@ public class SliceSources {
         storeInQuPathProjectIfExists(ijroisfile, erasePreviousFile);
     }
 
-    protected synchronized void exportRegionsToFile(String namingChoice, File dirOutput, boolean erasePreviousFile) {
+    public synchronized void exportRegionsToFile(String namingChoice, File dirOutput, boolean erasePreviousFile) {
 
         prepareExport(namingChoice);
 
@@ -974,8 +977,8 @@ public class SliceSources {
         return new RealPointList(cvtList);
     }
 
-    protected void editLastRegistration(SourcesProcessor preprocessFixed,
-        SourcesProcessor preprocessMoving) {
+    public void editLastRegistration(SourcesProcessor preprocessFixed,
+                                     SourcesProcessor preprocessMoving) {
         Registration reg = this.registrations.get(registrations.size() - 1);
         if (RegistrationPluginHelper.isEditable(reg)) {
             mp.log.accept("Edition will begin when the manual lock is acquired");

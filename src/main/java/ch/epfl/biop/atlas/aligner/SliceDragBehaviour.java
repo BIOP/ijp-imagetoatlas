@@ -1,5 +1,6 @@
 package ch.epfl.biop.atlas.aligner;
 
+import ch.epfl.biop.atlas.aligner.action.MarkActionSequenceBatchAction;
 import net.imglib2.RealPoint;
 import org.scijava.ui.behaviour.DragBehaviour;
 import org.slf4j.Logger;
@@ -219,7 +220,7 @@ public class SliceDragBehaviour implements DragBehaviour {
                 slice.setSlicingAxisPosition(initialAxisPositions.get(slice));//.setSlicingAxisPosition(iniSlicePos + shift);
             }
 
-            if (affectedSlices.size()>1) new MarkActionSequenceBatch(mp).runRequest();
+            if (affectedSlices.size()>1) new MarkActionSequenceBatchAction(mp).runRequest();
 
             RealPoint currentMousePosition = new RealPoint(3);
             mp.getBdvh().getViewerPanel().getGlobalMouseCoordinates(currentMousePosition);
@@ -300,7 +301,7 @@ public class SliceDragBehaviour implements DragBehaviour {
                 }
             }
 
-            if (affectedSlices.size()>1) new MarkActionSequenceBatch(mp).runRequest();
+            if (affectedSlices.size()>1) new MarkActionSequenceBatchAction(mp).runRequest();
 
             mp.updateDisplay();
             perform = false;

@@ -1,8 +1,8 @@
 package ch.epfl.biop.registration.sourceandconverter.affine;
 
 import bdv.viewer.SourceAndConverter;
-import ch.epfl.biop.atlas.aligner.commands.RegistrationElastixAffineCommand;
-import ch.epfl.biop.atlas.aligner.commands.RegistrationElastixAffineRemoteCommand;
+import ch.epfl.biop.atlas.aligner.command.RegistrationElastixAffineCommand;
+import ch.epfl.biop.atlas.aligner.command.RegistrationElastixAffineRemoteCommand;
 import ch.epfl.biop.atlas.aligner.plugin.IABBARegistrationPlugin;
 import ch.epfl.biop.atlas.aligner.plugin.RegistrationTypeProperties;
 import ch.epfl.biop.bdv.command.register.Elastix2DAffineRegisterCommand;

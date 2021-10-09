@@ -2,7 +2,7 @@ package ch.epfl.biop.abba;
 
 import bdv.viewer.SourceAndConverter;
 import bigwarp.BigWarp;
-import ch.epfl.biop.atlas.aligner.commands.ABBAStartCommand;
+import ch.epfl.biop.atlas.aligner.command.ABBAStartCommand;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import mpicbg.spim.data.sequence.Tile;
 import net.imagej.ImageJ;
