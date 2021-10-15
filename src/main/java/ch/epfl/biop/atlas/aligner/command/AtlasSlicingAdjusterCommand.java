@@ -26,7 +26,6 @@ public class AtlasSlicingAdjusterCommand extends InteractiveCommand {
     ReslicedAtlas reslicedAtlas;
 
     public void run() {
-
         if (!lockAngles) {
             reslicedAtlas.setRotateX(rotateX / 180.0 * Math.PI);
             reslicedAtlas.setRotateY(rotateY / 180.0 * Math.PI);

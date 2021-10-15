@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -28,8 +27,6 @@ public class MultiSliceObserver {
     Set<CancelableAction> hiddenActions = ConcurrentHashMap.newKeySet(); // For cancelled actions
 
     JPanel innerPanel = new JPanel();
-
-    Thread animatorThread;
 
     volatile boolean animate = true;
 
@@ -96,30 +93,19 @@ public class MultiSliceObserver {
                 &&mp.getSlices().contains(slice)
                 &&sliceSortedActions.get(slice).size()!=0) {
 
-            logger.debug("UpdateInfoPanel called 0");
             if (!actionPerSlice.containsKey(slice)) {
-
-                logger.debug("UpdateInfoPanel called a");
                 JTextArea textArea = new JTextArea();
                 textArea.setEditable(false);
                 innerPanel.add(textArea);
                 textAreaPerSlice.put(slice, textArea);
             }
-
-            logger.debug("UpdateInfoPanel called 1");
             String infoSlice = getTextSlice(slice);
 
             actionPerSlice.put(slice, infoSlice);
-
-            logger.debug("UpdateInfoPanel called 2");
             textAreaPerSlice.get(slice).setText(getTextSlice(slice));
-
-            logger.debug("UpdateInfoPanel called 3");
 
         } else {
             // Slice has been removed
-
-            logger.debug("UpdateInfoPanel called 4");
             if (actionPerSlice.containsKey(slice)) {
                 innerPanel.remove(textAreaPerSlice.get(slice));
                 actionPerSlice.remove(slice);

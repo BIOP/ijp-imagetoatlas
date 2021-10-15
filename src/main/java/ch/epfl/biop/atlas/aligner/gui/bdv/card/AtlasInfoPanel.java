@@ -1,4 +1,4 @@
-package ch.epfl.biop.atlas.aligner.gui;
+package ch.epfl.biop.atlas.aligner.gui.bdv.card;
 
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import org.scijava.Context;
