@@ -49,30 +49,6 @@ public class MultiSliceObserver {
 
     public MultiSliceObserver(MultiSlicePositioner mp) {
         this.mp = mp;
-        if (mp.hasGUI()) {
-
-            innerPanel.setLayout(new BoxLayout(innerPanel, BoxLayout.Y_AXIS));
-
-            animatorThread = new Thread(() -> {
-                while (animate) {
-
-                    if (repaintNeeded) {
-                        mp.getBdvh().getViewerPanel().getDisplay().repaint();
-                    }
-                    repaintNeeded = false;
-                    try {
-                        Thread.sleep(300);
-                    } catch (InterruptedException e) {
-                        //e.printStackTrace();
-                    }
-                }
-                logger.info("Animator thread stopped");
-            });
-
-            animatorThread.start();
-            logger.info("Animator thread started");
-        }
-
     }
 
     public void hide(CancelableAction action) {
@@ -81,80 +57,6 @@ public class MultiSliceObserver {
 
     public void unhide(CancelableAction action) {
         hiddenActions.remove(action);
-    }
-
-    public void draw(Graphics2D g) {
-        int yInc = 20;
-        g.setColor(new Color(255,255,255,200));
-        synchronized (sliceSortedActions) {
-            List<SliceSources> slices = mp.getSlices();
-            sliceSortedActions.forEach(((slice, actions) -> {
-                if (slices.contains(slice)) {
-                    int xP = slice.getGUIState().getBdvHandleCoords()[0];
-                    int yP = slice.getGUIState().getBdvHandleCoords()[1] + yInc;
-
-                    int yP0 = yP;
-
-                    for (int indexAction = 0; indexAction < actions.size(); indexAction++) {
-                        CancelableAction action = sliceSortedActions.get(slice).get(indexAction);
-
-                        if (hiddenActions.contains(action)) {
-                            indexAction++;
-                            continue;
-                        }
-
-                        if (action.draw()) {
-
-                            if (action instanceof MoveSliceAction) {
-                                if (indexAction == sliceSortedActions.get(slice).size() - 1) {
-
-                                    action.draw(g, xP, yP, 1);
-                                    yP += yInc;
-
-                                    if ((mp.iCurrentSlice >= 0) && (mp.iCurrentSlice < slices.size()))
-                                        if (slices.get(mp.iCurrentSlice).equals(slice)) {
-                                            action.draw(g, 50, yP - yP0 + 50, 1);
-                                        }
-                                } else {
-                                    if (sliceSortedActions.get(slice).get(indexAction + 1) instanceof MoveSliceAction) {
-                                        // ignored action
-                                    } else {
-                                        action.draw(g, xP, yP, 1);
-                                        yP += yInc;
-
-                                        if ((mp.iCurrentSlice >= 0) && (mp.iCurrentSlice < slices.size()))
-                                            if (slices.get(mp.iCurrentSlice).equals(slice)) {
-                                                action.draw(g, 50, yP - yP0 + 50, 1);
-                                            }
-                                    }
-                                }
-                            } else {
-                                action.draw(g, xP, yP, 1);
-                                yP += yInc;
-                                if ((mp.iCurrentSlice >= 0) && (mp.iCurrentSlice < slices.size()))
-                                    if (slices.get(mp.iCurrentSlice).equals(slice)) {
-                                        action.draw(g, 50, yP - yP0, 1);
-                                    }
-                            }
-                        }
-                    }
-                }
-            }));
-        }
-
-    }
-
-    public void end() {
-        this.animate = false;
-        try {
-            animatorThread.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public JComponent getJPanel() {
-        return innerPanel;
     }
 
     public synchronized String getTextSlice(SliceSources slice) {

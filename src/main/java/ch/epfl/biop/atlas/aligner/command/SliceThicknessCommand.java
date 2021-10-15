@@ -30,6 +30,5 @@ public class SliceThicknessCommand implements Command {
                 slice.setSliceThickness(thickness_in_micrometer /1000.);
             }
         }
-        mp.updateDisplay();
     }
 }

@@ -35,7 +35,7 @@ public class DemoRegistrationIJ1 {
 
         SliceSources slice = mp.getSortedSlices().get(0);
 
-        mp.centerBdvViewOn(slice);
+        //mp.centerBdvViewOn(slice);
         mp.selectSlice(slice);
 
         ij.command().run(RegistrationElastixAffineCommand.class, true,

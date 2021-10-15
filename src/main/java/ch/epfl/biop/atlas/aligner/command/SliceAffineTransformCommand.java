@@ -94,9 +94,6 @@ public class SliceAffineTransformCommand extends InteractiveCommand {
                         at3d.translate(translate_X, translate_Y, 0);
                         slice.transformSourceOrigin(at3d);
                     }
-                    if (mp.getBdvh() != null) {
-                        mp.getBdvh().getViewerPanel().requestRepaint();
-                    }
                 }
             }
         }
@@ -109,9 +106,6 @@ public class SliceAffineTransformCommand extends InteractiveCommand {
                     AffineTransform3D at3d = originalTransforms.get(slice);
                     slice.transformSourceOrigin(at3d);
                 });
-            }
-            if (mp.getBdvh() != null) {
-                mp.getBdvh().getViewerPanel().requestRepaint();
             }
         }
         angle_degrees = 0;

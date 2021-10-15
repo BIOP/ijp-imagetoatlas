@@ -4,7 +4,6 @@ import bdv.util.BdvHandle;
 import bdv.util.BdvHandleFrame;
 import ch.epfl.biop.atlas.struct.Atlas;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
-import ch.epfl.biop.atlas.aligner.MultiSlicePositionerNoGUI;
 import ch.epfl.biop.atlas.aligner.ReslicedAtlas;
 import net.imglib2.realtransform.AffineTransform3D;
 import org.scijava.Context;
@@ -68,10 +67,8 @@ public class ABBAStartCommand implements Command {
 
         try {
 
-            if (nogui) {
-                mp = new MultiSlicePositionerNoGUI(ba, ra, context);
-            } else {
-                bdvMultiSlicer = new DefaultBdvSupplier(new SerializableBdvOptions()).get(); // Get a default supplier
+
+                /*bdvMultiSlicer = new DefaultBdvSupplier(new SerializableBdvOptions()).get(); // Get a default supplier
 
                 // Set ABBA Icon in Window
                 JFrame frame = ((BdvHandleFrame)bdvMultiSlicer).getBigDataViewer().getViewerFrame();
@@ -81,9 +78,9 @@ public class ABBAStartCommand implements Command {
                 if (bdvMultiSlicer==null) {
                     System.err.println("Error : bdv multislicer null");
                     return;
-                }
-                mp = new MultiSlicePositioner(bdvMultiSlicer, ba, ra, context);
-            }
+                }*/
+                mp = new MultiSlicePositioner(ba, ra, context);
+
 
             os.addObject(mp);
 

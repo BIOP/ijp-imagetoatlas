@@ -34,8 +34,8 @@ public class SliceSourcesStateDeserializer implements JsonDeserializer<AlignerSt
             action.runRequest();
             sliceSourceConsumer.accept(action.getSliceSources());
             slice = action.getSliceSources();
-            slice.getGUIState().sliceDisplayModeChanged();
-            if (slice!=null) slice.getGUIState().setSliceInvisible();
+            //slice.getGUIState().sliceDisplayModeChanged();
+            //if (slice!=null) slice.getGUIState().setSliceInvisible();
             actions.add(action);
         });
 
@@ -48,7 +48,7 @@ public class SliceSourcesStateDeserializer implements JsonDeserializer<AlignerSt
         sliceState.actions = actions;
         sliceState.channelsVisibility = visible;
         sliceState.sliceVisibleUser = visibleUser;
-        if (visibleUser) slice.getGUIState().setSliceVisible();
+        //if (visibleUser) slice.getGUIState().setSliceVisible();
         sliceState.settings_per_channel = ds;
         sliceState.slice = slice;
         sliceState.preTransform = preTransform;

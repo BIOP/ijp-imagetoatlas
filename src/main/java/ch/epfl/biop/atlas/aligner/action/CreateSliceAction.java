@@ -36,7 +36,6 @@ public class CreateSliceAction extends CancelableAction {
         return sliceSource;
     }
 
-
     public List<SourceAndConverter<?>> getSacs() {
         return sacs;
     }
@@ -57,15 +56,6 @@ public class CreateSliceAction extends CancelableAction {
     @Override
     public boolean cancel() {
         return mp.cancelCreateSlice(this);
-    }
-
-    public void drawAction(Graphics2D g, double px, double py, double scale) {
-        g.drawString("C", (int) px - 5, (int) py + 5);
-    }
-
-    @Override
-    public boolean draw() {
-        return false;
     }
 
     public void setSlice(SliceSources sliceSources) {

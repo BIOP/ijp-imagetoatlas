@@ -56,7 +56,7 @@ public class TestExternalRegistrationPlugin {
 
         SliceSources slice = mp.getSortedSlices().get(0);
 
-        mp.centerBdvViewOn(slice);
+        //mp.centerBdvViewOn(slice);
         mp.selectSlice(slice);
 
         /*mp.register(rotationRegName,

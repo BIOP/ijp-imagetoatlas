@@ -78,7 +78,7 @@ public class SliceSources {
 
     protected static Logger logger = LoggerFactory.getLogger(SliceSources.class);
 
-    final private SliceSourcesGUIState guiState; // in here ? GOod idea ?
+    //final private SliceSourcesGUIState guiState; // in here ? GOod idea ?
 
     // What are they ?
     final SourceAndConverter<?>[] original_sacs;
@@ -148,18 +148,13 @@ public class SliceSources {
         zPositioner = new AffineTransformedSourceWrapperRegistration();
         preTransform = new AffineTransformedSourceWrapperRegistration();
 
-        if (mp.hasGUI()) {
-            guiState = new SliceSourcesGUIState(this, mp);
-        } else {
-            guiState = new SliceSourcesNoGUIState(this, mp);
-        }
-
         runRegistration(centerPositioner, new SourcesIdentity(), new SourcesIdentity());
         runRegistration(preTransform, new SourcesIdentity(), new SourcesIdentity());
         runRegistration(zPositioner, new SourcesIdentity(), new SourcesIdentity());
         waitForEndOfTasks();
         updateZPosition();
-        guiState.positionChanged();
+        //mp.positionZChanged(slice);
+        positionChanged();
 
         computeZThickness();
 
@@ -169,6 +164,10 @@ public class SliceSources {
             mp.errlog.accept("Couldn't name slice");
             e.printStackTrace();
         }
+    }
+
+    private void positionChanged() {
+        // TODO
     }
 
     protected double zThicknessCorrection;
@@ -191,10 +190,6 @@ public class SliceSources {
         return name;
     }
 
-    public SliceSourcesGUIState getGUIState() {
-        return guiState;
-    }
-
     public synchronized SourceAndConverter<?>[] getRegisteredSources() {
         return registered_sacs;
     }
@@ -206,7 +201,7 @@ public class SliceSources {
     public void setSlicingAxisPosition(double newSlicingAxisPosition) {
         slicingAxisPosition = newSlicingAxisPosition;
         updateZPosition();
-        guiState.positionChanged();
+        //guiState.positionChanged();
     }
 
     public void setSliceThickness(double zBeginInMm, double zEndInMm) {
@@ -298,14 +293,17 @@ public class SliceSources {
     public synchronized void select() {
         if (!this.isSelected) {
             this.isSelected = true;
-            guiState.select();
+            //guiState.select();
+            // TODO : not public ? when to notify?
         }
     }
 
     public void deSelect() {
         if (this.isSelected) {
             this.isSelected = false;
-            guiState.deselect();
+            //guiState.deselect();
+
+            // TODO : not public ? when to notify?
         }
     } // TODO : thread lock!
 
@@ -426,8 +424,11 @@ public class SliceSources {
         registered_sacs_sequence.add(new RegistrationAndSources(reg, registered_sacs));
         registrations.add(reg);
         mp.mso.updateInfoPanel(this);
-        guiState.sourcesChanged();
+        sourcesChanged();
+    }
 
+    private void sourcesChanged() {
+        // TODO : notify
     }
 
     private boolean performRegistration(Registration<SourceAndConverter<?>[]> reg,
@@ -482,7 +483,7 @@ public class SliceSources {
 
                 registered_sacs = registered_sacs_sequence.get(registered_sacs_sequence.size()-1).sacs;
 
-                guiState.sourcesChanged();
+                sourcesChanged();
 
                 return true;
             } else {

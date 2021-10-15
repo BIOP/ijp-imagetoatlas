@@ -57,16 +57,6 @@ public abstract class CancelableAction {
         return true;
     }
 
-    public void draw(Graphics2D g, double px, double py, double scale) {
-        if (mp.drawActions) {
-            drawAction(g, px, py, scale);
-        }
-    }
-
-    public void drawAction(Graphics2D g, double px, double py, double scale) {
-        g.drawString(toString(), (int) px, (int) py);
-    }
-
     public boolean isValid() {
         return true;
     }

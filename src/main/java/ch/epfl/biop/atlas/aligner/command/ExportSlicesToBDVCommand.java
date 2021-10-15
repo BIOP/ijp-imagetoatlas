@@ -35,10 +35,6 @@ public class ExportSlicesToBDVCommand implements Command {
 
     @Override
     public void run() {
-        if ((mp.hasGUI())&&(bdvh[0].equals(mp.getBdvh()))) {
-            mp.errorMessageForUser.accept("Error","Do not use the same window as ABBA!");
-            return;
-        }
         mp.log.accept("Waiting for the end of all current tasks...");
         mp.waitForTasks();
         mp.log.accept("All tasks ended");

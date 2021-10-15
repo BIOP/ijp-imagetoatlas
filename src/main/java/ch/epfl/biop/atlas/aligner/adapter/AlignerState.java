@@ -19,14 +19,6 @@ public class AlignerState {
 
     public AlignerState(MultiSlicePositioner mp) {
 
-        displayMode = mp.getDisplayMode();
-        sliceDisplayMode = mp.getSliceDisplayMode();
-        overlapMode = mp.getOverlapMode();
-        if (mp.hasGUI()) {
-            bdvView = mp.getBdvh().getViewerPanel().state().getViewerTransform();
-        } else {
-            bdvView = new AffineTransform3D();
-        }
         rotationX = mp.getReslicedAtlas().getRotateX();
         rotationY = mp.getReslicedAtlas().getRotateY();
         iCurrentSlice = mp.getCurrentSliceIndex();
@@ -34,28 +26,19 @@ public class AlignerState {
         mp.getSortedSlices().forEach(sliceSource -> {
             SliceSourcesState slice_state = new SliceSourcesState();
             slice_state.actions.addAll(filterSerializedActions(mp.getActionsFromSlice(sliceSource)));
-            slice_state.channelsVisibility = sliceSource.getGUIState().getChannelsVisibility();
-            slice_state.settings_per_channel = sliceSource.getGUIState().getDisplaysettings();
+            slice_state.channelsVisibility = null;// TODO sliceSource.getGUIState().getChannelsVisibility();
+            slice_state.settings_per_channel = null;// TODO sliceSource.getGUIState().getDisplaysettings();
             slice_state.preTransform = sliceSource.getTransformSourceOrigin();
-            slice_state.sliceVisibleUser = sliceSource.getGUIState().isSliceVisible();
-
+            slice_state.sliceVisibleUser = true; // TODO sliceSource.getGUIState().isSliceVisible();
             slices_state_list.add(slice_state);
         });
     }
-
-    public int displayMode;
-
-    public int sliceDisplayMode;
-
-    public int overlapMode;
 
     public int iCurrentSlice;
 
     public double rotationX;
 
     public double rotationY;
-
-    public AffineTransform3D bdvView;
 
     public List<SliceSourcesState> slices_state_list = new ArrayList<>();
 
