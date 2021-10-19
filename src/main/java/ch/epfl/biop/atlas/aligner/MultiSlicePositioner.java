@@ -1146,6 +1146,10 @@ public class MultiSlicePositioner { // SelectedSourcesListener,
         listeners.forEach(sliceChangeListener -> sliceChangeListener.sliceSourcesChanged(sliceSources));
     }
 
+    public void slicePreTransformChanged(SliceSources sliceSources) {
+        listeners.forEach(sliceChangeListener -> sliceChangeListener.slicePretransformChanged(sliceSources));
+    }
+
     public interface SliceChangeListener {
         void sliceDeleted(SliceSources slice);
         void sliceCreated(SliceSources slice);
@@ -1153,13 +1157,8 @@ public class MultiSlicePositioner { // SelectedSourcesListener,
         void sliceVisibilityChanged(SliceSources slice);
         void sliceSelected(SliceSources slice);
         void sliceDeselected(SliceSources slice);
-        void isCurrentSlice(SliceSources slice);
         void sliceSourcesChanged(SliceSources slice);
-    }
-
-    public interface ModeListener {
-        void modeChanged(MultiSlicePositioner mp, int oldmode, int newmode);
-        void sliceDisplayModeChanged(MultiSlicePositioner mp, int oldmode, int newmode);
+        void slicePretransformChanged(SliceSources sliceSources);
     }
 
     /**

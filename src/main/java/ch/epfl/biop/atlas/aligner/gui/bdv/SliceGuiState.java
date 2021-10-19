@@ -2,6 +2,7 @@ package ch.epfl.biop.atlas.aligner.gui.bdv;
 
 import bdv.util.BdvHandle;
 import bdv.viewer.SourceAndConverter;
+import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.bdv.gui.CircleGraphicalHandle;
 import ch.epfl.biop.bdv.gui.GraphicalHandle;
@@ -174,5 +175,26 @@ public class SliceGuiState {
 
     public double getYShift() {
         return yShift_slicing_mode;
+    }
+
+    public void sliceDisplayChanged(int mode) {
+        switch (mode) {
+            case BdvMultislicePositionerView.NO_SLICE_DISPLAY_MODE:
+                sliceIsVisibleMode = false;
+                hide();
+                break;
+            case BdvMultislicePositionerView.CURRENT_SLICE_DISPLAY_MODE:
+                sliceIsVisibleMode = view.isCurrentSlice(slice);
+                if (sliceIsVisibleMode) {
+                    show();
+                } else {
+                    hide();
+                }
+                break;
+            case BdvMultislicePositionerView.ALL_SLICES_DISPLAY_MODE:
+                sliceIsVisibleMode = true;
+                if (sliceIsVisibleUser) show();
+                break;
+        }
     }
 }

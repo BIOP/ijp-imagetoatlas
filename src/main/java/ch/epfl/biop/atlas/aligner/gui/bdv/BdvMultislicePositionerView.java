@@ -4,11 +4,15 @@ import bdv.util.BdvFunctions;
 import bdv.util.BdvHandle;
 import bdv.util.BdvOptions;
 import bdv.util.BdvOverlay;
+import bdv.viewer.SourceAndConverter;
+import bdv.viewer.ViewerFrame;
 import ch.epfl.biop.ResourcesMonitor;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.atlas.aligner.action.DeleteSliceAction;
 import ch.epfl.biop.atlas.aligner.command.*;
+import ch.epfl.biop.atlas.aligner.gui.bdv.card.AtlasInfoPanel;
+import ch.epfl.biop.atlas.aligner.gui.bdv.card.EditPanel;
 import ch.epfl.biop.atlas.aligner.plugin.IABBARegistrationPlugin;
 import ch.epfl.biop.atlas.aligner.plugin.RegistrationPluginHelper;
 import ch.epfl.biop.bdv.gui.GraphicalHandle;
@@ -27,9 +31,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sc.fiji.bdvpg.bdv.BdvHandleHelper;
 import sc.fiji.bdvpg.scijava.BdvScijavaHelper;
+import sc.fiji.bdvpg.scijava.ScijavaSwingUI;
 import sc.fiji.bdvpg.scijava.services.SourceAndConverterBdvDisplayService;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import ch.epfl.biop.atlas.aligner.command.*;
+import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
 
 import javax.swing.*;
 import java.awt.*;
@@ -71,22 +77,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
     Runnable atlasSlicingListener;
 
-    public BdvMultislicePositionerView(MultiSlicePositioner msp, BdvHandle bdvh) {
-        this.bdvh = bdvh;
-        this.msp = msp;
-        msp.addSliceListener(this);
-        // Creates previously exiting slices
-        msp.getSlices().forEach(slice -> {
-            sliceCreated(slice);
-        });
-        displayService = msp.getContext().getService(SourceAndConverterBdvDisplayService.class);
-        //TODO : removeSliceListener
-
-
-        setDisplayMode(POSITIONING_MODE_INT);
-
-        logger.debug("Installing behaviours : common");
-
+    void installCommonBehaviours() {
         //common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.changeSliceDisplayMode(), "toggle_single_source_mode", "S");
         common_behaviours.behaviour((ClickBehaviour) (x, y) -> msp.cancelLastAction(), "cancel_last_action", "ctrl Z", "meta Z");
         common_behaviours.behaviour((ClickBehaviour) (x, y) -> msp.redoAction(), "redo_last_action", "ctrl Y", "ctrl shift Z", "meta Y", "ctrl meta Z");
@@ -101,23 +92,20 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
         bdvh.getTriggerbindings().addBehaviourMap(COMMON_BEHAVIOURS_KEY, common_behaviours.getBehaviourMap());
         bdvh.getTriggerbindings().addInputTriggerMap(COMMON_BEHAVIOURS_KEY, common_behaviours.getInputTriggerMap()); // "transform", "bdv"
+    }
 
-        logger.debug("Overriding standard navigation commands : common");
-
-        overrideStandardNavigation();
-
-        logger.debug("Installing menu");
-
-        // Skips 4 levels of hierarchy in scijava command path (Plugins>BIOP>Atlas>Multi Image To Atlas>)
-        // And uses the rest to make the hierarchy of the top menu in the bdv window
+    void clearBdvDefaults() {
         //bdvh.getCardPanel().removeCard(DEFAULT_SOURCES_CARD); // Cannot do this : errors
         bdvh.getCardPanel().removeCard(DEFAULT_SOURCEGROUPS_CARD);
         bdvh.getCardPanel().removeCard(DEFAULT_VIEWERMODES_CARD);
         bdvh.getCardPanel().setCardExpanded(DEFAULT_SOURCES_CARD, false);
-
         BdvScijavaHelper.clearBdvHandleMenuBar(bdvh);
+    }
 
-        int hierarchyLevelsSkipped = 4;
+    void installBdvMenu(int hierarchyLevelsSkipped) {
+
+        // Skips 4 levels of hierarchy in scijava command path (Plugins>BIOP>Atlas>Multi Image To Atlas>)
+        // And uses the rest to make the hierarchy of the top menu in the bdv window
 
         // Load and Save state
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ABBAStateLoadCommand.class, hierarchyLevelsSkipped,"mp", msp );
@@ -161,29 +149,6 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
         // Adds registration plugin commands : discovered via scijava plugin autodiscovery mechanism
 
-        logger.debug("Installing java registration plugins ui");
-
-        PluginService pluginService = msp.getContext().getService(PluginService.class);
-
-        pluginService.getPluginsOfType(IABBARegistrationPlugin.class).forEach(registrationPluginClass -> {
-            IABBARegistrationPlugin plugin = pluginService.createInstance(registrationPluginClass);
-            for (Class<? extends Command> commandUI: RegistrationPluginHelper.userInterfaces(plugin)) {
-                logger.info("Registration plugin "+commandUI.getSimpleName()+" discovered");
-                BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), commandUI, hierarchyLevelsSkipped,"mp", msp);
-            }
-        });
-
-        msp.getExternalRegistrationPluginsUI().keySet().forEach(externalRegistrationType -> {
-            msp.getExternalRegistrationPluginsUI().get(externalRegistrationType).forEach( ui -> {
-                        logger.info("External registration plugin "+ui+" added in bdv user interface");
-                        //BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, scijavaCtx, commandUI, hierarchyLevelsSkipped,"mp", this);
-                        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh, "Align>"+ui, 0, () -> {
-                            (msp.getContext().getService(CommandService.class)).run(ui, true, "mp", msp);
-                        });
-                    }
-            );
-        });
-
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RegistrationEditLastCommand.class, hierarchyLevelsSkipped,"mp", msp);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RegistrationEditLastCommand.class, hierarchyLevelsSkipped,"mp", msp ); // TODO
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ExportRegionsToRoiManagerCommand.class, hierarchyLevelsSkipped,"mp", msp);
@@ -208,16 +173,113 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ABBAUserFeedbackCommand.class, hierarchyLevelsSkipped);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), DocumentationDeepSliceCommand.class, hierarchyLevelsSkipped);
 
+    }
 
-        BdvFunctions.showOverlay(new InnerOverlay(), "MultiSlice Overlay", BdvOptions.options().addTo(bdvh));
-        logger.debug("Multislice Overlay displayed");
+    void installRegistrationPluginUI(int hierarchyLevelsSkipped) {
+        PluginService pluginService = msp.getContext().getService(PluginService.class);
 
-        atlasSlicingListener = this::atlasSlicingChanged;
+        pluginService.getPluginsOfType(IABBARegistrationPlugin.class).forEach(registrationPluginClass -> {
+            IABBARegistrationPlugin plugin = pluginService.createInstance(registrationPluginClass);
+            for (Class<? extends Command> commandUI: RegistrationPluginHelper.userInterfaces(plugin)) {
+                logger.info("Registration plugin "+commandUI.getSimpleName()+" discovered");
+                BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), commandUI, hierarchyLevelsSkipped,"mp", msp);
+            }
+        });
 
-        msp.getReslicedAtlas().addListener(atlasSlicingListener);
 
+        logger.debug("Installing external registration plugins ui");
+        msp.getExternalRegistrationPluginsUI().keySet().forEach(externalRegistrationType -> {
+            msp.getExternalRegistrationPluginsUI().get(externalRegistrationType).forEach( ui -> {
+                        logger.info("External registration plugin "+ui+" added in bdv user interface");
+                        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh, "Align>"+ui, 0, () -> {
+                            (msp.getContext().getService(CommandService.class)).run(ui, true, "mp", msp);
+                        });
+                    }
+            );
+        });
+    }
+
+    void installBigDataViewerCards() {
+
+        bdvh.getCardPanel().addCard("Atlas Information", new AtlasInfoPanel(msp).getPanel(), true);
+
+        bdvh.getCardPanel().addCard("Atlas Display", ScijavaSwingUI.getPanel(msp.getContext(), AtlasAdjustDisplayCommand.class, "view", this), true);
+
+        //bdvh.getCardPanel().addCard("Slices Display", new SliceDisplayPanel(this).getPanel(), true); TODO
+
+        bdvh.getCardPanel().addCard("Display & Navigation", new NavigationPanel(this).getPanel(), true);
+
+        bdvh.getCardPanel().addCard("Edit Selected Slices", new EditPanel(msp).getPanel(), true);
+
+        bdvh.getCardPanel().addCard("Atlas Slicing", ScijavaSwingUI.getPanel(msp.getContext(), AtlasSlicingAdjusterCommand.class, "reslicedAtlas", msp.getReslicedAtlas()), true);
+
+        /*bdvh.getCardPanel().addCard("Define region of interest",
+                ScijavaSwingUI.getPanel(msp.getContext(), SliceDefineROICommand.class, "mp", msp),
+                false);*/
+    }
+
+    void displayAtlas() {
+        List<SourceAndConverter<?>> sacsToAppend = new ArrayList<>();
+        for (int i = 0; i < msp.getAtlas().getMap().getStructuralImages().size(); i++) {
+            sacsToAppend.add(msp.getReslicedAtlas().extendedSlicedSources[i]);
+            sacsToAppend.add(msp.getReslicedAtlas().nonExtendedSlicedSources[i]);
+        }
+        SourceAndConverterServices.getBdvDisplayService()
+                .show(bdvh, sacsToAppend.toArray(new SourceAndConverter[0]));
+    }
+
+    public BdvMultislicePositionerView(MultiSlicePositioner msp, BdvHandle bdvh) {
+        // Final variable initialization
+        this.bdvh = bdvh;
+        this.msp = msp;
+        this.displayService = msp.getContext().getService(SourceAndConverterBdvDisplayService.class);
+
+        excludedKeys.add("X");
+        excludedKeys.add("Y");
+        excludedKeys.add("Z");
+        excludedKeys.add("Left Right");
+
+        // Other variable initialization
         previouszStep = (int) msp.getReslicedAtlas().getStep();
 
+        // Creates previously exiting slices TODO check that it works!
+        msp.addSliceListener(this);
+        msp.getSlices().forEach(slice -> {
+            sliceCreated(slice);
+        });
+
+        setDisplayMode(POSITIONING_MODE_INT);
+
+        logger.debug("Installing behaviours : common");
+        installCommonBehaviours();
+
+        logger.debug("Overriding standard navigation commands");
+        overrideStandardNavigation();
+
+        logger.debug("Clearing default cards and bdv functionalities of BigDataViewer");
+        clearBdvDefaults();
+
+        logger.debug("Installing menu");
+        int hierarchyLevelsSkipped = 4;
+        installBdvMenu(hierarchyLevelsSkipped);
+
+        logger.debug("Installing java registration plugins ui");
+        installRegistrationPluginUI(hierarchyLevelsSkipped);
+
+        logger.debug("Installing multislice overlay");
+        BdvFunctions.showOverlay(new InnerOverlay(), "MultiSlice Overlay", BdvOptions.options().addTo(bdvh));
+
+        logger.debug("Defining atlas slicing listener");
+        atlasSlicingListener = this::atlasSlicingChanged;
+        msp.getReslicedAtlas().addListener(atlasSlicingListener);
+
+        logger.debug("Adding bigdataviewer cards");
+        installBigDataViewerCards();
+
+        logger.debug("Displaying Altas");
+        displayAtlas();
+
+        logger.debug("Adding close window cleaning hook");
         // Close hook to try to release as many resources as possible -> proven avoiding mem leaks
         BdvHandleHelper.setBdvHandleCloseOperation(bdvh, msp.getContext().getService(CacheService.class),
                 SourceAndConverterServices.getBdvDisplayService(), false,
@@ -227,10 +289,11 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                     this.common_behaviours = null;
                     this.positioning_behaviours = null;
                     this.review_behaviours = null;
+                    logger.debug("Removing listeners");
                     msp.getReslicedAtlas().removeListener(atlasSlicingListener);
+                    msp.removeSliceListener(this);
                 }
         );
-
     }
 
     public synchronized void iniSlice(SliceSources slice) {
@@ -370,15 +433,29 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         bdvh.getViewerPanel().getDisplay().repaint();
     }
 
-    @Override
-    public synchronized void isCurrentSlice(SliceSources slice) {
-        debug.accept(slice.name+ " becomes the current slice");
+    public boolean isCurrentSlice(SliceSources slice) {
+        List<SliceSources> sortedSlices = msp.getSortedSlices();
+        if (iCurrentSlice >= sortedSlices.size()) {
+            iCurrentSlice = 0;
+        }
+
+        if (sortedSlices.size() > 0) {
+            return slice.equals(sortedSlices.get(iCurrentSlice));
+        } else {
+            return false;
+        }
     }
 
     @Override
     public synchronized void sliceSourcesChanged(SliceSources slice) {
         debug.accept(slice.name+ " slices changed");
         sliceGuiState.get(slice).sourcesChanged();
+    }
+
+    @Override
+    public void slicePretransformChanged(SliceSources sliceSources) {
+        // TODO if slice visible
+        bdvh.getViewerPanel().requestRepaint();
     }
 
     // --------------------------------------------------------- SETTING MODES
@@ -392,12 +469,13 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
     public synchronized void setDisplayMode(int mode) {
         if (this.mode!=mode) {
+            int oldMode = mode;
             this.mode = mode;
-            modeChanged(mode);
+            modeChanged(mode, oldMode);
         }
     }
 
-    private synchronized void modeChanged(int mode) {
+    private synchronized void modeChanged(int mode, int oldMode) {
         sliceGuiState.values().forEach(sliceGuiState -> sliceGuiState.slicePositionChanged()); // Force displacement of slice
 
         if (mode == POSITIONING_MODE_INT) {
@@ -417,6 +495,8 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             navigateCurrentSlice();
             refreshBlockMap();
         }
+
+        modeListeners.forEach(modeListener -> modeListener.modeChanged(this, oldMode, mode));
     }
 
     public RealPoint getSliceCenterPosition(SliceSources slice) {
@@ -718,12 +798,33 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         }
     }
 
+    public BdvHandle getBdvh() {
+        return bdvh;
+    }
+
+    public SourceAndConverter<?>[] getDisplayedAtlasSources() {
+        switch (mode) {
+            case POSITIONING_MODE_INT:
+                return msp.getReslicedAtlas().extendedSlicedSources;
+            case REVIEW_MODE_INT:
+                return msp.getReslicedAtlas().nonExtendedSlicedSources;
+            default:
+                return null;
+        }
+    }
+
+    public static List<String> excludedKeys = new ArrayList<>();
+
+    public boolean includedKey(String key) {
+        return !(excludedKeys.contains(key));
+    }
+
     class InnerOverlay extends BdvOverlay {
 
         @Override
         protected void draw(Graphics2D g) {
             // Gets a copy of the slices to avoid concurrent exception
-            List<SliceSources> slicesCopy = msp.getSlices();
+            //List<SliceSources> slicesCopy = msp.getSlices();
 
             // Gets current bdv view position
             AffineTransform3D bdvAt3D = new AffineTransform3D();
@@ -746,6 +847,39 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             if (showSliceInfo) drawSliceInfo(g, slicesCopy); */
 
         }
+    }
+
+    int sliceDisplayMode = 0;
+
+    final static public int NO_SLICE_DISPLAY_MODE = 2;
+    final static public int ALL_SLICES_DISPLAY_MODE = 0;
+    final static public int CURRENT_SLICE_DISPLAY_MODE = 1;
+
+    public void setSliceDisplayMode (int sliceDisplayMode) {
+        if (this.sliceDisplayMode!=sliceDisplayMode) {
+            this.sliceDisplayMode = sliceDisplayMode;
+            sliceGuiState.values().forEach(sliceGuiState -> sliceGuiState.sliceDisplayChanged(sliceDisplayMode));
+        }
+    }
+
+    public void toggleOverlap() {
+        // TODO
+    }
+
+    List<ModeListener> modeListeners = new ArrayList<>();
+
+    public void addModeListener(ModeListener modeListener) {
+        modeListeners.add(modeListener);
+    }
+
+    public void removeModeListener(ModeListener modeListener) {
+        modeListeners.remove(modeListener);
+    }
+
+
+    public interface ModeListener {
+        void modeChanged(BdvMultislicePositionerView mp, int oldmode, int newmode);
+        void sliceDisplayModeChanged(BdvMultislicePositionerView mp, int oldmode, int newmode);
     }
 
 }

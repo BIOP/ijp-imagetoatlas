@@ -66,12 +66,12 @@ public class DebugView implements MultiSlicePositioner.SliceChangeListener{
     }
 
     @Override
-    public void isCurrentSlice(SliceSources slice) {
+    public void sliceSourcesChanged(SliceSources slice) {
 
     }
 
     @Override
-    public void sliceSourcesChanged(SliceSources slice) {
+    public void slicePretransformChanged(SliceSources sliceSources) {
 
     }
 }

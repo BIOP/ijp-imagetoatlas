@@ -47,7 +47,7 @@ public class DemoRegistrationIJ1 {
         //mp.createSlice(sac,6.5); // easy way to have several slices
 
         //mp.createSlice(sac,8.5); // easy way to have several slices
-
+        /*
         mp.waitForTasks();
 
         SliceSources slice = mp.getSortedSlices().get(0);
@@ -62,6 +62,7 @@ public class DemoRegistrationIJ1 {
                         "atlas_image_channel",0,
                         "slice_image_channel",0
                 ).get();
+                */
 
         /*ij.command().run(RegistrationElastixSplineCommand.class, true,
                     "mp", mp,
@@ -72,12 +73,17 @@ public class DemoRegistrationIJ1 {
                     "sliceImageChannel",0
             ).get();*/
 
-        System.out.println("Waiting for registration tasks to be finished...");
+        /*System.out.println("Waiting for registration tasks to be finished...");
         mp.waitForTasks();
         System.out.println("Saving...");
         mp.saveState(new File("src/test/resources/output/reg_demoregistrationij1.json"), true);
-        System.out.println("Done");
+        System.out.println("Done");*/
+            /*
+        sac = ij.convert().convert(demoSlice.getTitle(), SourceAndConverter[].class);
 
-	}
+        mp.createSlice(sac,6.5);*/
+
+
+    }
 
 }

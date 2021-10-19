@@ -390,6 +390,7 @@ public class SliceSources {
 
     public void transformSourceOrigin(AffineTransform3D at3D) {
         preTransform.setAffineTransform(at3D);
+        mp.slicePreTransformChanged(this);
     }
 
     public AffineTransform3D getTransformSourceOrigin() {
@@ -399,7 +400,7 @@ public class SliceSources {
     public void rotateSourceOrigin(int axis, double angle) {
         AffineTransform3D at3d = preTransform.getAffineTransform();
         at3d.rotate(axis, angle);
-        preTransform.setAffineTransform(at3d);
+        transformSourceOrigin(at3d);
     }
 
     public int getNumberOfRegistrations() {
