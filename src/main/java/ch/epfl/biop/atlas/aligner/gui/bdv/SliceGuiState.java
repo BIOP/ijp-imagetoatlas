@@ -197,4 +197,9 @@ public class SliceGuiState {
                 break;
         }
     }
+
+    public boolean isVisible() {
+        // TODO
+        return sliceIsVisibleMode;
+    }
 }

@@ -74,4 +74,9 @@ public class DebugView implements MultiSlicePositioner.SliceChangeListener{
     public void slicePretransformChanged(SliceSources sliceSources) {
 
     }
+
+    @Override
+    public void roiChanged() {
+
+    }
 }

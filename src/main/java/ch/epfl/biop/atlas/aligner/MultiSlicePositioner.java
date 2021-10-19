@@ -280,7 +280,7 @@ public class MultiSlicePositioner { // SelectedSourcesListener,
         roiPY = py;
         roiSX = sx;
         roiSY = sy;
-
+        listeners.forEach(sliceChangeListener -> sliceChangeListener.roiChanged());
     }
 
     public double[] getROI() {
@@ -1159,6 +1159,7 @@ public class MultiSlicePositioner { // SelectedSourcesListener,
         void sliceDeselected(SliceSources slice);
         void sliceSourcesChanged(SliceSources slice);
         void slicePretransformChanged(SliceSources sliceSources);
+        void roiChanged();
     }
 
     /**

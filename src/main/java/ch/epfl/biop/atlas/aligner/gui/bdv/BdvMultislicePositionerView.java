@@ -1,24 +1,27 @@
 package ch.epfl.biop.atlas.aligner.gui.bdv;
 
-import bdv.util.BdvFunctions;
-import bdv.util.BdvHandle;
-import bdv.util.BdvOptions;
-import bdv.util.BdvOverlay;
+import bdv.util.*;
 import bdv.viewer.SourceAndConverter;
 import bdv.viewer.ViewerFrame;
 import ch.epfl.biop.ResourcesMonitor;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.atlas.aligner.action.DeleteSliceAction;
+import ch.epfl.biop.atlas.aligner.action.SliceDefineROICommand;
 import ch.epfl.biop.atlas.aligner.command.*;
+import ch.epfl.biop.atlas.aligner.gui.MultiSliceContextMenuClickBehaviour;
 import ch.epfl.biop.atlas.aligner.gui.bdv.card.AtlasInfoPanel;
 import ch.epfl.biop.atlas.aligner.gui.bdv.card.EditPanel;
 import ch.epfl.biop.atlas.aligner.plugin.IABBARegistrationPlugin;
 import ch.epfl.biop.atlas.aligner.plugin.RegistrationPluginHelper;
 import ch.epfl.biop.bdv.gui.GraphicalHandle;
 import ch.epfl.biop.bdv.gui.GraphicalHandleListener;
+import net.imglib2.FinalInterval;
+import net.imglib2.RealLocalizable;
 import net.imglib2.RealPoint;
+import net.imglib2.position.FunctionRealRandomAccessible;
 import net.imglib2.realtransform.AffineTransform3D;
+import net.imglib2.type.numeric.integer.UnsignedShortType;
 import org.scijava.cache.CacheService;
 import org.scijava.command.Command;
 import org.scijava.command.CommandService;
@@ -42,6 +45,7 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import static bdv.ui.BdvDefaultCards.*;
@@ -186,7 +190,6 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             }
         });
 
-
         logger.debug("Installing external registration plugins ui");
         msp.getExternalRegistrationPluginsUI().keySet().forEach(externalRegistrationType -> {
             msp.getExternalRegistrationPluginsUI().get(externalRegistrationType).forEach( ui -> {
@@ -213,9 +216,9 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
         bdvh.getCardPanel().addCard("Atlas Slicing", ScijavaSwingUI.getPanel(msp.getContext(), AtlasSlicingAdjusterCommand.class, "reslicedAtlas", msp.getReslicedAtlas()), true);
 
-        /*bdvh.getCardPanel().addCard("Define region of interest",
-                ScijavaSwingUI.getPanel(msp.getContext(), SliceDefineROICommand.class, "mp", msp),
-                false);*/
+        bdvh.getCardPanel().addCard("Define region of interest",
+                ScijavaSwingUI.getPanel(msp.getContext(), SliceDefineROICommand.class, "mp", msp, "view", this),
+                false);
     }
 
     void displayAtlas() {
@@ -228,10 +231,75 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                 .show(bdvh, sacsToAppend.toArray(new SourceAndConverter[0]));
     }
 
+    void addRoiOverlaySource() {
+
+        logger.debug("Adding user ROI source");
+
+        BiConsumer<RealLocalizable, UnsignedShortType> fun = (loc, val) -> {
+            double px = loc.getFloatPosition(0);
+            double py = loc.getFloatPosition(1);
+
+            if (py<-sY/1.9) {val.set(0); return;}
+            if (py>sY/1.9) {val.set(0); return;}
+
+            if (mode == POSITIONING_MODE_INT) {
+                final double v = Math.IEEEremainder(px + sX * 0.5, sX);
+                if (v < roiPX) {val.set(255); return;}
+                if (v > roiPX+roiSX) {val.set(255); return;}
+                if (py<roiPY) {val.set(255); return;}
+                if (py>roiPY+roiSY) {val.set(255); return;}
+                val.set(0);
+            }
+
+            if (mode == REVIEW_MODE_INT) {
+                if (loc.getFloatPosition(0) < roiPX) {val.set(255); return;}
+                if (loc.getFloatPosition(0) > roiPX+roiSX) {val.set(255); return;}
+                if (loc.getFloatPosition(1)<roiPY) {val.set(255); return;}
+                if (loc.getFloatPosition(1)>roiPY+roiSY) {val.set(255); return;}
+                val.set(0);
+            }
+
+        };
+
+        FunctionRealRandomAccessible<UnsignedShortType> roiOverlay = new FunctionRealRandomAccessible<>(3, fun, UnsignedShortType::new);
+
+        BdvStackSource<?> bss = BdvFunctions.show(roiOverlay,
+                new FinalInterval(new long[]{0, 0, 0}, new long[]{10, 10, 10}),"ROI", BdvOptions.options().addTo(bdvh));
+
+        bss.setDisplayRangeBounds(0,1600);
+    }
+
+    void addCleanUpHook() {
+        // Close hook to try to release as many resources as possible -> proven avoiding mem leaks
+        BdvHandleHelper.setBdvHandleCloseOperation(bdvh, msp.getContext().getService(CacheService.class),
+                SourceAndConverterServices.getBdvDisplayService(), false,
+                () -> {
+                    logger.info("Closing multipositioner bdv window, releasing some resources.");
+                    this.selectionLayer = null;
+                    this.common_behaviours = null;
+                    this.positioning_behaviours = null;
+                    this.review_behaviours = null;
+                    logger.debug("Removing listeners");
+                    msp.getReslicedAtlas().removeListener(atlasSlicingListener);
+                    msp.removeSliceListener(this);
+                }
+        );
+    }
+
+    void addRightClickActions() {
+        common_behaviours.behaviour(new MultiSliceContextMenuClickBehaviour( msp, this, msp::getSelectedSources ), "Slices Context Menu", "button3", "ctrl button1", "meta button1");
+    }
+
+    final double sX, sY;
+    double roiPX, roiPY, roiSX, roiSY;
+
     public BdvMultislicePositionerView(MultiSlicePositioner msp, BdvHandle bdvh) {
         // Final variable initialization
         this.bdvh = bdvh;
         this.msp = msp;
+        this.sX = msp.sX;
+        this.sY = msp.sY;
+        roiChanged(); // initialize roi
         this.displayService = msp.getContext().getService(SourceAndConverterBdvDisplayService.class);
 
         excludedKeys.add("X");
@@ -279,21 +347,14 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         logger.debug("Displaying Altas");
         displayAtlas();
 
+        logger.debug("Adding ROI Overlay source");
+        addRoiOverlaySource();
+
+        logger.debug("Add right click actions");
+        addRightClickActions();
+
         logger.debug("Adding close window cleaning hook");
-        // Close hook to try to release as many resources as possible -> proven avoiding mem leaks
-        BdvHandleHelper.setBdvHandleCloseOperation(bdvh, msp.getContext().getService(CacheService.class),
-                SourceAndConverterServices.getBdvDisplayService(), false,
-                () -> {
-                    logger.info("Closing multipositioner bdv window, releasing some resources.");
-                    this.selectionLayer = null;
-                    this.common_behaviours = null;
-                    this.positioning_behaviours = null;
-                    this.review_behaviours = null;
-                    logger.debug("Removing listeners");
-                    msp.getReslicedAtlas().removeListener(atlasSlicingListener);
-                    msp.removeSliceListener(this);
-                }
-        );
+        addCleanUpHook();
     }
 
     public synchronized void iniSlice(SliceSources slice) {
@@ -454,7 +515,18 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
     @Override
     public void slicePretransformChanged(SliceSources sliceSources) {
-        // TODO if slice visible
+        if (sliceGuiState.get(sliceSources).isVisible()) {
+            bdvh.getViewerPanel().requestRepaint();
+        }
+    }
+
+    @Override
+    public void roiChanged() {
+        double[] currentRoi = msp.getROI();
+        roiPX = currentRoi[0];
+        roiPY = currentRoi[1];
+        roiSX = currentRoi[2];
+        roiSY = currentRoi[3];
         bdvh.getViewerPanel().requestRepaint();
     }
 
@@ -817,6 +889,16 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
     public boolean includedKey(String key) {
         return !(excludedKeys.contains(key));
+    }
+
+    public int getDisplayMode() {
+        return mode;
+    }
+
+    public void setSliceInvisible(SliceSources slice) {
+    }
+
+    public void setSliceVisible(SliceSources slice) {
     }
 
     class InnerOverlay extends BdvOverlay {
