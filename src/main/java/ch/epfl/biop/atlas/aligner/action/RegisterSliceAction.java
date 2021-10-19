@@ -63,9 +63,11 @@ public class RegisterSliceAction extends CancelableAction {
     public boolean run() { //
         if (registration.isRegistrationDone()&&isValid()) {
             slice.appendRegistration(registration);
+            slice.sourcesChanged();
             return true;
         } else {
             isValid = slice.runRegistration(registration, preprocessFixed, preprocessMoving);
+            slice.sourcesChanged();
             return isValid;
         }
     }

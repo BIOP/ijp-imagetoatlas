@@ -515,4 +515,7 @@ public class ReslicedAtlas implements RealInterval {
         return getLabelSourceIndex()-1;
     }
 
+    public void removeListener(Runnable atlasSlicingListener) {
+        listeners.remove(atlasSlicingListener);
+    }
 }

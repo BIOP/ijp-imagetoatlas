@@ -471,22 +471,23 @@ public class MultiSlicePositioner { // SelectedSourcesListener,
 
     public void runRequest(CancelableAction action) {
         if ((action.getSliceSources()!=null)) {
-            logger.debug("Action "+action +" on slice "+action.getSliceSources()+" requested (async).");
+            logger.debug("Action "+action+" on slice "+action.getSliceSources()+" requested (async).");
             action.getSliceSources().enqueueRunAction(action, () -> mso.updateInfoPanel(action.getSliceSources()) );
         } else {
             // Not asynchronous
-            logger.debug("Action "+action +" on slice "+action.getSliceSources()+" run (non async).");
+            logger.debug("Action "+action+" on slice "+action.getSliceSources()+" run (non async).");
             action.run();
-            logger.debug("Action "+action +" on slice "+action.getSliceSources()+" done.");
+            logger.debug("Action "+action+" on slice "+action.getSliceSources()+" done.");
         }
         if (action.isValid()) {
             logger.debug("Action "+action+" on slice "+action.getSliceSources()+" is valid.");
             userActions.add(action);
             logger.debug("Action "+action+" on slice "+action.getSliceSources()+" added to userActions.");
             if (redoableUserActions.size() > 0) {
-                if (redoableUserActions.get(redoableUserActions.size() - 1).equals(this)) {
+                if (redoableUserActions.get(redoableUserActions.size() - 1).equals(action)) {
                     redoableUserActions.remove(redoableUserActions.size() - 1);
                 } else {
+                    logger.debug("DELETED REDOABLE ACTIONS");
                     // different branch : clear redoable actions
                     redoableUserActions.clear();
                 }
@@ -935,7 +936,6 @@ public class MultiSlicePositioner { // SelectedSourcesListener,
             } else {
                 redoableUserActions.get(redoableUserActions.size() - 1).runRequest();
             }
-
         } else {
             log.accept("No action can be redone.");
         }
@@ -1142,6 +1142,10 @@ public class MultiSlicePositioner { // SelectedSourcesListener,
         listeners.remove(listener);
     }
 
+    public void notifySourcesChanged(SliceSources sliceSources) {
+        listeners.forEach(sliceChangeListener -> sliceChangeListener.sliceSourcesChanged(sliceSources));
+    }
+
     public interface SliceChangeListener {
         void sliceDeleted(SliceSources slice);
         void sliceCreated(SliceSources slice);
@@ -1150,6 +1154,7 @@ public class MultiSlicePositioner { // SelectedSourcesListener,
         void sliceSelected(SliceSources slice);
         void sliceDeselected(SliceSources slice);
         void isCurrentSlice(SliceSources slice);
+        void sliceSourcesChanged(SliceSources slice);
     }
 
     public interface ModeListener {
@@ -1217,6 +1222,10 @@ public class MultiSlicePositioner { // SelectedSourcesListener,
     }
 
     static Map<String, List<String>> externalRegistrationPluginsUI = new HashMap<>();
+
+    public Map<String, List<String>> getExternalRegistrationPluginsUI() {
+        return externalRegistrationPluginsUI;
+    }
 
     public static void registerRegistrationPluginUI(String registrationTypeName, String registrationUICommandName) {
         if (!externalRegistrationPluginsUI.containsKey(registrationTypeName)) {

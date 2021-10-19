@@ -293,17 +293,14 @@ public class SliceSources {
     public synchronized void select() {
         if (!this.isSelected) {
             this.isSelected = true;
-            //guiState.select();
-            // TODO : not public ? when to notify?
+            mp.sliceSelected(this);
         }
     }
 
     public void deSelect() {
         if (this.isSelected) {
             this.isSelected = false;
-            //guiState.deselect();
-
-            // TODO : not public ? when to notify?
+            mp.sliceDeselected(this);
         }
     } // TODO : thread lock!
 
@@ -424,11 +421,11 @@ public class SliceSources {
         registered_sacs_sequence.add(new RegistrationAndSources(reg, registered_sacs));
         registrations.add(reg);
         mp.mso.updateInfoPanel(this);
-        sourcesChanged();
     }
 
-    private void sourcesChanged() {
+    public void sourcesChanged() {
         // TODO : notify
+        mp.notifySourcesChanged(this);
     }
 
     private boolean performRegistration(Registration<SourceAndConverter<?>[]> reg,

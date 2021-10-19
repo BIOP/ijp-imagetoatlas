@@ -68,6 +68,7 @@ public class EditLastRegistrationAction extends CancelableAction {
         } else {
             slice.editLastRegistration(rs.preprocessFixed, rs.preprocessMoving);
         }
+        slice.sourcesChanged();
         return true;
     }
 
