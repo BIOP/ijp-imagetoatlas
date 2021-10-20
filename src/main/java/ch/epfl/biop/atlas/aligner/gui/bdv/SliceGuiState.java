@@ -159,7 +159,6 @@ public class SliceGuiState {
         return 12;
     }
 
-
     public void drawGraphicalHandles(Graphics2D g) {
         ghs.forEach(gh -> gh.draw(g));
         if (view.getCurrentSlice().equals(slice)) {
@@ -168,6 +167,7 @@ public class SliceGuiState {
     }
 
     double yShift_slicing_mode = 0;
+
     public void setYShift(double yShift) {
         yShift_slicing_mode = yShift;
         slicePositionChanged();
