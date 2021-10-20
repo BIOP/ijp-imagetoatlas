@@ -58,13 +58,11 @@ public class DeleteSliceAction extends CancelableAction {
             savedActions.forEach(action -> {
                 if (action!=this) {
                     action.run();
-                    mp.mso.sendInfo(action);
                 }
             });
             return true;
         }
     }
-
 
     public void drawAction(Graphics2D g, double px, double py, double scale) {
         switch (sliceSource.getActionState(this)){

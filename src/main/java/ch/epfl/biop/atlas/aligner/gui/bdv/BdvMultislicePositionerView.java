@@ -3,15 +3,16 @@ package ch.epfl.biop.atlas.aligner.gui.bdv;
 import bdv.util.*;
 import bdv.viewer.Interpolation;
 import bdv.viewer.SourceAndConverter;
-import bdv.viewer.ViewerFrame;
 import ch.epfl.biop.ResourcesMonitor;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.ReslicedAtlas;
 import ch.epfl.biop.atlas.aligner.SliceSources;
+import ch.epfl.biop.atlas.aligner.action.CancelableAction;
 import ch.epfl.biop.atlas.aligner.action.DeleteSliceAction;
-import ch.epfl.biop.atlas.aligner.action.SliceDefineROICommand;
+import ch.epfl.biop.atlas.aligner.gui.bdv.card.SliceDefineROICommand;
 import ch.epfl.biop.atlas.aligner.command.*;
 import ch.epfl.biop.atlas.aligner.gui.MultiSliceContextMenuClickBehaviour;
+import ch.epfl.biop.atlas.aligner.gui.bdv.card.AtlasAdjustDisplayCommand;
 import ch.epfl.biop.atlas.aligner.gui.bdv.card.AtlasInfoPanel;
 import ch.epfl.biop.atlas.aligner.gui.bdv.card.EditPanel;
 import ch.epfl.biop.atlas.aligner.plugin.IABBARegistrationPlugin;
@@ -30,7 +31,6 @@ import net.imglib2.type.numeric.real.FloatType;
 import org.scijava.cache.CacheService;
 import org.scijava.command.Command;
 import org.scijava.command.CommandService;
-import org.scijava.object.ObjectService;
 import org.scijava.plugin.PluginService;
 import org.scijava.ui.behaviour.*;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
@@ -43,8 +43,6 @@ import sc.fiji.bdvpg.scijava.ScijavaSwingUI;
 import sc.fiji.bdvpg.scijava.services.SourceAndConverterBdvDisplayService;
 import sc.fiji.bdvpg.scijava.services.ui.swingdnd.BdvTransferHandler;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
-import ch.epfl.biop.atlas.aligner.command.*;
-import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
 
 import javax.swing.*;
 import java.awt.*;
@@ -547,11 +545,6 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     }
 
     @Override
-    public synchronized void sliceVisibilityChanged(SliceSources slice) {
-        debug.accept(slice.name+ " visibility changed");
-    }
-
-    @Override
     public synchronized void sliceSelected(SliceSources slice) {
         debug.accept(slice.name+ " selected");
         bdvh.getViewerPanel().getDisplay().repaint();
@@ -597,6 +590,36 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         roiSX = currentRoi[2];
         roiSY = currentRoi[3];
         bdvh.getViewerPanel().requestRepaint();
+    }
+
+    @Override
+    public void actionEnqueue(SliceSources slice, CancelableAction action) {
+
+    }
+
+    @Override
+    public void actionStarted(SliceSources slice, CancelableAction action) {
+
+    }
+
+    @Override
+    public void actionFinished(SliceSources slice, CancelableAction action, boolean result) {
+
+    }
+
+    @Override
+    public void actionCancelEnqueue(SliceSources slice, CancelableAction action) {
+
+    }
+
+    @Override
+    public void actionCancelStarted(SliceSources slice, CancelableAction action) {
+
+    }
+
+    @Override
+    public void actionCancelFinished(SliceSources slice, CancelableAction action, boolean result) {
+
     }
 
     // --------------------------------------------------------- SETTING MODES

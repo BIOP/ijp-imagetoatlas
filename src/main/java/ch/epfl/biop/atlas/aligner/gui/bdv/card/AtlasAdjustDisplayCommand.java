@@ -1,4 +1,4 @@
-package ch.epfl.biop.atlas.aligner.command;
+package ch.epfl.biop.atlas.aligner.gui.bdv.card;
 
 import bdv.tools.brightness.ConverterSetup;
 import bdv.viewer.SourceAndConverter;

@@ -50,6 +50,8 @@ public class SliceGuiState {
 
     final List<GraphicalHandle> ghs = new ArrayList<>();
 
+
+
     public SliceGuiState(BdvMultislicePositionerView view, SliceSources slice, BdvHandle bdvh) {
         this.view = view;
         this.bdvh = bdvh;

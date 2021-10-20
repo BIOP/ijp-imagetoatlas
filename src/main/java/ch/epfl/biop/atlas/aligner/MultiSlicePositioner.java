@@ -100,7 +100,7 @@ public class MultiSlicePositioner { // SelectedSourcesListener,
     Context scijavaCtx;
 
     // Multislice observer observes and display events happening to slices
-    public MultiSliceObserver mso;
+    public SliceActionObserver mso;
 
     // Index of the current slice
     int iCurrentSlice = 0;
@@ -199,7 +199,8 @@ public class MultiSlicePositioner { // SelectedSourcesListener,
         sY = nPixY * sizePixY;
         sZ = nPixZ * sizePixZ;
 
-        mso = new MultiSliceObserver(this);
+        mso = new SliceActionObserver(this);
+        addSliceListener(mso);
 
         // Default registration region = full atlas size
         roiPX = -sX / 2.0;
@@ -414,10 +415,6 @@ public class MultiSlicePositioner { // SelectedSourcesListener,
         listeners.forEach(listener -> listener.sliceZPositionChanged(slice));
     }
 
-    public void sliceVisibilityChanged(SliceSources slice) {
-        listeners.forEach(listener -> listener.sliceVisibilityChanged(slice));
-    }
-
     public void sliceSelected(SliceSources slice) {
         listeners.forEach(listener -> listener.sliceSelected(slice));
     }
@@ -472,11 +469,15 @@ public class MultiSlicePositioner { // SelectedSourcesListener,
     public void runRequest(CancelableAction action) {
         if ((action.getSliceSources()!=null)) {
             logger.debug("Action "+action+" on slice "+action.getSliceSources()+" requested (async).");
-            action.getSliceSources().enqueueRunAction(action, () -> mso.updateInfoPanel(action.getSliceSources()) );
+            listeners.forEach(sliceChangeListener -> sliceChangeListener.actionEnqueue(action.getSliceSources(), action));
+            action.getSliceSources().enqueueRunAction(action, () -> {} );
         } else {
             // Not asynchronous
             logger.debug("Action "+action+" on slice "+action.getSliceSources()+" run (non async).");
-            action.run();
+            listeners.forEach(sliceChangeListener -> sliceChangeListener.actionEnqueue(action.getSliceSources(), action));
+            listeners.forEach(sliceChangeListener -> sliceChangeListener.actionStarted(action.getSliceSources(), action));
+            boolean result = action.run();
+            listeners.forEach(sliceChangeListener -> sliceChangeListener.actionFinished(action.getSliceSources(), action, result));
             logger.debug("Action "+action+" on slice "+action.getSliceSources()+" done.");
         }
         if (action.isValid()) {
@@ -493,7 +494,6 @@ public class MultiSlicePositioner { // SelectedSourcesListener,
                 }
             }
             logger.debug("Action "+action+" on slice "+action.getSliceSources()+" info sending to MultiSliceObserver.");
-            mso.sendInfo(action);
             logger.debug("Action "+action+" on slice "+action.getSliceSources()+" info sent to MultiSliceObserver!");
         } else {
             logger.error("Invalid action "+action+" on slice "+action.getSliceSources());
@@ -501,11 +501,14 @@ public class MultiSlicePositioner { // SelectedSourcesListener,
     }
 
     public void cancelRequest(CancelableAction action) {
+        listeners.forEach(sliceChangeListener -> sliceChangeListener.actionCancelEnqueue(action.getSliceSources(), action));
         if (action.isValid()) {
             if ((action.getSliceSources() == null)) {
                 // Not asynchronous
                 logger.debug("Non Async cancel call : " + action + " on slice "+action.getSliceSources());
-                action.cancel();
+                listeners.forEach(sliceChangeListener -> sliceChangeListener.actionCancelStarted(action.getSliceSources(), action));
+                boolean result = action.cancel();
+                listeners.forEach(sliceChangeListener -> sliceChangeListener.actionCancelFinished(action.getSliceSources(), action, result));
             } else {
                 logger.debug("Async cancel call : " + action + " on slice "+action.getSliceSources());
                 action.getSliceSources().enqueueCancelAction(action, () -> { });
@@ -518,8 +521,6 @@ public class MultiSlicePositioner { // SelectedSourcesListener,
                 logger.error("Error : cancel not called on the last action");
                 return;
             }
-            logger.debug("Updating mso after action cancelled");
-            mso.cancelInfo(action);
         }
     }
 
@@ -567,10 +568,8 @@ public class MultiSlicePositioner { // SelectedSourcesListener,
                         createSliceAction.slicingAxisPosition, this, createSliceAction.zSliceThicknessCorrection, createSliceAction.zSliceShiftCorrection));
             }
 
-            createSlice(createSliceAction.getSlice());//.getPrivateSlices().add(sliceSource);
+            createSlice(createSliceAction.getSlice());
 
-            //createSliceAction.getSlice().getGUIState().sliceDisplayModeChanged(); // Triggers redraw on cancel
-            // TODO : notify
             log.accept("Slice added");
         }
         return true;
@@ -941,10 +940,6 @@ public class MultiSlicePositioner { // SelectedSourcesListener,
         }
     }
 
-    //------------------------------------------ DRAG BEHAVIOURS
-
-    // ------------------------------------------- Block map
-
     // ------------------------------------------------ Serialization / Deserialization
 
     Gson getGsonStateSerializer(List<SourceAndConverter> serialized_sources) {
@@ -1154,12 +1149,19 @@ public class MultiSlicePositioner { // SelectedSourcesListener,
         void sliceDeleted(SliceSources slice);
         void sliceCreated(SliceSources slice);
         void sliceZPositionChanged(SliceSources slice);
-        void sliceVisibilityChanged(SliceSources slice);
         void sliceSelected(SliceSources slice);
         void sliceDeselected(SliceSources slice);
         void sliceSourcesChanged(SliceSources slice);
-        void slicePretransformChanged(SliceSources sliceSources);
+        void slicePretransformChanged(SliceSources slice);
+
         void roiChanged();
+
+        void actionEnqueue(SliceSources slice, CancelableAction action);
+        void actionStarted(SliceSources slice, CancelableAction action);
+        void actionFinished(SliceSources slice, CancelableAction action, boolean result);
+        void actionCancelEnqueue(SliceSources slice, CancelableAction action);
+        void actionCancelStarted(SliceSources slice, CancelableAction action);
+        void actionCancelFinished(SliceSources slice, CancelableAction action, boolean result);
     }
 
     /**

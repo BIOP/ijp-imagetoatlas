@@ -421,7 +421,7 @@ public class SliceSources {
         registered_sacs = reg.getTransformedImageMovingToFixed(registered_sacs);
         registered_sacs_sequence.add(new RegistrationAndSources(reg, registered_sacs));
         registrations.add(reg);
-        mp.mso.updateInfoPanel(this);
+
     }
 
     public void sourcesChanged() {
@@ -504,7 +504,9 @@ public class SliceSources {
                 if (out) {
                     actionInProgress = action;
                     logger.debug(this+": action "+action+" started");
+                    mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.actionStarted(action.getSliceSources(), action));
                     boolean result = action.run();
+                    mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.actionFinished(action.getSliceSources(), action, result));
                     logger.debug(this+": action "+action+" result "+result);
                     if (result) {
                         actionInProgress = null;
@@ -516,7 +518,6 @@ public class SliceSources {
                             tasks.remove(future);
                         }
                         mapActionTask.remove(action);
-                        mp.mso.cancelInfo(action);
                         mp.userActions.remove(action);
                     }
                     return result;
@@ -527,7 +528,6 @@ public class SliceSources {
                         tasks.remove(future);
                     }
                     mapActionTask.remove(action);
-                    mp.mso.cancelInfo(action);
                     mp.userActions.remove(action);
                     return false;
                 }
@@ -543,21 +543,24 @@ public class SliceSources {
                 if (mapActionTask.get(action).isDone() || ((action!=null)&&(action == this.actionInProgress))) {
 
                     if (action==actionInProgress) {
-                        if (actionInProgress instanceof RegisterSliceAction) {
-                            // Special case : let's abort ASAP the registration to avoid overloading the server
+                       if (actionInProgress instanceof RegisterSliceAction) {
+                           mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.actionCancelStarted(action.getSliceSources(), action));
+                           boolean result;
+
+                           // Special case : let's abort ASAP the registration to avoid overloading the server
                             logger.debug("Aborting register slice action :  "+actionInProgress);
                             ((RegisterSliceAction) actionInProgress).getRegistration().abort();
                             //postRun.run();
-                            action.cancel();
+                            result = action.cancel();
                             if (mapActionTask.containsKey(action)) {
                                 CompletableFuture future = mapActionTask.get(action);
                                 tasks.remove(future);
                             }
                             mapActionTask.remove(action);
-                            mp.mso.cancelInfo(action);
                             mp.userActions.remove(action);
                             postRun.run();
-                        }
+                            mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.actionCancelFinished(action.getSliceSources(), action, result));
+                       }
                     } else {
                         CompletableFuture<Boolean> startingPoint;
                         if (tasks.size() == 0) {
@@ -567,26 +570,33 @@ public class SliceSources {
                         }
                         tasks.add(startingPoint.thenApplyAsync((out) -> {
                             if (out) {
+                                mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.actionCancelStarted(action.getSliceSources(), action));
                                 boolean result = action.cancel();
                                 tasks.remove(mapActionTask.get(action));
                                 mapActionTask.remove(action);
                                 postRun.run();
+                                mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.actionCancelFinished(action.getSliceSources(), action, result));
                                 return result;
                             } else {
+                                logger.error("Weird edge case!");
                                 return false;
                             }
                         }));
                     }
                 } else {
+                    mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.actionCancelStarted(action.getSliceSources(), action));
                     // Not done yet! - let's remove right now from the task list
-                    mapActionTask.get(action).cancel(true);
+                    boolean result = mapActionTask.get(action).cancel(true);
                     tasks.remove(mapActionTask.get(action));
                     mapActionTask.remove(action);
                     postRun.run();
+                    mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.actionCancelFinished(action.getSliceSources(), action, result));
                 }
             } else if (action instanceof CreateSliceAction) {
+                mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.actionCancelStarted(action.getSliceSources(), action));
                 waitForEndOfTasks();
-                action.cancel();
+                boolean result = action.cancel();
+                mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.actionCancelFinished(action.getSliceSources(), action, result));
             } else {
                 mp.errlog.accept("Unregistered action");
             }

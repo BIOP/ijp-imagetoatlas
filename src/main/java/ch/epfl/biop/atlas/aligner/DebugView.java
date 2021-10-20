@@ -1,5 +1,6 @@
 package ch.epfl.biop.atlas.aligner;
 
+import ch.epfl.biop.atlas.aligner.action.CancelableAction;
 import ij.IJ;
 
 import javax.swing.*;
@@ -37,46 +38,74 @@ public class DebugView implements MultiSlicePositioner.SliceChangeListener{
 
     @Override
     public void sliceDeleted(SliceSources slice) {
-        logger.accept("Deleted slice "+slice);
+        logger.accept("Deleted slice "+slice.getName());
     }
 
     @Override
     public void sliceCreated(SliceSources slice) {
-        logger.accept("Created slice "+slice);
+        logger.accept("Created slice "+slice.getName());
     }
 
     @Override
     public void sliceZPositionChanged(SliceSources slice) {
-        logger.accept("Z position changed slice "+slice);
-    }
-
-    @Override
-    public void sliceVisibilityChanged(SliceSources slice) {
-
+        logger.accept("Z position changed slice "+slice.getName());
     }
 
     @Override
     public void sliceSelected(SliceSources slice) {
-
+        logger.accept("Slice selected "+slice.getName());
     }
 
     @Override
     public void sliceDeselected(SliceSources slice) {
-
+        logger.accept("Slice deselected "+slice.getName());
     }
 
     @Override
     public void sliceSourcesChanged(SliceSources slice) {
-
+        logger.accept("Slice sources changed "+slice.getName());
     }
 
     @Override
-    public void slicePretransformChanged(SliceSources sliceSources) {
-
+    public void slicePretransformChanged(SliceSources slice) {
+        logger.accept("Slice pretransform changed "+slice.getName());
     }
 
     @Override
     public void roiChanged() {
-
+        logger.accept("ROI changed");
     }
+
+    @Override
+    public void actionEnqueue(SliceSources slice, CancelableAction action) {
+        logger.accept("Action ["+action.actionClassString()+"] Enqueued");
+    }
+
+    @Override
+    public void actionStarted(SliceSources slice, CancelableAction action) {
+        logger.accept("Action ["+action.actionClassString()+"] Started");
+    }
+
+    @Override
+    public void actionFinished(SliceSources slice, CancelableAction action, boolean result) {
+        String success = result?"Yes":"No";
+        logger.accept("Action ["+action.actionClassString()+"] Finished. Success ? "+success);
+    }
+
+    @Override
+    public void actionCancelEnqueue(SliceSources slice, CancelableAction action) {
+        logger.accept("Action ["+action.actionClassString()+"] Cancelation enqueued.");
+    }
+
+    @Override
+    public void actionCancelStarted(SliceSources slice, CancelableAction action) {
+        logger.accept("Action ["+action.actionClassString()+"] Cancelation Started.");
+    }
+
+    @Override
+    public void actionCancelFinished(SliceSources slice, CancelableAction action, boolean result) {
+        String success = result?"Yes":"No";
+        logger.accept("Action ["+action.actionClassString()+"] Cancelation Ended. Success ? "+success);
+    }
+
 }

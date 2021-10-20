@@ -58,7 +58,6 @@ public class EditLastRegistrationAction extends CancelableAction {
     @Override
     public boolean run() {
         mp.removeUserAction(this);
-        mp.mso.cancelInfo(this);
         if (!reuseOriginalChannels) {
             slice.editLastRegistration(
                     SourcesProcessorHelper.compose(preprocessAtlas,
