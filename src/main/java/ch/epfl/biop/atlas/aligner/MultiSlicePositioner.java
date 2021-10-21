@@ -63,7 +63,7 @@ import static sc.fiji.bdvpg.scijava.services.SourceAndConverterService.SPIM_DATA
  *      The atlas is fully displayed
  */
 
-public class MultiSlicePositioner { // SelectedSourcesListener,
+public class MultiSlicePositioner {
 
     protected static Logger logger = LoggerFactory.getLogger(MultiSlicePositioner.class);
 
@@ -234,17 +234,6 @@ public class MultiSlicePositioner { // SelectedSourcesListener,
         return sortedSlices;
     }
 
-
-    public void hide(SliceSources slice) {
-        //slice.getGUIState().setSliceInvisible();
-        // TODO ?
-    }
-
-    public void show(SliceSources slice) {
-        //slice.getGUIState().setSliceVisible();
-        // TODO ?
-    }
-
     // -------------------------------------------------------- NAVIGATION ( BOTH MODES )
 
     /**
@@ -286,23 +275,6 @@ public class MultiSlicePositioner { // SelectedSourcesListener,
 
     public double[] getROI() {
         return new double[]{roiPX, roiPY, roiSX, roiSY};
-    }
-
-    public SliceSources getCurrentSlice() {
-        List<SliceSources> sortedSlices = getSortedSlices();
-
-        if (sortedSlices.size()>0) {
-            if (iCurrentSlice >= sortedSlices.size()) {
-                iCurrentSlice = 0;
-            }
-            return sortedSlices.get(iCurrentSlice);
-        } else {
-            return null;
-        }
-    }
-
-    public int getCurrentSliceIndex() {
-        return iCurrentSlice;
     }
 
     public void selectSlice(SliceSources... slices) {
@@ -554,7 +526,7 @@ public class MultiSlicePositioner { // SelectedSourcesListener,
         return true;
     }
 
-    public void removeUserAction(CancelableAction action) {
+    protected void removeUserAction(CancelableAction action) {
         userActions.remove(action);
     }
 
@@ -1062,8 +1034,6 @@ public class MultiSlicePositioner { // SelectedSourcesListener,
                     sliceState.slice.transformSourceOrigin((AffineTransform3D) (sliceState.preTransform));
                     // TODO : notify
                 });
-
-                this.iCurrentSlice = state.iCurrentSlice; // Does not work if multiple states are opened TODO : fix, but honestly not important enough
 
             } catch (Exception e) {
                 e.printStackTrace();

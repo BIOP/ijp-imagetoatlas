@@ -1066,10 +1066,12 @@ public class SliceSources {
 
     public void keySliceOn() {
         setAsKeySlice = true;
+        mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.sliceKeyOn(this));
     }
 
     public void keySliceOff() {
         setAsKeySlice = false;
+        mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.sliceKeyOff(this));
     }
 
     public boolean isKeySlice() {

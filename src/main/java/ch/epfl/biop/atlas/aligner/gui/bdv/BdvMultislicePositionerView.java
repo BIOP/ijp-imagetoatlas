@@ -546,6 +546,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     public void sliceZPositionChanged(SliceSources slice) {
         debug.accept(slice.name+ " z position changed");
         guiState.runSlice(slice, guiState -> guiState.slicePositionChanged());
+        bdvh.getViewerPanel().requestRepaint();
     }
 
     @Override
@@ -581,9 +582,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
     @Override
     public void slicePretransformChanged(SliceSources sliceSources) {
-        //if (sliceGuiState.get(sliceSources).isVisible()) {
-            bdvh.getViewerPanel().requestRepaint();
-        //}
+        bdvh.getViewerPanel().requestRepaint();
     }
 
     @Override

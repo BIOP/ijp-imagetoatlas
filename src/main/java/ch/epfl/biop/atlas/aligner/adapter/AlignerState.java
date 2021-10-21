@@ -21,7 +21,6 @@ public class AlignerState {
 
         rotationX = mp.getReslicedAtlas().getRotateX();
         rotationY = mp.getReslicedAtlas().getRotateY();
-        iCurrentSlice = mp.getCurrentSliceIndex();
 
         mp.getSortedSlices().forEach(sliceSource -> {
             SliceSourcesState slice_state = new SliceSourcesState();
@@ -33,8 +32,6 @@ public class AlignerState {
             slices_state_list.add(slice_state);
         });
     }
-
-    public int iCurrentSlice;
 
     public double rotationX;
 
