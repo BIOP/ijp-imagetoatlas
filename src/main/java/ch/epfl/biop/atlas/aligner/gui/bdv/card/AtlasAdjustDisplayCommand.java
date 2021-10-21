@@ -61,7 +61,7 @@ public class AtlasAdjustDisplayCommand extends InteractiveCommand implements
         slicingSteps.setMaximumValue(50);
         slicingSteps.setPersisted(false);
         slicingSteps.setLabel("Displayed slicing [atlas steps]");
-
+        slicingSteps.setValue(this, (int) (view.msp.getReslicedAtlas().getStep())); // Initialisation to current state
     }
 
     // -- Runnable methods --

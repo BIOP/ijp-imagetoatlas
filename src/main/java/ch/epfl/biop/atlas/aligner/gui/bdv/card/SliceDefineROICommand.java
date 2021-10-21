@@ -4,9 +4,11 @@ import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.gui.bdv.BdvMultislicePositionerView;
 import ch.epfl.biop.bdv.command.userdefinedregion.GetUserRectangleCommand;
 import net.imglib2.RealPoint;
+import org.scijava.Initializable;
 import org.scijava.command.Command;
 import org.scijava.command.CommandService;
 import org.scijava.command.InteractiveCommand;
+import org.scijava.module.MutableModuleItem;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.widget.Button;
@@ -18,7 +20,7 @@ import java.util.List;
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>ABBA - Define Rectangular ROI",
         description = "Defines a rectangular ROI that will be considered for registrations")
-public class SliceDefineROICommand extends InteractiveCommand {
+public class SliceDefineROICommand extends InteractiveCommand implements Initializable {
 
     protected static Logger logger = LoggerFactory.getLogger(SliceDefineROICommand.class);
 
@@ -28,17 +30,17 @@ public class SliceDefineROICommand extends InteractiveCommand {
     @Parameter
     BdvMultislicePositionerView view;
 
-    @Parameter
-    double px;
+    @Parameter(persist = false)
+    Double px;
 
-    @Parameter
-    double py;
+    @Parameter(persist = false)
+    Double py;
 
-    @Parameter
-    double sx = -1;
+    @Parameter(persist = false)
+    Double sx;
 
-    @Parameter
-    double sy = -1;
+    @Parameter(persist = false)
+    Double sy;
 
     @Parameter(label = "Define Interactively", callback = "defineClicked")
     Button defineRegionInteractively;
@@ -53,6 +55,28 @@ public class SliceDefineROICommand extends InteractiveCommand {
 
     @Parameter
     CommandService cs;
+
+
+    @Override
+    public void initialize() {
+        double[] roi = view.msp.getROI();
+
+        final MutableModuleItem<Double> px =
+                getInfo().getMutableInput("px", Double.class);
+        px.setValue(this, roi[0]);
+
+        final MutableModuleItem<Double> py =
+                getInfo().getMutableInput("py", Double.class);
+        py.setValue(this, roi[1]);
+
+        final MutableModuleItem<Double> sx =
+                getInfo().getMutableInput("sx", Double.class);
+        sx.setValue(this, roi[2]);
+
+        final MutableModuleItem<Double> sy =
+                getInfo().getMutableInput("sy", Double.class);
+        sy.setValue(this, roi[3]);
+    }
 
     public void defineClicked() {
 
