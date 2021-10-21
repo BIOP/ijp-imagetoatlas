@@ -32,7 +32,7 @@ public class DeleteSliceAction extends CancelableAction {
         synchronized (DeleteSliceAction.class) { // avoid screw up with batch cancel ?
 
             logger.debug("Deleting slice "+getSliceSources()+" ...");
-            savedActions = mp.mso.getActionsFromSlice(sliceSource);
+            savedActions = mp.getActionsFromSlice(sliceSource);
             savedActions.remove(this);savedActions.remove(this);savedActions.remove(this);
             logger.debug("Saved actions slice in run : " + sliceSource);
 

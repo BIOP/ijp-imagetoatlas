@@ -50,9 +50,4 @@ public class MoveSliceAction extends CancelableAction {
         g.drawString("M", (int) px - 5, (int) py + 5);//+new DecimalFormat("###.##").format(newSlicingAxisPosition), (int) px-5, (int) py+5);
     }
 
-    @Override
-    public boolean draw() {
-        return false;
-    }
-
 }

@@ -1,6 +1,8 @@
 package ch.epfl.biop.atlas.aligner;
 
 import ch.epfl.biop.atlas.aligner.action.CancelableAction;
+import ch.epfl.biop.atlas.aligner.action.CreateSliceAction;
+import ch.epfl.biop.atlas.aligner.action.DeleteSliceAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -105,6 +107,9 @@ public class SliceActionObserver implements MultiSlicePositioner.SliceChangeList
                 sliceSortedActions.put(action.getSliceSources(), new ArrayList<>());
             }
             sliceSortedActions.get(action.getSliceSources()).add(action);
+            logger.debug("Action registered in observer: "+action);
+        } else {
+            assert action instanceof CreateSliceAction;
         }
     }
 
@@ -115,7 +120,23 @@ public class SliceActionObserver implements MultiSlicePositioner.SliceChangeList
 
     @Override
     public void actionFinished(SliceSources slice, CancelableAction action, boolean result) {
-
+        assert action.getSliceSources()!=null;
+        // Specific case : the action has no reference slice until it is actually created
+        if (action instanceof CreateSliceAction) {
+            if (!sliceSortedActions.containsKey(action.getSliceSources())) {
+                sliceSortedActions.put(action.getSliceSources(), new ArrayList<>());
+            }
+            logger.debug("Size of sliceSortedAction (normally 0) "+sliceSortedActions.get(action.getSliceSources()).size());
+            if (!sliceSortedActions.get(action.getSliceSources()).contains(action)) {
+                sliceSortedActions.get(action.getSliceSources()).add(action);
+            } else {
+                logger.debug("Ah, create slice was already contained, it's a redo!");
+            }
+            logger.debug("Action registered in observer: "+action);
+        }
+        if (action instanceof DeleteSliceAction) {
+            sliceSortedActions.get(action.getSliceSources()).remove(action); // Causes issues otherwise
+        }
     }
 
     @Override
@@ -132,6 +153,9 @@ public class SliceActionObserver implements MultiSlicePositioner.SliceChangeList
     public void actionCancelFinished(SliceSources slice, CancelableAction action, boolean result) {
         if ((action.getSliceSources()!=null)&&(sliceSortedActions.get(action.getSliceSources())!=null)) {
             sliceSortedActions.get(action.getSliceSources()).remove(action);
+            logger.debug("Action removed in observer: "+action);
+        } else {
+            logger.debug("Action not removed: "+action);
         }
     }
 }

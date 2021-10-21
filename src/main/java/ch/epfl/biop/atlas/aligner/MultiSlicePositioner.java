@@ -100,7 +100,7 @@ public class MultiSlicePositioner { // SelectedSourcesListener,
     Context scijavaCtx;
 
     // Multislice observer observes and display events happening to slices
-    public SliceActionObserver mso;
+    protected SliceActionObserver mso;
 
     // Index of the current slice
     int iCurrentSlice = 0;
@@ -362,18 +362,6 @@ public class MultiSlicePositioner { // SelectedSourcesListener,
         for (SliceSources slice : sortedSelected) {
             slice.rotateSourceOrigin(axis, angle_rad);
         }
-    }
-
-    public void showAllSlices() {
-        for (SliceSources slice : getSortedSlices()) {
-            //slice.getGUIState().setSliceVisible();
-            // TODO ?
-        }
-    }
-
-    public void showCurrentSlice() {
-       // getSortedSlices().get(iCurrentSlice).getGUIState().setSliceVisible();
-        // TODO ?
     }
 
     protected void removeSlice(SliceSources sliceSource) {
@@ -1110,9 +1098,6 @@ public class MultiSlicePositioner { // SelectedSourcesListener,
 
     public void slicePreTransformChanged(SliceSources sliceSources) {
         listeners.forEach(sliceChangeListener -> sliceChangeListener.slicePretransformChanged(sliceSources));
-    }
-
-    public void sliceZMoved(SliceSources sliceSources) {
     }
 
     public interface SliceChangeListener {

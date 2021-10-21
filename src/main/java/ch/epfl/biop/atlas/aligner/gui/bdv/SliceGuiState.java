@@ -135,6 +135,7 @@ public class SliceGuiState {
     }
 
     private void hide() {
+        System.out.println("AAAAHHHHHHH!");
         bdvh.getViewerPanel().state()
                 .removeSources(Arrays.asList(sources_displayed));
     }

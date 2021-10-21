@@ -18,7 +18,7 @@ public class DeleteLastRegistrationAction extends CancelableAction {
         List<CancelableAction> registrationActionsCompiled = new ArrayList<>();
         // One need to get the list of still active registrations i.e.
         // All registrations minus the one already cancelled by a DeleteLastRegistration action
-        for (CancelableAction action : mp.mso.getActionsFromSlice(slice)) {
+        for (CancelableAction action : mp.getActionsFromSlice(slice)) {
             if (action instanceof RegisterSliceAction) {
                 registrationActionsCompiled.add(action);
             }
@@ -32,8 +32,7 @@ public class DeleteLastRegistrationAction extends CancelableAction {
         } else {
             rs = (RegisterSliceAction) registrationActionsCompiled.get(registrationActionsCompiled.size()-1);
         }
-
-        mp.mso.hide(this);
+        hide();
     }
 
     public boolean isValid() {
@@ -47,13 +46,13 @@ public class DeleteLastRegistrationAction extends CancelableAction {
 
     @Override
     public boolean run() {
-        mp.mso.hide(rs);
+        rs.hide();
         return rs.cancel();
     }
 
     @Override
     public boolean cancel() {
-        mp.mso.unhide(rs);
+        rs.show();
         return rs.run();
     }
 }

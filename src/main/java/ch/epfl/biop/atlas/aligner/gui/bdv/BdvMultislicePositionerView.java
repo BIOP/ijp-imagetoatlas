@@ -296,15 +296,13 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                 if (py>roiPY+roiSY) {val.set(255); return;}
                 val.set(0);
             }
-
             if (mode == REVIEW_MODE_INT) {
                 if (loc.getFloatPosition(0) < roiPX) {val.set(255); return;}
                 if (loc.getFloatPosition(0) > roiPX+roiSX) {val.set(255); return;}
-                if (loc.getFloatPosition(1)<roiPY) {val.set(255); return;}
-                if (loc.getFloatPosition(1)>roiPY+roiSY) {val.set(255); return;}
+                if (loc.getFloatPosition(1) < roiPY) {val.set(255); return;}
+                if (loc.getFloatPosition(1) > roiPY+roiSY) {val.set(255); return;}
                 val.set(0);
             }
-
         };
 
         FunctionRealRandomAccessible<UnsignedShortType> roiOverlay = new FunctionRealRandomAccessible<>(3, fun, UnsignedShortType::new);
@@ -1065,6 +1063,12 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
     public Integer[] getSliceHandleCoords(SliceSources slice) {
         return guiState.getSliceHandleCoords(slice);
+    }
+
+    public void showAllSlices() {
+    }
+
+    public void showCurrentSlice() {
     }
 
     class InnerOverlay extends BdvOverlay {

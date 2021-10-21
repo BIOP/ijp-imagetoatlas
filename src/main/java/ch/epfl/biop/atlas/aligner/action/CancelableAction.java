@@ -53,8 +53,18 @@ public abstract class CancelableAction {
 
     public abstract boolean cancel();
 
-    public boolean draw() {
-        return true;
+    private boolean isHidden = false;
+
+    protected void hide() {
+        isHidden = true;
+    }
+
+    protected void show() {
+        isHidden = false;
+    }
+
+    public boolean isHidden() {
+        return isHidden;
     }
 
     public boolean isValid() {

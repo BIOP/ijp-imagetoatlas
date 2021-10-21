@@ -36,9 +36,9 @@ public class SliceSourcesPopupMenu {
     public static JPopupMenu createFinalPopupMenu(MultiSlicePositioner mp, BdvMultislicePositionerView view) {
         JPopupMenu popup = new JPopupMenu();
 
-        addPopupAction(popup,"Show all Slices", mp::showAllSlices);
+        addPopupAction(popup,"Show all Slices", view::showAllSlices);
 
-        addPopupAction(popup, "Show current slice", mp::showCurrentSlice);
+        addPopupAction(popup, "Show current slice", view::showCurrentSlice);
 
         popup.addSeparator();
 
@@ -120,9 +120,9 @@ public class SliceSourcesPopupMenu {
     {
         popup = new JPopupMenu();
 
-        addPopupAction("Show all Slices", (slices) -> mp.showAllSlices());
+        addPopupAction("Show all Slices", (slices) -> view.showAllSlices());
 
-        addPopupAction("Show current slice", (slices)-> mp.showCurrentSlice());
+        addPopupAction("Show current slice", (slices)-> view.showCurrentSlice());
 
         if (slices.length>0) {
 
