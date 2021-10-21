@@ -47,9 +47,12 @@ import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.Point;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -57,12 +60,11 @@ import java.util.stream.Collectors;
 
 import static bdv.ui.BdvDefaultCards.*;
 
-public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceChangeListener, GraphicalHandleListener {
+public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceChangeListener, GraphicalHandleListener, MouseMotionListener {
 
     public final MultiSlicePositioner msp;
     final BdvHandle bdvh;
     final SourceAndConverterBdvDisplayService displayService;
-    Map<SliceSources, SliceGuiState> sliceGuiState = new WeakHashMap<>();
 
     Consumer<String> debug = System.out::println;
 
@@ -90,6 +92,8 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
     // Flag for overlaying the position of the mouse on the atlas + the region name
     boolean showAtlasPosition = true;
+
+    SynchronizedSliceGuiState guiState = new SynchronizedSliceGuiState();
 
     /**
      * Non blocking error message for users
@@ -187,7 +191,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         // Adds registration plugin commands : discovered via scijava plugin autodiscovery mechanism
 
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RegistrationEditLastCommand.class, hierarchyLevelsSkipped,"mp", msp);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RegistrationEditLastCommand.class, hierarchyLevelsSkipped,"mp", msp ); // TODO
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RegistrationRemoveLastCommand.class, hierarchyLevelsSkipped,"mp", msp ); // TODO
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ExportRegionsToRoiManagerCommand.class, hierarchyLevelsSkipped,"mp", msp);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ExportToQuPathProjectCommand.class, hierarchyLevelsSkipped,"mp", msp);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ExportSlicesToBDVJsonDatasetCommand.class, hierarchyLevelsSkipped,"mp", msp);
@@ -422,13 +426,15 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         logger.debug("Adding Drag and Drop Handler");
         this.bdvh.getViewerPanel().setTransferHandler(new BdvMultislicePositionerView.TransferHandler());
         iSliceNoStep = (int) (msp.getReslicedAtlas().getStep());
+
+        logger.debug("Adding mouse motion listener / handler");
+        bdvh.getViewerPanel().getDisplay().addHandler(this);
     }
 
-    public synchronized void iniSlice(SliceSources slice) {
+    public void iniSlice(SliceSources slice) {
         debug.accept("Initializing "+slice.name);
-        sliceGuiState.put(slice, new SliceGuiState(this, slice, bdvh));
-        sliceGuiState.get(slice).created();
-        if (sliceGuiState.values().size()==1) {
+        guiState.created(slice);
+        if (guiState.nSlices()==1) {
             iCurrentSlice = 0;
             navigateCurrentSlice();
         }
@@ -446,13 +452,14 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     public void updateDisplay() {
         // Sort slices along slicing axis
         if (overlapMode == 0) {
-            sliceGuiState.values().forEach(sliceGuiState -> sliceGuiState.setYShift(1));
+            guiState.forEachSlice(sliceGuiState -> sliceGuiState.setYShift(1));
         } else if (overlapMode == 2) {
 
             double lastPositionAlongX = -Double.MAX_VALUE;
 
             int stairIndex = 0;
 
+            /*synchronized () TODO !!
             for (SliceSources slice : msp.getSortedSlices()) {
                 SliceGuiState guiState = sliceGuiState.get(slice);
                 double posX = getSliceCenterPosition(slice).getDoublePosition(0);
@@ -464,9 +471,9 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                     stairIndex++;
                     guiState.setYShift(1 + stairIndex);
                 }
-            }
+            }*/
         } else if (overlapMode == 1) {
-            sliceGuiState.values().forEach(sliceGuiState -> sliceGuiState.setYShift(0));
+            guiState.forEachSlice(sliceGuiState -> sliceGuiState.setYShift(0));
         }
         bdvh.getViewerPanel().requestRepaint();
     }
@@ -526,32 +533,31 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     }
 
     @Override
-    public synchronized void sliceCreated(SliceSources slice) {
+    public void sliceCreated(SliceSources slice) {
         debug.accept(slice.name+ " created");
         iniSlice(slice);
     }
 
     @Override
-    public synchronized void sliceDeleted(SliceSources slice) {
+    public void sliceDeleted(SliceSources slice) {
         debug.accept(slice.name+ " deleted");
-        sliceGuiState.get(slice).deleted();
-        sliceGuiState.remove(slice);
+        guiState.deleted(slice);
     }
 
     @Override
-    public synchronized void sliceZPositionChanged(SliceSources slice) {
+    public void sliceZPositionChanged(SliceSources slice) {
         debug.accept(slice.name+ " z position changed");
-        sliceGuiState.get(slice).slicePositionChanged();
+        guiState.runSlice(slice, guiState -> guiState.slicePositionChanged());
     }
 
     @Override
-    public synchronized void sliceSelected(SliceSources slice) {
+    public void sliceSelected(SliceSources slice) {
         debug.accept(slice.name+ " selected");
         bdvh.getViewerPanel().getDisplay().repaint();
     }
 
     @Override
-    public synchronized void sliceDeselected(SliceSources slice) {
+    public void sliceDeselected(SliceSources slice) {
         debug.accept(slice.name+ " deselected");
         bdvh.getViewerPanel().getDisplay().repaint();
     }
@@ -570,16 +576,26 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     }
 
     @Override
-    public synchronized void sliceSourcesChanged(SliceSources slice) {
+    public void sliceSourcesChanged(SliceSources slice) {
         debug.accept(slice.name+ " slices changed");
-        sliceGuiState.get(slice).sourcesChanged();
+        guiState.runSlice(slice, guiState -> guiState.sourcesChanged());
     }
 
     @Override
     public void slicePretransformChanged(SliceSources sliceSources) {
-        if (sliceGuiState.get(sliceSources).isVisible()) {
+        //if (sliceGuiState.get(sliceSources).isVisible()) {
             bdvh.getViewerPanel().requestRepaint();
-        }
+        //}
+    }
+
+    @Override
+    public void sliceKeyOn(SliceSources slice) {
+        bdvh.getViewerPanel().getDisplay().repaint();
+    }
+
+    @Override
+    public void sliceKeyOff(SliceSources slice) {
+        bdvh.getViewerPanel().getDisplay().repaint();
     }
 
     @Override
@@ -631,7 +647,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         setDisplayMode(1-mode);
     }
 
-    public synchronized void setDisplayMode(int mode) {
+    public void setDisplayMode(int mode) {
         if (this.mode!=mode) {
             int oldMode = mode;
             this.mode = mode;
@@ -660,11 +676,11 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         }
     }
 
-    private synchronized void modeChanged(int mode, int oldMode) {
-        sliceGuiState.values().forEach(sliceGuiState -> sliceGuiState.slicePositionChanged()); // Force displacement of slice
+    private void modeChanged(int mode, int oldMode) {
+        guiState.forEachSlice(sliceGuiState -> sliceGuiState.slicePositionChanged());
 
         if (mode == POSITIONING_MODE_INT) {
-            //slices.forEach(slice -> slice.getGUIState().enableGraphicalHandles()); // TODO
+            guiState.forEachSlice(guiState -> guiState.enableGraphicalHandles());
             bdvh.getTriggerbindings().removeInputTriggerMap(REVIEW_BEHAVIOURS_KEY);
             bdvh.getTriggerbindings().removeBehaviourMap(REVIEW_BEHAVIOURS_KEY);
             positioning_behaviours.install(bdvh.getTriggerbindings(), POSITIONING_BEHAVIOURS_KEY);
@@ -673,7 +689,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         }
 
         if (mode == REVIEW_MODE_INT) {
-            //slices.forEach(slice -> slice.getGUIState().enableGraphicalHandles()); // TODO
+            guiState.forEachSlice(guiState -> guiState.disableGraphicalHandles());
             bdvh.getTriggerbindings().removeInputTriggerMap(POSITIONING_BEHAVIOURS_KEY);
             bdvh.getTriggerbindings().removeBehaviourMap(POSITIONING_BEHAVIOURS_KEY);
             review_behaviours.install(bdvh.getTriggerbindings(), REVIEW_BEHAVIOURS_KEY);
@@ -688,7 +704,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         if (mode==POSITIONING_MODE_INT) {
             double slicingAxisSnapped = (((int) ((slice.getSlicingAxisPosition()) / msp.sizePixX)) * msp.sizePixX);
             double posX = (slicingAxisSnapped / msp.sizePixX * msp.sX / msp.getReslicedAtlas().getStep()) + 0.5 * (msp.sX);
-            double posY = msp.sY * sliceGuiState.get(slice).getYShift();
+            double posY = msp.sY * guiState.getYShift(slice);
             return new RealPoint(posX, posY, 0);
         } else if (mode==REVIEW_MODE_INT) {
             return new RealPoint(0, 0, slice.getSlicingAxisPosition());
@@ -760,13 +776,12 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         }
         if (sortedSlices.size() > 0) {
             SliceSources slice = sortedSlices.get(iCurrentSlice);
-            if ((slice!=null)&&(sliceGuiState.get(slice)!=null)) {
-                sliceGuiState.get(slice).isCurrent();
+            if (slice!=null) {
+                guiState.runSlice(slice, sliceGuiState -> sliceGuiState.isCurrent());
                 centerBdvViewOn(sortedSlices.get(iCurrentSlice));
             }
         }
     }
-
 
     /**
      * Center bdv on next slice (iCurrentSlice + 1)
@@ -787,9 +802,9 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             centerBdvViewOn(sortedSlices.get(iCurrentSlice), true, previousSlice);
             //centerBdvViewOn(sortedSlices.get(iCurrentSlice), true);
             if ((previousSliceIndex>=0)&&(previousSliceIndex<sortedSlices.size())) { // Could have been deleted
-                sliceGuiState.get(sortedSlices.get(previousSliceIndex)).isNotCurrent();
+                guiState.runSlice(sortedSlices.get(previousSliceIndex), sliceGuiState -> sliceGuiState.isNotCurrent());
             }
-            sliceGuiState.get(sortedSlices.get(iCurrentSlice)).isCurrent();
+            guiState.runSlice(sortedSlices.get(iCurrentSlice), sliceGuiState -> sliceGuiState.isCurrent());
         }
     }
 
@@ -813,9 +828,9 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             }
             centerBdvViewOn(sortedSlices.get(iCurrentSlice), true, previousSlice);
             if ((previousSliceIndex>=0)&&(previousSliceIndex<sortedSlices.size())) { // Could have been deleted
-                sliceGuiState.get(sortedSlices.get(previousSliceIndex)).isNotCurrent();
+                guiState.runSlice(sortedSlices.get(previousSliceIndex), sliceGuiState -> sliceGuiState.isNotCurrent());
             }
-            sliceGuiState.get(sortedSlices.get(iCurrentSlice)).isCurrent();
+            guiState.runSlice(sortedSlices.get(iCurrentSlice), sliceGuiState -> sliceGuiState.isCurrent());
         }
     }
 
@@ -895,13 +910,13 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
     private AtomicBoolean dragActionInProgress = new AtomicBoolean(false);
 
-    synchronized boolean startDragAction() {
+    boolean startDragAction() {
         boolean result = dragActionInProgress.compareAndSet(false, true);
         logger.debug("Attempt to do a drag action : successful = "+result);
         return result;
     }
 
-    synchronized void stopDragAction() {
+    void stopDragAction() {
         logger.debug("Stopping a drag action");
         dragActionInProgress.set(false);
     }
@@ -928,7 +943,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     }
 
     @Override
-    public synchronized void hover_in(GraphicalHandle gh) {
+    public void hover_in(GraphicalHandle gh) {
         gh_below_mouse.add(gh);
         if (gh_below_mouse.size() == 1) {
             block();
@@ -936,39 +951,27 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     }
 
     @Override
-    public synchronized void hover_out(GraphicalHandle gh) {
+    public void hover_out(GraphicalHandle gh) {
         gh_below_mouse.remove(gh);
         if (gh_below_mouse.size() == 0) {
             unblock();
         }
     }
 
-    /*@Override
-    public synchronized void mouseDragged(MouseEvent e) {
-        this.ghs.forEach(gh -> gh.mouseDragged(e));
-        this.slices.forEach(slice -> slice.getGUIState().ghs.forEach(gh -> gh.mouseDragged(e)));
-    }
-
     @Override
-    public synchronized void mouseMoved(MouseEvent e) {
-        this.ghs.forEach(gh -> gh.mouseMoved(e));
-        slices.forEach(slice -> slice.getGUIState().ghs.forEach(gh -> gh.mouseMoved(e)));
-    }*/
-
-    @Override
-    public synchronized void created(GraphicalHandle gh) {
+    public void created(GraphicalHandle gh) {
 
     }
 
+
     @Override
-    public synchronized void removed(GraphicalHandle gh) {
+    public void removed(GraphicalHandle gh) {
         if (gh_below_mouse.contains(gh)) {
             gh_below_mouse.remove(gh);
             if (gh_below_mouse.size() == 0) unblock();
         }
         ghs.remove(gh);
     }
-
 
     public Object getCurrentSlice() {
         List<SliceSources> sortedSlices = msp.getSortedSlices();
@@ -1014,16 +1017,15 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     public void setSliceVisible(SliceSources slice) {
     }
 
-
     private void drawSliceInfo(Graphics2D g, List<SliceSources> slicesCopy) {
         RealPoint mouseWindowPosition = new RealPoint(2);
         bdvh.getViewerPanel().getMouseCoordinates(mouseWindowPosition);
         // Slice info is displayed if the mouse is over the round slice handle
         Optional<SliceSources> optSlice = slicesCopy.stream()
                 .filter(slice -> {
-                    Integer[] coords = sliceGuiState.get(slice).getSliceHandleCoords();
+                    Integer[] coords = guiState.getSliceHandleCoords(slice);
                     if (coords==null) return false;
-                    int radius = sliceGuiState.get(slice).getBdvHandleRadius();
+                    int radius = guiState.getBdvHandleRadius(slice);
                     double dx = coords[0]-mouseWindowPosition.getDoublePosition(0);
                     double dy = coords[1]-mouseWindowPosition.getDoublePosition(1);
                     double dist = Math.sqrt(dx*dx+dy*dy);
@@ -1049,6 +1051,22 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             g.drawString(line,x, y += lineHeight);
     }
 
+    @Override
+    public void mouseDragged(MouseEvent e) {
+        this.ghs.forEach(gh -> gh.mouseDragged(e));
+        guiState.forEachSlice(guiState -> guiState.ghs.forEach(gh -> gh.mouseDragged(e)));
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent e) {
+        this.ghs.forEach(gh -> gh.mouseMoved(e));
+        guiState.forEachSlice(guiState -> guiState.ghs.forEach(gh -> gh.mouseMoved(e)));
+    }
+
+    public Integer[] getSliceHandleCoords(SliceSources slice) {
+        return guiState.getSliceHandleCoords(slice);
+    }
+
     class InnerOverlay extends BdvOverlay {
 
         @Override
@@ -1062,7 +1080,8 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
             drawDragAndDropRectangle(g, bdvAt3D);
 
-            sliceGuiState.values().forEach(sliceGuiState -> sliceGuiState.drawGraphicalHandles(g));
+            guiState.forEachSlice(sliceGuiState -> sliceGuiState.drawGraphicalHandles(g));
+            //sliceGuiState.values().forEach(sliceGuiState -> sliceGuiState.drawGraphicalHandles(g));
 
             drawCurrentSliceOverlay(g, slicesCopy);
 
@@ -1179,8 +1198,8 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
             for (int i = 0; i < sortedSelected.size(); i++) {
                 SliceSources slice = sortedSelected.get(i);
-                SliceGuiState sliceState = sliceGuiState.get(slice);
-                Integer[] coords = sliceState.getSliceHandleCoords();
+                //SliceGuiState sliceState = sliceGuiState.get(slice);
+                Integer[] coords = guiState.getSliceHandleCoords(slice);//sliceState.getSliceHandleCoords();
                 RealPoint sliceCenter = new RealPoint(coords[0], coords[1], 0);
 
                 if (precedentPoint != null) {
@@ -1236,7 +1255,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             //listeners.forEach(listener -> listener.isCurrentSlice(slice));
             g.setColor(new Color(255, 255, 255, 128));
             g.setStroke(new BasicStroke(5));
-            Integer[] coords = sliceGuiState.get(slice).getSliceHandleCoords();
+            Integer[] coords = guiState.getSliceHandleCoords(slice);//sliceGuiState.get(slice).getSliceHandleCoords();
             RealPoint sliceCenter = new RealPoint(coords[0], coords[1], 0);
             g.drawOval((int) sliceCenter.getDoublePosition(0) - 15, (int) sliceCenter.getDoublePosition(1) - 15, 29, 29);
             Integer[] c = {255,255,255,128};
@@ -1255,7 +1274,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     public void setSliceDisplayMode (int sliceDisplayMode) {
         if (this.sliceDisplayMode!=sliceDisplayMode) {
             this.sliceDisplayMode = sliceDisplayMode;
-            sliceGuiState.values().forEach(sliceGuiState -> sliceGuiState.sliceDisplayChanged(sliceDisplayMode));
+            guiState.forEachSlice(sliceGuiState -> sliceGuiState.sliceDisplayChanged(sliceDisplayMode));
         }
     }
 
@@ -1344,6 +1363,71 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             if (bdvh.isPresent()) {
                 double slicingAxisPosition = iSliceNoStep * msp.sizePixX * (int) msp.getReslicedAtlas().getStep();
                 msp.createSlice(sacs.toArray(new SourceAndConverter[0]), slicingAxisPosition, msp.getAtlas().getMap().getAtlasPrecisionInMillimeter(), Tile.class, new Tile(-1));
+            }
+        }
+    }
+
+    class SynchronizedSliceGuiState {
+        private Map<SliceSources, SliceGuiState> sliceGuiState = new ConcurrentHashMap<>();
+
+        synchronized
+        void created(SliceSources slice) {
+            sliceGuiState.put(slice, new SliceGuiState(BdvMultislicePositionerView.this, slice, bdvh));
+            sliceGuiState.get(slice).created();
+        }
+
+        synchronized
+        void deleted(SliceSources slice) {
+            sliceGuiState.get(slice).deleted();
+            sliceGuiState.remove(slice);
+        }
+
+        //synchronized
+        int nSlices() {
+            return sliceGuiState.values().size();
+        }
+
+        //synchronized
+        void forEachSlice(Consumer<SliceGuiState> consumer) {
+            sliceGuiState.values().forEach(consumer);
+        }
+
+        //synchronized
+        void runSlice(SliceSources slice, Consumer<SliceGuiState> consumer) {
+            if (sliceGuiState.get(slice)!=null) {
+                consumer.accept(sliceGuiState.get(slice));
+            } else {
+                logger.debug("Unavailable slice state, cannot perform operation");
+            }
+        }
+
+        //synchronized
+        double getYShift(SliceSources slice) {
+            if (sliceGuiState.get(slice)!=null) {
+                return sliceGuiState.get(slice).getYShift();
+            } else {
+                logger.debug("Unavailable slice state, cannot perform operation");
+                return 0;
+            }
+        }
+
+        //synchronized
+        Integer[] getSliceHandleCoords(SliceSources slice) {
+            if (sliceGuiState.get(slice)!=null) {
+                return sliceGuiState.get(slice).getSliceHandleCoords();
+            } else {
+                logger.debug("Unavailable slice state, cannot perform operation");
+                return new Integer[]{0,0,0};
+            }
+        }
+
+        //synchronized
+        int getBdvHandleRadius(SliceSources slice) {
+            if (sliceGuiState.get(slice)!=null) {
+                return sliceGuiState.get(slice).getBdvHandleRadius();
+            } else {
+                logger.debug("Unavailable slice state, cannot perform operation");
+                return 10;
             }
         }
     }

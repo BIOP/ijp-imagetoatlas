@@ -51,7 +51,7 @@ public class ExportSliceRegionsToQuPathProjectAction extends CancelableAction {
     @Override
     public boolean cancel() {
         logger.debug("Export to QuPath cancel : no action");
-        return false;
+        return true;
     }
 
     @Override

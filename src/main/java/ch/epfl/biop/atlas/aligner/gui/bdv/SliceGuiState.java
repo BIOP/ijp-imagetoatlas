@@ -7,9 +7,11 @@ import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.bdv.gui.CircleGraphicalHandle;
 import ch.epfl.biop.bdv.gui.GraphicalHandle;
 import ch.epfl.biop.bdv.gui.GraphicalHandleToolTip;
+import ch.epfl.biop.bdv.gui.SquareGraphicalHandle;
 import ch.epfl.biop.registration.sourceandconverter.affine.AffineTransformedSourceWrapperRegistration;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
+import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
@@ -50,7 +52,7 @@ public class SliceGuiState {
 
     final List<GraphicalHandle> ghs = new ArrayList<>();
 
-
+    SquareGraphicalHandle keyHandle;
 
     public SliceGuiState(BdvMultislicePositionerView view, SliceSources slice, BdvHandle bdvh) {
         this.view = view;
@@ -68,7 +70,7 @@ public class SliceGuiState {
         GraphicalHandle gh = new CircleGraphicalHandle(view,
                 new Behaviours(new InputTriggerConfig()),
                 view.bdvh.getTriggerbindings(),
-                this.toString(), // pray for unicity ? TODO : do better than thoughts and prayers
+                this.toString()+"_gh", // pray for unicity ? TODO : do better than thoughts and prayers
                 this::getSliceHandleCoords,
                 this::getBdvHandleRadius,
                 this::getBdvHandleColor
@@ -76,6 +78,46 @@ public class SliceGuiState {
 
         tt = new GraphicalHandleToolTip(gh, slice::toString, -20, -10);
         ghs.add(gh);
+
+        final Behaviours behavioursHandleSlice = new Behaviours(new InputTriggerConfig());
+        behavioursHandleSlice.behaviour(new SliceDragBehaviour(view, slice),//mp.getSelectedSourceDragBehaviour(slice),
+                "dragSelectedSources" + this.toString(), "button1");
+        behavioursHandleSlice.behaviour((ClickBehaviour) (x, y) -> {
+            slice.deSelect();
+            view.getBdvh().getViewerPanel().requestRepaint();
+        }, "deselectedSources" + this.toString(), "button3", "ctrl button1");
+
+
+        keyHandle = new SquareGraphicalHandle(view,
+                behavioursHandleSlice,
+                view.getBdvh().getTriggerbindings(),
+                this.toString()+"_keyHandle", // assumes unicity
+                () -> {
+                    AffineTransform3D bdvAt3D = new AffineTransform3D();
+                    view.getBdvh().getViewerPanel().state().getViewerTransform(bdvAt3D);
+
+                    RealPoint handlePoint = view.getSliceCenterPosition(slice);
+                    handlePoint.setPosition(+view.msp.sY / 2.0, 1);
+                    bdvAt3D.apply(handlePoint, handlePoint);
+                    return new Integer[]{(int) handlePoint.getDoublePosition(0), (int) handlePoint.getDoublePosition(1), (int) handlePoint.getDoublePosition(2)};
+                },
+                () -> {
+                    if (slice.isKeySlice()) {
+                        return getBdvHandleRadius();
+                    } else {
+                        return getBdvHandleRadius() / 2;
+                    }
+                },
+                () -> {
+                    if (slice.isKeySlice() && slice.isSelected()) {
+                        return new Integer[]{255, 0, 255, 200};
+                    } else {
+                        return getBdvHandleColor();
+                    }
+                }
+        );
+
+        ghs.add(keyHandle);
     }
 
     private void show() {
@@ -203,5 +245,13 @@ public class SliceGuiState {
     public boolean isVisible() {
         // TODO
         return sliceIsVisibleMode;
+    }
+
+    public void disableGraphicalHandles() {
+        keyHandle.disable();
+    }
+
+    public void enableGraphicalHandles() {
+        keyHandle.enable();
     }
 }

@@ -383,22 +383,7 @@ public class MultiSlicePositioner { // SelectedSourcesListener,
             listener.sliceDeleted(sliceSource);
         });
         slices.remove(sliceSource);
-        //sliceSource.getGUIState().sliceDeleted();
-        // TODO : notify
         logger.info("Slice "+sliceSource+" removed!");
-    }
-
-    public boolean isCurrentSlice(SliceSources slice) {
-        List<SliceSources> sortedSlices = getSortedSlices();
-        if (iCurrentSlice >= sortedSlices.size()) {
-            iCurrentSlice = 0;
-        }
-
-        if (sortedSlices.size() > 0) {
-            return slice.equals(sortedSlices.get(iCurrentSlice));
-        } else {
-            return false;
-        }
     }
 
     protected void createSlice(SliceSources sliceSource) {
@@ -673,24 +658,6 @@ public class MultiSlicePositioner { // SelectedSourcesListener,
             }
             new MarkActionSequenceBatchAction(MultiSlicePositioner.this).runRequest();
         }
-    }
-
-    public void exportSelectedSlicesRegionsToFile(String namingChoice, File dirOutput, boolean erasePreviousFile) {
-        List<SliceSources> sortedSelected = getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
-        if (sortedSelected.size()==0) {
-            errorMessageForUser.accept("No slice selected", "You did not select any slice.");
-        } else {
-
-            new MarkActionSequenceBatchAction(MultiSlicePositioner.this).runRequest();
-            for (SliceSources slice : sortedSelected) {
-                exportSliceRegionsToFile(slice, namingChoice, dirOutput, erasePreviousFile);
-            }
-            new MarkActionSequenceBatchAction(MultiSlicePositioner.this).runRequest();
-        }
-    }
-
-    public void exportSliceRegionsToFile(SliceSources slice, String namingChoice, File dirOutput, boolean erasePreviousFile) {
-        new ExportSliceRegionsToFileAction(this, slice, namingChoice, dirOutput, erasePreviousFile).runRequest();
     }
 
     public void exportSliceRegionsToRoiManager(SliceSources slice, String namingChoice) {
@@ -1145,6 +1112,9 @@ public class MultiSlicePositioner { // SelectedSourcesListener,
         listeners.forEach(sliceChangeListener -> sliceChangeListener.slicePretransformChanged(sliceSources));
     }
 
+    public void sliceZMoved(SliceSources sliceSources) {
+    }
+
     public interface SliceChangeListener {
         void sliceDeleted(SliceSources slice);
         void sliceCreated(SliceSources slice);
@@ -1153,6 +1123,8 @@ public class MultiSlicePositioner { // SelectedSourcesListener,
         void sliceDeselected(SliceSources slice);
         void sliceSourcesChanged(SliceSources slice);
         void slicePretransformChanged(SliceSources slice);
+        void sliceKeyOn(SliceSources slice);
+        void sliceKeyOff(SliceSources slice);
 
         void roiChanged();
 

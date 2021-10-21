@@ -318,6 +318,7 @@ public class SliceSources {
         zShiftAffineTransform.translate(0, 0, slicingAxisPosition+zShiftCorrection);
         zPositioner.setAffineTransform(zShiftAffineTransform); // Moves the registered slices to the correct position
         si.updateBox();
+        mp.positionZChanged(this);
     }
 
     protected void setIndex(int idx) {

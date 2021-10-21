@@ -84,6 +84,16 @@ public class SliceActionObserver implements MultiSlicePositioner.SliceChangeList
     }
 
     @Override
+    public void sliceKeyOn(SliceSources slice) {
+
+    }
+
+    @Override
+    public void sliceKeyOff(SliceSources slice) {
+
+    }
+
+    @Override
     public void roiChanged() {
 
     }

@@ -133,13 +133,11 @@ public class SelectionLayer {
     Set<SliceSources> getLastSelectedSources() {
         Set<SliceSources> lastSelected = new HashSet<>();
         Rectangle r = getCurrentSelectionRectangle();
-        //synchronized (mp.slices) {
-            for (SliceSources slice : view.msp.getSlices()) {
-                Integer[] coords = view.sliceGuiState.get(slice).getSliceHandleCoords();
-                Point p = new Point(coords[0], coords[1]);
-                if (r.contains(p)) lastSelected.add(slice);
-            }
-        //}
+        for (SliceSources slice : view.msp.getSlices()) {
+            Integer[] coords = view.getSliceHandleCoords(slice);
+            Point p = new Point(coords[0], coords[1]);
+            if (r.contains(p)) lastSelected.add(slice);
+        }
         return lastSelected;
     }
 
