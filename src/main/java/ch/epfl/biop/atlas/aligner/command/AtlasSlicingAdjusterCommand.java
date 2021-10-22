@@ -1,29 +1,41 @@
 package ch.epfl.biop.atlas.aligner.command;
 
 import ch.epfl.biop.atlas.aligner.ReslicedAtlas;
+import org.scijava.Initializable;
 import org.scijava.command.InteractiveCommand;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
 @Plugin(type = InteractiveCommand.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>ABBA - Adjust Slicing")
-public class AtlasSlicingAdjusterCommand extends InteractiveCommand {
+public class AtlasSlicingAdjusterCommand extends InteractiveCommand implements Initializable {
 
     @Parameter(label = "Lock rotations")
     Boolean lockAngles = Boolean.FALSE;
 
     @Parameter(min = "-45", max = "+45", stepSize = "0.5", style = "slider", label = "X Rotation [deg]",
-            callback = "changeRotate")
+            callback = "changeRotate", persist = false)
     double rotateX = 0;
     double oldRotateX = 0;
 
     @Parameter(min = "-45", max = "+45", stepSize = "0.5", style = "slider", label = "Y Rotation [deg]",
-    callback = "changeRotate")
+    callback = "changeRotate", persist = false)
     double rotateY = 0;
     double oldRotateY = 0;
 
     @Parameter
     ReslicedAtlas reslicedAtlas;
+
+    @Override
+    public void initialize() {
+
+        rotateX = reslicedAtlas.getRotateX() * 180.0 / Math.PI;
+        oldRotateX = rotateX;
+
+        rotateY = reslicedAtlas.getRotateY() * 180.0 / Math.PI;
+        oldRotateY = rotateY;
+
+    }
 
     public void run() {
         if (!lockAngles) {

@@ -21,6 +21,7 @@ import org.scijava.Context;
 import org.scijava.InstantiableException;
 import org.scijava.command.Command;
 import org.scijava.convert.ConvertService;
+import org.scijava.object.ObjectService;
 import org.scijava.plugin.PluginService;
 import org.scijava.util.VersionUtils;
 import org.slf4j.Logger;
@@ -33,10 +34,7 @@ import sc.fiji.persist.RuntimeTypeAdapterFactory;
 import sc.fiji.persist.ScijavaGsonHelper;
 
 import javax.swing.*;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -63,7 +61,7 @@ import static sc.fiji.bdvpg.scijava.services.SourceAndConverterService.SPIM_DATA
  *      The atlas is fully displayed
  */
 
-public class MultiSlicePositioner {
+public class MultiSlicePositioner implements Closeable {
 
     protected static Logger logger = LoggerFactory.getLogger(MultiSlicePositioner.class);
 
@@ -232,6 +230,22 @@ public class MultiSlicePositioner {
             sortedSlices.get(i).setIndex(i);
         }
         return sortedSlices;
+    }
+
+    public void close() {
+        scijavaCtx.getService(ObjectService.class).removeObject(this);
+        logger.info("Closing multipositioner bdv window, releasing some resources.");
+        if (mso!=null) this.mso.clear();
+        if (userActions!=null) this.userActions.clear();
+        //bdvh.getCardPanel().removeCard("Slices Display"); // Avoid NPE on exit
+        if (slices!=null) this.slices.clear();
+        this.redoableUserActions.clear();
+        this.biopAtlas = null;
+        this.slices = null;
+        this.userActions = null;
+        this.mso = null;
+        this.reslicedAtlas = null;
+        currentSerializedSlice = null;
     }
 
     // -------------------------------------------------------- NAVIGATION ( BOTH MODES )

@@ -56,7 +56,6 @@ public class SliceDefineROICommand extends InteractiveCommand implements Initial
     @Parameter
     CommandService cs;
 
-
     @Override
     public void initialize() {
         double[] roi = view.msp.getROI();

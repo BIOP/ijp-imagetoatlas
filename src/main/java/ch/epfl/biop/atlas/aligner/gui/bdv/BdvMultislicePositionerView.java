@@ -3,6 +3,7 @@ package ch.epfl.biop.atlas.aligner.gui.bdv;
 import bdv.util.*;
 import bdv.viewer.Interpolation;
 import bdv.viewer.SourceAndConverter;
+import bdv.viewer.ViewerPanel;
 import ch.epfl.biop.ResourcesMonitor;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.ReslicedAtlas;
@@ -62,7 +63,7 @@ import static bdv.ui.BdvDefaultCards.*;
 
 public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceChangeListener, GraphicalHandleListener, MouseMotionListener {
 
-    public final MultiSlicePositioner msp;
+    public MultiSlicePositioner msp; // TODO : make accessor
     final BdvHandle bdvh;
     final SourceAndConverterBdvDisplayService displayService;
 
@@ -133,6 +134,15 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
         bdvh.getTriggerbindings().addBehaviourMap(COMMON_BEHAVIOURS_KEY, common_behaviours.getBehaviourMap());
         bdvh.getTriggerbindings().addInputTriggerMap(COMMON_BEHAVIOURS_KEY, common_behaviours.getInputTriggerMap()); // "transform", "bdv"
+    }
+
+    void installPositioningBehaviours() {
+        positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> this.toggleOverlap(), "toggle_superimpose", "O");
+        positioning_behaviours.behaviour((ClickBehaviour) (x, y) -> msp.equalSpacingSelectedSlices(), "equalSpacingSelectedSlices", "D");
+    }
+
+    void installReviewBehaviours() {
+
     }
 
     void clearBdvDefaults() {
@@ -265,6 +275,16 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         bdvh.getCardPanel().addCard("Define region of interest",
                 ScijavaSwingUI.getPanel(msp.getContext(), SliceDefineROICommand.class, "mp", msp, "view", this),
                 false);
+        addToCleanUpHook(() -> {
+            if (bdvh.getCardPanel()!=null) {
+                bdvh.getCardPanel().removeCard("Atlas Information");
+                bdvh.getCardPanel().removeCard("Atlas Display");
+                bdvh.getCardPanel().removeCard("Display & Navigation");
+                bdvh.getCardPanel().removeCard("Edit Selected Slices");
+                bdvh.getCardPanel().removeCard("Atlas Slicing");
+                bdvh.getCardPanel().removeCard("Define region of interest");
+            }
+        });
     }
 
     void displayAtlas() {
@@ -275,6 +295,12 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         }
         SourceAndConverterServices.getBdvDisplayService()
                 .show(bdvh, sacsToAppend.toArray(new SourceAndConverter[0]));
+    }
+
+    List<Runnable> extraCleanUp = new ArrayList<>();
+
+    public void addToCleanUpHook(Runnable runnable) {
+        extraCleanUp.add(runnable);
     }
 
     void addRoiOverlaySource() {
@@ -319,19 +345,50 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                 SourceAndConverterServices.getBdvDisplayService(), false,
                 () -> {
                     logger.info("Closing multipositioner bdv window, releasing some resources.");
-                    this.selectionLayer = null;
-                    this.common_behaviours = null;
-                    this.positioning_behaviours = null;
-                    this.review_behaviours = null;
+
                     logger.debug("Removing listeners");
-                    msp.getReslicedAtlas().removeListener(atlasSlicingListener);
-                    msp.removeSliceListener(this);
+                    if (msp!=null) {
+                        bdvh.getTriggerbindings().removeInputTriggerMap(REVIEW_BEHAVIOURS_KEY);
+                        bdvh.getTriggerbindings().removeBehaviourMap(REVIEW_BEHAVIOURS_KEY);
+                        bdvh.getTriggerbindings().removeInputTriggerMap(POSITIONING_BEHAVIOURS_KEY);
+                        bdvh.getTriggerbindings().removeBehaviourMap(POSITIONING_BEHAVIOURS_KEY);
+                        bdvh.getTriggerbindings().removeInputTriggerMap(COMMON_BEHAVIOURS_KEY);
+                        bdvh.getTriggerbindings().removeBehaviourMap(COMMON_BEHAVIOURS_KEY);
+                        this.common_behaviours = null;
+                        this.positioning_behaviours = null;
+                        this.review_behaviours = null;
+                        this.selectionLayer = null;
+                        msp.getReslicedAtlas().removeListener(atlasSlicingListener);
+                        msp.removeSliceListener(this);
+                        msp = null;
+                    }
+                    if (guiState!=null) {
+                        guiState.clear();
+                        guiState.clear();
+                    }
+                    if (vp!=null) {
+                        vp.setTransferHandler(new javax.swing.TransferHandler("Dummy"));
+                        transferHandler = null;
+                        vp.getDisplay().removeHandler(this);
+                        vp = null;
+                    }
+                    if (rm!=null) {
+                        rm.stop();
+                        rm = null;
+                    }
+                    if (mscClick!=null) {
+                        mscClick.clear();
+                        mscClick = null;
+                    }
+                    extraCleanUp.forEach(Runnable::run);
                 }
         );
     }
 
+    MultiSliceContextMenuClickBehaviour mscClick;
     void addRightClickActions() {
-        common_behaviours.behaviour(new MultiSliceContextMenuClickBehaviour( msp, this, msp::getSelectedSources ), "Slices Context Menu", "button3", "ctrl button1", "meta button1");
+        mscClick = new MultiSliceContextMenuClickBehaviour( msp, this, msp::getSelectedSources );
+        common_behaviours.behaviour(mscClick, "Slices Context Menu", "button3", "ctrl button1", "meta button1");
     }
 
     public void showAtlasPosition() {
@@ -355,9 +412,21 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     final double sX, sY;
     double roiPX, roiPY, roiSX, roiSY;
 
+    void addFrameIcon() {
+        // Set ABBA Icon in Window
+        JFrame frame = ((BdvHandleFrame)bdvh).getBigDataViewer().getViewerFrame();
+        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        frame.setIconImage((new ImageIcon(MultiSlicePositioner.class.getResource("/graphics/ABBAFrame.jpg"))).getImage());
+    }
+
+    TransferHandler transferHandler;
+    ViewerPanel vp;
+
     public BdvMultislicePositionerView(MultiSlicePositioner msp, BdvHandle bdvh) {
         // Final variable initialization
         this.bdvh = bdvh;
+        this.vp = bdvh.getViewerPanel();
+        System.out.println("VP!!!!!!!!!!!!!! = "+vp);
         this.msp = msp;
         this.sX = msp.sX;
         this.sY = msp.sY;
@@ -380,8 +449,16 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
         setDisplayMode(POSITIONING_MODE_INT);
 
+        addFrameIcon();
+
         logger.debug("Installing behaviours : common");
         installCommonBehaviours();
+
+        logger.debug("Installing behaviours : positioning");
+        installPositioningBehaviours();
+
+        logger.debug("Installing behaviours : review");
+        installReviewBehaviours();
 
         logger.debug("Overriding standard navigation commands");
         overrideStandardNavigation();
@@ -422,7 +499,8 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         bdvh.getSplitPanel().setCollapsed(false);
 
         logger.debug("Adding Drag and Drop Handler");
-        this.bdvh.getViewerPanel().setTransferHandler(new BdvMultislicePositionerView.TransferHandler());
+        transferHandler = new BdvMultislicePositionerView.TransferHandler();
+        this.bdvh.getViewerPanel().setTransferHandler(transferHandler);
         iSliceNoStep = (int) (msp.getReslicedAtlas().getStep());
 
         logger.debug("Adding mouse motion listener / handler");
@@ -454,22 +532,19 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         } else if (overlapMode == 2) {
 
             double lastPositionAlongX = -Double.MAX_VALUE;
-
             int stairIndex = 0;
-
-            /*synchronized () TODO !!
             for (SliceSources slice : msp.getSortedSlices()) {
-                SliceGuiState guiState = sliceGuiState.get(slice);
                 double posX = getSliceCenterPosition(slice).getDoublePosition(0);
                 if (posX >= (lastPositionAlongX + msp.sX)) {
                     stairIndex = 0;
                     lastPositionAlongX = posX;
-                    guiState.setYShift(1);
+                    guiState.runSlice(slice, guiState -> guiState.setYShift(1));
                 } else {
                     stairIndex++;
-                    guiState.setYShift(1 + stairIndex);
+                    final int finalStairIndex = stairIndex;
+                    guiState.runSlice(slice, guiState -> guiState.setYShift(1 + finalStairIndex));
                 }
-            }*/
+            }
         } else if (overlapMode == 1) {
             guiState.forEachSlice(sliceGuiState -> sliceGuiState.setYShift(0));
         }
@@ -1282,7 +1357,10 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     }
 
     public void toggleOverlap() {
-        // TODO
+        overlapMode+=1;
+        if (overlapMode==3) overlapMode = 0;
+        updateDisplay();
+        bdvh.getViewerPanel().requestRepaint();
     }
 
     List<ModeListener> modeListeners = new ArrayList<>();
@@ -1432,6 +1510,10 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                 logger.debug("Unavailable slice state, cannot perform operation");
                 return 10;
             }
+        }
+
+        public void clear() {
+            sliceGuiState.clear();
         }
     }
 

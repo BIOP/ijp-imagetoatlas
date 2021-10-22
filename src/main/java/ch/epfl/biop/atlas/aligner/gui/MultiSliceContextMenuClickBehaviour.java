@@ -12,9 +12,9 @@ import java.util.function.Supplier;
 
 public class MultiSliceContextMenuClickBehaviour implements ClickBehaviour {
 
-    final MultiSlicePositioner mp;
-    final Supplier<Collection<SliceSources>> slicesSupplier;
-    final BdvMultislicePositionerView view;
+    private MultiSlicePositioner mp;
+    private Supplier<Collection<SliceSources>> slicesSupplier;
+    private BdvMultislicePositionerView view;
 
     public MultiSliceContextMenuClickBehaviour(MultiSlicePositioner mp, BdvMultislicePositionerView view, Supplier<Collection<SliceSources>> sourcesSupplier ) {
         this.mp = mp;
@@ -25,6 +25,12 @@ public class MultiSliceContextMenuClickBehaviour implements ClickBehaviour {
     @Override
     public void click(int x, int y) {
         showPopupMenu( x, y );
+    }
+
+    public void clear() {
+        this.mp = null;
+        this.view = null;
+        this.slicesSupplier = null;
     }
 
     private void showPopupMenu(int x, int y) {

@@ -106,7 +106,7 @@
 		<license.excludes>**/resources/**</license.excludes>
 		<main-class>ch.epfl.biop.abba.ABBALaunchMouse</main-class>
 
-		<bigdataviewer-playground.version>0.3.99-SNAPSHOT</bigdataviewer-playground.version>
+		<bigdataviewer-playground.version>0.3.13-SNAPSHOT-local</bigdataviewer-playground.version>
 		<bigdataviewer-bioformats.version>0.2.22</bigdataviewer-bioformats.version>
 
 		<bigdataviewer-playground-display.version>0.1.8</bigdataviewer-playground-display.version>

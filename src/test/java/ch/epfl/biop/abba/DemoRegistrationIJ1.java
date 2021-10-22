@@ -40,7 +40,7 @@ public class DemoRegistrationIJ1 {
 
         BdvMultislicePositionerView view = new BdvMultislicePositionerView(mp, bdvh);
 
-        DebugView debugView = new DebugView(mp);
+        //DebugView debugView = new DebugView(mp);
 
         mp.createSlice(sac,4.5);
 

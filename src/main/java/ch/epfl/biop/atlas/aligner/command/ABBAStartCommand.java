@@ -65,28 +65,8 @@ public class ABBAStartCommand implements Command {
         ra.setResolution(ba.getMap().getAtlasPrecisionInMillimeter());
         ra.setSlicingTransform(slicingTransfom);
 
-        try {
-
-
-                /*bdvMultiSlicer = new DefaultBdvSupplier(new SerializableBdvOptions()).get(); // Get a default supplier
-
-                // Set ABBA Icon in Window
-                JFrame frame = ((BdvHandleFrame)bdvMultiSlicer).getBigDataViewer().getViewerFrame();
-                frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-                frame.setIconImage((new ImageIcon(MultiSlicePositioner.class.getResource("/graphics/ABBAFrame.jpg"))).getImage());
-
-                if (bdvMultiSlicer==null) {
-                    System.err.println("Error : bdv multislicer null");
-                    return;
-                }*/
-                mp = new MultiSlicePositioner(ba, ra, context);
-
-
-            os.addObject(mp);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        mp = new MultiSlicePositioner(ba, ra, context);
+        os.addObject(mp);
 
     }
 
