@@ -505,6 +505,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
         logger.debug("Adding mouse motion listener / handler");
         bdvh.getViewerPanel().getDisplay().addHandler(this);
+
     }
 
     public void iniSlice(SliceSources slice) {
@@ -527,6 +528,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
     void atlasSlicingChanged() {
         recenterBdvh();
+        guiState.forEachSlice(guiState -> updateSliceDisplayedPosition(guiState));
     }
 
     int overlapMode = 0;
@@ -534,14 +536,12 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
     protected void updateSliceDisplayedPosition(SliceGuiState sliceGuiState) {
         // Sort slices along slicing axis
-        System.out.println("overlapMode = "+overlapMode);
-
-        System.out.println("sliceGuiState = "+sliceGuiState);
         if (overlapMode == 0) {
             sliceGuiState.setYShift(0);
         } else if (overlapMode == 1) {
             sliceGuiState.setYShift(1);
         } else if (overlapMode == 2) {
+            // N^2 algo! Take care TODO improve
             double lastPositionAlongX = -Double.MAX_VALUE;
             int stairIndex = 0;
             for (SliceSources slice : msp.getSortedSlices()) {
@@ -788,7 +788,6 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     public RealPoint getSliceCenterPosition(SliceSources slice) {
         if (mode==POSITIONING_MODE_INT) {
             double slicingAxisSnapped = (((int) ((slice.getSlicingAxisPosition()+guiState.getXShift(slice)) / msp.sizePixX)) * msp.sizePixX);
-            //System.out.println(guiState.getXShift(slice));
             double posX = ((slicingAxisSnapped) / msp.sizePixX * msp.sX / msp.getReslicedAtlas().getStep()) + (0.5) * (msp.sX);
             double posY = msp.sY * guiState.getYShift(slice);
             return new RealPoint(posX, posY, 0);
