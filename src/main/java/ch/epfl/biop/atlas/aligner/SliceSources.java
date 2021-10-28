@@ -201,7 +201,6 @@ public class SliceSources {
     public void setSlicingAxisPosition(double newSlicingAxisPosition) {
         slicingAxisPosition = newSlicingAxisPosition;
         updateZPosition();
-        //guiState.positionChanged();
     }
 
     public void setSliceThickness(double zBeginInMm, double zEndInMm) {

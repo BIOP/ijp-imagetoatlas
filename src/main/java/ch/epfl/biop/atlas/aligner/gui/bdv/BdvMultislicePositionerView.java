@@ -630,7 +630,10 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     @Override
     public void sliceZPositionChanged(SliceSources slice) {
         debug.accept(slice.name+ " z position changed");
-        guiState.runSlice(slice, guiState -> guiState.slicePositionChanged());
+        guiState.runSlice(slice, guiState -> {
+            guiState.slicePositionChanged();
+            updateSliceDisplayedPosition(guiState);
+        });
         bdvh.getViewerPanel().requestRepaint();
     }
 
@@ -784,8 +787,9 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
     public RealPoint getSliceCenterPosition(SliceSources slice) {
         if (mode==POSITIONING_MODE_INT) {
-            double slicingAxisSnapped = (((int) ((slice.getSlicingAxisPosition()) / msp.sizePixX)) * msp.sizePixX);
-            double posX = (slicingAxisSnapped / msp.sizePixX * msp.sX / msp.getReslicedAtlas().getStep()) + 0.5 * (msp.sX);
+            double slicingAxisSnapped = (((int) ((slice.getSlicingAxisPosition()+guiState.getXShift(slice)) / msp.sizePixX)) * msp.sizePixX);
+            //System.out.println(guiState.getXShift(slice));
+            double posX = ((slicingAxisSnapped) / msp.sizePixX * msp.sX / msp.getReslicedAtlas().getStep()) + (0.5) * (msp.sX);
             double posY = msp.sY * guiState.getYShift(slice);
             return new RealPoint(posX, posY, 0);
         } else if (mode==REVIEW_MODE_INT) {
@@ -1499,6 +1503,16 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         double getYShift(SliceSources slice) {
             if (sliceGuiState.get(slice)!=null) {
                 return sliceGuiState.get(slice).getYShift();
+            } else {
+                logger.debug("Unavailable slice state, cannot perform operation");
+                return 0;
+            }
+        }
+
+        //synchronized
+        double getXShift(SliceSources slice) {
+            if (sliceGuiState.get(slice)!=null) {
+                return sliceGuiState.get(slice).getXShift();
             } else {
                 logger.debug("Unavailable slice state, cannot perform operation");
                 return 0;

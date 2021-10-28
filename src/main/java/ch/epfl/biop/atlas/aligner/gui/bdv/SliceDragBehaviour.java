@@ -148,25 +148,25 @@ public class SliceDragBehaviour implements DragBehaviour {
                     if (rangeBefore == 0) {
                         assert i!= 0;
                         double ratio = 1.0 / (i);
-                        sliceMoved.setSlicingAxisPosition(keyLeftPosition + (initialAxisPositions.get(sliceMoved) - keyLeftPosition) * ratio);
+                        setDisplayAxisPosition(sliceMoved,keyLeftPosition + (initialAxisPositions.get(sliceMoved) - keyLeftPosition) * ratio );
                     } else {
                         double ratio = (currentSlicingAxisPosition - keyLeftPosition) / rangeBefore;
-                        sliceMoved.setSlicingAxisPosition(keyLeftPosition + (initialAxisPositions.get(sliceMoved) - keyLeftPosition) * ratio);
+                        setDisplayAxisPosition(sliceMoved, keyLeftPosition + (initialAxisPositions.get(sliceMoved) - keyLeftPosition) * ratio);
                     }
                 } else {
                     if (keyRight) {
                         if (rangeAfter == 0) {
                             assert i!= affectedSlices.size()-1;
                             double ratio = 1.0 / (affectedSlices.size()-1-i);
-                            sliceMoved.setSlicingAxisPosition(keyRightPosition + (initialAxisPositions.get(sliceMoved) - keyRightPosition) * ratio);
+                            setDisplayAxisPosition(sliceMoved, keyRightPosition + (initialAxisPositions.get(sliceMoved) - keyRightPosition) * ratio);
                         } else {
                             double ratio = (keyRightPosition - currentSlicingAxisPosition) / rangeAfter;
-                            sliceMoved.setSlicingAxisPosition(keyRightPosition + (initialAxisPositions.get(sliceMoved) - keyRightPosition) * ratio);
+                            setDisplayAxisPosition(sliceMoved, keyRightPosition + (initialAxisPositions.get(sliceMoved) - keyRightPosition) * ratio);
                         }
                     } else {
                         // Simple shift of all slices
                         double shift = currentSlicingAxisPosition - initialAxisPositions.get(affectedSlices.get(indexOfSliceInDraggedOnes));
-                        sliceMoved.setSlicingAxisPosition(iniSlicePos + shift);
+                        setDisplayAxisPosition(sliceMoved, iniSlicePos + shift);
                     }
                 }
             }
@@ -180,10 +180,10 @@ public class SliceDragBehaviour implements DragBehaviour {
                     if (rangeAfter == 0) {
                         assert i!= affectedSlices.size()-1;
                         double ratio = 1.0 / (affectedSlices.size()-1-i);
-                        sliceMoved.setSlicingAxisPosition(keyRightPosition + (initialAxisPositions.get(sliceMoved) - keyRightPosition) * ratio);
+                        setDisplayAxisPosition(sliceMoved, keyRightPosition + (initialAxisPositions.get(sliceMoved) - keyRightPosition) * ratio);
                     } else {
                         double ratio = (keyRightPosition - currentSlicingAxisPosition) / rangeAfter;
-                        sliceMoved.setSlicingAxisPosition(keyRightPosition + (initialAxisPositions.get(sliceMoved) - keyRightPosition) * ratio);
+                        setDisplayAxisPosition(sliceMoved, keyRightPosition + (initialAxisPositions.get(sliceMoved) - keyRightPosition) * ratio);
                     }
                 } else {
                     if (keyLeft) {
@@ -191,36 +191,35 @@ public class SliceDragBehaviour implements DragBehaviour {
                         if (rangeBefore == 0) {
                             assert i!= 0;
                             double ratio = 1.0 / (i);
-                            sliceMoved.setSlicingAxisPosition(keyLeftPosition + (initialAxisPositions.get(sliceMoved) - keyLeftPosition) * ratio);
+                            setDisplayAxisPosition(sliceMoved, keyLeftPosition + (initialAxisPositions.get(sliceMoved) - keyLeftPosition) * ratio);
                         } else {
                             double ratio = (currentSlicingAxisPosition - keyLeftPosition) / rangeBefore;
-                            sliceMoved.setSlicingAxisPosition(keyLeftPosition + (initialAxisPositions.get(sliceMoved) - keyLeftPosition) * ratio);
+                            setDisplayAxisPosition(sliceMoved, keyLeftPosition + (initialAxisPositions.get(sliceMoved) - keyLeftPosition) * ratio);
                         }
                     } else {
                         // Simple shift of all slices
                         double shift = currentSlicingAxisPosition - initialAxisPositions.get(affectedSlices.get(indexOfSliceInDraggedOnes));
-                        sliceMoved.setSlicingAxisPosition(iniSlicePos + shift);
+                        setDisplayAxisPosition(sliceMoved, iniSlicePos + shift);
                     }
 
                 }
             }
-            /*if (view.overlapMode == 2) {
-                view.updateSliceDisplayedPosition(null);
-            }*/
             view.getBdvh().getViewerPanel().requestRepaint();
         }
+    }
+
+    void setDisplayAxisPosition(SliceSources slice, double displayedAxisPosition) {
+        view.guiState.runSlice(slice, sliceGuiState -> sliceGuiState.setDisplayedAxisPosition(displayedAxisPosition));
     }
 
     @Override
     public void end(int x, int y) {
         if (perform) {
             logger.debug(" DragSlice end (" + x + ":" + y + ") "+sliceDragged);
-            //RealPoint currentMousePosition = new RealPoint(3);
-            //mp.getBdvh().getViewerPanel().getGlobalMouseCoordinates(currentMousePosition);
 
-            // Restores the original atlas position
+            // Restores the original displayed atlas position
             for (SliceSources slice : affectedSlices) {
-                slice.setSlicingAxisPosition(initialAxisPositions.get(slice));//.setSlicingAxisPosition(iniSlicePos + shift);
+                setDisplayAxisPosition(slice, initialAxisPositions.get(slice));
             }
 
             if (affectedSlices.size()>1) new MarkActionSequenceBatchAction(view.msp).runRequest();
