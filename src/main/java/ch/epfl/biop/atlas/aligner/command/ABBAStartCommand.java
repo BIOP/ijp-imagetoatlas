@@ -1,7 +1,5 @@
 package ch.epfl.biop.atlas.aligner.command;
 
-import bdv.util.BdvHandle;
-import bdv.util.BdvHandleFrame;
 import ch.epfl.biop.atlas.struct.Atlas;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.ReslicedAtlas;
@@ -12,11 +10,6 @@ import org.scijava.command.Command;
 import org.scijava.object.ObjectService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import sc.fiji.bdvpg.bdv.supplier.DefaultBdvSupplier;
-import sc.fiji.bdvpg.bdv.supplier.SerializableBdvOptions;
-
-import javax.swing.JFrame;
-import javax.swing.ImageIcon;
 
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>ABBA - Align Big Brains and Atlases",
@@ -32,17 +25,11 @@ public class ABBAStartCommand implements Command {
     @Parameter
     Context context;
 
-    @Parameter(type = ItemIO.OUTPUT)
-    BdvHandle bdvMultiSlicer;
-
     @Parameter
     ObjectService os;
 
     @Parameter(type = ItemIO.OUTPUT)
     MultiSlicePositioner mp;
-
-    @Parameter(label = "No Graphical User Interface")
-    boolean nogui = false;
 
     @Override
     public void run() {

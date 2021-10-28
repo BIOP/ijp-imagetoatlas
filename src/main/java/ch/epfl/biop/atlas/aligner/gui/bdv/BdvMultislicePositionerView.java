@@ -443,11 +443,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
         // Creates previously exiting slices TODO check that it works!
         msp.addSliceListener(this);
-        msp.getSlices().forEach(slice -> {
-            sliceCreated(slice);
-        });
-
-        setDisplayMode(POSITIONING_MODE_INT);
+        msp.getSlices().forEach(this::sliceCreated);
 
         addFrameIcon();
 
@@ -459,6 +455,10 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
         logger.debug("Installing behaviours : review");
         installReviewBehaviours();
+
+        mode = REVIEW_MODE_INT;
+        setDisplayMode(POSITIONING_MODE_INT);
+        toggleOverlap();
 
         logger.debug("Overriding standard navigation commands");
         overrideStandardNavigation();
@@ -514,23 +514,34 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             iCurrentSlice = 0;
             navigateCurrentSlice();
         }
+        sliceZPositionChanged(slice);
+        guiState.runSlice(slice, sliceGuiState -> updateSliceDisplayedPosition(sliceGuiState));
+        if (slice.isSelected()) {
+            this.sliceSelected(slice);
+        } else {
+            this.sliceDeselected(slice);
+        }
     }
 
     int previouszStep;
 
     void atlasSlicingChanged() {
         recenterBdvh();
-        updateDisplay();
     }
 
     int overlapMode = 0;
 
-    public void updateDisplay() {
-        // Sort slices along slicing axis
-        if (overlapMode == 0) {
-            guiState.forEachSlice(sliceGuiState -> sliceGuiState.setYShift(1));
-        } else if (overlapMode == 2) {
 
+    protected void updateSliceDisplayedPosition(SliceGuiState sliceGuiState) {
+        // Sort slices along slicing axis
+        System.out.println("overlapMode = "+overlapMode);
+
+        System.out.println("sliceGuiState = "+sliceGuiState);
+        if (overlapMode == 0) {
+            sliceGuiState.setYShift(0);
+        } else if (overlapMode == 1) {
+            sliceGuiState.setYShift(1);
+        } else if (overlapMode == 2) {
             double lastPositionAlongX = -Double.MAX_VALUE;
             int stairIndex = 0;
             for (SliceSources slice : msp.getSortedSlices()) {
@@ -545,8 +556,6 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                     guiState.runSlice(slice, guiState -> guiState.setYShift(1 + finalStairIndex));
                 }
             }
-        } else if (overlapMode == 1) {
-            guiState.forEachSlice(sliceGuiState -> sliceGuiState.setYShift(0));
         }
         bdvh.getViewerPanel().requestRepaint();
     }
@@ -603,6 +612,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
         bdvh.getViewerPanel().state().setViewerTransform(nextAffineTransform);
         previouszStep = (int) msp.getReslicedAtlas().getStep();
+        bdvh.getViewerPanel().requestRepaint();
     }
 
     @Override
@@ -1359,8 +1369,11 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     public void toggleOverlap() {
         overlapMode+=1;
         if (overlapMode==3) overlapMode = 0;
-        updateDisplay();
-        bdvh.getViewerPanel().requestRepaint();
+        if (overlapMode==2) {
+            updateSliceDisplayedPosition(null);
+        } else {
+            guiState.forEachSlice(sliceGuiState -> updateSliceDisplayedPosition(sliceGuiState));
+        }
     }
 
     List<ModeListener> modeListeners = new ArrayList<>();

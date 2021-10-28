@@ -204,8 +204,10 @@ public class SliceDragBehaviour implements DragBehaviour {
 
                 }
             }
-
-            view.updateDisplay();
+            /*if (view.overlapMode == 2) {
+                view.updateSliceDisplayedPosition(null);
+            }*/
+            view.getBdvh().getViewerPanel().requestRepaint();
         }
     }
 
@@ -303,8 +305,10 @@ public class SliceDragBehaviour implements DragBehaviour {
             }
 
             if (affectedSlices.size()>1) new MarkActionSequenceBatchAction(view.msp).runRequest();
-
-            view.updateDisplay();
+            if (view.overlapMode == 2) {
+                view.updateSliceDisplayedPosition(null);
+                view.getBdvh().getViewerPanel().requestRepaint();
+            }
             perform = false;
             view.stopDragAction();
         }
