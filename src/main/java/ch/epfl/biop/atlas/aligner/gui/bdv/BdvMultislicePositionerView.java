@@ -748,7 +748,10 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     }
 
     private void modeChanged(int mode, int oldMode) {
-        guiState.forEachSlice(sliceGuiState -> sliceGuiState.slicePositionChanged());
+        guiState.forEachSlice(sliceGuiState -> {
+            sliceGuiState.sliceDisplayChanged();
+            sliceGuiState.slicePositionChanged();
+        });
 
         if (mode == POSITIONING_MODE_INT) {
             guiState.forEachSlice(guiState -> guiState.enableGraphicalHandles());
@@ -1257,7 +1260,6 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
             List<SliceSources> sortedSelected = msp.getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
             RealPoint precedentPoint = null;
-            System.out.println("sortedSelected size = "+sortedSelected.size());
 
             for (int i = 0; i < sortedSelected.size(); i++) {
                 SliceSources slice = sortedSelected.get(i);
