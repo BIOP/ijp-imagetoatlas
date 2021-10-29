@@ -29,18 +29,10 @@ public class SliceGuiState {
 
     final int nChannels;
 
-    final Object lockChangeDisplay = new Object();
-
     // Visible to the user in slicing mode
     private SourceAndConverter<?>[] sources_displayed; // For Positioning mode
 
     AffineTransformedSourceWrapperRegistration slicePositioner;
-
-    final boolean[] channelVisible;
-
-    boolean sliceIsVisibleUser = true; // Takes precedence over channelIsVisible
-
-    private boolean sliceIsVisibleMode = true; // Equal precedence with sliceIsVisibleUser
 
     final BdvHandle bdvh;
 
@@ -58,10 +50,6 @@ public class SliceGuiState {
         this.bdvh = bdvh;
         this.slice = slice;
         this.nChannels = slice.getRegisteredSources().length;
-        channelVisible = new boolean[nChannels];
-        for (int i = 0; i < nChannels; i++) {
-            channelVisible[i] = true;
-        }
         slicePositioner = new AffineTransformedSourceWrapperRegistration();
         sources_displayed = slicePositioner.getTransformedImageMovingToFixed(slice.getRegisteredSources());
         SourceAndConverterHelper.transferColorConverters(slice.getRegisteredSources(), sources_displayed);
@@ -120,21 +108,28 @@ public class SliceGuiState {
     }
 
     private void show() {
-        //synchronized (lockChangeDisplay) {
-        if (sliceIsVisibleMode) {
-            List<SourceAndConverter<?>> sourcesToDisplay = IntStream.range(0,nChannels)
-                    .filter(idx -> channelVisible[idx])
-                    .mapToObj(idx -> sources_displayed[idx])
-                    .collect(Collectors.toList());
+        List<SourceAndConverter<?>> sourcesToDisplay = IntStream.range(0,nChannels)
+                .filter(idx -> {
+                    for (FilterDisplay fd : displayFilters) {
+                        if (!fd.displayChannel(idx)) {
+                            return false;
+                        }
+                    }
+                    return true;
+                })
+                .mapToObj(idx -> sources_displayed[idx])
+                .collect(Collectors.toList());
 
+        SourceAndConverter[] sources = sourcesToDisplay.toArray(new SourceAndConverter[sourcesToDisplay.size()]);
+
+        if (sources.length>0) {
             SourceAndConverterServices
                     .getBdvDisplayService()
-                    .show(bdvh, sourcesToDisplay.toArray(new SourceAndConverter[sourcesToDisplay.size()]));
+                    .show(bdvh, sources);
         }
     }
 
     private void hide() {
-        System.out.println("AAAAHHHHHHH!");
         bdvh.getViewerPanel().state()
                 .removeSources(Arrays.asList(sources_displayed));
     }
@@ -168,9 +163,11 @@ public class SliceGuiState {
     }
 
     public void isCurrent() {
+        sliceDisplayChanged();
     }
 
     public void isNotCurrent() {
+        sliceDisplayChanged();
     }
 
     public Integer[] getSliceHandleCoords() {
@@ -231,7 +228,7 @@ public class SliceGuiState {
         return xShift;
     }
 
-    public void sliceDisplayChanged(int mode) {
+    /*public void sliceDisplayChanged(int mode) {
         switch (mode) {
             case BdvMultislicePositionerView.NO_SLICE_DISPLAY_MODE:
                 sliceIsVisibleMode = false;
@@ -250,12 +247,7 @@ public class SliceGuiState {
                 if (sliceIsVisibleUser) show();
                 break;
         }
-    }
-
-    public boolean isVisible() {
-        // TODO
-        return sliceIsVisibleMode;
-    }
+    }*/
 
     public void disableGraphicalHandles() {
         keyHandle.disable();
@@ -267,5 +259,25 @@ public class SliceGuiState {
 
     public void setDisplayedAxisPosition(double displayedAxisPosition) {
         setXShift(displayedAxisPosition-slice.getZAxisPosition());
+    }
+
+    List<FilterDisplay> displayFilters = new ArrayList<>();
+
+    public void addDisplayFilters(FilterDisplay filterDisplay) {
+        displayFilters.add(filterDisplay);
+    }
+
+    public void sliceDisplayChanged() {
+        // TODO : improve by not doing anything is the slices displayed are not changed
+        hide();
+        show();
+    }
+
+    public void removeDisplayFilters(FilterDisplay fd) {
+        displayFilters.remove(fd);
+    }
+
+    public interface FilterDisplay {
+        boolean displayChannel(int iChannel);
     }
 }

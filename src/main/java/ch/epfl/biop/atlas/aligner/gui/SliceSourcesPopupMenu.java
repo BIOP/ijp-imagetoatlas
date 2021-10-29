@@ -60,6 +60,7 @@ public class SliceSourcesPopupMenu {
             if (slices.length>1) new MarkActionSequenceBatchAction(mp).runRequest();
         });
 
+        /* TODO : restore ? or not ?
         addPopupAction(popup, "Hide Slices", () -> {
             SliceSources[] slices = mp.getSelectedSources().toArray(new SliceSources[0]);
             for (SliceSources slice : slices) {
@@ -73,6 +74,7 @@ public class SliceSourcesPopupMenu {
                 view.setSliceVisible(slice);
             }
         });
+        */
 
         addPopupAction(popup, "Remove Selected Slices ", () -> {
             SliceSources[] slices = mp.getSelectedSources().toArray(new SliceSources[0]);
@@ -144,6 +146,7 @@ public class SliceSourcesPopupMenu {
                 if (slices.length>1) new MarkActionSequenceBatchAction(mp).runRequest();
             });
 
+            /* TODO : restore ? or not ?
             addPopupAction("Hide Slices", (slices) -> {
                 for (SliceSources slice : slices) {
                     view.setSliceInvisible(slice);
@@ -155,6 +158,7 @@ public class SliceSourcesPopupMenu {
                     view.setSliceVisible(slice);
                 }
             });
+            */
 
             addPopupAction("Remove Selected Slices ("+slices.length+")", (slices) -> {
                 if (slices.length>1) new MarkActionSequenceBatchAction(mp).runRequest();
