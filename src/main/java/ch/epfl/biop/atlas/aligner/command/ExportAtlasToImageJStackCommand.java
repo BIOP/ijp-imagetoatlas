@@ -46,7 +46,7 @@ public class ExportAtlasToImageJStackCommand implements Command {
     @Override
     public void run() {
         // TODO : check if tasks are done
-        List<SliceSources> slicesToExport = mp.getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
+        List<SliceSources> slicesToExport = mp.getSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
 
         SourcesProcessor preprocess = SourcesProcessorHelper.Identity();
 

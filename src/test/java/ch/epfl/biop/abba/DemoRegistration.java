@@ -36,8 +36,8 @@ public class DemoRegistration {
             ;
 
         mp.createSlice(sacs,8, 0.182, Tile.class, new Tile(-1));
-        mp.deselectSlice(mp.getSortedSlices());
-        mp.selectSlice(mp.getSortedSlices().get(0));
+        mp.deselectSlice(mp.getSlices());
+        mp.selectSlice(mp.getSlices().get(0));
 
 
 

@@ -22,7 +22,7 @@ public class AlignerState {
         rotationX = mp.getReslicedAtlas().getRotateX();
         rotationY = mp.getReslicedAtlas().getRotateY();
 
-        mp.getSortedSlices().forEach(sliceSource -> {
+        mp.getSlices().forEach(sliceSource -> {
             SliceSourcesState slice_state = new SliceSourcesState();
             slice_state.actions.addAll(filterSerializedActions(mp.getActionsFromSlice(sliceSource)));
             slice_state.channelsVisibility = null;// TODO sliceSource.getGUIState().getChannelsVisibility();

@@ -921,7 +921,7 @@ public class SliceSources {
         if (!name.equals("") ) {
             return name;
         } else {
-            int index = mp.getSortedSlices().indexOf(this);
+            int index = mp.getSlices().indexOf(this);
             return "Slice_"+index;
         }
     }

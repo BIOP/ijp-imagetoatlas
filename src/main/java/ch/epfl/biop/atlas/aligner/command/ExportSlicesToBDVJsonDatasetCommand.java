@@ -44,7 +44,7 @@ public class ExportSlicesToBDVJsonDatasetCommand implements Command {
         mp.log.accept("All tasks ended");
         mp.log.accept("Starting saving...");
         List<SourceAndConverter> sacs = new ArrayList<>();
-        List<SliceSources> slices = mp.getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
+        List<SliceSources> slices = mp.getSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
         if (slices.size()==0) {
             mp.errorMessageForUser.accept("No slice selected", "You did not select any slice to save");
         } else {

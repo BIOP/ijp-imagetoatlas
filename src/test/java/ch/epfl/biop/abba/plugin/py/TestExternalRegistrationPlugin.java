@@ -54,7 +54,7 @@ public class TestExternalRegistrationPlugin {
 
         mp.waitForTasks();
 
-        SliceSources slice = mp.getSortedSlices().get(0);
+        SliceSources slice = mp.getSlices().get(0);
 
         //mp.centerBdvViewOn(slice);
         mp.selectSlice(slice);

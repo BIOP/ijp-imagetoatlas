@@ -146,7 +146,6 @@ public class MultiSlicePositioner implements Closeable {
 
     final Object slicesLock = new Object();
 
-
     /**
      * @return a copy of the array of current slices in this ABBA instance
      */
@@ -156,11 +155,6 @@ public class MultiSlicePositioner implements Closeable {
             out = new ArrayList<>(slices);
         }
         return out;
-    }
-
-    // Used for CreateSlice action
-    protected List<SliceSources> getPrivateSlices() {
-        return slices;
     }
 
     /**
@@ -214,22 +208,7 @@ public class MultiSlicePositioner implements Closeable {
     }
 
     public List<SliceSources> getSelectedSources() {
-        return getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
-    }
-
-    /**
-     * Gets all slices sorted along the slicing axis
-     *
-     * @return the list of slices present, sorted along the z axis
-     */
-    public List<SliceSources> getSortedSlices() {
-        List<SliceSources> sortedSlices = new ArrayList<>(slices);
-        sortedSlices.sort(Comparator.comparingDouble(SliceSources::getSlicingAxisPosition));
-        // Sending index info to slices each time this function is called
-        for (int i = 0; i < sortedSlices.size(); i++) {
-            sortedSlices.get(i).setIndex(i);
-        }
-        return sortedSlices;
+        return getSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
     }
 
     public void close() {
@@ -237,7 +216,6 @@ public class MultiSlicePositioner implements Closeable {
         logger.info("Closing multipositioner bdv window, releasing some resources.");
         if (mso!=null) this.mso.clear();
         if (userActions!=null) this.userActions.clear();
-        //bdvh.getCardPanel().removeCard("Slices Display"); // Avoid NPE on exit
         if (slices!=null) this.slices.clear();
         this.redoableUserActions.clear();
         this.biopAtlas = null;
@@ -344,7 +322,7 @@ public class MultiSlicePositioner implements Closeable {
     }
 
     public void rotateSlices(int axis, double angle_rad) {
-        List<SliceSources> sortedSelected = getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
+        List<SliceSources> sortedSelected = getSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
         for (SliceSources slice : sortedSelected) {
             slice.rotateSourceOrigin(axis, angle_rad);
         }
@@ -356,13 +334,19 @@ public class MultiSlicePositioner implements Closeable {
             logger.debug("Removing slice "+sliceSource+" - calling "+listener);
             listener.sliceDeleted(sliceSource);
         });
-        slices.remove(sliceSource);
+        synchronized (slicesLock) {
+            slices.remove(sliceSource);
+            sortSlices();
+        }
         logger.info("Slice "+sliceSource+" removed!");
     }
 
     protected void createSlice(SliceSources sliceSource) {
         logger.info("Creating slice "+sliceSource+"...");
-        slices.add(sliceSource);
+        synchronized (slicesLock) {
+            slices.add(sliceSource);
+            sortSlices();
+        }
         listeners.forEach(listener -> {
             logger.debug("Creating slice "+sliceSource+" - calling "+listener);
             listener.sliceCreated(sliceSource);
@@ -370,7 +354,18 @@ public class MultiSlicePositioner implements Closeable {
         logger.info("Slice "+sliceSource+" created!");
     }
 
+    private void sortSlices() {
+        slices.sort(Comparator.comparingDouble(SliceSources::getSlicingAxisPosition));
+        // Sending index info to slices each time this function is called
+        for (int i = 0; i < slices.size(); i++) {
+            slices.get(i).setIndex(i);
+        }
+    }
+
     public void positionZChanged(SliceSources slice) {
+        synchronized (slicesLock) {
+            sortSlices();
+        }
         listeners.forEach(listener -> listener.sliceZPositionChanged(slice));
     }
 
@@ -505,7 +500,7 @@ public class MultiSlicePositioner implements Closeable {
                 // If all sources match exactly what's in a single SliceSources -> that's a move operation
 
                 boolean exactMatch = false;
-                for (SliceSources ss : getPrivateSlices()) {
+                for (SliceSources ss : slices) {
                     if (ss.exactMatch(createSliceAction.getSacs())) {
                         exactMatch = true;
                         zeSlice = ss;
@@ -609,7 +604,7 @@ public class MultiSlicePositioner implements Closeable {
     }
 
     public void exportSelectedSlicesRegionsToRoiManager(String namingChoice) {
-        List<SliceSources> sortedSelected = getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
+        List<SliceSources> sortedSelected = getSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
         if (sortedSelected.size()==0) {
             errorMessageForUser.accept("No slice selected", "You did not select any slice.");
         } else {
@@ -622,7 +617,7 @@ public class MultiSlicePositioner implements Closeable {
     }
 
     public void exportSelectedSlicesRegionsToQuPathProject(boolean erasePreviousFile) {
-        List<SliceSources> sortedSelected = getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
+        List<SliceSources> sortedSelected = getSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
         if (sortedSelected.size()==0) {
             errorMessageForUser.accept("No slice selected", "You did not select any slice.");
         } else {
@@ -648,7 +643,7 @@ public class MultiSlicePositioner implements Closeable {
      * Also the first and last selected slices are not moved
      */
     public void equalSpacingSelectedSlices() {
-        List<SliceSources> sortedSelected = getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
+        List<SliceSources> sortedSelected = getSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
         if (sortedSelected.size() > 2) {
             int indexPreviousKey = 0;
             int indexNextKey = 1;
@@ -961,13 +956,13 @@ public class MultiSlicePositioner implements Closeable {
 
         // Wait patiently for all tasks to be performed
         log.accept("Waiting for all tasks to be finished ... ");
-        this.getSortedSlices().forEach(SliceSources::waitForEndOfTasks);
+        getSlices().forEach(SliceSources::waitForEndOfTasks);
         log.accept("All tasks have been performed!");
 
         // First save all sources required in the state
         List<SourceAndConverter> allSacs = new ArrayList<>();
 
-        this.getSortedSlices().forEach(sliceSource -> allSacs.addAll(Arrays.asList(sliceSource.getOriginalSources())));
+        getSlices().forEach(sliceSource -> allSacs.addAll(Arrays.asList(sliceSource.getOriginalSources())));
 
         String fileNoExt = FilenameUtils.removeExtension(stateFile.getAbsolutePath());
         File sacsFile = new File(fileNoExt+"_sources.json");
@@ -995,7 +990,7 @@ public class MultiSlicePositioner implements Closeable {
 
     public void loadState(File stateFile) {
         // TODO : add a clock as an overlay
-        this.getSortedSlices().forEach(SliceSources::waitForEndOfTasks);
+        getSlices().forEach(SliceSources::waitForEndOfTasks);
 
         String fileNoExt = FilenameUtils.removeExtension(stateFile.getAbsolutePath());
         File sacsFile = new File(fileNoExt+"_sources.json");

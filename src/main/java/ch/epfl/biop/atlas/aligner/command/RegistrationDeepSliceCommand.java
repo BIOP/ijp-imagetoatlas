@@ -120,7 +120,7 @@ public class RegistrationDeepSliceCommand implements Command {
     @Override
     public void run() {
 
-        List<SliceSources> slicesToExport = mp.getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
+        List<SliceSources> slicesToExport = mp.getSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
 
         if (mp.getNumberOfSelectedSources()==0) {
             mp.log.accept("No slice selected");

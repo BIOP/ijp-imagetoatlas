@@ -65,7 +65,7 @@ public class ImportImageCommand implements Command {
                 slice_axis_initial += (slices.size()+1)* increment_between_slices;
 
             }
-            mp.selectSlice(mp.getSortedSlices());
+            mp.selectSlice(mp.getSlices());
         } catch (InterruptedException e) {
             e.printStackTrace();
         }  catch (ExecutionException e) {

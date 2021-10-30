@@ -20,11 +20,11 @@ public class SliceThicknessMatchNeighborsCommand implements Command {
 
     @Override
     public void run() {
-        List<SliceSources> slices = mp.getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
+        List<SliceSources> slices = mp.getSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
         if (slices.size()==0) {
             mp.errorMessageForUser.accept("No slice selected", "You did not select any slice to edit");
         } else {
-            List<SliceSources> allSlices = mp.getSortedSlices();
+            List<SliceSources> allSlices = mp.getSlices();
             if (allSlices.size()<2) {
                 mp.errorMessageForUser.accept("Insufficient number of slices", "You need at least two slices.");
             } else {

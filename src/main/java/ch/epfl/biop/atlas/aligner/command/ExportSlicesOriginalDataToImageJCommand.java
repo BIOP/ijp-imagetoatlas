@@ -43,7 +43,7 @@ public class ExportSlicesOriginalDataToImageJCommand implements Command {
     @Override
     public void run() {
         // TODO : check if tasks are done
-        List<SliceSources> slicesToExport = mp.getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
+        List<SliceSources> slicesToExport = mp.getSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
 
         if (slicesToExport.size()==0) {
             mp.log.accept("No slice selected");

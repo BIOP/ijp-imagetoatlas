@@ -44,6 +44,7 @@ import sc.fiji.bdvpg.scijava.ScijavaSwingUI;
 import sc.fiji.bdvpg.scijava.services.SourceAndConverterBdvDisplayService;
 import sc.fiji.bdvpg.scijava.services.ui.swingdnd.BdvTransferHandler;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
+import spimdata.util.Displaysettings;
 
 import javax.swing.*;
 import java.awt.*;
@@ -66,6 +67,8 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     public MultiSlicePositioner msp; // TODO : make accessor
     final BdvHandle bdvh;
     final SourceAndConverterBdvDisplayService displayService;
+
+    //final JTableView tableView;
 
     Consumer<String> debug = System.out::println;
 
@@ -167,7 +170,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>ABBA - Select all slices [Ctrl+A]",0,() -> msp.getSlices().forEach(SliceSources::select));
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>ABBA - Deselect all slices [Ctrl+Shift+A]",0,() -> msp.getSlices().forEach(SliceSources::deSelect));
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>ABBA - Remove selected slices",0,() ->
-                msp.getSortedSlices()
+                msp.getSlices()
                         .stream()
                         .filter(SliceSources::isSelected)
                         .forEach(slice -> new DeleteSliceAction(msp, slice).runRequest())
@@ -228,6 +231,8 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), DocumentationABBACommand.class, hierarchyLevelsSkipped);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ABBAUserFeedbackCommand.class, hierarchyLevelsSkipped);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), DocumentationDeepSliceCommand.class, hierarchyLevelsSkipped);
+
+        // JTableView
 
     }
 
@@ -506,6 +511,12 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         logger.debug("Adding mouse motion listener / handler");
         bdvh.getViewerPanel().getDisplay().addHandler(this);
 
+        logger.debug("Adding jtable");
+        /*
+        tableView = new JTableView(this);
+        msp.addSliceListener(tableView);
+        bdvh.getCardPanel().addCard("Slices Display", tableView.getPanel(), true);
+        addToCleanUpHook(() -> msp.removeSliceListener(tableView));*/
     }
 
     public void iniSlice(SliceSources slice) {
@@ -543,7 +554,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             // N^2 algo! Take care TODO improve, because it's called for each slice
             double lastPositionAlongX = -Double.MAX_VALUE;
             int stairIndex = 0;
-            for (SliceSources slice : msp.getSortedSlices()) {
+            for (SliceSources slice : msp.getSlices()) {
                 double posX = getSliceCenterPosition(slice).getDoublePosition(0);
                 if (posX >= (lastPositionAlongX + msp.sX)) {
                     stairIndex = 0;
@@ -844,7 +855,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
      * Center bdv on current slice (iCurrentSlice)
      */
     public void navigateCurrentSlice() {
-        List<SliceSources> sortedSlices = msp.getSortedSlices();
+        List<SliceSources> sortedSlices = msp.getSlices();
         if (iCurrentSlice >= sortedSlices.size()) {
             iCurrentSlice = 0;
         }
@@ -861,7 +872,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
      * Center bdv on next slice (iCurrentSlice + 1)
      */
     public void navigateNextSlice() {
-        List<SliceSources> sortedSlices = msp.getSortedSlices();
+        List<SliceSources> sortedSlices = msp.getSlices();
         int previousSliceIndex = iCurrentSlice;
         iCurrentSlice++;
         if (iCurrentSlice >= sortedSlices.size()) {
@@ -889,7 +900,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     public void navigatePreviousSlice() {
         int previousSliceIndex = iCurrentSlice;
         iCurrentSlice--;
-        List<SliceSources> sortedSlices = msp.getSortedSlices();
+        List<SliceSources> sortedSlices = msp.getSlices();
 
         if (iCurrentSlice < 0) {
             iCurrentSlice = sortedSlices.size() - 1;
@@ -1039,7 +1050,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     }
 
     public Object getCurrentSlice() {
-        List<SliceSources> sortedSlices = msp.getSortedSlices();
+        List<SliceSources> sortedSlices = msp.getSlices();
 
         if (sortedSlices.size()>0) {
             if (iCurrentSlice >= sortedSlices.size()) {
@@ -1130,6 +1141,14 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     }
 
     public void showCurrentSlice() {
+    }
+
+    public Boolean getChannelVisibility(SliceSources slice, int iChannel) {
+        return true;
+    }
+
+    public Object getDisplaySettings(SliceSources slice, int iChannel) {
+        return new Displaysettings(-1,"-");
     }
 
     class InnerOverlay extends BdvOverlay {
@@ -1258,7 +1277,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
         if (slicesCopy.stream().anyMatch(SliceSources::isSelected)) {
 
-            List<SliceSources> sortedSelected = msp.getSortedSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
+            List<SliceSources> sortedSelected = msp.getSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
             RealPoint precedentPoint = null;
 
             for (int i = 0; i < sortedSelected.size(); i++) {
@@ -1316,7 +1335,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     private void drawCurrentSliceOverlay(Graphics2D g, List<SliceSources> slicesCopy) {
 
         if (iCurrentSlice != -1 && slicesCopy.size() > iCurrentSlice) {
-            SliceSources slice = msp.getSortedSlices().get(iCurrentSlice);
+            SliceSources slice = msp.getSlices().get(iCurrentSlice);
             //listeners.forEach(listener -> listener.isCurrentSlice(slice));
             g.setColor(new Color(255, 255, 255, 128));
             g.setStroke(new BasicStroke(5));
@@ -1441,12 +1460,10 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     class SynchronizedSliceGuiState {
         private Map<SliceSources, SliceGuiState> sliceGuiState = new ConcurrentHashMap<>();
 
-        SliceGuiState.FilterDisplay fd;
-
         synchronized
         void created(final SliceSources slice) {
             sliceGuiState.put(slice, new SliceGuiState(BdvMultislicePositionerView.this, slice, bdvh));
-            fd = iChannel -> {
+            SliceGuiState.FilterDisplay fd = iChannel -> {
                 //System.out.println("Slice = "+slice+"| iChannel = "+iChannel+" mode = "+BdvMultislicePositionerView.this.sliceDisplayMode);
                 if (BdvMultislicePositionerView.this.mode == REVIEW_MODE_INT) {
                     return slice.equals(BdvMultislicePositionerView.this.getCurrentSlice());
@@ -1468,7 +1485,6 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
         synchronized
         void deleted(SliceSources slice) {
-            sliceGuiState.get(slice).removeDisplayFilters(fd);
             sliceGuiState.get(slice).deleted();
             sliceGuiState.remove(slice);
         }
