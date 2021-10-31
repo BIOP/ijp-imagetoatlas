@@ -1081,12 +1081,6 @@ public class SliceSources {
         return setAsKeySlice;
     }
 
-    public void setDisplaysettings(Displaysettings[] ds) {
-        for (int idx = 0; idx<nChannels;idx++) {
-            Displaysettings.applyDisplaysettings(registered_sacs[idx], ds[idx]);
-        }
-    }
-
     public static class RegistrationAndSources {
 
         final Registration reg;

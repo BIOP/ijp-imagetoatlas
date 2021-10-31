@@ -1,4 +1,4 @@
-package ch.epfl.biop.atlas.aligner.adapter;
+package ch.epfl.biop.bdv.sourcepreprocessor.adapter;
 
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.bdv.sourcepreprocessor.SourcesResampler;

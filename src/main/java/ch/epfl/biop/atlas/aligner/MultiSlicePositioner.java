@@ -8,6 +8,7 @@ import ch.epfl.biop.atlas.aligner.plugin.IABBARegistrationPlugin;
 import ch.epfl.biop.atlas.aligner.plugin.RegistrationPluginHelper;
 import ch.epfl.biop.bdv.sourcepreprocessor.*;
 import ch.epfl.biop.atlas.struct.Atlas;
+import ch.epfl.biop.bdv.sourcepreprocessor.adapter.*;
 import ch.epfl.biop.registration.Registration;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -100,9 +101,6 @@ public class MultiSlicePositioner implements Closeable {
     // Multislice observer observes and display events happening to slices
     protected SliceActionObserver mso;
 
-    // Index of the current slice
-    int iCurrentSlice = 0;
-
     // Resliced atlas
     ReslicedAtlas reslicedAtlas;
 
@@ -117,9 +115,7 @@ public class MultiSlicePositioner implements Closeable {
     /**
      * Non blocking log message for users
      */
-    public Consumer<String> log = (message) -> {
-        logger.info("Multipositioner : "+message);
-    };
+    public Consumer<String> log = (message) -> logger.info("Multipositioner : "+message);
 
     /**
      * Non blocking error message for users
@@ -262,7 +258,7 @@ public class MultiSlicePositioner implements Closeable {
         roiPY = py;
         roiSX = sx;
         roiSY = sy;
-        listeners.forEach(sliceChangeListener -> sliceChangeListener.roiChanged());
+        listeners.forEach(SliceChangeListener::roiChanged);
     }
 
     public double[] getROI() {
@@ -473,7 +469,6 @@ public class MultiSlicePositioner implements Closeable {
                 redoableUserActions.add(action);
             } else {
                 logger.error("Error : cancel not called on the last action");
-                return;
             }
         }
     }
@@ -533,10 +528,6 @@ public class MultiSlicePositioner implements Closeable {
         removeSlice(action.getSlice());
         log.accept("Slice "+action.getSlice()+" removed ");
         return true;
-    }
-
-    protected void removeUserAction(CancelableAction action) {
-        userActions.remove(action);
     }
 
     //-----------------------------------------

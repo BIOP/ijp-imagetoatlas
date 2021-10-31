@@ -1,4 +1,4 @@
-package ch.epfl.biop.atlas.aligner.adapter;
+package ch.epfl.biop.bdv.sourcepreprocessor.adapter;
 
 import ch.epfl.biop.bdv.sourcepreprocessor.SourcesChannelsSelect;
 import com.google.gson.*;
