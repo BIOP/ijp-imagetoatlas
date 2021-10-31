@@ -1,13 +1,9 @@
 package ch.epfl.biop.atlas.aligner.gui.bdv;
 
-import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.atlas.aligner.action.CancelableAction;
-import ch.epfl.biop.atlas.aligner.command.DisplaySettingsCommand;
 import ch.epfl.biop.atlas.aligner.gui.SliceSourcesPopupMenu;
-import org.apache.commons.lang.ArrayUtils;
-import org.scijava.command.CommandService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spimdata.util.Displaysettings;
@@ -16,7 +12,6 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import java.awt.*;
@@ -163,37 +158,41 @@ public class JTableView implements MultiSlicePositioner.SliceChangeListener, Lis
 
     int currentIndex = -1;
 
-    List<Integer> currentlySelectedIndices = new ArrayList<>();
-
-    synchronized List<Integer> getSelectedIndices() {
-        return new ArrayList<>(currentlySelectedIndices);
-    }
-
-    synchronized void setCurrentlySelectedIndices(List<Integer> selectedIndices) {
-        currentlySelectedIndices = new ArrayList<>(selectedIndices);
-    }
-
     @Override
-    public void valueChanged(ListSelectionEvent e) {
-        ListSelectionModel lsm = (ListSelectionModel)e.getSource();
+    public synchronized void valueChanged(ListSelectionEvent e) {
+        ListSelectionModel lsm = (ListSelectionModel) e.getSource();
 
         List<Integer> currentSelection = new ArrayList<>();
-        List<SliceSources> sortedSlices = mp.getSlices();
+        List<SliceSources> slices = mp.getSlices();
         if (!lsm.isSelectionEmpty()) {
-            for (int i = 0; i < sortedSlices.size(); i++) {
+            for (int i = 0; i < slices.size(); i++) {
                 if (lsm.isSelectedIndex(i)) {
                     currentSelection.add(i);
-                    SliceSources slice = sortedSlices.get(i);
+                    SliceSources slice = slices.get(i);
                     if (!slice.isSelected()) slice.select();
                 } else {
-                    SliceSources slice = sortedSlices.get(i);
+                    SliceSources slice = slices.get(i);
                     if (slice.isSelected()) slice.deSelect();
                 }
             }
         }
 
         //mp.getBdvh().getViewerPanel().getDisplay().repaint(); // To update current selection state
-        setCurrentlySelectedIndices(currentSelection);
+        //setCurrentlySelectedIndices(currentSelection);
+
+
+        /*if (!lsm.isSelectionEmpty()) {
+            for (int i = 0; i < slices.size(); i++) {
+                SliceSources slice = slices.get(i);
+                if (lsm.isSelectedIndex(i)&&!slice.isSelected()) {
+                    lsm.removeSelectionInterval(i, i);
+                }
+                if (!lsm.isSelectedIndex(i)&&slice.isSelected()) {
+                    lsm.addSelectionInterval(i, i);
+                }
+            }
+        }*/
+        //setCurrentlySelectedIndices(currentSelection);
     }
 
     public JComponent getPanel() {
@@ -317,16 +316,15 @@ public class JTableView implements MultiSlicePositioner.SliceChangeListener, Lis
 
     }
 
-
     @Override
     public synchronized void sliceDeleted(SliceSources slice) {
-        //sortSlices();
-        List<SliceSources> slices = mp.getSlices();
-        int index = slices.indexOf(slice);
-        slices.remove(slice);
+
+        int index = slice.getIndex();
         model.fireTableRowsDeleted(index, index);
 
-        // What happened to the number of channels ?
+        // What happens to the number of channels ?
+
+        List<SliceSources> slices = mp.getSlices();
         if (slice.nChannels==maxChannels) {
 
             // Maybe it's the last one with this number of channels...
@@ -350,8 +348,7 @@ public class JTableView implements MultiSlicePositioner.SliceChangeListener, Lis
 
     @Override
     public void sliceCreated(SliceSources slice) {
-        //sortSlices();
-        int index = mp.getSlices().indexOf(slice);
+        int index = slice.getIndex();
         model.fireTableRowsInserted(index, index);
         if (slice.nChannels>maxChannels) {
             maxChannels = slice.nChannels;
@@ -360,16 +357,15 @@ public class JTableView implements MultiSlicePositioner.SliceChangeListener, Lis
     }
 
     @Override
-    public void sliceZPositionChanged(SliceSources slice) {
+    public synchronized void sliceZPositionChanged(SliceSources slice) {
         model.fireTableDataChanged();
+        // TODO Need to update which rows are selected ...
     }
 
     @Override
     public void sliceSelected(SliceSources slice) {
-        List<SliceSources> sortedSlices = mp.getSlices();
-        int idx = sortedSlices.indexOf(slice);
-        //if (!sortedSlices.get(idx).isSelected()) {
-        if (!table.getSelectionModel().isSelectedIndex(idx)){//sortedSlices.get(idx).isSelected()) {
+        int idx = slice.getIndex();
+        if (!table.getSelectionModel().isSelectedIndex(idx)){
             table.getSelectionModel().addSelectionInterval(idx, idx);
             table.repaint();
         }
@@ -377,13 +373,11 @@ public class JTableView implements MultiSlicePositioner.SliceChangeListener, Lis
 
     @Override
     public void sliceDeselected(SliceSources slice) {
-        List<SliceSources> sortedSlices = mp.getSlices();
-        int idx = sortedSlices.indexOf(slice);
-        if (table.getSelectionModel().isSelectedIndex(idx)){//sortedSlices.get(idx).isSelected()) {
+        int idx = slice.getIndex();
+        if (table.getSelectionModel().isSelectedIndex(idx)){
             table.getSelectionModel().removeSelectionInterval(idx, idx);
             table.repaint();
         }
-
     }
 
     @Override

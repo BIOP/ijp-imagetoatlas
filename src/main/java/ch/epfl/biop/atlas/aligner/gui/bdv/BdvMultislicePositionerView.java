@@ -68,7 +68,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     final BdvHandle bdvh;
     final SourceAndConverterBdvDisplayService displayService;
 
-    //final JTableView tableView;
+    final JTableView tableView;
 
     Consumer<String> debug = System.out::println;
 
@@ -512,11 +512,11 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         bdvh.getViewerPanel().getDisplay().addHandler(this);
 
         logger.debug("Adding jtable");
-        /*
+
         tableView = new JTableView(this);
         msp.addSliceListener(tableView);
         bdvh.getCardPanel().addCard("Slices Display", tableView.getPanel(), true);
-        addToCleanUpHook(() -> msp.removeSliceListener(tableView));*/
+        addToCleanUpHook(() -> msp.removeSliceListener(tableView));
     }
 
     public void iniSlice(SliceSources slice) {

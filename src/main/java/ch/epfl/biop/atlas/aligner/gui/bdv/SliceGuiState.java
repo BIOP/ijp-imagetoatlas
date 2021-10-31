@@ -82,11 +82,11 @@ public class SliceGuiState {
                 () -> {
                     AffineTransform3D bdvAt3D = new AffineTransform3D();
                     view.getBdvh().getViewerPanel().state().getViewerTransform(bdvAt3D);
-
                     RealPoint handlePoint = view.getSliceCenterPosition(slice);
+                    double yShift = getBdvHandleRadius();
                     handlePoint.setPosition(+view.msp.sY / 2.0, 1);
                     bdvAt3D.apply(handlePoint, handlePoint);
-                    return new Integer[]{(int) handlePoint.getDoublePosition(0), (int) handlePoint.getDoublePosition(1), (int) handlePoint.getDoublePosition(2)};
+                    return new Integer[]{(int) handlePoint.getDoublePosition(0), (int) (handlePoint.getDoublePosition(1)+(slice.isSelected()?-0.6:+0.6)*yShift), (int) handlePoint.getDoublePosition(2)};
                 },
                 () -> {
                     if (slice.isKeySlice()) {
