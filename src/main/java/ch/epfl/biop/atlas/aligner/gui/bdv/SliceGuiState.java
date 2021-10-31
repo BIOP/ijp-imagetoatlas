@@ -52,6 +52,14 @@ public class SliceGuiState {
 
     final Displaysettings[] displaysettings;
 
+    boolean sliceVisible = false;
+
+    double yShift = 0;
+
+    double xShift = 0;
+
+    List<FilterDisplay> displayFilters = new ArrayList<>();
+
     public SliceGuiState(BdvMultislicePositionerView view, SliceSources slice, BdvHandle bdvh) {
         this.view = view;
         this.bdvh = bdvh;
@@ -128,8 +136,6 @@ public class SliceGuiState {
         ghs.add(keyHandle);
 
     }
-
-    boolean sliceVisible = false;
 
     public void setSliceVisibility(boolean visible) {
         if (visible!=sliceVisible) {
@@ -285,9 +291,6 @@ public class SliceGuiState {
         }
     }
 
-    double yShift = 0;
-    double xShift = 0;
-
     public void setYShift(double yShift) {
         this.yShift = yShift;
         slicePositionChanged();
@@ -318,8 +321,6 @@ public class SliceGuiState {
         setXShift(displayedAxisPosition-slice.getZAxisPosition());
     }
 
-    List<FilterDisplay> displayFilters = new ArrayList<>();
-
     public void addDisplayFilters(FilterDisplay filterDisplay) {
         displayFilters.add(filterDisplay);
     }
@@ -338,7 +339,33 @@ public class SliceGuiState {
         displayFilters.remove(fd);
     }
 
+    public void setState(State state) {
+        hide();
+        assert state.channelVisible.length == nChannels;
+        for (int i = 0; i< nChannels; i++) {
+            channelVisible[i] = state.channelVisible[i];
+            displaysettings[i] = state.displaysettings[i];
+        }
+        sliceVisible = state.sliceVisible;
+        show();
+    }
+
     public interface FilterDisplay {
         boolean displayChannel(int iChannel);
+    }
+
+    public static class State {
+
+        final boolean[] channelVisible;
+
+        final Displaysettings[] displaysettings;
+
+        boolean sliceVisible;
+
+        public State(SliceGuiState state) {
+            this.channelVisible = state.channelVisible;
+            this.sliceVisible = state.sliceVisible;
+            this.displaysettings = state.displaysettings;
+        }
     }
 }

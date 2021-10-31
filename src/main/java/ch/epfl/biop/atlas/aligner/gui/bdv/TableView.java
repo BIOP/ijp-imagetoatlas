@@ -169,6 +169,10 @@ public class TableView implements MultiSlicePositioner.SliceChangeListener, List
         listCopy.clear(); // Avoid memory leak... what a pain these swing components!
     }
 
+    public void updateTable() {
+        model.fireTableStructureChanged(); // All changed!
+    }
+
     class SliceDisplayTableModel extends AbstractTableModel {
 
         public String getColumnName(int columnIndex) {

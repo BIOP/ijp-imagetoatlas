@@ -74,7 +74,6 @@ public class DebugView implements MultiSlicePositioner.SliceChangeListener{
     @Override
     public void sliceKeyOn(SliceSources slice) {
         logger.accept("Slice is a key Slice "+slice.getName());
-
     }
 
     @Override
