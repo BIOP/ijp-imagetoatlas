@@ -63,56 +63,49 @@ public class JTableView implements MultiSlicePositioner.SliceChangeListener, Lis
         table.getTableHeader().addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                List<SliceSources> sortedSlices = mp.getSlices();
                 int col = table.columnAtPoint(e.getPoint());
                 String name = table.getColumnName(col);
                 logger.debug("Column index selected " + col + " " + name);
 
                 if (col==1) {
-                    // Let's gather whether most are visible or invisible
-                    /*long nVisible = getSelectedIndices().stream()
-                            .map(idx -> sortedSlices.get(idx).getGUIState())
-                            .filter(SliceSourcesGUIState::isSliceVisible)
-                            .count();
-                    long nInvisible = getSelectedIndices().size()-nVisible;
+                    int[] selectedRows = table.getSelectedRows();
 
-                    if (nVisible<nInvisible) {
-                        getSelectedIndices().stream()
-                                .map(idx -> sortedSlices.get(idx).getGUIState())
-                                .forEach(SliceSourcesGUIState::setSliceVisible);
-                    } else {
-                        getSelectedIndices().stream()
-                                .map(idx -> sortedSlices.get(idx).getGUIState())
-                                .forEach(SliceSourcesGUIState::setSliceInvisible);
-                    }*/
+                    int nVisible = 0;
+                    int nInvisible = 0;
+                    for (int i = 0; i<selectedRows.length; i++) {
+                        if ((Boolean) table.getValueAt(selectedRows[i],col)) {
+                            nVisible++;
+                        } else {
+                            nInvisible++;
+                        }
+                    }
+
+                    boolean newState = nVisible<nInvisible;
+                    for (int i = 0; i<selectedRows.length; i++) {
+                        view.guiState.runSlice(getSlices().get(selectedRows[i]),
+                                sliceGuiState -> sliceGuiState.setSliceVisibility(newState));
+                    }
                 }
                 if ((col>1)&&(col%2 == 0)) {
 
                     int iChannel = (col-2)/2;
+                    int[] selectedRows = table.getSelectedRows();
 
-                    /*long nVisible = getSelectedIndices().stream() TODO
-                            .filter(idx -> sortedSlices.get(idx).nChannels > iChannel)
-                            .map(idx -> sortedSlices.get(idx).getGUIState())
-                            .filter(guiState -> guiState.isChannelVisible(iChannel))
-                            .count();
+                    int nVisible = 0;
+                    int nInvisible = 0;
+                    for (int i = 0; i<selectedRows.length; i++) {
+                        if ((Boolean) table.getValueAt(selectedRows[i],col)) {
+                            nVisible++;
+                        } else {
+                            nInvisible++;
+                        }
+                    }
 
-                    long nInvisible = getSelectedIndices().stream()
-                            .filter(idx -> sortedSlices.get(idx).nChannels > iChannel)
-                            .map(idx -> sortedSlices.get(idx).getGUIState())
-                            .filter(guiState -> !guiState.isChannelVisible(iChannel))
-                            .count();
-
-                    if (nVisible<nInvisible) {
-                        getSelectedIndices().stream()
-                                .filter(idx -> sortedSlices.get(idx).nChannels > iChannel)
-                                .map(idx -> sortedSlices.get(idx).getGUIState())
-                                .forEach(guiState -> guiState.setChannelVisibility(iChannel, true));
-                    } else {
-                        getSelectedIndices().stream()
-                                .filter(idx -> sortedSlices.get(idx).nChannels > iChannel)
-                                .map(idx -> sortedSlices.get(idx).getGUIState())
-                                .forEach(guiState -> guiState.setChannelVisibility(iChannel, false));
-                    }*/
+                    boolean newState = nVisible<nInvisible;
+                    for (int i = 0; i<selectedRows.length; i++) {
+                        view.guiState.runSlice(getSlices().get(selectedRows[i]),
+                                sliceGuiState -> sliceGuiState.setChannelVisibility(iChannel, newState));
+                    }
 
                 }
 
@@ -159,45 +152,28 @@ public class JTableView implements MultiSlicePositioner.SliceChangeListener, Lis
     int currentIndex = -1;
 
     @Override
-    public synchronized void valueChanged(ListSelectionEvent e) {
+    public void valueChanged(ListSelectionEvent e) {
         ListSelectionModel lsm = (ListSelectionModel) e.getSource();
-
         List<Integer> currentSelection = new ArrayList<>();
-        List<SliceSources> slices = mp.getSlices();
         if (!lsm.isSelectionEmpty()) {
-            for (int i = 0; i < slices.size(); i++) {
+            for (SliceSources slice:getSlices()) {
+                int i = slice.getIndex();
                 if (lsm.isSelectedIndex(i)) {
                     currentSelection.add(i);
-                    SliceSources slice = slices.get(i);
                     if (!slice.isSelected()) slice.select();
                 } else {
-                    SliceSources slice = slices.get(i);
                     if (slice.isSelected()) slice.deSelect();
                 }
             }
         }
-
-        //mp.getBdvh().getViewerPanel().getDisplay().repaint(); // To update current selection state
-        //setCurrentlySelectedIndices(currentSelection);
-
-
-        /*if (!lsm.isSelectionEmpty()) {
-            for (int i = 0; i < slices.size(); i++) {
-                SliceSources slice = slices.get(i);
-                if (lsm.isSelectedIndex(i)&&!slice.isSelected()) {
-                    lsm.removeSelectionInterval(i, i);
-                }
-                if (!lsm.isSelectedIndex(i)&&slice.isSelected()) {
-                    lsm.addSelectionInterval(i, i);
-                }
-            }
-        }*/
-        //setCurrentlySelectedIndices(currentSelection);
     }
 
     public JComponent getPanel() {
         return paneDisplay;
     }
+
+    List<SliceSources> listCopy = new ArrayList<>();
+    final Object slicesModifyLock = new Object();
 
     class SliceDisplayTableModel extends AbstractTableModel {
 
@@ -216,7 +192,7 @@ public class JTableView implements MultiSlicePositioner.SliceChangeListener, Lis
 
         @Override
         public int getRowCount() {
-            return mp.getSlices().size();
+            return getSlices().size();
         }
 
         @Override
@@ -226,7 +202,7 @@ public class JTableView implements MultiSlicePositioner.SliceChangeListener, Lis
 
         @Override
         public Object getValueAt(int rowIndex, int columnIndex) {
-            if (rowIndex>mp.getSlices().size()-1) {
+            if (rowIndex>getSlices().size()-1) {
                 if ((columnIndex == 0)) {
                     return "null";
                 } else if ((columnIndex) == 1) {
@@ -237,26 +213,21 @@ public class JTableView implements MultiSlicePositioner.SliceChangeListener, Lis
                     return new Displaysettings(-1,"-");
                 }
             }
-            SliceSources slice =  mp.getSlices().get(rowIndex);
+            SliceSources slice =  getSlices().get(rowIndex);
             if ((columnIndex == 0)) {
                 if (rowIndex == currentIndex) {
                     return "["+ rowIndex +"] - "+slice.getName();
                 }
                 return " "+ rowIndex+"  - "+slice.getName();
             } else if ((columnIndex) == 1) {
-                return true;//view.slice.getGUIState().isSliceVisible();
+                return view.getSliceVisibility(slice);
             } else if (columnIndex%2 == 0) {
                 int iChannel = (columnIndex-2)/2;
-                if (slice.nChannels>iChannel) {
-                    //assert slice.getGUIState().getChannelsVisibility() != null;
-                    return view.getChannelVisibility(slice, iChannel);//slice.getGUIState().getChannelsVisibility()[iChannel];
-                } else {
-                    return Boolean.FALSE;
-                }
+                return view.getChannelVisibility(slice, iChannel);
             } else {
                 int iChannel = (columnIndex-3)/2;
                 if (slice.nChannels>iChannel) {
-                    return view.getDisplaySettings(slice, iChannel);//slice.getGUIState().getDisplaysettings()[iChannel];
+                    return view.getDisplaySettings(slice, iChannel);
                 } else {
                     return new Displaysettings(-1,"-");
                 }
@@ -270,33 +241,18 @@ public class JTableView implements MultiSlicePositioner.SliceChangeListener, Lis
          *  @param  columnIndex  column of cell
          */
         public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-            SliceSources slice =  mp.getSlices().get(rowIndex);
+            SliceSources slice =  getSlices().get(rowIndex);
             if (columnIndex != 0) { // column zero used for selecting
                 if ((columnIndex) == 1) {
-                    Boolean flag = (Boolean) aValue;
-                    /*if (flag) { TODO
-                        if (!slice.getGUIState().isSliceVisible())
-                            slice.getGUIState().setSliceVisible();
-                    } else {
-                        if (slice.getGUIState().isSliceVisible()) {
-                            slice.getGUIState().setSliceInvisible();
-                        }
-                    }*/
+                    view.guiState.runSlice(slice, sliceGuiState -> {
+                        sliceGuiState.setSliceVisibility(!sliceGuiState.getSliceVisibility());
+                    });
                 } else if (columnIndex%2 == 0) {
                     int iChannel = (columnIndex-2)/2;
-                    if (slice.nChannels>iChannel) {
-                        /* Boolean flag = (Boolean) aValue; TODO
-                        if (slice.getGUIState().isChannelVisible(iChannel)) {
-                            if (!flag) {
-                                slice.getGUIState().setChannelVisibility(iChannel, false);
-                            }
-                        } else {
-                            if (flag) {
-                                slice.getGUIState().setChannelVisibility(iChannel, true);
-                            }
-                        }*/
-                    } // else Channel not available for this slice
-                } // else -> dealt in the mouse adapter
+                    view.guiState.runSlice(slice, sliceGuiState -> {
+                        sliceGuiState.setChannelVisibility(iChannel, !sliceGuiState.getChannelVisibility(iChannel));
+                    });
+                }
             }
         }
 
@@ -316,48 +272,57 @@ public class JTableView implements MultiSlicePositioner.SliceChangeListener, Lis
 
     }
 
-    @Override
-    public synchronized void sliceDeleted(SliceSources slice) {
-
-        int index = slice.getIndex();
-        model.fireTableRowsDeleted(index, index);
-
-        // What happens to the number of channels ?
-
-        List<SliceSources> slices = mp.getSlices();
-        if (slice.nChannels==maxChannels) {
-
-            // Maybe it's the last one with this number of channels...
-            int newMaxChannels;
-            if (slices.size()==0) { // special case : hangs forever if the last slice is removed
-                newMaxChannels = 0;
-            } else {
-                newMaxChannels = slices.stream()
-                        .mapToInt(s -> s.nChannels).max().getAsInt();
-            }
-
-            if (newMaxChannels < maxChannels) {
-                // The number of channels diminished... full update
-                maxChannels = newMaxChannels;
-                model.fireTableStructureChanged();
-            }
-
-        } // else no change of number of channels
-
+    synchronized List<SliceSources> getSlices() {
+        return listCopy;
     }
 
     @Override
-    public void sliceCreated(SliceSources slice) {
-        int index = slice.getIndex();
-        model.fireTableRowsInserted(index, index);
-        if (slice.nChannels>maxChannels) {
-            maxChannels = slice.nChannels;
-            model.fireTableStructureChanged(); // All changed!
+    public synchronized void sliceDeleted(SliceSources slice) {
+        synchronized (slicesModifyLock) {
+            listCopy = mp.getSlices();
+            System.out.println("--------------- "+listCopy.size());
+            int index = slice.getIndex();
+            model.fireTableRowsDeleted(index, index);
+
+            // What happens to the number of channels ?
+
+            List<SliceSources> slices = getSlices();
+            if (slice.nChannels == maxChannels) {
+
+                // Maybe it's the last one with this number of channels...
+                int newMaxChannels;
+                if (slices.size() == 0) { // special case : hangs forever if the last slice is removed
+                    newMaxChannels = 0;
+                } else {
+                    newMaxChannels = slices.stream()
+                            .mapToInt(s -> s.nChannels).max().getAsInt();
+                }
+
+                if (newMaxChannels < maxChannels) {
+                    // The number of channels diminished... full update
+                    maxChannels = newMaxChannels;
+                    model.fireTableStructureChanged();
+                }
+
+            } // else no change of number of channels
         }
     }
 
     @Override
-    public synchronized void sliceZPositionChanged(SliceSources slice) {
+    public void sliceCreated(SliceSources slice) {
+        synchronized (slicesModifyLock) {
+            listCopy = mp.getSlices();
+            int index = slice.getIndex();
+            model.fireTableRowsInserted(index, index);
+            if (slice.nChannels>maxChannels) {
+                maxChannels = slice.nChannels;
+                model.fireTableStructureChanged(); // All changed!
+            }
+        }
+    }
+
+    @Override
+    public void sliceZPositionChanged(SliceSources slice) {
         model.fireTableDataChanged();
         // TODO Need to update which rows are selected ...
     }
@@ -374,7 +339,7 @@ public class JTableView implements MultiSlicePositioner.SliceChangeListener, Lis
     @Override
     public void sliceDeselected(SliceSources slice) {
         int idx = slice.getIndex();
-        if (table.getSelectionModel().isSelectedIndex(idx)){
+        if (table.getSelectionModel().isSelectedIndex(idx)) {
             table.getSelectionModel().removeSelectionInterval(idx, idx);
             table.repaint();
         }
@@ -434,7 +399,6 @@ public class JTableView implements MultiSlicePositioner.SliceChangeListener, Lis
     public void actionCancelFinished(SliceSources slice, CancelableAction action, boolean result) {
 
     }
-
 
     public static class DisplaySettingsRenderer implements TableCellRenderer {
         Border unselectedBorder = null;

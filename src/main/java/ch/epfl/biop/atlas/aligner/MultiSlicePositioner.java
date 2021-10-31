@@ -330,14 +330,14 @@ public class MultiSlicePositioner implements Closeable {
 
     protected void removeSlice(SliceSources sliceSource) {
         logger.info("Removing slice "+sliceSource+"...");
-        listeners.forEach(listener -> {
-            logger.debug("Removing slice "+sliceSource+" - calling "+listener);
-            listener.sliceDeleted(sliceSource);
-        });
         synchronized (slicesLock) {
             slices.remove(sliceSource);
             sortSlices();
         }
+        listeners.forEach(listener -> {
+            logger.debug("Removing slice "+sliceSource+" - calling "+listener);
+            listener.sliceDeleted(sliceSource);
+        });
         logger.info("Slice "+sliceSource+" removed!");
     }
 

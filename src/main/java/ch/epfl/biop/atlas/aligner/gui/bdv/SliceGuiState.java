@@ -45,11 +45,19 @@ public class SliceGuiState {
 
     SquareGraphicalHandle keyHandle;
 
+    final boolean[] channelVisible;
+
     public SliceGuiState(BdvMultislicePositionerView view, SliceSources slice, BdvHandle bdvh) {
         this.view = view;
         this.bdvh = bdvh;
         this.slice = slice;
         this.nChannels = slice.getRegisteredSources().length;
+
+        channelVisible = new boolean[nChannels];
+
+        this.addDisplayFilters(iChannel -> channelVisible[iChannel]);
+        this.addDisplayFilters(iChannel -> sliceVisible);
+
         slicePositioner = new AffineTransformedSourceWrapperRegistration();
         sources_displayed = slicePositioner.getTransformedImageMovingToFixed(slice.getRegisteredSources());
         SourceAndConverterHelper.transferColorConverters(slice.getRegisteredSources(), sources_displayed);
@@ -105,18 +113,53 @@ public class SliceGuiState {
         );
 
         ghs.add(keyHandle);
+
+    }
+
+    boolean sliceVisible = false;
+
+    public void setSliceVisibility(boolean visible) {
+        if (visible!=sliceVisible) {
+            sliceVisible = visible;
+            sliceDisplayChanged();
+        }
+    }
+
+    public boolean getSliceVisibility() {
+        return sliceVisible;
+    }
+
+    public void setChannelVisibility(int channel, boolean visible) {
+        assert channel>=0;
+        if (channel<nChannels) {
+            if (channelVisible[channel]!=visible) {
+                channelVisible[channel] = visible;
+                sliceDisplayChanged();
+            }
+        }
+    }
+
+    public boolean getChannelVisibility(int channel) {
+        assert channel>=0;
+        if (channel<nChannels) {
+            return channelVisible[channel];
+        } else {
+            return false;
+        }
+    }
+
+    private boolean currentlyVisible(int idxChannel) {
+        for (FilterDisplay fd : displayFilters) {
+            if (!fd.displayChannel(idxChannel)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private void show() {
         List<SourceAndConverter<?>> sourcesToDisplay = IntStream.range(0,nChannels)
-                .filter(idx -> {
-                    for (FilterDisplay fd : displayFilters) {
-                        if (!fd.displayChannel(idx)) {
-                            return false;
-                        }
-                    }
-                    return true;
-                })
+                .filter(this::currentlyVisible)
                 .mapToObj(idx -> sources_displayed[idx])
                 .collect(Collectors.toList());
 
@@ -227,27 +270,6 @@ public class SliceGuiState {
     public double getXShift() {
         return xShift;
     }
-
-    /*public void sliceDisplayChanged(int mode) {
-        switch (mode) {
-            case BdvMultislicePositionerView.NO_SLICE_DISPLAY_MODE:
-                sliceIsVisibleMode = false;
-                hide();
-                break;
-            case BdvMultislicePositionerView.CURRENT_SLICE_DISPLAY_MODE:
-                sliceIsVisibleMode = view.isCurrentSlice(slice);
-                if (sliceIsVisibleMode) {
-                    show();
-                } else {
-                    hide();
-                }
-                break;
-            case BdvMultislicePositionerView.ALL_SLICES_DISPLAY_MODE:
-                sliceIsVisibleMode = true;
-                if (sliceIsVisibleUser) show();
-                break;
-        }
-    }*/
 
     public void disableGraphicalHandles() {
         keyHandle.disable();

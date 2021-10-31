@@ -1144,11 +1144,19 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     }
 
     public Boolean getChannelVisibility(SliceSources slice, int iChannel) {
-        return true;
+        SliceGuiState guiStateSlice = guiState.sliceGuiState.get(slice);
+        if (guiState == null) return false;
+        return guiStateSlice.getChannelVisibility(iChannel);
     }
 
     public Object getDisplaySettings(SliceSources slice, int iChannel) {
         return new Displaysettings(-1,"-");
+    }
+
+    public Boolean getSliceVisibility(SliceSources slice) {
+        SliceGuiState guiStateSlice = guiState.sliceGuiState.get(slice);
+        if (guiState == null) return false;
+        return guiStateSlice.getSliceVisibility();
     }
 
     class InnerOverlay extends BdvOverlay {
