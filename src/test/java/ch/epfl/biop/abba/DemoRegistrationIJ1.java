@@ -30,11 +30,11 @@ public class DemoRegistrationIJ1 {
 
         //ij.command().run(ABBAStartCommand.class, true).get();
 
-        ij.command().run(SourceFromImagePlusCommand.class, true, "imagePlus", demoSlice).get();
+        //ij.command().run(SourceFromImagePlusCommand.class, true, "imagePlus", demoSlice).get();
 
         MultiSlicePositioner mp = (MultiSlicePositioner) (ij.command().run(ABBAStartCommand.class, true).get().getOutput("mp"));
 
-        SourceAndConverter[] sac = ij.convert().convert(demoSlice.getTitle(), SourceAndConverter[].class);
+        //SourceAndConverter[] sac = ij.convert().convert(demoSlice.getTitle(), SourceAndConverter[].class);
 
         BdvHandle bdvh = SourceAndConverterServices.getBdvDisplayService().getNewBdv();
 
@@ -42,7 +42,7 @@ public class DemoRegistrationIJ1 {
 
         //DebugView debugView = new DebugView(mp);
 
-        mp.createSlice(sac,4.5);
+        //mp.createSlice(sac,4.5);
 
         //mp.createSlice(sac,6.5); // easy way to have several slices
 

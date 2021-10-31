@@ -25,10 +25,7 @@ public class AlignerState {
         mp.getSlices().forEach(sliceSource -> {
             SliceSourcesState slice_state = new SliceSourcesState();
             slice_state.actions.addAll(filterSerializedActions(mp.getActionsFromSlice(sliceSource)));
-            slice_state.channelsVisibility = null;// TODO sliceSource.getGUIState().getChannelsVisibility();
-            slice_state.settings_per_channel = null;// TODO sliceSource.getGUIState().getDisplaysettings();
             slice_state.preTransform = sliceSource.getTransformSourceOrigin();
-            slice_state.sliceVisibleUser = true; // TODO sliceSource.getGUIState().isSliceVisible();
             slices_state_list.add(slice_state);
         });
     }
@@ -43,9 +40,6 @@ public class AlignerState {
         transient public SliceSources slice;
         public RealTransform preTransform; // In reality : AffineTransform3D, but for serialization, it's RealTransform
         public List<CancelableAction> actions = new ArrayList<>();
-        public Displaysettings[] settings_per_channel;
-        public boolean sliceVisibleUser;
-        public boolean[] channelsVisibility;
     }
 
     /*

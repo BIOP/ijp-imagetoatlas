@@ -1037,11 +1037,7 @@ public class MultiSlicePositioner implements Closeable {
 
                 state.slices_state_list.forEach(sliceState -> {
                     sliceState.slice.waitForEndOfTasks();
-                    //sliceState.slice.getGUIState().setChannelsVisibility(sliceState.channelsVisibility); // TODO : restore
-                    //sliceState.slice.getGUIState().setDisplaysettings(sliceState.settings_per_channel);
-                    sliceState.slice.setDisplaysettings(sliceState.settings_per_channel);
                     sliceState.slice.transformSourceOrigin((AffineTransform3D) (sliceState.preTransform));
-                    // TODO : notify
                 });
 
             } catch (Exception e) {

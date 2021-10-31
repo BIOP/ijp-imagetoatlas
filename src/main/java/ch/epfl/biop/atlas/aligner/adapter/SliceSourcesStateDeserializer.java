@@ -4,7 +4,6 @@ import ch.epfl.biop.atlas.aligner.action.CancelableAction;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import com.google.gson.*;
 import net.imglib2.realtransform.AffineTransform3D;
-import spimdata.util.Displaysettings;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -29,27 +28,17 @@ public class SliceSourcesStateDeserializer implements JsonDeserializer<AlignerSt
         JsonObject obj = json.getAsJsonObject();
 
         obj.get("actions").getAsJsonArray().forEach(jsonElement -> {
-            //System.out.println(jsonElement);
             CancelableAction action = context.deserialize(jsonElement, CancelableAction.class);
             action.runRequest();
             sliceSourceConsumer.accept(action.getSliceSources());
             slice = action.getSliceSources();
-            //slice.getGUIState().sliceDisplayModeChanged();
-            //if (slice!=null) slice.getGUIState().setSliceInvisible();
             actions.add(action);
         });
 
-        Displaysettings[] ds = context.deserialize(obj.get("settings_per_channel"), Displaysettings[].class);
-        boolean[] visible = context.deserialize(obj.get("channelsVisibility"), boolean[].class);
-        boolean visibleUser = context.deserialize(obj.get("sliceVisibleUser"), boolean.class);
         AffineTransform3D preTransform = context.deserialize(obj.get("preTransform"), AffineTransform3D.class);
 
         AlignerState.SliceSourcesState sliceState = new AlignerState.SliceSourcesState();
         sliceState.actions = actions;
-        sliceState.channelsVisibility = visible;
-        sliceState.sliceVisibleUser = visibleUser;
-        //if (visibleUser) slice.getGUIState().setSliceVisible();
-        sliceState.settings_per_channel = ds;
         sliceState.slice = slice;
         sliceState.preTransform = preTransform;
 
