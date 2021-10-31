@@ -226,14 +226,14 @@ public class ReslicedAtlas implements RealInterval {
         for (int index = 0; index<map.getStructuralImages().size()+1;index++) {
             SourceAndConverter sac;
             if (index<map.getStructuralImages().size()) {
-                System.out.println("index = "+index+"| source key: "+keys.get(index));
+                logger.debug("index = "+index+"| source key: "+keys.get(index));
                 sac = map.getStructuralImages().get(keys.get(index));
-                System.out.println(sac.getSpimSource().getName());
+                logger.debug(sac.getSpimSource().getName());
             } else {
                 labelIndex = index;
-                System.out.println("index = "+index+"| LABELS");
+                logger.debug("index = "+index+"| LABELS");
                 sac = map.getLabelImage();
-                System.out.println(sac.getSpimSource().getName());
+                logger.debug(sac.getSpimSource().getName());
             }
 
             SourceAndConverter reslicedSac = mosaic.apply(sac);

@@ -80,7 +80,6 @@ public class SliceSourcesPopupMenu {
             SliceSources[] slices = mp.getSelectedSources().toArray(new SliceSources[0]);
             if (slices.length>1) new MarkActionSequenceBatchAction(mp).runRequest();
             for (SliceSources slice : slices) {
-                System.out.println("Slice delete +"+slice);
                 new DeleteSliceAction(mp, slice).runRequest();
             }
             if (slices.length>1) new MarkActionSequenceBatchAction(mp).runRequest();
@@ -163,7 +162,6 @@ public class SliceSourcesPopupMenu {
             addPopupAction("Remove Selected Slices ("+slices.length+")", (slices) -> {
                 if (slices.length>1) new MarkActionSequenceBatchAction(mp).runRequest();
                 for (SliceSources slice : slices) {
-                    System.out.println("Slice delete +"+slice);
                     new DeleteSliceAction(mp, slice).runRequest();
                 }
                 if (slices.length>1) new MarkActionSequenceBatchAction(mp).runRequest();

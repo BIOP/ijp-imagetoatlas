@@ -1,6 +1,5 @@
 package ch.epfl.biop.atlas.aligner.command;
 
-import bdv.viewer.SourceAndConverter;
 import org.scijava.Initializable;
 import org.scijava.ItemIO;
 import org.scijava.command.Command;
@@ -9,13 +8,13 @@ import org.scijava.module.MutableModuleItem;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.util.ColorRGB;
-import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import spimdata.util.Displaysettings;
+
+import java.util.function.Consumer;
 
 /**
  * Command triggered by the user when he is clicking on the the table header of the slice
- * display card. It allows to set common display settings to all sources {@link DisplaySettingsCommand#sacs}
- * given as input of this command
+ * display card.
  */
 @Plugin(type = Command.class)
 public class DisplaySettingsCommand extends DynamicCommand implements
@@ -32,14 +31,11 @@ public class DisplaySettingsCommand extends DynamicCommand implements
     @Parameter(persist = false)
     ColorRGB color;
 
-    @Parameter
-    public SourceAndConverter[] sacs;
-
     @Parameter(type = ItemIO.OUTPUT)
     Displaysettings ds;
 
     @Parameter(required = false)
-    Runnable postrun;
+    Consumer<Displaysettings> postrun;
 
     @Override
     public void initialize() {
@@ -63,12 +59,8 @@ public class DisplaySettingsCommand extends DynamicCommand implements
         ds.min = min;
         ds.color = new int[]{color.getRed(), color.getGreen(), color.getBlue(), 255};
 
-        Displaysettings.applyDisplaysettings(sacs, ds);
-        SourceAndConverterServices.getBdvDisplayService()
-                .updateDisplays(sacs);
-
         if (postrun!=null) {
-            postrun.run();
+            postrun.accept(ds);
         }
     }
 

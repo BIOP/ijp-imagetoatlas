@@ -431,7 +431,6 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         // Final variable initialization
         this.bdvh = bdvh;
         this.vp = bdvh.getViewerPanel();
-        System.out.println("VP!!!!!!!!!!!!!! = "+vp);
         this.msp = msp;
         this.sX = msp.sX;
         this.sY = msp.sY;
@@ -516,7 +515,10 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         tableView = new JTableView(this);
         msp.addSliceListener(tableView);
         bdvh.getCardPanel().addCard("Slices Display", tableView.getPanel(), true);
-        addToCleanUpHook(() -> msp.removeSliceListener(tableView));
+        addToCleanUpHook(() -> {
+            msp.removeSliceListener(tableView);
+            tableView.cleanup();
+        });
     }
 
     public void iniSlice(SliceSources slice) {
@@ -1149,8 +1151,10 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         return guiStateSlice.getChannelVisibility(iChannel);
     }
 
-    public Object getDisplaySettings(SliceSources slice, int iChannel) {
-        return new Displaysettings(-1,"-");
+    public Displaysettings getDisplaySettings(SliceSources slice, int iChannel) {
+        SliceGuiState guiStateSlice = guiState.sliceGuiState.get(slice);
+        if (guiState == null) return new Displaysettings(-1);
+        return guiStateSlice.getDisplaySettings(iChannel);
     }
 
     public Boolean getSliceVisibility(SliceSources slice) {
@@ -1472,7 +1476,6 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         void created(final SliceSources slice) {
             sliceGuiState.put(slice, new SliceGuiState(BdvMultislicePositionerView.this, slice, bdvh));
             SliceGuiState.FilterDisplay fd = iChannel -> {
-                //System.out.println("Slice = "+slice+"| iChannel = "+iChannel+" mode = "+BdvMultislicePositionerView.this.sliceDisplayMode);
                 if (BdvMultislicePositionerView.this.mode == REVIEW_MODE_INT) {
                     return slice.equals(BdvMultislicePositionerView.this.getCurrentSlice());
                 }

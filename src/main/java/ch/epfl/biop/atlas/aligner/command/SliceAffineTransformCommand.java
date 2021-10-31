@@ -58,7 +58,6 @@ public class SliceAffineTransformCommand extends InteractiveCommand {
                 boolean oneRegistrationOccured = false;
                 for (SliceSources slice : selectedSlices) {
                     originalTransforms.put(slice, slice.getTransformSourceOrigin());
-                    System.out.println(slice.getNumberOfRegistrations());
                     if (slice.getNumberOfRegistrations() != 0) {
                         oneRegistrationOccured = true;
                     }

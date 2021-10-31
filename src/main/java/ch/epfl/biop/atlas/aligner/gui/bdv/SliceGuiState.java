@@ -15,6 +15,7 @@ import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
+import spimdata.util.Displaysettings;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -47,6 +48,8 @@ public class SliceGuiState {
 
     final boolean[] channelVisible;
 
+    final Displaysettings[] displaysettings;
+
     public SliceGuiState(BdvMultislicePositionerView view, SliceSources slice, BdvHandle bdvh) {
         this.view = view;
         this.bdvh = bdvh;
@@ -54,6 +57,7 @@ public class SliceGuiState {
         this.nChannels = slice.getRegisteredSources().length;
 
         channelVisible = new boolean[nChannels];
+        displaysettings = new Displaysettings[nChannels];
 
         this.addDisplayFilters(iChannel -> channelVisible[iChannel]);
         this.addDisplayFilters(iChannel -> sliceVisible);
@@ -61,6 +65,12 @@ public class SliceGuiState {
         slicePositioner = new AffineTransformedSourceWrapperRegistration();
         sources_displayed = slicePositioner.getTransformedImageMovingToFixed(slice.getRegisteredSources());
         SourceAndConverterHelper.transferColorConverters(slice.getRegisteredSources(), sources_displayed);
+
+        for (int i=0; i<nChannels; i++) {
+            Displaysettings ds = new Displaysettings(-1);
+            Displaysettings.GetDisplaySettingsFromCurrentConverter(sources_displayed[i], ds);
+            displaysettings[i] = ds;
+        }
 
         GraphicalHandle gh = new CircleGraphicalHandle(view,
                 new Behaviours(new InputTriggerConfig()),
@@ -148,6 +158,21 @@ public class SliceGuiState {
         }
     }
 
+    public void setDisplaySettings(int channel, Displaysettings ds) {
+        if (channel<nChannels) {
+            displaysettings[channel] = ds;
+            sliceDisplayChanged();
+        }
+    }
+
+    public Displaysettings getDisplaySettings(int channel) {
+        if (channel<nChannels) {
+            return displaysettings[channel];
+        } else {
+            return new Displaysettings(-1);
+        }
+    }
+
     private boolean currentlyVisible(int idxChannel) {
         for (FilterDisplay fd : displayFilters) {
             if (!fd.displayChannel(idxChannel)) {
@@ -160,7 +185,10 @@ public class SliceGuiState {
     private void show() {
         List<SourceAndConverter<?>> sourcesToDisplay = IntStream.range(0,nChannels)
                 .filter(this::currentlyVisible)
-                .mapToObj(idx -> sources_displayed[idx])
+                .mapToObj(idx -> {
+                    Displaysettings.applyDisplaysettings(sources_displayed[idx], displaysettings[idx]);
+                    return sources_displayed[idx];
+                })
                 .collect(Collectors.toList());
 
         SourceAndConverter[] sources = sourcesToDisplay.toArray(new SourceAndConverter[sourcesToDisplay.size()]);
@@ -187,6 +215,9 @@ public class SliceGuiState {
 
     public void sourcesChanged() {
         hide();
+        for (int idx = 0; idx<nChannels; idx++) {
+            Displaysettings.applyDisplaysettings(slice.getRegisteredSources()[idx], displaysettings[idx]);
+        }
         sources_displayed = slicePositioner.getTransformedImageMovingToFixed(slice.getRegisteredSources());
         show();
     }

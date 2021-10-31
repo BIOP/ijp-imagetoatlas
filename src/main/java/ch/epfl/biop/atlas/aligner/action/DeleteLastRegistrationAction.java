@@ -15,6 +15,7 @@ public class DeleteLastRegistrationAction extends CancelableAction {
     public DeleteLastRegistrationAction(MultiSlicePositioner mp, SliceSources slice) {
         super(mp);
         this.sliceSource = slice;
+        // TODO : check whether this should be in the run method instead of in the constructor
         List<CancelableAction> registrationActionsCompiled = new ArrayList<>();
         // One need to get the list of still active registrations i.e.
         // All registrations minus the one already cancelled by a DeleteLastRegistration action
@@ -23,7 +24,9 @@ public class DeleteLastRegistrationAction extends CancelableAction {
                 registrationActionsCompiled.add(action);
             }
             if (action instanceof DeleteLastRegistrationAction) {
-                registrationActionsCompiled.remove(registrationActionsCompiled.size()-1);
+                if (registrationActionsCompiled.size()-1!=-1) {
+                    registrationActionsCompiled.remove(registrationActionsCompiled.size() - 1);
+                }
             }
         }
 
@@ -46,13 +49,21 @@ public class DeleteLastRegistrationAction extends CancelableAction {
 
     @Override
     public boolean run() {
-        rs.hide();
-        return rs.cancel();
+        if (rs!=null){
+            rs.hide();
+            return rs.cancel();
+        } else {
+            return false;
+        }
     }
 
     @Override
     public boolean cancel() {
-        rs.show();
-        return rs.run();
+        if (rs!=null) {
+            rs.show();
+            return rs.run();
+        } else {
+            return true;
+        }
     }
 }

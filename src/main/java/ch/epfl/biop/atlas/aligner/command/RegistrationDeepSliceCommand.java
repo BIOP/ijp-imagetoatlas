@@ -300,7 +300,6 @@ public class RegistrationDeepSliceCommand implements Command {
                 }
                 biggestRankDifference = 0;
                 for (int i = 0; i < indicesNewlyOrdered.length; i++) {
-                    //System.out.println("Slice at rank "+i +": previous index = " + indicesNewlyOrdered[i]);
                     int abs = Math.abs(i - indicesNewlyOrdered[i]);
                     if (abs > biggestRankDifference) {
                         biggestRankDifference = abs;

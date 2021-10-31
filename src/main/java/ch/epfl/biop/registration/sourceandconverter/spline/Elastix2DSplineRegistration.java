@@ -250,7 +250,7 @@ public class Elastix2DSplineRegistration extends RealTransformSourceAndConverter
 
                 if (landMarksToKeep.size()<4) {
                     // Too many landmarks removed
-                    System.out.println("Too few landmarks after pruning - skip pruning");
+                    System.err.println("Too few landmarks after pruning - skip pruning");
                     return input;
                 }
 

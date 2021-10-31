@@ -29,7 +29,7 @@ public class SliceSourcesStateDeserializer implements JsonDeserializer<AlignerSt
         JsonObject obj = json.getAsJsonObject();
 
         obj.get("actions").getAsJsonArray().forEach(jsonElement -> {
-            System.out.println(jsonElement);
+            //System.out.println(jsonElement);
             CancelableAction action = context.deserialize(jsonElement, CancelableAction.class);
             action.runRequest();
             sliceSourceConsumer.accept(action.getSliceSources());
