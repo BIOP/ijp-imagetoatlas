@@ -9,7 +9,7 @@ import ch.epfl.biop.atlas.aligner.action.RegisterSliceAction;
 import ch.epfl.biop.atlas.struct.AtlasNode;
 import ch.epfl.biop.atlas.struct.AtlasOntology;
 import ch.epfl.biop.atlas.struct.AtlasHelper;
-import ch.epfl.biop.atlas.aligner.sourcepreprocessor.*;
+import ch.epfl.biop.bdv.sourcepreprocessor.*;
 import ch.epfl.biop.atlas.aligner.plugin.RegistrationPluginHelper;
 import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
 import ch.epfl.biop.java.utilities.roi.SelectToROIKeepLines;

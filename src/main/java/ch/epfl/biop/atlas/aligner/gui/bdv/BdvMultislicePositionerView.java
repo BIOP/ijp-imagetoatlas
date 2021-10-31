@@ -10,12 +10,9 @@ import ch.epfl.biop.atlas.aligner.ReslicedAtlas;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.atlas.aligner.action.CancelableAction;
 import ch.epfl.biop.atlas.aligner.action.DeleteSliceAction;
-import ch.epfl.biop.atlas.aligner.gui.bdv.card.SliceDefineROICommand;
+import ch.epfl.biop.atlas.aligner.gui.bdv.card.*;
 import ch.epfl.biop.atlas.aligner.command.*;
 import ch.epfl.biop.atlas.aligner.gui.MultiSliceContextMenuClickBehaviour;
-import ch.epfl.biop.atlas.aligner.gui.bdv.card.AtlasAdjustDisplayCommand;
-import ch.epfl.biop.atlas.aligner.gui.bdv.card.AtlasInfoPanel;
-import ch.epfl.biop.atlas.aligner.gui.bdv.card.EditPanel;
 import ch.epfl.biop.atlas.aligner.plugin.IABBARegistrationPlugin;
 import ch.epfl.biop.atlas.aligner.plugin.RegistrationPluginHelper;
 import ch.epfl.biop.atlas.struct.AtlasNode;
@@ -68,7 +65,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     final BdvHandle bdvh;
     final SourceAndConverterBdvDisplayService displayService;
 
-    final JTableView tableView;
+    TableView tableView;
 
     Consumer<String> debug = System.out::println;
 
@@ -352,21 +349,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                     logger.info("Closing multipositioner bdv window, releasing some resources.");
 
                     logger.debug("Removing listeners");
-                    if (msp!=null) {
-                        bdvh.getTriggerbindings().removeInputTriggerMap(REVIEW_BEHAVIOURS_KEY);
-                        bdvh.getTriggerbindings().removeBehaviourMap(REVIEW_BEHAVIOURS_KEY);
-                        bdvh.getTriggerbindings().removeInputTriggerMap(POSITIONING_BEHAVIOURS_KEY);
-                        bdvh.getTriggerbindings().removeBehaviourMap(POSITIONING_BEHAVIOURS_KEY);
-                        bdvh.getTriggerbindings().removeInputTriggerMap(COMMON_BEHAVIOURS_KEY);
-                        bdvh.getTriggerbindings().removeBehaviourMap(COMMON_BEHAVIOURS_KEY);
-                        this.common_behaviours = null;
-                        this.positioning_behaviours = null;
-                        this.review_behaviours = null;
-                        this.selectionLayer = null;
-                        msp.getReslicedAtlas().removeListener(atlasSlicingListener);
-                        msp.removeSliceListener(this);
-                        msp = null;
-                    }
+
                     if (guiState!=null) {
                         guiState.clear();
                         guiState.clear();
@@ -386,6 +369,22 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                         mscClick = null;
                     }
                     extraCleanUp.forEach(Runnable::run);
+                    
+                    if (msp!=null) {
+                        bdvh.getTriggerbindings().removeInputTriggerMap(REVIEW_BEHAVIOURS_KEY);
+                        bdvh.getTriggerbindings().removeBehaviourMap(REVIEW_BEHAVIOURS_KEY);
+                        bdvh.getTriggerbindings().removeInputTriggerMap(POSITIONING_BEHAVIOURS_KEY);
+                        bdvh.getTriggerbindings().removeBehaviourMap(POSITIONING_BEHAVIOURS_KEY);
+                        bdvh.getTriggerbindings().removeInputTriggerMap(COMMON_BEHAVIOURS_KEY);
+                        bdvh.getTriggerbindings().removeBehaviourMap(COMMON_BEHAVIOURS_KEY);
+                        this.common_behaviours = null;
+                        this.positioning_behaviours = null;
+                        this.review_behaviours = null;
+                        this.selectionLayer = null;
+                        msp.getReslicedAtlas().removeListener(atlasSlicingListener);
+                        msp.removeSliceListener(this);
+                        msp = null;
+                    }
                 }
         );
     }
@@ -422,6 +421,18 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         JFrame frame = ((BdvHandleFrame)bdvh).getBigDataViewer().getViewerFrame();
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
         frame.setIconImage((new ImageIcon(MultiSlicePositioner.class.getResource("/graphics/ABBAFrame.jpg"))).getImage());
+    }
+
+    void addTableView() {
+        tableView = new TableView(this);
+        msp.addSliceListener(tableView);
+        bdvh.getCardPanel().addCard("Slices Display", tableView.getPanel(), true);
+        addToCleanUpHook(() -> {
+            tableView.cleanup();
+            if (msp!=null) { // Because cleanup is called 2 times. TODO fix double call
+                msp.removeSliceListener(tableView);
+            }
+        });
     }
 
     TransferHandler transferHandler;
@@ -511,14 +522,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         bdvh.getViewerPanel().getDisplay().addHandler(this);
 
         logger.debug("Adding jtable");
-
-        tableView = new JTableView(this);
-        msp.addSliceListener(tableView);
-        bdvh.getCardPanel().addCard("Slices Display", tableView.getPanel(), true);
-        addToCleanUpHook(() -> {
-            msp.removeSliceListener(tableView);
-            tableView.cleanup();
-        });
+        addTableView();
     }
 
     public void iniSlice(SliceSources slice) {

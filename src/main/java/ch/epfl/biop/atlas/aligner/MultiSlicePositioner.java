@@ -6,7 +6,7 @@ import ch.epfl.biop.atlas.aligner.adapter.*;
 import ch.epfl.biop.atlas.aligner.plugin.ExternalABBARegistrationPlugin;
 import ch.epfl.biop.atlas.aligner.plugin.IABBARegistrationPlugin;
 import ch.epfl.biop.atlas.aligner.plugin.RegistrationPluginHelper;
-import ch.epfl.biop.atlas.aligner.sourcepreprocessor.*;
+import ch.epfl.biop.bdv.sourcepreprocessor.*;
 import ch.epfl.biop.atlas.struct.Atlas;
 import ch.epfl.biop.registration.Registration;
 import com.google.gson.Gson;

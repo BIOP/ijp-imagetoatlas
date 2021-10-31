@@ -2,8 +2,8 @@ package ch.epfl.biop.quicknii;
 
 import ch.epfl.biop.atlas.aligner.SliceToImagePlus;
 import ch.epfl.biop.atlas.aligner.SliceSources;
-import ch.epfl.biop.atlas.aligner.sourcepreprocessor.SourcesProcessor;
-import ch.epfl.biop.atlas.aligner.sourcepreprocessor.SourcesProcessorHelper;
+import ch.epfl.biop.bdv.sourcepreprocessor.SourcesProcessor;
+import ch.epfl.biop.bdv.sourcepreprocessor.SourcesProcessorHelper;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.process.ImageConverter;

@@ -1,4 +1,4 @@
-package ch.epfl.biop.atlas.aligner.sourcepreprocessor;
+package ch.epfl.biop.bdv.sourcepreprocessor;
 
 import bdv.viewer.SourceAndConverter;
 import net.imglib2.realtransform.AffineTransform3D;

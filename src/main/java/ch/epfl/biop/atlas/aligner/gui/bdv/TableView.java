@@ -25,13 +25,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class JTableView implements MultiSlicePositioner.SliceChangeListener, ListSelectionListener {
+public class TableView implements MultiSlicePositioner.SliceChangeListener, ListSelectionListener {
 
     int maxChannels = 0;
 
     final JPanel paneDisplay;
 
-    protected static Logger logger = LoggerFactory.getLogger(JTableView.class);
+    protected static Logger logger = LoggerFactory.getLogger(TableView.class);
 
     final JTable table;
 
@@ -44,7 +44,7 @@ public class JTableView implements MultiSlicePositioner.SliceChangeListener, Lis
     List<SliceSources> listCopy = new ArrayList<>();
     final Object slicesModifyLock = new Object();
 
-    public JTableView(BdvMultislicePositionerView view) {
+    public TableView(BdvMultislicePositionerView view) {
         paneDisplay = new JPanel(new BorderLayout());
         this.view = view;
         this.mp = view.msp;
@@ -445,7 +445,7 @@ public class JTableView implements MultiSlicePositioner.SliceChangeListener, Lis
 
         static {
             URL iconURL;
-            iconURL = JTableView.class.getResource("/graphics/Visible.png");
+            iconURL = TableView.class.getResource("/graphics/Visible.png");
 
             visibleIcon = new ImageIcon(iconURL);
             Image image = visibleIcon.getImage(); // transform it
@@ -453,7 +453,7 @@ public class JTableView implements MultiSlicePositioner.SliceChangeListener, Lis
             visibleIcon = new ImageIcon(newimg);  // transform it back
 
 
-            iconURL = JTableView.class.getResource("/graphics/InvisibleL.png");
+            iconURL = TableView.class.getResource("/graphics/InvisibleL.png");
             invisibleIcon = new ImageIcon(iconURL);
             image = invisibleIcon.getImage(); // transform it
             newimg = image.getScaledInstance(15, 15,  java.awt.Image.SCALE_SMOOTH); // scale it the smooth way

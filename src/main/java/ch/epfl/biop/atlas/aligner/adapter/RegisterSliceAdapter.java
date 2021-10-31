@@ -4,7 +4,7 @@ import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.action.RegisterSliceAction;
 import ch.epfl.biop.atlas.aligner.SliceSources;
-import ch.epfl.biop.atlas.aligner.sourcepreprocessor.SourcesProcessor;
+import ch.epfl.biop.bdv.sourcepreprocessor.SourcesProcessor;
 import ch.epfl.biop.registration.Registration;
 import com.google.gson.*;
 import org.slf4j.Logger;

@@ -1,6 +1,6 @@
 package ch.epfl.biop.atlas.aligner.adapter;
 
-import ch.epfl.biop.atlas.aligner.sourcepreprocessor.SourcesAffineTransformer;
+import ch.epfl.biop.bdv.sourcepreprocessor.SourcesAffineTransformer;
 import com.google.gson.*;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.realtransform.RealTransform;

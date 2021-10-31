@@ -1,6 +1,6 @@
-package ch.epfl.biop.atlas.aligner.gui.bdv;
+package ch.epfl.biop.atlas.aligner.gui.bdv.card;
 
-import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
+import ch.epfl.biop.atlas.aligner.gui.bdv.BdvMultislicePositionerView;
 
 import javax.swing.*;
 import java.awt.*;

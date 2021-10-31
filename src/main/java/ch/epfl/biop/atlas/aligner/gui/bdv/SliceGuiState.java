@@ -33,6 +33,8 @@ public class SliceGuiState {
     // Visible to the user in slicing mode
     private SourceAndConverter<?>[] sources_displayed; // For Positioning mode
 
+    private SourceAndConverter<?>[] ini_sources; // For Positioning mode
+
     AffineTransformedSourceWrapperRegistration slicePositioner;
 
     final BdvHandle bdvh;
@@ -58,6 +60,7 @@ public class SliceGuiState {
 
         channelVisible = new boolean[nChannels];
         displaysettings = new Displaysettings[nChannels];
+        ini_sources = slice.getRegisteredSources();
 
         this.addDisplayFilters(iChannel -> channelVisible[iChannel]);
         this.addDisplayFilters(iChannel -> sliceVisible);
@@ -216,6 +219,7 @@ public class SliceGuiState {
     public void sourcesChanged() {
         hide();
         for (int idx = 0; idx<nChannels; idx++) {
+            Displaysettings.applyDisplaysettings(ini_sources[idx], displaysettings[idx]);
             Displaysettings.applyDisplaysettings(slice.getRegisteredSources()[idx], displaysettings[idx]);
         }
         sources_displayed = slicePositioner.getTransformedImageMovingToFixed(slice.getRegisteredSources());
@@ -323,6 +327,10 @@ public class SliceGuiState {
     public void sliceDisplayChanged() {
         // TODO : improve by not doing anything is the slices displayed are not changed
         hide();
+        for (int idx = 0; idx<nChannels; idx++) {
+            Displaysettings.applyDisplaysettings(ini_sources[idx], displaysettings[idx]);
+            Displaysettings.applyDisplaysettings(slice.getRegisteredSources()[idx], displaysettings[idx]);
+        }
         show();
     }
 

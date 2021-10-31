@@ -1,6 +1,6 @@
 package ch.epfl.biop.atlas.aligner.adapter;
 
-import ch.epfl.biop.atlas.aligner.sourcepreprocessor.SourcesIdentity;
+import ch.epfl.biop.bdv.sourcepreprocessor.SourcesIdentity;
 import com.google.gson.*;
 
 import java.lang.reflect.Type;
