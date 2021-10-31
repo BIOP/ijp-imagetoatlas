@@ -36,12 +36,6 @@ public class SliceSourcesPopupMenu {
     public static JPopupMenu createFinalPopupMenu(MultiSlicePositioner mp, BdvMultislicePositionerView view) {
         JPopupMenu popup = new JPopupMenu();
 
-        addPopupAction(popup,"Show all Slices", view::showAllSlices);
-
-        addPopupAction(popup, "Show current slice", view::showCurrentSlice);
-
-        popup.addSeparator();
-
         addPopupAction(popup,"Set as Key Slice(s)", () -> {
             SliceSources[] slices = mp.getSelectedSources().toArray(new SliceSources[0]);
             if (slices.length>1) new MarkActionSequenceBatchAction(mp).runRequest();
@@ -121,13 +115,7 @@ public class SliceSourcesPopupMenu {
     {
         popup = new JPopupMenu();
 
-        addPopupAction("Show all Slices", (slices) -> view.showAllSlices());
-
-        addPopupAction("Show current slice", (slices)-> view.showCurrentSlice());
-
         if (slices.length>0) {
-
-            addPopupLine();
 
             addPopupAction("Set as Key Slice(s)", (slices) -> {
                 if (slices.length>1) new MarkActionSequenceBatchAction(mp).runRequest();

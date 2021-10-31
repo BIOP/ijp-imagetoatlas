@@ -15,6 +15,7 @@ public class KeySliceOffAction extends CancelableAction {
     public KeySliceOffAction(MultiSlicePositioner mp, SliceSources sliceSource) {
         super(mp);
         this.sliceSource = sliceSource;
+        hide();
     }
 
     @Override

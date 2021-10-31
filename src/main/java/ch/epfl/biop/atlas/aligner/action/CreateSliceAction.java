@@ -29,6 +29,7 @@ public class CreateSliceAction extends CancelableAction {
         this.slicingAxisPosition = slicingAxisPosition;
         this.zSliceShiftCorrection = zSliceShiftCorrection;
         this.zSliceThicknessCorrection = zSliceThicknessCorrection;
+        hide();
     }
 
     @Override
@@ -56,6 +57,11 @@ public class CreateSliceAction extends CancelableAction {
     @Override
     public boolean cancel() {
         return mp.cancelCreateSlice(this);
+    }
+
+    @Override
+    public void drawAction(Graphics2D g, double px, double py, double scale) {
+
     }
 
     public void setSlice(SliceSources sliceSources) {

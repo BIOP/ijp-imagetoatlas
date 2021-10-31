@@ -127,9 +127,4 @@ public class AtlasAdjustDisplayCommand extends InteractiveCommand implements
         }
     }
 
-    @Override
-    public void sliceDisplayModeChanged(BdvMultislicePositionerView mp, int oldmode, int newmode) {
-
-    }
-
 }

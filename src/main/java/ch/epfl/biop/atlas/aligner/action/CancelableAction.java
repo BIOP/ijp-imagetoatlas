@@ -75,4 +75,6 @@ public abstract class CancelableAction {
         return this.getClass().getSimpleName();
     }
 
+    abstract public void drawAction(Graphics2D g, double px, double py, double scale);
+
 }

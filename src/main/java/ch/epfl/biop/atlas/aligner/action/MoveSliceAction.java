@@ -20,6 +20,7 @@ public class MoveSliceAction extends CancelableAction {
         this.sliceSource = sliceSource;
         this.oldSlicingAxisPosition = sliceSource.getSlicingAxisPosition();
         this.newSlicingAxisPosition = slicingAxisPosition;
+        hide();
     }
 
     @Override

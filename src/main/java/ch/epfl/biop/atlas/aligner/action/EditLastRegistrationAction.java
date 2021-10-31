@@ -6,6 +6,7 @@ import ch.epfl.biop.bdv.sourcepreprocessor.SourcesProcessor;
 import ch.epfl.biop.bdv.sourcepreprocessor.SourcesProcessorHelper;
 import ch.epfl.biop.atlas.aligner.plugin.RegistrationPluginHelper;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,6 +49,11 @@ public class EditLastRegistrationAction extends CancelableAction {
 
     public boolean isValid() {
         return ((rs!=null) && (RegistrationPluginHelper.isEditable(rs.registration)));
+    }
+
+    @Override
+    public void drawAction(Graphics2D g, double px, double py, double scale) {
+
     }
 
     @Override

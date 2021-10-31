@@ -103,7 +103,7 @@ public class SliceGuiState {
                 () -> {
                     AffineTransform3D bdvAt3D = new AffineTransform3D();
                     view.getBdvh().getViewerPanel().state().getViewerTransform(bdvAt3D);
-                    RealPoint handlePoint = view.getSliceCenterPosition(slice);
+                    RealPoint handlePoint = view.getDisplayedCenter(slice);
                     double yShift = getBdvHandleRadius();
                     handlePoint.setPosition(+view.msp.sY / 2.0, 1);
                     bdvAt3D.apply(handlePoint, handlePoint);
@@ -229,7 +229,7 @@ public class SliceGuiState {
     public void slicePositionChanged() {
         if (view.mode == BdvMultislicePositionerView.POSITIONING_MODE_INT) {
             AffineTransform3D slicingModePositionAffineTransform = new AffineTransform3D();
-            RealPoint center = view.getSliceCenterPosition(slice);
+            RealPoint center = view.getDisplayedCenter(slice);
 
             slicingModePositionAffineTransform.translate(
                     center.getDoublePosition(0), center.getDoublePosition(1), -slice.getSlicingAxisPosition());
@@ -253,7 +253,7 @@ public class SliceGuiState {
         view.bdvh.getViewerPanel().state().getViewerTransform(bdvAt3D);
         RealPoint sliceCenter;
         if (view.mode == BdvMultislicePositionerView.POSITIONING_MODE_INT) {
-            sliceCenter = view.getSliceCenterPosition(slice);
+            sliceCenter = view.getDisplayedCenter(slice);
             bdvAt3D.apply(sliceCenter, sliceCenter);
             return new Integer[]{(int) sliceCenter.getDoublePosition(0), (int) sliceCenter.getDoublePosition(1), (int) sliceCenter.getDoublePosition(2)};
         } else if (view.mode == BdvMultislicePositionerView.REVIEW_MODE_INT) {

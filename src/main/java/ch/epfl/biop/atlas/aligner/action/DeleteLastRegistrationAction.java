@@ -3,6 +3,7 @@ package ch.epfl.biop.atlas.aligner.action;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,6 +41,11 @@ public class DeleteLastRegistrationAction extends CancelableAction {
 
     public boolean isValid() {
         return rs != null;
+    }
+
+    @Override
+    public void drawAction(Graphics2D g, double px, double py, double scale) {
+
     }
 
     @Override
