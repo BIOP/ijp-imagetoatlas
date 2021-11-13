@@ -1,7 +1,7 @@
 package ch.epfl.biop.atlas.aligner;
 
 import bdv.viewer.SourceAndConverter;
-import ch.epfl.biop.bdv.sourcepreprocessor.SourcesProcessor;
+import ch.epfl.biop.sourceandconverter.processor.SourcesProcessor;
 import ij.ImagePlus;
 import net.imglib2.realtransform.AffineTransform3D;
 import org.slf4j.Logger;

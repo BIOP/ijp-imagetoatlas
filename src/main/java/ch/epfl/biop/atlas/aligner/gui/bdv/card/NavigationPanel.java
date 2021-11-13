@@ -62,7 +62,7 @@ public class NavigationPanel {
 
     }
 
-    public JPanel box(boolean alongX,JComponent... components) {
+    public static JPanel box(boolean alongX,JComponent... components) {
         JPanel box = new JPanel();
         if (alongX) {
             box.setLayout(new GridLayout(1, components.length));

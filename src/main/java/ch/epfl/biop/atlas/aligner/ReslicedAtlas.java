@@ -125,8 +125,8 @@ public class ReslicedAtlas implements RealInterval {
                     sacTransform.apply(pt,ptRealSpace);
 
                     double projectedPointOnSlicingAxis =
-                            ptRealSpace.getDoublePosition(0)*slicingTransfom.get(2,0)+
-                                    ptRealSpace.getDoublePosition(1)*slicingTransfom.get(2,1)+
+                            ptRealSpace.getDoublePosition(0)*slicingTransfom.get(0,2)+
+                                    ptRealSpace.getDoublePosition(1)*slicingTransfom.get(1,2)+
                                     ptRealSpace.getDoublePosition(2)*slicingTransfom.get(2,2);
                     if (projectedPointOnSlicingAxis<minZAxis)
                         minZAxis = projectedPointOnSlicingAxis;
@@ -135,17 +135,17 @@ public class ReslicedAtlas implements RealInterval {
 
                     double projectedPointOnSlicingXAxis =
                             ptRealSpace.getDoublePosition(0)*slicingTransfom.get(0,0)+
-                                    ptRealSpace.getDoublePosition(1)*slicingTransfom.get(0,1)+
-                                    ptRealSpace.getDoublePosition(2)*slicingTransfom.get(0,2);
+                                    ptRealSpace.getDoublePosition(1)*slicingTransfom.get(1,0)+
+                                    ptRealSpace.getDoublePosition(2)*slicingTransfom.get(2,0);
                     if (projectedPointOnSlicingXAxis<minXAxis)
                         minXAxis = projectedPointOnSlicingXAxis;
                     if (projectedPointOnSlicingXAxis>maxXAxis)
                         maxXAxis = projectedPointOnSlicingXAxis;
 
                     double projectedPointOnSlicingYAxis =
-                            ptRealSpace.getDoublePosition(0)*slicingTransfom.get(1,0)+
+                            ptRealSpace.getDoublePosition(0)*slicingTransfom.get(0,1)+
                                     ptRealSpace.getDoublePosition(1)*slicingTransfom.get(1,1)+
-                                    ptRealSpace.getDoublePosition(2)*slicingTransfom.get(1,2);
+                                    ptRealSpace.getDoublePosition(2)*slicingTransfom.get(2,1);
                     if (projectedPointOnSlicingYAxis<minYAxis)
                         minYAxis = projectedPointOnSlicingYAxis;
                     if (projectedPointOnSlicingYAxis>maxYAxis)
@@ -174,7 +174,7 @@ public class ReslicedAtlas implements RealInterval {
 
         RealPoint realCenter = new RealPoint(cX, cY, cZ);
 
-        slicingTransfom.inverse().apply(realCenter, realCenter);
+        slicingTransfom.apply(realCenter, realCenter);
 
         cX = realCenter.getDoublePosition(0);
         cY = realCenter.getDoublePosition(1);

@@ -9,7 +9,7 @@ import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.atlas.aligner.gui.bdv.BdvMultislicePositionerView;
 import ch.epfl.biop.atlas.mouse.allen.ccfv3.command.AllenBrainAdultMouseAtlasCCF2017Command;
-import ch.epfl.biop.bdv.command.importer.SourceFromImagePlusCommand;
+import ch.epfl.biop.atlas.rat.waxholm.spraguedawley.v4.command.WaxholmSpragueDawleyRatV4Command;
 import ij.IJ;
 import ij.ImagePlus;
 import net.imagej.ImageJ;
@@ -27,6 +27,8 @@ public class DemoRegistrationIJ1 {
         demoSlice.show();
 
         ij.command().run(AllenBrainAdultMouseAtlasCCF2017Command.class, true).get();
+
+        ij.command().run(WaxholmSpragueDawleyRatV4Command.class, true).get();
 
         //ij.command().run(ABBAStartCommand.class, true).get();
 

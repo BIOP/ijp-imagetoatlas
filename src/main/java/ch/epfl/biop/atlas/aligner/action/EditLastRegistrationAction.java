@@ -2,9 +2,9 @@ package ch.epfl.biop.atlas.aligner.action;
 
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
-import ch.epfl.biop.bdv.sourcepreprocessor.SourcesProcessor;
-import ch.epfl.biop.bdv.sourcepreprocessor.SourcesProcessorHelper;
 import ch.epfl.biop.atlas.aligner.plugin.RegistrationPluginHelper;
+import ch.epfl.biop.sourceandconverter.processor.SourcesProcessor;
+import ch.epfl.biop.sourceandconverter.processor.SourcesProcessorHelper;
 
 import java.awt.*;
 import java.util.ArrayList;

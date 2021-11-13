@@ -9,7 +9,6 @@ import ch.epfl.biop.atlas.aligner.action.RegisterSliceAction;
 import ch.epfl.biop.atlas.struct.AtlasNode;
 import ch.epfl.biop.atlas.struct.AtlasOntology;
 import ch.epfl.biop.atlas.struct.AtlasHelper;
-import ch.epfl.biop.bdv.sourcepreprocessor.*;
 import ch.epfl.biop.atlas.aligner.plugin.RegistrationPluginHelper;
 import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
 import ch.epfl.biop.java.utilities.roi.SelectToROIKeepLines;
@@ -18,6 +17,7 @@ import ch.epfl.biop.java.utilities.roi.types.IJShapeRoiArray;
 import ch.epfl.biop.java.utilities.roi.types.ImageJRoisFile;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import ch.epfl.biop.registration.sourceandconverter.spline.RealTransformSourceAndConverterRegistration;
+import ch.epfl.biop.sourceandconverter.processor.*;
 import ch.epfl.biop.spimdata.qupath.QuPathEntryEntity;
 import ch.epfl.biop.registration.Registration;
 import ch.epfl.biop.registration.sourceandconverter.affine.AffineTransformedSourceWrapperRegistration;
@@ -886,6 +886,9 @@ public class SliceSources {
                 Gson gson = ScijavaGsonHelper.getGsonBuilder(mp.scijavaCtx, false).setPrettyPrinting().create();
 
                 String transform_string = gson.toJson(transform, RealTransform.class);
+
+                RealTransform tr_back = gson.fromJson(transform_string, RealTransform.class);
+
 
                 if (ftransform.exists()) {
                     if (erasePreviousFile) {

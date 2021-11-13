@@ -1,6 +1,5 @@
 package ch.epfl.biop.quicknii;
 
-import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
 
 import javax.xml.bind.annotation.XmlAccessType;

@@ -11,6 +11,7 @@ import org.scijava.plugin.Plugin;
 import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceAffineTransformer;
+import sc.fiji.bdvpg.sourceandconverter.transform.SourceRealTransformer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +41,7 @@ public class ExportSlicesToBDVCommand implements Command {
         mp.log.accept("All tasks ended");
 
         List<SliceSources> slices = mp.getSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
+
         if (slices.size()==0) {
             mp.errorMessageForUser.accept("No slice selected", "You did not select any slice to export");
         } else {

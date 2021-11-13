@@ -2,7 +2,7 @@ package ch.epfl.biop.atlas.aligner.gui.bdv.card;
 
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.gui.bdv.BdvMultislicePositionerView;
-import ch.epfl.biop.bdv.command.userdefinedregion.GetUserRectangleCommand;
+import ch.epfl.biop.scijava.command.bdv.userdefinedregion.GetUserRectangleCommand;
 import net.imglib2.RealPoint;
 import org.scijava.Initializable;
 import org.scijava.command.Command;

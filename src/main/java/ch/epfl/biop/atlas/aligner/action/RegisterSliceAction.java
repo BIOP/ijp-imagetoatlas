@@ -3,9 +3,9 @@ package ch.epfl.biop.atlas.aligner.action;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
-import ch.epfl.biop.bdv.sourcepreprocessor.SourcesProcessor;
 import ch.epfl.biop.atlas.aligner.plugin.RegistrationPluginHelper;
 import ch.epfl.biop.registration.Registration;
+import ch.epfl.biop.sourceandconverter.processor.SourcesProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

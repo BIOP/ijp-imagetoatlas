@@ -1,7 +1,7 @@
 package ch.epfl.biop.abba.plugin;
 
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
-import ch.epfl.biop.bdv.sourcepreprocessor.SourcesProcessorHelper;
+import ch.epfl.biop.sourceandconverter.processor.SourcesProcessorHelper;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
