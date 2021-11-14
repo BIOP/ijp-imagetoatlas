@@ -18,7 +18,7 @@ import java.util.Set;
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Edit>ABBA - Interactive Transform",
         description = "To use at the beginning of the registration process only! Rotates, scales, translate the original unregistered selected slices")
-public class SliceAffineTransformCommand extends InteractiveCommand {
+public class SliceAffineTransformCommand extends InteractiveCommand implements MultiSlicePositioner.MultiSlicePositionerListener {
 
     @Parameter
     MultiSlicePositioner mp;
@@ -48,9 +48,15 @@ public class SliceAffineTransformCommand extends InteractiveCommand {
     Map<SliceSources, AffineTransform3D> originalTransforms = null;
     Set<SliceSources> selectedSlices = null;
 
+    boolean listenerRegistered = false;
+
     @Override
     public void run() {
         if (mp!=null) {
+            if (!listenerRegistered) {
+                listenerRegistered = true;
+                mp.addMultiSlicePositionerListener(this);
+            }
             if ((selectedSlices == null)) {
                 selectedSlices = new HashSet<>();
                 selectedSlices.addAll(mp.getSelectedSources());
@@ -112,5 +118,14 @@ public class SliceAffineTransformCommand extends InteractiveCommand {
         scale_Y = 1;
         translate_X = 0;
         translate_Y = 0;
+    }
+
+    @Override
+    public void closing(MultiSlicePositioner msp) {
+        if (msp == mp) {
+            originalTransforms.clear();
+            selectedSlices = null;
+            mp = null;
+        }
     }
 }

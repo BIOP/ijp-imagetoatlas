@@ -209,6 +209,8 @@ public class MultiSlicePositioner implements Closeable {
     }
 
     public void close() {
+        mpListeners.forEach(l -> l.closing(this));
+        mpListeners.clear();
         scijavaCtx.getService(ObjectService.class).removeObject(this);
         logger.info("Closing multipositioner bdv window, releasing some resources.");
         if (mso!=null) this.mso.clear();
@@ -1083,6 +1085,7 @@ public class MultiSlicePositioner implements Closeable {
     }
 
     public void slicePreTransformChanged(SliceSources sliceSources) {
+        stateHasBeenChanged();
         listeners.forEach(sliceChangeListener -> sliceChangeListener.slicePretransformChanged(sliceSources));
     }
 
@@ -1120,6 +1123,20 @@ public class MultiSlicePositioner implements Closeable {
         void actionCancelEnqueue(SliceSources slice, CancelableAction action);
         void actionCancelStarted(SliceSources slice, CancelableAction action);
         void actionCancelFinished(SliceSources slice, CancelableAction action, boolean result);
+    }
+
+    public interface MultiSlicePositionerListener {
+        void closing(MultiSlicePositioner msp);
+    }
+
+    List<MultiSlicePositionerListener> mpListeners = new ArrayList<>();
+
+    public void addMultiSlicePositionerListener(MultiSlicePositionerListener listener) {
+        mpListeners.add(listener);
+    }
+
+    public void removeMultiSlicePositionerListener(MultiSlicePositionerListener listener) {
+        mpListeners.remove(listener);
     }
 
     /**

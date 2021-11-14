@@ -21,6 +21,7 @@ import ch.epfl.biop.bdv.gui.graphicalhandle.GraphicalHandle;
 import ch.epfl.biop.bdv.gui.graphicalhandle.GraphicalHandleListener;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import ij.IJ;
 import mpicbg.spim.data.sequence.Tile;
 import net.imglib2.*;
 import net.imglib2.position.FunctionRealRandomAccessible;
@@ -69,7 +70,7 @@ import java.util.stream.Collectors;
 
 import static bdv.ui.BdvDefaultCards.*;
 
-public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceChangeListener, GraphicalHandleListener, MouseMotionListener {
+public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceChangeListener, GraphicalHandleListener, MouseMotionListener, MultiSlicePositioner.MultiSlicePositionerListener {
 
     public MultiSlicePositioner msp; // TODO : make accessor
     final BdvHandle bdvh;
@@ -729,6 +730,9 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
         logger.debug("Add clean all hook");
         addCleanAllHook();
+
+        logger.debug("Add closing listener");
+        msp.addMultiSlicePositionerListener(this);
 
     }
 
@@ -1449,6 +1453,13 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         SliceGuiState guiStateSlice = guiState.sliceGuiState.get(slice);
         if (guiState == null) return false;
         return guiStateSlice.getSliceVisibility();
+    }
+
+    @Override
+    public void closing(MultiSlicePositioner msp) {
+        if ((msp == this.msp)&&(!cleanAllOnExit)) {
+            IJ.error("This ABBA session has been closed outside BigDataViewer, expect errors!");
+        }
     }
 
     class InnerOverlay extends BdvOverlay {
