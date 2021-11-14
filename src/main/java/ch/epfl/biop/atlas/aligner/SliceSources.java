@@ -846,7 +846,7 @@ public class SliceSources {
     private void storeInQuPathProjectIfExists(ImageJRoisFile ijroisfile, boolean erasePreviousFile) {
 
         if (!QuPathBdvHelper.isSourceLinkedToQuPath(original_sacs[0])) {
-            mp.errlog.accept("Slice"+toString()+" not linked to a QuPath dataset");
+            mp.errlog.accept("Slice "+this+" not linked to a QuPath dataset");
         }
         File dataEntryFolder = null;
 
@@ -857,7 +857,7 @@ public class SliceSources {
             String projectFolderPath = QuPathBdvHelper.getQuPathProjectFile(original_sacs[0]).getParent();
             logger.debug("QuPath Project Folder = "+projectFolderPath);
 
-            File f = new File(dataEntryFolder, "ABBA-RoiSet.zip");
+            File f = new File(dataEntryFolder, "ABBA-RoiSet-"+mp.getAtlas().getName()+".zip");
             mp.log.accept("Save slice ROI to quPath project " + f.getAbsolutePath());
 
             if (f.exists()) {
@@ -881,7 +881,7 @@ public class SliceSources {
             RealTransform transform = getSlicePixToCCFRealTransform();
 
             if (transform!=null) {
-                File ftransform = new File(dataEntryFolder, "ABBA-Transform.json");
+                File ftransform = new File(dataEntryFolder, "ABBA-Transform-"+mp.getAtlas().getName()+".json");
                 mp.log.accept("Save transformation to quPath project " + ftransform.getAbsolutePath());
 
                 Gson gson = ScijavaGsonHelper.getGsonBuilder(mp.scijavaCtx, false).setPrettyPrinting().create();
