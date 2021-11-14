@@ -25,10 +25,10 @@ public class ImportQuPathProjectCommand implements Command {
     @Parameter(label = "QuPath project file (.qpproj)")
     File qupath_project;
 
-    @Parameter(label = "Initial axis position (0 = front, mm units)")
+    @Parameter(label = "Initial axis position (0 = front, mm units)", style="format:0.000", stepSize = "0.1")
     double slice_axis_initial;
 
-    @Parameter(label = "Axis increment between slices (mm, can be negative for reverse order)")
+    @Parameter(label = "Axis increment between slices (mm, can be negative for reverse order)", style="format:0.000", stepSize = "0.01")
     double increment_between_slices;
 
     @Parameter

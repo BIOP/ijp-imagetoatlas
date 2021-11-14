@@ -30,10 +30,10 @@ public class ImportImageCommand implements Command {
     @Parameter(label = "Split RGB channels")
     boolean split_rgb_channels = false;
 
-    @Parameter(label = "Initial axis position (0 = front, mm units)")
+    @Parameter(label = "Initial axis position (0 = front, mm units)", style="format:0.000", stepSize = "0.1")
     double slice_axis_initial;
 
-    @Parameter(label = "Axis increment between slices (mm, can be negative for reverse order)")
+    @Parameter(label = "Axis increment between slices (mm, can be negative for reverse order)", style="format:0.000", stepSize = "0.02")
     double increment_between_slices;
 
     @Parameter
@@ -54,7 +54,7 @@ public class ImportImageCommand implements Command {
                                     "splitrgbchannels", split_rgb_channels
                                 )
                                 .get()
-                                .getOutput("spimData");
+                                .getOutput("spimdata");
 
                 SourceAndConverter[] sacs =
                         sac_service.getSourceAndConverterFromSpimdata(spimdata)

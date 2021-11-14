@@ -18,7 +18,7 @@ public class ImportImagePlusCommand implements Command {
     @Parameter
     MultiSlicePositioner mp;
 
-    @Parameter(label = "Initial axis position (0 = front, mm units)")
+    @Parameter(label = "Initial axis position (0 = front, mm units)", style="format:0.000", stepSize = "0.1")
     double slice_axis;
 
     @Parameter
