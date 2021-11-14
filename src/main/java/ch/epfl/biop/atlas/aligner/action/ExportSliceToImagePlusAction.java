@@ -43,7 +43,9 @@ public class ExportSliceToImagePlusAction extends CancelableAction {
 
     @Override
     public boolean run() {
+        mp.addTask();
         resultImage = SliceToImagePlus.export(slice,preprocess,px,py,sx,sy,pixel_size_mm,timepoint,interpolate);
+        mp.removeTask();
         return resultImage!=null;
     }
 

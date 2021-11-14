@@ -22,8 +22,10 @@ public class ExportSliceRegionsToRoiManagerAction extends CancelableAction {
 
     @Override
     public boolean run() { //
+        mp.addTask();
         logger.debug("Exporting slice ROI Manager registration");
         slice.exportRegionsToROIManager(namingChoice);
+        mp.removeTask();
         return true;
     }
 

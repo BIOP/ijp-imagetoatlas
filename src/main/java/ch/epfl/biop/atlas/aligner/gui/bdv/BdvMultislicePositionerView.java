@@ -632,6 +632,54 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         logger.debug("Adding mouse motion listener / handler");
         bdvh.getViewerPanel().getDisplay().addHandler(this);
 
+        BdvHandleHelper.setWindowTitle(bdvh, getViewName());
+
+        modificationMonitorThread = new Thread(this::modificationMonitor);
+        modificationMonitorThread.start();
+
+        addToCleanUpHook(() -> stopMonitoring = true);
+
+    }
+
+    Thread modificationMonitorThread;
+    boolean stopMonitoring = false;
+
+    private void modificationMonitor() {
+        boolean previousStateModification = msp.isModifiedSinceLastSave();
+        boolean previousTimeReady = msp.getNumberOfTasks()==0;
+        while (!stopMonitoring) {
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            MultiSlicePositioner current_msp = this.msp;
+            if (current_msp!=null) {
+                if (previousStateModification != current_msp.isModifiedSinceLastSave()) {
+                    previousStateModification = current_msp.isModifiedSinceLastSave();
+                    BdvHandleHelper.setWindowTitle(bdvh, getViewName());
+                }
+                if (current_msp.getNumberOfTasks()>0) {
+                    bdvh.getViewerPanel().getDisplay().repaint();
+                    previousTimeReady = false;
+                } else {
+                    if (!previousTimeReady) {
+                        bdvh.getViewerPanel().getDisplay().repaint();
+                        previousTimeReady = true;
+                    }
+                }
+            }
+        }
+        logger.debug("Bdv view modification monitoring stopped");
+    }
+
+    public String getViewName() {
+        String name = "Aligning Big Brains and Atlases - "+msp.getAtlas().getName();
+        if (msp.isModifiedSinceLastSave()) {
+            return name+"* (modified)";
+        } else {
+            return name;
+        }
     }
 
     public void showAtlasPosition() {
@@ -1313,9 +1361,13 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     }
 
     class InnerOverlay extends BdvOverlay {
-
+        int drawCounter = 0;
+        Color color = new Color(128,112,50,200);
+        Stroke stroke = new BasicStroke(4);
         @Override
         protected void draw(Graphics2D g) {
+            drawCounter++;
+            drawCounter = drawCounter%21;
             // Gets a copy of the slices to avoid concurrent exception
             List<SliceSources> slicesCopy = msp.getSlices();
 
@@ -1350,6 +1402,27 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             if (showAtlasPosition) drawAtlasPosition(g);
 
             if (showSliceInfo) drawSliceInfo(g, slicesCopy);
+
+            int w = bdvh.getViewerPanel().getWidth();
+            int h = bdvh.getViewerPanel().getHeight();
+
+            g.setColor(color);
+            g.setStroke(stroke);
+
+            if (msp.getNumberOfTasks()>0) {
+                g.drawString(""+msp.getNumberOfTasks(), w-30-4, h-18-4);
+                if (drawCounter<=10) {
+                    g.drawArc(w - 54, h - 54, 50, 50, 0, drawCounter * 36);
+                } else {
+                    g.drawArc(w - 54, h - 54, 50, 50, (drawCounter-10) * 36, 360-((drawCounter-10) * 36));
+                }
+            }
+
+            if (msp.isModifiedSinceLastSave()) {
+                g.drawString("Modified since last save!", 5, h-15);
+            } else {
+                g.drawString("No modification", 5, h-15);
+            }
 
         }
     }

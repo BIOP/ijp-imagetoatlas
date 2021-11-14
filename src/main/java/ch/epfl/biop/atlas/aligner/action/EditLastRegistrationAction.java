@@ -43,7 +43,6 @@ public class EditLastRegistrationAction extends CancelableAction {
         } else {
             rs = (RegisterSliceAction) registrationActionsCompiled.get(registrationActionsCompiled.size()-1);
         }
-
         hide();
     }
 
@@ -63,6 +62,7 @@ public class EditLastRegistrationAction extends CancelableAction {
 
     @Override
     public boolean run() {
+        mp.addTask();
         //mp.removeUserAction(this);
         if (!reuseOriginalChannels) {
             slice.editLastRegistration(
@@ -74,11 +74,14 @@ public class EditLastRegistrationAction extends CancelableAction {
             slice.editLastRegistration(rs.preprocessFixed, rs.preprocessMoving);
         }
         slice.sourcesChanged();
+        mp.stateHasBeenChanged();
+        mp.removeTask();
         return true;
     }
 
     @Override
     public boolean cancel() { // it cannot be canceled. maybe we could but I don't know
+        // Unsupported yet : TODO!
         return true;
     }
 

@@ -64,6 +64,7 @@ import java.util.stream.Collectors;
  */
 
 // TODO: allow only in coronal and AB atlas
+// TODO : fix display settings not updated with the new ABBA structure
 
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>ABBA - DeepSlice Registration",

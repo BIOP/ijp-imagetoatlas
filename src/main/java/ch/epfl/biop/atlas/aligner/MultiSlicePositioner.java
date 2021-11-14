@@ -38,6 +38,7 @@ import javax.swing.*;
 import java.io.*;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -348,6 +349,7 @@ public class MultiSlicePositioner implements Closeable {
             listener.sliceCreated(sliceSource);
         });
         logger.info("Slice "+sliceSource+" created!");
+        sortSlices(); // makes sense, no ?
     }
 
     private void sortSlices() {
@@ -356,6 +358,7 @@ public class MultiSlicePositioner implements Closeable {
         for (int i = 0; i < slices.size(); i++) {
             slices.get(i).setIndex(i);
         }
+        logger.debug("Slices sorted recomputed");
     }
 
     public void positionZChanged(SliceSources slice) {
@@ -464,7 +467,7 @@ public class MultiSlicePositioner implements Closeable {
                 action.getSliceSources().enqueueCancelAction(action, () -> { });
             }
             if (userActions.get(userActions.size() - 1).equals(action)) {
-                logger.debug(action.toString() + " cancelled on slice "+action.getSliceSources()+", updating useractions and redoable actions");
+                logger.debug(action+" cancelled on slice "+action.getSliceSources()+", updating useractions and redoable actions");
                 userActions.remove(userActions.size() - 1);
                 redoableUserActions.add(action);
             } else {
@@ -936,8 +939,18 @@ public class MultiSlicePositioner implements Closeable {
         return gsonbuilder.create();
     }
 
-    public void saveState(File stateFile, boolean overwrite) {
+    private boolean stateChangedSinceLastSave = false;
 
+    public void stateHasBeenChanged() {
+        stateChangedSinceLastSave = true;
+    }
+
+    public boolean isModifiedSinceLastSave() {
+        return stateChangedSinceLastSave;
+    }
+
+    public void saveState(File stateFile, boolean overwrite) {
+        addTask();
         if (slices.size() == 0) {
             errorMessageForUser.accept("No Slices To Save", "No slices are present. Nothing saved");
             return;
@@ -977,9 +990,13 @@ public class MultiSlicePositioner implements Closeable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        stateChangedSinceLastSave = false;
+        removeTask();
     }
 
     public void loadState(File stateFile) {
+        addTask();
+        boolean emptyState = this.slices.size()==0;
         // TODO : add a clock as an overlay
         getSlices().forEach(SliceSources::waitForEndOfTasks);
 
@@ -1031,12 +1048,15 @@ public class MultiSlicePositioner implements Closeable {
                     sliceState.slice.transformSourceOrigin((AffineTransform3D) (sliceState.preTransform));
                 });
 
+                if (emptyState) stateChangedSinceLastSave = false; // loaded state has not been changed, and it was the only one loaded
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
         } else {
             errlog.accept("Error : file "+stateFile.getAbsolutePath()+" not found!");
         }
+        removeTask();
     }
 
     volatile private SliceSources currentSerializedSlice = null;
@@ -1064,6 +1084,21 @@ public class MultiSlicePositioner implements Closeable {
 
     public void slicePreTransformChanged(SliceSources sliceSources) {
         listeners.forEach(sliceChangeListener -> sliceChangeListener.slicePretransformChanged(sliceSources));
+    }
+
+    protected AtomicInteger numberOfTasks = new AtomicInteger();
+
+    public void addTask() {
+        System.out.println("Task added");
+        numberOfTasks.incrementAndGet();
+    }
+
+    public void removeTask(){
+        numberOfTasks.decrementAndGet();
+    }
+
+    public int getNumberOfTasks() {
+        return numberOfTasks.get();
     }
 
     public interface SliceChangeListener {

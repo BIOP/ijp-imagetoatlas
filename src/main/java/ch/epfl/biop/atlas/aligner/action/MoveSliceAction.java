@@ -34,7 +34,10 @@ public class MoveSliceAction extends CancelableAction {
     }
 
     public boolean run() {
+        mp.addTask();
         sliceSource.setSlicingAxisPosition(newSlicingAxisPosition);
+        mp.stateHasBeenChanged();
+        mp.removeTask();
         return true;
     }
 
@@ -43,7 +46,10 @@ public class MoveSliceAction extends CancelableAction {
     }
 
     public boolean cancel() {
+        mp.addTask();
         sliceSource.setSlicingAxisPosition(oldSlicingAxisPosition);
+        mp.stateHasBeenChanged();
+        mp.removeTask();
         return true;
     }
 

@@ -318,6 +318,10 @@ public class TableView implements MultiSlicePositioner.SliceChangeListener, List
 
     @Override
     public void sliceZPositionChanged(SliceSources slice) {
+        //model.fireTableStructureChanged(); // All changed! TODO : improve!!
+        synchronized (slicesModifyLock) { // new order
+            listCopy = mp.getSlices();
+        }
         model.fireTableDataChanged();
         // TODO Need to update which rows are selected ...
     }

@@ -43,7 +43,11 @@ public class CreateSliceAction extends CancelableAction {
 
     @Override
     public boolean run() {
-        return mp.runCreateSlice(this);
+        mp.addTask();
+        boolean result = mp.runCreateSlice(this);
+        mp.stateHasBeenChanged();
+        mp.removeTask();
+        return result;
     }
 
     public SliceSources getSlice() {
@@ -56,7 +60,11 @@ public class CreateSliceAction extends CancelableAction {
 
     @Override
     public boolean cancel() {
-        return mp.cancelCreateSlice(this);
+        mp.addTask();
+        boolean result = mp.cancelCreateSlice(this);
+        mp.stateHasBeenChanged();
+        mp.removeTask();
+        return result;
     }
 
     @Override

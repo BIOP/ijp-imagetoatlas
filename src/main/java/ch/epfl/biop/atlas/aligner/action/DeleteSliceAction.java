@@ -30,7 +30,7 @@ public class DeleteSliceAction extends CancelableAction {
     @Override
     public boolean run() {
         synchronized (DeleteSliceAction.class) { // avoid screw up with batch cancel ?
-
+            mp.addTask();
             logger.debug("Deleting slice "+getSliceSources()+" ...");
             savedActions = mp.getActionsFromSlice(sliceSource);
             savedActions.remove(this);savedActions.remove(this);savedActions.remove(this);
@@ -47,6 +47,8 @@ public class DeleteSliceAction extends CancelableAction {
             //}
 
             logger.debug("Slice "+getSliceSources()+" deleted !");
+            mp.stateHasBeenChanged();
+            mp.removeTask();
             return true;
         }
     }
@@ -60,6 +62,7 @@ public class DeleteSliceAction extends CancelableAction {
                     action.run();
                 }
             });
+            mp.stateHasBeenChanged();
             return true;
         }
     }

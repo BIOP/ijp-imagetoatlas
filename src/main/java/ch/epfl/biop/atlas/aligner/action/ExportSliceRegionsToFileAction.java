@@ -27,8 +27,10 @@ public class ExportSliceRegionsToFileAction extends CancelableAction {
 
     @Override
     public boolean run() { //
+        mp.addTask();
         logger.info("Exporting slice registration of slice "+slice);
         slice.exportRegionsToFile(namingChoice, dirOutput, erasePreviousFile);
+        mp.removeTask();
         return true;
     }
 

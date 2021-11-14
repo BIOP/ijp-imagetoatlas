@@ -22,8 +22,10 @@ public class ExportSliceRegionsToQuPathProjectAction extends CancelableAction {
 
     @Override
     public boolean run() { //
+        mp.addTask();
         logger.info("Exporting slice "+slice+" registration to QuPath");
         slice.exportToQuPathProject(erasePreviousFile);
+        mp.removeTask();
         return true;
     }
 

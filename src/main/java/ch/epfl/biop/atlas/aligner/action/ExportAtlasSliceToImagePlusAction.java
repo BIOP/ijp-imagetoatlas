@@ -43,7 +43,9 @@ public class ExportAtlasSliceToImagePlusAction extends CancelableAction {
 
     @Override
     public boolean run() {
+        mp.addTask();
         resultImage = SliceToImagePlus.exportAtlas(mp,slice,preprocess,px,py,sx,sy,pixel_size_mm,timepoint,interpolate);
+        mp.removeTask();
         return resultImage!=null;
     }
 

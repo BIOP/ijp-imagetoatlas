@@ -63,9 +63,9 @@ abstract public class RealTransformSourceAndConverterRegistration extends Source
 
     @Override
     final public String getTransform() {
-        logger.debug("Serializing transform of class "+rt.getClass().getSimpleName());
+        //logger.debug("Serializing transform of class "+rt.getClass().getSimpleName());
         String transform = ScijavaGsonHelper.getGson(context).toJson(rt, RealTransform.class);
-        logger.debug("Serialization result = "+transform);
+        //logger.debug("Serialization result = "+transform);
         return transform;
     }
 

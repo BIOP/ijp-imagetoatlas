@@ -26,6 +26,7 @@ public class KeySliceOffAction extends CancelableAction {
     public boolean run() {
         if (sliceSource.isKeySlice()) {
             sliceSource.keySliceOff();
+            mp.stateHasBeenChanged();
             return true;
         } else return false; // already NOT a key slice
     }
@@ -35,7 +36,10 @@ public class KeySliceOffAction extends CancelableAction {
     }
 
     public boolean cancel() {
-        sliceSource.keySliceOn();
+        if (!sliceSource.isKeySlice()) {
+            sliceSource.keySliceOn();
+            mp.stateHasBeenChanged();
+        }
         return true;
     }
 
