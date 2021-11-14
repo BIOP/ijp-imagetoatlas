@@ -10,18 +10,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
+import java.util.Collection;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class SliceSourcesPopupMenu {
 
     protected static Logger logger = LoggerFactory.getLogger(SliceSourcesPopupMenu.class);
 
     private JPopupMenu popup;
-    private final SliceSources[] slices;
+    private final Supplier<Collection<SliceSources>> slices;
     final MultiSlicePositioner mp;
     final BdvMultislicePositionerView view;
 
-    public SliceSourcesPopupMenu(MultiSlicePositioner mp, BdvMultislicePositionerView view, SliceSources[] slices ) {
+    public SliceSourcesPopupMenu(MultiSlicePositioner mp, BdvMultislicePositionerView view, Supplier<Collection<SliceSources>> slices ) {
         this.slices = slices;
         this.mp = mp;
         this.view = view;
@@ -115,7 +117,7 @@ public class SliceSourcesPopupMenu {
     {
         popup = new JPopupMenu();
 
-        if (slices.length>0) {
+        if (slices.get().size()>0) {
 
             addPopupAction("Set as Key Slice(s)", (slices) -> {
                 if (slices.length>1) new MarkActionSequenceBatchAction(mp).runRequest();
@@ -147,7 +149,7 @@ public class SliceSourcesPopupMenu {
             });
             */
 
-            addPopupAction("Remove Selected Slices ("+slices.length+")", (slices) -> {
+            addPopupAction("Remove Selected Slices ("+slices.get().size()+")", (slices) -> {
                 if (slices.length>1) new MarkActionSequenceBatchAction(mp).runRequest();
                 for (SliceSources slice : slices) {
                     new DeleteSliceAction(mp, slice).runRequest();
@@ -212,7 +214,7 @@ public class SliceSourcesPopupMenu {
             System.err.println("No action defined for action named "+actionName);
         }
         JMenuItem menuItem = new JMenuItem(actionName);
-        menuItem.addActionListener(e -> action.accept(slices));
+        menuItem.addActionListener(e -> action.accept(slices.get().toArray(new SliceSources[0])));
         popup.add(menuItem);
     }
 
