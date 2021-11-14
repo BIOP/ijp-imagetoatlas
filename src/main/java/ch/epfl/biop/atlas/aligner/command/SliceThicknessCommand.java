@@ -17,7 +17,7 @@ public class SliceThicknessCommand implements Command {
     @Parameter
     MultiSlicePositioner mp;
 
-    @Parameter(label = "Slice thickness in micrometer")
+    @Parameter(label = "Slice thickness in micrometer", style="format:0.00")
     double thickness_in_micrometer;
 
     @Override

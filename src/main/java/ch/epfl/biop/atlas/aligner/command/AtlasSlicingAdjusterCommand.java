@@ -13,12 +13,12 @@ public class AtlasSlicingAdjusterCommand extends InteractiveCommand implements I
     @Parameter(label = "Lock rotations")
     Boolean lockAngles = Boolean.FALSE;
 
-    @Parameter(min = "-45", max = "+45", stepSize = "0.5", style = "slider", label = "X Rotation [deg]",
+    @Parameter(min = "-45", max = "+45", stepSize = "0.5", style = "slider,format:0.0", label = "X Rotation [deg]",
             callback = "changeRotate", persist = false)
     double rotateX = 0;
     double oldRotateX = 0;
 
-    @Parameter(min = "-45", max = "+45", stepSize = "0.5", style = "slider", label = "Y Rotation [deg]",
+    @Parameter(min = "-45", max = "+45", stepSize = "0.5", style = "slider,format:0.0", label = "Y Rotation [deg]",
     callback = "changeRotate", persist = false)
     double rotateY = 0;
     double oldRotateY = 0;

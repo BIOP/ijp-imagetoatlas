@@ -16,7 +16,7 @@ public class SliceRotateCommand implements Command {
     @Parameter(label = "Rotation axis", choices = {"Z","Y","X"})
     String axis_string;
 
-    @Parameter(label = "Angle (degrees)")
+    @Parameter(label = "Angle (degrees)", style="format:0.00")
     double angle_degrees;
 
     @Override
