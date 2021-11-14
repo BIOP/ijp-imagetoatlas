@@ -114,7 +114,7 @@
 		<bigdataviewer-biop-tools.version>0.2.34</bigdataviewer-biop-tools.version>
 
 		<bigdataviewer-selector.version>0.1.9</bigdataviewer-selector.version>
-		<scijava.app.directory>C:\Users\nicol\Desktop\fiji-win64-ABBA\Fiji.app</scijava.app.directory>
+		<scijava.app.directory>C:\fiji-win64\Fiji.app</scijava.app.directory>
 
 		<bigdataviewer-core.version>10.2.1</bigdataviewer-core.version>
 		<bigdataviewer-vistools.version>1.0.0-beta-29</bigdataviewer-vistools.version>
