@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SpimData version="0.2">
+  <BasePath type="relative">_bdvdataset_27.xml</BasePath>
+  <SequenceDescription>
+    <ImageLoader format="spimreconstruction.biop_virtualstackimageplusimageloader">
+      <imageplus_filepath>Untitled</imageplus_filepath>
+      <imageplus_time_origin>0</imageplus_time_origin>
+    </ImageLoader>
+    <ViewSetups>
+      <ViewSetup>
+        <id>0</id>
+        <name>demoSlice.tif channel 1</name>
+        <size>580 397 1</size>
+        <voxelSize>
+          <unit>pixel</unit>
+          <size>0.01500000015 0.01500000015 1.0</size>
+        </voxelSize>
+        <attributes>
+          <channel>1</channel>
+          <displaysettings>1</displaysettings>
+        </attributes>
+      </ViewSetup>
+      <Attributes name="channel">
+        <Channel>
+          <id>1</id>
+          <name>1</name>
+        </Channel>
+      </Attributes>
+      <Attributes name="displaysettings">
+        <Displaysettings>
+          <id>1</id>
+          <isset>true</isset>
+          <color>255 255 255 255</color>
+          <min>0.0</min>
+          <max>255.0</max>
+          <Projection_Mode>Sum</Projection_Mode>
+        </Displaysettings>
+      </Attributes>
+    </ViewSetups>
+    <Timepoints type="range">
+      <first>0</first>
+      <last>0</last>
+    </Timepoints>
+  </SequenceDescription>
+  <ViewRegistrations>
+    <ViewRegistration timepoint="0" setup="0">
+      <ViewTransform type="affine">
+        <affine>0.01500000015 0.0 0.0 0.0 0.0 0.01500000015 0.0 0.0 0.0 0.0 1.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+  </ViewRegistrations>
+</SpimData>

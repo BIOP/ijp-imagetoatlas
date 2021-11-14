@@ -1,13 +1,12 @@
 package ch.epfl.biop.abba.plugin.py;
 
 import bdv.viewer.SourceAndConverter;
-import ch.epfl.biop.atlas.ABBACommand;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
-import ch.epfl.biop.atlas.aligner.sourcepreprocessors.SourcesChannelsSelect;
-import ch.epfl.biop.atlas.aligner.sourcepreprocessors.SourcesProcessorHelper;
-import ch.epfl.biop.atlas.plugin.SimpleRegistrationWrapper;
-import ch.epfl.biop.bdv.command.importer.SourceFromImagePlusCommand;
+import ch.epfl.biop.atlas.aligner.command.ABBAStartCommand;
+import ch.epfl.biop.atlas.aligner.plugin.SimpleRegistrationWrapper;
+import ch.epfl.biop.scijava.command.spimdata.SourceFromImagePlusCommand;
+import ch.epfl.biop.sourceandconverter.processor.SourcesChannelsSelect;
 import ij.IJ;
 import ij.ImagePlus;
 import net.imagej.ImageJ;
@@ -42,7 +41,7 @@ public class TestExternalRegistrationPlugin {
 
 
         // --------------- Starting ABBA
-        MultiSlicePositioner mp = (MultiSlicePositioner) ij.command().run(ABBACommand.class, true).get().getOutput("mp");
+        MultiSlicePositioner mp = (MultiSlicePositioner) ij.command().run(ABBAStartCommand.class, true).get().getOutput("mp");
 
         ImagePlus demoSlice = IJ.openImage("src/test/resources/demoSlice.tif");
         demoSlice.show();
@@ -55,9 +54,9 @@ public class TestExternalRegistrationPlugin {
 
         mp.waitForTasks();
 
-        SliceSources slice = mp.getSortedSlices().get(0);
+        SliceSources slice = mp.getSlices().get(0);
 
-        mp.centerBdvViewOn(slice);
+        //mp.centerBdvViewOn(slice);
         mp.selectSlice(slice);
 
         /*mp.register(rotationRegName,

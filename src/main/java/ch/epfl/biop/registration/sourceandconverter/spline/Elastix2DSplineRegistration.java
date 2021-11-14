@@ -5,13 +5,12 @@ import bdv.util.BdvHandle;
 import bdv.viewer.DisplayMode;
 import bdv.viewer.Interpolation;
 import bdv.viewer.SourceAndConverter;
-import ch.epfl.biop.atlas.aligner.MultiSliceObserver;
-import ch.epfl.biop.atlas.aligner.commands.RegistrationElastixSplineCommand;
-import ch.epfl.biop.atlas.aligner.commands.RegistrationElastixSplineRemoteCommand;
-import ch.epfl.biop.atlas.plugin.IABBARegistrationPlugin;
-import ch.epfl.biop.atlas.plugin.RegistrationTypeProperties;
-import ch.epfl.biop.bdv.command.register.Elastix2DSplineRegisterCommand;
-import ch.epfl.biop.bdv.command.register.Elastix2DSplineRegisterServerCommand;
+import ch.epfl.biop.atlas.aligner.command.RegistrationElastixSplineCommand;
+import ch.epfl.biop.atlas.aligner.command.RegistrationElastixSplineRemoteCommand;
+import ch.epfl.biop.atlas.aligner.plugin.IABBARegistrationPlugin;
+import ch.epfl.biop.atlas.aligner.plugin.RegistrationTypeProperties;
+import ch.epfl.biop.scijava.command.source.register.Elastix2DSplineRegisterCommand;
+import ch.epfl.biop.scijava.command.source.register.Elastix2DSplineRegisterServerCommand;
 import com.google.gson.Gson;
 import ij.gui.WaitForUserDialog;
 import jitk.spline.ThinPlateR2LogRSplineKernelTransform;
@@ -19,7 +18,7 @@ import net.imglib2.RealPoint;
 import net.imglib2.RealRandomAccessible;
 import net.imglib2.realtransform.*;
 import net.imglib2.realtransform.inverse.WrappedIterativeInvertibleRealTransform;
-import net.imglib2.type.numeric.integer.UnsignedShortType;
+import net.imglib2.type.numeric.IntegerType;
 import org.scijava.command.Command;
 import org.scijava.command.CommandModule;
 import org.scijava.command.CommandService;
@@ -97,6 +96,8 @@ public class Elastix2DSplineRegistration extends RealTransformSourceAndConverter
             // Necessary for CommandService
             List<Object> flatParameters = new ArrayList<>(parameters.size()*2+4);
 
+            double voxSizeInMm = Double.parseDouble(parameters.get("pxSizeInCurrentUnit"));
+
             parameters.keySet().forEach(k -> {
                 flatParameters.add(k);
                 flatParameters.add(parameters.get(k));
@@ -120,13 +121,11 @@ public class Elastix2DSplineRegistration extends RealTransformSourceAndConverter
                     // Atlas image : a single timepoint
                     "tpFixed", 0,
                     // Level 2 for the atlas
-                    "levelFixedSource", 1,
+                    "levelFixedSource", SourceAndConverterHelper.bestLevel(fimg[0], timePoint, voxSizeInMm),
                     // Timepoint moving source (normally 0)
                     "tpMoving", timePoint,
                     // Tries to be clever for the moving source sampling
-                    "levelMovingSource", SourceAndConverterHelper.bestLevel(fimg[0], timePoint, 0.02),
-                    // 40 microns per pixel for the initial registration
-                    "pxSizeInCurrentUnit", 0.02
+                    "levelMovingSource", SourceAndConverterHelper.bestLevel(mimg[0], timePoint, voxSizeInMm)
                     );
 
              task = context
@@ -232,8 +231,7 @@ public class Elastix2DSplineRegistration extends RealTransformSourceAndConverter
                     ptsTarget.add(ptTarget);
                 }
 
-                // Beurk - Unsigned short type : TODO removes this type specificity
-                RealRandomAccessible<UnsignedShortType> mask = fimg_mask[0].getSpimSource().getInterpolatedSource(timePoint,0, Interpolation.NEARESTNEIGHBOR);
+                RealRandomAccessible<IntegerType> mask = fimg_mask[0].getSpimSource().getInterpolatedSource(timePoint,0, Interpolation.NEARESTNEIGHBOR);
 
                 AffineTransform3D at3D = new AffineTransform3D();
                 fimg_mask[0].getSpimSource().getSourceTransform(timePoint,0,at3D);
@@ -243,7 +241,7 @@ public class Elastix2DSplineRegistration extends RealTransformSourceAndConverter
                     at3D.inverse().apply(ptsTarget.get(i), ptsTarget.get(i));
                     at3D.inverse().apply(ptsSource.get(i), ptsSource.get(i));
 
-                    if ((mask.getAt(ptsSource.get(i)).get() == 0) && (mask.getAt(ptsTarget.get(i)).get() == 0)) {
+                    if ((mask.getAt(ptsSource.get(i)).getInteger() == 0) && (mask.getAt(ptsTarget.get(i)).getInteger() == 0)) {
 
                     } else {
                         landMarksToKeep.add(i);
@@ -252,7 +250,7 @@ public class Elastix2DSplineRegistration extends RealTransformSourceAndConverter
 
                 if (landMarksToKeep.size()<4) {
                     // Too many landmarks removed
-                    System.out.println("Too few landmarks after pruning - skip pruning");
+                    System.err.println("Too few landmarks after pruning - skip pruning");
                     return input;
                 }
 
@@ -324,7 +322,6 @@ public class Elastix2DSplineRegistration extends RealTransformSourceAndConverter
 
         if (rt!=null) {
             bwl.getBigWarp().loadLandmarks(BigWarpFileFromRealTransform(rt));
-            //bwl.getBigWarp().setInLandmarkMode(true);
             bwl.getBigWarp().setIsMovingDisplayTransformed(true);
         }
 

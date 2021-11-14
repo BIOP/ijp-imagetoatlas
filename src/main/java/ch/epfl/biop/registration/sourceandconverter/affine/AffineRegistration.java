@@ -1,26 +1,13 @@
 package ch.epfl.biop.registration.sourceandconverter.affine;
 
 import bdv.viewer.SourceAndConverter;
-import ch.epfl.biop.atlas.aligner.commands.RegistrationElastixAffineCommand;
-import ch.epfl.biop.atlas.aligner.commands.RegistrationElastixAffineRemoteCommand;
-import ch.epfl.biop.atlas.plugin.IABBARegistrationPlugin;
-import ch.epfl.biop.atlas.plugin.RegistrationTypeProperties;
-import ch.epfl.biop.bdv.command.register.Elastix2DAffineRegisterCommand;
-import ch.epfl.biop.bdv.command.register.Elastix2DAffineRegisterServerCommand;
+import ch.epfl.biop.atlas.aligner.plugin.IABBARegistrationPlugin;
+import ch.epfl.biop.atlas.aligner.plugin.RegistrationTypeProperties;
 import com.google.gson.Gson;
 import net.imglib2.realtransform.AffineTransform3D;
-import net.imglib2.realtransform.AffineTransform3DAdapter;
-import org.scijava.command.Command;
-import org.scijava.command.CommandModule;
-import org.scijava.command.CommandService;
 import org.scijava.plugin.Plugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Future;
 
 /**
  * To make an affine transform programmatically conveniently

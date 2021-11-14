@@ -1,26 +1,7 @@
 {
-  "displayMode": 0,
-  "sliceDisplayMode": 0,
-  "overlapMode": 2,
   "iCurrentSlice": 0,
   "rotationX": 0.0,
   "rotationY": 0.0,
-  "bdvView": {
-    "affinetransform3d": [
-      1.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      1.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      1.0,
-      0.0
-    ]
-  },
   "slices_state_list": [
     {
       "preTransform": {
@@ -41,7 +22,7 @@
       },
       "actions": [
         {
-          "type": "CreateSlice",
+          "type": "CreateSliceAction",
           "original_sources": {
             "source_indexes": [
               0
@@ -52,7 +33,7 @@
           "final_zShiftCorrection": 0.0
         },
         {
-          "type": "RegisterSlice",
+          "type": "RegisterSliceAction",
           "fixed_sources_preprocess": {
             "type": "SourcesProcessComposer",
             "f1": {
@@ -113,12 +94,13 @@
           },
           "registration": {
             "type": "Elastix2DAffineRegistration",
-            "transform": "{\"affinetransform3d\":[0.9189023818707905,0.006992298746075787,0.0,-0.09749108381977045,0.05286994470864954,1.111264093082724,0.0,-0.006397821218466326,0.0,0.0,1.0,0.0]}",
+            "transform": "{\n  \"affinetransform3d\": [\n    0.9099279494126155,\n    0.005874569193925302,\n    0.0,\n    -0.10160418314458841,\n    0.05127442444261913,\n    1.0997999883679783,\n    0.0,\n    -0.05510476622640592,\n    0.0,\n    0.0,\n    1.0,\n    0.0\n  ]\n}",
             "parameters": {
               "showImagePlusRegistrationResult": "true",
               "background_offset_value_moving": "0.0",
               "sx": "13.11",
               "sy": "9.19",
+              "pxSizeInCurrentUnit": "0.04",
               "px": "-6.555",
               "py": "-4.595",
               "background_offset_value_fixed": "0.0"
@@ -126,26 +108,7 @@
           }
         }
       ],
-      "settings_per_channel": [
-        {
-          "color": [
-            255,
-            255,
-            255,
-            255
-          ],
-          "min": 0.0,
-          "max": 255.0,
-          "isSet": true,
-          "projectionMode": "Sum",
-          "name": "vs:-1",
-          "id": -1
-        }
-      ],
-      "sliceVisibleUser": false,
-      "channelsVisibility": [
-        false
-      ]
+      "sliceVisibleUser": true
     }
   ]
 }

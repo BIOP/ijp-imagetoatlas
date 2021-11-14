@@ -3,16 +3,21 @@ package ch.epfl.biop.atlas.aligner;
 import bdv.util.BoundedRealTransform;
 import bdv.util.QuPathBdvHelper;
 import bdv.viewer.SourceAndConverter;
-import ch.epfl.biop.atlas.AtlasNode;
-import ch.epfl.biop.atlas.aligner.sourcepreprocessors.*;
-import ch.epfl.biop.atlas.commands.ConstructROIsFromImgLabel;
-import ch.epfl.biop.atlas.plugin.RegistrationPluginHelper;
+import ch.epfl.biop.atlas.aligner.action.CancelableAction;
+import ch.epfl.biop.atlas.aligner.action.CreateSliceAction;
+import ch.epfl.biop.atlas.aligner.action.RegisterSliceAction;
+import ch.epfl.biop.atlas.struct.AtlasNode;
+import ch.epfl.biop.atlas.struct.AtlasOntology;
+import ch.epfl.biop.atlas.struct.AtlasHelper;
+import ch.epfl.biop.atlas.aligner.plugin.RegistrationPluginHelper;
 import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
+import ch.epfl.biop.java.utilities.roi.SelectToROIKeepLines;
 import ch.epfl.biop.java.utilities.roi.types.CompositeFloatPoly;
 import ch.epfl.biop.java.utilities.roi.types.IJShapeRoiArray;
 import ch.epfl.biop.java.utilities.roi.types.ImageJRoisFile;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import ch.epfl.biop.registration.sourceandconverter.spline.RealTransformSourceAndConverterRegistration;
+import ch.epfl.biop.sourceandconverter.processor.*;
 import ch.epfl.biop.spimdata.qupath.QuPathEntryEntity;
 import ch.epfl.biop.registration.Registration;
 import ch.epfl.biop.registration.sourceandconverter.affine.AffineTransformedSourceWrapperRegistration;
@@ -21,12 +26,20 @@ import com.google.gson.Gson;
 import ij.ImagePlus;
 import ij.gui.Roi;
 import ij.plugin.frame.RoiManager;
+import ij.process.FloatProcessor;
+import ij.process.ImageProcessor;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import mpicbg.spim.data.generic.sequence.BasicViewSetup;
+import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealInterval;
 import net.imglib2.RealPoint;
+import net.imglib2.converter.Converter;
+import net.imglib2.converter.Converters;
+import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.realtransform.*;
 import net.imglib2.realtransform.inverse.WrappedIterativeInvertibleRealTransform;
+import net.imglib2.type.numeric.IntegerType;
+import net.imglib2.type.numeric.real.FloatType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
@@ -43,9 +56,7 @@ import spimdata.util.Displaysettings;
 
 import java.awt.*;
 import java.io.*;
-import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.List;
@@ -67,7 +78,7 @@ public class SliceSources {
 
     protected static Logger logger = LoggerFactory.getLogger(SliceSources.class);
 
-    final private SliceSourcesGUIState guiState; // in here ? GOod idea ?
+    //final private SliceSourcesGUIState guiState; // in here ? GOod idea ?
 
     // What are they ?
     final SourceAndConverter<?>[] original_sacs;
@@ -137,18 +148,13 @@ public class SliceSources {
         zPositioner = new AffineTransformedSourceWrapperRegistration();
         preTransform = new AffineTransformedSourceWrapperRegistration();
 
-        if (mp.hasGUI()) {
-            guiState = new SliceSourcesGUIState(this, mp);
-        } else {
-            guiState = new SliceSourcesNoGUIState(this, mp);
-        }
-
         runRegistration(centerPositioner, new SourcesIdentity(), new SourcesIdentity());
         runRegistration(preTransform, new SourcesIdentity(), new SourcesIdentity());
         runRegistration(zPositioner, new SourcesIdentity(), new SourcesIdentity());
         waitForEndOfTasks();
         updateZPosition();
-        guiState.positionChanged();
+        //mp.positionZChanged(slice);
+        positionChanged();
 
         computeZThickness();
 
@@ -158,6 +164,10 @@ public class SliceSources {
             mp.errlog.accept("Couldn't name slice");
             e.printStackTrace();
         }
+    }
+
+    private void positionChanged() {
+        // TODO
     }
 
     protected double zThicknessCorrection;
@@ -180,10 +190,6 @@ public class SliceSources {
         return name;
     }
 
-    public SliceSourcesGUIState getGUIState() {
-        return guiState;
-    }
-
     public synchronized SourceAndConverter<?>[] getRegisteredSources() {
         return registered_sacs;
     }
@@ -192,10 +198,13 @@ public class SliceSources {
         return slicingAxisPosition;
     }
 
-    protected void setSlicingAxisPosition(double newSlicingAxisPosition) {
+    /**
+     * SHOULD NOT BE USED! Use MoveSliceAction instead!
+     * @param newSlicingAxisPosition
+     */
+    public void setSlicingAxisPosition(double newSlicingAxisPosition) {
         slicingAxisPosition = newSlicingAxisPosition;
         updateZPosition();
-        guiState.positionChanged();
     }
 
     public void setSliceThickness(double zBeginInMm, double zEndInMm) {
@@ -210,7 +219,6 @@ public class SliceSources {
         setSliceThickness(zEndInMm-zBeginInMm);
         zShiftCorrection = ((zEndInMm+zBeginInMm) / 2) - slicingAxisPosition;
         updateZPosition();
-
     }
 
     public double getZAxisPosition() {
@@ -281,7 +289,6 @@ public class SliceSources {
 
     }
 
-
     public SourceAndConverter<?>[] getOriginalSources() {
         return original_sacs;
     }
@@ -289,14 +296,14 @@ public class SliceSources {
     public synchronized void select() {
         if (!this.isSelected) {
             this.isSelected = true;
-            guiState.select();
+            mp.sliceSelected(this);
         }
     }
 
     public void deSelect() {
         if (this.isSelected) {
             this.isSelected = false;
-            guiState.deselect();
+            mp.sliceDeselected(this);
         }
     } // TODO : thread lock!
 
@@ -314,13 +321,14 @@ public class SliceSources {
         zShiftAffineTransform.translate(0, 0, slicingAxisPosition+zShiftCorrection);
         zPositioner.setAffineTransform(zShiftAffineTransform); // Moves the registered slices to the correct position
         si.updateBox();
+        mp.positionZChanged(this);
     }
 
     protected void setIndex(int idx) {
         currentSliceIndex = idx;
     }
 
-    protected String getActionState(CancelableAction action) {
+    public String getActionState(CancelableAction action) {
         if ((action!=null)&&(action == actionInProgress)) {
             return "(pending)";
         }
@@ -386,6 +394,7 @@ public class SliceSources {
 
     public void transformSourceOrigin(AffineTransform3D at3D) {
         preTransform.setAffineTransform(at3D);
+        mp.slicePreTransformChanged(this);
     }
 
     public AffineTransform3D getTransformSourceOrigin() {
@@ -395,7 +404,7 @@ public class SliceSources {
     public void rotateSourceOrigin(int axis, double angle) {
         AffineTransform3D at3d = preTransform.getAffineTransform();
         at3d.rotate(axis, angle);
-        preTransform.setAffineTransform(at3d);
+        transformSourceOrigin(at3d);
     }
 
     public int getNumberOfRegistrations() {
@@ -416,24 +425,25 @@ public class SliceSources {
         registered_sacs = reg.getTransformedImageMovingToFixed(registered_sacs);
         registered_sacs_sequence.add(new RegistrationAndSources(reg, registered_sacs));
         registrations.add(reg);
-        mp.mso.updateInfoPanel(this);
-        guiState.sourcesChanged();
 
     }
 
+    public void sourcesChanged() {
+        // TODO : notify
+        mp.notifySourcesChanged(this);
+    }
+
     private boolean performRegistration(Registration<SourceAndConverter<?>[]> reg,
-                                       SourcesProcessor
-                                               preprocessFixed,
-                                       SourcesProcessor
-                                                preprocessMoving) {
+                                       SourcesProcessor preprocessFixed,
+                                       SourcesProcessor preprocessMoving) {
         reg.setFixedImage(preprocessFixed.apply(mp.reslicedAtlas.nonExtendedSlicedSources));
         reg.setMovingImage(preprocessMoving.apply(registered_sacs));
 
         // For the mask : we set it as the label image, pre processed identically
         // 0 - remove channel select from pre processor
         SourcesProcessor fixedProcessor = SourcesProcessorHelper.removeChannelsSelect(preprocessFixed);
-        // 1 - adds a channel select for the atlas (indexed 3) TODO : improve way to select indexing
-        fixedProcessor = new SourcesProcessComposer(fixedProcessor, new SourcesChannelsSelect(mp.reslicedAtlas.nonExtendedSlicedSources.length-1));
+        // 1 - adds a channel select for the atlas
+        fixedProcessor = new SourcesProcessComposer(fixedProcessor, new SourcesChannelsSelect(mp.reslicedAtlas.getLabelSourceIndex()));
         reg.setFixedMask(fixedProcessor.apply(mp.reslicedAtlas.nonExtendedSlicedSources));
 
         boolean out = reg.register();
@@ -450,13 +460,9 @@ public class SliceSources {
      *
      * @param reg the registration to perform
      */
-    protected boolean runRegistration(Registration<SourceAndConverter<?>[]> reg,
-                                SourcesProcessor //Function<SourceAndConverter[], SourceAndConverter[]>
-                                        preprocessFixed,
-                                //Function<SourceAndConverter[], SourceAndConverter[]>
-                                SourcesProcessor
-                                              preprocessMoving) {
-
+    public boolean runRegistration(Registration<SourceAndConverter<?>[]> reg,
+                                   SourcesProcessor preprocessFixed,
+                                   SourcesProcessor preprocessMoving) {
         if (RegistrationPluginHelper.isManual(reg)) {
             //Waiting for manual lock release...
             synchronized (MultiSlicePositioner.manualActionLock) {
@@ -466,10 +472,9 @@ public class SliceSources {
         } else {
             return performRegistration(reg,preprocessFixed, preprocessMoving);
         }
-
     }
 
-    protected synchronized boolean removeRegistration(Registration reg) {
+    public synchronized boolean removeRegistration(Registration reg) {
         if (registrations.contains(reg)) {
             int idx = registrations.indexOf(reg);
             if (idx == registrations.size() - 1) {
@@ -480,7 +485,7 @@ public class SliceSources {
 
                 registered_sacs = registered_sacs_sequence.get(registered_sacs_sequence.size()-1).sacs;
 
-                guiState.sourcesChanged();
+                sourcesChanged();
 
                 return true;
             } else {
@@ -503,7 +508,9 @@ public class SliceSources {
                 if (out) {
                     actionInProgress = action;
                     logger.debug(this+": action "+action+" started");
+                    mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.actionStarted(action.getSliceSources(), action));
                     boolean result = action.run();
+                    mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.actionFinished(action.getSliceSources(), action, result));
                     logger.debug(this+": action "+action+" result "+result);
                     if (result) {
                         actionInProgress = null;
@@ -515,7 +522,6 @@ public class SliceSources {
                             tasks.remove(future);
                         }
                         mapActionTask.remove(action);
-                        mp.mso.cancelInfo(action);
                         mp.userActions.remove(action);
                     }
                     return result;
@@ -526,7 +532,6 @@ public class SliceSources {
                         tasks.remove(future);
                     }
                     mapActionTask.remove(action);
-                    mp.mso.cancelInfo(action);
                     mp.userActions.remove(action);
                     return false;
                 }
@@ -542,21 +547,24 @@ public class SliceSources {
                 if (mapActionTask.get(action).isDone() || ((action!=null)&&(action == this.actionInProgress))) {
 
                     if (action==actionInProgress) {
-                        if (actionInProgress instanceof RegisterSlice) {
-                            // Special case : let's abort ASAP the registration to avoid overloading the server
+                       if (actionInProgress instanceof RegisterSliceAction) {
+                           mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.actionCancelStarted(action.getSliceSources(), action));
+                           boolean result;
+
+                           // Special case : let's abort ASAP the registration to avoid overloading the server
                             logger.debug("Aborting register slice action :  "+actionInProgress);
-                            ((RegisterSlice) actionInProgress).registration.abort();
+                            ((RegisterSliceAction) actionInProgress).getRegistration().abort();
                             //postRun.run();
-                            action.cancel();
+                            result = action.cancel();
                             if (mapActionTask.containsKey(action)) {
                                 CompletableFuture future = mapActionTask.get(action);
                                 tasks.remove(future);
                             }
                             mapActionTask.remove(action);
-                            mp.mso.cancelInfo(action);
                             mp.userActions.remove(action);
                             postRun.run();
-                        }
+                            mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.actionCancelFinished(action.getSliceSources(), action, result));
+                       }
                     } else {
                         CompletableFuture<Boolean> startingPoint;
                         if (tasks.size() == 0) {
@@ -566,26 +574,33 @@ public class SliceSources {
                         }
                         tasks.add(startingPoint.thenApplyAsync((out) -> {
                             if (out) {
+                                mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.actionCancelStarted(action.getSliceSources(), action));
                                 boolean result = action.cancel();
                                 tasks.remove(mapActionTask.get(action));
                                 mapActionTask.remove(action);
                                 postRun.run();
+                                mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.actionCancelFinished(action.getSliceSources(), action, result));
                                 return result;
                             } else {
+                                logger.error("Weird edge case!");
                                 return false;
                             }
                         }));
                     }
                 } else {
+                    mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.actionCancelStarted(action.getSliceSources(), action));
                     // Not done yet! - let's remove right now from the task list
-                    mapActionTask.get(action).cancel(true);
+                    boolean result = mapActionTask.get(action).cancel(true);
                     tasks.remove(mapActionTask.get(action));
                     mapActionTask.remove(action);
                     postRun.run();
+                    mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.actionCancelFinished(action.getSliceSources(), action, result));
                 }
-            } else if (action instanceof CreateSlice) {
+            } else if (action instanceof CreateSliceAction) {
+                mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.actionCancelStarted(action.getSliceSources(), action));
                 waitForEndOfTasks();
-                action.cancel();
+                boolean result = action.cancel();
+                mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.actionCancelFinished(action.getSliceSources(), action, result));
             } else {
                 mp.errlog.accept("Unregistered action");
             }
@@ -610,7 +625,7 @@ public class SliceSources {
         translateZ.translate(0, 0, -slicingAxisPosition);
 
         SourceAndConverter sac =
-                mp.reslicedAtlas.nonExtendedSlicedSources[mp.reslicedAtlas.nonExtendedSlicedSources.length-1]; // By convention the label image is the last one
+                mp.reslicedAtlas.nonExtendedSlicedSources[mp.reslicedAtlas.getLabelSourceIndex()]; // By convention the label image is the last one
 
         sac = resampler.apply(sac);
         sac = SourceTransformHelper.createNewTransformedSourceAndConverter(translateZ, new SourceAndConverterAndTimeRange(sac, 0));
@@ -620,22 +635,25 @@ public class SliceSources {
 
         List<SourceAndConverter<?>> sourceList = new ArrayList<>();
         sourceList.add(sac);
-        impLabelImage =
-                ImagePlusHelper.wrap(sourceList.stream().map(s -> (SourceAndConverter) s).collect(Collectors.toList()), mapSacToMml,
-                        0, 1, 1);
 
-        ConstructROIsFromImgLabel labelToROIs = new ConstructROIsFromImgLabel();
-        labelToROIs.atlas = mp.biopAtlas;
-        labelToROIs.labelImg = impLabelImage;
-        labelToROIs.smoothen = false;
-        labelToROIs.run();
-        cvtRoisOrigin = labelToROIs.cr_out;
+        if (!(sourceList.get(0).getSpimSource().getType() instanceof IntegerType)) {
+            logger.error("Label image is not integer typed! Type = "+sourceList.get(0).getSpimSource().getType().getClass().getSimpleName());
+            return;
+        }
+
+        RandomAccessibleInterval<IntegerType<?>> raiLabel = (RandomAccessibleInterval<IntegerType<?>>) sourceList.get(0).getSpimSource().getSource(0,0);
+
+        RandomAccessibleInterval<FloatType> cvtRai = convertedRai(raiLabel);
+
+        impLabelImage = ImageJFunctions.wrap(cvtRai, "Labels");
+
+        cvtRoisOrigin = constructROIsFromImgLabel(mp.getAtlas().getOntology(), impLabelImage);
 
         at3DLastLabelImage = at3D;
         labelImageBeingComputed = false;
 
         // Now Left Right:
-        sac = mp.reslicedAtlas.nonExtendedSlicedSources[mp.reslicedAtlas.nonExtendedSlicedSources.length-2]; // Don't know why this is working
+        sac = mp.reslicedAtlas.nonExtendedSlicedSources[mp.reslicedAtlas.getLeftRightSourceIndex()]; // Don't know why this is working
 
         sac = resampler.apply(sac);
         sac = SourceTransformHelper.createNewTransformedSourceAndConverter(translateZ, new SourceAndConverterAndTimeRange(sac, 0));
@@ -649,8 +667,17 @@ public class SliceSources {
                 ImagePlusHelper.wrap(sourceList.stream().map(s -> (SourceAndConverter) s).collect(Collectors.toList()), mapSacToMml,
                         0, 1, 1);
 
-
         leftRightOrigin.set(ConvertibleRois.labelImageToRoiArrayKeepSinglePixelPrecision(leftRightImage));
+    }
+
+    private RandomAccessibleInterval<FloatType> convertedRai(RandomAccessibleInterval<IntegerType<?>> raiLabel) {
+        Converter<IntegerType<?>, FloatType> cvt = new Converter<IntegerType<?>, FloatType>() {
+            @Override
+            public void convert(IntegerType<?> integerType, FloatType floatType) {
+                floatType.set(Float.intBitsToFloat(integerType.getInteger()));
+            }
+        };
+        return Converters.convert(raiLabel, cvt, new FloatType());
     }
 
     void prepareExport(String namingChoice) {
@@ -681,9 +708,10 @@ public class SliceSources {
         for (int i=0;i<roiList.rois.size();i++) {
             CompositeFloatPoly roi = roiList.rois.get(i);
             int atlasId = Integer.parseInt(roi.name);
-            AtlasNode node = mp.biopAtlas.ontology.getNodeFromId(atlasId);
+            AtlasNode node = mp.getAtlas().getOntology().getNodeFromId(atlasId);
             roi.name = node.data().get(namingChoice);
-            roi.color = mp.biopAtlas.ontology.getColor(node);
+            int[] color = node.getColor();
+            roi.color = new Color(color[0], color[1], color[2], color[3]);//mp.getAtlas().getOntology().getColor(node);
         }
 
         IJShapeRoiArray roiArray = (IJShapeRoiArray) leftRightTranformed.to(IJShapeRoiArray.class);
@@ -700,12 +728,12 @@ public class SliceSources {
         roiList.rois.add(new CompositeFloatPoly(right));
     }
 
-    protected synchronized void exportRegionsToROIManager(String namingChoice) {
+    public synchronized void exportRegionsToROIManager(String namingChoice) {
         prepareExport(namingChoice);
         cvtRoisTransformed.to(RoiManager.class);
     }
 
-    protected synchronized void exportToQuPathProject(boolean erasePreviousFile) {
+    public synchronized void exportToQuPathProject(boolean erasePreviousFile) {
         prepareExport("id");
 
         ImageJRoisFile ijroisfile = (ImageJRoisFile) cvtRoisTransformed.to(ImageJRoisFile.class);
@@ -713,7 +741,7 @@ public class SliceSources {
         storeInQuPathProjectIfExists(ijroisfile, erasePreviousFile);
     }
 
-    protected synchronized void exportRegionsToFile(String namingChoice, File dirOutput, boolean erasePreviousFile) {
+    public synchronized void exportRegionsToFile(String namingChoice, File dirOutput, boolean erasePreviousFile) {
 
         prepareExport(namingChoice);
 
@@ -745,7 +773,7 @@ public class SliceSources {
     }
 
     public RealTransform getSlicePixToCCFRealTransform() {
-        return getSlicePixToCCFRealTransform(0,0.002, 200);
+        return getSlicePixToCCFRealTransform(0,mp.getAtlas().getMap().getAtlasPrecisionInMillimeter()/5.0, 200);
     }
 
     boolean isWrapped(RealTransform rt) {
@@ -776,7 +804,6 @@ public class SliceSources {
                 ((WrappedIterativeInvertibleRealTransform<?>) transform).getOptimzer().setMaxIters(maxIteration);
                 break;
             }
-            System.out.println(transform.getClass());
         }
     }
 
@@ -819,7 +846,7 @@ public class SliceSources {
     private void storeInQuPathProjectIfExists(ImageJRoisFile ijroisfile, boolean erasePreviousFile) {
 
         if (!QuPathBdvHelper.isSourceLinkedToQuPath(original_sacs[0])) {
-            mp.errlog.accept("Slice"+toString()+" not linked to a QuPath dataset");
+            mp.errlog.accept("Slice "+this+" not linked to a QuPath dataset");
         }
         File dataEntryFolder = null;
 
@@ -830,7 +857,7 @@ public class SliceSources {
             String projectFolderPath = QuPathBdvHelper.getQuPathProjectFile(original_sacs[0]).getParent();
             logger.debug("QuPath Project Folder = "+projectFolderPath);
 
-            File f = new File(dataEntryFolder, "ABBA-RoiSet.zip");
+            File f = new File(dataEntryFolder, "ABBA-RoiSet-"+mp.getAtlas().getName()+".zip");
             mp.log.accept("Save slice ROI to quPath project " + f.getAbsolutePath());
 
             if (f.exists()) {
@@ -854,13 +881,12 @@ public class SliceSources {
             RealTransform transform = getSlicePixToCCFRealTransform();
 
             if (transform!=null) {
-                File ftransform = new File(dataEntryFolder, "ABBA-Transform.json");
+                File ftransform = new File(dataEntryFolder, "ABBA-Transform-"+mp.getAtlas().getName()+".json");
                 mp.log.accept("Save transformation to quPath project " + ftransform.getAbsolutePath());
 
                 Gson gson = ScijavaGsonHelper.getGsonBuilder(mp.scijavaCtx, false).setPrettyPrinting().create();
 
                 String transform_string = gson.toJson(transform, RealTransform.class);
-
 
                 if (ftransform.exists()) {
                     if (erasePreviousFile) {
@@ -885,21 +911,10 @@ public class SliceSources {
 
     }
 
-    // statically synchronized to avoid race conditions in file writing
     static public synchronized void writeOntotogyIfNotPresent(MultiSlicePositioner mp, String quPathFilePath) {
-        File ontology = new File(quPathFilePath, "AllenMouseBrainOntology.json");
+        File ontology = new File(quPathFilePath, mp.getAtlas().getName()+"-Ontology.json");
         if (!ontology.exists()) {
-            try {
-                URL ontologyURL = mp.biopAtlas.ontology.getDataSource();
-                if (ontologyURL.getFile()==null) {
-                    mp.errlog.accept("No ontology file found at location "+ontologyURL);
-                    return;
-                }
-                Path originalOntologyFile = Paths.get(ontologyURL.toURI());
-                Files.copy(originalOntologyFile, Paths.get(quPathFilePath, "AllenMouseBrainOntology.json"));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            AtlasHelper.saveOntologyToJsonFile(mp.getAtlas().getOntology(), ontology.getAbsolutePath());
         }
     }
 
@@ -907,7 +922,7 @@ public class SliceSources {
         if (!name.equals("") ) {
             return name;
         } else {
-            int index = mp.getSortedSlices().indexOf(this);
+            int index = mp.getSlices().indexOf(this);
             return "Slice_"+index;
         }
     }
@@ -976,13 +991,8 @@ public class SliceSources {
         return new RealPointList(cvtList);
     }
 
-    protected void editLastRegistration(
-        //Function<SourceAndConverter[], SourceAndConverter[]>
-        SourcesProcessor
-                preprocessFixed,
-        //Function<SourceAndConverter[], SourceAndConverter[]>
-        SourcesProcessor
-                preprocessMoving) {
+    public void editLastRegistration(SourcesProcessor preprocessFixed,
+                                     SourcesProcessor preprocessMoving) {
         Registration reg = this.registrations.get(registrations.size() - 1);
         if (RegistrationPluginHelper.isEditable(reg)) {
             mp.log.accept("Edition will begin when the manual lock is acquired");
@@ -998,8 +1008,8 @@ public class SliceSources {
 
                 // 0 - remove channel select from pre processor
                 SourcesProcessor fixedProcessor = SourcesProcessorHelper.removeChannelsSelect(preprocessFixed);
-                // 1 - adds a channel select for the atlas (indexed 3) TODO : improve way to select indexing
-                fixedProcessor = new SourcesProcessComposer(fixedProcessor, new SourcesChannelsSelect(mp.reslicedAtlas.nonExtendedSlicedSources.length-1));
+                // 1 - adds a channel select for the atlas
+                fixedProcessor = new SourcesProcessComposer(fixedProcessor, new SourcesChannelsSelect(mp.reslicedAtlas.getLabelSourceIndex()));
                 reg.setFixedMask(fixedProcessor.apply(mp.reslicedAtlas.nonExtendedSlicedSources));
 
                 reg.edit();
@@ -1008,10 +1018,6 @@ public class SliceSources {
         } else {
             mp.log.accept("The last registration of class "+reg.getClass().getSimpleName()+" is not editable.");
         }
-    }
-
-    public int getAdaptedMipMapLevel(double pxSizeInMm) {
-        return SourceAndConverterHelper.bestLevel(registered_sacs[0],0,pxSizeInMm);
     }
 
     public String getInfo() {
@@ -1064,20 +1070,16 @@ public class SliceSources {
 
     public void keySliceOn() {
         setAsKeySlice = true;
+        mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.sliceKeyOn(this));
     }
 
     public void keySliceOff() {
         setAsKeySlice = false;
+        mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.sliceKeyOff(this));
     }
 
     public boolean isKeySlice() {
         return setAsKeySlice;
-    }
-
-    public void setDisplaysettings(Displaysettings[] ds) {
-        for (int idx = 0; idx<nChannels;idx++) {
-            Displaysettings.applyDisplaysettings(registered_sacs[idx], ds[idx]);
-        }
     }
 
     public static class RegistrationAndSources {
@@ -1110,7 +1112,6 @@ public class SliceSources {
 
         @Override
         public double realMin(int i) {
-            // TODO : fix X and Y issues
             return ptMin.getDoublePosition(i);
         }
 
@@ -1124,4 +1125,152 @@ public class SliceSources {
             return 3;
         }
     }
+
+    private static ConvertibleRois constructROIsFromImgLabel(AtlasOntology ontology, ImagePlus labelImg) {
+
+        ImageProcessor ip = labelImg.getProcessor();
+        float[][] pixels = ip.getFloatArray();
+
+        boolean[][] movablePx = new boolean[ip.getWidth()+1][ip.getHeight()+1];
+        for (int x=1;x<ip.getWidth();x++) {
+            for (int y=1;y<ip.getHeight();y++) {
+                boolean is3Colored = false;
+                boolean isCrossed = false;
+                float p1p1 = pixels[x][y];
+                float p1m1 = pixels[x][y-1];
+                float m1p1 = pixels[x-1][y];
+                float m1m1 = pixels[x-1][y-1];
+                float min = p1p1;
+                if (p1m1<min) min = p1m1;
+                if (m1p1<min) min = m1p1;
+                if (m1m1<min) min = m1m1;
+                float max = p1p1;
+                if (p1m1>max) max = p1m1;
+                if (m1p1>max) max = m1p1;
+                if (m1m1>max) max = m1m1;
+                if (min!=max) {
+                    if ((p1p1!=min)&&(p1p1!=max)) is3Colored=true;
+                    if ((m1p1!=min)&&(m1p1!=max)) is3Colored=true;
+                    if ((p1m1!=min)&&(p1m1!=max)) is3Colored=true;
+                    if ((m1m1!=min)&&(m1m1!=max)) is3Colored=true;
+
+                    if (!is3Colored) {
+                        if ((p1p1==m1m1)&&(p1m1==m1p1)) {
+                            isCrossed=true;
+                        }
+                    }
+                } // if not it's monocolored
+                movablePx[x][y]=(!is3Colored)&&(!isCrossed);
+            }
+        }
+
+        // Hack: re set the label image according to the real id ( Mouse Allen Brain Hack )
+        // Gets all existing values in the image
+        HashSet<Integer> existingLabelValues = new HashSet<>();
+        for (int x=0;x<ip.getWidth();x++) {
+            for (int y=0;y<ip.getHeight();y++) {
+                existingLabelValues.add(Float.floatToRawIntBits(pixels[x][y]));
+            }
+        }
+
+        FloatProcessor fp = new FloatProcessor(ip.getWidth(), ip.getHeight());
+        fp.setFloatArray(pixels);
+        ImagePlus imgFloatCopy = new ImagePlus("FloatLabel",fp);
+
+        HashSet<Integer> existingIdValues = new HashSet<>();
+        existingLabelValues.forEach(v -> {
+            fp.setThreshold( Float.intBitsToFloat(v), Float.intBitsToFloat(v), ImageProcessor.NO_LUT_UPDATE);
+            Roi roi = SelectToROIKeepLines.run(imgFloatCopy, movablePx, true);
+            AtlasNode node = ontology.getNodeFromId(v);
+            if (node!=null) {
+                int correctedId = node.getId();
+                existingIdValues.add(correctedId);
+                fp.setColor(Float.intBitsToFloat(correctedId));
+                fp.fill(roi);
+            }
+        });
+
+        // All the parents of the existing label will be met at some point
+        // keep a list of possible values encountered in the tree
+        HashSet<Integer> possibleIdValues = new HashSet<>();
+        existingIdValues.forEach(id -> {
+            possibleIdValues.addAll(AtlasHelper.getAllParentIds(ontology, id));
+            possibleIdValues.add(id);
+        });
+
+        // We should keep, for each possible values, a way to know
+        // if their are some labels which belong to children labels in the image.
+        Map<Integer, Set<Integer>> childrenContained = new HashMap<>();
+        possibleIdValues.forEach(idValue -> {
+            AtlasNode node = ontology.getNodeFromId(idValue);
+            if (node != null) {
+                Set<Integer> valuesMetInTheImage = node.children().stream()
+                        .map(n -> (AtlasNode) n)
+                        .map(AtlasNode::getId)
+                        .filter(possibleIdValues::contains)
+                        .collect(Collectors.toSet());
+                childrenContained.put(idValue, valuesMetInTheImage);
+            }
+        });
+
+        HashSet<Integer> isLeaf = new HashSet<>();
+        childrenContained.forEach((k,v) -> {
+            if (v.size()==0) {
+                isLeaf.add(k);
+            }
+        });
+
+        boolean containsLeaf=true;
+
+        ArrayList<Roi> roiArray = new ArrayList<>();
+
+        while (containsLeaf) {
+            List<Integer> leavesValues = existingIdValues
+                    .stream()
+                    .filter(v -> isLeaf.contains(v))
+                    .collect(Collectors.toList());
+            leavesValues.forEach(v -> {
+                        fp.setThreshold( Float.intBitsToFloat(v), Float.intBitsToFloat(v), ImageProcessor.NO_LUT_UPDATE);
+                        Roi roi = SelectToROIKeepLines.run(imgFloatCopy, movablePx, true);
+
+                        roi.setName(Integer.toString(v));
+                        roiArray.add(roi);
+
+                        if (ontology.getNodeFromId(v)!=null) {
+                            AtlasNode parent = (AtlasNode) ontology.getNodeFromId(v).parent();
+                            if (parent!=null) {
+
+                                int parentId = parent.getId();
+                                fp.setColor(Float.intBitsToFloat(parentId));
+                                fp.fill(roi);
+                                if (childrenContained.get(parentId)!=null) {
+                                    if (childrenContained.get(v).size()==0) {
+                                        childrenContained.get(parentId).remove(v);
+                                    }
+                                    existingIdValues.add(parentId);
+                                }
+                            }
+                        }
+                    }
+            );
+            existingIdValues.removeAll(leavesValues);
+            leavesValues.forEach(childrenContained::remove);
+            isLeaf.clear();
+            childrenContained.forEach((k,v) -> {
+                        if (v.size()==0) {
+                            isLeaf.add(k);
+                        }
+                    }
+            );
+            containsLeaf = existingIdValues.stream().anyMatch(v -> isLeaf.contains(v));
+        }
+
+        ConvertibleRois cr_out = new ConvertibleRois();
+        IJShapeRoiArray output = new IJShapeRoiArray(roiArray);
+        output.smoothenWithConstrains(movablePx);
+        output.smoothenWithConstrains(movablePx);
+        cr_out.set(output);
+        return cr_out;
+    }
+
 }

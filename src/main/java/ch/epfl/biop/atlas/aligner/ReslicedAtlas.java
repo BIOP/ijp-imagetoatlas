@@ -2,7 +2,8 @@ package ch.epfl.biop.atlas.aligner;
 
 import bdv.tools.transformation.TransformedSource;
 import bdv.viewer.SourceAndConverter;
-import ch.epfl.biop.atlas.BiopAtlas;
+import ch.epfl.biop.atlas.struct.AtlasMap;
+import ch.epfl.biop.atlas.struct.Atlas;
 import ch.epfl.biop.sourceandconverter.EmptyMultiResolutionSourceAndConverterCreator;
 import ch.epfl.biop.registration.sourceandconverter.affine.AffineTransformedSourceWrapperRegistration;
 import ch.epfl.biop.sourceandconverter.transform.SourceMosaicZSlicer;
@@ -24,7 +25,7 @@ public class ReslicedAtlas implements RealInterval {
 
     protected static Logger logger = LoggerFactory.getLogger(ReslicedAtlas.class);
 
-    final public BiopAtlas ba;
+    final public Atlas ba;
 
     AffineTransform3D slicingTransfom = new AffineTransform3D();
 
@@ -52,7 +53,7 @@ public class ReslicedAtlas implements RealInterval {
 
     List<Runnable> listeners = new ArrayList<>();
 
-    public ReslicedAtlas(BiopAtlas ba) {
+    public ReslicedAtlas(Atlas ba) {
         this.ba = ba;
     }
 
@@ -93,7 +94,7 @@ public class ReslicedAtlas implements RealInterval {
 
         // No let's check for bounds along the z axis
         // Pick the first SourceAndConverter
-        SourceAndConverter sacForBoundsTesting = ba.map.getStructuralImages().get(ba.map.getImagesKeys().get(0));
+        SourceAndConverter sacForBoundsTesting = ba.getMap().getStructuralImages().get(ba.getMap().getImagesKeys().get(0));
 
         // Gets level 0 (and timepoint 0) and source transform
         AffineTransform3D sacTransform = new AffineTransform3D();
@@ -124,8 +125,8 @@ public class ReslicedAtlas implements RealInterval {
                     sacTransform.apply(pt,ptRealSpace);
 
                     double projectedPointOnSlicingAxis =
-                            ptRealSpace.getDoublePosition(0)*slicingTransfom.get(2,0)+
-                                    ptRealSpace.getDoublePosition(1)*slicingTransfom.get(2,1)+
+                            ptRealSpace.getDoublePosition(0)*slicingTransfom.get(0,2)+
+                                    ptRealSpace.getDoublePosition(1)*slicingTransfom.get(1,2)+
                                     ptRealSpace.getDoublePosition(2)*slicingTransfom.get(2,2);
                     if (projectedPointOnSlicingAxis<minZAxis)
                         minZAxis = projectedPointOnSlicingAxis;
@@ -134,17 +135,17 @@ public class ReslicedAtlas implements RealInterval {
 
                     double projectedPointOnSlicingXAxis =
                             ptRealSpace.getDoublePosition(0)*slicingTransfom.get(0,0)+
-                                    ptRealSpace.getDoublePosition(1)*slicingTransfom.get(0,1)+
-                                    ptRealSpace.getDoublePosition(2)*slicingTransfom.get(0,2);
+                                    ptRealSpace.getDoublePosition(1)*slicingTransfom.get(1,0)+
+                                    ptRealSpace.getDoublePosition(2)*slicingTransfom.get(2,0);
                     if (projectedPointOnSlicingXAxis<minXAxis)
                         minXAxis = projectedPointOnSlicingXAxis;
                     if (projectedPointOnSlicingXAxis>maxXAxis)
                         maxXAxis = projectedPointOnSlicingXAxis;
 
                     double projectedPointOnSlicingYAxis =
-                            ptRealSpace.getDoublePosition(0)*slicingTransfom.get(1,0)+
+                            ptRealSpace.getDoublePosition(0)*slicingTransfom.get(0,1)+
                                     ptRealSpace.getDoublePosition(1)*slicingTransfom.get(1,1)+
-                                    ptRealSpace.getDoublePosition(2)*slicingTransfom.get(1,2);
+                                    ptRealSpace.getDoublePosition(2)*slicingTransfom.get(2,1);
                     if (projectedPointOnSlicingYAxis<minYAxis)
                         minYAxis = projectedPointOnSlicingYAxis;
                     if (projectedPointOnSlicingYAxis>maxYAxis)
@@ -173,7 +174,7 @@ public class ReslicedAtlas implements RealInterval {
 
         RealPoint realCenter = new RealPoint(cX, cY, cZ);
 
-        slicingTransfom.inverse().apply(realCenter, realCenter);
+        slicingTransfom.apply(realCenter, realCenter);
 
         cX = realCenter.getDoublePosition(0);
         cY = realCenter.getDoublePosition(1);
@@ -207,9 +208,11 @@ public class ReslicedAtlas implements RealInterval {
 
         SourceAndConverterServices.getSourceAndConverterService().register(slicingModel);
 
+        AtlasMap map = ba.getMap();
+
         // 1 -
-        extendedSlicedSources = new SourceAndConverter[ba.map.getStructuralImages().size()+1];
-        SourceAndConverter[] tempNonExtendedSlicedSources = new SourceAndConverter[ba.map.getStructuralImages().size()+1];
+        extendedSlicedSources = new SourceAndConverter[map.getStructuralImages().size()+1];
+        SourceAndConverter[] tempNonExtendedSlicedSources = new SourceAndConverter[map.getStructuralImages().size()+1];
 
         SourceMosaicZSlicer mosaic = new SourceMosaicZSlicer(null, slicingModel, true, false, false,
                 this::getStep);
@@ -218,14 +221,19 @@ public class ReslicedAtlas implements RealInterval {
 
         centerTransform = null;
 
-        List<String> keys = ba.map.getImagesKeys();
+        List<String> keys = map.getImagesKeys();
 
-        for (int index = 0; index<ba.map.getStructuralImages().size()+1;index++) {
+        for (int index = 0; index<map.getStructuralImages().size()+1;index++) {
             SourceAndConverter sac;
-            if (index<ba.map.getStructuralImages().size()) {
-                sac = ba.map.getStructuralImages().get(keys.get(index));
+            if (index<map.getStructuralImages().size()) {
+                logger.debug("index = "+index+"| source key: "+keys.get(index));
+                sac = map.getStructuralImages().get(keys.get(index));
+                logger.debug(sac.getSpimSource().getName());
             } else {
-                sac = ba.map.getLabelImage();
+                labelIndex = index;
+                logger.debug("index = "+index+"| LABELS");
+                sac = map.getLabelImage();
+                logger.debug(sac.getSpimSource().getName());
             }
 
             SourceAndConverter reslicedSac = mosaic.apply(sac);
@@ -251,8 +259,8 @@ public class ReslicedAtlas implements RealInterval {
             }
 
             reslicedSac = new SourceAffineTransformer(null, centerTransform).apply(reslicedSac);
-            SourceAndConverterServices.getSourceAndConverterService()
-                    .register(reslicedSac);
+            //SourceAndConverterServices.getSourceAndConverterService()
+            //        .register(reslicedSac);
             extendedSlicedSources[index] = reslicedSac;
         }
 
@@ -260,14 +268,7 @@ public class ReslicedAtlas implements RealInterval {
         //slicingUpdate();
     }
 
-    /*
-     * ?? TODO : doc
-     * @param slicingTransfom
-     * @param nX
-     * @param nY
-     * @param nZ
-     */
-    public static void adjustShiftSlicingTransform(AffineTransform3D slicingTransfom, double cx, double cy, double cz, long nX, long nY, long nZ) {
+     static void adjustShiftSlicingTransform(AffineTransform3D slicingTransfom, double cx, double cy, double cz, long nX, long nY, long nZ) {
         AffineTransform3D notShifted = new AffineTransform3D();
         notShifted.set(slicingTransfom);
         notShifted.set(0,0,3);
@@ -500,4 +501,21 @@ public class ReslicedAtlas implements RealInterval {
         return atlasToSlicingTransform.inverse().copy();
     }
 
+    private int labelIndex = -1;
+
+    public int getLabelSourceIndex() {
+        return labelIndex;
+    }
+
+    public int getCoordinateSourceIndex(int coordinates) {
+        return getLabelSourceIndex()-(2-coordinates)-2;
+    }
+
+    public int getLeftRightSourceIndex() {
+        return getLabelSourceIndex()-1;
+    }
+
+    public void removeListener(Runnable atlasSlicingListener) {
+        listeners.remove(atlasSlicingListener);
+    }
 }

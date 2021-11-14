@@ -1,13 +1,12 @@
 package ch.epfl.biop.registration.sourceandconverter.affine;
 
 import bdv.viewer.SourceAndConverter;
-import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
-import ch.epfl.biop.atlas.aligner.commands.RegistrationElastixAffineCommand;
-import ch.epfl.biop.atlas.aligner.commands.RegistrationElastixAffineRemoteCommand;
-import ch.epfl.biop.atlas.plugin.IABBARegistrationPlugin;
-import ch.epfl.biop.atlas.plugin.RegistrationTypeProperties;
-import ch.epfl.biop.bdv.command.register.Elastix2DAffineRegisterCommand;
-import ch.epfl.biop.bdv.command.register.Elastix2DAffineRegisterServerCommand;
+import ch.epfl.biop.atlas.aligner.command.RegistrationElastixAffineCommand;
+import ch.epfl.biop.atlas.aligner.command.RegistrationElastixAffineRemoteCommand;
+import ch.epfl.biop.atlas.aligner.plugin.IABBARegistrationPlugin;
+import ch.epfl.biop.atlas.aligner.plugin.RegistrationTypeProperties;
+import ch.epfl.biop.scijava.command.source.register.Elastix2DAffineRegisterCommand;
+import ch.epfl.biop.scijava.command.source.register.Elastix2DAffineRegisterServerCommand;
 import com.google.gson.Gson;
 import net.imglib2.realtransform.AffineTransform3D;
 import org.scijava.command.Command;
@@ -88,6 +87,8 @@ public class Elastix2DAffineRegistration extends AffineTransformSourceAndConvert
             // Necessary for CommandService
             List<Object> flatParameters = new ArrayList<>(parameters.size()*2+4);
 
+            double voxSizeInMm = Double.parseDouble(parameters.get("pxSizeInCurrentUnit"));
+
             parameters.keySet().forEach(k -> {
                 flatParameters.add(k);
                 flatParameters.add(parameters.get(k));
@@ -111,13 +112,11 @@ public class Elastix2DAffineRegistration extends AffineTransformSourceAndConvert
                  // Atlas image : a single timepoint
                  "tpFixed", 0,
                  // Level 2 for the atlas
-                 "levelFixedSource", 2,
+                 "levelFixedSource", SourceAndConverterHelper.bestLevel(fimg[0], timePoint, voxSizeInMm),
                  // Timepoint moving source (normally 0)
                  "tpMoving", timePoint,
                  // Tries to be clever for the moving source sampling
-                 "levelMovingSource", SourceAndConverterHelper.bestLevel(fimg[0], timePoint, 0.04),
-                 // 40 microns per pixel for the initial registration
-                 "pxSizeInCurrentUnit", "0.04"
+                 "levelMovingSource", SourceAndConverterHelper.bestLevel(mimg[0], timePoint, voxSizeInMm)
             );
 
             task = context
