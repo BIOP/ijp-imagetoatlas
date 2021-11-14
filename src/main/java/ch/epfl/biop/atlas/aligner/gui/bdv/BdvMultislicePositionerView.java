@@ -15,6 +15,7 @@ import ch.epfl.biop.atlas.aligner.command.*;
 import ch.epfl.biop.atlas.aligner.gui.MultiSliceContextMenuClickBehaviour;
 import ch.epfl.biop.atlas.aligner.plugin.IABBARegistrationPlugin;
 import ch.epfl.biop.atlas.aligner.plugin.RegistrationPluginHelper;
+import ch.epfl.biop.atlas.struct.Atlas;
 import ch.epfl.biop.atlas.struct.AtlasNode;
 import ch.epfl.biop.bdv.gui.graphicalhandle.GraphicalHandle;
 import ch.epfl.biop.bdv.gui.graphicalhandle.GraphicalHandleListener;
@@ -29,10 +30,12 @@ import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
 import org.apache.commons.io.FilenameUtils;
+import org.scijava.Context;
 import org.scijava.cache.CacheService;
 import org.scijava.command.Command;
 import org.scijava.command.CommandModule;
 import org.scijava.command.CommandService;
+import org.scijava.object.ObjectService;
 import org.scijava.plugin.PluginService;
 import org.scijava.ui.behaviour.*;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
@@ -50,8 +53,7 @@ import spimdata.util.Displaysettings;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.Point;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionListener;
+import java.awt.event.*;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -501,17 +503,23 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                     extraCleanUp.forEach(Runnable::run);
 
                     if (msp!=null) {
-                        bdvh.getTriggerbindings().removeInputTriggerMap(REVIEW_BEHAVIOURS_KEY);
+                        // NPE!!, and not necessary anyway
+                        /*bdvh.getTriggerbindings().removeInputTriggerMap(REVIEW_BEHAVIOURS_KEY);
                         bdvh.getTriggerbindings().removeBehaviourMap(REVIEW_BEHAVIOURS_KEY);
                         bdvh.getTriggerbindings().removeInputTriggerMap(POSITIONING_BEHAVIOURS_KEY);
                         bdvh.getTriggerbindings().removeBehaviourMap(POSITIONING_BEHAVIOURS_KEY);
                         bdvh.getTriggerbindings().removeInputTriggerMap(COMMON_BEHAVIOURS_KEY);
-                        bdvh.getTriggerbindings().removeBehaviourMap(COMMON_BEHAVIOURS_KEY);
+                        bdvh.getTriggerbindings().removeBehaviourMap(COMMON_BEHAVIOURS_KEY);*/
+                    }
+
+                    if (msp!=null) {
                         this.common_behaviours = null;
                         this.positioning_behaviours = null;
                         this.review_behaviours = null;
                         this.selectionLayer = null;
-                        msp.getReslicedAtlas().removeListener(atlasSlicingListener);
+                        if (msp.getReslicedAtlas()!=null) {
+                            msp.getReslicedAtlas().removeListener(atlasSlicingListener);
+                        }
                         msp.removeSliceListener(this);
                         msp = null;
                     }
@@ -549,9 +557,90 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         iSliceNoStep = (int) (msp.getReslicedAtlas().getStep());
     }
 
+    private void addModificationMonitor() {
+        BdvHandleHelper.setWindowTitle(bdvh, getViewName());
+
+        modificationMonitorThread = new Thread(this::modificationMonitor);
+        modificationMonitorThread.start();
+
+        addToCleanUpHook(() -> stopMonitoring = true);
+    }
+
+    private boolean closeAlreadyActivated = false;
+    private boolean cleanAllOnExit = false;
+
+    private void addCleanAllHook() {
+        addToCleanUpHook(() -> {
+            if (cleanAllOnExit) {
+                if (msp!=null) {
+                    Context ctx = msp.getContext();
+                    Atlas atlas = msp.getAtlas();
+                    msp.close();
+                    ctx.getService(ObjectService.class).removeObject(msp);
+                    ctx.getService(ObjectService.class).removeObject(atlas);
+
+                    // Remove all sources - TODO : make this more specific!
+                    SourceAndConverterServices
+                            .getSourceAndConverterService()
+                            .remove(
+                                    SourceAndConverterServices
+                                            .getSourceAndConverterService().getSourceAndConverters().toArray(new SourceAndConverter[0])
+                            );
+
+                    System.gc();
+                }
+            }
+        });
+    }
+
+    private void addConfirmationCloseHook() {
+        JFrame frame = BdvHandleHelper.getJFrame(bdvh);
+        WindowListener[] listeners = frame.getWindowListeners();
+
+        for (WindowListener listener:listeners) {
+            frame.removeWindowListener(listener);
+        }
+
+        frame.addWindowListener(new WindowAdapter() {
+
+            @Override
+            public void windowClosing(WindowEvent e) {
+                if (!closeAlreadyActivated) {
+                    String message = "Are you sure you want to exit ABBA?";
+
+                    if (msp.isModifiedSinceLastSave()) {
+                        message+= " Your last modifications have not been saved.";
+                    }
+                    int confirmed = JOptionPane.showConfirmDialog(frame,
+                            message, "Close ABBA",
+                            JOptionPane.YES_NO_OPTION);
+                    if (confirmed == JOptionPane.YES_OPTION) {
+
+
+                        int clearMemory = JOptionPane.showConfirmDialog(frame,
+                                "Close session and clear memory ?", "Close ABBA session completely",
+                                JOptionPane.YES_NO_OPTION);
+
+                        if (clearMemory == JOptionPane.YES_OPTION) {
+                            cleanAllOnExit = true;
+                        }
+
+                        closeAlreadyActivated = true;
+                        for (WindowListener listener : listeners) {
+                            listener.windowClosing(e);
+                        }
+                    } else {
+                        frame.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
+                    }
+                }
+            }
+        });
+    }
+
     // --------------- METHODS FOR INITIALISATION - END
 
     public BdvMultislicePositionerView(MultiSlicePositioner msp, BdvHandle bdvh) {
+
         // Final variable initialization
         this.bdvh = bdvh;
         this.vp = bdvh.getViewerPanel();
@@ -632,12 +721,14 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         logger.debug("Adding mouse motion listener / handler");
         bdvh.getViewerPanel().getDisplay().addHandler(this);
 
-        BdvHandleHelper.setWindowTitle(bdvh, getViewName());
+        logger.debug("Adding modification monitor");
+        addModificationMonitor();
 
-        modificationMonitorThread = new Thread(this::modificationMonitor);
-        modificationMonitorThread.start();
+        logger.debug("Adding confirmation close hook");
+        addConfirmationCloseHook();
 
-        addToCleanUpHook(() -> stopMonitoring = true);
+        logger.debug("Add clean all hook");
+        addCleanAllHook();
 
     }
 
