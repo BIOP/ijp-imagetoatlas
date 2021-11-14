@@ -120,9 +120,9 @@
 		<bigdataviewer-vistools.version>1.0.0-beta-29</bigdataviewer-vistools.version>
 		<imglib2-cache.version>1.0.0-beta-16</imglib2-cache.version>
 		<bigwarp_fiji.version>7.0.4</bigwarp_fiji.version>
-
+		<pyimagej-scijava-command.version>0.1.2</pyimagej-scijava-command.version>
 		<ijl-utilities-wrappers.version>0.3.20</ijl-utilities-wrappers.version>
-
+		<atlas.version>0.1.2-SNAPSHOT</atlas.version>
 		<elastix_registration_server.version>0.1.4</elastix_registration_server.version>
 		<bigvolumeviewer.version>0.2.0</bigvolumeviewer.version>
 		<oshi-core.version>5.5.1</oshi-core.version>
@@ -223,13 +223,13 @@
 		<dependency>
 			<groupId>ch.epfl.biop</groupId>
 			<artifactId>pyimagej-scijava-command</artifactId>
-			<version>0.1.2</version>
+			<version>${pyimagej-scijava-command.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>ch.epfl.biop</groupId>
 			<artifactId>atlas</artifactId>
-			<version>0.1.1-SNAPSHOT-local</version>
+			<version>${atlas.version}</version>
 		</dependency>
 
 	</dependencies>

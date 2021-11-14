@@ -710,7 +710,8 @@ public class SliceSources {
             int atlasId = Integer.parseInt(roi.name);
             AtlasNode node = mp.getAtlas().getOntology().getNodeFromId(atlasId);
             roi.name = node.data().get(namingChoice);
-            roi.color = mp.getAtlas().getOntology().getColor(node);
+            int[] color = node.getColor();
+            roi.color = new Color(color[0], color[1], color[2], color[3]);//mp.getAtlas().getOntology().getColor(node);
         }
 
         IJShapeRoiArray roiArray = (IJShapeRoiArray) leftRightTranformed.to(IJShapeRoiArray.class);
@@ -886,9 +887,6 @@ public class SliceSources {
                 Gson gson = ScijavaGsonHelper.getGsonBuilder(mp.scijavaCtx, false).setPrettyPrinting().create();
 
                 String transform_string = gson.toJson(transform, RealTransform.class);
-
-                RealTransform tr_back = gson.fromJson(transform_string, RealTransform.class);
-
 
                 if (ftransform.exists()) {
                     if (erasePreviousFile) {
