@@ -110,6 +110,7 @@ public class AlignerState {
         return compiledActions;
     }
 
+
     static Set<String> toReplace = new HashSet<>();
 
     static {
@@ -119,6 +120,15 @@ public class AlignerState {
         toReplace.add("KeySliceOff");
         toReplace.add("KeySliceOn");
     }
+
+    /**
+     * In the previous ABBA version, CreateSliceAction was named CreateSlice, etc.
+     * All these need to be changed before being open.
+     *
+     * Function is there for legacy reasons.
+     * @param element
+     * @return
+     */
     public static JsonElement convertOldJson(JsonElement element) {
         if (element.isJsonObject()) {
             JsonObject object  = (JsonObject) element;
@@ -142,31 +152,5 @@ public class AlignerState {
         }
         return element;
     }
-
-    /*
-
-    private static JsonElement convertOldJson(JsonElement object) {
-
-        object.entrySet().forEach(e -> {
-            if (e.getKey().equals("type")) {
-                String val = e.getValue().getAsString();
-                if (toReplace.contains(val)) {
-                    e.setValue(new JsonPrimitive(val+"Action")); // stupid renaming
-                }
-            } else {
-                if (e.getValue().isJsonObject()) {
-                    e.setValue(convertOldJson(e.getValue().getAsJsonObject()));
-                }
-                if (e.getValue().isJsonArray()) {
-                    JsonArray array = e.getValue().getAsJsonArray();
-                    for (JsonElement element:array) {
-                        JsonElement
-                    }
-                }
-            }
-        });
-        return object;
-    }
-     */
 
 }
