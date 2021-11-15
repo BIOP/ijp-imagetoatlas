@@ -10,8 +10,8 @@ import ch.epfl.biop.atlas.struct.Atlas;
 import ch.epfl.biop.registration.Registration;
 import ch.epfl.biop.sourceandconverter.processor.*;
 import ch.epfl.biop.sourceandconverter.processor.adapter.*;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.google.api.client.json.JsonString;
+import com.google.gson.*;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import mpicbg.spim.data.generic.base.Entity;
 import mpicbg.spim.data.generic.sequence.AbstractSequenceDescription;
@@ -986,7 +986,9 @@ public class MultiSlicePositioner implements Closeable {
 
         try {
             FileWriter writer = new FileWriter(stateFile.getAbsolutePath());
-            getGsonStateSerializer(serialized_sources).toJson(new AlignerState(this), writer);
+            AlignerState alignerState = new AlignerState(this);
+            alignerState.version = VersionUtils.getVersion(AlignerState.class);
+            getGsonStateSerializer(serialized_sources).toJson(alignerState, writer);
             writer.flush();
             writer.close();
         } catch (IOException e) {
@@ -1022,7 +1024,18 @@ public class MultiSlicePositioner implements Closeable {
             try {
                 FileReader fileReader = new FileReader(stateFile);
 
-                AlignerState state = gson.fromJson(fileReader, AlignerState.class); // actions are executed during deserialization
+                JsonObject element = gson.fromJson(fileReader, JsonObject.class);
+                // Didn't have the foresight to add a version number from the start...
+                String version = element.has("version") ? element.get("version").getAsString() : null;
+                if (version == null) {
+                    log.accept("Old state version, conversion required.");
+                    element = (JsonObject) AlignerState.convertOldJson(element);
+                    log.accept("Conversion done.");
+                    // throw new IllegalArgumentException("Older-style project is not compatible with this current FIJI QuPath bridge ");
+                    //				return LegacyProject.readFromFile(fileProject, cls);
+                }
+
+                AlignerState state = gson.fromJson(element, AlignerState.class); // actions are executed during deserialization
                 fileReader.close();
 
                 String warningMessageForUser = "";

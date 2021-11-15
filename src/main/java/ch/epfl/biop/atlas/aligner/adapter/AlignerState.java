@@ -2,6 +2,10 @@ package ch.epfl.biop.atlas.aligner.adapter;
 
 import ch.epfl.biop.atlas.aligner.*;
 import ch.epfl.biop.atlas.aligner.action.*;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.realtransform.RealTransform;
 import org.slf4j.Logger;
@@ -29,6 +33,8 @@ public class AlignerState {
             slices_state_list.add(slice_state);
         });
     }
+
+    public String version;
 
     public double rotationX;
 
@@ -104,5 +110,63 @@ public class AlignerState {
         return compiledActions;
     }
 
+    static Set<String> toReplace = new HashSet<>();
+
+    static {
+        toReplace.add("MoveSlice");
+        toReplace.add("CreateSlice");
+        toReplace.add("RegisterSlice");
+        toReplace.add("KeySliceOff");
+        toReplace.add("KeySliceOn");
+    }
+    public static JsonElement convertOldJson(JsonElement element) {
+        if (element.isJsonObject()) {
+            JsonObject object  = (JsonObject) element;
+            object.entrySet().forEach(e -> {
+                if (e.getKey().equals("type")) {
+                    String val = e.getValue().getAsString();
+                    if (toReplace.contains(val)) {
+                        e.setValue(new JsonPrimitive(val+"Action")); // stupid renaming
+                    }
+                } else {
+                    e.setValue(convertOldJson(e.getValue()));
+                }
+            });
+        } else if (element.isJsonArray()) {
+            JsonArray array = (JsonArray) element;
+            JsonArray converted = new JsonArray();
+            for (JsonElement e : array) {
+                converted.add(convertOldJson(e));
+            }
+            element = converted;
+        }
+        return element;
+    }
+
+    /*
+
+    private static JsonElement convertOldJson(JsonElement object) {
+
+        object.entrySet().forEach(e -> {
+            if (e.getKey().equals("type")) {
+                String val = e.getValue().getAsString();
+                if (toReplace.contains(val)) {
+                    e.setValue(new JsonPrimitive(val+"Action")); // stupid renaming
+                }
+            } else {
+                if (e.getValue().isJsonObject()) {
+                    e.setValue(convertOldJson(e.getValue().getAsJsonObject()));
+                }
+                if (e.getValue().isJsonArray()) {
+                    JsonArray array = e.getValue().getAsJsonArray();
+                    for (JsonElement element:array) {
+                        JsonElement
+                    }
+                }
+            }
+        });
+        return object;
+    }
+     */
 
 }
