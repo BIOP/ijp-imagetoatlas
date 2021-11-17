@@ -716,16 +716,25 @@ public class SliceSources {
 
         IJShapeRoiArray roiArray = (IJShapeRoiArray) leftRightTranformed.to(IJShapeRoiArray.class);
 
-        Roi left = roiArray.rois.get(0).getRoi();
-        left.setStrokeColor(new Color(0,255,0));
-        left.setName("Left");
+        for (CompositeFloatPoly cfp: roiArray.rois) {
+            int value = Integer.parseInt(cfp.getRoi().getName());
+            if (value==mp.getAtlas().getMap().labelLeft()) {
+                logger.debug("Left region detected");
+                Roi left = cfp.getRoi();
+                left.setStrokeColor(new Color(0,255,0));
+                left.setName("Left");
+                roiList.rois.add(new CompositeFloatPoly(left));
+            } else if (value==mp.getAtlas().getMap().labelRight()) {
+                logger.debug("Right region detected");
+                Roi right = cfp.getRoi();
+                right.setStrokeColor(new Color(255,0,255));
+                right.setName("Right");
+                roiList.rois.add(new CompositeFloatPoly(right));
+            } else {
+                logger.error("Unrecognized left right label : "+value);
+            }
+        }
 
-        roiList.rois.add(new CompositeFloatPoly(left));
-
-        Roi right = roiArray.rois.get(1).getRoi();
-        right.setStrokeColor(new Color(255,0,255));
-        right.setName("Right");
-        roiList.rois.add(new CompositeFloatPoly(right));
     }
 
     public synchronized void exportRegionsToROIManager(String namingChoice) {

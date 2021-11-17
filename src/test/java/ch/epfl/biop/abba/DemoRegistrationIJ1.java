@@ -25,7 +25,6 @@ public class DemoRegistrationIJ1 {
 
         ImagePlus demoSlice = IJ.openImage("src/test/resources/demoSlice.tif");
         demoSlice.show();
-
         ij.command().run(AllenBrainAdultMouseAtlasCCF2017Command.class, true).get();
 
         ij.command().run(WaxholmSpragueDawleyRatV4Command.class, true).get();
