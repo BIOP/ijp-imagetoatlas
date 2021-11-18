@@ -13,8 +13,10 @@ import ch.epfl.biop.atlas.aligner.action.DeleteSliceAction;
 import ch.epfl.biop.atlas.aligner.gui.bdv.card.*;
 import ch.epfl.biop.atlas.aligner.command.*;
 import ch.epfl.biop.atlas.aligner.gui.MultiSliceContextMenuClickBehaviour;
+import ch.epfl.biop.atlas.aligner.plugin.ABBACommand;
 import ch.epfl.biop.atlas.aligner.plugin.IABBARegistrationPlugin;
 import ch.epfl.biop.atlas.aligner.plugin.RegistrationPluginHelper;
+import ch.epfl.biop.atlas.mouse.allen.ccfv3.command.AllenBrainAdultMouseAtlasCCF2017Command;
 import ch.epfl.biop.atlas.struct.Atlas;
 import ch.epfl.biop.atlas.struct.AtlasNode;
 import ch.epfl.biop.bdv.gui.graphicalhandle.GraphicalHandle;
@@ -32,11 +34,13 @@ import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
 import org.apache.commons.io.FilenameUtils;
 import org.scijava.Context;
+import org.scijava.MenuPath;
 import org.scijava.cache.CacheService;
 import org.scijava.command.Command;
 import org.scijava.command.CommandModule;
 import org.scijava.command.CommandService;
 import org.scijava.object.ObjectService;
+import org.scijava.plugin.PTService;
 import org.scijava.plugin.PluginService;
 import org.scijava.ui.behaviour.*;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
@@ -223,6 +227,12 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>ABBA - Hide mouse atlas Position",0, this::hideAtlasPosition);
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>ABBA - Show slice info at mouse position",0, this::showSliceInfo);
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>ABBA - Hide slice info at mouse position",0, this::hideSliceInfo);
+
+        // Cards commands
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Cards>Expand Card Panel",0, () -> bdvh.getSplitPanel().setCollapsed(false));
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Cards>Collapse Card Panel",0, () -> bdvh.getSplitPanel().setCollapsed(true));
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Cards>Add Resources Monitor",0, this::addResourcesMonitor);
+
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Navigate>ABBA - Next Slice [Right]",0, this::navigateNextSlice);
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Navigate>ABBA - Previous Slice [Left]",0, this::navigatePreviousSlice);
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Navigate>ABBA - Center On Current Slice [C]",0, this::navigateCurrentSlice);
@@ -249,8 +259,12 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
         logger.debug("Installing DeepSlice command");
         //DeepSliceCommand
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RegistrationDeepSliceCommand.class, hierarchyLevelsSkipped,"mp", msp);
+        if ((msp.getAtlas() instanceof AllenBrainAdultMouseAtlasCCF2017Command)) {
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RegistrationDeepSliceCommand.class, hierarchyLevelsSkipped, "mp", msp);
+        }
 
+        logger.debug("Installing java registration plugins ui");
+        installRegistrationPluginUI(hierarchyLevelsSkipped);
         // Adds registration plugin commands : discovered via scijava plugin autodiscovery mechanism
 
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RegistrationEditLastCommand.class, hierarchyLevelsSkipped,"mp", msp);
@@ -271,104 +285,12 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), SliceThicknessCommand.class, hierarchyLevelsSkipped,"mp", msp);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), SliceThicknessMatchNeighborsCommand.class, hierarchyLevelsSkipped,"mp", msp);
 
-        // Cards commands
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Cards>Expand Card Panel",0, () -> bdvh.getSplitPanel().setCollapsed(false));
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Cards>Collapse Card Panel",0, () -> bdvh.getSplitPanel().setCollapsed(true));
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Cards>Add Resources Monitor",0, this::addResourcesMonitor);
-
         // Help commands
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ABBAForumHelpCommand.class, hierarchyLevelsSkipped);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), DocumentationABBACommand.class, hierarchyLevelsSkipped);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ABBAUserFeedbackCommand.class, hierarchyLevelsSkipped);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), DocumentationDeepSliceCommand.class, hierarchyLevelsSkipped);
 
-    }
-
-    /**
-     * Saves the current view on top of the state file
-     */
-    public void loadState() {
-        //BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ABBAStateLoadCommand.class, hierarchyLevelsSkipped,"mp", msp );
-
-        try {
-            CommandModule cm = msp.getContext().getService(CommandService.class)
-                    .run(ABBAStateLoadCommand.class, true,"mp", msp).get();
-
-
-            msp.waitForTasks();
-
-            File f = (File) cm.getInput("state_file");
-            String fileNoExt = FilenameUtils.removeExtension(f.getAbsolutePath());
-            File viewFile = new File(fileNoExt+"_bdv_view.json");
-
-            if (viewFile.exists()) {
-                FileReader fileReader = new FileReader(viewFile);
-                ViewState vs = new Gson().fromJson(fileReader, ViewState.class); // actions are executed during deserialization
-                fileReader.close();
-
-                msp.getReslicedAtlas().setStep(vs.atlasSlicingStep);
-                this.setDisplayMode(vs.bdvViewMode);
-                this.setSliceDisplayMode(vs.bdvSliceViewMode);
-                this.overlapMode = vs.overlapMode; updateOverlapMode();
-                double[] rowPackedCopy = vs.bdvView;
-                AffineTransform3D view = new AffineTransform3D();
-                view.set(rowPackedCopy);
-                bdvh.getViewerPanel().state().setViewerTransform(view);
-                if (vs.showInfo) {showSliceInfo();} else {hideSliceInfo();}
-
-                List<SliceSources> slices = msp.getSlices();
-                if (vs.slicesStates.size() == msp.getSlices().size()) {
-                    for ( int i = 0; i<vs.slicesStates.size(); i++) {
-                        SliceGuiState.State state = vs.slicesStates.get(i);
-                        guiState.runSlice(slices.get(i), sliceGuiState -> sliceGuiState.setState(state));
-                    }
-                    tableView.updateTable();
-                } else {
-                    System.err.println("Cannot restore display slices because other slices are present"); // TODO : could be improved
-                }
-
-            } else {
-                // No view -> nothing to be done
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void saveState() {
-        //BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ABBAStateSaveCommand.class, hierarchyLevelsSkipped,"mp", msp );
-        try {
-            CommandModule cm = msp.getContext().getService(CommandService.class)
-                    .run(ABBAStateSaveCommand.class, true,"mp", msp).get();
-
-            msp.waitForTasks();
-
-            File f = (File) cm.getInput("state_file");
-            String fileNoExt = FilenameUtils.removeExtension(f.getAbsolutePath());
-            File viewFile = new File(fileNoExt+"_bdv_view.json");
-
-            // Ok, let's save the view File
-
-            //serializeView(viewFile);
-            List<SliceGuiState.State> states = new ArrayList<>();
-            guiState.forEachSlice(sliceState -> states.add(new SliceGuiState.State(sliceState)));
-            ViewState vs = new ViewState();
-            vs.slicesStates = states;
-            vs.showInfo = showSliceInfo;
-            vs.bdvSliceViewMode = sliceDisplayMode;
-            vs.overlapMode = overlapMode;
-            vs.bdvView = bdvh.getViewerPanel().state().getViewerTransform().getRowPackedCopy();
-            vs.atlasSlicingStep = (int) msp.getReslicedAtlas().getStep();
-
-            FileWriter writer = new FileWriter(viewFile.getAbsolutePath());
-            new GsonBuilder().setPrettyPrinting().create().toJson(vs, writer);
-            writer.flush();
-            writer.close();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     private void installRegistrationPluginUI(int hierarchyLevelsSkipped) {
@@ -638,6 +560,24 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         });
     }
 
+
+    private void addExtraABBACommands() {
+        msp.getContext().getService(PluginService.class)
+                .getPluginsOfType(ABBACommand.class)
+                .forEach(ci -> {
+                    logger.debug("- ABBA command "+ci.getMenuPath().getLeaf().toString()+" ["+ci.getMenuPath()+"]");
+                    MenuPath menuPath = ci.getMenuPath();
+                    try {
+                        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh,
+                                msp.getContext(),
+                                ci.loadClass(),
+                                menuPath.size() - 2, "mp", msp);
+                    } catch (Exception e) {
+                        msp.errorMessageForUser.accept("Error while installing "+ci.getMenuPath().getLeaf(), e.getMessage());
+                    }
+                });
+    }
+
     // --------------- METHODS FOR INITIALISATION - END
 
     public BdvMultislicePositionerView(MultiSlicePositioner msp, BdvHandle bdvh) {
@@ -688,9 +628,6 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         int hierarchyLevelsSkipped = 4;
         installBdvMenu(hierarchyLevelsSkipped);
 
-        logger.debug("Installing java registration plugins ui");
-        installRegistrationPluginUI(hierarchyLevelsSkipped);
-
         logger.debug("Installing multislice overlay");
         BdvFunctions.showOverlay(new InnerOverlay(), "MultiSlice Overlay", BdvOptions.options().addTo(bdvh));
 
@@ -731,9 +668,99 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         logger.debug("Add clean all hook");
         addCleanAllHook();
 
+        logger.debug("Installing extra ABBA plugin");
+        addExtraABBACommands();
+
         logger.debug("Add closing listener");
         msp.addMultiSlicePositionerListener(this);
 
+    }
+
+    /**
+     * Saves the current view on top of the state file
+     */
+    public void loadState() {
+        //BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ABBAStateLoadCommand.class, hierarchyLevelsSkipped,"mp", msp );
+
+        try {
+            CommandModule cm = msp.getContext().getService(CommandService.class)
+                    .run(ABBAStateLoadCommand.class, true,"mp", msp).get();
+
+
+            msp.waitForTasks();
+
+            File f = (File) cm.getInput("state_file");
+            String fileNoExt = FilenameUtils.removeExtension(f.getAbsolutePath());
+            File viewFile = new File(fileNoExt+"_bdv_view.json");
+
+            if (viewFile.exists()) {
+                FileReader fileReader = new FileReader(viewFile);
+                ViewState vs = new Gson().fromJson(fileReader, ViewState.class); // actions are executed during deserialization
+                fileReader.close();
+
+                msp.getReslicedAtlas().setStep(vs.atlasSlicingStep);
+                this.setDisplayMode(vs.bdvViewMode);
+                this.setSliceDisplayMode(vs.bdvSliceViewMode);
+                this.overlapMode = vs.overlapMode; updateOverlapMode();
+                double[] rowPackedCopy = vs.bdvView;
+                AffineTransform3D view = new AffineTransform3D();
+                view.set(rowPackedCopy);
+                bdvh.getViewerPanel().state().setViewerTransform(view);
+                if (vs.showInfo) {showSliceInfo();} else {hideSliceInfo();}
+
+                List<SliceSources> slices = msp.getSlices();
+                if (vs.slicesStates.size() == msp.getSlices().size()) {
+                    for ( int i = 0; i<vs.slicesStates.size(); i++) {
+                        SliceGuiState.State state = vs.slicesStates.get(i);
+                        guiState.runSlice(slices.get(i), sliceGuiState -> sliceGuiState.setState(state));
+                    }
+                    tableView.updateTable();
+                } else {
+                    System.err.println("Cannot restore display slices because other slices are present"); // TODO : could be improved
+                }
+
+            } else {
+                // No view -> nothing to be done
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void saveState() {
+        //BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ABBAStateSaveCommand.class, hierarchyLevelsSkipped,"mp", msp );
+        try {
+            CommandModule cm = msp.getContext().getService(CommandService.class)
+                    .run(ABBAStateSaveCommand.class, true,"mp", msp).get();
+
+            msp.waitForTasks();
+
+            File f = (File) cm.getInput("state_file");
+            String fileNoExt = FilenameUtils.removeExtension(f.getAbsolutePath());
+            File viewFile = new File(fileNoExt+"_bdv_view.json");
+
+            // Ok, let's save the view File
+
+            //serializeView(viewFile);
+            List<SliceGuiState.State> states = new ArrayList<>();
+            guiState.forEachSlice(sliceState -> states.add(new SliceGuiState.State(sliceState)));
+            ViewState vs = new ViewState();
+            vs.slicesStates = states;
+            vs.showInfo = showSliceInfo;
+            vs.bdvSliceViewMode = sliceDisplayMode;
+            vs.overlapMode = overlapMode;
+            vs.bdvView = bdvh.getViewerPanel().state().getViewerTransform().getRowPackedCopy();
+            vs.atlasSlicingStep = (int) msp.getReslicedAtlas().getStep();
+
+            FileWriter writer = new FileWriter(viewFile.getAbsolutePath());
+            new GsonBuilder().setPrettyPrinting().create().toJson(vs, writer);
+            writer.flush();
+            writer.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     Thread modificationMonitorThread;
