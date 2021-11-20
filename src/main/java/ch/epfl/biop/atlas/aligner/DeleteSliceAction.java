@@ -1,7 +1,5 @@
-package ch.epfl.biop.atlas.aligner.action;
+package ch.epfl.biop.atlas.aligner;
 
-import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
-import ch.epfl.biop.atlas.aligner.SliceSources;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,9 +28,9 @@ public class DeleteSliceAction extends CancelableAction {
     @Override
     public boolean run() {
         synchronized (DeleteSliceAction.class) { // avoid screw up with batch cancel ?
-            mp.addTask();
+            getMP().addTask();
             logger.debug("Deleting slice "+getSliceSources()+" ...");
-            savedActions = mp.getActionsFromSlice(sliceSource);
+            savedActions = getMP().getActionsFromSlice(sliceSource);
             savedActions.remove(this);savedActions.remove(this);savedActions.remove(this);
             logger.debug("Saved actions slice in run : " + sliceSource);
 
@@ -47,8 +45,8 @@ public class DeleteSliceAction extends CancelableAction {
             //}
 
             logger.debug("Slice "+getSliceSources()+" deleted !");
-            mp.stateHasBeenChanged();
-            mp.removeTask();
+            getMP().stateHasBeenChanged();
+            getMP().removeTask();
             return true;
         }
     }
@@ -62,7 +60,7 @@ public class DeleteSliceAction extends CancelableAction {
                     action.run();
                 }
             });
-            mp.stateHasBeenChanged();
+            getMP().stateHasBeenChanged();
             return true;
         }
     }

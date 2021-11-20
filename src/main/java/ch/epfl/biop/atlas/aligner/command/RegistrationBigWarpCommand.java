@@ -9,7 +9,7 @@ import org.scijava.plugin.Plugin;
 public class RegistrationBigWarpCommand extends RegistrationSingleChannelCommand {
 
     public void runValidated() {
-        mp.register(this, getFixedFilter(), getMovingFilter());
+        mp.registerSelectedSlices(this, getFixedFilter(), getMovingFilter());
     }
 
 }

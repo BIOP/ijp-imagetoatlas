@@ -36,6 +36,8 @@ public class DemoRegistrationIJ1 {
                 "mp", mp,
                 "slice_axis", 5).get();
 
+
+
         //DebugView debugView = new DebugView(mp);
 
         //mp.createSlice(sac,4.5);

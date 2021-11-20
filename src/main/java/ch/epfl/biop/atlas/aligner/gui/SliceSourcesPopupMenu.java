@@ -1,5 +1,6 @@
 package ch.epfl.biop.atlas.aligner.gui;
 
+import ch.epfl.biop.atlas.aligner.DeleteSliceAction;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.atlas.aligner.action.*;

@@ -1,6 +1,5 @@
 package ch.epfl.biop.atlas.aligner;
 
-import ch.epfl.biop.atlas.aligner.action.CancelableAction;
 import ij.IJ;
 
 import javax.swing.*;

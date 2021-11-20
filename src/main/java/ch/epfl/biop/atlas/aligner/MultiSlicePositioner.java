@@ -339,17 +339,17 @@ public class MultiSlicePositioner implements Closeable {
         logger.info("Slice "+sliceSource+" removed!");
     }
 
-    protected void createSlice(SliceSources sliceSource) {
-        logger.info("Creating slice "+sliceSource+"...");
+    protected void createSlice(SliceSources slice) {
+        logger.info("Creating slice "+slice+"...");
         synchronized (slicesLock) {
-            slices.add(sliceSource);
+            slices.add(slice);
             sortSlices();
         }
         listeners.forEach(listener -> {
-            logger.debug("Creating slice "+sliceSource+" - calling "+listener);
-            listener.sliceCreated(sliceSource);
+            logger.debug("Creating slice "+slice+" - calling "+listener);
+            listener.sliceCreated(slice);
         });
-        logger.info("Slice "+sliceSource+" created!");
+        logger.info("Slice "+slice+" created!");
         sortSlices(); // makes sense, no ?
     }
 
@@ -385,16 +385,12 @@ public class MultiSlicePositioner implements Closeable {
         return reslicedAtlas.nonExtendedSlicedSources.length;
     }
 
-    public int getNumberOfSelectedSources() {
-        return getSelectedSlices().size();
-    }
-
     public int getChannelBoundForSelectedSlices() {
-        List<SliceSources> sources = getSelectedSlices();
-        if (sources.size()==0) {
+        List<SliceSources> slices = getSelectedSlices();
+        if (slices.size()==0) {
             return 0;
         } else {
-            return sources.stream()
+            return slices.stream()
                     .mapToInt(slice -> slice.nChannels)
                     .min().getAsInt();
         }
@@ -404,8 +400,8 @@ public class MultiSlicePositioner implements Closeable {
         return reslicedAtlas.getSlicingTransformToAtlas();
     }
 
-    public List<CancelableAction> getActionsFromSlice(SliceSources sliceSource) {
-        return mso.getActionsFromSlice(sliceSource);
+    public List<CancelableAction> getActionsFromSlice(SliceSources slice) {
+        return mso.getActionsFromSlice(slice);
     }
 
     public Context getContext() {
@@ -420,7 +416,7 @@ public class MultiSlicePositioner implements Closeable {
         return redoableUserActions.size();
     }
 
-    public void runRequest(CancelableAction action) {
+    protected void runRequest(CancelableAction action) {
         if ((action.getSliceSources()!=null)) {
             logger.debug("Action "+action+" on slice "+action.getSliceSources()+" requested (async).");
             listeners.forEach(sliceChangeListener -> sliceChangeListener.actionEnqueue(action.getSliceSources(), action));
@@ -454,7 +450,7 @@ public class MultiSlicePositioner implements Closeable {
         }
     }
 
-    public void cancelRequest(CancelableAction action) {
+    protected void cancelRequest(CancelableAction action) {
         listeners.forEach(sliceChangeListener -> sliceChangeListener.actionCancelEnqueue(action.getSliceSources(), action));
         if (action.isValid()) {
             if ((action.getSliceSources() == null)) {
@@ -477,8 +473,7 @@ public class MultiSlicePositioner implements Closeable {
         }
     }
 
-    public boolean runCreateSlice(CreateSliceAction createSliceAction) {
-
+    protected boolean runCreateSlice(CreateSliceAction createSliceAction) {
         synchronized (CreateSliceAction.class) { // only one slice addition at a time
             boolean sacAlreadyPresent = false;
             for (SourceAndConverter sac : createSliceAction.getSacs()) {
@@ -528,7 +523,7 @@ public class MultiSlicePositioner implements Closeable {
         return true;
     }
 
-    public boolean cancelCreateSlice(CreateSliceAction action) {
+    protected boolean cancelCreateSlice(CreateSliceAction action) {
         removeSlice(action.getSlice());
         log.accept("Slice "+action.getSlice()+" removed ");
         return true;
@@ -624,31 +619,14 @@ public class MultiSlicePositioner implements Closeable {
         }
     }
 
-    public void editLastRegistration(boolean reuseOriginalChannels, SourcesProcessor preprocessSlice, SourcesProcessor preprocessAtlas) {
+    public void editLastRegistrationSelectedSlices(boolean reuseOriginalChannels, SourcesProcessor preprocessSlice, SourcesProcessor preprocessAtlas) {
         if (getSelectedSlices().size()==0) {
             warningMessageForUser.accept("No selected slice", "Please select the slice you want to edit");
             log.accept("Edit registration ignored : no slice selected");
         } else {
-            for (SliceSources slice : slices) {
-                if (slice.isSelected()) {
-                    new EditLastRegistrationAction(this, slice, reuseOriginalChannels, preprocessSlice, preprocessAtlas ).runRequest();
-                }
+            for (SliceSources slice : getSelectedSlices()) {
+                new EditLastRegistrationAction(this, slice, reuseOriginalChannels, preprocessSlice, preprocessAtlas ).runRequest();
             }
-        }
-    }
-
-    public void removeLastRegistration() {
-        if (getSelectedSlices().size()==0) {
-            warningMessageForUser.accept("No selected slice", "Please select the slice where you want to remove the registration");
-            log.accept("Remove registration ignored : no slice selected");
-        } else {
-            new MarkActionSequenceBatchAction(this).runRequest();
-            for (SliceSources slice : slices) {
-                if (slice.isSelected()) {
-                    new DeleteLastRegistrationAction(this, slice).runRequest();
-                }
-            }
-            new MarkActionSequenceBatchAction(this).runRequest();
         }
     }
 
@@ -662,10 +640,10 @@ public class MultiSlicePositioner implements Closeable {
         return convertedParams;
     }
 
-    public void register(Command command,
-                         SourcesProcessor preprocessFixed,
-                         SourcesProcessor preprocessMoving) {
-        register(command,
+    public void registerSelectedSlices(Command command,
+                                       SourcesProcessor preprocessFixed,
+                                       SourcesProcessor preprocessMoving) {
+        registerSelectedSlices(command,
                 preprocessFixed,
                 preprocessMoving,
                 new HashMap<>()
@@ -681,11 +659,11 @@ public class MultiSlicePositioner implements Closeable {
      *                   to String using the scijava {@link ConvertService}. They need to be strings
      *                   to be serialized
      */
-    public void register(Command command,
-                         SourcesProcessor preprocessFixed,
-                         SourcesProcessor preprocessMoving,
-                         Map<String,Object> parameters) {
-        register(RegistrationPluginHelper.registrationFromUI(scijavaCtx,command.getClass()),
+    public void registerSelectedSlices(Command command,
+                                       SourcesProcessor preprocessFixed,
+                                       SourcesProcessor preprocessMoving,
+                                       Map<String,Object> parameters) {
+        registerSelectedSlices(RegistrationPluginHelper.registrationFromUI(scijavaCtx,command.getClass()),
                 preprocessFixed,
                 preprocessMoving,
                 parameters
@@ -701,10 +679,10 @@ public class MultiSlicePositioner implements Closeable {
      *                   to String using the scijava {@link ConvertService}. They need to be strings
      *                   to be serialized
      */
-    public void register(Class<? extends IABBARegistrationPlugin> registrationClass,
-                         SourcesProcessor preprocessFixed,
-                         SourcesProcessor preprocessMoving,
-                         Map<String,Object> parameters) {
+    public void registerSelectedSlices(Class<? extends IABBARegistrationPlugin> registrationClass,
+                                       SourcesProcessor preprocessFixed,
+                                       SourcesProcessor preprocessMoving,
+                                       Map<String,Object> parameters) {
 
         PluginService ps = scijavaCtx.getService(PluginService.class);
         Supplier<? extends IABBARegistrationPlugin> pluginSupplier =
@@ -717,7 +695,7 @@ public class MultiSlicePositioner implements Closeable {
                     }
                 };
 
-        register(pluginSupplier, preprocessFixed, preprocessMoving, parameters);
+        registerSelectedSlices(pluginSupplier, preprocessFixed, preprocessMoving, parameters);
     }
 
     /**
@@ -729,12 +707,12 @@ public class MultiSlicePositioner implements Closeable {
      *                   to String using the scijava {@link ConvertService}. They need to be strings
      *                   to be serialized
      */
-    public void register(String registrationPluginName,
-                         SourcesProcessor preprocessFixed,
-                         SourcesProcessor preprocessMoving,
-                         Map<String,Object> parameters) {
+    public void registerSelectedSlices(String registrationPluginName,
+                                       SourcesProcessor preprocessFixed,
+                                       SourcesProcessor preprocessMoving,
+                                       Map<String,Object> parameters) {
         if (externalRegistrationPlugins.containsKey(registrationPluginName)) {
-            register(externalRegistrationPlugins.get(registrationPluginName),
+            registerSelectedSlices(externalRegistrationPlugins.get(registrationPluginName),
                     preprocessFixed, preprocessMoving, parameters);
         } else {
             this.errlog.accept("Registration type:"+registrationPluginName+" not found!");
@@ -751,10 +729,10 @@ public class MultiSlicePositioner implements Closeable {
      *                   to String using the scijava {@link ConvertService}. They need to be strings
      *                   to be serialized
      */
-    public void register(Supplier<? extends IABBARegistrationPlugin> registrationPluginSupplier,
-                         SourcesProcessor preprocessFixed,
-                         SourcesProcessor preprocessMoving,
-                         Map<String,Object> parameters) {
+    public void registerSelectedSlices(Supplier<? extends IABBARegistrationPlugin> registrationPluginSupplier,
+                                       SourcesProcessor preprocessFixed,
+                                       SourcesProcessor preprocessMoving,
+                                       Map<String,Object> parameters) {
         if (getSelectedSlices().size()==0) {
             warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to register");
             log.accept("Registration ignored : no slice selected");
@@ -766,25 +744,23 @@ public class MultiSlicePositioner implements Closeable {
             parameters.put("sx", roiSX);
             parameters.put("sy", roiSY);
 
-            for (SliceSources slice : slices) {
-                if (slice.isSelected()) {
-                    IABBARegistrationPlugin registration = registrationPluginSupplier.get();
-                    if (registration!=null) {
-                        registration.setScijavaContext(scijavaCtx);
+            for (SliceSources slice : getSelectedSlices()) {
+                IABBARegistrationPlugin registration = registrationPluginSupplier.get();
+                if (registration!=null) {
+                    registration.setScijavaContext(scijavaCtx);
 
-                        registration.setSliceInfo(new SliceInfo(this, slice));
+                    registration.setSliceInfo(new SliceInfo(this, slice));
 
-                        // Sends parameters to the registration
-                        registration.setRegistrationParameters(convertToString(scijavaCtx, parameters));
+                    // Sends parameters to the registration
+                    registration.setRegistrationParameters(convertToString(scijavaCtx, parameters));
 
-                        // Always set slice at zero position for registration
-                        parameters.put("pz", 0);
-                        AffineTransform3D at3d = new AffineTransform3D();
-                        at3d.translate(0, 0, -slice.getSlicingAxisPosition());
-                        SourcesAffineTransformer z_zero = new SourcesAffineTransformer(at3d);
+                    // Always set slice at zero position for registration
+                    parameters.put("pz", 0);
+                    AffineTransform3D at3d = new AffineTransform3D();
+                    at3d.translate(0, 0, -slice.getSlicingAxisPosition());
+                    SourcesAffineTransformer z_zero = new SourcesAffineTransformer(at3d);
 
-                        new RegisterSliceAction(this, slice, registration, SourcesProcessorHelper.compose(z_zero, preprocessFixed), SourcesProcessorHelper.compose(z_zero, preprocessMoving)).runRequest();
-                    }
+                    new RegisterSliceAction(this, slice, registration, SourcesProcessorHelper.compose(z_zero, preprocessFixed), SourcesProcessorHelper.compose(z_zero, preprocessMoving)).runRequest();
                 }
             }
         }

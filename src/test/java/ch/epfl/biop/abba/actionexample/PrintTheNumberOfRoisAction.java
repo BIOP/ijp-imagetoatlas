@@ -1,8 +1,8 @@
-package ch.epfl.biop.abba.actionandcommandexample;
+package ch.epfl.biop.abba.actionexample;
 
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
-import ch.epfl.biop.atlas.aligner.action.CancelableAction;
+import ch.epfl.biop.atlas.aligner.CancelableAction;
 import ij.IJ;
 import ij.gui.Roi;
 import net.imglib2.realtransform.RealTransform;
@@ -36,7 +36,7 @@ public class PrintTheNumberOfRoisAction extends CancelableAction {
     }
 
     @Override
-    public boolean run() {
+    protected boolean run() {
         RealTransform realTransform = slice.getSlicePixToCCFRealTransform(); // This will be important to save somewhere
         List<Roi> rois = slice.getRois(namingChoice);
         IJ.log("The slice "+slice+" contains "+rois.size()+" rois.");
@@ -44,7 +44,7 @@ public class PrintTheNumberOfRoisAction extends CancelableAction {
     }
 
     @Override
-    public boolean cancel() {
+    protected boolean cancel() {
         return true; // Return true if the cancellation worked fine, here there's nothing to cancel, so it returns true always
     }
 

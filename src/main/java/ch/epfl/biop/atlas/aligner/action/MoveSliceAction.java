@@ -1,5 +1,6 @@
 package ch.epfl.biop.atlas.aligner.action;
 
+import ch.epfl.biop.atlas.aligner.CancelableAction;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 
@@ -33,11 +34,11 @@ public class MoveSliceAction extends CancelableAction {
         return newSlicingAxisPosition;
     }
 
-    public boolean run() {
-        mp.addTask();
+    protected boolean run() {
+        getMP().addTask();
         sliceSource.setSlicingAxisPosition(newSlicingAxisPosition);
-        mp.stateHasBeenChanged();
-        mp.removeTask();
+        getMP().stateHasBeenChanged();
+        getMP().removeTask();
         return true;
     }
 
@@ -45,11 +46,11 @@ public class MoveSliceAction extends CancelableAction {
         return "Axis Position = " + new DecimalFormat("###.##").format(newSlicingAxisPosition);
     }
 
-    public boolean cancel() {
-        mp.addTask();
+    protected boolean cancel() {
+        getMP().addTask();
         sliceSource.setSlicingAxisPosition(oldSlicingAxisPosition);
-        mp.stateHasBeenChanged();
-        mp.removeTask();
+        getMP().stateHasBeenChanged();
+        getMP().removeTask();
         return true;
     }
 

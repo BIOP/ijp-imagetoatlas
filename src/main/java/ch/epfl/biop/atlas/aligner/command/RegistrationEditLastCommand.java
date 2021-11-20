@@ -65,6 +65,6 @@ public class RegistrationEditLastCommand implements Command {
             preprocessAtlas = new SourcesChannelsSelect(indices);
         }
 
-        mp.editLastRegistration(reuse_original_channels, preprocessSlice, preprocessAtlas);
+        mp.editLastRegistrationSelectedSlices(reuse_original_channels, preprocessSlice, preprocessAtlas);
     }
 }

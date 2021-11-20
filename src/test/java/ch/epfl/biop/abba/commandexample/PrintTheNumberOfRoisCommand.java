@@ -1,8 +1,8 @@
-package ch.epfl.biop.abba.actionandcommandexample;
+package ch.epfl.biop.abba.commandexample;
 
+import ch.epfl.biop.abba.actionexample.PrintTheNumberOfRoisAction;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
-import ch.epfl.biop.atlas.aligner.action.ExportSliceRegionsToRoiManagerAction;
 import ch.epfl.biop.atlas.aligner.action.MarkActionSequenceBatchAction;
 import ch.epfl.biop.atlas.aligner.plugin.ABBACommand;
 import org.scijava.Initializable;

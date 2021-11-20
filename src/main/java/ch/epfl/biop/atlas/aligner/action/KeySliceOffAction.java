@@ -1,5 +1,6 @@
 package ch.epfl.biop.atlas.aligner.action;
 
+import ch.epfl.biop.atlas.aligner.CancelableAction;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 
@@ -23,10 +24,10 @@ public class KeySliceOffAction extends CancelableAction {
         return sliceSource;
     }
 
-    public boolean run() {
+    protected boolean run() {
         if (sliceSource.isKeySlice()) {
             sliceSource.keySliceOff();
-            mp.stateHasBeenChanged();
+            getMP().stateHasBeenChanged();
             return true;
         } else return false; // already NOT a key slice
     }
@@ -35,10 +36,10 @@ public class KeySliceOffAction extends CancelableAction {
         return "Key slice Off";
     }
 
-    public boolean cancel() {
+    protected boolean cancel() {
         if (!sliceSource.isKeySlice()) {
             sliceSource.keySliceOn();
-            mp.stateHasBeenChanged();
+            getMP().stateHasBeenChanged();
         }
         return true;
     }

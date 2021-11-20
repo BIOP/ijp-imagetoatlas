@@ -2,7 +2,7 @@ package ch.epfl.biop.atlas.aligner.gui.bdv;
 
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
-import ch.epfl.biop.atlas.aligner.action.CancelableAction;
+import ch.epfl.biop.atlas.aligner.CancelableAction;
 import ch.epfl.biop.atlas.aligner.command.DisplaySettingsCommand;
 import ch.epfl.biop.atlas.aligner.gui.SliceSourcesPopupMenu;
 import org.scijava.command.CommandService;

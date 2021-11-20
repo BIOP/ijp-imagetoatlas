@@ -1,5 +1,6 @@
 package ch.epfl.biop.atlas.aligner.action;
 
+import ch.epfl.biop.atlas.aligner.CancelableAction;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.atlas.aligner.plugin.RegistrationPluginHelper;
@@ -61,8 +62,8 @@ public class EditLastRegistrationAction extends CancelableAction {
     }
 
     @Override
-    public boolean run() {
-        mp.addTask();
+    protected boolean run() {
+        getMP().addTask();
         //mp.removeUserAction(this);
         if (!reuseOriginalChannels) {
             slice.editLastRegistration(
@@ -74,13 +75,13 @@ public class EditLastRegistrationAction extends CancelableAction {
             slice.editLastRegistration(rs.preprocessFixed, rs.preprocessMoving);
         }
         slice.sourcesChanged();
-        mp.stateHasBeenChanged();
-        mp.removeTask();
+        getMP().stateHasBeenChanged();
+        getMP().removeTask();
         return true;
     }
 
     @Override
-    public boolean cancel() { // it cannot be canceled. maybe we could but I don't know
+    protected boolean cancel() { // it cannot be canceled. maybe we could but I don't know
         // Unsupported yet : TODO!
         return true;
     }

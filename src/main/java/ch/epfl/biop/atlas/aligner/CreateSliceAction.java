@@ -1,8 +1,6 @@
-package ch.epfl.biop.atlas.aligner.action;
+package ch.epfl.biop.atlas.aligner;
 
 import bdv.viewer.SourceAndConverter;
-import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
-import ch.epfl.biop.atlas.aligner.SliceSources;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,11 +40,11 @@ public class CreateSliceAction extends CancelableAction {
     }
 
     @Override
-    public boolean run() {
-        mp.addTask();
-        boolean result = mp.runCreateSlice(this);
-        mp.stateHasBeenChanged();
-        mp.removeTask();
+    protected boolean run() {
+        getMP().addTask();
+        boolean result = getMP().runCreateSlice(this);
+        getMP().stateHasBeenChanged();
+        getMP().removeTask();
         return result;
     }
 
@@ -59,11 +57,11 @@ public class CreateSliceAction extends CancelableAction {
     }
 
     @Override
-    public boolean cancel() {
-        mp.addTask();
-        boolean result = mp.cancelCreateSlice(this);
-        mp.stateHasBeenChanged();
-        mp.removeTask();
+    protected boolean cancel() {
+        getMP().addTask();
+        boolean result = getMP().cancelCreateSlice(this);
+        getMP().stateHasBeenChanged();
+        getMP().removeTask();
         return result;
     }
 

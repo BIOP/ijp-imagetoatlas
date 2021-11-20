@@ -60,7 +60,7 @@ public class RegistrationElastixSplineRemoteCommand extends RegistrationSingleCh
         parameters.put("nbControlPointsX", nb_control_points_x);
         parameters.put("pxSizeInCurrentUnit", pxSizeInCurrentUnit/1000.0);
 
-        mp.register(this,
+        mp.registerSelectedSlices(this,
                 getFixedFilter(),
                 getMovingFilter(),
                 parameters);

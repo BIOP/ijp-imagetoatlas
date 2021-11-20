@@ -1,7 +1,7 @@
 package ch.epfl.biop.atlas.aligner.adapter;
 
 import bdv.viewer.SourceAndConverter;
-import ch.epfl.biop.atlas.aligner.action.CreateSliceAction;
+import ch.epfl.biop.atlas.aligner.CreateSliceAction;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import com.google.gson.*;
 

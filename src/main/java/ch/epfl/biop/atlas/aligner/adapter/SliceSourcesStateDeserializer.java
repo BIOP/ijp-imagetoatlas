@@ -1,6 +1,6 @@
 package ch.epfl.biop.atlas.aligner.adapter;
 
-import ch.epfl.biop.atlas.aligner.action.CancelableAction;
+import ch.epfl.biop.atlas.aligner.CancelableAction;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import com.google.gson.*;
 import net.imglib2.realtransform.AffineTransform3D;

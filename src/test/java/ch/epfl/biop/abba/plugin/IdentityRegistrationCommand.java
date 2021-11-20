@@ -14,7 +14,7 @@ public class IdentityRegistrationCommand implements Command {
 
     @Override
     public void run() {
-        mp.register(this, SourcesProcessorHelper.Identity(),
+        mp.registerSelectedSlices(this, SourcesProcessorHelper.Identity(),
                 SourcesProcessorHelper.Identity());
     }
 }

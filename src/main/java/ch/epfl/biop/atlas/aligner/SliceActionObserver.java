@@ -1,8 +1,5 @@
 package ch.epfl.biop.atlas.aligner;
 
-import ch.epfl.biop.atlas.aligner.action.CancelableAction;
-import ch.epfl.biop.atlas.aligner.action.CreateSliceAction;
-import ch.epfl.biop.atlas.aligner.action.DeleteSliceAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -41,7 +41,7 @@ public class RegistrationElastixSplineCommand extends RegistrationSingleChannelC
         parameters.put("background_offset_value_fixed", background_offset_value_fixed);
         parameters.put("pxSizeInCurrentUnit", pxSizeInCurrentUnit/1000.0);
 
-        mp.register(this,
+        mp.registerSelectedSlices(this,
                 getFixedFilter(),
                 getMovingFilter(),
                 parameters);

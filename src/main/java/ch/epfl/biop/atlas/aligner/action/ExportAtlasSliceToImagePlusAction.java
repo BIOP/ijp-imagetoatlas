@@ -1,5 +1,6 @@
 package ch.epfl.biop.atlas.aligner.action;
 
+import ch.epfl.biop.atlas.aligner.CancelableAction;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.atlas.aligner.SliceToImagePlus;
@@ -42,15 +43,15 @@ public class ExportAtlasSliceToImagePlusAction extends CancelableAction {
     }
 
     @Override
-    public boolean run() {
-        mp.addTask();
-        resultImage = SliceToImagePlus.exportAtlas(mp,slice,preprocess,px,py,sx,sy,pixel_size_mm,timepoint,interpolate);
-        mp.removeTask();
+    protected boolean run() {
+        getMP().addTask();
+        resultImage = SliceToImagePlus.exportAtlas(getMP(),slice,preprocess,px,py,sx,sy,pixel_size_mm,timepoint,interpolate);
+        getMP().removeTask();
         return resultImage!=null;
     }
 
     @Override
-    public boolean cancel() {
+    protected boolean cancel() {
         clean(); // Allows GC
         return true;
     }

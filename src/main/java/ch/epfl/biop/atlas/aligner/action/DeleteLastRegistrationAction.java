@@ -1,5 +1,6 @@
 package ch.epfl.biop.atlas.aligner.action;
 
+import ch.epfl.biop.atlas.aligner.CancelableAction;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 
@@ -54,13 +55,13 @@ public class DeleteLastRegistrationAction extends CancelableAction {
     }
 
     @Override
-    public boolean run() {
+    protected boolean run() {
         if (rs!=null){
-            mp.addTask();
+            getMP().addTask();
             rs.hide();
             boolean result = rs.cancel();
-            mp.stateHasBeenChanged();
-            mp.removeTask();
+            getMP().stateHasBeenChanged();
+            getMP().removeTask();
             return result;
         } else {
             return false;
@@ -68,13 +69,13 @@ public class DeleteLastRegistrationAction extends CancelableAction {
     }
 
     @Override
-    public boolean cancel() {
+    protected boolean cancel() {
         if (rs!=null) {
-            mp.addTask();
+            getMP().addTask();
             rs.show();
             boolean result = rs.run();
-            mp.stateHasBeenChanged();
-            mp.removeTask();
+            getMP().stateHasBeenChanged();
+            getMP().removeTask();
             return result;
         } else {
             return true;

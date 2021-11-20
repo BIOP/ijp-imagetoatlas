@@ -1,6 +1,7 @@
 package ch.epfl.biop.atlas.aligner.action;
 
 import bdv.viewer.SourceAndConverter;
+import ch.epfl.biop.atlas.aligner.CancelableAction;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.atlas.aligner.plugin.RegistrationPluginHelper;
@@ -60,20 +61,20 @@ public class RegisterSliceAction extends CancelableAction {
     boolean isValid = true;
 
     @Override
-    public boolean run() { //
+    protected boolean run() { //
         if (registration.isRegistrationDone()&&isValid()) {
-            mp.addTask();
+            getMP().addTask();
             slice.appendRegistration(registration);
             slice.sourcesChanged();
-            mp.stateHasBeenChanged();
-            mp.removeTask();
+            getMP().stateHasBeenChanged();
+            getMP().removeTask();
             return true;
         } else {
-            mp.addTask();
+            getMP().addTask();
             isValid = slice.runRegistration(registration, preprocessFixed, preprocessMoving);
             slice.sourcesChanged();
-            mp.stateHasBeenChanged();
-            mp.removeTask();
+            getMP().stateHasBeenChanged();
+            getMP().removeTask();
             return isValid;
         }
     }
@@ -113,15 +114,15 @@ public class RegisterSliceAction extends CancelableAction {
     }
 
     @Override
-    public boolean cancel() {
-        mp.addTask();
+    protected boolean cancel() {
+        getMP().addTask();
         if (registration!=null) {
             logger.debug("Registration action "+this+" cancelled");
             registration.abort(); // Probably not necessary
         }
         boolean result = slice.removeRegistration(registration);
-        mp.stateHasBeenChanged();
-        mp.removeTask();
+        getMP().stateHasBeenChanged();
+        getMP().removeTask();
         return result;
     }
 

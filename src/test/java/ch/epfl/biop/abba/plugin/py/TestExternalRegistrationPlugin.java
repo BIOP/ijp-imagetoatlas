@@ -75,7 +75,7 @@ public class TestExternalRegistrationPlugin {
                 .function((inputs) -> {
                     System.out.println("Inside run");
                     Map<String, Object> params = new HashMap<>();
-                    ((MultiSlicePositioner) inputs.get("mp")).register(registrationTypeName,
+                    ((MultiSlicePositioner) inputs.get("mp")).registerSelectedSlices(registrationTypeName,
                             new SourcesChannelsSelect((Integer) inputs.get("fixed_channel")),
                             new SourcesChannelsSelect((Integer) inputs.get("moving_channel")),
                             params);

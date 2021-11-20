@@ -123,7 +123,7 @@ public class RegistrationDeepSliceCommand implements Command {
 
         List<SliceSources> slicesToExport = mp.getSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
 
-        if (mp.getNumberOfSelectedSources()==0) {
+        if (mp.getSelectedSlices().size()==0) {
             mp.log.accept("No slice selected");
             mp.warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to register");
             return;

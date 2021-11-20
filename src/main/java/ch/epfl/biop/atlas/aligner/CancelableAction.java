@@ -1,7 +1,5 @@
-package ch.epfl.biop.atlas.aligner.action;
+package ch.epfl.biop.atlas.aligner;
 
-import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
-import ch.epfl.biop.atlas.aligner.SliceSources;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +33,10 @@ public abstract class CancelableAction {
         this.mp = mp;
     }
 
+    public MultiSlicePositioner getMP() {
+        return mp;
+    }
+
     /**
      *
      * @return the SliceSources involved in this action
@@ -49,17 +51,17 @@ public abstract class CancelableAction {
         mp.cancelRequest(this);
     }
 
-    public abstract boolean run();
+    protected abstract boolean run();
 
-    public abstract boolean cancel();
+    protected abstract boolean cancel();
 
     private boolean isHidden = false;
 
-    protected void hide() {
+    public void hide() {
         isHidden = true;
     }
 
-    protected void show() {
+    public void show() {
         isHidden = false;
     }
 
