@@ -57,11 +57,9 @@ public class DeleteLastRegistrationAction extends CancelableAction {
     @Override
     protected boolean run() {
         if (rs!=null){
-            getMP().addTask();
             rs.hide();
             boolean result = rs.cancel();
             getMP().stateHasBeenChanged();
-            getMP().removeTask();
             return result;
         } else {
             return false;
@@ -71,11 +69,9 @@ public class DeleteLastRegistrationAction extends CancelableAction {
     @Override
     protected boolean cancel() {
         if (rs!=null) {
-            getMP().addTask();
             rs.show();
             boolean result = rs.run();
             getMP().stateHasBeenChanged();
-            getMP().removeTask();
             return result;
         } else {
             return true;

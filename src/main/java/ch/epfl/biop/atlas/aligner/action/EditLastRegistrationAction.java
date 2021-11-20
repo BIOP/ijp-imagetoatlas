@@ -63,7 +63,6 @@ public class EditLastRegistrationAction extends CancelableAction {
 
     @Override
     protected boolean run() {
-        getMP().addTask();
         //mp.removeUserAction(this);
         if (!reuseOriginalChannels) {
             slice.editLastRegistration(
@@ -76,7 +75,6 @@ public class EditLastRegistrationAction extends CancelableAction {
         }
         slice.sourcesChanged();
         getMP().stateHasBeenChanged();
-        getMP().removeTask();
         return true;
     }
 

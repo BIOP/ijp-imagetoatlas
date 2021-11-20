@@ -426,7 +426,9 @@ public class MultiSlicePositioner implements Closeable {
             logger.debug("Action "+action+" on slice "+action.getSliceSources()+" run (non async).");
             listeners.forEach(sliceChangeListener -> sliceChangeListener.actionEnqueue(action.getSliceSources(), action));
             listeners.forEach(sliceChangeListener -> sliceChangeListener.actionStarted(action.getSliceSources(), action));
+            addTask();
             boolean result = action.run();
+            removeTask();
             listeners.forEach(sliceChangeListener -> sliceChangeListener.actionFinished(action.getSliceSources(), action, result));
             logger.debug("Action "+action+" on slice "+action.getSliceSources()+" done.");
         }

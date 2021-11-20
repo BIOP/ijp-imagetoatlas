@@ -503,6 +503,7 @@ public class SliceSources {
             }
             tasks.add(startingPoint.thenApplyAsync((out) -> {
                 if (out) {
+                    mp.addTask();
                     actionInProgress = action;
                     logger.debug(this+": action "+action+" started");
                     mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.actionStarted(action.getSliceSources(), action));
@@ -521,6 +522,7 @@ public class SliceSources {
                         mapActionTask.remove(action);
                         mp.userActions.remove(action);
                     }
+                    mp.removeTask();
                     return result;
                 } else {
                     mp.errorMessageForUser.accept("Action not started","Upstream tasked failed, canceling action "+action);
@@ -545,6 +547,7 @@ public class SliceSources {
 
                     if (action==actionInProgress) {
                        if (actionInProgress instanceof RegisterSliceAction) {
+                           mp.addTask();
                            mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.actionCancelStarted(action.getSliceSources(), action));
                            boolean result;
 
@@ -561,6 +564,7 @@ public class SliceSources {
                             mp.userActions.remove(action);
                             postRun.run();
                             mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.actionCancelFinished(action.getSliceSources(), action, result));
+                            mp.removeTask();
                        }
                     } else {
                         CompletableFuture<Boolean> startingPoint;
@@ -571,12 +575,14 @@ public class SliceSources {
                         }
                         tasks.add(startingPoint.thenApplyAsync((out) -> {
                             if (out) {
+                                mp.addTask();
                                 mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.actionCancelStarted(action.getSliceSources(), action));
                                 boolean result = action.cancel();
                                 tasks.remove(mapActionTask.get(action));
                                 mapActionTask.remove(action);
                                 postRun.run();
                                 mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.actionCancelFinished(action.getSliceSources(), action, result));
+                                mp.removeTask();
                                 return result;
                             } else {
                                 logger.error("Weird edge case!");
@@ -585,6 +591,7 @@ public class SliceSources {
                         }));
                     }
                 } else {
+                    mp.addTask();
                     mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.actionCancelStarted(action.getSliceSources(), action));
                     // Not done yet! - let's remove right now from the task list
                     boolean result = mapActionTask.get(action).cancel(true);
@@ -592,12 +599,15 @@ public class SliceSources {
                     mapActionTask.remove(action);
                     postRun.run();
                     mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.actionCancelFinished(action.getSliceSources(), action, result));
+                    mp.removeTask();
                 }
             } else if (action instanceof CreateSliceAction) {
+                mp.addTask();
                 mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.actionCancelStarted(action.getSliceSources(), action));
                 waitForEndOfTasks();
                 boolean result = action.cancel();
                 mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.actionCancelFinished(action.getSliceSources(), action, result));
+                mp.removeTask();
             } else {
                 mp.errlog.accept("Unregistered action");
             }

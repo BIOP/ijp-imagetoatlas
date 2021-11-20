@@ -39,9 +39,7 @@ public class ExportDeformationFieldToImagePlusAction extends CancelableAction {
 
     @Override
     protected boolean run() {
-        getMP().addTask();
         resultImage = DeformationFieldToImagePlus.export(slice,resolutionLevel, downsample, timepoint,toleranceInMm, maxIteration);
-        getMP().removeTask();
         return resultImage!=null;
     }
 

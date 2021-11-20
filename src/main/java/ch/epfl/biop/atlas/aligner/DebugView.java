@@ -6,10 +6,19 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.function.Consumer;
 
+import static ch.epfl.biop.atlas.aligner.gui.bdv.card.NavigationPanel.box;
+
 public class DebugView implements MultiSlicePositioner.SliceChangeListener{
 
-    Consumer<String> logger = IJ::log;
+    Consumer<String> logger = this::append;
+
+    private void append(String s) {
+        area.append(s+"\n");
+    }
+
     final MultiSlicePositioner msp;
+
+    JTextArea area = new JTextArea();
 
     public DebugView(MultiSlicePositioner msp) {
         JFrame debug = new JFrame("Debug MultiSlicePositioner "+msp);
@@ -29,7 +38,10 @@ public class DebugView implements MultiSlicePositioner.SliceChangeListener{
 
         debugActions.add(writeUserActions);
         debugActions.add(writeRedoableUserActions);
-        debug.add(debugActions);
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.add(new JScrollPane(area), BorderLayout.CENTER);
+        panel.add(debugActions, BorderLayout.SOUTH);
+        debug.add(panel);
         debug.pack();
         debug.setVisible(true);
         msp.addSliceListener(this);

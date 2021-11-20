@@ -63,18 +63,14 @@ public class RegisterSliceAction extends CancelableAction {
     @Override
     protected boolean run() { //
         if (registration.isRegistrationDone()&&isValid()) {
-            getMP().addTask();
             slice.appendRegistration(registration);
             slice.sourcesChanged();
             getMP().stateHasBeenChanged();
-            getMP().removeTask();
             return true;
         } else {
-            getMP().addTask();
             isValid = slice.runRegistration(registration, preprocessFixed, preprocessMoving);
             slice.sourcesChanged();
             getMP().stateHasBeenChanged();
-            getMP().removeTask();
             return isValid;
         }
     }
@@ -115,14 +111,12 @@ public class RegisterSliceAction extends CancelableAction {
 
     @Override
     protected boolean cancel() {
-        getMP().addTask();
         if (registration!=null) {
             logger.debug("Registration action "+this+" cancelled");
             registration.abort(); // Probably not necessary
         }
         boolean result = slice.removeRegistration(registration);
         getMP().stateHasBeenChanged();
-        getMP().removeTask();
         return result;
     }
 

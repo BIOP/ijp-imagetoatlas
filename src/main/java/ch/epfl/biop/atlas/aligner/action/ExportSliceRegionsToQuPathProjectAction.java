@@ -22,11 +22,9 @@ public class ExportSliceRegionsToQuPathProjectAction extends CancelableAction {
     }
 
     @Override
-    protected boolean run() { //
-        getMP().addTask();
+    protected boolean run() {
         logger.info("Exporting slice "+slice+" registration to QuPath");
         slice.exportToQuPathProject(erasePreviousFile);
-        getMP().removeTask();
         return true;
     }
 
