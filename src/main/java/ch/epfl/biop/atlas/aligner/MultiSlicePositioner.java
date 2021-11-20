@@ -10,7 +10,6 @@ import ch.epfl.biop.atlas.struct.Atlas;
 import ch.epfl.biop.registration.Registration;
 import ch.epfl.biop.sourceandconverter.processor.*;
 import ch.epfl.biop.sourceandconverter.processor.adapter.*;
-import com.google.api.client.json.JsonString;
 import com.google.gson.*;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import mpicbg.spim.data.generic.base.Entity;
@@ -162,7 +161,7 @@ public class MultiSlicePositioner implements Closeable {
      */
     public MultiSlicePositioner(Atlas biopAtlas, ReslicedAtlas reslicedAtlas, Context ctx) {
 
-        logger.info("Creating instance");
+        logger.info("Creating MultiSlicePositioner instance");
         this.reslicedAtlas = reslicedAtlas;
         this.biopAtlas = biopAtlas;
         this.scijavaCtx = ctx;
@@ -197,14 +196,14 @@ public class MultiSlicePositioner implements Closeable {
         roiSX = sX;
         roiSY = sY;
 
-        logger.info("Instance created");
+        logger.info("MultiSlicePositioner instance created");
     }
 
     public ReslicedAtlas getReslicedAtlas() {
         return reslicedAtlas;
     }
 
-    public List<SliceSources> getSelectedSources() {
+    public List<SliceSources> getSelectedSlices() {
         return getSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
     }
 
@@ -387,11 +386,11 @@ public class MultiSlicePositioner implements Closeable {
     }
 
     public int getNumberOfSelectedSources() {
-        return getSelectedSources().size();
+        return getSelectedSlices().size();
     }
 
     public int getChannelBoundForSelectedSlices() {
-        List<SliceSources> sources = getSelectedSources();
+        List<SliceSources> sources = getSelectedSlices();
         if (sources.size()==0) {
             return 0;
         } else {
@@ -599,40 +598,6 @@ public class MultiSlicePositioner implements Closeable {
         new MoveSliceAction(this, slice, axisPosition).runRequest();
     }
 
-    public void exportSelectedSlicesRegionsToRoiManager(String namingChoice) {
-        List<SliceSources> sortedSelected = getSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
-        if (sortedSelected.size()==0) {
-            errorMessageForUser.accept("No slice selected", "You did not select any slice.");
-        } else {
-            new MarkActionSequenceBatchAction(MultiSlicePositioner.this).runRequest();
-            for (SliceSources slice : sortedSelected) {
-                exportSliceRegionsToRoiManager(slice, namingChoice);
-            }
-            new MarkActionSequenceBatchAction(MultiSlicePositioner.this).runRequest();
-        }
-    }
-
-    public void exportSelectedSlicesRegionsToQuPathProject(boolean erasePreviousFile) {
-        List<SliceSources> sortedSelected = getSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
-        if (sortedSelected.size()==0) {
-            errorMessageForUser.accept("No slice selected", "You did not select any slice.");
-        } else {
-            new MarkActionSequenceBatchAction(MultiSlicePositioner.this).runRequest();
-            for (SliceSources slice : sortedSelected) {
-                exportSliceRegionsToQuPathProject(slice, erasePreviousFile);
-            }
-            new MarkActionSequenceBatchAction(MultiSlicePositioner.this).runRequest();
-        }
-    }
-
-    public void exportSliceRegionsToRoiManager(SliceSources slice, String namingChoice) {
-        new ExportSliceRegionsToRoiManagerAction(this, slice, namingChoice).runRequest();
-    }
-
-    public void exportSliceRegionsToQuPathProject(SliceSources slice, boolean erasePreviousFile) {
-        new ExportSliceRegionsToQuPathProjectAction(this, slice, erasePreviousFile).runRequest();
-    }
-
     /**
      * Equal spacing between selected slices, respecting the location of key slices
      * (key slices are not moved)
@@ -660,7 +625,7 @@ public class MultiSlicePositioner implements Closeable {
     }
 
     public void editLastRegistration(boolean reuseOriginalChannels, SourcesProcessor preprocessSlice, SourcesProcessor preprocessAtlas) {
-        if (getSelectedSources().size()==0) {
+        if (getSelectedSlices().size()==0) {
             warningMessageForUser.accept("No selected slice", "Please select the slice you want to edit");
             log.accept("Edit registration ignored : no slice selected");
         } else {
@@ -673,7 +638,7 @@ public class MultiSlicePositioner implements Closeable {
     }
 
     public void removeLastRegistration() {
-        if (getSelectedSources().size()==0) {
+        if (getSelectedSlices().size()==0) {
             warningMessageForUser.accept("No selected slice", "Please select the slice where you want to remove the registration");
             log.accept("Remove registration ignored : no slice selected");
         } else {
@@ -790,7 +755,7 @@ public class MultiSlicePositioner implements Closeable {
                          SourcesProcessor preprocessFixed,
                          SourcesProcessor preprocessMoving,
                          Map<String,Object> parameters) {
-        if (getSelectedSources().size()==0) {
+        if (getSelectedSlices().size()==0) {
             warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to register");
             log.accept("Registration ignored : no slice selected");
         } else {
@@ -1104,15 +1069,31 @@ public class MultiSlicePositioner implements Closeable {
 
     protected AtomicInteger numberOfTasks = new AtomicInteger();
 
+    /**
+     * Simply indicates that a task is current being performed.
+     * This can be useful to indicate to the user that something is currently waited for or going on.
+     * You need to indicate when it has ended with {@link MultiSlicePositioner#removeTask()}
+     * See {@link MultiSlicePositioner#getNumberOfTasks()}
+     */
     public void addTask() {
-        System.out.println("Task added");
         numberOfTasks.incrementAndGet();
+        logger.debug("Task added. Current number of tasks: "+numberOfTasks.get());
     }
 
+    /**
+     * Indicates that a task has been finished.
+     * See {@link MultiSlicePositioner#addTask()}
+     * See {@link MultiSlicePositioner#getNumberOfTasks()}
+     */
     public void removeTask(){
         numberOfTasks.decrementAndGet();
+        logger.debug("Task removed. Current number of tasks: "+numberOfTasks.get());
     }
 
+    /**
+     *
+     * @return the number of tasks currently being performed
+     */
     public int getNumberOfTasks() {
         return numberOfTasks.get();
     }

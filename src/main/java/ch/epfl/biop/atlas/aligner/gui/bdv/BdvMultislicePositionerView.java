@@ -40,7 +40,6 @@ import org.scijava.command.Command;
 import org.scijava.command.CommandModule;
 import org.scijava.command.CommandService;
 import org.scijava.object.ObjectService;
-import org.scijava.plugin.PTService;
 import org.scijava.plugin.PluginService;
 import org.scijava.ui.behaviour.*;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
@@ -66,7 +65,6 @@ import java.text.DecimalFormat;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -451,7 +449,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     }
 
     private void addRightClickActions() {
-        mscClick = new MultiSliceContextMenuClickBehaviour( msp, this, msp::getSelectedSources );
+        mscClick = new MultiSliceContextMenuClickBehaviour( msp, this, msp::getSelectedSlices);
         common_behaviours.behaviour(mscClick, "Slices Context Menu", "button3", "ctrl button1", "meta button1");
     }
 

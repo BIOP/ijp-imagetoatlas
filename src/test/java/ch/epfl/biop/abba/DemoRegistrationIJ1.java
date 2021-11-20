@@ -1,21 +1,16 @@
 package ch.epfl.biop.abba;
 
 import bdv.util.BdvHandle;
-import bdv.viewer.SourceAndConverter;
-import ch.epfl.biop.atlas.aligner.DebugView;
-import ch.epfl.biop.atlas.aligner.command.RegistrationElastixAffineCommand;
-import ch.epfl.biop.atlas.aligner.command.ABBAStartCommand;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
-import ch.epfl.biop.atlas.aligner.SliceSources;
+import ch.epfl.biop.atlas.aligner.command.ABBAStartCommand;
+import ch.epfl.biop.atlas.aligner.command.ImportImagePlusCommand;
 import ch.epfl.biop.atlas.aligner.gui.bdv.BdvMultislicePositionerView;
 import ch.epfl.biop.atlas.mouse.allen.ccfv3.command.AllenBrainAdultMouseAtlasCCF2017Command;
-import ch.epfl.biop.atlas.rat.waxholm.spraguedawley.v4.command.WaxholmSpragueDawleyRatV4Command;
+import ch.epfl.biop.atlas.struct.Atlas;
 import ij.IJ;
 import ij.ImagePlus;
 import net.imagej.ImageJ;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
-
-import java.io.File;
 
 public class DemoRegistrationIJ1 {
 
@@ -25,21 +20,21 @@ public class DemoRegistrationIJ1 {
 
         ImagePlus demoSlice = IJ.openImage("src/test/resources/demoSlice.tif");
         demoSlice.show();
-        ij.command().run(AllenBrainAdultMouseAtlasCCF2017Command.class, true).get();
 
-        ij.command().run(WaxholmSpragueDawleyRatV4Command.class, true).get();
+        Atlas mouseAtlas = (Atlas) ij.command().run(AllenBrainAdultMouseAtlasCCF2017Command.class, true).get().getOutput("ba");
 
-        //ij.command().run(ABBAStartCommand.class, true).get();
-
-        //ij.command().run(SourceFromImagePlusCommand.class, true, "imagePlus", demoSlice).get();
-
-        MultiSlicePositioner mp = (MultiSlicePositioner) (ij.command().run(ABBAStartCommand.class, true).get().getOutput("mp"));
-
-        //SourceAndConverter[] sac = ij.convert().convert(demoSlice.getTitle(), SourceAndConverter[].class);
+        MultiSlicePositioner mp = (MultiSlicePositioner) (ij.command()
+                .run(ABBAStartCommand.class, true,
+                "ba", mouseAtlas,
+                        "slicing_mode", "coronal").get().getOutput("mp"));
 
         BdvHandle bdvh = SourceAndConverterServices.getBdvDisplayService().getNewBdv();
 
         BdvMultislicePositionerView view = new BdvMultislicePositionerView(mp, bdvh);
+
+        ij.command().run(ImportImagePlusCommand.class, true,
+                "mp", mp,
+                "slice_axis", 5).get();
 
         //DebugView debugView = new DebugView(mp);
 

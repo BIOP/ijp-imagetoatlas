@@ -53,7 +53,7 @@ public class SliceDragBehaviour implements DragBehaviour {
             logger.debug(" DragSlice start ("+x+":"+y+")  ! "+ sliceDragged + " perform = "+perform);
 
             // Collect all selected sources
-            affectedSlices = view.msp.getSelectedSources();
+            affectedSlices = view.msp.getSelectedSlices();
 
             int indexKeySliceRight = -1;
             int indexKeySliceLeft = -1;

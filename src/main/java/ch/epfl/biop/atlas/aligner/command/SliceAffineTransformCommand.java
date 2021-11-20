@@ -59,7 +59,7 @@ public class SliceAffineTransformCommand extends InteractiveCommand implements M
             }
             if ((selectedSlices == null)) {
                 selectedSlices = new HashSet<>();
-                selectedSlices.addAll(mp.getSelectedSources());
+                selectedSlices.addAll(mp.getSelectedSlices());
                 originalTransforms = new HashMap<>();
                 boolean oneRegistrationOccured = false;
                 for (SliceSources slice : selectedSlices) {
@@ -76,7 +76,7 @@ public class SliceAffineTransformCommand extends InteractiveCommand implements M
             if (selectedSlices.size()==0) {
                 mp.errorMessageForUser.accept("No selected slice", "Please select a slice and rerun the function");
             } else {
-                if (!CollectionUtils.isEqualCollection(selectedSlices, mp.getSelectedSources())) {
+                if (!CollectionUtils.isEqualCollection(selectedSlices, mp.getSelectedSlices())) {
                     mp.warningMessageForUser.accept("Warning: selected slices have changed!","Please close and restart this command if you want to transform different slices. Otherwise restore the original selection");
                 } else {
                     double angle_rad = angle_degrees / 180.0 * Math.PI;

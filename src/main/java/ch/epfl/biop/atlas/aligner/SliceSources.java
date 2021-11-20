@@ -23,6 +23,7 @@ import ch.epfl.biop.registration.Registration;
 import ch.epfl.biop.registration.sourceandconverter.affine.AffineTransformedSourceWrapperRegistration;
 import ch.epfl.biop.registration.sourceandconverter.affine.CenterZeroRegistration;
 import com.google.gson.Gson;
+import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.Roi;
 import ij.plugin.frame.RoiManager;
@@ -680,6 +681,9 @@ public class SliceSources {
         return Converters.convert(raiLabel, cvt, new FloatType());
     }
 
+    double rotXLastExport = Double.MAX_VALUE;
+    double rotYLastExport = Double.MAX_VALUE;
+
     void prepareExport(String namingChoice) {
         // Need to raster the label image
         AffineTransform3D at3D = new AffineTransform3D();
@@ -692,13 +696,20 @@ public class SliceSources {
         if (!labelImageBeingComputed) {
             if (at3DLastLabelImage != null) {
                 if (Arrays.equals(at3D.getRowPackedCopy(), at3DLastLabelImage.getRowPackedCopy())) {
-                    computeLabelImageNecessary = false;
+                    if ((mp.getReslicedAtlas().getRotateX() == rotXLastExport)&&(mp.getReslicedAtlas().getRotateY() == rotYLastExport)) {
+                        logger.debug("Slice " + this + ": Label image already computed, skips computation.");
+                        computeLabelImageNecessary = false;
+                    }
                 }
             }
         }
 
         if (computeLabelImageNecessary) {
+            logger.debug("Slice "+this+": Computing label image BEGIN.");
+            rotXLastExport = mp.getReslicedAtlas().getRotateX();
+            rotYLastExport = mp.getReslicedAtlas().getRotateY();
             computeLabelImage(at3D);
+            logger.debug("Slice "+this+": Computing label image END.");
         }
 
         computeTransformedRois();
@@ -740,6 +751,16 @@ public class SliceSources {
     public synchronized void exportRegionsToROIManager(String namingChoice) {
         prepareExport(namingChoice);
         cvtRoisTransformed.to(RoiManager.class);
+    }
+
+    public synchronized List<Roi> getRois(String namingChoice) {
+        prepareExport(namingChoice);
+        IJShapeRoiArray roiArray = (IJShapeRoiArray) cvtRoisTransformed.to(IJShapeRoiArray.class);
+        List<Roi> rois = new ArrayList<>();
+        for (CompositeFloatPoly cfp: roiArray.rois) {
+            rois.add(cfp.getRoi());
+        }
+        return rois;
     }
 
     public synchronized void exportToQuPathProject(boolean erasePreviousFile) {

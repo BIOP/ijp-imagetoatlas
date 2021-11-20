@@ -47,7 +47,7 @@ public class SliceActionObserver implements MultiSlicePositioner.SliceChangeList
     }
 
     public synchronized List<CancelableAction> getActionsFromSlice(SliceSources slice) {
-        return sliceSortedActions.get(slice);
+        return sliceSortedActions.get(slice); // TODO : return a copy instead ?
     }
 
     @Override

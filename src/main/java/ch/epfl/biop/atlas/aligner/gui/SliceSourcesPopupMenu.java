@@ -39,7 +39,7 @@ public class SliceSourcesPopupMenu {
         JPopupMenu popup = new JPopupMenu();
 
         addPopupAction(popup,"Set as Key Slice(s)", () -> {
-            SliceSources[] slices = mp.getSelectedSources().toArray(new SliceSources[0]);
+            SliceSources[] slices = mp.getSelectedSlices().toArray(new SliceSources[0]);
             if (slices.length>1) new MarkActionSequenceBatchAction(mp).runRequest();
             for (SliceSources slice : slices) {
                 new KeySliceOnAction(mp, slice).runRequest();
@@ -48,7 +48,7 @@ public class SliceSourcesPopupMenu {
         });
 
         addPopupAction(popup,"Remove Key Slice(s)", () -> {
-            SliceSources[] slices = mp.getSelectedSources().toArray(new SliceSources[0]);
+            SliceSources[] slices = mp.getSelectedSlices().toArray(new SliceSources[0]);
             if (slices.length>1) new MarkActionSequenceBatchAction(mp).runRequest();
             for (SliceSources slice : slices) {
                 new KeySliceOffAction(mp, slice).runRequest();
@@ -73,7 +73,7 @@ public class SliceSourcesPopupMenu {
         */
 
         addPopupAction(popup, "Remove Selected Slices ", () -> {
-            SliceSources[] slices = mp.getSelectedSources().toArray(new SliceSources[0]);
+            SliceSources[] slices = mp.getSelectedSlices().toArray(new SliceSources[0]);
             if (slices.length>1) new MarkActionSequenceBatchAction(mp).runRequest();
             for (SliceSources slice : slices) {
                 new DeleteSliceAction(mp, slice).runRequest();
@@ -88,7 +88,7 @@ public class SliceSourcesPopupMenu {
         });
 
         addPopupAction(popup, "Remove Last Registration", () -> {
-            SliceSources[] slices = mp.getSelectedSources().toArray(new SliceSources[0]);
+            SliceSources[] slices = mp.getSelectedSlices().toArray(new SliceSources[0]);
             if (slices.length>1) new MarkActionSequenceBatchAction(mp).runRequest();
             for (SliceSources slice : slices) {
                 new DeleteLastRegistrationAction(mp, slice).runRequest();
