@@ -2,7 +2,7 @@ package ch.epfl.biop.atlas.aligner.adapter;
 
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
-import ch.epfl.biop.atlas.aligner.action.RegisterSliceAction;
+import ch.epfl.biop.atlas.aligner.RegisterSliceAction;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.registration.Registration;
 import ch.epfl.biop.sourceandconverter.processor.SourcesProcessor;

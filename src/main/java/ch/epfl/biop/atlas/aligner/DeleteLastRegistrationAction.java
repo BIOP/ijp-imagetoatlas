@@ -1,8 +1,4 @@
-package ch.epfl.biop.atlas.aligner.action;
-
-import ch.epfl.biop.atlas.aligner.CancelableAction;
-import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
-import ch.epfl.biop.atlas.aligner.SliceSources;
+package ch.epfl.biop.atlas.aligner;
 
 import java.awt.*;
 import java.util.ArrayList;

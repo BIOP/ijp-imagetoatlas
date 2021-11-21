@@ -3,7 +3,6 @@ package ch.epfl.biop.atlas.aligner;
 import bdv.util.BoundedRealTransform;
 import bdv.util.QuPathBdvHelper;
 import bdv.viewer.SourceAndConverter;
-import ch.epfl.biop.atlas.aligner.action.RegisterSliceAction;
 import ch.epfl.biop.atlas.struct.AtlasNode;
 import ch.epfl.biop.atlas.struct.AtlasOntology;
 import ch.epfl.biop.atlas.struct.AtlasHelper;
@@ -124,7 +123,7 @@ public class SliceSources {
 
     private int currentSliceIndex = -1;
 
-    public String name = "";
+    protected String name = "";
 
     // For fast display : Icon TODO : see https://github.com/bigdataviewer/bigdataviewer-core/blob/17d2f55d46213d1e2369ad7ef4464e3efecbd70a/src/main/java/bdv/tools/RecordMovieDialog.java#L256-L318
     protected SliceSources(SourceAndConverter<?>[] sacs, double slicingAxisPosition, MultiSlicePositioner mp, double thicknessCorrection, double zShiftCorrection) {
@@ -216,10 +215,6 @@ public class SliceSources {
         setSliceThickness(zEndInMm-zBeginInMm);
         zShiftCorrection = ((zEndInMm+zBeginInMm) / 2) - slicingAxisPosition;
         updateZPosition();
-    }
-
-    public double getZAxisPosition() {
-        return slicingAxisPosition;
     }
 
     public void setSliceThickness(double sizeInMm) {
@@ -408,7 +403,7 @@ public class SliceSources {
         return registrations.size()-3;
     }
 
-    public void appendRegistration(Registration<SourceAndConverter<?>[]> reg) {
+    protected void appendRegistration(Registration<SourceAndConverter<?>[]> reg) {
 
         if (reg instanceof RealTransformSourceAndConverterRegistration) {
             RealTransformSourceAndConverterRegistration sreg = (RealTransformSourceAndConverterRegistration) reg;
@@ -457,7 +452,7 @@ public class SliceSources {
      *
      * @param reg the registration to perform
      */
-    public boolean runRegistration(Registration<SourceAndConverter<?>[]> reg,
+    protected boolean runRegistration(Registration<SourceAndConverter<?>[]> reg,
                                    SourcesProcessor preprocessFixed,
                                    SourcesProcessor preprocessMoving) {
         if (RegistrationPluginHelper.isManual(reg)) {
@@ -471,7 +466,7 @@ public class SliceSources {
         }
     }
 
-    public synchronized boolean removeRegistration(Registration reg) {
+    protected synchronized boolean removeRegistration(Registration reg) {
         if (registrations.contains(reg)) {
             int idx = registrations.indexOf(reg);
             if (idx == registrations.size() - 1) {
@@ -1027,7 +1022,7 @@ public class SliceSources {
         return new RealPointList(cvtList);
     }
 
-    public void editLastRegistration(SourcesProcessor preprocessFixed,
+    protected void editLastRegistration(SourcesProcessor preprocessFixed,
                                      SourcesProcessor preprocessMoving) {
         Registration reg = this.registrations.get(registrations.size() - 1);
         if (RegistrationPluginHelper.isEditable(reg)) {

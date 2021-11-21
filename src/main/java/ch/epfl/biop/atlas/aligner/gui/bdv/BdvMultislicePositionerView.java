@@ -820,7 +820,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     }
 
     public void iniSlice(SliceSources slice) {
-        debug.accept("Initializing "+slice.name);
+        debug.accept("Initializing "+slice.getName());
         guiState.created(slice);
         if (guiState.nSlices()==1) {
             iCurrentSlice = 0;
@@ -946,19 +946,19 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
     @Override
     public void sliceCreated(SliceSources slice) {
-        debug.accept(slice.name+ " created");
+        debug.accept(slice.getName()+ " created");
         iniSlice(slice);
     }
 
     @Override
     public void sliceDeleted(SliceSources slice) {
-        debug.accept(slice.name+ " deleted");
+        debug.accept(slice.getName()+ " deleted");
         guiState.deleted(slice);
     }
 
     @Override
     public void sliceZPositionChanged(SliceSources slice) {
-        debug.accept(slice.name+ " z position changed");
+        debug.accept(slice.getName()+ " z position changed");
         guiState.runSlice(slice, guiState -> {
             guiState.slicePositionChanged();
             updateSliceDisplayedPosition(guiState);
@@ -968,19 +968,19 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
     @Override
     public void sliceSelected(SliceSources slice) {
-        debug.accept(slice.name+ " selected");
+        debug.accept(slice.getName()+ " selected");
         bdvh.getViewerPanel().getDisplay().repaint();
     }
 
     @Override
     public void sliceDeselected(SliceSources slice) {
-        debug.accept(slice.name+ " deselected");
+        debug.accept(slice.getName()+ " deselected");
         bdvh.getViewerPanel().getDisplay().repaint();
     }
 
     @Override
     public void sliceSourcesChanged(SliceSources slice) {
-        debug.accept(slice.name+ " slices changed");
+        debug.accept(slice.getName()+ " slices changed");
         guiState.runSlice(slice, SliceGuiState::sourcesChanged);
     }
 

@@ -318,7 +318,7 @@ public class SliceGuiState {
     }
 
     public void setDisplayedAxisPosition(double displayedAxisPosition) {
-        setXShift(displayedAxisPosition-slice.getZAxisPosition());
+        setXShift(displayedAxisPosition-slice.getSlicingAxisPosition());
     }
 
     public void addDisplayFilters(FilterDisplay filterDisplay) {

@@ -32,7 +32,7 @@ public class SliceThicknessMatchNeighborsCommand implements Command {
                     SliceSources currentSlice = allSlices.get(i);
                     if (currentSlice.isSelected()) {
                         double zBegin, zEnd;
-                        double currentPosition = currentSlice.getZAxisPosition();
+                        double currentPosition = currentSlice.getSlicingAxisPosition();
                         if (i==0) {
                             // No slice before -> we need to look at the one after
                             if (i==allSlices.size()-1) {
@@ -40,7 +40,7 @@ public class SliceThicknessMatchNeighborsCommand implements Command {
                                 mp.errorMessageForUser.accept("Insufficient number of slices", "You need at least two slices.");
                             } else {
                                 SliceSources sliceAfter = allSlices.get(i+1);
-                                zEnd = (sliceAfter.getZAxisPosition()+currentSlice.getZAxisPosition())/2.0;
+                                zEnd = (sliceAfter.getSlicingAxisPosition()+currentSlice.getSlicingAxisPosition())/2.0;
                                 zBegin = currentPosition-(zEnd-currentPosition);
                                 currentSlice.setSliceThickness(zBegin, zEnd);
                             }
@@ -51,15 +51,15 @@ public class SliceThicknessMatchNeighborsCommand implements Command {
                                 mp.errorMessageForUser.accept("Insufficient number of slices", "You need at least two slices.");
                             } else {
                                 SliceSources sliceBefore = allSlices.get(i-1);
-                                zBegin = (sliceBefore.getZAxisPosition()+currentSlice.getZAxisPosition())/2.0;
+                                zBegin = (sliceBefore.getSlicingAxisPosition()+currentSlice.getSlicingAxisPosition())/2.0;
                                 zEnd = currentPosition+(currentPosition-zBegin);
                                 currentSlice.setSliceThickness(zBegin, zEnd);
                             }
                         } else {
                             SliceSources sliceBefore = allSlices.get(i-1);
                             SliceSources sliceAfter = allSlices.get(i+1);
-                            zBegin = (sliceBefore.getZAxisPosition()+currentSlice.getZAxisPosition())/2.0;
-                            zEnd = (sliceAfter.getZAxisPosition()+currentSlice.getZAxisPosition())/2.0;
+                            zBegin = (sliceBefore.getSlicingAxisPosition()+currentSlice.getSlicingAxisPosition())/2.0;
+                            zEnd = (sliceAfter.getSlicingAxisPosition()+currentSlice.getSlicingAxisPosition())/2.0;
                             currentSlice.setSliceThickness(zBegin, zEnd);
                         }
 

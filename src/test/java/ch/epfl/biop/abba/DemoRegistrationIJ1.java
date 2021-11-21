@@ -116,6 +116,8 @@ public class DemoRegistrationIJ1 {
         mp.waitForTasks();
         IJ.log("*** Done");
 
+
+
         //DebugView debugView = new DebugView(mp);
 
         //mp.createSlice(sac,4.5);

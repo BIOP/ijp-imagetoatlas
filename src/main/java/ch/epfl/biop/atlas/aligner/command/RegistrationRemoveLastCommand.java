@@ -2,7 +2,7 @@ package ch.epfl.biop.atlas.aligner.command;
 
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
-import ch.epfl.biop.atlas.aligner.action.DeleteLastRegistrationAction;
+import ch.epfl.biop.atlas.aligner.DeleteLastRegistrationAction;
 import ch.epfl.biop.atlas.aligner.action.MarkActionSequenceBatchAction;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;

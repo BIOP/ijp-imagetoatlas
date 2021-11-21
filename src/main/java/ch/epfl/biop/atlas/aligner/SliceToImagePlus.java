@@ -200,7 +200,7 @@ public class SliceToImagePlus {
 
         //at3D.scale(1/pixel_size_mm);
 
-        at3D.translate(-px, -py, -slice.getZAxisPosition());
+        at3D.translate(-px, -py, -slice.getSlicingAxisPosition());
 
         at3D.scale(1/pixel_size_mm);
         // Getting an image independent of the view scaling unit (not sure)
