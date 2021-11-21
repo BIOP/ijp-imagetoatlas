@@ -20,10 +20,10 @@ import java.util.List;
 public class PrintTheNumberOfRoisCommand extends DynamicCommand implements ABBACommand, Initializable {
 
     @Parameter
-    MultiSlicePositioner mp; // Compulsory, DO NOT CHANGE THE NAME
+    MultiSlicePositioner mp; // Compulsory, DO NOT CHANGE THE VARIABLE NAME: "mp"
 
     @Parameter(label="Roi Naming")
-    String naming_choice; // Intellij claims it's not used. but it's wrong. It's use through scijava reflection
+    String naming_choice;
 
     @Override
     public void run() {

@@ -10,6 +10,9 @@ import ch.epfl.biop.wrappers.elastix.ElastixTask;
 import ch.epfl.biop.wrappers.elastix.RemoteElastixTask;
 import ij.IJ;
 import net.imagej.ImageJ;
+import net.imagej.updater.UpdateService;
+import net.imagej.updater.UpdateSite;
+import net.imagej.updater.util.AvailableSites;
 import org.scijava.command.Command;
 import org.scijava.platform.PlatformService;
 import org.scijava.plugin.Parameter;
@@ -19,6 +22,7 @@ import sc.fiji.bdvpg.services.SourceAndConverterServices;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Map;
 
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Help>ABBA - Ask for help in the forum",
@@ -28,9 +32,22 @@ public class ABBAForumHelpCommand implements Command {
     @Parameter
     PlatformService ps;
 
+    @Parameter
+    UpdateService us;
+
     @Override
     public void run() {
         try {
+            Map<String, UpdateSite> sites = AvailableSites.getAvailableSites();
+
+            StringBuilder sites_string = new StringBuilder();
+
+            sites.values().stream()
+                    .filter(site -> us.getUpdateSite(site.getName()).isActive())
+                    .forEach(site -> {
+                        sites_string.append(site.getName()+"+");
+                    });
+
             String nl = "%0D%0A"; // new line in url get
             String imageScForumUrl = "https://forum.image.sc/";
             String title = "Help for ABBA in Fiji: [your question here]";
@@ -52,6 +69,7 @@ public class ABBAForumHelpCommand implements Command {
             body +="Bdv BioFormats "+VersionUtils.getVersion(BioFormatsMetaDataHelper.class)+nl;
             body +="Biop Wrappers "+VersionUtils.getVersion(ElastixTask.class)+nl;
             body +="Registration Server "+VersionUtils.getVersion(RemoteElastixTask.class)+nl;
+            body +="Updates sites: "+sites_string+nl;
             body +="```";
 
             String fullUrl = imageScForumUrl+"new-topic?"
@@ -60,8 +78,10 @@ public class ABBAForumHelpCommand implements Command {
                     +"category=usage-issues&"
                     +"tags=fiji,abba";
 
+            IJ.log(fullUrl); // Mac OS : if the URL is too long, the next line returns an error
+
             ps.open(new URL(fullUrl));
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
