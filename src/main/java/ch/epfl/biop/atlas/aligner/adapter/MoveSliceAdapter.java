@@ -1,6 +1,6 @@
 package ch.epfl.biop.atlas.aligner.adapter;
 
-import ch.epfl.biop.atlas.aligner.action.MoveSliceAction;
+import ch.epfl.biop.atlas.aligner.MoveSliceAction;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import com.google.gson.*;

@@ -194,11 +194,7 @@ public class SliceSources {
         return slicingAxisPosition;
     }
 
-    /**
-     * SHOULD NOT BE USED! Use MoveSliceAction instead!
-     * @param newSlicingAxisPosition
-     */
-    public void setSlicingAxisPosition(double newSlicingAxisPosition) {
+    protected void setSlicingAxisPosition(double newSlicingAxisPosition) {
         slicingAxisPosition = newSlicingAxisPosition;
         updateZPosition();
     }

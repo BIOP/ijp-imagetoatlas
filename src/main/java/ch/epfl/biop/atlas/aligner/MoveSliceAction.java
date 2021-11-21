@@ -1,4 +1,4 @@
-package ch.epfl.biop.atlas.aligner.action;
+package ch.epfl.biop.atlas.aligner;
 
 import ch.epfl.biop.atlas.aligner.CancelableAction;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
