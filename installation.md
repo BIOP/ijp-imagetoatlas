@@ -2,42 +2,36 @@
 
 ---
 
-:warning: ABBA Currently only works with QuPath 0.2.3!
+:warning: ABBA should be used with QuPath v0.3+!
 
 ---
-
-## Download all necessary software (windows only)
-
-If you want to gain time, you can run on windows the download_all.bat file from [@enassar](https://github.com/enassar) and [@nickdelgrosso](https://github.com/nickdelgrosso) present in this repository: [https://github.com/nickdelgrosso/ABBA-QuPath-utility-scripts](https://github.com/nickdelgrosso/ABBA-QuPath-utility-scripts) 
-
-This script file will download all what's needed for the setup detailed below.
 
 ## Step by step standard installation
 The installation consists of four steps detailed in the paragraphs below:
 
-1. Install QuPath and BIOP QuPath extensions,
+1. Install QuPath and 2 QuPath extensions,
 2. Enable Fiji's ABBA update site,
 3. Install the additional programs required for automated registration (Elastix / Transformix),
 4. Setup ABBA in Fiji:
-   * download Allen Mouse Brain Atlas
    * specify the location of elastix and transformix executable files to Fiji
 
-### 1.  Install BIOP QuPath extensions
+### 1.  Install QuPath extensions
 
-Install the [QuPath version 0.2.3](https://github.com/qupath/qupath/releases/tag/v0.2.3).
+Install [QuPath version 0.3.0](https://github.com/qupath/qupath/releases/tag/v0.3.0).
 
-Install the QuPath biop extensions and its dependencies:
-* Go to the [latest release](https://github.com/BIOP/qupath-biop-extensions/releases)
-  * Download `biop-tools-2.0.8.jar`
-  * Download `WSI-dependencies.zip` and unzip it  
-* Put the jar file and the `WSI-dependencies` folder into a folder named `extensions` within another folder (for instance `C>QuPath Common Data>extensions`
-* In QuPath, go to `Edit>Preferences`, specify the location of the `QuPath Common Data` folder:
+Install the [QuPath Warpy extension](https://github.com/BIOP/qupath-extension-warpy) (and its dependencies):
+* Go to the [latest release](https://github.com/BIOP/qupath-extension-warpy/releases)
+  * Download `qupath-extension-warpy-x.y.z.zip` and unzip it
+  * Drag its contained files into the main QuPath window
 
-![Where to set QuPath extension folder](./assets/img/qupath_set_extension_folder.png)
+Install the [QuPath ABBA extension](https://github.com/BIOP/qupath-extension-abba) (and its dependencies):
+* Go to the [latest release](https://github.com/BIOP/qupath-extension-abba/releases)
+    * Download `qupath-extension-abba-x.y.z.jar`
+    * Drag this jar file into the main QuPath window
 
-* Restart QuPath: a BIOP menu should appear on top of the QuPath window:
+* Restart QuPath: in `Extensions>Installed extensions` you should see both extensions installed:
 
-![Where to set QuPath extension folder](./assets/img/qupath_show_biop_menu.png)
+![Installed extensions](./assets/img/qupath_installed_extensions.png)
 
 ### 2. Enable Fiji's ABBA update site
 In Fiji:
@@ -95,26 +89,20 @@ The procedure to install your own registration server will be detailed in the re
 
 ### 4. Setup ABBA in Fiji
 
-Start Fiji, type `ABBA` in the command search bar or navigate and click `Plugins > BIOP > Atlas > ABBA`.
+Start Fiji, type `ABBA BDV` in the command search bar or navigate and click ` Plugins › BIOP › Atlas › ABBA - Align Big Brains and Atlases (BDV)`:
+![Look for and start ABBA](./assets/img/fiji_launch_abba.png)
 
 You will get the following window on startup:
 
-![ABBA settings startup window](./assets/img/fiji_abba_startup_settings.png)
+![ABBA chose atlas](./assets/img/fiji_open_atlas.png)
 
-You can let the first two fields empty. The Allen Brain dataset will then automatically be downloaded (approx 3Gb.):
+These are the two atlases present by default. If this is the first time you launch ABBA, the atlas data will be downloaded and saved in your user folder inside a `cached_atlas` folder (3Gb. for the mouse brain atlas, 500 Mb for the rat atlas).
 
 ![Allen atlas download progress bar](./assets/img/fiji_atlas_download_progress_bar.png)
 
-The allen brain atlas and associated files will be cached in your user folder under the directory `\cached_atlas`. These data are directly  downloaded from a [Zenodo repository](https://zenodo.org/record/4173229#.YASj5RYo_BU). If you check `Store these settings for all users`, the data location for elastix and the atlas will be stored in a file `abbasettings.txt` stored in your hard drive in the folder `Fiji.app > plugins`. You can modify or delete this file if necessary. This is useful to avoid downloading multiple times the atlas in a multi user situation.
+The allen brain atlas and associated files will be cached in your user folder under the directory `\cached_atlas`. These data are directly  downloaded from zenodo repositories:
+- [Mouse atlas repository](https://zenodo.org/record/4173229#.YASj5RYo_BU)
+- [Rat atlas repository](https://zenodo.org/record/5644162#.YZrUnroo8uU)
+
 If the initial atlas download failed, because you had no access to internet or for any other reason, you can restart the command and let empty fields to trigger again the download from Zenodo.
-
-The last two field needs to be completed with the location of the executable file for elastix and transformix, if you managed to successfully install elastix and transformix on your computer. If you do not have a working local install, just let these fields empty.
-* On windows:
-  * `elastix.exe`
-  * `transformix.exe`
-* On mac and linux:
-  * `elastix` or `elastix.sh`
-  * `transformix` or `transformix.sh`
-
-On following startups, you normally won't need to change anything in this window. The cached atlas data will be detected, preventing a new download.
 

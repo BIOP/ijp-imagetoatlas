@@ -1,6 +1,6 @@
 ## [EXPERIMENTAL] ABBA - Aligning Big Brains & Atlases
 
-A [Fiji](https://fiji.sc/) plugin for the registration of thin mouse brain slices to the [3D mouse Allen Brain atlas](http://atlas.brain-map.org/atlas?atlas=602630314) + [QuPath](https://qupath.github.io) associated tools.
+A [Fiji](https://fiji.sc/) plugin for the registration of thin brain slices to various atlases ([3D mouse Allen Brain atlas](http://atlas.brain-map.org/atlas?atlas=602630314), [Waxholm Space Atlas of the Sprague Dawley Rat Brain](https://www.nitrc.org/projects/whs-sd-atlas), and [BrainGlobe atlases](https://github.com/brainglobe/bg-atlasapi)) + [QuPath](https://qupath.github.io) associated tools.
 
 ---
 
@@ -8,11 +8,11 @@ A [Fiji](https://fiji.sc/) plugin for the registration of thin mouse brain slice
 
 ---
 
-Aligning Big Brains & Atlases or ABBA for short, is a Fiji plugin which allows to register adult mouse brain serial sections to the [adult mouse brain atlas by the Allen Institute](http://atlas.brain-map.org/atlas?atlas=602630314).
+Aligning Big Brains & Atlases or ABBA for short, is a Fiji plugin which allows to register adult mouse brain serial sections to several atlases, in coronal, sagittal and horizontal orientations.
 
 It uses [BigDataViewer](https://imagej.net/plugins/bdv/index) and [BigWarp](https://imagej.net/plugins/bigwarp) for the display and on-the-fly computation of spline-transformed multiresolution images (typical output of Whole Slide Imaging).
 
-It has been developed by the [BioImaging & Optics Platform](https://www.epfl.ch/research/facilities/ptbiop/) at EPFL. This page contains the documentation of ABBA (installation and usage). If you require additional help, please post your question on the [image.sc](https://forum.image.sc) forum  and tag your question / issue with `abba` and `fiji` or `qupath`. If you have already installed ABBA, you can also click on `Help > Ask for help in the forum` from the plugin.
+It has been developed by the [BioImaging & Optics Platform](https://www.epfl.ch/research/facilities/ptbiop/) at EPFL. This page contains the documentation of ABBA (installation and usage). If you require additional help, please post your question on the [image.sc](https://forum.image.sc) forum  and tag your question / issue with `abba` and `fiji` or `qupath`. If you have already installed ABBA, you can also click on `Help > Ask for help in the forum` from the plugin (some helpful information from your local installation will be included in your post).
 
 If you want to test this plugin, you can download one of the following test dataset: 
 
