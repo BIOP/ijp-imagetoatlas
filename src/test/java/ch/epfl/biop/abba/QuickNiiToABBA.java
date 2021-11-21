@@ -1,8 +1,12 @@
 package ch.epfl.biop.abba;
 
+import bdv.util.BdvHandle;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.command.ABBAStartCommand;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
+import ch.epfl.biop.atlas.aligner.gui.bdv.BdvMultislicePositionerView;
+import ch.epfl.biop.atlas.mouse.allen.ccfv3.command.AllenBrainAdultMouseAtlasCCF2017Command;
+import ch.epfl.biop.atlas.struct.Atlas;
 import ch.epfl.biop.bdv.bioformats.command.BasicOpenFilesWithBigdataviewerBioformatsBridgeCommand;
 import ch.epfl.biop.quicknii.QuickNIISeries;
 import ch.epfl.biop.quicknii.QuickNIISlice;
@@ -27,9 +31,12 @@ public class QuickNiiToABBA {
         ij.ui().showUI();
 
         DebugTools.setRootLevel("off");
-        //DebugTools.setRootLevel();
+        Atlas mouseAtlas = (Atlas) ij.command().run(AllenBrainAdultMouseAtlasCCF2017Command.class, true).get().getOutput("ba");
 
-        MultiSlicePositioner mp = (MultiSlicePositioner) ij.command().run(ABBAStartCommand.class, true).get().getOutput("mp");
+        MultiSlicePositioner mp = (MultiSlicePositioner) (ij.command()
+                .run(ABBAStartCommand.class, true,
+                        "ba", mouseAtlas,
+                        "slicing_mode", "coronal").get().getOutput("mp"));
 
         String path = "src/test/resources/quicknii/";
 
@@ -125,7 +132,7 @@ public class QuickNiiToABBA {
             SourceTransformHelper.append(toABBA,
                     new SourceAndConverterAndTimeRange(source, 0));
 
-            /*AffineTransform3D nonFlat = toCCFv3.preConcatenate(toABBA);
+            AffineTransform3D nonFlat = toCCFv3.preConcatenate(toABBA);
 
             AffineTransform3D flat = new AffineTransform3D();
             flat.set(nonFlat);
@@ -145,18 +152,20 @@ public class QuickNiiToABBA {
             //SourceTransformHelper.append(nonFlat,
             //            new SourceAndConverterAndTimeRange(source, 0));
 
-            //mp.createSlice(new SourceAndConverter[]{source}, zLocation ); // This doesn't work because the slice is recentered on creation
+            mp.createSlice(new SourceAndConverter[]{source}, zLocation ); // This doesn't work because the slice is recentered on creation
 
         }
 
+        BdvHandle bdvh = SourceAndConverterServices.getBdvDisplayService().getNewBdv();
 
+        BdvMultislicePositionerView view = new BdvMultislicePositionerView(mp, bdvh);
 
-                /*nonFlat.set(0,2,0);
-                nonFlat.set(0,2,1);
-                nonFlat.set(1,2,2);*/
+        /*nonFlat.set(0,2,0);
+        nonFlat.set(0,2,1);
+        nonFlat.set(1,2,2);*/
 
-                /*SourceTransformHelper.append(nonFlat,
-                        new SourceAndConverterAndTimeRange(source, 0));**/
+        /*SourceTransformHelper.append(nonFlat,
+                new SourceAndConverterAndTimeRange(source, 0));**/
 
     }
 

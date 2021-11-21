@@ -1,10 +1,14 @@
-package ch.epfl.biop.abba.plugin.py;
+package ch.epfl.biop.abba.pluginexample.py;
 
+import bdv.util.BdvHandle;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.atlas.aligner.command.ABBAStartCommand;
+import ch.epfl.biop.atlas.aligner.gui.bdv.BdvMultislicePositionerView;
 import ch.epfl.biop.atlas.aligner.plugin.SimpleRegistrationWrapper;
+import ch.epfl.biop.atlas.mouse.allen.ccfv3.command.AllenBrainAdultMouseAtlasCCF2017Command;
+import ch.epfl.biop.atlas.struct.Atlas;
 import ch.epfl.biop.scijava.command.spimdata.SourceFromImagePlusCommand;
 import ch.epfl.biop.sourceandconverter.processor.SourcesChannelsSelect;
 import ij.IJ;
@@ -12,6 +16,7 @@ import ij.ImagePlus;
 import net.imagej.ImageJ;
 import org.scijava.Context;
 import org.scijava.command.PyCommandBuilder;
+import sc.fiji.bdvpg.services.SourceAndConverterServices;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,6 +26,8 @@ public class TestExternalRegistrationPlugin {
     public static void main (String... args) throws Error, Exception{
         final ImageJ ij = new ImageJ();
         ij.ui().showUI();
+
+        Atlas mouseAtlas = (Atlas) ij.command().run(AllenBrainAdultMouseAtlasCCF2017Command.class, true).get().getOutput("ba");
 
         String identityRegName = "ext.IdentityRegistration";
 
@@ -42,6 +49,10 @@ public class TestExternalRegistrationPlugin {
 
         // --------------- Starting ABBA
         MultiSlicePositioner mp = (MultiSlicePositioner) ij.command().run(ABBAStartCommand.class, true).get().getOutput("mp");
+
+        BdvHandle bdvh = SourceAndConverterServices.getBdvDisplayService().getNewBdv();
+
+        BdvMultislicePositionerView view = new BdvMultislicePositionerView(mp, bdvh);
 
         ImagePlus demoSlice = IJ.openImage("src/test/resources/demoSlice.tif");
         demoSlice.show();

@@ -1,4 +1,4 @@
-package ch.epfl.biop.abba.plugin.py;
+package ch.epfl.biop.abba.pluginexample.py;
 
 import ch.epfl.biop.atlas.aligner.plugin.SimpleABBARegistrationPlugin;
 import ij.ImagePlus;

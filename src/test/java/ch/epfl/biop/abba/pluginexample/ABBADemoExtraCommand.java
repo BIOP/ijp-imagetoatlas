@@ -1,4 +1,4 @@
-package ch.epfl.biop.abba.plugin;
+package ch.epfl.biop.abba.pluginexample;
 
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.plugin.ABBACommand;

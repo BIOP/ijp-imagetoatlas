@@ -597,10 +597,6 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         // Other variable initialization
         previouszStep = (int) msp.getReslicedAtlas().getStep();
 
-        // Creates previously exiting slices TODO check that it works!
-        msp.addSliceListener(this);
-        msp.getSlices().forEach(this::sliceCreated);
-
         addFrameIcon();
 
         logger.debug("Installing behaviours : common");
@@ -671,6 +667,11 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
         logger.debug("Add closing listener");
         msp.addMultiSlicePositionerListener(this);
+
+        // Creates previously exiting slices for this view and the linked tableview
+        msp.addSliceListener(this);
+        msp.getSlices().forEach(this::sliceCreated);
+        msp.getSlices().forEach(tableView::sliceCreated);
 
     }
 
