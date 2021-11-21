@@ -941,7 +941,7 @@ public class MultiSlicePositioner implements Closeable {
         removeTask();
     }
 
-    public void loadState(File stateFile) {
+    public boolean loadState(File stateFile) {
         addTask();
         boolean emptyState = this.slices.size()==0;
         // TODO : add a clock as an overlay
@@ -952,7 +952,7 @@ public class MultiSlicePositioner implements Closeable {
 
         if (!sacsFile.exists()) {
             errlog.accept("File "+sacsFile.getAbsolutePath()+" not found!");
-            return;
+            return false;
         }
 
         SourceAndConverterServiceLoader sacsl = new SourceAndConverterServiceLoader(sacsFile.getAbsolutePath(), sacsFile.getParent(), this.scijavaCtx, false);
@@ -1009,12 +1009,18 @@ public class MultiSlicePositioner implements Closeable {
                 if (emptyState) stateChangedSinceLastSave = false; // loaded state has not been changed, and it was the only one loaded
 
             } catch (Exception e) {
+                removeTask();
+                errlog.accept(e.getMessage());
                 e.printStackTrace();
+                return false;
             }
         } else {
+            removeTask();
             errlog.accept("Error : file "+stateFile.getAbsolutePath()+" not found!");
+            return false;
         }
         removeTask();
+        return true;
     }
 
     volatile private SliceSources currentSerializedSlice = null;

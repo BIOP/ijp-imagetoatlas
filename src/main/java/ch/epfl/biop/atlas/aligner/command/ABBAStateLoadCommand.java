@@ -20,6 +20,7 @@ public class ABBAStateLoadCommand implements Command {
 
     @Override
     public void run() {
-        mp.loadState(state_file);
+        boolean result = mp.loadState(state_file);
+        if (!result) mp.errorMessageForUser.accept("Could not load state", "Please check the stack trace");
     }
 }
