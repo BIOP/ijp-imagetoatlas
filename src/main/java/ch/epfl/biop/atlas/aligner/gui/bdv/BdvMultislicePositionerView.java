@@ -1484,21 +1484,24 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     }
 
     public Boolean getChannelVisibility(SliceSources slice, int iChannel) {
-        SliceGuiState guiStateSlice = guiState.sliceGuiState.get(slice);
         if (guiState == null) return false;
+        if (guiState.sliceGuiState == null) return false;
+        SliceGuiState guiStateSlice = guiState.sliceGuiState.get(slice);
         return guiStateSlice.getChannelVisibility(iChannel);
     }
 
     public Displaysettings getDisplaySettings(SliceSources slice, int iChannel) {
-        SliceGuiState guiStateSlice = guiState.sliceGuiState.get(slice);
         if (guiState == null) return new Displaysettings(-1);
+        if (guiState.sliceGuiState == null) return new Displaysettings(-1);
+        SliceGuiState guiStateSlice = guiState.sliceGuiState.get(slice);
         return guiStateSlice.getDisplaySettings(iChannel);
     }
 
     public Boolean getSliceVisibility(SliceSources slice) {
-        SliceGuiState guiStateSlice = guiState.sliceGuiState.get(slice);
         if (guiState == null) return false;
-        return guiStateSlice.getSliceVisibility();
+        if (guiState.sliceGuiState == null) return false;
+        SliceGuiState guiStateSlice = guiState.sliceGuiState.get(slice);
+        return guiStateSlice.getSliceVisibility(); //
     }
 
     @Override
