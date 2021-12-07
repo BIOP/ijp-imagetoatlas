@@ -1500,6 +1500,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     public Boolean getSliceVisibility(SliceSources slice) {
         if (guiState == null) return false;
         if (guiState.sliceGuiState == null) return false;
+        if (guiState.sliceGuiState.get(slice) == null) return false;
         SliceGuiState guiStateSlice = guiState.sliceGuiState.get(slice);
         return guiStateSlice.getSliceVisibility(); //
     }

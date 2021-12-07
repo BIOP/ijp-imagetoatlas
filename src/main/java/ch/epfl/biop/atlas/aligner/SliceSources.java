@@ -687,7 +687,6 @@ public class SliceSources {
         at3D.translate(-mp.nPixX / 2.0, -mp.nPixY / 2.0, 0);
         at3D.scale(mp.sizePixX, mp.sizePixY, mp.sizePixZ);
         at3D.translate(0, 0, slicingAxisPosition);
-
         boolean computeLabelImageNecessary = true;
 
         if (!labelImageBeingComputed) {
@@ -714,7 +713,9 @@ public class SliceSources {
         // Renaming
         IJShapeRoiArray roiList = (IJShapeRoiArray) cvtRoisTransformed.to(IJShapeRoiArray.class);
         for (int i=0;i<roiList.rois.size();i++) {
+
             CompositeFloatPoly roi = roiList.rois.get(i);
+
             int atlasId = Integer.parseInt(roi.name);
             AtlasNode node = mp.getAtlas().getOntology().getNodeFromId(atlasId);
             roi.name = node.data().get(namingChoice);
@@ -762,9 +763,7 @@ public class SliceSources {
 
     public synchronized void exportToQuPathProject(boolean erasePreviousFile) {
         prepareExport("id");
-
         ImageJRoisFile ijroisfile = (ImageJRoisFile) cvtRoisTransformed.to(ImageJRoisFile.class);
-
         storeInQuPathProjectIfExists(ijroisfile, erasePreviousFile);
     }
 
