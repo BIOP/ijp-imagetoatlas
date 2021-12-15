@@ -676,6 +676,9 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         msp.getSlices().forEach(this::sliceCreated);
         msp.getSlices().forEach(tableView::sliceCreated);
 
+        logger.debug("Register bdv view in the object service");
+        msp.getContext().getService(ObjectService.class).addObject(this);
+        addToCleanUpHook(() -> msp.getContext().getService(ObjectService.class).removeObject(this)); // Cleans object when view is closed
     }
 
     /**

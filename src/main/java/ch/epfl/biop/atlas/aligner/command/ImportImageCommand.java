@@ -24,6 +24,9 @@ public class ImportImageCommand implements Command {
     @Parameter
     MultiSlicePositioner mp;
 
+    @Parameter(label = "Dataset Name")
+    String datasetname;
+
     @Parameter(label = "Files to import")
     File[] files;
 
@@ -45,26 +48,25 @@ public class ImportImageCommand implements Command {
     @Override
     public void run() {
         try {
-            for (File f : files) {
-                AbstractSpimData<?> spimdata = (AbstractSpimData<?>)
-                        command_service.run(
-                                    BasicOpenFilesWithBigdataviewerBioformatsBridgeCommand.class,
-                                    true, "files", new File[]{f},
-                                    "unit", "MILLIMETER",
-                                    "splitrgbchannels", split_rgb_channels
-                                )
-                                .get()
-                                .getOutput("spimdata");
+            AbstractSpimData<?> spimdata = (AbstractSpimData<?>)
+                    command_service.run(
+                                BasicOpenFilesWithBigdataviewerBioformatsBridgeCommand.class,
+                                true, "files", files,
+                                "datasetname", datasetname,
+                                "unit", "MILLIMETER",
+                                "splitrgbchannels", split_rgb_channels
+                            )
+                            .get()
+                            .getOutput("spimdata");
 
-                SourceAndConverter[] sacs =
-                        sac_service.getSourceAndConverterFromSpimdata(spimdata)
-                                .toArray(new SourceAndConverter[0]);
+            SourceAndConverter[] sacs =
+                    sac_service.getSourceAndConverterFromSpimdata(spimdata)
+                            .toArray(new SourceAndConverter[0]);
 
-                List<SliceSources> slices = mp.createSlice(sacs, slice_axis_initial, increment_between_slices, Tile.class, new Tile(-1));
+            List<SliceSources> slices = mp.createSlice(sacs, slice_axis_initial, increment_between_slices, Tile.class, new Tile(-1));
 
-                slice_axis_initial += (slices.size()+1)* increment_between_slices;
+            slice_axis_initial += (slices.size()+1)* increment_between_slices;
 
-            }
             mp.selectSlice(mp.getSlices());
         } catch (InterruptedException e) {
             e.printStackTrace();
