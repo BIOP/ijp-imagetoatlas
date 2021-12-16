@@ -11,6 +11,7 @@ import org.scijava.module.MutableModuleItem;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import sc.fiji.bdvpg.scijava.services.SourceAndConverterBdvDisplayService;
+import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
 
 import java.util.ArrayList;
@@ -68,7 +69,7 @@ public class AtlasAdjustDisplayCommand extends InteractiveCommand implements
     // -- Runnable methods --
 
     @Parameter
-    SourceAndConverterBdvDisplayService bdvDisplayService;
+    SourceAndConverterService sac_service;
 
     @Override
     public void run() {
@@ -83,7 +84,7 @@ public class AtlasAdjustDisplayCommand extends InteractiveCommand implements
             String key = keys.get(iChannel);
             if (view.includedKey(key)) {
                 view.getBdvh().getViewerPanel().state().setSourceActive(view.getDisplayedAtlasSources()[iChannel], (Boolean) getInput(key + "_enable"));
-                ConverterSetup converterSetup = bdvDisplayService.getConverterSetup(view.getDisplayedAtlasSources()[iChannel]);
+                ConverterSetup converterSetup = sac_service.getConverterSetup(view.getDisplayedAtlasSources()[iChannel]);
                 double sliderValue = (Double) getInput(key + "_slider");
                 converterSetup.setDisplayRange(0,view.msp.getAtlas().getMap().getImageMax(key)*(1.0-sliderValue));
             }

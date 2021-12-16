@@ -51,9 +51,9 @@ public class SacBigWarp2DRegistration extends RealTransformSourceAndConverterReg
 
             List<SourceAndConverter> fixedSacs = Arrays.stream(fimg).collect(Collectors.toList());
 
-            List<ConverterSetup> converterSetups = Arrays.stream(mimg).map(src -> SourceAndConverterServices.getBdvDisplayService().getConverterSetup(src)).collect(Collectors.toList());
+            List<ConverterSetup> converterSetups = Arrays.stream(mimg).map(src -> SourceAndConverterServices.getSourceAndConverterService().getConverterSetup(src)).collect(Collectors.toList());
 
-            converterSetups.addAll(Arrays.stream(fimg).map(src -> SourceAndConverterServices.getBdvDisplayService().getConverterSetup(src)).collect(Collectors.toList()));
+            converterSetups.addAll(Arrays.stream(fimg).map(src -> SourceAndConverterServices.getSourceAndConverterService().getConverterSetup(src)).collect(Collectors.toList()));
 
             // Launch BigWarp
             bwl = new BigWarpLauncher(movingSacs, fixedSacs, "Big Warp", converterSetups);
