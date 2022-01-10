@@ -111,19 +111,19 @@
 
 		<bigdataviewer-playground-display.version>0.1.8</bigdataviewer-playground-display.version>
 		<bigdataviewer-spimdata-extras.version>0.1.6</bigdataviewer-spimdata-extras.version>
-		<bigdataviewer-biop-tools.version>0.2.36</bigdataviewer-biop-tools.version>
+		<bigdataviewer-biop-tools.version>0.2.37</bigdataviewer-biop-tools.version>
 
 		<bigdataviewer-selector.version>0.1.9</bigdataviewer-selector.version>
 		<scijava.app.directory>C:\fiji-win64\Fiji.app</scijava.app.directory>
 		<!--<scijava.app.directory>C:\Users\nicol\Desktop\fiji-win64-ABBA\Fiji.app</scijava.app.directory>-->
 
-		<bigdataviewer-core.version>10.2.1</bigdataviewer-core.version>
+		<bigdataviewer-core.version>10.2.2</bigdataviewer-core.version>
 		<bigdataviewer-vistools.version>1.0.0-beta-29</bigdataviewer-vistools.version>
 		<imglib2-cache.version>1.0.0-beta-16</imglib2-cache.version>
-		<bigwarp_fiji.version>7.0.4</bigwarp_fiji.version>
+		<bigwarp_fiji.version>7.0.5</bigwarp_fiji.version>
 		<pyimagej-scijava-command.version>0.1.3</pyimagej-scijava-command.version>
-		<ijl-utilities-wrappers.version>0.3.23</ijl-utilities-wrappers.version>
-		<atlas.version>0.1.5</atlas.version>
+		<ijl-utilities-wrappers.version>0.3.25</ijl-utilities-wrappers.version>
+		<atlas.version>0.1.7</atlas.version>
 		<elastix_registration_server.version>0.1.4</elastix_registration_server.version>
 		<bigvolumeviewer.version>0.2.0</bigvolumeviewer.version>
 		<oshi-core.version>5.5.1</oshi-core.version>
