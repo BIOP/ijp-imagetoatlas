@@ -2,7 +2,7 @@
 
 A [Fiji](https://fiji.sc/) plugin for the registration of thin mouse brain slices to the [3D mouse Allen Brain atlas](http://atlas.brain-map.org/atlas?atlas=602630314) + [QuPath](https://qupath.github.io) associated tools.
 
-<video autoplay loop muted>
+<video autoplay loop muted style="width: 100%;">
   <source src="https://user-images.githubusercontent.com/20223054/149301605-07b27dd0-4010-4ca4-b415-f5a9acc8963d.mp4" type="video/mp4">
   Your browser does not support the video tag.
 </video>
