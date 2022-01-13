@@ -1,8 +1,11 @@
 ## [EXPERIMENTAL] [ABBA](https://www.youtube.com/watch?v=8haRfsY4-_s) - Aligning Big Brains & Atlases
 
-https://user-images.githubusercontent.com/20223054/149176971-418d7177-9e93-449c-bac8-4d9e4018152b.mp4
-
 A [Fiji](https://fiji.sc/) plugin for the registration of thin mouse brain slices to the [3D mouse Allen Brain atlas](http://atlas.brain-map.org/atlas?atlas=602630314) + [QuPath](https://qupath.github.io) associated tools.
+
+<video width="320" height="240" autoplay>
+  <source src="https://user-images.githubusercontent.com/20223054/149176971-418d7177-9e93-449c-bac8-4d9e4018152b.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
 
 ---
 
