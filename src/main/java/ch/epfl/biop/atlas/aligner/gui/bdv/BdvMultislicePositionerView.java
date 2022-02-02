@@ -273,6 +273,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ExportRegionsToRoiManagerCommand.class, hierarchyLevelsSkipped,"mp", msp);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ExportToQuPathProjectCommand.class, hierarchyLevelsSkipped,"mp", msp);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ExportSlicesToBDVJsonDatasetCommand.class, hierarchyLevelsSkipped,"mp", msp);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ExportResampledSlicesToBDVSourceCommand.class, hierarchyLevelsSkipped,"mp", msp);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ExportSlicesToBDVCommand.class, hierarchyLevelsSkipped,"mp", msp);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ExportSlicesToImageJStackCommand.class, hierarchyLevelsSkipped,"mp", msp);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ExportSlicesOriginalDataToImageJCommand.class, hierarchyLevelsSkipped,"mp", msp);
@@ -1490,14 +1491,22 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         if (guiState == null) return false;
         if (guiState.sliceGuiState == null) return false;
         SliceGuiState guiStateSlice = guiState.sliceGuiState.get(slice);
-        return guiStateSlice.getChannelVisibility(iChannel);
+        if (guiStateSlice!=null) {
+            return guiStateSlice.getChannelVisibility(iChannel);
+        } else {
+            return false;
+        }
     }
 
     public Displaysettings getDisplaySettings(SliceSources slice, int iChannel) {
         if (guiState == null) return new Displaysettings(-1);
         if (guiState.sliceGuiState == null) return new Displaysettings(-1);
         SliceGuiState guiStateSlice = guiState.sliceGuiState.get(slice);
-        return guiStateSlice.getDisplaySettings(iChannel);
+        if (guiStateSlice!=null) {
+            return guiStateSlice.getDisplaySettings(iChannel);
+        } else {
+            return new Displaysettings(-1);
+        }
     }
 
     public Boolean getSliceVisibility(SliceSources slice) {
@@ -1505,7 +1514,11 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         if (guiState.sliceGuiState == null) return false;
         if (guiState.sliceGuiState.get(slice) == null) return false;
         SliceGuiState guiStateSlice = guiState.sliceGuiState.get(slice);
-        return guiStateSlice.getSliceVisibility(); //
+        if (guiStateSlice!=null) {
+            return guiStateSlice.getSliceVisibility(); //
+        } else {
+            return false;
+        }
     }
 
     @Override

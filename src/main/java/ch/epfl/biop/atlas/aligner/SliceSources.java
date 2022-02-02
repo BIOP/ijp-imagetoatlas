@@ -1,7 +1,15 @@
 package ch.epfl.biop.atlas.aligner;
 
 import bdv.util.BoundedRealTransform;
+import bdv.util.DefaultInterpolators;
+import bdv.util.EmptySource;
 import bdv.util.QuPathBdvHelper;
+import bdv.util.source.alpha.AlphaSource;
+import bdv.util.source.alpha.AlphaSourceHelper;
+import bdv.util.source.alpha.AlphaSourceRAI;
+import bdv.util.source.alpha.IAlphaSource;
+import bdv.viewer.Interpolation;
+import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.struct.AtlasNode;
 import ch.epfl.biop.atlas.struct.AtlasOntology;
@@ -27,16 +35,19 @@ import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import mpicbg.spim.data.generic.sequence.BasicViewSetup;
-import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.RealInterval;
-import net.imglib2.RealPoint;
+import mpicbg.spim.data.sequence.FinalVoxelDimensions;
+import mpicbg.spim.data.sequence.VoxelDimensions;
+import net.imglib2.*;
 import net.imglib2.converter.Converter;
 import net.imglib2.converter.Converters;
 import net.imglib2.img.display.imagej.ImageJFunctions;
+import net.imglib2.position.FunctionRandomAccessible;
 import net.imglib2.realtransform.*;
 import net.imglib2.realtransform.inverse.WrappedIterativeInvertibleRealTransform;
 import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.real.FloatType;
+import net.imglib2.view.ExtendedRandomAccessibleInterval;
+import net.imglib2.view.Views;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
@@ -58,7 +69,10 @@ import java.util.*;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
+
+import static bdv.util.source.alpha.AlphaSourceHelper.ALPHA_SOURCE_KEY;
 
 
 /**
@@ -125,6 +139,10 @@ public class SliceSources {
 
     protected String name = "";
 
+    final IAlphaSource alphaSource;
+
+    protected final DefaultInterpolators< FloatType > interpolators = new DefaultInterpolators<>();
+
     // For fast display : Icon TODO : see https://github.com/bigdataviewer/bigdataviewer-core/blob/17d2f55d46213d1e2369ad7ef4464e3efecbd70a/src/main/java/bdv/tools/RecordMovieDialog.java#L256-L318
     protected SliceSources(SourceAndConverter<?>[] sacs, double slicingAxisPosition, MultiSlicePositioner mp, double thicknessCorrection, double zShiftCorrection) {
 
@@ -144,6 +162,78 @@ public class SliceSources {
         zPositioner = new AffineTransformedSourceWrapperRegistration();
         preTransform = new AffineTransformedSourceWrapperRegistration();
 
+        String unit = original_sacs[0].getSpimSource().getVoxelDimensions().unit();
+        double voxX = original_sacs[0].getSpimSource().getVoxelDimensions().dimension(0);
+        double voxY = original_sacs[0].getSpimSource().getVoxelDimensions().dimension(0);
+        double voxZ = original_sacs[0].getSpimSource().getVoxelDimensions().dimension(0);
+        FinalVoxelDimensions voxD = new FinalVoxelDimensions(unit, voxX, voxY, voxZ);
+        FinalInterval interval = new FinalInterval(mp.nPixX,mp.nPixY,1);
+
+        alphaSource = new IAlphaSource() {
+            @Override
+            public boolean doBoundingBoxCulling()
+            {
+                return false;
+            }
+
+            @Override
+            public boolean intersectBox(AffineTransform3D affineTransform, Interval cell, int timepoint) {
+                // Let's try a simplebox computation and see if there are intersections.
+                AlphaSourceRAI.Box3D box_cell = new AlphaSourceRAI.Box3D(affineTransform, cell);
+                AffineTransform3D affineTransform3D = new AffineTransform3D();
+                getSourceTransform(timepoint,0,affineTransform3D);
+                AlphaSourceRAI.Box3D box_this = new AlphaSourceRAI.Box3D(affineTransform3D, this.getSource(timepoint,0));
+                return box_this.intersects(box_cell);
+            }
+
+            @Override
+            public boolean isPresent(int t) {
+                return t==0;
+            }
+
+            @Override
+            public RandomAccessibleInterval<FloatType> getSource(int t, int level) {
+                final RandomAccessible< FloatType > randomAccessible =
+                        new FunctionRandomAccessible<>( 3, () -> (loc, out) -> out.setReal( 1f ), FloatType::new );
+                return Views.interval(randomAccessible, interval);
+            }
+
+            @Override
+            public RealRandomAccessible<FloatType> getInterpolatedSource(int t, int level, Interpolation interpolation) {
+                ExtendedRandomAccessibleInterval<FloatType, RandomAccessibleInterval< FloatType >>
+                        eView = Views.extendZero(getSource( t, level ));
+                RealRandomAccessible< FloatType > realRandomAccessible = Views.interpolate( eView, interpolators.get(Interpolation.NEARESTNEIGHBOR) );
+                return realRandomAccessible;
+            }
+
+            @Override
+            public void getSourceTransform(int t, int level, AffineTransform3D affineTransform3D) {
+                affineTransform3D.identity();
+                affineTransform3D.scale(mp.sizePixX, mp.sizePixY, thicknessInMm);
+                affineTransform3D.translate(-mp.sX / 2.0, -mp.sY / 2.0, getSlicingAxisPosition());
+            }
+
+            @Override
+            public FloatType getType() {
+                return new FloatType();
+            }
+
+            @Override
+            public String getName() {
+                return "alpha-slice";
+            }
+
+            @Override
+            public VoxelDimensions getVoxelDimensions() {
+                return voxD;
+            }
+
+            @Override
+            public int getNumMipmapLevels() {
+                return 1;
+            }
+        };
+
         runRegistration(centerPositioner, new SourcesIdentity(), new SourcesIdentity());
         runRegistration(preTransform, new SourcesIdentity(), new SourcesIdentity());
         runRegistration(zPositioner, new SourcesIdentity(), new SourcesIdentity());
@@ -160,6 +250,8 @@ public class SliceSources {
             mp.errlog.accept("Couldn't name slice");
             e.printStackTrace();
         }
+
+
     }
 
     private void positionChanged() {
@@ -358,7 +450,7 @@ public class SliceSources {
                 lastTask.get();
             } catch (Exception e) {
                 e.printStackTrace();
-                mp.errlog.accept("Tasks were cancelled for slice "+this.toString());
+                mp.errlog.accept("Tasks were cancelled for slice "+this.toString()+" Error:"+e.getMessage());
             }
         }
     }
@@ -411,6 +503,16 @@ public class SliceSources {
         }
 
         registered_sacs = reg.getTransformedImageMovingToFixed(registered_sacs);
+        // TODO: Set ALPHA SOURCE
+        for (SourceAndConverter sac: registered_sacs) {
+            SourceAndConverterServices
+                    .getSourceAndConverterService()
+                    .register(sac);
+            if (alphaSource!=null) {
+                AlphaSourceHelper.setAlphaSource(sac, alphaSource);
+            }
+        }
+
         registered_sacs_sequence.add(new RegistrationAndSources(reg, registered_sacs));
         registrations.add(reg);
 
@@ -991,7 +1093,6 @@ public class SliceSources {
 
         this.original_sacs[0].getSpimSource().getSourceTransform(0,0,at3D);
         listRegions = getTransformedPtsFixedToMoving(listRegions, at3D);
-
         listLeftRight = getTransformedPtsFixedToMoving(listLeftRight, at3D);
 
         cvtRoisTransformed.clear();

@@ -106,12 +106,12 @@
 		<license.excludes>**/resources/**</license.excludes>
 		<main-class>ch.epfl.biop.abba.ABBALaunchMouse</main-class>
 
-		<bigdataviewer-playground.version>0.4.0</bigdataviewer-playground.version>
+		<bigdataviewer-playground.version>0.4.1</bigdataviewer-playground.version>
 		<bigdataviewer-bioformats.version>0.2.22</bigdataviewer-bioformats.version>
 
-		<bigdataviewer-playground-display.version>0.1.8</bigdataviewer-playground-display.version>
+		<bigdataviewer-playground-display.version>0.2.0</bigdataviewer-playground-display.version>
 		<bigdataviewer-spimdata-extras.version>0.1.6</bigdataviewer-spimdata-extras.version>
-		<bigdataviewer-biop-tools.version>0.2.37</bigdataviewer-biop-tools.version>
+		<bigdataviewer-biop-tools.version>0.2.38</bigdataviewer-biop-tools.version>
 
 		<bigdataviewer-selector.version>0.1.9</bigdataviewer-selector.version>
 		<scijava.app.directory>C:\fiji-win64\Fiji.app</scijava.app.directory>

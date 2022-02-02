@@ -353,7 +353,7 @@ public class MultiSlicePositioner implements Closeable {
         sortSlices(); // makes sense, no ?
     }
 
-    private void sortSlices() {
+    private synchronized void sortSlices() {
         slices.sort(Comparator.comparingDouble(SliceSources::getSlicingAxisPosition));
         // Sending index info to slices each time this function is called
         for (int i = 0; i < slices.size(); i++) {
