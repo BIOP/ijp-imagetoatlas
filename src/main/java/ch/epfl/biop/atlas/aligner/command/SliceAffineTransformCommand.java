@@ -2,6 +2,7 @@ package ch.epfl.biop.atlas.aligner.command;
 
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
+import ij.IJ;
 import net.imglib2.realtransform.AffineTransform3D;
 import org.apache.commons.collections.CollectionUtils;
 import org.scijava.command.Command;
@@ -50,6 +51,8 @@ public class SliceAffineTransformCommand extends InteractiveCommand implements M
 
     boolean listenerRegistered = false;
 
+    static int counterWarning = 0;
+
     @Override
     public void run() {
         if (mp!=null) {
@@ -69,7 +72,13 @@ public class SliceAffineTransformCommand extends InteractiveCommand implements M
                     }
                 }
                 if (oneRegistrationOccured) {
-                    mp.warningMessageForUser.accept("Warning", "These transformations should be applied before any registration is performed!");
+                    if (counterWarning==0) {
+                        mp.warningMessageForUser.accept("Warning", "These transformations should be applied before any registration is performed!");
+                    } else {
+                        // Non blocking
+                        IJ.log("It is advised to apply these interactive transformations before any registration is performed!");
+                    }
+                    counterWarning++;
                 }
             }
 
