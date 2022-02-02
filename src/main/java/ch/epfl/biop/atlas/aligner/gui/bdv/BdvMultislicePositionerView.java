@@ -148,6 +148,13 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     public BiConsumer<String, String> warningMessageForUser = (title, message) ->
             JOptionPane.showMessageDialog(new JFrame(), message, title, JOptionPane.WARNING_MESSAGE);
 
+
+    /**
+     * Blocking warning message for users
+     */
+    public BiConsumer<String, String> infoMessageForUser = (title, message) ->
+            JOptionPane.showMessageDialog(new JFrame(), message, title, JOptionPane.INFORMATION_MESSAGE);
+
     public Consumer<String> errlog = (message) -> {
         logger.error("Multipositioner : "+message);
         errorMessageForUser.accept("Error", message);
@@ -750,6 +757,13 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
             msp.waitForTasks();
 
+            boolean success = (Boolean) (cm.getOutput("success"));
+
+            if (!success) {
+                errorMessageForUser.accept("State not saved!", "Something went wrong");
+                return;
+            }
+
             File f = (File) cm.getInput("state_file");
             String fileNoExt = FilenameUtils.removeExtension(f.getAbsolutePath());
             File viewFile = new File(fileNoExt+"_bdv_view.json");
@@ -775,7 +789,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             writer.close();
 
             if ((f.exists())&& (Files.size(Paths.get(f.getAbsolutePath()))>0)) {
-                warningMessageForUser.accept("State saved", "Path:" + f.getAbsolutePath());
+                infoMessageForUser.accept("State saved", "Path:" + f.getAbsolutePath());
             } else {
                 errorMessageForUser.accept("State not saved!", "Something went wrong");
             }

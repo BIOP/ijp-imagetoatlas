@@ -894,11 +894,12 @@ public class MultiSlicePositioner implements Closeable {
         return stateChangedSinceLastSave;
     }
 
-    public void saveState(File stateFile, boolean overwrite) {
+    public boolean saveState(File stateFile, boolean overwrite) {
         addTask();
         if (slices.size() == 0) {
             errorMessageForUser.accept("No Slices To Save", "No slices are present. Nothing saved");
-            return;
+            removeTask();
+            return false;
         }
 
         slices.get(0).waitForEndOfTasks();
@@ -918,7 +919,8 @@ public class MultiSlicePositioner implements Closeable {
 
         if (sacsFile.exists()&&(!overwrite)) {
             logger.error("File "+sacsFile.getAbsolutePath()+" already exists. Abort command");
-            return;
+            removeTask();
+            return false;
         }
 
         SourceAndConverterServiceSaver sacss = new SourceAndConverterServiceSaver(sacsFile,this.scijavaCtx,allSacs);
@@ -934,11 +936,14 @@ public class MultiSlicePositioner implements Closeable {
             getGsonStateSerializer(serialized_sources).toJson(alignerState, writer);
             writer.flush();
             writer.close();
+            stateChangedSinceLastSave = false;
+            return true;
         } catch (IOException e) {
             e.printStackTrace();
+            removeTask();
+            return false;
         }
-        stateChangedSinceLastSave = false;
-        removeTask();
+
     }
 
     public boolean loadState(File stateFile) {

@@ -1,6 +1,7 @@
 package ch.epfl.biop.atlas.aligner.command;
 
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
+import org.scijava.ItemIO;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
@@ -8,7 +9,7 @@ import org.scijava.plugin.Plugin;
 import java.io.File;
 
 @Plugin(type = Command.class,
-        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>File>ABBA - Save State [Experimental]",
+        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>File>ABBA - Save State",
         description = "Saves the current registration state")
 public class ABBAStateSaveCommand implements Command {
 
@@ -18,8 +19,11 @@ public class ABBAStateSaveCommand implements Command {
     @Parameter(style = "save")
     File state_file;
 
+    @Parameter(persist = false, required = false, type = ItemIO.OUTPUT)
+    Boolean success = false;
+
     @Override
     public void run() {
-        mp.saveState(state_file, true);
+        success = mp.saveState(state_file, true);
     }
 }

@@ -8,7 +8,7 @@ import org.scijava.plugin.Plugin;
 import java.io.File;
 
 @Plugin(type = Command.class,
-        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>File>ABBA - Load State [Experimental]",
+        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>File>ABBA - Load State",
         description = "Loads a previous registration state into ABBA")
 public class ABBAStateLoadCommand implements Command {
 
