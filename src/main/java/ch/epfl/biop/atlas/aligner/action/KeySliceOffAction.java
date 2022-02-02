@@ -29,7 +29,7 @@ public class KeySliceOffAction extends CancelableAction {
             sliceSource.keySliceOff();
             getMP().stateHasBeenChanged();
             return true;
-        } else return false; // already NOT a key slice
+        } else return true; // already NOT a key slice, but we don't care
     }
 
     public String toString() {

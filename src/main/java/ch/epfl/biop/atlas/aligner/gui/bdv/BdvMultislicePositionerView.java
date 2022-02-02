@@ -806,12 +806,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     private void modificationMonitor() {
         boolean previousStateModification = msp.isModifiedSinceLastSave();
         boolean previousTimeReady = msp.getNumberOfTasks()==0;
-        while (!stopMonitoring) {
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+        while ((!stopMonitoring)&&(bdvh!=null)) {
             MultiSlicePositioner current_msp = this.msp;
             if (current_msp!=null) {
                 if (previousStateModification != current_msp.isModifiedSinceLastSave()) {
@@ -819,14 +814,23 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                     BdvHandleHelper.setWindowTitle(bdvh, getViewName());
                 }
                 if (current_msp.getNumberOfTasks()>0) {
-                    bdvh.getViewerPanel().getDisplay().repaint();
-                    previousTimeReady = false;
+                    if (bdvh!=null) {
+                        bdvh.getViewerPanel().getDisplay().repaint();
+                        previousTimeReady = false;
+                    }
                 } else {
                     if (!previousTimeReady) {
-                        bdvh.getViewerPanel().getDisplay().repaint();
-                        previousTimeReady = true;
+                        if (bdvh!=null) {
+                            bdvh.getViewerPanel().getDisplay().repaint();
+                            previousTimeReady = true;
+                        }
                     }
                 }
+            }
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
         logger.debug("Bdv view modification monitoring stopped");
