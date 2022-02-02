@@ -13,6 +13,7 @@ public class DeepSliceOutputTest {
 
         JAXBContext context = JAXBContext.newInstance(QuickNIISeries.class);
         QuickNIISeries series = (QuickNIISeries) context.createUnmarshaller()
-                .unmarshal(new FileReader(path+"resultstestfix.xml"));
+                .unmarshal(new FileReader(path+"results2022-02-02.xml"));
+        System.out.println(series);
     }
 }

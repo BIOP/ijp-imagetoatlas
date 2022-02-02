@@ -123,7 +123,7 @@ public class RegistrationDeepSliceCommand implements Command {
 
         List<SliceSources> slicesToExport = mp.getSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
 
-        if (mp.getSelectedSlices().size()==0) {
+        if (slicesToExport.size()==0) {
             mp.log.accept("No slice selected");
             mp.warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to register");
             return;
@@ -165,6 +165,11 @@ public class RegistrationDeepSliceCommand implements Command {
         } catch (Exception e) {
             mp.errorMessageForUser.accept("Deep Slice Command error","Could not parse xml file "+deepSliceResult.getAbsolutePath());
             e.printStackTrace();
+            return;
+        }
+
+        if (series.slices.length!=slicesToExport.size()) {
+            mp.errorMessageForUser.accept("Deep Slice Command error","Please retry the command, DeepSlice returned less images than present in the input ("+(slicesToExport.size()-series.slices.length)+" missing) ! ");
             return;
         }
 
