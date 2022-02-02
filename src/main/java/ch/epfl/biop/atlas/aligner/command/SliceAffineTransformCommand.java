@@ -73,10 +73,10 @@ public class SliceAffineTransformCommand extends InteractiveCommand implements M
                 }
                 if (oneRegistrationOccured) {
                     if (counterWarning==0) {
-                        mp.warningMessageForUser.accept("Warning", "These transformations should be applied before any registration is performed!");
+                        mp.warningMessageForUser.accept("Warning", "These transformations should be applied before any registration is performed! Undo impossible after the window is closed!");
                     } else {
                         // Non blocking
-                        IJ.log("It is advised to apply these interactive transformations before any registration is performed!");
+                        IJ.log("It is advised to apply these interactive transformations before any registration is performed! Undo impossible after the window is closed!");
                     }
                     counterWarning++;
                 }

@@ -323,6 +323,14 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                     }
             );
         });
+
+
+        logger.debug("Adding interactive transform");
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh, "Align>ABBA - Interactive Transform", 0, () -> {
+            (msp.getContext().getService(CommandService.class)).run(SliceAffineTransformCommand.class, true, "mp", msp);
+        });
+        //BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), SliceAffineTransformCommand.class, hierarchyLevelsSkipped,"mp", msp);
+
     }
 
     private void installBigDataViewerCards() {
