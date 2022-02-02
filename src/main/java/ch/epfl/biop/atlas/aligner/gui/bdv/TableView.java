@@ -214,9 +214,18 @@ public class TableView implements MultiSlicePositioner.SliceChangeListener, List
             SliceSources slice =  getSlices().get(rowIndex);
             if ((columnIndex == 0)) {
                 if (rowIndex == currentIndex) {
-                    return "["+ rowIndex +"] - "+slice.getName();
+                    // TODO : not implemented, currentIndex is always -1
+                    if (slice.isKeySlice()) {
+                        return "[" + rowIndex + "] " + slice.getName() + " (Key)";
+                    } else {
+                        return " " + rowIndex + "  " + slice.getName();
+                    }
                 }
-                return " "+ rowIndex+"  - "+slice.getName();
+                if (slice.isKeySlice()) {
+                    return "["+ rowIndex+"] "+slice.getName()+" (Key)";
+                } else {
+                    return " "+ rowIndex+"  "+slice.getName();
+                }
             } else if ((columnIndex) == 1) {
                 return view.getSliceVisibility(slice);
             } else if (columnIndex%2 == 0) {
@@ -356,12 +365,14 @@ public class TableView implements MultiSlicePositioner.SliceChangeListener, List
 
     @Override
     public void sliceKeyOn(SliceSources slice) {
-
+        int idx = slice.getIndex();
+        ((AbstractTableModel)table.getModel()).fireTableCellUpdated(idx, 0);
     }
 
     @Override
     public void sliceKeyOff(SliceSources slice) {
-
+        int idx = slice.getIndex();
+        ((AbstractTableModel)table.getModel()).fireTableCellUpdated(idx, 0);
     }
 
     @Override

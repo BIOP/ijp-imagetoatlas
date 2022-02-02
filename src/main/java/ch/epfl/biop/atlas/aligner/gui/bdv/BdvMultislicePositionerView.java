@@ -1748,7 +1748,11 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             g.setStroke(new BasicStroke(5));
             Integer[] coords = guiState.getSliceHandleCoords(slice);//sliceGuiState.get(slice).getSliceHandleCoords();
             RealPoint sliceCenter = new RealPoint(coords[0], coords[1], 0);
-            g.drawOval((int) sliceCenter.getDoublePosition(0) - 15, (int) sliceCenter.getDoublePosition(1) - 15, 29, 29);
+            if (slice.isKeySlice()) {
+                g.drawOval((int) sliceCenter.getDoublePosition(0) - 20, (int) sliceCenter.getDoublePosition(1) - 20, 39, 39);
+            } else {
+                g.drawOval((int) sliceCenter.getDoublePosition(0) - 15, (int) sliceCenter.getDoublePosition(1) - 15, 29, 29);
+            }
             Integer[] c = {255,255,255,128};
             g.setColor(new Color(c[0], c[1], c[2], c[3]));
             g.setFont(new Font("TimesRoman", Font.PLAIN, 16));

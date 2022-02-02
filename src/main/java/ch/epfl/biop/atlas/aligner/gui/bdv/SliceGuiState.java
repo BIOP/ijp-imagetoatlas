@@ -274,14 +274,26 @@ public class SliceGuiState {
 
     public Integer[] getBdvHandleColor() {
         if (slice.isSelected()) {
-            return new Integer[]{0, 255, 0, 200};
+            if (slice.isKeySlice()) {
+                return new Integer[]{0, 255, 0, 255};
+            } else {
+                return new Integer[]{0, 255, 0, 180};
+            }
         } else {
-            return new Integer[]{255, 255, 0, 64};
+            if (slice.isKeySlice()) {
+                return new Integer[]{255, 255, 0, 128};
+            } else {
+                return new Integer[]{255, 255, 0, 64};
+            }
         }
     }
 
     public Integer getBdvHandleRadius() {
-        return 12;
+        if (slice.isKeySlice()) {
+            return 16;
+        } else {
+            return 12;
+        }
     }
 
     public void drawGraphicalHandles(Graphics2D g) {
