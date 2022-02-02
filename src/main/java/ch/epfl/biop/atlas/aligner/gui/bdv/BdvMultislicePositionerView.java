@@ -247,6 +247,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>ABBA - Undo [Ctrl+Z]",0, msp::cancelLastAction);
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>ABBA - Redo [Ctrl+Shift+Z]",0, msp::redoAction);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), SliceMinMaxDisplaySetCommand.class, hierarchyLevelsSkipped,"view", this );
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>ABBA - Select all slices [Ctrl+A]",0,() -> msp.getSlices().forEach(SliceSources::select));
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>ABBA - Deselect all slices [Ctrl+Shift+A]",0,() -> msp.getSlices().forEach(SliceSources::deSelect));
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>ABBA - Remove selected slices",0,() ->
@@ -1552,6 +1553,19 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         if ((msp == this.msp)&&(!cleanAllOnExit)) {
             IJ.error("This ABBA session has been closed outside BigDataViewer, expect errors!");
         }
+    }
+
+    public void setSliceDisplayMinMax(SliceSources slice, int iChannel, double display_min, double display_max) {
+        guiState.runSlice(slice,
+                sliceGuiState -> {
+                    if (iChannel<sliceGuiState.nChannels) {
+                        Displaysettings ds = sliceGuiState.getDisplaySettings(iChannel);
+                        ds.min = display_min;
+                        ds.max = display_max;
+                        sliceGuiState.setDisplaySettings(iChannel, ds);
+                    }
+                });
+        tableView.sliceDisplaySettingsChanged(slice);
     }
 
     class InnerOverlay extends BdvOverlay {

@@ -173,6 +173,11 @@ public class TableView implements MultiSlicePositioner.SliceChangeListener, List
         model.fireTableStructureChanged(); // All changed!
     }
 
+    public void sliceDisplaySettingsChanged(SliceSources slice) {
+        int idx = slice.getIndex();
+        ((AbstractTableModel)table.getModel()).fireTableRowsUpdated(idx, idx);
+    }
+
     class SliceDisplayTableModel extends AbstractTableModel {
 
         public String getColumnName(int columnIndex) {
