@@ -343,6 +343,7 @@ public class TableView implements MultiSlicePositioner.SliceChangeListener, List
     @Override
     public void sliceSelected(SliceSources slice) {
         int idx = slice.getIndex();
+        if (idx!=-1)
         if (!table.getSelectionModel().isSelectedIndex(idx)){
             table.getSelectionModel().addSelectionInterval(idx, idx);
             table.repaint();
@@ -352,6 +353,7 @@ public class TableView implements MultiSlicePositioner.SliceChangeListener, List
     @Override
     public void sliceDeselected(SliceSources slice) {
         int idx = slice.getIndex();
+        if (idx!=-1)
         if (table.getSelectionModel().isSelectedIndex(idx)) {
             table.getSelectionModel().removeSelectionInterval(idx, idx);
             table.repaint();
@@ -371,12 +373,14 @@ public class TableView implements MultiSlicePositioner.SliceChangeListener, List
     @Override
     public void sliceKeyOn(SliceSources slice) {
         int idx = slice.getIndex();
+        if (idx!=-1)
         ((AbstractTableModel)table.getModel()).fireTableCellUpdated(idx, 0);
     }
 
     @Override
     public void sliceKeyOff(SliceSources slice) {
         int idx = slice.getIndex();
+        if (idx!=-1)
         ((AbstractTableModel)table.getModel()).fireTableCellUpdated(idx, 0);
     }
 

@@ -1722,6 +1722,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
     private void drawSetOfSliceControls(Graphics2D g, AffineTransform3D bdvAt3D, List<SliceSources> slicesCopy) {
 
+
         if (slicesCopy.stream().anyMatch(SliceSources::isSelected)) {
 
             List<SliceSources> sortedSelected = msp.getSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
@@ -1777,6 +1778,36 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             }
             ghs.forEach(gh -> gh.draw(g));
         }
+
+
+        Color colorNotSelected = new Color(255, 255, 0, 64);
+        Color colorSelected = new Color(0, 255, 0, 180);
+        //Stroke stroke = new BasicStroke(4);
+
+
+        // Set the stroke of the copy, not the original
+        Stroke dashed = new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL,
+                0, new float[]{9}, 0);
+        g.setStroke(dashed);
+        // draw dashed line from handle
+        slicesCopy.forEach(slice -> {
+
+            Integer[] coordSliceCenter = guiState.getSliceHandleCoords(slice);
+
+            RealPoint handlePoint = this.getDisplayedCenter(slice);
+            handlePoint.setPosition(+sY/2.0, 1);
+            bdvAt3D.apply(handlePoint, handlePoint);
+            if (slice.isSelected()) {
+                g.setColor(colorSelected);
+            } else {
+
+                g.setColor(colorNotSelected);
+            }
+
+            g.drawLine(coordSliceCenter[0], coordSliceCenter[1],
+                    (int) handlePoint.getDoublePosition(0), (int) handlePoint.getDoublePosition(1));
+
+        });
     }
 
     private void drawCurrentSliceOverlay(Graphics2D g, List<SliceSources> slicesCopy) {
