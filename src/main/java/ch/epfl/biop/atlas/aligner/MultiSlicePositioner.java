@@ -365,8 +365,8 @@ public class MultiSlicePositioner implements Closeable {
     public void positionZChanged(SliceSources slice) {
         synchronized (slicesLock) {
             sortSlices();
+            listeners.forEach(listener -> listener.sliceZPositionChanged(slice));
         }
-        listeners.forEach(listener -> listener.sliceZPositionChanged(slice));
     }
 
     public void sliceSelected(SliceSources slice) {

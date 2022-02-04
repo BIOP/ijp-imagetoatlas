@@ -287,11 +287,8 @@ public class SliceSources {
     }
 
     protected void setSlicingAxisPosition(double newSlicingAxisPosition) {
-        DebugView.instance.logger.accept(this, " setSlicingAxisPosition - 0");
         slicingAxisPosition = newSlicingAxisPosition;
-        DebugView.instance.logger.accept(this, " setSlicingAxisPosition - 1");
         updateZPosition();
-        DebugView.instance.logger.accept(this, " setSlicingAxisPosition - 2");
     }
 
     public void setSliceThickness(double zBeginInMm, double zEndInMm) {

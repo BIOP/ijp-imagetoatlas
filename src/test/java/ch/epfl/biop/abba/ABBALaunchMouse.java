@@ -36,7 +36,7 @@ public class ABBALaunchMouse {
         BdvMultislicePositionerView view = new BdvMultislicePositionerView(mp, bdvh);
 
         DebugView dv = new DebugView(mp);
-        DebugView.instance = dv;
+        //DebugView.instance = dv;
         MoveSliceAction a;
 
     }

@@ -6,7 +6,7 @@ import java.sql.Timestamp;
 import java.util.function.BiConsumer;
 public class DebugView implements MultiSlicePositioner.SliceChangeListener{
 
-    public static DebugView instance;
+    //public static DebugView instance;
 
     BiConsumer<SliceSources,String> logger = this::append;
 
