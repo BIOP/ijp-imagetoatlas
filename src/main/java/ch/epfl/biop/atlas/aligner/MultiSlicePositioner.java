@@ -937,6 +937,7 @@ public class MultiSlicePositioner implements Closeable {
             writer.flush();
             writer.close();
             stateChangedSinceLastSave = false;
+            removeTask();
             return true;
         } catch (IOException e) {
             e.printStackTrace();
