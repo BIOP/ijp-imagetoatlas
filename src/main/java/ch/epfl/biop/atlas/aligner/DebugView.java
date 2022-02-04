@@ -1,19 +1,22 @@
 package ch.epfl.biop.atlas.aligner;
 
-import ij.IJ;
-
 import javax.swing.*;
 import java.awt.*;
-import java.util.function.Consumer;
-
-import static ch.epfl.biop.atlas.aligner.gui.bdv.card.NavigationPanel.box;
-
+import java.sql.Timestamp;
+import java.util.function.BiConsumer;
 public class DebugView implements MultiSlicePositioner.SliceChangeListener{
 
-    Consumer<String> logger = this::append;
+    public static DebugView instance;
 
-    private void append(String s) {
-        area.append(s+"\n");
+    BiConsumer<SliceSources,String> logger = this::append;
+
+    private synchronized void append(SliceSources slice, String s) {
+        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+        if (slice==null) {
+            area.append(timestamp+"\t-\t"+s+"\n");
+        } else {
+            area.append(timestamp+"\t"+slice.getName()+"\t"+s+"\n");
+        }
     }
 
     final MultiSlicePositioner msp;
@@ -26,14 +29,14 @@ public class DebugView implements MultiSlicePositioner.SliceChangeListener{
         JPanel debugActions = new JPanel(new FlowLayout());
         JButton writeUserActions = new JButton("Write User Actions");
         writeUserActions.addActionListener((e) -> {
-            logger.accept("User actions: ");
-            msp.userActions.forEach(action -> logger.accept("\t"+action.toString()));
+            //logger.accept("User actions: ");
+            msp.userActions.forEach(action -> logger.accept(action.getSliceSources(),"\t"+action.toString()));
         });
 
         JButton writeRedoableUserActions = new JButton("Write Redoable User Actions");
         writeRedoableUserActions.addActionListener((e) -> {
-            logger.accept("Redoable user actions: ");
-            msp.redoableUserActions.forEach(action -> logger.accept("\t"+action.toString()));
+            //logger.accept("Redoable user actions: ");
+            msp.redoableUserActions.forEach(action -> logger.accept(action.getSliceSources(), "\t"+action.toString()));
         });
 
         debugActions.add(writeUserActions);
@@ -49,84 +52,84 @@ public class DebugView implements MultiSlicePositioner.SliceChangeListener{
 
     @Override
     public void sliceDeleted(SliceSources slice) {
-        logger.accept("Deleted slice "+slice.getName());
+        logger.accept(slice,"Deleted slice "+slice.getName());
     }
 
     @Override
     public void sliceCreated(SliceSources slice) {
-        logger.accept("Created slice "+slice.getName());
+        logger.accept(slice,"Created slice "+slice.getName());
     }
 
     @Override
     public void sliceZPositionChanged(SliceSources slice) {
-        logger.accept("Z position changed slice "+slice.getName());
+        logger.accept(slice,"Z position changed slice "+slice.getName());
     }
 
     @Override
     public void sliceSelected(SliceSources slice) {
-        logger.accept("Slice selected "+slice.getName());
+        logger.accept(slice,"Slice selected "+slice.getName());
     }
 
     @Override
     public void sliceDeselected(SliceSources slice) {
-        logger.accept("Slice deselected "+slice.getName());
+        logger.accept(slice,"Slice deselected "+slice.getName());
     }
 
     @Override
     public void sliceSourcesChanged(SliceSources slice) {
-        logger.accept("Slice sources changed "+slice.getName());
+        logger.accept(slice,"Slice sources changed "+slice.getName());
     }
 
     @Override
     public void slicePretransformChanged(SliceSources slice) {
-        logger.accept("Slice pretransform changed "+slice.getName());
+        logger.accept(slice,"Slice pretransform changed "+slice.getName());
     }
 
     @Override
     public void sliceKeyOn(SliceSources slice) {
-        logger.accept("Slice is a key Slice "+slice.getName());
+        logger.accept(slice,"Slice is a key Slice "+slice.getName());
     }
 
     @Override
     public void sliceKeyOff(SliceSources slice) {
-        logger.accept("Slice is not a key slice "+slice.getName());
+        logger.accept(slice,"Slice is not a key slice "+slice.getName());
     }
 
     @Override
     public void roiChanged() {
-        logger.accept("ROI changed");
+        logger.accept(null,"ROI changed");
     }
 
     @Override
     public void actionEnqueue(SliceSources slice, CancelableAction action) {
-        logger.accept("Action ["+action.actionClassString()+"] Enqueued");
+        logger.accept(slice,"Action ["+action.actionClassString()+"] Enqueued");
     }
 
     @Override
     public void actionStarted(SliceSources slice, CancelableAction action) {
-        logger.accept("Action ["+action.actionClassString()+"] Started");
+        logger.accept(slice,"Action ["+action.actionClassString()+"] Started");
     }
 
     @Override
     public void actionFinished(SliceSources slice, CancelableAction action, boolean result) {
         String success = result?"Yes":"No";
-        logger.accept("Action ["+action.actionClassString()+"] Finished. Success ? "+success);
+        logger.accept(slice,"Action ["+action.actionClassString()+"] Finished. Success ? "+success);
     }
 
     @Override
     public void actionCancelEnqueue(SliceSources slice, CancelableAction action) {
-        logger.accept("Action ["+action.actionClassString()+"] Cancelation enqueued.");
+        logger.accept(slice,"Action ["+action.actionClassString()+"] Cancelation enqueued.");
     }
 
     @Override
     public void actionCancelStarted(SliceSources slice, CancelableAction action) {
-        logger.accept("Action ["+action.actionClassString()+"] Cancelation Started.");
+        logger.accept(slice,"Action ["+action.actionClassString()+"] Cancelation Started.");
     }
 
     @Override
     public void actionCancelFinished(SliceSources slice, CancelableAction action, boolean result) {
         String success = result?"Yes":"No";
-        logger.accept("Action ["+action.actionClassString()+"] Cancelation Ended. Success ? "+success);
+        logger.accept(slice,"Action ["+action.actionClassString()+"] Cancelation Ended. Success ? "+success);
     }
 
 }

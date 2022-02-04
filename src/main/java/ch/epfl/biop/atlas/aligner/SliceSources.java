@@ -287,8 +287,11 @@ public class SliceSources {
     }
 
     protected void setSlicingAxisPosition(double newSlicingAxisPosition) {
+        DebugView.instance.logger.accept(this, " setSlicingAxisPosition - 0");
         slicingAxisPosition = newSlicingAxisPosition;
+        DebugView.instance.logger.accept(this, " setSlicingAxisPosition - 1");
         updateZPosition();
+        DebugView.instance.logger.accept(this, " setSlicingAxisPosition - 2");
     }
 
     public void setSliceThickness(double zBeginInMm, double zEndInMm) {
@@ -396,12 +399,14 @@ public class SliceSources {
     }
 
     private void updateZPosition() {
-        AffineTransform3D zShiftAffineTransform = new AffineTransform3D();
-        zShiftAffineTransform.scale(1,1,zThicknessCorrection);
-        zShiftAffineTransform.translate(0, 0, slicingAxisPosition+zShiftCorrection);
-        zPositioner.setAffineTransform(zShiftAffineTransform); // Moves the registered slices to the correct position
-        si.updateBox();
-        mp.positionZChanged(this);
+        synchronized (this.mp) {
+            AffineTransform3D zShiftAffineTransform = new AffineTransform3D();
+            zShiftAffineTransform.scale(1, 1, zThicknessCorrection);
+            zShiftAffineTransform.translate(0, 0, slicingAxisPosition + zShiftCorrection);
+            zPositioner.setAffineTransform(zShiftAffineTransform); // Moves the registered slices to the correct position
+            si.updateBox();
+            mp.positionZChanged(this);
+        }
     }
 
     protected void setIndex(int idx) {
