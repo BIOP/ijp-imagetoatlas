@@ -11,6 +11,7 @@ import bdv.util.source.alpha.IAlphaSource;
 import bdv.viewer.Interpolation;
 import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
+import ch.epfl.biop.atlas.mouse.allen.ccfv3.command.AllenBrainAdultMouseAtlasCCF2017Command;
 import ch.epfl.biop.atlas.struct.AtlasNode;
 import ch.epfl.biop.atlas.struct.AtlasOntology;
 import ch.epfl.biop.atlas.struct.AtlasHelper;
@@ -63,7 +64,9 @@ import spimdata.imageplus.ImagePlusHelper;
 
 import java.awt.*;
 import java.io.*;
+import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.List;
@@ -996,12 +999,28 @@ public class SliceSources {
                     // Save in user specified folder
                     Files.copy(Paths.get(ijroisfile.f.getAbsolutePath()),Paths.get(f.getAbsolutePath()));
                     writeOntotogyIfNotPresent(mp, projectFolderPath);
+                    //----------------- LEGACY
+                    // For compatibility with previous versions
+                    if (mp.getAtlas() instanceof AllenBrainAdultMouseAtlasCCF2017Command) {
+                        // Save it the old fashioned way
+                        f = new File(dataEntryFolder, "ABBA-RoiSet.zip");
+                        Files.copy(Paths.get(ijroisfile.f.getAbsolutePath()),Paths.get(f.getAbsolutePath()));
+                    }
+                    //----------------- LEGACY
+
                 } else {
                     mp.errlog.accept("Error : QuPath ROI file already exists");
                 }
             } else {
                 Files.copy(Paths.get(ijroisfile.f.getAbsolutePath()),Paths.get(f.getAbsolutePath()));
                 writeOntotogyIfNotPresent(mp, projectFolderPath);
+                //----------------- LEGACY
+                if (mp.getAtlas() instanceof AllenBrainAdultMouseAtlasCCF2017Command) {
+                    // Save it the old fashioned way
+                    f = new File(dataEntryFolder, "ABBA-RoiSet.zip");
+                    Files.copy(Paths.get(ijroisfile.f.getAbsolutePath()),Paths.get(f.getAbsolutePath()));
+                }
+                //----------------- LEGACY
             }
         } catch (Exception e) {
             mp.errlog.accept("QuPath Entry data folder not found! ");
@@ -1025,6 +1044,16 @@ public class SliceSources {
                         writer.write(transform_string);
                         writer.flush();
                         writer.close();
+                        //----------------- LEGACY
+                        if (mp.getAtlas() instanceof AllenBrainAdultMouseAtlasCCF2017Command) {
+                            // Save it the old fashioned way
+                            ftransform = new File(dataEntryFolder, "ABBA-Transform.json");
+                            writer = new FileWriter(ftransform.getAbsolutePath());
+                            writer.write(transform_string);
+                            writer.flush();
+                            writer.close();
+                        }
+                        //----------------- LEGACY
                     } else {
                         mp.errlog.accept("Error : Transformation file already exists");
                     }
@@ -1033,6 +1062,16 @@ public class SliceSources {
                     writer.write(transform_string);
                     writer.flush();
                     writer.close();
+                    //----------------- LEGACY
+                    if (mp.getAtlas() instanceof AllenBrainAdultMouseAtlasCCF2017Command) {
+                        // Save it the old fashioned way
+                        ftransform = new File(dataEntryFolder, "ABBA-Transform.json");
+                        writer = new FileWriter(ftransform.getAbsolutePath());
+                        writer.write(transform_string);
+                        writer.flush();
+                        writer.close();
+                    }
+                    //----------------- LEGACY
                 }
             }
         } catch (Exception e) {
@@ -1046,6 +1085,24 @@ public class SliceSources {
         if (!ontology.exists()) {
             AtlasHelper.saveOntologyToJsonFile(mp.getAtlas().getOntology(), ontology.getAbsolutePath());
         }
+        //---------------- LEGACY
+        if (mp.getAtlas() instanceof AllenBrainAdultMouseAtlasCCF2017Command) {
+            ontology = new File(quPathFilePath, "AllenMouseBrainOntology.json");
+            if (!ontology.exists()) {
+                try {
+                    URL ontologyURL = mp.getAtlas().getOntology().getDataSource();
+                    if (ontologyURL.getFile()==null) {
+                        mp.errlog.accept("No ontology file found at location "+ontologyURL);
+                        return;
+                    }
+                    Path originalOntologyFile = Paths.get(ontologyURL.toURI());
+                    Files.copy(originalOntologyFile, Paths.get(quPathFilePath, "AllenMouseBrainOntology.json"));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        //----------------- LEGACY
     }
 
     public String toString() {
