@@ -20,6 +20,7 @@ public class NavigationPanel {
     final JButton gotoPreviousSlice;
 
     final JButton changeOverlapMode;
+    final JSlider overlapFactorSlider;
 
     public NavigationPanel(BdvMultislicePositionerView view) {
         paneDisplay = new JPanel();
@@ -50,13 +51,16 @@ public class NavigationPanel {
         gotoNextSlice = new JButton("Next [Right]");
         gotoNextSlice.addActionListener(e -> view.navigateNextSlice());
 
+        overlapFactorSlider = new JSlider();
+        overlapFactorSlider.addChangeListener(l -> view.setOverlapFactor(overlapFactorSlider.getValue()));
+
         paneDisplay.add(box(false,
                 new JLabel("Modes"),
                 box(true,reviewMode, positioningMode),
                 new JLabel("Slice Display"),
                 box(true, singleSliceDisplayMode, allSlicesDisplayMode),
                 new JLabel("Overlap (positioning)"),
-                changeOverlapMode,
+                box(false,changeOverlapMode,box(true,new JLabel("Overlap size"), overlapFactorSlider)),
                 new JLabel("Navigate Slice"),
                 box(true, gotoPreviousSlice, centerOnCurrentSlice, gotoNextSlice)));
 

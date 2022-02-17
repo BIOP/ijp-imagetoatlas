@@ -724,6 +724,9 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                 this.setDisplayMode(vs.bdvViewMode);
                 this.sliceDisplayMode = -1;
                 this.setSliceDisplayMode(vs.bdvSliceViewMode);
+                if (vs.overlapFactor!=0) {
+                    this.overlapFactor = vs.overlapFactor;
+                }
                 this.overlapMode = vs.overlapMode; updateOverlapMode();
                 double[] rowPackedCopy = vs.bdvView;
 
@@ -909,7 +912,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                 for (int i = current;i<slices.size();i++) {
                     SliceSources slice = slices.get(i);
                     double posX = getDisplayedCenter(slice).getDoublePosition(0);
-                    if (posX >= (lastPositionAlongX + msp.sX)) {
+                    if (posX >= (lastPositionAlongX + msp.sX/overlapFactor)) {
                         stairIndex = 0;
                         lastPositionAlongX = posX;
                         guiState.runSlice(slice, guiState -> guiState.setYShift(1));
@@ -924,7 +927,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                 for (int i = current;i>=0;i--) {
                     SliceSources slice = slices.get(i);
                     double posX = getDisplayedCenter(slice).getDoublePosition(0);
-                    if (posX <= (lastPositionAlongX - msp.sX)) {
+                    if (posX <= (lastPositionAlongX - msp.sX/overlapFactor)) {
                         stairIndex = 0;
                         lastPositionAlongX = posX;
                         guiState.runSlice(slice, guiState -> guiState.setYShift(1));
@@ -937,7 +940,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             } else {
                 for (SliceSources slice : slices) {
                     double posX = getDisplayedCenter(slice).getDoublePosition(0);
-                    if (posX >= (lastPositionAlongX + msp.sX)) {
+                    if (posX >= (lastPositionAlongX + msp.sX/overlapFactor)) {
                         stairIndex = 0;
                         lastPositionAlongX = posX;
                         guiState.runSlice(slice, guiState -> guiState.setYShift(1));
@@ -1605,6 +1608,20 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         tableView.sliceDisplaySettingsChanged(slice);
     }
 
+    double overlapFactor = 1.0;
+
+    public void setOverlapFactor(int value) {
+        double newValue = 0.1 + 3.0 - ((value/100.0) * 3.0);
+        System.out.println("value = "+value);
+        System.out.println("newV = "+newValue);
+        if (newValue!=overlapFactor) {
+            overlapFactor = newValue;
+            if (overlapMode == 2) {
+                updateOverlapMode();
+            }
+        }
+    }
+
     class InnerOverlay extends BdvOverlay {
         int drawCounter = 0;
         Color color = new Color(128,112,50,200);
@@ -2056,6 +2073,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         boolean showInfo;
         int atlasSlicingStep;
         Integer iCurrentSlice;
+        double overlapFactor = 1.0;
     }
 
 }
