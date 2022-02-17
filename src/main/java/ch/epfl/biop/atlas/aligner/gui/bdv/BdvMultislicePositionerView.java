@@ -749,6 +749,8 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                 view.set(rowPackedCopy);
                 bdvh.getViewerPanel().state().setViewerTransform(view);
 
+                updateSliceDisplayedPosition(null);
+
             } else {
                 // No view -> nothing to be done
             }
@@ -901,16 +903,49 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             // N^2 algo! Take care TODO improve
             double lastPositionAlongX = -Double.MAX_VALUE;
             int stairIndex = 0;
-            for (SliceSources slice : msp.getSlices()) {
-                double posX = getDisplayedCenter(slice).getDoublePosition(0);
-                if (posX >= (lastPositionAlongX + msp.sX)) {
-                    stairIndex = 0;
-                    lastPositionAlongX = posX;
-                    guiState.runSlice(slice, guiState -> guiState.setYShift(1));
-                } else {
-                    stairIndex++;
-                    final int finalStairIndex = stairIndex;
-                    guiState.runSlice(slice, guiState -> guiState.setYShift(1 + finalStairIndex));
+            List<SliceSources> slices = msp.getSlices();
+            int current = iCurrentSlice;
+            if ((current>0)&&(current<slices.size())) {
+                for (int i = current;i<slices.size();i++) {
+                    SliceSources slice = slices.get(i);
+                    double posX = getDisplayedCenter(slice).getDoublePosition(0);
+                    if (posX >= (lastPositionAlongX + msp.sX)) {
+                        stairIndex = 0;
+                        lastPositionAlongX = posX;
+                        guiState.runSlice(slice, guiState -> guiState.setYShift(1));
+                    } else {
+                        stairIndex++;
+                        final int finalStairIndex = stairIndex;
+                        guiState.runSlice(slice, guiState -> guiState.setYShift(1 + finalStairIndex));
+                    }
+                }
+                lastPositionAlongX = Double.MAX_VALUE;
+                stairIndex = 0;
+                for (int i = current;i>=0;i--) {
+                    SliceSources slice = slices.get(i);
+                    double posX = getDisplayedCenter(slice).getDoublePosition(0);
+                    if (posX <= (lastPositionAlongX - msp.sX)) {
+                        stairIndex = 0;
+                        lastPositionAlongX = posX;
+                        guiState.runSlice(slice, guiState -> guiState.setYShift(1));
+                    } else {
+                        stairIndex++;
+                        final int finalStairIndex = stairIndex;
+                        guiState.runSlice(slice, guiState -> guiState.setYShift(1 + finalStairIndex));
+                    }
+                }
+            } else {
+                for (SliceSources slice : slices) {
+                    double posX = getDisplayedCenter(slice).getDoublePosition(0);
+                    if (posX >= (lastPositionAlongX + msp.sX)) {
+                        stairIndex = 0;
+                        lastPositionAlongX = posX;
+                        guiState.runSlice(slice, guiState -> guiState.setYShift(1));
+                    } else {
+                        stairIndex++;
+                        final int finalStairIndex = stairIndex;
+                        guiState.runSlice(slice, guiState -> guiState.setYShift(1 + finalStairIndex));
+                    }
                 }
             }
         }
@@ -1286,11 +1321,12 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             if ((previousSliceIndex>=0)&&(previousSliceIndex<sortedSlices.size())) {
                 previousSlice = sortedSlices.get(previousSliceIndex);
             }
-            centerBdvViewOn(sortedSlices.get(iCurrentSlice), true, previousSlice);
             if ((previousSliceIndex>=0)&&(previousSliceIndex<sortedSlices.size())) { // Could have been deleted
                 guiState.runSlice(sortedSlices.get(previousSliceIndex), SliceGuiState::isNotCurrent);
             }
             guiState.runSlice(sortedSlices.get(iCurrentSlice), SliceGuiState::isCurrent);
+            if (overlapMode==2) updateSliceDisplayedPosition(null);
+            centerBdvViewOn(sortedSlices.get(iCurrentSlice), true, previousSlice);
         }
     }
 
@@ -1311,11 +1347,12 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             if ((previousSliceIndex>=0)&&(previousSliceIndex<sortedSlices.size())) {
                 previousSlice = sortedSlices.get(previousSliceIndex);
             }
-            centerBdvViewOn(sortedSlices.get(iCurrentSlice), true, previousSlice);
             if ((previousSliceIndex>=0)&&(previousSliceIndex<sortedSlices.size())) { // Could have been deleted
                 guiState.runSlice(sortedSlices.get(previousSliceIndex), SliceGuiState::isNotCurrent);
             }
             guiState.runSlice(sortedSlices.get(iCurrentSlice), SliceGuiState::isCurrent);
+            if (overlapMode==2) updateSliceDisplayedPosition(null);
+            centerBdvViewOn(sortedSlices.get(iCurrentSlice), true, previousSlice);
         }
     }
 
