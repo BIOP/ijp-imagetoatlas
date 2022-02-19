@@ -62,8 +62,10 @@ import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
 import sc.fiji.persist.ScijavaGsonHelper;
 import spimdata.imageplus.ImagePlusHelper;
 
+import javax.swing.*;
 import java.awt.*;
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -71,6 +73,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -132,7 +135,7 @@ public class SliceSources {
 
     private final List<CompletableFuture<Boolean>> tasks = new ArrayList<>();
 
-    private final Map<CancelableAction, CompletableFuture<Boolean>> mapActionTask = new HashMap<>();
+    private final Map<CancelableAction, CompletableFuture<Boolean>> mapActionTask = new ConcurrentHashMap<>();
 
     private volatile CancelableAction actionInProgress = null;
 
@@ -281,7 +284,7 @@ public class SliceSources {
         return name;
     }
 
-    public synchronized SourceAndConverter<?>[] getRegisteredSources() {
+    public SourceAndConverter<?>[] getRegisteredSources() {
         return registered_sacs;
     }
 
@@ -376,7 +379,7 @@ public class SliceSources {
         return original_sacs;
     }
 
-    public synchronized void select() {
+    public void select() {
         if (!this.isSelected) {
             this.isSelected = true;
             mp.sliceSelected(this);
@@ -399,14 +402,12 @@ public class SliceSources {
     }
 
     private void updateZPosition() {
-        synchronized (this.mp) {
-            AffineTransform3D zShiftAffineTransform = new AffineTransform3D();
-            zShiftAffineTransform.scale(1, 1, zThicknessCorrection);
-            zShiftAffineTransform.translate(0, 0, slicingAxisPosition + zShiftCorrection);
-            zPositioner.setAffineTransform(zShiftAffineTransform); // Moves the registered slices to the correct position
-            si.updateBox();
-            mp.positionZChanged(this);
-        }
+        AffineTransform3D zShiftAffineTransform = new AffineTransform3D();
+        zShiftAffineTransform.scale(1, 1, zThicknessCorrection);
+        zShiftAffineTransform.translate(0, 0, slicingAxisPosition + zShiftCorrection);
+        zPositioner.setAffineTransform(zShiftAffineTransform); // Moves the registered slices to the correct position
+        si.updateBox();
+        mp.positionZChanged(this);
     }
 
     protected void setIndex(int idx) {
@@ -509,6 +510,7 @@ public class SliceSources {
 
         registered_sacs = reg.getTransformedImageMovingToFixed(registered_sacs);
         // TODO: Set ALPHA SOURCE
+
         for (SourceAndConverter sac: registered_sacs) {
             SourceAndConverterServices
                     .getSourceAndConverterService()
@@ -569,7 +571,7 @@ public class SliceSources {
         }
     }
 
-    protected synchronized boolean removeRegistration(Registration reg) {
+    protected boolean removeRegistration(Registration reg) {
         if (registrations.contains(reg)) {
             int idx = registrations.indexOf(reg);
             if (idx == registrations.size() - 1) {
@@ -592,123 +594,127 @@ public class SliceSources {
     }
 
     protected void enqueueRunAction(CancelableAction action, Runnable postRun) {
-        synchronized(tasks) {
-            CompletableFuture<Boolean> startingPoint;
-            if (tasks.size() == 0) {
-                startingPoint = CompletableFuture.supplyAsync(() -> true);
-            } else {
-                startingPoint = tasks.get(tasks.size() - 1);
-            }
-            tasks.add(startingPoint.thenApplyAsync((out) -> {
-                if (out) {
-                    mp.addTask();
-                    actionInProgress = action;
-                    logger.debug(this+": action "+action+" started");
-                    mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.actionStarted(action.getSliceSources(), action));
-                    boolean result = action.run();
-                    mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.actionFinished(action.getSliceSources(), action, result));
-                    logger.debug(this+": action "+action+" result "+result);
-                    if (result) {
-                        actionInProgress = null;
-                        postRun.run();
-                    } else {
-                        mp.nonBlockingErrorMessageForUser.accept("Action failed", action.toString());
-                        if (mapActionTask.containsKey(action)) {
-                            CompletableFuture future = mapActionTask.get(action);
-                            tasks.remove(future);
-                        }
-                        mapActionTask.remove(action);
-                        mp.userActions.remove(action);
-                    }
-                    mp.removeTask();
-                    return result;
+        CompletableFuture<Boolean> startingPoint;
+        if (tasks.size() == 0) {
+            startingPoint = CompletableFuture.supplyAsync(() -> true);
+        } else {
+            startingPoint = tasks.get(tasks.size() - 1);
+        }
+        tasks.add(startingPoint.thenApplyAsync((out) -> {
+            if (out) {
+                mp.addTask();
+                actionInProgress = action;
+                logger.debug(this+": action "+action+" started");
+
+                for (MultiSlicePositioner.SliceChangeListener listener: mp.listeners) {
+                    listener.actionStarted(action.getSliceSources(), action);
+                }
+
+                boolean result = action.run();
+
+                for (MultiSlicePositioner.SliceChangeListener listener: mp.listeners) {
+                    listener.actionFinished(action.getSliceSources(), action, result);
+                }
+
+                logger.debug(this+": action "+action+" result "+result);
+                if (result) {
+                    actionInProgress = null;
+                    postRun.run();
                 } else {
-                    mp.errorMessageForUser.accept("Action not started","Upstream tasked failed, canceling action "+action);
+                    mp.nonBlockingErrorMessageForUser.accept("Action failed", action.toString());
                     if (mapActionTask.containsKey(action)) {
                         CompletableFuture future = mapActionTask.get(action);
                         tasks.remove(future);
                     }
                     mapActionTask.remove(action);
                     mp.userActions.remove(action);
-                    return false;
                 }
-            }));
-            mapActionTask.put(action, tasks.get(tasks.size() - 1));
-        }
+                mp.removeTask();
+                return result;
+            } else {
+                mp.errorMessageForUser.accept("Action not started","Upstream tasked failed, canceling action "+action);
+                if (mapActionTask.containsKey(action)) {
+                    CompletableFuture future = mapActionTask.get(action);
+                    tasks.remove(future);
+                }
+                mapActionTask.remove(action);
+                mp.userActions.remove(action);
+                return false;
+            }
+        }));
+        mapActionTask.put(action, tasks.get(tasks.size() - 1));
     }
 
-    protected synchronized void enqueueCancelAction(CancelableAction action, Runnable postRun) {
-        synchronized(tasks) {
-            // Has the action started ?
-            if (mapActionTask.containsKey(action)) {
-                if (mapActionTask.get(action).isDone() || ((action!=null)&&(action == this.actionInProgress))) {
+    protected void enqueueCancelAction(CancelableAction action, Runnable postRun) {
+        // Has the action started ?
+        if (mapActionTask.containsKey(action)) {
+            if (mapActionTask.get(action).isDone() || ((action!=null)&&(action == this.actionInProgress))) {
 
-                    if (action==actionInProgress) {
-                       if (actionInProgress instanceof RegisterSliceAction) {
-                           mp.addTask();
-                           mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.actionCancelStarted(action.getSliceSources(), action));
-                           boolean result;
+                if (action==actionInProgress) {
+                   if (actionInProgress instanceof RegisterSliceAction) {
+                       mp.addTask();
+                       mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.actionCancelStarted(action.getSliceSources(), action));
+                       boolean result;
 
-                           // Special case : let's abort ASAP the registration to avoid overloading the server
-                            logger.debug("Aborting register slice action :  "+actionInProgress);
-                            ((RegisterSliceAction) actionInProgress).getRegistration().abort();
-                            //postRun.run();
-                            result = action.cancel();
-                            if (mapActionTask.containsKey(action)) {
-                                CompletableFuture future = mapActionTask.get(action);
-                                tasks.remove(future);
-                            }
+                       // Special case : let's abort ASAP the registration to avoid overloading the server
+                        logger.debug("Aborting register slice action :  "+actionInProgress);
+                        ((RegisterSliceAction) actionInProgress).getRegistration().abort();
+                        //postRun.run();
+                        result = action.cancel();
+                        if (mapActionTask.containsKey(action)) {
+                            CompletableFuture future = mapActionTask.get(action);
+                            tasks.remove(future);
+                        }
+                        mapActionTask.remove(action);
+                        mp.userActions.remove(action);
+                        postRun.run();
+                        mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.actionCancelFinished(action.getSliceSources(), action, result));
+                        mp.removeTask();
+                   }
+                } else {
+                    CompletableFuture<Boolean> startingPoint;
+                    if (tasks.size() == 0) {
+                        startingPoint = CompletableFuture.supplyAsync(() -> true);
+                    } else {
+                        startingPoint = tasks.get(tasks.size() - 1);
+                    }
+                    tasks.add(startingPoint.thenApplyAsync((out) -> {
+                        if (out) {
+                            mp.addTask();
+                            mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.actionCancelStarted(action.getSliceSources(), action));
+                            boolean result = action.cancel();
+                            tasks.remove(mapActionTask.get(action));
                             mapActionTask.remove(action);
-                            mp.userActions.remove(action);
                             postRun.run();
                             mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.actionCancelFinished(action.getSliceSources(), action, result));
                             mp.removeTask();
-                       }
-                    } else {
-                        CompletableFuture<Boolean> startingPoint;
-                        if (tasks.size() == 0) {
-                            startingPoint = CompletableFuture.supplyAsync(() -> true);
+                            return result;
                         } else {
-                            startingPoint = tasks.get(tasks.size() - 1);
+                            logger.error("Weird edge case!");
+                            return false;
                         }
-                        tasks.add(startingPoint.thenApplyAsync((out) -> {
-                            if (out) {
-                                mp.addTask();
-                                mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.actionCancelStarted(action.getSliceSources(), action));
-                                boolean result = action.cancel();
-                                tasks.remove(mapActionTask.get(action));
-                                mapActionTask.remove(action);
-                                postRun.run();
-                                mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.actionCancelFinished(action.getSliceSources(), action, result));
-                                mp.removeTask();
-                                return result;
-                            } else {
-                                logger.error("Weird edge case!");
-                                return false;
-                            }
-                        }));
-                    }
-                } else {
-                    mp.addTask();
-                    mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.actionCancelStarted(action.getSliceSources(), action));
-                    // Not done yet! - let's remove right now from the task list
-                    boolean result = mapActionTask.get(action).cancel(true);
-                    tasks.remove(mapActionTask.get(action));
-                    mapActionTask.remove(action);
-                    postRun.run();
-                    mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.actionCancelFinished(action.getSliceSources(), action, result));
-                    mp.removeTask();
+                    }));
                 }
-            } else if (action instanceof CreateSliceAction) {
+            } else {
                 mp.addTask();
                 mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.actionCancelStarted(action.getSliceSources(), action));
-                waitForEndOfTasks();
-                boolean result = action.cancel();
+                // Not done yet! - let's remove right now from the task list
+                boolean result = mapActionTask.get(action).cancel(true);
+                tasks.remove(mapActionTask.get(action));
+                mapActionTask.remove(action);
+                postRun.run();
                 mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.actionCancelFinished(action.getSliceSources(), action, result));
                 mp.removeTask();
-            } else {
-                mp.errlog.accept("Unregistered action");
             }
+        } else if (action instanceof CreateSliceAction) {
+            mp.addTask();
+            mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.actionCancelStarted(action.getSliceSources(), action));
+            waitForEndOfTasks();
+            boolean result = action.cancel();
+            mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.actionCancelFinished(action.getSliceSources(), action, result));
+            mp.removeTask();
+        } else {
+            mp.errlog.accept("Unregistered action");
         }
     }
 
@@ -853,12 +859,12 @@ public class SliceSources {
 
     }
 
-    public synchronized void exportRegionsToROIManager(String namingChoice) {
+    public void exportRegionsToROIManager(String namingChoice) {
         prepareExport(namingChoice);
         cvtRoisTransformed.to(RoiManager.class);
     }
 
-    public synchronized List<Roi> getRois(String namingChoice) {
+    public List<Roi> getRois(String namingChoice) {
         prepareExport(namingChoice);
         IJShapeRoiArray roiArray = (IJShapeRoiArray) cvtRoisTransformed.to(IJShapeRoiArray.class);
         List<Roi> rois = new ArrayList<>();
@@ -868,13 +874,13 @@ public class SliceSources {
         return rois;
     }
 
-    public synchronized void exportToQuPathProject(boolean erasePreviousFile) {
+    public void exportToQuPathProject(boolean erasePreviousFile) {
         prepareExport("id");
         ImageJRoisFile ijroisfile = (ImageJRoisFile) cvtRoisTransformed.to(ImageJRoisFile.class);
         storeInQuPathProjectIfExists(ijroisfile, erasePreviousFile);
     }
 
-    public synchronized void exportRegionsToFile(String namingChoice, File dirOutput, boolean erasePreviousFile) {
+    public void exportRegionsToFile(String namingChoice, File dirOutput, boolean erasePreviousFile) {
 
         prepareExport(namingChoice);
 
@@ -1266,6 +1272,16 @@ public class SliceSources {
 
     public boolean isKeySlice() {
         return setAsKeySlice;
+    }
+
+    // Hack to avoid overriding position during sorting, see sortslices in MultiSlicePositioner
+    double tempAxisPosition;
+    public void setTempSlicingAxisPosition() {
+        tempAxisPosition = slicingAxisPosition;
+    }
+
+    public double getTempSlicingAxisPosition() {
+        return tempAxisPosition;
     }
 
     public static class RegistrationAndSources {

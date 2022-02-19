@@ -37,7 +37,5 @@ public class ABBALaunchMouse {
 
         DebugView dv = new DebugView(mp);
         //DebugView.instance = dv;
-        MoveSliceAction a;
-
     }
 }

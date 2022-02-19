@@ -5,11 +5,7 @@ import bdv.viewer.Interpolation;
 import bdv.viewer.SourceAndConverter;
 import bdv.viewer.ViewerPanel;
 import ch.epfl.biop.ResourcesMonitor;
-import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
-import ch.epfl.biop.atlas.aligner.ReslicedAtlas;
-import ch.epfl.biop.atlas.aligner.SliceSources;
-import ch.epfl.biop.atlas.aligner.CancelableAction;
-import ch.epfl.biop.atlas.aligner.DeleteSliceAction;
+import ch.epfl.biop.atlas.aligner.*;
 import ch.epfl.biop.atlas.aligner.gui.bdv.card.*;
 import ch.epfl.biop.atlas.aligner.command.*;
 import ch.epfl.biop.atlas.aligner.gui.MultiSliceContextMenuClickBehaviour;
@@ -724,8 +720,11 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                 this.setDisplayMode(vs.bdvViewMode);
                 this.sliceDisplayMode = -1;
                 this.setSliceDisplayMode(vs.bdvSliceViewMode);
-                if (vs.overlapFactor!=0) {
-                    this.overlapFactor = vs.overlapFactor;
+                if (vs.overlapFactorX!=0) {
+                    this.overlapFactorX = vs.overlapFactorX;
+                }
+                if (vs.overlapFactorY!=0) {
+                    this.overlapFactorY = vs.overlapFactorY;
                 }
                 this.overlapMode = vs.overlapMode; updateOverlapMode();
                 double[] rowPackedCopy = vs.bdvView;
@@ -896,61 +895,78 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         guiState.forEachSlice(this::updateSliceDisplayedPosition);
     }
 
-    protected void updateSliceDisplayedPosition(SliceGuiState sliceGuiState) {
+    protected synchronized void updateSliceDisplayedPosition(SliceGuiState sliceGuiState) {
         // Sort slices along slicing axis
-        if (overlapMode == 0) {
+        if ((overlapMode == 0)&&(sliceGuiState!=null)) {
             sliceGuiState.setYShift(0);
-        } else if (overlapMode == 1) {
+        } else if ((overlapMode == 1)&&(sliceGuiState!=null)) {
             sliceGuiState.setYShift(1);
         } else if (overlapMode == 2) {
             // N^2 algo! Take care TODO improve
             double lastPositionAlongX = -Double.MAX_VALUE;
-            int stairIndex = 0;
+            double stairIndex = 0;
             List<SliceSources> slices = msp.getSlices();
             int current = iCurrentSlice;
             if ((current>0)&&(current<slices.size())) {
                 for (int i = current;i<slices.size();i++) {
                     SliceSources slice = slices.get(i);
-                    double posX = getDisplayedCenter(slice).getDoublePosition(0);
-                    if (posX >= (lastPositionAlongX + msp.sX/overlapFactor)) {
-                        stairIndex = 0;
-                        lastPositionAlongX = posX;
-                        guiState.runSlice(slice, guiState -> guiState.setYShift(1));
-                    } else {
-                        stairIndex++;
-                        final int finalStairIndex = stairIndex;
-                        guiState.runSlice(slice, guiState -> guiState.setYShift(1 + finalStairIndex));
+                    if (slice!=null) {
+                        RealPoint pt = getDisplayedCenter(slice);
+                        if (pt!=null) {
+                            double posX = pt.getDoublePosition(0);
+                            if (posX >= (lastPositionAlongX + msp.sX / overlapFactorX)) {
+                                stairIndex = 0;
+                                lastPositionAlongX = posX;
+                                guiState.runSlice(slice, guiState -> guiState.setYShift(1));
+                            } else {
+                                stairIndex += overlapFactorY;
+                                final double finalStairIndex = stairIndex;
+                                guiState.runSlice(slice, guiState -> guiState.setYShift(1 + finalStairIndex));
+                            }
+                        }
                     }
                 }
                 lastPositionAlongX = Double.MAX_VALUE;
                 stairIndex = 0;
                 for (int i = current;i>=0;i--) {
                     SliceSources slice = slices.get(i);
-                    double posX = getDisplayedCenter(slice).getDoublePosition(0);
-                    if (posX <= (lastPositionAlongX - msp.sX/overlapFactor)) {
-                        stairIndex = 0;
-                        lastPositionAlongX = posX;
-                        guiState.runSlice(slice, guiState -> guiState.setYShift(1));
-                    } else {
-                        stairIndex++;
-                        final int finalStairIndex = stairIndex;
-                        guiState.runSlice(slice, guiState -> guiState.setYShift(1 + finalStairIndex));
+                    if (slice!=null) {
+                        RealPoint pt = getDisplayedCenter(slice);
+                        if (pt!=null) {
+                            double posX = pt.getDoublePosition(0);
+                            if (posX <= (lastPositionAlongX - msp.sX / overlapFactorX)) {
+                                stairIndex = 0;
+                                lastPositionAlongX = posX;
+                                guiState.runSlice(slice, guiState -> guiState.setYShift(1));
+                            } else {
+                                stairIndex += overlapFactorY;
+                                final double finalStairIndex = stairIndex;
+                                guiState.runSlice(slice, guiState -> guiState.setYShift(1 + finalStairIndex));
+                            }
+                        }
                     }
                 }
             } else {
+                // SOMETHING'S FAILING BELOW!!
                 for (SliceSources slice : slices) {
-                    double posX = getDisplayedCenter(slice).getDoublePosition(0);
-                    if (posX >= (lastPositionAlongX + msp.sX/overlapFactor)) {
-                        stairIndex = 0;
-                        lastPositionAlongX = posX;
-                        guiState.runSlice(slice, guiState -> guiState.setYShift(1));
-                    } else {
-                        stairIndex++;
-                        final int finalStairIndex = stairIndex;
-                        guiState.runSlice(slice, guiState -> guiState.setYShift(1 + finalStairIndex));
+                    if (slice!=null) {
+                        RealPoint rp = getDisplayedCenter(slice);
+                        if (rp!=null) {
+                            double posX = rp.getDoublePosition(0);
+                            if (posX >= (lastPositionAlongX + msp.sX / overlapFactorX)) {
+                                stairIndex = 0;
+                                lastPositionAlongX = posX;
+                                guiState.runSlice(slice, guiState -> guiState.setYShift(1));
+                            } else {
+                                stairIndex += overlapFactorY;
+                                final double finalStairIndex = stairIndex;
+                                guiState.runSlice(slice, guiState -> guiState.setYShift(1 + finalStairIndex));
+                            }
+                        }
                     }
                 }
             }
+
         }
         bdvh.getViewerPanel().requestRepaint();
     }
@@ -1045,14 +1061,15 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         guiState.deleted(slice);
     }
 
+    // Error : sometimes this does not return
     @Override
-    public void sliceZPositionChanged(SliceSources slice) {
+    public void sliceZPositionChanged(SliceSources slice) { // should not be sync : slices lock is already locked
         debug.accept(slice.getName()+ " z position changed");
         guiState.runSlice(slice, guiState -> {
             guiState.slicePositionChanged();
-            updateSliceDisplayedPosition(guiState);
+            updateSliceDisplayedPosition(guiState); // fail!! TODO FIX
         });
-        bdvh.getViewerPanel().requestRepaint();
+        //bdvh.getViewerPanel().requestRepaint();
     }
 
     @Override
@@ -1608,14 +1625,23 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         tableView.sliceDisplaySettingsChanged(slice);
     }
 
-    double overlapFactor = 1.0;
+    double overlapFactorX = 1.0;
+    double overlapFactorY = 1.0;
 
-    public void setOverlapFactor(int value) {
+    public void setOverlapFactorX(int value) {
         double newValue = 0.1 + 3.0 - ((value/100.0) * 3.0);
-        System.out.println("value = "+value);
-        System.out.println("newV = "+newValue);
-        if (newValue!=overlapFactor) {
-            overlapFactor = newValue;
+        if (newValue!=overlapFactorX) {
+            overlapFactorX = newValue;
+            if (overlapMode == 2) {
+                updateOverlapMode();
+            }
+        }
+    }
+
+    public void setOverlapFactorY(int value) {
+        double newValue = 0.1 + 3.0 - ((value/100.0) * 3.0);
+        if (newValue!=overlapFactorY) {
+            overlapFactorY = newValue;
             if (overlapMode == 2) {
                 updateOverlapMode();
             }
@@ -2012,8 +2038,9 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
         //synchronized
         void runSlice(SliceSources slice, Consumer<SliceGuiState> consumer) {
-            if (sliceGuiState.get(slice)!=null) {
-                consumer.accept(sliceGuiState.get(slice));
+            SliceGuiState slice_gui = sliceGuiState.get(slice);
+            if (slice_gui!=null) {
+                consumer.accept(slice_gui);
             } else {
                 logger.debug("Unavailable slice state, cannot perform operation "+consumer+" on slice "+slice);
             }
@@ -2021,8 +2048,9 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
         //synchronized
         double getYShift(SliceSources slice) {
-            if (sliceGuiState.get(slice)!=null) {
-                return sliceGuiState.get(slice).getYShift();
+            SliceGuiState slice_gui = sliceGuiState.get(slice);
+            if (slice_gui!=null) {
+                return slice_gui.getYShift();
             } else {
                 logger.debug("Unavailable slice state, cannot perform operation getYShift on slice "+slice);
                 return 0;
@@ -2031,8 +2059,9 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
         //synchronized
         double getXShift(SliceSources slice) {
-            if (sliceGuiState.get(slice)!=null) {
-                return sliceGuiState.get(slice).getXShift();
+            SliceGuiState slice_gui = sliceGuiState.get(slice);
+            if (slice_gui!=null) {
+                return slice_gui.getXShift();
             } else {
                 logger.debug("Unavailable slice state, cannot perform operation getXShift on slice "+slice);
                 return 0;
@@ -2041,8 +2070,9 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
         //synchronized
         Integer[] getSliceHandleCoords(SliceSources slice) {
-            if (sliceGuiState.get(slice)!=null) {
-                return sliceGuiState.get(slice).getSliceHandleCoords();
+            SliceGuiState slice_gui = sliceGuiState.get(slice);
+            if (slice_gui!=null) {
+                return slice_gui.getSliceHandleCoords();
             } else {
                 logger.debug("Unavailable slice state, cannot perform operation getSliceHandleCoords on slice "+slice);
                 return new Integer[]{0,0,0};
@@ -2051,8 +2081,9 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
         //synchronized
         int getBdvHandleRadius(SliceSources slice) {
-            if (sliceGuiState.get(slice)!=null) {
-                return sliceGuiState.get(slice).getBdvHandleRadius();
+            SliceGuiState slice_gui = sliceGuiState.get(slice);
+            if (slice_gui!=null) {
+                return slice_gui.getBdvHandleRadius();
             } else {
                 logger.debug("Unavailable slice state, cannot perform operation getBdvHandleRadius on slice "+slice);
                 return 10;
@@ -2073,7 +2104,8 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         boolean showInfo;
         int atlasSlicingStep;
         Integer iCurrentSlice;
-        double overlapFactor = 1.0;
+        double overlapFactorX = 1.0;
+        double overlapFactorY = 1.0;
     }
 
 }

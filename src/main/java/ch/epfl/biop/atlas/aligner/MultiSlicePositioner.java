@@ -331,12 +331,12 @@ public class MultiSlicePositioner implements Closeable {
         synchronized (slicesLock) {
             slices.remove(sliceSource);
             sortSlices();
+            listeners.forEach(listener -> {
+                logger.debug("Removing slice "+sliceSource+" - calling "+listener);
+                listener.sliceDeleted(sliceSource);
+            });
+            logger.info("Slice "+sliceSource+" removed!");
         }
-        listeners.forEach(listener -> {
-            logger.debug("Removing slice "+sliceSource+" - calling "+listener);
-            listener.sliceDeleted(sliceSource);
-        });
-        logger.info("Slice "+sliceSource+" removed!");
     }
 
     protected void createSlice(SliceSources slice) {
@@ -344,29 +344,43 @@ public class MultiSlicePositioner implements Closeable {
         synchronized (slicesLock) {
             slices.add(slice);
             sortSlices();
+        //}
+            listeners.forEach(listener -> {
+                logger.debug("Creating slice "+slice+" - calling "+listener);
+                listener.sliceCreated(slice);
+            });
+            logger.info("Slice "+slice+" created!");
+        //synchronized (slicesLock) {
+            sortSlices(); // makes sense, no ?
         }
-        listeners.forEach(listener -> {
-            logger.debug("Creating slice "+slice+" - calling "+listener);
-            listener.sliceCreated(slice);
-        });
-        logger.info("Slice "+slice+" created!");
-        sortSlices(); // makes sense, no ?
     }
 
-    private synchronized void sortSlices() {
-        slices.sort(Comparator.comparingDouble(SliceSources::getSlicingAxisPosition));
+    private void sortSlices() { // should always be called within a synchronized slicesLock block
+        slices.forEach(slice -> slice.setTempSlicingAxisPosition()); // To avoid problems during the sorting
+        slices.sort(Comparator.comparingDouble(SliceSources::getTempSlicingAxisPosition)); // the axis position may change within the loop... -> Error!!
+
         // Sending index info to slices each time this function is called
         for (int i = 0; i < slices.size(); i++) {
             slices.get(i).setIndex(i);
         }
+
+        //DebugView.instance.logger.accept(null, "sort after, re-indexing done");
         logger.debug("Slices sorted recomputed");
     }
 
     public void positionZChanged(SliceSources slice) {
+
         synchronized (slicesLock) {
+            //DebugView.instance.logger.accept(slice, "sort before");
             sortSlices();
-            listeners.forEach(listener -> listener.sliceZPositionChanged(slice));
+            //DebugView.instance.logger.accept(slice, "sort after");
+            for (SliceChangeListener listener:listeners) {
+                //DebugView.instance.logger.accept(slice, "listener start:"+listener);
+                listener.sliceZPositionChanged(slice);
+                //DebugView.instance.logger.accept(slice, "listener end:"+listener);
+            }
         }
+        stateHasBeenChanged();
     }
 
     public void sliceSelected(SliceSources slice) {
@@ -476,7 +490,7 @@ public class MultiSlicePositioner implements Closeable {
     }
 
     protected boolean runCreateSlice(CreateSliceAction createSliceAction) {
-        synchronized (CreateSliceAction.class) { // only one slice addition at a time
+        synchronized (this) { // only one slice addition at a time
             boolean sacAlreadyPresent = false;
             for (SourceAndConverter sac : createSliceAction.getSacs()) {
                 for (SliceSources slice : getSlices()) {
@@ -1037,7 +1051,7 @@ public class MultiSlicePositioner implements Closeable {
         return currentSerializedSlice;
     }
 
-    List<SliceChangeListener> listeners = new ArrayList<>();
+    volatile List<SliceChangeListener> listeners = new ArrayList<>();
 
     public void addSliceListener(SliceChangeListener listener) {
         logger.debug("Adding slice change listener :"+listener+" of class"+listener.getClass().getSimpleName());

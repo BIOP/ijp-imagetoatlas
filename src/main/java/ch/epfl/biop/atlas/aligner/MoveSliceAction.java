@@ -1,9 +1,5 @@
 package ch.epfl.biop.atlas.aligner;
 
-import ch.epfl.biop.atlas.aligner.CancelableAction;
-import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
-import ch.epfl.biop.atlas.aligner.SliceSources;
-
 import java.awt.*;
 import java.text.DecimalFormat;
 
@@ -35,11 +31,7 @@ public class MoveSliceAction extends CancelableAction {
     }
 
     protected boolean run() {
-        //DebugView.instance.logger.accept(sliceSource, " run - 0");
         sliceSource.setSlicingAxisPosition(newSlicingAxisPosition);
-        //DebugView.instance.logger.accept(sliceSource, " run - 1");
-        getMP().stateHasBeenChanged();
-        //DebugView.instance.logger.accept(sliceSource, " run - 2");
         return true;
     }
 
@@ -49,7 +41,6 @@ public class MoveSliceAction extends CancelableAction {
 
     protected boolean cancel() {
         sliceSource.setSlicingAxisPosition(oldSlicingAxisPosition);
-        getMP().stateHasBeenChanged();
         return true;
     }
 

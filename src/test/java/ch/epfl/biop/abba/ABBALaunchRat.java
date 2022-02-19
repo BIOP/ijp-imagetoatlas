@@ -1,12 +1,14 @@
 package ch.epfl.biop.abba;
 
 import bdv.util.BdvHandle;
+import ch.epfl.biop.atlas.aligner.DebugView;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.command.ABBAStartCommand;
 import ch.epfl.biop.atlas.aligner.gui.bdv.BdvMultislicePositionerView;
 import ch.epfl.biop.atlas.mouse.allen.ccfv3.command.AllenBrainAdultMouseAtlasCCF2017Command;
 import ch.epfl.biop.atlas.rat.waxholm.spraguedawley.v4.command.WaxholmSpragueDawleyRatV4Command;
 import ch.epfl.biop.atlas.struct.Atlas;
+import loci.common.DebugTools;
 import net.imagej.ImageJ;
 import net.imagej.patcher.LegacyInjector;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
@@ -18,6 +20,7 @@ public class ABBALaunchRat {
     public static void main(String[] args) throws Exception{
         final ImageJ ij = new ImageJ();
         ij.ui().showUI();
+        DebugTools.enableLogging ("OFF");
 
         Atlas ratAtlas = (Atlas) ij.command().run(WaxholmSpragueDawleyRatV4Command.class, true).get().getOutput("ba");
 
@@ -29,6 +32,9 @@ public class ABBALaunchRat {
         BdvHandle bdvh = SourceAndConverterServices.getBdvDisplayService().getNewBdv();
 
         BdvMultislicePositionerView view = new BdvMultislicePositionerView(mp, bdvh);
+
+        DebugView dv = new DebugView(mp);
+        //DebugView.instance = dv;
 
     }
 }

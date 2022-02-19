@@ -38,8 +38,8 @@ public class KeySliceOnAction extends CancelableAction {
 
     protected boolean cancel() {
         if (sliceSource.isKeySlice()) {
-            getMP().stateHasBeenChanged();
             sliceSource.keySliceOff();
+            getMP().stateHasBeenChanged();
         }
         return true;
     }
