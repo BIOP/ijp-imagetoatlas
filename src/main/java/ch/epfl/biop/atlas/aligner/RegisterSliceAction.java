@@ -81,7 +81,11 @@ public class RegisterSliceAction extends CancelableAction {
     }
 
     public void drawAction(Graphics2D g, double px, double py, double scale) {
+        double size = 7.0*scale;
         if (isValid) {
+            if (scale<0.9) {
+                g.setColor(new Color(128, 128, 128, 200));
+            } else
             switch (slice.getActionState(this)) {
                 case "(done)":
                     g.setColor(new Color(0, 255, 0, 200));
@@ -94,9 +98,9 @@ public class RegisterSliceAction extends CancelableAction {
                     break;
             }
             if (RegistrationPluginHelper.isManual(registration)) {
-                g.fillRect((int) (px - 7), (int) (py - 7), 14, 14);
+                g.fillRect((int) (px - size), (int) (py - size), (int) (2.0*size), (int) (2.0*size));
             } else {
-                g.fillOval((int) (px - 7), (int) (py - 7), 14, 14);
+                g.fillOval((int) (px - size), (int) (py - size), (int) (2.0*size), (int) (2.0*size));
             }
             g.setColor(new Color(255, 255, 255, 200));
             g.drawString("R", (int) px - 4, (int) py + 5);

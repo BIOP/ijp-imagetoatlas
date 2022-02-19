@@ -22,6 +22,9 @@ public class NavigationPanel {
     final JButton changeOverlapMode;
     final JSlider overlapFactorSliderX, overlapFactorSliderY;
 
+    final JButton viewPreviousRegistration;
+    final JButton viewNextRegistration;
+
     public NavigationPanel(BdvMultislicePositionerView view) {
         paneDisplay = new JPanel();
 
@@ -57,6 +60,12 @@ public class NavigationPanel {
         overlapFactorSliderY = new JSlider();
         overlapFactorSliderY.addChangeListener(l -> view.setOverlapFactorY(overlapFactorSliderY.getValue()));
 
+        viewPreviousRegistration = new JButton("View Previous [P]");
+        viewPreviousRegistration.addActionListener(e -> view.viewPreviousRegistration());
+
+        viewNextRegistration = new JButton("View Next [N]");
+        viewNextRegistration.addActionListener(e -> view.viewNextRegistration());
+
         paneDisplay.add(box(false,
                 new JLabel("Modes"),
                 box(true,reviewMode, positioningMode),
@@ -65,7 +74,9 @@ public class NavigationPanel {
                 new JLabel("Overlap (positioning)"),
                 box(false,changeOverlapMode,box(true,new JLabel("Overlap size (X|Y)"), overlapFactorSliderX, overlapFactorSliderY)),
                 new JLabel("Navigate Slice"),
-                box(true, gotoPreviousSlice, centerOnCurrentSlice, gotoNextSlice)));
+                box(true, gotoPreviousSlice, centerOnCurrentSlice, gotoNextSlice),
+                new JLabel("Browse Registrations"),
+                box(true, viewPreviousRegistration, viewNextRegistration)));
 
     }
 

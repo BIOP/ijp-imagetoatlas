@@ -1284,6 +1284,14 @@ public class SliceSources {
         return tempAxisPosition;
     }
 
+    public SourceAndConverter[] getRegisteredSources(int stepBack) {
+        if (stepBack==0) {
+            return getRegisteredSources();
+        } else {
+            return registered_sacs_sequence.get(Math.max(2,registered_sacs_sequence.size() - 1 - stepBack)).sacs;
+        }
+    }
+
     public static class RegistrationAndSources {
 
         final Registration reg;

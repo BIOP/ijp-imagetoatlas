@@ -65,18 +65,19 @@ public class SliceGuiState {
         this.view = view;
         this.bdvh = bdvh;
         this.slice = slice;
-        this.nChannels = slice.getRegisteredSources().length;
+        SourceAndConverter[] iniSources = getRegisteredSourcesAtStep(stepBack);
+        this.nChannels = iniSources.length;
 
         channelVisible = new boolean[nChannels];
         displaysettings = new Displaysettings[nChannels];
-        ini_sources = slice.getRegisteredSources();
+        ini_sources = iniSources;
 
         this.addDisplayFilters(iChannel -> channelVisible[iChannel]);
         this.addDisplayFilters(iChannel -> sliceVisible);
 
         slicePositioner = new AffineTransformedSourceWrapperRegistration();
-        sources_displayed = slicePositioner.getTransformedImageMovingToFixed(slice.getRegisteredSources());
-        SourceAndConverterHelper.transferColorConverters(slice.getRegisteredSources(), sources_displayed);
+        sources_displayed = slicePositioner.getTransformedImageMovingToFixed(iniSources);
+        SourceAndConverterHelper.transferColorConverters(iniSources, sources_displayed);
 
         for (int i=0; i<nChannels; i++) {
             Displaysettings ds = new Displaysettings(-1);
@@ -223,13 +224,33 @@ public class SliceGuiState {
         hide();
     }
 
+    int stepBack = 0;
+
+    public void setRegistrationStepBack(int stepBack) {
+        if (stepBack<0) stepBack = 0;
+        if (this.stepBack!=stepBack) {
+            this.stepBack = stepBack;
+            sourcesChanged();
+        }
+    }
+
+    public int getRegistrationStepBack() {
+        return stepBack;
+    }
+
+    private SourceAndConverter[] getRegisteredSourcesAtStep(int stepBack) {
+        //slice.getNumberOfRegistrations()-stepBack
+        return slice.getRegisteredSources(stepBack);
+    }
+
     public void sourcesChanged() {
         hide();
+        SourceAndConverter[] displayedSources = getRegisteredSourcesAtStep(stepBack);
         for (int idx = 0; idx<nChannels; idx++) {
             Displaysettings.applyDisplaysettings(ini_sources[idx], displaysettings[idx]);
-            Displaysettings.applyDisplaysettings(slice.getRegisteredSources()[idx], displaysettings[idx]);
+            Displaysettings.applyDisplaysettings(displayedSources[idx], displaysettings[idx]);
         }
-        sources_displayed = slicePositioner.getTransformedImageMovingToFixed(slice.getRegisteredSources());
+        sources_displayed = slicePositioner.getTransformedImageMovingToFixed(displayedSources);
         show();
     }
 
@@ -339,11 +360,11 @@ public class SliceGuiState {
     }
 
     public void sliceDisplayChanged() {
-        // TODO : improve by not doing anything is the slices displayed are not changed
+        // TODO : improve by not doing anything if the slices displayed are not changed
         hide();
         for (int idx = 0; idx<nChannels; idx++) {
             Displaysettings.applyDisplaysettings(ini_sources[idx], displaysettings[idx]);
-            Displaysettings.applyDisplaysettings(slice.getRegisteredSources()[idx], displaysettings[idx]);
+            Displaysettings.applyDisplaysettings(getRegisteredSourcesAtStep(stepBack)[idx], displaysettings[idx]);
         }
         show();
     }

@@ -196,8 +196,29 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
         common_behaviours.behaviour((ClickBehaviour) (x, y) -> this.printBindings(), "print_bindings", "K");
 
+        common_behaviours.behaviour((ClickBehaviour) (x, y) -> viewPreviousRegistration(), "viewPreviousRegistration", "P");
+        common_behaviours.behaviour((ClickBehaviour) (x, y) -> viewNextRegistration(), "viewNextRegistration", "N");
+
         bdvh.getTriggerbindings().addBehaviourMap(COMMON_BEHAVIOURS_KEY, common_behaviours.getBehaviourMap());
         bdvh.getTriggerbindings().addInputTriggerMap(COMMON_BEHAVIOURS_KEY, common_behaviours.getInputTriggerMap()); // "transform", "bdv"
+    }
+
+    int registrationStepBack = 0;
+
+    public void viewPreviousRegistration() {
+        // So : how many registrations max ?
+        int maxNRegistrations = msp.getSlices().stream().mapToInt(SliceSources::getNumberOfRegistrations).max().getAsInt();
+        if (registrationStepBack<maxNRegistrations) {
+            registrationStepBack++;
+            guiState.forEachSlice(guiState -> guiState.setRegistrationStepBack(registrationStepBack));
+        }
+    }
+
+    public void viewNextRegistration() {
+        if (registrationStepBack>0) {
+            registrationStepBack--;
+            guiState.forEachSlice(guiState -> guiState.setRegistrationStepBack(registrationStepBack));
+        }
     }
 
     private void installPositioningBehaviours() {
@@ -1674,11 +1695,36 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                 Integer[] pos = sliceGuiState.getSliceHandleCoords();
                 if (actions!=null) {
                     int iPos = 0;
+                    int totalNumberOfRegistration = 0;
+                    for (int idx = 0; idx<actions.size(); idx ++) {
+                        CancelableAction action = actions.get(idx);
+                        if (!action.isHidden()) {
+                            if (action instanceof RegisterSliceAction) {
+                                if (action.getSliceSources().getActionState(action).equals("(done)"))
+                                totalNumberOfRegistration++;
+                            }
+                        }
+                    }
+                    int countNumberOfRegistration = 0;
                     for (int idx = 0; idx<actions.size(); idx ++) {
                         CancelableAction action = actions.get(idx);
                         if (!action.isHidden()) {
                             iPos++;
-                            action.drawAction(g, pos[0], pos[1]+ iPos*10, 1.0);
+                            if (action instanceof RegisterSliceAction) {
+                                // Is it viewed or not ? How to know this
+                                countNumberOfRegistration++;
+                                if (totalNumberOfRegistration-registrationStepBack<countNumberOfRegistration) {
+                                    if (action.getSliceSources().getActionState(action).equals("(done)")) {
+                                        action.drawAction(g, pos[0], pos[1] + iPos * 10, 0.85);
+                                    } else {
+                                        action.drawAction(g, pos[0], pos[1] + iPos * 10, 1.2);
+                                    }
+                                } else {
+                                    action.drawAction(g, pos[0], pos[1] + iPos * 10, 1.2);
+                                }
+                            } else {
+                                action.drawAction(g, pos[0], pos[1] + iPos * 10, 1.0);
+                            }
                         }
                     }
                 }
@@ -1784,7 +1830,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         if (node!=null) {
             ontologyLocation = new StringBuilder(node.toString());
             while (node.parent()!=null) {
-                node = (AtlasNode) node.parent();
+                node = node.parent();
                 if (node!=null) {
                     ontologyLocation.append("<").append(node.toString());
                 }
@@ -1915,7 +1961,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             String name = slice.getName();
             int yOffset = 20;
             if (mode==REVIEW_MODE_INT) yOffset = 130;
-            if (slice.isKeySlice()) name += "[Key]";
+            if (slice.isKeySlice()) name += " [Key]";
             DecimalFormat df = new DecimalFormat("00.000");
             g.drawString("Z: "+df.format(slice.getSlicingAxisPosition())+" mm", 15, yOffset+20);
             g.drawString(name, 15, yOffset);
