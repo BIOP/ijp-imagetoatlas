@@ -895,7 +895,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         guiState.forEachSlice(this::updateSliceDisplayedPosition);
     }
 
-    protected synchronized void updateSliceDisplayedPosition(SliceGuiState sliceGuiState) {
+    protected void updateSliceDisplayedPosition(SliceGuiState sliceGuiState) {
         // Sort slices along slicing axis
         if ((overlapMode == 0)&&(sliceGuiState!=null)) {
             sliceGuiState.setYShift(0);
@@ -906,67 +906,68 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             double lastPositionAlongX = -Double.MAX_VALUE;
             double stairIndex = 0;
             List<SliceSources> slices = msp.getSlices();
-            int current = iCurrentSlice;
-            if ((current>0)&&(current<slices.size())) {
-                for (int i = current;i<slices.size();i++) {
-                    SliceSources slice = slices.get(i);
-                    if (slice!=null) {
-                        RealPoint pt = getDisplayedCenter(slice);
-                        if (pt!=null) {
-                            double posX = pt.getDoublePosition(0);
-                            if (posX >= (lastPositionAlongX + msp.sX / overlapFactorX)) {
-                                stairIndex = 0;
-                                lastPositionAlongX = posX;
-                                guiState.runSlice(slice, guiState -> guiState.setYShift(1));
-                            } else {
-                                stairIndex += overlapFactorY;
-                                final double finalStairIndex = stairIndex;
-                                guiState.runSlice(slice, guiState -> guiState.setYShift(1 + finalStairIndex));
+            synchronized (this) { // synchronize after getting the slices to avoid deadlock
+                int current = iCurrentSlice;
+                if ((current > 0) && (current < slices.size())) {
+                    for (int i = current; i < slices.size(); i++) {
+                        SliceSources slice = slices.get(i);
+                        if (slice != null) {
+                            RealPoint pt = getDisplayedCenter(slice);
+                            if (pt != null) {
+                                double posX = pt.getDoublePosition(0);
+                                if (posX >= (lastPositionAlongX + msp.sX / overlapFactorX)) {
+                                    stairIndex = 0;
+                                    lastPositionAlongX = posX;
+                                    guiState.runSlice(slice, guiState -> guiState.setYShift(1));
+                                } else {
+                                    stairIndex += overlapFactorY;
+                                    final double finalStairIndex = stairIndex;
+                                    guiState.runSlice(slice, guiState -> guiState.setYShift(1 + finalStairIndex));
+                                }
                             }
                         }
                     }
-                }
-                lastPositionAlongX = Double.MAX_VALUE;
-                stairIndex = 0;
-                for (int i = current;i>=0;i--) {
-                    SliceSources slice = slices.get(i);
-                    if (slice!=null) {
-                        RealPoint pt = getDisplayedCenter(slice);
-                        if (pt!=null) {
-                            double posX = pt.getDoublePosition(0);
-                            if (posX <= (lastPositionAlongX - msp.sX / overlapFactorX)) {
-                                stairIndex = 0;
-                                lastPositionAlongX = posX;
-                                guiState.runSlice(slice, guiState -> guiState.setYShift(1));
-                            } else {
-                                stairIndex += overlapFactorY;
-                                final double finalStairIndex = stairIndex;
-                                guiState.runSlice(slice, guiState -> guiState.setYShift(1 + finalStairIndex));
+                    lastPositionAlongX = Double.MAX_VALUE;
+                    stairIndex = 0;
+                    for (int i = current; i >= 0; i--) {
+                        SliceSources slice = slices.get(i);
+                        if (slice != null) {
+                            RealPoint pt = getDisplayedCenter(slice);
+                            if (pt != null) {
+                                double posX = pt.getDoublePosition(0);
+                                if (posX <= (lastPositionAlongX - msp.sX / overlapFactorX)) {
+                                    stairIndex = 0;
+                                    lastPositionAlongX = posX;
+                                    guiState.runSlice(slice, guiState -> guiState.setYShift(1));
+                                } else {
+                                    stairIndex += overlapFactorY;
+                                    final double finalStairIndex = stairIndex;
+                                    guiState.runSlice(slice, guiState -> guiState.setYShift(1 + finalStairIndex));
+                                }
                             }
                         }
                     }
-                }
-            } else {
-                // SOMETHING'S FAILING BELOW!!
-                for (SliceSources slice : slices) {
-                    if (slice!=null) {
-                        RealPoint rp = getDisplayedCenter(slice);
-                        if (rp!=null) {
-                            double posX = rp.getDoublePosition(0);
-                            if (posX >= (lastPositionAlongX + msp.sX / overlapFactorX)) {
-                                stairIndex = 0;
-                                lastPositionAlongX = posX;
-                                guiState.runSlice(slice, guiState -> guiState.setYShift(1));
-                            } else {
-                                stairIndex += overlapFactorY;
-                                final double finalStairIndex = stairIndex;
-                                guiState.runSlice(slice, guiState -> guiState.setYShift(1 + finalStairIndex));
+                } else {
+                    // SOMETHING'S FAILING BELOW!!
+                    for (SliceSources slice : slices) {
+                        if (slice != null) {
+                            RealPoint rp = getDisplayedCenter(slice);
+                            if (rp != null) {
+                                double posX = rp.getDoublePosition(0);
+                                if (posX >= (lastPositionAlongX + msp.sX / overlapFactorX)) {
+                                    stairIndex = 0;
+                                    lastPositionAlongX = posX;
+                                    guiState.runSlice(slice, guiState -> guiState.setYShift(1));
+                                } else {
+                                    stairIndex += overlapFactorY;
+                                    final double finalStairIndex = stairIndex;
+                                    guiState.runSlice(slice, guiState -> guiState.setYShift(1 + finalStairIndex));
+                                }
                             }
                         }
                     }
                 }
             }
-
         }
         bdvh.getViewerPanel().requestRepaint();
     }
