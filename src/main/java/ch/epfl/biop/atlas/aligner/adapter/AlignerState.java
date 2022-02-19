@@ -53,7 +53,7 @@ public class AlignerState {
     For instance a series of attempted registration then deleted will not be saved.
      */
 
-    static List<CancelableAction> filterSerializedActions(List<CancelableAction> ini_actions) {
+    static public List<CancelableAction> filterSerializedActions(List<CancelableAction> ini_actions) {
         Set<Class<? extends CancelableAction>> serializableActions = new HashSet<>();
         serializableActions.add(CreateSliceAction.class);
         serializableActions.add(MoveSliceAction.class);

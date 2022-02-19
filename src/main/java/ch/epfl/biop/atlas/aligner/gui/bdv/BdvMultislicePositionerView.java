@@ -6,6 +6,7 @@ import bdv.viewer.SourceAndConverter;
 import bdv.viewer.ViewerPanel;
 import ch.epfl.biop.ResourcesMonitor;
 import ch.epfl.biop.atlas.aligner.*;
+import ch.epfl.biop.atlas.aligner.adapter.AlignerState;
 import ch.epfl.biop.atlas.aligner.gui.bdv.card.*;
 import ch.epfl.biop.atlas.aligner.command.*;
 import ch.epfl.biop.atlas.aligner.gui.MultiSliceContextMenuClickBehaviour;
@@ -65,6 +66,7 @@ import java.util.*;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -1907,8 +1909,27 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             }
             Integer[] c = {255,255,255,128};
             g.setColor(new Color(c[0], c[1], c[2], c[3]));
-            g.setFont(new Font("TimesRoman", Font.PLAIN, 16));
+            g.setFont(new Font("TimesRoman", Font.BOLD, 18));
             g.drawString("\u25C4 \u25BA", (int) (sliceCenter.getDoublePosition(0) - 15), (int) (sliceCenter.getDoublePosition(1) - 20));
+
+            String name = slice.getName();
+            int yOffset = 20;
+            if (mode==REVIEW_MODE_INT) yOffset = 130;
+            if (slice.isKeySlice()) name += "[Key]";
+            DecimalFormat df = new DecimalFormat("00.000");
+            g.drawString("Z: "+df.format(slice.getSlicingAxisPosition())+" mm", 15, yOffset+20);
+            g.drawString(name, 15, yOffset);
+            List<CancelableAction> actions = new ArrayList<>(msp.getActionsFromSlice(slice)); // Copy useful ?
+            actions = AlignerState.filterSerializedActions(actions); // To get rid of useless actions for the user
+            g.setFont(new Font("TimesRoman", Font.PLAIN, 16));
+            int index = 0;
+            for (CancelableAction action : actions) {
+                if ((!(action instanceof MoveSliceAction))&&(!(action instanceof CreateSliceAction))) {
+                    g.drawString(action.toString(), 15, yOffset + 5 + (index + 2) * 15); // -30 because of Bdv message
+                    index++;
+                }
+            }
+
         }
     }
 
