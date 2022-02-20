@@ -942,11 +942,11 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                                 if (posX >= (lastPositionAlongX + msp.sX / overlapFactorX)) {
                                     stairIndex = 0;
                                     lastPositionAlongX = posX;
-                                    guiState.runSlice(slice, guiState -> guiState.setYShift(1));
+                                    guiState.runSlice(slice, guiState -> guiState.setYShift(0.5+overlapFactorY));
                                 } else {
                                     stairIndex += overlapFactorY;
                                     final double finalStairIndex = stairIndex;
-                                    guiState.runSlice(slice, guiState -> guiState.setYShift(1 + finalStairIndex));
+                                    guiState.runSlice(slice, guiState -> guiState.setYShift(0.5+overlapFactorY + finalStairIndex));
                                 }
                             }
                         }
@@ -962,11 +962,11 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                                 if (posX <= (lastPositionAlongX - msp.sX / overlapFactorX)) {
                                     stairIndex = 0;
                                     lastPositionAlongX = posX;
-                                    guiState.runSlice(slice, guiState -> guiState.setYShift(1));
+                                    guiState.runSlice(slice, guiState -> guiState.setYShift(0.5+overlapFactorY));
                                 } else {
                                     stairIndex += overlapFactorY;
                                     final double finalStairIndex = stairIndex;
-                                    guiState.runSlice(slice, guiState -> guiState.setYShift(1 + finalStairIndex));
+                                    guiState.runSlice(slice, guiState -> guiState.setYShift(0.5+overlapFactorY + finalStairIndex));
                                 }
                             }
                         }
@@ -981,11 +981,11 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                                 if (posX >= (lastPositionAlongX + msp.sX / overlapFactorX)) {
                                     stairIndex = 0;
                                     lastPositionAlongX = posX;
-                                    guiState.runSlice(slice, guiState -> guiState.setYShift(1));
+                                    guiState.runSlice(slice, guiState -> guiState.setYShift(0.5+overlapFactorY));
                                 } else {
                                     stairIndex += overlapFactorY;
                                     final double finalStairIndex = stairIndex;
-                                    guiState.runSlice(slice, guiState -> guiState.setYShift(1 + finalStairIndex));
+                                    guiState.runSlice(slice, guiState -> guiState.setYShift(0.5+overlapFactorY + finalStairIndex));
                                 }
                             }
                         }
