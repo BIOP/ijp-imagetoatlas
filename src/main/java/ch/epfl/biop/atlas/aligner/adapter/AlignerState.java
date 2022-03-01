@@ -65,6 +65,7 @@ public class AlignerState {
         skipableActions.add(ExportSliceRegionsToFileAction.class);
         skipableActions.add(ExportSliceRegionsToQuPathProjectAction.class);
         skipableActions.add(ExportSliceRegionsToRoiManagerAction.class);
+        skipableActions.add(EditLastRegistrationAction.class); //TODO : make it serializable ? serializable or not ?
 
         if ((ini_actions == null)||(ini_actions.size()==0)) {
             logger.error("Wrong number of actions to be serialized");
