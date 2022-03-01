@@ -42,7 +42,7 @@ public class QuickNiiToABBA {
 
         JAXBContext context = JAXBContext.newInstance(QuickNIISeries.class);
         QuickNIISeries series = (QuickNIISeries) context.createUnmarshaller()
-                .unmarshal(new FileReader(path+"quickniiresults.xml"));
+                .unmarshal(new FileReader(path+"results2022-03-01.xml"));
 
         File[] files = Arrays.stream(series.slices)
                 .map(slice -> new File(path, slice.filename))

@@ -15,10 +15,10 @@ import javax.xml.bind.annotation.XmlType;
 public class QuickNIISeries {
 
     @XmlAttribute
-    public int first;
+    public String first;
 
     @XmlAttribute
-    public int last;
+    public String last;
 
     @XmlAttribute
     public String name;
