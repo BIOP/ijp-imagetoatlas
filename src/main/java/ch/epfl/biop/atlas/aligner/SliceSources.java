@@ -1010,6 +1010,7 @@ public class SliceSources {
                     if (mp.getAtlas() instanceof AllenBrainAdultMouseAtlasCCF2017Command) {
                         // Save it the old fashioned way
                         f = new File(dataEntryFolder, "ABBA-RoiSet.zip");
+                        Files.delete(Paths.get(f.getAbsolutePath()));
                         Files.copy(Paths.get(ijroisfile.f.getAbsolutePath()),Paths.get(f.getAbsolutePath()));
                     }
                     //----------------- LEGACY
