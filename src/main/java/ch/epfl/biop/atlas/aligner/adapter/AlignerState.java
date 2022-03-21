@@ -67,15 +67,15 @@ public class AlignerState {
         skipableActions.add(ExportSliceRegionsToRoiManagerAction.class);
         skipableActions.add(EditLastRegistrationAction.class); //TODO : make it serializable ? serializable or not ?
 
+        List<CancelableAction> compiledActions = new ArrayList<>();
         if ((ini_actions == null)||(ini_actions.size()==0)) {
             logger.error("Wrong number of actions to be serialized");
-            return null;
+            return compiledActions;
         }
         if (!(ini_actions.get(0) instanceof CreateSliceAction)) {
             logger.error("Error : the first action is not a CreateSlice action");
-            return null;
+            return compiledActions;
         }
-        List<CancelableAction> compiledActions = new ArrayList<>();
         int idxCompiledActions = 0;
         int idxIniActions = 0;
         while (ini_actions.size()>idxIniActions) {

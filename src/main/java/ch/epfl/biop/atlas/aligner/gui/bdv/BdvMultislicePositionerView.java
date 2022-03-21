@@ -724,9 +724,19 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     public void loadState() {
 
         try {
+
+            if ((msp.getSlices()!=null)&&(msp.getSlices().size()>0)) {
+                JFrame frame = BdvHandleHelper.getJFrame(bdvh);
+                int confirmed = JOptionPane.showConfirmDialog(frame,
+                        "It is advised to close and reopen ABBA because slices are already present. Proceed anyway ?", "Other slices present!",
+                        JOptionPane.YES_NO_OPTION);
+                if (confirmed == JOptionPane.NO_OPTION) {
+                    return;
+                }
+            }
+
             CommandModule cm = msp.getContext().getService(CommandService.class)
                     .run(ABBAStateLoadCommand.class, true,"mp", msp).get();
-
 
             msp.waitForTasks();
 
@@ -1971,7 +1981,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             g.setFont(new Font("TimesRoman", Font.PLAIN, 16));
             int index = 0;
             for (CancelableAction action : actions) {
-                if ((!(action instanceof MoveSliceAction))&&(!(action instanceof CreateSliceAction))) {
+                if ((!(action instanceof MoveSliceAction)) && (!(action instanceof CreateSliceAction))) {
                     g.drawString(action.toString(), 15, yOffset + 5 + (index + 2) * 15); // -30 because of Bdv message
                     index++;
                 }
