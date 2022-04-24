@@ -75,7 +75,7 @@ public class ExportSlicesOriginalDataToImageJCommand implements Command {
 
                 List<SourceAndConverter> sliceSources = Arrays.asList(preprocess.apply(slice.getOriginalSources()));
                 CZTRange range = ImagePlusGetter.fromSources(sliceSources, 0, resolution_level);
-                images[index] = ImagePlusGetter.getImagePlus(sliceSources.get(0).getSpimSource().getName(), sliceSources, resolution_level, range, verbose, false, false, false);
+                images[index] = ImagePlusGetter.getImagePlus(sliceSources.get(0).getSpimSource().getName(), sliceSources, resolution_level, range, verbose, false, false, null);
                 images[index].show();
                 index++;
             }
