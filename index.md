@@ -31,7 +31,7 @@ One animal, 87 serial sections, 2 fluorescent channels (nuclei and autofluoresce
 * [Sample sections  (Zenodo repository, 21 Gb) ](https://doi.org/10.5281/zenodo.4715656) - each section has to be downloaded individually (multiresolution ome.tiff file)
 * [Downsampled sections  (GDrive, 0.4 Gb) ](https://drive.google.com/file/d/1OVb860hy-UZSSXa_u9drWiPKEunWT_a7/view?usp=sharing)
 
-## [Worshop slides](https://docs.google.com/presentation/d/1c5yG-5Rhz5WlR4Hf9TNVkjqb6yD6oukza8P6vHGVZMw)
+## [Workshop slides](https://docs.google.com/presentation/d/1c5yG-5Rhz5WlR4Hf9TNVkjqb6yD6oukza8P6vHGVZMw)
 ## [Installation](installation.md)
 ## [Using ABBA](usage.md)
 ## [Developer documentation (In progress...)]()
