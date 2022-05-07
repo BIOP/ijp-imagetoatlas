@@ -14,18 +14,18 @@ import ch.epfl.biop.sourceandconverter.processor.SourcesProcessorHelper;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.plugin.Concatenator;
+import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
 import org.scijava.ItemIO;
 import org.scijava.ItemVisibility;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
+import sc.fiji.bdvpg.scijava.command.bdv.BdvSourcesShowCommand;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceAffineTransformer;
+import spimdata.imageplus.ImagePlusHelper;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -47,12 +47,6 @@ public class ExportResampledSlicesToBDVSourceCommand implements Command {
     @Parameter
     boolean interpolate;
 
-    @Parameter(label="Match atlas resolution (parameters below ignored)")
-    boolean matchAtlasResolution;
-
-    @Parameter(visibility = ItemVisibility.MESSAGE)
-    String message = "Matching the atlas axis can vastly affect performance! The 'Z' axis is in the atlas coordinates 'X' for the allen brain atlas";
-
     @Parameter(label="Pixel Size in micron (X)")
     double px_size_micron_x = 20;
 
@@ -62,6 +56,9 @@ public class ExportResampledSlicesToBDVSourceCommand implements Command {
     @Parameter(label="Pixel Size in micron (Z)")
     double px_size_micron_z = 20;
 
+    @Parameter(label="Margin in Z in micron")
+    double margin_z = 0;
+
     @Parameter(label="X downsampling")
     int downsample_x = 2;
 
@@ -69,16 +66,16 @@ public class ExportResampledSlicesToBDVSourceCommand implements Command {
     int downsample_y = 2;
 
     @Parameter(label="Z downsampling")
-    int downsample_z = 2;
+    int downsample_z = 1;
 
     @Parameter(label="Block Size X")
-    int block_size_x = 1;
+    int block_size_x = 64;
 
     @Parameter(label="Block Size Y")
     int block_size_y = 64;
 
     @Parameter(label="Block Size Z")
-    int block_size_z = 64;
+    int block_size_z = 4;
 
     @Parameter(label="Number of threads")
     int n_threads = 6;
@@ -125,33 +122,75 @@ public class ExportResampledSlicesToBDVSourceCommand implements Command {
         fusedImages = new SourceAndConverter[nChannels];
 
         SourceAndConverter model;
-        if (matchAtlasResolution) {
-            model = mp.getAtlas().getMap().getLabelImage();
-        } else {
-            AffineTransform3D atlasLocation = new AffineTransform3D();
-            Source atlasLabel = mp.getAtlas().getMap().getLabelImage().getSpimSource();
-            atlasLabel.getSourceTransform(0, 0, atlasLocation);
-            long[] dims = new long[3];
-            atlasLabel.getSource(0, 0).dimensions(dims);
 
-            double pixSizeAtlas = mp.getAtlas().getMap().getAtlasPrecisionInMillimeter() * 1000.0;
+        double[] roi = mp.getROI();
+        double sizeX = roi[2];
+        double sizeY = roi[3];
 
-            long nx = (long) (((double) dims[0]) * pixSizeAtlas / px_size_micron_x);
-            long ny = (long) (((double) dims[1]) * pixSizeAtlas / px_size_micron_y);
-            long nz = (long) (((double) dims[2]) * pixSizeAtlas / px_size_micron_z);
+        SliceSources frontSlice = slicesToExport.get(0);
+        double minZ = frontSlice.getSlicingAxisPosition()-frontSlice.getThicknessInMm()/2.0-margin_z*0.001;
+        SliceSources backSlice = slicesToExport.get(slicesToExport.size()-1);
+        double maxZ = backSlice.getSlicingAxisPosition()+backSlice.getThicknessInMm()/2.0+margin_z*0.001;
+        double sizeZ = maxZ-minZ;
 
-            double sgnX = Math.signum(atlasLocation.get(0, 0));
-            double sgnY = Math.signum(atlasLocation.get(1, 1));
-            double sgnZ = Math.signum(atlasLocation.get(2, 2));
-            atlasLocation.set(sgnX * px_size_micron_x / 1000.0, 0, 0);
-            atlasLocation.set(sgnY * px_size_micron_y / 1000.0, 1, 1);
-            atlasLocation.set(sgnZ * px_size_micron_z / 1000.0, 2, 2);
+        AffineTransform3D coord = new AffineTransform3D();
+        coord.scale(px_size_micron_x/1000.0, px_size_micron_y/1000.0, px_size_micron_z/1000.0);
+        coord.translate(roi[0], roi[1], minZ);
 
-            if (resolution_levels<=0) resolution_levels = 1;
+        coord.preConcatenate(mp.getAffineTransformFormAlignerToAtlas());
 
-            model = new EmptyMultiResolutionSourceAndConverterCreator("Model",
-                    atlasLocation, nx, ny, nz, 1, downsample_x, downsample_y, downsample_z, resolution_levels).get();
+        // Now makes the matrix orthonormal
+        double[] m = coord.getRowPackedCopy();
+        double[] voxelSizes = new double[3];
+
+        for(int d = 0; d < 3; ++d) {
+            voxelSizes[d] = Math.sqrt(m[d] * m[d] + m[d + 4] * m[d + 4] + m[d + 8] * m[d + 8]);
         }
+
+        for(int d = 0; d < 3; ++d) {
+            double c0 = m[d];
+            double c1 = m[d+4];
+            double c2 = m[d+8];
+
+            if (Math.abs(c0)>Math.abs(c1)) {
+                // c0 > c1
+                if (Math.abs(c0)>Math.abs(c2)) {
+                    // c0 > c2
+                    // c0 max
+                    m[d] = voxelSizes[d]*Math.signum(m[d]);
+                    m[d+4] = 0;
+                    m[d+8] = 0;
+                } else {
+                    // c2 > c0 > c1
+                    // c2 max
+                    m[d] = 0;
+                    m[d+4] = 0;
+                    m[d+8] = voxelSizes[d]*Math.signum(m[d+8]);
+                }
+            } else {
+                // c1 > c0
+                if (Math.abs(c1)>Math.abs(c2)) {
+                    // c1 > c2
+                    // c1 max
+                    m[d] = 0;
+                    m[d+4] = voxelSizes[d]*Math.signum(m[d+4]);
+                    m[d+8] = 0;
+                } else {
+                    // c2 > c1 > c0
+                    // c2 max
+                    m[d] = 0;
+                    m[d+4] = 0;
+                    m[d+8] = voxelSizes[d]*Math.signum(m[d+8]);
+                }
+            }
+        }
+
+        coord.set(m);
+
+        model = new EmptyMultiResolutionSourceAndConverterCreator("Model",
+                coord, (long)(sizeX/(px_size_micron_x/1000.0)),
+                (long)(sizeY/(px_size_micron_y/1000.0)),
+                (long)(sizeZ/(px_size_micron_z/1000.0)), 1, downsample_x, downsample_y, downsample_z, resolution_levels).get();
 
         for (int iCh = 0; iCh<nChannels; iCh++) {
             final int iChannel = iCh;
@@ -168,7 +207,6 @@ public class ExportResampledSlicesToBDVSourceCommand implements Command {
                     model,
                     image_name+"_ch"+iChannel,
                     true,true,interpolate,0,block_size_x,block_size_y,block_size_z,n_threads).get();
-
         }
 
     }

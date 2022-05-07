@@ -345,6 +345,10 @@ public class SliceSources {
         updateZPosition();
     }
 
+    public double getThicknessInMm() {
+        return thicknessInMm;
+    }
+
     double thicknessInMm;
 
     private void computeZThickness() {
