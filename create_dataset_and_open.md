@@ -10,12 +10,15 @@ For a quick setup with the demo dataset:
 * create a project by dragging and dropping an empty folder into QuPath
 * drag and drop your images to import them into a QuPath project
 * select `Bio-Formats builder` and then click Import
+* MAKE SURE to UNCHECK `Auto-generate pyramids`
 
 ![creating a project with slices in QuPath](assets/gif/qupath_create_project.gif)
 
 ---
 
-:warning: All files need to be properly calibrated (microns, millimeters, etc, but not pixels!). Check on the image tab of QuPath that you have a proper physical unit specified for your images, and not pixels!
+:warning: All files need to be properly calibrated (microns, millimeters, etc, but not pixels!). Check on the image tab of QuPath that you have a proper physical unit specified for your images, and not pixels! If that's not the case, you should specify the correct pixel size NOW! (= BEFORE importing the project into Fiji's ABBA plugin). Otherwise, the images will look gigantic because 1 pixel is assumed to be 1 millimeter...
+
+Also please make sure to read the message about [pyramidal file formats requirements](usage.md#supported-file-formats).
 
 ![img.png](assets/img/qupath_image_calibration.png)
 
@@ -31,9 +34,9 @@ You are done for now on the QuPath side. You can let QuPath open while performin
 
 ### Getting started with ABBA
 
-Mac users : you will probably need a mouse.
+Note : you will probably need a mouse, since navigating with a trackpad can be very frustrating.
 
-In Fiji, start the ABBA plugin (type `ABBA` in Fiji's search bar or go to ` Plugins › BIOP › Atlas › ABBA`). You will then need to chose between 3 ways of slicing the atlas : coronal, sagittal, or horizontal. The documentation is made in the coronal sectioning orientation because it is probably the most frequent orientation, but ABBA works the same way in all orientations.
+In Fiji, start the ABBA plugin (type `ABBA` in Fiji's search bar or go to ` Plugins › BIOP › Atlas › ABBA - ABBA Start`). You will then need to chose the atlas (the whole documentation is made with the Allen adult mouse brain atlas) and between 3 ways of slicing the atlas : coronal, sagittal, or horizontal. The documentation is made in the coronal sectioning orientation because it is probably the most frequent orientation, but ABBA works the same way in all orientations.
 
 #### ABBA Navigation
 ABBA uses [Fiji's BigDataViewer](https://imagej.github.io/plugins/bdv/index) in order to display multiresolution images in a responsive manner, this comes with a totally different way of visualizing your data than from the standard ImageJ. So let's first go through some basic navigation commands in ABBA:
@@ -48,9 +51,9 @@ Try to get familiar with these commands in order to go quickly from one end of t
 #### Allen Brain Atlas display options
 
 The image you see when you start ABBA is the Allen Brain Atlas dataset, sliced regularly along Z. This data consists of a 3 channel image:
-* `Nissl (Channel 0)`
-* `Auto Fluorescence (Channel 1)`
-* `Label Borders (Channel 2)` 
+* `Nissl (Ch. 0)`
+* `Ara (Ch. 1)`
+* `Label Borders (Ch. 2)` 
   
 You can activate or deactivate each of these channels with checkboxes and emphasize more or less their display with sliders.
 
@@ -66,7 +69,7 @@ Select your project file, the initial position of the first slice, and the appro
 
 ![Set initial positions of the slices in the atlas](assets/img/fiji_set_ini_position.png)
 
-A second window shows up which specifies some advanced opening parameters. The default values (shown below) will work in most cases. By default, all units will be converted to millimeters, which is the default unit for ABBA.
+A second window shows up which specifies some advanced opening parameters. The default values (shown below) will work in most cases.
 
 ![Advanced import options](assets/img/fiji_advanced_import_options.png)
 
