@@ -41,7 +41,7 @@ shell-init: error retrieving current directory: getcwd: cannot access parent dir
 /bin/bash: ./full_install_abba.sh: Operation not permitted,
 ```
 
-Then follow the operation explained in https://osxdaily.com/2018/10/09/fix-operation-not-permitted-terminal-error-macos/ and restart the script.
+Then follow the operation explained in [https://osxdaily.com/2018/10/09/fix-operation-not-permitted-terminal-error-macos/](https://osxdaily.com/2018/10/09/fix-operation-not-permitted-terminal-error-macos/) and restart the script.
 
 ### For Linux
 
@@ -59,7 +59,7 @@ The installation consists of four steps detailed in the paragraphs below:
 
 ### 1.  Install QuPath extensions
 
-Install [QuPath version 0.3+](https://github.com/qupath/qupath/releases/tag/v0.3.0).
+Install [QuPath version 0.3+](https://qupath.github.io/).
 
 Install the [QuPath Warpy extension](https://github.com/BIOP/qupath-extension-warpy) (and its dependencies):
 * Go to the [latest release](https://github.com/BIOP/qupath-extension-warpy/releases)
@@ -149,3 +149,5 @@ The allen brain atlas and associated files will be cached in your user folder un
 - [Rat atlas repository](https://zenodo.org/record/5644162#.YZrUnroo8uU)
 
 If the initial atlas download failed, because you had no access to internet or for any other reason, you can restart the command and let empty fields to trigger again the download from Zenodo.
+
+[**Back to documentation**](index.md)
