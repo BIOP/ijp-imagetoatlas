@@ -19,17 +19,15 @@ In QuPath, provided you have correctly installed the [required extensions](insta
 
 When opening the annotation, you will be able to split the regions between left and right hemi-brain, or not.
 
-The following script can also be used and ran in batch to import the regions for all slices of the dataset:
+If you go to the workflow tab of QuPath, you will see that a worflow step is present and thus you can create a script out of it, such as:
 
 ```
-TO UPDATE
+setImageType('FLUORESCENCE');
+clearAllObjects();
+qupath.ext.biop.abba.AtlasTools.loadWarpedAtlasAnnotations(getCurrentImageData(), "acronym", false);
 ```
 
-If you need to keep only certain regions, you can modify and reuse the script below:
-
-```
-TO UPDATE
-```
+This script can be ran in batch to import the regions for all slices present in the QuPath project.
 
 ## Analysis in QuPath
 
@@ -53,10 +51,36 @@ selectObjectsByClassification(regionClassPath);
 
 A convenient way to pool analysis from several animals, is to combine the result of the analysis into a common coordinate space.
 
-For that, we provide the following script which, for all detections of images in QuPath, appends the coordinate of each centroid detection as extra measurements ("CCFx","CCFy", "CCFz"):
+For that, we provide the following script which, for all detections of images in QuPath, appends the coordinate of each centroid detection as extra measurements:
 
 ```
-TO UPDATE
+/**
+ * Computes the centroid coordinates of each detection within the atlas
+ * then adds these coordinates onto the measurement list.
+ * Measurements names: "Atlas_X", "Atlas_Y", "Atlas_Z"
+ */
+
+def pixelToAtlasTransform = 
+    AtlasTools
+    .getAtlasToPixelTransform(getCurrentImageData())
+    .inverse() // pixel to atlas = inverse of atlas to pixel
+
+getDetectionObjects().forEach(detection -> {
+    RealPoint atlasCoordinates = new RealPoint(3);
+    MeasurementList ml = detection.getMeasurementList();
+    atlasCoordinates.setPosition([detection.getROI().getCentroidX(),detection.getROI().getCentroidY(),0] as double[]);
+    pixelToAtlasTransform.apply(atlasCoordinates, atlasCoordinates);
+    ml.addMeasurement("Atlas_X", atlasCoordinates.getDoublePosition(0) )
+    ml.addMeasurement("Atlas_Y", atlasCoordinates.getDoublePosition(1) )
+    ml.addMeasurement("Atlas_Z", atlasCoordinates.getDoublePosition(2) )
+})
+
+import qupath.ext.biop.warpy.Warpy
+import net.imglib2.RealPoint
+import qupath.lib.measurements.MeasurementList
+import qupath.ext.biop.abba.AtlasTools
+
+import static qupath.lib.gui.scripting.QPEx.* // For intellij editor autocompletion
 ```
 
 This script can also be run in batch.
@@ -65,9 +89,9 @@ This script can also be run in batch.
 
 You can use the scripts developed by [@enassar](https://github.com/enassar) and [@nickdelgrosso](https://github.com/nickdelgrosso) in this repository: https://github.com/nickdelgrosso/ABBA-QuPath-utility-scripts in order to automate cell detection and export.
 
-Some analysis scripts are also available in https://github.com/nickdelgrosso/ABBA-QuPath-RegistrationAnalysis 
-
 ## Display results in 3D
+
+Some analysis scripts are also available in https://github.com/nickdelgrosso/ABBA-QuPath-RegistrationAnalysis
 
 To be done... combining [PaQuo](https://paquo.readthedocs.io/en/latest/quickstart.html) and [BrainRender](https://github.com/brainglobe/brainrender) looks like the best option for this task. 
 
