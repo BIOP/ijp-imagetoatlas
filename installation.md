@@ -6,7 +6,49 @@
 
 ---
 
-## Step by step standard installation
+You can choose between the two installation methods, automated or manual. My advice : start with the automated one, and troubleshoot with the manual one if needed.
+
+## Automated installation
+
+Bash installation scripts for ABBA are available and have been tested (in May 2022) for Windows 10, 11 and Mac OSX. 
+* Download the [install scripts](https://github.com/BIOP/biop-bash-scripts/archive/refs/heads/main.zip)
+* Unzip them
+
+You will need a decent internet connection! Several gigabytes need to be downloaded (mainly Fiji, QuPath and the atlases).
+
+### For Windows
+* Install [Git for Windows](https://gitforwindows.org/) with standard options (just hit next on the installer)
+* Double click on the script `full_install_abba.sh`
+* It is recommended to choose `C:/` as the install path
+* Wait until the script ends
+
+### For Mac OSX
+
+You will need to know your admin password.
+
+:warning: If, for some reason, you want to keep your previous version of QuPath intact, save it to a different name before starting the script.
+
+* Right-click on `full_install_abba.command` (do NOT double click!)
+* Click Open
+* Accept the execution: you will be asked for your admin password (you won’t see any character as you type the password, and that’s normal!)
+* Enter `/Applications/` as the install path (compulsory)
+* Wait until the script ends
+
+If you get this issue:
+
+```
+shell-init: error retrieving current directory: getcwd: cannot access parent directories: Operation not permitted
+/bin/bash: ./full_install_abba.sh: Operation not permitted,
+```
+
+Then follow the operation explained in https://osxdaily.com/2018/10/09/fix-operation-not-permitted-terminal-error-macos/ and restart the script.
+
+### For Linux
+
+UNTESTED!
+* Run `full_install_abba.sh`
+
+## Step by step manual installation
 The installation consists of four steps detailed in the paragraphs below:
 
 1. Install QuPath and 2 QuPath extensions,
@@ -17,7 +59,7 @@ The installation consists of four steps detailed in the paragraphs below:
 
 ### 1.  Install QuPath extensions
 
-Install [QuPath version 0.3.0](https://github.com/qupath/qupath/releases/tag/v0.3.0).
+Install [QuPath version 0.3+](https://github.com/qupath/qupath/releases/tag/v0.3.0).
 
 Install the [QuPath Warpy extension](https://github.com/BIOP/qupath-extension-warpy) (and its dependencies):
 * Go to the [latest release](https://github.com/BIOP/qupath-extension-warpy/releases)
@@ -33,7 +75,10 @@ Install the [QuPath ABBA extension](https://github.com/BIOP/qupath-extension-abb
 
 ![Installed extensions](./assets/img/qupath_installed_extensions.png)
 
-### 2. Enable Fiji's ABBA update site
+### 2. Install Fiji and enable Fiji's ABBA update site
+
+Download and install [ImageJ/Fiji](https://fiji.sc/)
+
 In Fiji:
 * Click `Help > Update... > Manage update sites
 * Tick the checkbox `ABBA (experimental)` 
@@ -73,7 +118,7 @@ This message should show up in the ImageJ console :
 * `[INFO] Transformix	->	set :-)`
 * `Elastix	->	set :-)`
 
-Once elastix is installed, you can run [the following script](https://gist.githubusercontent.com/NicoKiaru/b91f9f3f0069b765a49b5d4629a8b1c7/raw/571954a443d1e1f0597022f6c19f042aefbc0f5a/TestRegister.groovy) in Fiji to test elastix functionality. Save the linked file with a `.groovy` extension, open it Fiji, and run it.
+Once elastix is installed, you can run [the following script](https://gist.githubusercontent.com/NicoKiaru/b91f9f3f0069b765a49b5d4629a8b1c7/raw/571954a443d1e1f0597022f6c19f042aefbc0f5a/TestRegister.groovy) in Fiji to test elastix functionality. Save the linked file with a `.groovy` extension, open it in Fiji, and run it.
 
 ---
 
@@ -89,9 +134,8 @@ The procedure to install your own registration server will be detailed in the re
 
 ### 4. Setup ABBA in Fiji
 
-Start Fiji, type `ABBA BDV` in the command search bar or navigate and click ` Plugins › BIOP › Atlas › ABBA - Align Big Brains and Atlases (BDV)`:
-![Look for and start ABBA](./assets/img/fiji_launch_abba.png)
-
+Start Fiji, type `ABBA Start` in the command search bar or navigate and click ` Plugins › BIOP › Atlas › ABBA - ABBA Start`:
+![Look for and start ABBA](./assets/img/fiji_launch_abba_start.png)
 You will get the following window on startup:
 
 ![ABBA chose atlas](./assets/img/fiji_open_atlas.png)
@@ -105,4 +149,3 @@ The allen brain atlas and associated files will be cached in your user folder un
 - [Rat atlas repository](https://zenodo.org/record/5644162#.YZrUnroo8uU)
 
 If the initial atlas download failed, because you had no access to internet or for any other reason, you can restart the command and let empty fields to trigger again the download from Zenodo.
-
