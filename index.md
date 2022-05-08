@@ -1,6 +1,11 @@
-## [EXPERIMENTAL] ABBA - Aligning Big Brains & Atlases
+## [EXPERIMENTAL] [ABBA](https://www.youtube.com/watch?v=8haRfsY4-_s) - Aligning Big Brains & Atlases
 
 A [Fiji](https://fiji.sc/) plugin for the registration of thin brain slices to various atlases ([3D mouse Allen Brain atlas](http://atlas.brain-map.org/atlas?atlas=602630314), [Waxholm Space Atlas of the Sprague Dawley Rat Brain](https://www.nitrc.org/projects/whs-sd-atlas), and [BrainGlobe atlases](https://github.com/brainglobe/bg-atlasapi)) + [QuPath](https://qupath.github.io) associated tools.
+
+<video autoplay loop muted style="width: 100%;">
+  <source src="https://user-images.githubusercontent.com/20223054/149301605-07b27dd0-4010-4ca4-b415-f5a9acc8963d.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
 
 ---
 
@@ -26,6 +31,7 @@ One animal, 87 serial sections, 2 fluorescent channels (nuclei and autofluoresce
 * [Sample sections  (Zenodo repository, 21 Gb) ](https://doi.org/10.5281/zenodo.4715656) - each section has to be downloaded individually (multiresolution ome.tiff file)
 * [Downsampled sections  (GDrive, 0.4 Gb) ](https://drive.google.com/file/d/1OVb860hy-UZSSXa_u9drWiPKEunWT_a7/view?usp=sharing)
 
+## [Workshop slides](https://docs.google.com/presentation/d/1c5yG-5Rhz5WlR4Hf9TNVkjqb6yD6oukza8P6vHGVZMw)
 ## [Installation](installation.md)
 ## [Using ABBA](usage.md)
 ## [Developer documentation (In progress...)]()
