@@ -1,8 +1,8 @@
 # Registration of mouse brain slices with ABBA
 
-Once your dataset is opened in ABBA. You will be able to position slices first along the slicing axis (position multiple slices along "z"), then to performing 2d adjustement for each slice (tilt and roll atlas slicing correction, 2d affine and spline in-plane registrations).
+Once your dataset is opened in ABBA. You will be able to position slices first along the slicing axis (position multiple slices along "z"), then to perform 2d adjustment for each slice (tilt and roll atlas slicing correction, 2d affine and spline in-plane registrations).
 
-When you start ABBA, you will be in the `Positioning mode`, where the allen brain atlas is displayed with slices regularly spaced on top of the slices present on your dataset. 
+When you start ABBA, you will be in the `Positioning mode`, where the Allen brain atlas is displayed with slices regularly spaced on top of the slices present on your dataset. 
 
 ----
 
@@ -25,7 +25,7 @@ There are two ways of selecting slices:
 
 ---
 
-:warning:  you need to hold the modifier keys BEFORE drawing the rectangle in order to take their effect into account. This is in contrast to a lot of other software.
+:warning:  you need to hold the modifier keys BEFORE drawing the rectangle in order to take their effect into account.
 
 ---
 
@@ -37,13 +37,13 @@ Gif below : adding slices to selection using `shift+rectangle`, removing from th
 
 ![Selecting slices in bdv](assets/gif/fiji_select_slices_table.gif)
 
-`ctrl+a` allows to select all slices, `ctrl+shift+a` allows to deselect all slices.
+`ctrl+a` allows to select all slices, `ctrl+shift+a` allows to deselect all slices. For mac users, you may need to use `cmd` instead of `ctrl`.
 
 ## Slices display options
 
 It will be convenient for the registration to have your slices properly displayed. Depending on your use case, you may want to display a subset of the available channels, and adjust the min and max value displayed for a good contrast.
 
-But first, in multi series files like vsi files it could happen that you end up with unwanted images (label or macro image). In this case, you will need to remove these slices. For vsi files, these unwanted images, because they are rgb images, appear black in the slice display table. It is thus easy to select them. The selected slices can then be removed form ABBA by right clicking in the viewer window of ABBA and selecting `Remove Selected Slices` (also accessible in the menu bar : `Edit > Remove Selected Slices`). 
+But first, in multi series files like vsi files it could happen that you end up with unwanted images (label or macro image). In this case, you will need to remove these slices. For vsi files, these unwanted images, because they are rgb images, appear black in the slice display table. It is thus easy to select them. The selected slices can then be removed form ABBA by right clicking in the viewer window of ABBA and selecting `Remove Selected Slices` (also accessible in the menu bar : `Edit > ABBA - Remove Selected Slices`). 
 
 ![Removing slices](assets/gif/fiji_remove_slices.gif)
 
@@ -80,13 +80,11 @@ It could happen that the acquired slices were flipped or rotated compared to the
 
 The first two buttons rotate selected slices by 90 degrees CW or CCW. The next two buttons flip slices vertically or horizontally.
 
-In the top menu bar `Edit>ABBA - Rotate` can be used to rotate selected slices along any XYZ axis and with a custom angle in degree (you'll most probably need Z axis rotation).
-
 Contrary to a lot of other actions in ABBA, these actions (flip rotate) are not undone with `ctrl+Z` (and redone with `ctrl+shift+z`). These actions can be easily reversed by applying an opposite rotation / flip.
 
 #### Manual interactive transformation of slices (Scale, Translate, Rotate)
 
-In the top menu bar `Edit>ABBA - Interactive Transform` can be used to apply a transformation on the selected slices. You can rotate, translate and scale anisotropically the slides (slices are often shrunk in Y by about 20 % because of the slicing).
+In the top menu bar `Edit>ABBA - Interactive Transform` can be used to apply a transformation on the selected slices. You can rotate, translate and scale anisotropically the sections (which are often shrunk in Y by about 20 % because of the slicing).
 
 ![Interactive slice transformation](assets/gif/fiji_interactivetransform.gif)
 
@@ -115,19 +113,19 @@ When no slice is a key slice ( see next section ), `distribute spacing` keeps co
 
 ##### Lock the position of slices by setting "key slices"
 
-By using ABBA interface, you will be able (and will need), using pan and zooms to switch between a zoomed-out overview and a zoomed-in view where you look precisely at how a particular slice matches the atlas.
+By using ABBA interface, you will be able (and will need), to switch between a zoomed-out overview and a zoomed-in view where you look precisely at how a particular slice matches the atlas.
 
-Generally, to align the position of slices along the atlas, a convenient workflow is the following, you will need to follow these steps:
+Generally, to align the position of slices along the atlas, a convenient workflow is the following:
 
-* as mentioned before, sort slices correctly along the axis
+* sort slices correctly along the axis
 * rotate / flip slices to match the orientation of the atlas  
-* display the atlas sliced with the largest slices thickness ( one slice every 500 microns ):
-* approximately shift slices along the atlas
+* display the atlas sliced with the largest slices thickness ( one slice every 500 microns - see gif just below):
+* shift slices along the atlas at their approximately correct position
 * match precisely a slice of your choice (usually one with easily recognizable features) with the atlas by zooming in
 * set this slice as `key slice` (select this slice only, right click and select `Set as key slice` in the popup menu). As long as you don't drag this slice, each key slice has its z position locked in the atlas: `Distribute Spacing` won't affect the position of key slices.
 * set a few others slices precisely and set them as key slices
 * adjust the angles of the atlas slicing and check all slices
-* for set a regular spacing between key slices, click `Distribute spacing` 
+* for setting a regular spacing between key slices, click `Distribute spacing` 
 
 ![Coarsening atlas slicing](assets/gif/fiji_atlas_coarse_slicing.gif)
 
@@ -142,11 +140,11 @@ It's possible, once a matching atlas slice is found, to select the slice of inte
 
 ![Finding correspondance and key slice](assets/gif/fiji_atlas_drag_then_key.gif)
 
-When key slices are selected, they will keep their position along the axis when other slices are dragged ( you can still directly drag the key slice if you need to move it) . The other slices are stretched along the axis while maintaining their spacing ratio. 
+When key slices are selected, they will keep their position along the axis when other slices are dragged (you can still directly drag the key slice if you need to move it). The other slices are stretched along the axis while maintaining their spacing ratio. 
 
 You can set multiple key slices in specific positions along your sections, usually the ones with the most recognizable features.
 
-2 or 3 key slices is usually sufficient for a correct positioning along the atlas. The `distribute` button or action will equalize spacing between selected slices while respecting the position of selected key slices ( and the position of the first and last selected slices ).
+2 or 3 key slices can be sufficient for a correct positioning along the atlas axis. The `distribute` button or action will equalize spacing between selected slices while respecting the position of selected key slices (and the position of the first and last selected slices).
 
 ##### Using the review mode to investigate the position of slices along the atlas
 
@@ -161,13 +159,13 @@ It is possible to switch to a review mode by either:
 
 In this mode, a single slice is displayed at a time overlaying the atlas. The slice which is being displayed is the **current slice**. The current slice is indicated by a white circle around the slice handle.
 
-You can navigate along the slices by pressing arrow keys or pushing `Previous` and `Next` in the `Display & Navigation` card.
+You can navigate along the slices by pressing the left and right arrow keys or by pushing `Previous` and `Next` in the `Display & Navigation` card.
 
 If you notice a problem in the review mode, you can switch back any time to the `positioning mode` in order to correct the slice position or the atlas slicing angle.
 
 --- 
 
-`Right` and `Left` key to change the current slice also works in the positioning mode. Brackets `[]` indicates the current slice in the `Slices Display` card table:
+`Right` and `Left` key to change the current slice also works in the positioning mode.
 
 ![Current slice](assets/img/fiji_current_slice.png)
 
@@ -183,9 +181,9 @@ You can use slices with recognizable features to orient the atlas slicing. The a
 
 ## Slices registration 
 
-Once the slices have been correctly oriented and positioned along the slicing axis, they can be registered to the atlas in 2D, linearly or in a non linear way.
+Once the slices have been correctly oriented and positioned along the slicing axis, they can be registered to the atlas in 2D, linearly or in a non-linear way.
 
-For automated registration, ABBA uses [elastix](https://github.com/SuperElastix/elastix) with pre-defined registration parameters and takes advantage of its knowledge of the sections calibration as well as on the atlas physical voxel size in order to have an almost parameter free registration.
+For automated registration, ABBA uses [elastix](https://github.com/SuperElastix/elastix) with pre-defined registration parameters and takes advantage of its knowledge of the sections' calibration as well as on the atlas physical voxel size in order to have an almost parameter free registration.
 The metric used to measure the 'distance' between fixed and moving image is the [Mattes mutual information metric](https://doi.org/10.1109/TMI.2003.809072), which should allow for reasonable results when registering different imaging modalities.
 
 ---
@@ -200,7 +198,7 @@ When a registration 'job' is started for a slice, an indicator of the registrati
 
 ![Slice registration example](assets/gif/fiji_register_affine_spline.gif)
 
-You can start the registrations for all slices in parallel. Depending on your computer, between 4 and 32 registrations will be started in parallel (check the `Resources monitor` card to see how your CPU is busy). You can continue browsing ABBA during the registrations, which are processed asynchronously. As soon as any registration is done, its result is displayed in ABBA.
+You can start the registrations for all slices in parallel. Depending on your computer, between 4 and 32 registrations will be started in parallel (click on the menu `Cards > Add resources monitor` and check the `Resources monitor` card to see how busy is your CPU). You can continue browsing ABBA during the registrations, which are processed asynchronously. As soon as any registration is done, its result is displayed in ABBA.
 
 Below: registration of 80 sections, with, for each slice the following registration sequence:
 1. auto affine registration DAPI vs Nissl
@@ -211,8 +209,7 @@ Below: registration of 80 sections, with, for each slice the following registrat
 
 (real time ~ 10 min)
 
-It is possible (and advised) to perform several successive registration. You will usually start by an affine registration followed by one or several spline registrations. For 'difficult slices' where the automated registration result are bad, you can either start by a manual registration to facilitate a following automated registration, or, alternatively, you can directly edit the result of a spline transform, in order to improve it and even to add landmarks in regions in which you are more interested. 
-
+It is possible (and advised) to perform several successive registration. You will usually start by an affine registration followed by one or two spline registrations. For 'difficult slices' where the automated registration result are bad, you can either start by a manual registration to facilitate a following automated registration, or, alternatively, you can directly edit the result of a spline transform, in order to improve it and even to add landmarks in regions in which you are more interested. 
 
 ---
 
@@ -223,7 +220,7 @@ It is possible (and advised) to perform several successive registration. You wil
 ### Affine registration (Automated)
 
 You can select the slices you want to register and start an affine registration by clicking, in the top menu bar: 
-`Align > Elastix Registration (Affine)`, if you managed to install Elastix, or `Align > Elastix Registration (Affine) on Server`, if elastix is not locally installed.
+`Align > ABBA - Elastix Registration (Affine)`, if you managed to install Elastix, or `Align > ABBA - Elastix Registration (Affine) on Server`, if elastix is not locally installed.
 
 You will need to select a single channel for both the atlas and the sections for this affine registration. Multichannel registration is not supported for automated registrations.
 
@@ -238,7 +235,7 @@ A few extra options are available:
 ### Spline registration (Automated)
 
 You can select the slices you want to register and start a spline registration by clicking, in the top menu bar:
-`Align > Elastix Registration (Spline)`, if you managed to install Elastix, or `Align > Elastix Registration (Spline) on Server`, if elastix is not locally installed.
+`Align > ABBA - Elastix Registration (Spline)`, if you managed to install Elastix, or `Align > ABBA - Elastix Registration (Spline) on Server`, if elastix is not locally installed.
 
 ![Spline registration parameters](assets/img/fiji_elastix_spline_registration.png)
 
@@ -247,11 +244,11 @@ It is advised to use a value for control point between 5 (25 max total number of
 
 ### BigWarp registration (Manual)
 
-[BigWarp](https://imagej.github.io/plugins/bigwarp) can be used if you want to have a full control over the registration. This method allows to place your own landmarks manually. Since this method is manual, each slice is processed by the user one at a time.
+[BigWarp](https://imagej.github.io/plugins/bigwarp) can be used if you want to have a full control over the registration. This method allows to place your own landmarks manually. Since this method is manual, slices are processed sequentially by the user.
 
 ### Editing a registration
 
-When the last registration of a slice is either a BigWarp registration or a spline registration, the result can be manually edited by selected the slice and then clicking in the top menu bar `Align > Edit Last Registration`.
+When the last registration of a slice is either a BigWarp registration or a spline registration, the result can be manually edited by selected the slice and then clicking in the top menu bar `Align > ABBA - Edit Last Registration`.
 
 ---
 
@@ -277,10 +274,14 @@ After editing a registration, you can export it again (to QuPath for instance), 
 ### Canceling / removing a registration
 
 If you are not happy with the result of a registration, you can select the slices where you want to remove the last registration, and:
-* click, top menu bar : `Align > Remove Last registration`
+* click, top menu bar : `Align > ABBA - Remove Last registration`
 * or right- click in ABBA's viewer : `Remove Last registration`
 
-This removal can be cancelled, which is also a way to investigate the quality of the last registration.
+This removal can be cancelled.
+
+### Browsing registration steps
+
+If you want to investigate quickly the different registration steps, you can click in the card `Display & Navigation`: Browse: `View Previous [P]` and `View Next [N]`. Note how the registrations indicators are switching from green to gray when they are ignored in the display.
 
 ### Development - adding a registration method of your own
 
@@ -288,7 +289,7 @@ The registration methods (BigWarp, Elastix spline, affine...) are plugins automa
 
 ### Registration workflow example
 
-A typical registration may been obtained using the following successive steps, performed on all slices:
+A typical registration may be obtained using the following successive steps, performed on all slices:
 
 * affine registration on DAPI vs Atlas Nissl (Ch 0)
 * spline registration on an Autofluorescent channel vs Atlas Autofluorescent (Ch 1) (15 control points)
@@ -300,14 +301,13 @@ This takes about 10 minutes for 50 slices on a laptop.
 
 At each step of the workflow, you can save the current state of your work (as long as no job is being processed).
 
-To save your project, you can click, in the top menu bar `File > Save State [Experimental]`, and specify a file with a `.json` extension. One or several extra files will be stored on top of the json file. All files are text files, which are fast to save and rather small (in comparison to the images...). So do not hesitate to save multiple successive files all along your workflow, especially because ABBA is experimental and has bugs... Also, do not count on backward compatibility. Consider your work done when you have obtained regions in QuPath, but the ABBA state file has no guarantee currently on the long term.
+To save your project, you can click, in the top menu bar `File > Save State [Experimental]`, and specify a file with a `.json` extension. One or several extra files will be stored on top of the json file. All files are text files, which are fast to save and rather small (in comparison to the images...). So do not hesitate to save multiple successive files all along your workflow. Consider your work done when you have obtained regions in QuPath, but the ABBA state file has less guarantee on the long term.
 
-
-To open a project where you left it, it is advised to restart Fiji and ABBA, and then click, in the top menu bar `File > Load State [Experimental]`, and select your previously saved `.json` file.
+To open a project where you left it, it is compulsory close ABBA session and restart it. Once restarted, click in the top menu bar `File > Load State [Experimental]`, and select your previously saved `.json` file.
 
 ---
 
-:warning: If you move your image files, ABBA won't be able to find your images because absolute file path are used. If you opened images from a QuPath project, fix URIs in QuPath first before reopening ABBA.
+:warning: If you move your image files, your qupath project, or the other files associated to the state file, ABBA won't be able to find your images because absolute file path are used. If you opened images from a QuPath project, fix URIs in QuPath first before reopening ABBA.
 
 ---
 

@@ -12,7 +12,7 @@ It is highly recommended to use [QuPath](https://qupath.github.io/) in order to 
 For each animal:
 * [**Define sections dataset**](create_dataset_and_open.md)
   * [Define the serial sections dataset into a QuPath project](create_dataset_and_open.md)
-  * [Open these sections by importing this QuPath project into Fiji's ABBA plugin](create_dataset_and_open.md#abba-navigation)
+  * [Open these sections by importing this QuPath project into Fiji's ABBA plugin](create_dataset_and_open.md#import-a-qupath-project-in-abba)
 * [**Register sections to the Allen Brain Atlas**](registration.md)
   * [Basic slices manipulation and display](registration.md)
   * [Slices positioning along the atlas axis](registration.md#first-coarse-positioning)
