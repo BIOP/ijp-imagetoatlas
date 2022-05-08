@@ -47,7 +47,7 @@ selectObjectsByClassification(regionClassPath);
 
 ```
 
-## Export result into common coordinates of the Allen Brain Atlas (CCFv3)
+## Compute the location of detections into the Atlas coordinates
 
 A convenient way to pool analysis from several animals, is to combine the result of the analysis into a common coordinate space.
 
@@ -84,6 +84,14 @@ import static qupath.lib.gui.scripting.QPEx.* // For intellij editor autocomplet
 ```
 
 This script can also be run in batch.
+
+### Allen Brain CCFv3 coordinates
+
+For the particular case of the Adult Mouse Allen Brain Atlas CCFv3, coordinates are oriented like this: [(source)](http://help.brain-map.org/download/attachments/5308472/3DOrientation.png?version=1&modificationDate=1368132564812&api=v2):
+
+![img.png](assets/img/ccfv3.png)
+
+Mind the axes names and orientations!
 
 ## Analysis in QuPath
 

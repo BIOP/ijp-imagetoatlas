@@ -16,9 +16,9 @@ For a quick setup with the demo dataset:
 
 ---
 
-:warning: All files need to be properly calibrated (microns, millimeters, etc, but not pixels!). Check on the image tab of QuPath that you have a proper physical unit specified for your images, and not pixels! If that's not the case, you should specify the correct pixel size NOW! (= BEFORE importing the project into Fiji's ABBA plugin). Otherwise, the images will look gigantic because 1 pixel is assumed to be 1 millimeter...
+:warning: All files need to be properly calibrated (microns, millimeters, etc, but not pixels!). Check on the `Image` tab of QuPath that you have a proper physical unit specified for your images, and not pixels! If that's not the case, you should specify the correct pixel size NOW! (= BEFORE importing the project into Fiji's ABBA plugin). Otherwise, the images will look gigantic because 1 pixel is assumed to be 1 millimeter...
 
-Also please make sure to read the message about [pyramidal file formats requirements](usage.md#supported-file-formats).
+Also please make sure to read the message about [pyramidal file formats requirements](index.md#important-note-on-file-formats).
 
 ![img.png](assets/img/qupath_image_calibration.png)
 

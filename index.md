@@ -1,6 +1,6 @@
 ## [EXPERIMENTAL] [ABBA](https://www.youtube.com/watch?v=8haRfsY4-_s) - Aligning Big Brains & Atlases
 
-A [Fiji](https://fiji.sc/) plugin for the registration of thin brain slices to various atlases ([3D mouse Allen Brain atlas](http://atlas.brain-map.org/atlas?atlas=602630314), [Waxholm Space Atlas of the Sprague Dawley Rat Brain](https://www.nitrc.org/projects/whs-sd-atlas), and [BrainGlobe atlases](https://github.com/brainglobe/bg-atlasapi)) + [QuPath](https://qupath.github.io) associated tools.
+A [Fiji](https://fiji.sc/) plugin for the registration of thin brain slices to various atlases ([3D mouse Allen Brain atlas](http://atlas.brain-map.org/atlas?atlas=602630314), [Waxholm Space Atlas of the Sprague Dawley Rat Brain](https://www.nitrc.org/projects/whs-sd-atlas), and [BrainGlobe atlases (WIP)](https://github.com/NicoKiaru/ABBA-Python)) + [QuPath](https://qupath.github.io) associated tools.
 
 <video autoplay loop muted style="width: 100%;">
   <source src="https://user-images.githubusercontent.com/20223054/149301605-07b27dd0-4010-4ca4-b415-f5a9acc8963d.mp4" type="video/mp4">
@@ -64,3 +64,29 @@ Your Pages site will use the layout and styles from the Jekyll theme you have se
 Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
 
 -->
+
+# Important note on File formats!
+
+**TL; DR: Use calibrated VSI, CZI, OME-TIFF, NDPI, 
+a few others (please read the text below). Otherwise convert you files to pyramidal OME-Tiff files. You can use the Fiji plugin [Kheops](https://github.com/BIOP/ijp-kheops) for instance.**
+
+
+All files need to be properly calibrated (microns, millimeters, etc, but not pixels!). ABBA takes advantage of the  calibration to set appropriate registration parameters.
+
+---
+
+:bulb: It is strongly recommended to work with multiresolution file formats (VSI, OME-TIFF, SVS), since brain slices are usually very big 2d images. ABBA, like QuPath, uses pre-computed downsampled images of these files to speed-up (very significantly) the display and processing of these images. Downsampled images also help for registration, since the registration is made with large scale features (size above  a few cells), which are incorrectly sampled if no downsampled image pre-exists.
+
+---
+
+:warning: Because Fiji is used is the workflow, only Bio-Formats supported formats are correctly handled. You can check on  [the Bio-Formats documentation](https://docs.openmicroscopy.org/bio-formats/6.6.1/supported-formats.html) if your file formats will be correctly handled. This will be the case if `Pyramid` is checked. File which can be opened **only** via [`OpenSlide`](https://openslide.org/) are not supported.
+
+Tested file formats for ABBA :
+
+* CZI (Zeiss, ++, you may have to tick `Split RGB channels` for 16-bits RGB images)
+* VSI (Olympus, +++)
+* LIF (Leica, +, no multiresolution support in bio-formats)
+
+CZI, NDPI, OME-TIFF should work perfectly. Let us know if that's the case in practice and we'll update the list.
+
+RGB images as well as 8-bits and 16-bits images have also been successfully tested.
