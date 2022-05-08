@@ -145,7 +145,7 @@ These are the two atlases present by default. If this is the first time you laun
 ![Allen atlas download progress bar](./assets/img/fiji_atlas_download_progress_bar.png)
 
 The allen brain atlas and associated files will be cached in your user folder under the directory `\cached_atlas`. These data are directly  downloaded from zenodo repositories:
-- [Mouse atlas repository](https://zenodo.org/record/4173229#.YASj5RYo_BU)
+- [Mouse atlas repository](https://zenodo.org/record/4486659#.YnfL81RBziE)
 - [Rat atlas repository](https://zenodo.org/record/5644162#.YZrUnroo8uU)
 
 If the initial atlas download failed, because you had no access to internet or for any other reason, you can restart the command and let empty fields to trigger again the download from Zenodo.
