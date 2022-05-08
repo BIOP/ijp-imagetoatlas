@@ -3,17 +3,17 @@
 ## Exporting ABBA registration results
 When a registration is done in ABBA, and if the slices have been opened from a QuPath project, it is possible to re-export the registration results into the original QuPath project.
 
-For that, simply select all your slices of interest and click, in the top menu bar `Export > Export Regions To QuPath project`.
+For that, simply select all your slices of interest and click, in the top menu bar `Export > ABBA - Export Regions To QuPath project`.
 
 When executing this action, ABBA exports, for each slice:
 * regions of the allen brain atlas as a zip file (ImageJ rois file)
-* a json file which can be used to compute the transformation between pixels coordinates of the original file to the Allen Brain Atlas CCFv3
+* a json file which can be used to compute the transformation between pixels coordinates of the original file to the Allen Brain Atlas CCFv3 (and vice versa)
 
-These two files are saved into the data folder of each QuPath entry. Also, the Allen Brain Ontology is written next to the QuPath project file (do not erase it!).
+These two files are saved into each QuPath entry folder. Additionally, the Allen Brain Ontology is written next to the QuPath project file (do not erase it!).
 
 ## Importing ABBA registration results in QuPath
 
-In QuPath, provided you have correctly installed the [QuPath BIOP extensions](installation.md), you can click `BIOP > Atlas > Load Atlas Annotations into Open Image`.
+In QuPath, provided you have correctly installed [QuPath extensions](installation.md), you can click `BIOP > Atlas > Load Atlas Annotations into Open Image`.
 
 ![Load annotation](assets/img/qupath_import_atlas_regions.png)
 
