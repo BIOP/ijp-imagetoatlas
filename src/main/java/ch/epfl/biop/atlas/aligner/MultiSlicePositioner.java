@@ -410,7 +410,7 @@ public class MultiSlicePositioner implements Closeable {
         }
     }
 
-    public AffineTransform3D getAffineTransformFormAlignerToAtlas() {
+    public AffineTransform3D getAffineTransformFromAlignerToAtlas() {
         return reslicedAtlas.getSlicingTransformToAtlas();
     }
 
@@ -1145,7 +1145,7 @@ public class MultiSlicePositioner implements Closeable {
         public SliceInfo(MultiSlicePositioner mp, SliceSources slice) {
             sliceAxisPosition = slice.getSlicingAxisPosition();
             matrixAtlas = mp.getReslicedAtlas().getSlicingTransform().getRowPackedCopy();
-            matrixAlignerToAtlas = mp.getAffineTransformFormAlignerToAtlas().getRowPackedCopy();
+            matrixAlignerToAtlas = mp.getAffineTransformFromAlignerToAtlas().getRowPackedCopy();
             rotX = mp.getReslicedAtlas().getRotateX();
             rotY = mp.getReslicedAtlas().getRotateY();
             sliceHashCode = slice.hashCode();

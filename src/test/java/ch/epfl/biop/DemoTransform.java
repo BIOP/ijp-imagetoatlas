@@ -49,7 +49,7 @@ public class DemoTransform {
                 .getBdvDisplayService()
                 .show(bdvh2, slice10.getRegisteredSources());*/
 
-        AffineTransform3D at3D = mp.getAffineTransformFormAlignerToAtlas();
+        AffineTransform3D at3D = mp.getAffineTransformFromAlignerToAtlas();
 
         InvertibleRealTransformSequence irts = new InvertibleRealTransformSequence();
 

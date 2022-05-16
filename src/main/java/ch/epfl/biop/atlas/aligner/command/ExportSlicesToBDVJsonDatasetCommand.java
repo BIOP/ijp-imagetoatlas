@@ -48,7 +48,7 @@ public class ExportSlicesToBDVJsonDatasetCommand implements Command {
         if (slices.size()==0) {
             mp.errorMessageForUser.accept("No slice selected", "You did not select any slice to save");
         } else {
-            AffineTransform3D at3D = mp.getAffineTransformFormAlignerToAtlas();
+            AffineTransform3D at3D = mp.getAffineTransformFromAlignerToAtlas();
             SourceAffineTransformer sat = new SourceAffineTransformer(null, at3D);
             slices.forEach(slice -> {
                 for (SourceAndConverter sac : slice.getRegisteredSources()) {

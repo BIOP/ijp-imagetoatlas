@@ -1,33 +1,25 @@
 package ch.epfl.biop.atlas.aligner.command;
 
+import bdv.util.source.alpha.AlphaSourceHelper;
 import bdv.util.source.fused.AlphaFusedResampledSource;
-import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
-import ch.epfl.biop.atlas.aligner.action.ExportSliceToImagePlusAction;
 import ch.epfl.biop.sourceandconverter.EmptyMultiResolutionSourceAndConverterCreator;
 import ch.epfl.biop.sourceandconverter.SourceFuserAndResampler;
 import ch.epfl.biop.sourceandconverter.processor.SourcesChannelsSelect;
 import ch.epfl.biop.sourceandconverter.processor.SourcesProcessor;
 import ch.epfl.biop.sourceandconverter.processor.SourcesProcessorHelper;
-import ij.IJ;
-import ij.ImagePlus;
-import ij.plugin.Concatenator;
-import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
 import org.scijava.ItemIO;
-import org.scijava.ItemVisibility;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import sc.fiji.bdvpg.scijava.command.bdv.BdvSourcesShowCommand;
+import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceAffineTransformer;
-import spimdata.imageplus.ImagePlusHelper;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>ABBA - Export Resampled Slices as BDV Source ( experimental )",
@@ -77,6 +69,9 @@ public class ExportResampledSlicesToBDVSourceCommand implements Command {
     @Parameter(label="Block Size Z")
     int block_size_z = 4;
 
+    @Parameter(label="Number of blocks kept in memory (negative = until RAM is full)")
+    int n_block_bounds = 1000;
+
     @Parameter(label="Number of threads")
     int n_threads = 6;
 
@@ -116,7 +111,7 @@ public class ExportResampledSlicesToBDVSourceCommand implements Command {
         SliceSources first = slicesToExport.get(0);
         int nChannels = preprocess.apply(first.getRegisteredSources()).length;
 
-        AffineTransform3D at3D = mp.getAffineTransformFormAlignerToAtlas();
+        AffineTransform3D at3D = mp.getAffineTransformFromAlignerToAtlas();
         SourceAffineTransformer sat = new SourceAffineTransformer(null, at3D);
 
         fusedImages = new SourceAndConverter[nChannels];
@@ -137,7 +132,7 @@ public class ExportResampledSlicesToBDVSourceCommand implements Command {
         coord.scale(px_size_micron_x/1000.0, px_size_micron_y/1000.0, px_size_micron_z/1000.0);
         coord.translate(roi[0], roi[1], minZ);
 
-        coord.preConcatenate(mp.getAffineTransformFormAlignerToAtlas());
+        coord.preConcatenate(mp.getAffineTransformFromAlignerToAtlas());
 
         // Now makes the matrix orthonormal
         double[] m = coord.getRowPackedCopy();
@@ -192,6 +187,8 @@ public class ExportResampledSlicesToBDVSourceCommand implements Command {
                 (long)(sizeY/(px_size_micron_y/1000.0)),
                 (long)(sizeZ/(px_size_micron_z/1000.0)), 1, downsample_x, downsample_y, downsample_z, resolution_levels).get();
 
+        //SourceAndConverterServices.getSourceAndConverterService().register(model);
+
         for (int iCh = 0; iCh<nChannels; iCh++) {
             final int iChannel = iCh;
             List<SourceAndConverter> sourcesToFuse = slicesToExport.stream()
@@ -199,6 +196,11 @@ public class ExportResampledSlicesToBDVSourceCommand implements Command {
                     .map(preprocess)
                     .map(sources -> sources[iChannel])
                     .map(sat)
+                    /*.map(src -> {
+                        SourceAndConverterServices.getSourceAndConverterService()
+                                .register(AlphaSourceHelper.getOrBuildAlphaSource(src));
+                        return src;
+                    })*/
                     .collect(Collectors.toList());
 
             fusedImages[iCh]
@@ -206,7 +208,7 @@ public class ExportResampledSlicesToBDVSourceCommand implements Command {
                     AlphaFusedResampledSource.SUM,
                     model,
                     image_name+"_ch"+iChannel,
-                    true,true,interpolate,0,block_size_x,block_size_y,block_size_z,n_threads).get();
+                    true,true,interpolate,0,block_size_x,block_size_y,block_size_z,n_block_bounds,n_threads).get();
         }
 
     }

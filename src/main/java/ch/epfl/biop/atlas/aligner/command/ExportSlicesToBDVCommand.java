@@ -11,7 +11,6 @@ import org.scijava.plugin.Plugin;
 import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceAffineTransformer;
-import sc.fiji.bdvpg.sourceandconverter.transform.SourceRealTransformer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +45,7 @@ public class ExportSlicesToBDVCommand implements Command {
             mp.errorMessageForUser.accept("No slice selected", "You did not select any slice to export");
         } else {
             List<SourceAndConverter> sacsToAppend = new ArrayList<>();
-            AffineTransform3D at3D = mp.getAffineTransformFormAlignerToAtlas();
+            AffineTransform3D at3D = mp.getAffineTransformFromAlignerToAtlas();
             SourceAffineTransformer sat = new SourceAffineTransformer(null, at3D);
             slices.forEach(slice -> {
                 for (SourceAndConverter sac : slice.getRegisteredSources()) {

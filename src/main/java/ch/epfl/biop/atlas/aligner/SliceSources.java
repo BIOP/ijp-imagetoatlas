@@ -2,14 +2,11 @@ package ch.epfl.biop.atlas.aligner;
 
 import bdv.util.BoundedRealTransform;
 import bdv.util.DefaultInterpolators;
-import bdv.util.EmptySource;
 import bdv.util.QuPathBdvHelper;
-import bdv.util.source.alpha.AlphaSource;
 import bdv.util.source.alpha.AlphaSourceHelper;
 import bdv.util.source.alpha.AlphaSourceRAI;
 import bdv.util.source.alpha.IAlphaSource;
 import bdv.viewer.Interpolation;
-import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.mouse.allen.ccfv3.command.AllenBrainAdultMouseAtlasCCF2017Command;
 import ch.epfl.biop.atlas.struct.AtlasNode;
@@ -62,10 +59,8 @@ import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
 import sc.fiji.persist.ScijavaGsonHelper;
 import spimdata.imageplus.ImagePlusHelper;
 
-import javax.swing.*;
 import java.awt.*;
 import java.io.*;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -75,10 +70,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
-
-import static bdv.util.source.alpha.AlphaSourceHelper.ALPHA_SOURCE_KEY;
 
 
 /**
@@ -216,7 +208,7 @@ public class SliceSources {
             public void getSourceTransform(int t, int level, AffineTransform3D affineTransform3D) {
                 affineTransform3D.identity();
                 affineTransform3D.scale(mp.sizePixX, mp.sizePixY, thicknessInMm);
-                affineTransform3D.translate(-mp.sX / 2.0, -mp.sY / 2.0, getSlicingAxisPosition());
+                affineTransform3D.translate(-mp.sX / 2.0, -mp.sY / 2.0, getSlicingAxisPosition()+getZShiftCorrection());
             }
 
             @Override
@@ -956,7 +948,7 @@ public class SliceSources {
 
         AffineTransform3D at3D;
 
-        at3D = mp.getAffineTransformFormAlignerToAtlas();
+        at3D = mp.getAffineTransformFromAlignerToAtlas();
 
         rts.add(at3D.inverse().copy());
         irts.add(at3D.inverse().copy());
