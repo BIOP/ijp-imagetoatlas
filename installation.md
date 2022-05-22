@@ -10,14 +10,14 @@ You can choose between the two installation methods, automated or manual. My adv
 
 ## Automated installation
 
-Bash installation scripts for ABBA are available and have been tested (in May 2022) for Windows 10, 11 and Mac OSX. 
-* Download the [install scripts](https://github.com/BIOP/biop-bash-scripts/archive/refs/heads/main.zip)
-* Unzip them
-
+Bash installation scripts for ABBA are available and have been tested (in May 2022) for Windows 10, 11 and Mac OSX.
 You will need a decent internet connection! Several gigabytes need to be downloaded (mainly Fiji, QuPath and the atlases).
 
 ### For Windows
+
 * Install [Git for Windows](https://gitforwindows.org/) with standard options (just hit next on the installer)
+* Download the [install scripts](https://github.com/BIOP/biop-bash-scripts/archive/refs/heads/main.zip)
+* Unzip them
 * Double click on the script `full_install_abba.sh`
 * It is recommended to choose `C:/` as the install path
 * Wait until the script ends
@@ -28,6 +28,8 @@ You will need to know your admin password.
 
 :warning: If, for some reason, you want to keep your previous version of QuPath intact, save it to a different name before starting the script.
 
+* Download the [install scripts](https://github.com/BIOP/biop-bash-scripts/archive/refs/heads/main.zip)
+* Unzip them
 * Right-click on `full_install_abba.command` (do NOT double click!)
 * Click Open
 * Accept the execution: you will be asked for your admin password (you won’t see any character as you type the password, and that’s normal!)
