@@ -199,7 +199,7 @@ public class SimpleRegistrationWrapper implements ExternalABBARegistrationPlugin
 
         // Unbox bounded transform
         if (rt instanceof BoundedRealTransform) {
-            innerRT = ((BoundedRealTransform)rt).getTransform();
+            innerRT = ((BoundedRealTransform)rt).getTransform().copy();
         }
 
         ArrayList<RealPoint> cvtList = new ArrayList<>();

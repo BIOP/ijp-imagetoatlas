@@ -2,7 +2,6 @@ package ch.epfl.biop.abba;
 
 import bdv.util.BdvHandle;
 import ch.epfl.biop.atlas.aligner.DebugView;
-import ch.epfl.biop.atlas.aligner.MoveSliceAction;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.command.ABBAStartCommand;
 import ch.epfl.biop.atlas.aligner.gui.bdv.BdvMultislicePositionerView;
@@ -10,7 +9,6 @@ import ch.epfl.biop.atlas.mouse.allen.ccfv3.command.AllenBrainAdultMouseAtlasCCF
 import ch.epfl.biop.atlas.struct.Atlas;
 import loci.common.DebugTools;
 import net.imagej.ImageJ;
-import net.imagej.patcher.LegacyInjector;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
 
 public class ABBALaunchMouse {

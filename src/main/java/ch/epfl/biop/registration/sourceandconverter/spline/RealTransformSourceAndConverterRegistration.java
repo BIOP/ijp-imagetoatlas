@@ -1,8 +1,6 @@
 package ch.epfl.biop.registration.sourceandconverter.spline;
 
 import bdv.util.BoundedRealTransform;
-import bdv.util.BoundedRealTransformAdapter;
-import bdv.util.RealTransformHelper;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import ch.epfl.biop.registration.sourceandconverter.SourceAndConverterRegistration;
@@ -37,11 +35,10 @@ abstract public class RealTransformSourceAndConverterRegistration extends Source
 
         // Unbox bounded transform
         if (rt instanceof BoundedRealTransform) {
-            innerRT = ((BoundedRealTransform)rt).getTransform();
+            innerRT = ((BoundedRealTransform)rt).getTransform().copy();
         }
 
         ArrayList<RealPoint> cvtList = new ArrayList<>();
-
         for (RealPoint p : pts.ptList) {
             RealPoint pt3d = new RealPoint(3);
             pt3d.setPosition(new double[]{p.getDoublePosition(0), p.getDoublePosition(1),0});
