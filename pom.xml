@@ -111,7 +111,7 @@
 
 		<bigdataviewer-playground-display.version>0.2.0</bigdataviewer-playground-display.version>
 		<bigdataviewer-spimdata-extras.version>0.1.6</bigdataviewer-spimdata-extras.version>
-		<bigdataviewer-biop-tools.version>0.2.47</bigdataviewer-biop-tools.version>
+		<bigdataviewer-biop-tools.version>0.2.49</bigdataviewer-biop-tools.version>
 
 		<bigdataviewer-selector.version>0.1.9</bigdataviewer-selector.version>
 		<scijava.app.directory>C:\Fiji.app</scijava.app.directory>
