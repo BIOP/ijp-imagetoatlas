@@ -207,6 +207,12 @@
 			<groupId>ch.epfl.biop</groupId>
 			<artifactId>bigdataviewer-biop-tools</artifactId>
 			<version>${bigdataviewer-biop-tools.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>xalan</groupId>
+					<artifactId>serializer</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<dependency>
