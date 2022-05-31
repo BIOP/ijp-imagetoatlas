@@ -2,10 +2,10 @@ package ch.epfl.biop.quicknii;
 
 import net.imglib2.realtransform.AffineTransform3D;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlType;
 import java.text.DecimalFormat;
 
 @XmlAccessorType(XmlAccessType.FIELD) // Not sure what this does

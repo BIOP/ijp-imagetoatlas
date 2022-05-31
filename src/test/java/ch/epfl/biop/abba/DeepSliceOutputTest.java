@@ -2,7 +2,7 @@ package ch.epfl.biop.abba;
 
 import ch.epfl.biop.quicknii.QuickNIISeries;
 
-import javax.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBContext;
 import java.io.FileReader;
 
 public class DeepSliceOutputTest {

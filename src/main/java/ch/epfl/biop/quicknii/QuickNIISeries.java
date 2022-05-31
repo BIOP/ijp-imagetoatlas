@@ -1,15 +1,14 @@
 package ch.epfl.biop.quicknii;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.*;
+import java.util.List;
 
 /**
  * Pfou....... XMl stuff, I need to learn xml, let's try JAXB (https://www.baeldung.com/jaxb)
  *
  *
  */
+
 @XmlRootElement(name = "series")
 @XmlType(propOrder = { "first", "last", "name", "slices"})
 public class QuickNIISeries {
@@ -22,6 +21,9 @@ public class QuickNIISeries {
 
     @XmlAttribute
     public String name;
+
+    @XmlAttribute
+    public String aligner;
 
     @XmlElement(name="slice")
     public QuickNIISlice[] slices;

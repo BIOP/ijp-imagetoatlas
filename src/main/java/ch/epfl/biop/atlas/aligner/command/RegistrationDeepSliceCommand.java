@@ -25,12 +25,14 @@ import org.scijava.plugin.PluginService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.Unmarshaller;
 import java.io.File;
 import java.io.FileReader;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -118,6 +120,9 @@ public class RegistrationDeepSliceCommand implements Command {
     //@Parameter
     boolean interpolate = false;
 
+    @Parameter(required = false, persist = false)
+    Function<File,File> deepSliceProcessor = null;
+
     @Override
     public void run() {
 
@@ -131,23 +136,27 @@ public class RegistrationDeepSliceCommand implements Command {
 
         exportDownsampledDataset(slicesToExport);
 
-        IJ.log("Dataset exported in folder "+ dataset_folder.getAbsolutePath());
-        new WaitForUserDialog("Now opening DeepSlice webpage",
-                "Drag and drop all slices into the webpage.")
-                .show();
-        try {
-            ps.open(new URL("https://www.deepslice.com.au/"));
-            ps.open(dataset_folder.toURI().toURL());
-        } catch (Exception e) {
-            mp.errorMessageForUser.accept("Couldn't open DeepSlice from Fiji, ",
-                    "please go to https://www.deepslice.com.au/ and drag and drop your images located in "+ dataset_folder.getAbsolutePath());
+        File deepSliceResult;
+
+        if (deepSliceProcessor==null) {
+            IJ.log("Dataset exported in folder " + dataset_folder.getAbsolutePath());
+            new WaitForUserDialog("Now opening DeepSlice webpage",
+                    "Drag and drop all slices into the webpage.")
+                    .show();
+            try {
+                ps.open(new URL("https://www.deepslice.com.au/"));
+                ps.open(dataset_folder.toURI().toURL());
+            } catch (Exception e) {
+                mp.errorMessageForUser.accept("Couldn't open DeepSlice from Fiji, ",
+                        "please go to https://www.deepslice.com.au/ and drag and drop your images located in " + dataset_folder.getAbsolutePath());
+            }
+            new WaitForUserDialog("DeepSlice result",
+                    "Put the 'results.xml' file into " + dataset_folder.getAbsolutePath() + " then press ok.")
+                    .show();
+            deepSliceResult = new File(dataset_folder, "results.xml");
+        } else {
+            deepSliceResult = deepSliceProcessor.apply(dataset_folder);//, "results.xml");
         }
-
-        new WaitForUserDialog("DeepSlice result",
-                "Put the 'results.xml' file into "+ dataset_folder.getAbsolutePath()+" then press ok.")
-                .show();
-
-        File deepSliceResult = new File(dataset_folder, "results.xml");
 
         if (!deepSliceResult.exists()) {
             mp.errorMessageForUser.accept("Deep Slice registration aborted",
@@ -160,8 +169,9 @@ public class RegistrationDeepSliceCommand implements Command {
 
         try {
             JAXBContext context = JAXBContext.newInstance(QuickNIISeries.class);
-            series = (QuickNIISeries) context.createUnmarshaller()
-                    .unmarshal(new FileReader(deepSliceResult.getAbsolutePath()));
+            Unmarshaller unm = context.createUnmarshaller();
+            unm.setEventHandler(new jakarta.xml.bind.helpers.DefaultValidationEventHandler());
+            series = (QuickNIISeries) unm.unmarshal(new FileReader(deepSliceResult.getAbsolutePath()));
         } catch (Exception e) {
             mp.errorMessageForUser.accept("Deep Slice Command error","Could not parse xml file "+deepSliceResult.getAbsolutePath());
             e.printStackTrace();
@@ -251,14 +261,14 @@ public class RegistrationDeepSliceCommand implements Command {
 
         angleUpdatedMessage+="Angle Y : "+oldY+" has been updated to "+df.format(mp.getReslicedAtlas().getRotateY())+"\n";
 
-        mp.warningMessageForUser.accept("Slicing angle adjusted - ", angleUpdatedMessage);
+        mp.log.accept("Slicing angle adjusted to "+ angleUpdatedMessage);
 
     }
 
     private void adjustSlicesZPosition(final List<SliceSources> slices, double nPixX, double nPixY) {
         // The "slices" list is sorted according to the z axis, before deepslice action
 
-        final String regex = image_name_prefix +"_s([0-9]+).*";
+        final String regex = "(.*)"+image_name_prefix +"_s([0-9]+).*";
         final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
 
         Map<SliceSources, Double> slicesNewPosition = new HashMap<>();
@@ -271,7 +281,7 @@ public class RegistrationDeepSliceCommand implements Command {
 
             matcher.find();
 
-            int iSliceSource = Integer.parseInt(matcher.group(1));
+            int iSliceSource = Integer.parseInt(matcher.group(2));
 
             logger.debug("Slice QuickNii "+i+" correspond to initial slice "+iSliceSource);
 
@@ -334,7 +344,7 @@ public class RegistrationDeepSliceCommand implements Command {
         AffineTransform3D toABBA = mp.getReslicedAtlas().getSlicingTransformToAtlas().inverse();
 
         // Transform sources according to anchoring
-        final String regex = image_name_prefix +"_s([0-9]+).*";
+        final String regex = "(.*)"+image_name_prefix +"_s([0-9]+).*";
         final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
 
         for (int i = 0; i < slices.size(); i++) {
@@ -367,7 +377,7 @@ public class RegistrationDeepSliceCommand implements Command {
 
             matcher.find();
 
-            int iSliceSource = Integer.parseInt(matcher.group(1));
+            int iSliceSource = Integer.parseInt(matcher.group(2));
 
             logger.debug("Slice QuickNii "+i+" correspond to initial slice "+iSliceSource);
 

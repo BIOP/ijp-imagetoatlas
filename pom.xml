@@ -136,6 +136,23 @@
 	</properties>
 
 	<dependencies>
+
+
+		<!-- JAXB API v3.0.1 -->
+		<dependency>
+			<groupId>jakarta.xml.bind</groupId>
+			<artifactId>jakarta.xml.bind-api</artifactId>
+			<version>3.0.1</version>
+		</dependency>
+
+		<!-- JAXB v3.0.2 reference implementation (curiously with com.sun coordinates) -->
+		<dependency>
+			<groupId>com.sun.xml.bind</groupId>
+			<artifactId>jaxb-impl</artifactId>
+			<version>3.0.2</version>
+			<scope>runtime</scope>
+		</dependency>
+
         <!-- ImageJ dependencies -->
 		<dependency>
 			<groupId>net.imagej</groupId>
