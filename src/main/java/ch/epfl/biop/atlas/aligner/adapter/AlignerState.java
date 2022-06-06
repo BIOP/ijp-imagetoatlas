@@ -66,6 +66,7 @@ public class AlignerState {
         skipableActions.add(ExportSliceRegionsToQuPathProjectAction.class);
         skipableActions.add(ExportSliceRegionsToRoiManagerAction.class);
         skipableActions.add(EditLastRegistrationAction.class); //TODO : make it serializable ? serializable or not ?
+        skipableActions.add(ExportAtlasSliceToImagePlusAction.class);
 
         List<CancelableAction> compiledActions = new ArrayList<>();
         if ((ini_actions == null)||(ini_actions.size()==0)) {

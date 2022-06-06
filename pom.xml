@@ -129,7 +129,11 @@
 		<oshi-core.version>5.5.1</oshi-core.version>
 		<jna.version>5.6.0</jna.version>
 
-		<bio-formats.version>6.9.1</bio-formats.version>
+		<!--<bio-formats.version>6.9.1</bio-formats.version>-->
+
+		<!--- because xml deserialization with JAXB is not included in Java 11, and we prepare migrating to Java 11 -->
+		<jakarta.xml.bind-api.version>3.0.1</jakarta.xml.bind-api.version>
+		<jaxb-impl.version>3.0.2</jaxb-impl.version>
 
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>sign,deploy-to-scijava</releaseProfiles>
@@ -137,19 +141,18 @@
 
 	<dependencies>
 
-
 		<!-- JAXB API v3.0.1 -->
 		<dependency>
 			<groupId>jakarta.xml.bind</groupId>
 			<artifactId>jakarta.xml.bind-api</artifactId>
-			<version>3.0.1</version>
+			<version>${jakarta.xml.bind-api.version}</version>
 		</dependency>
 
 		<!-- JAXB v3.0.2 reference implementation (curiously with com.sun coordinates) -->
 		<dependency>
 			<groupId>com.sun.xml.bind</groupId>
 			<artifactId>jaxb-impl</artifactId>
-			<version>3.0.2</version>
+			<version>${jaxb-impl.version}</version>
 			<scope>runtime</scope>
 		</dependency>
 

@@ -81,7 +81,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
     TableView tableView;
 
-    Consumer<String> debug = System.out::println;
+    Consumer<String> debug = (str) -> {};//System.out::println;
 
     protected static Logger logger = LoggerFactory.getLogger(MultiSlicePositioner.class);
 

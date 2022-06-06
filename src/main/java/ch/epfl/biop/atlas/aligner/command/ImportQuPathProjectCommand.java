@@ -47,8 +47,10 @@ public class ImportQuPathProjectCommand implements Command {
             SourceAndConverter[] sacs =
                     sac_service.getSourceAndConverterFromSpimdata(spimdata)
                             .toArray(new SourceAndConverter[0]);
-            mp.createSlice(sacs, slice_axis_initial, increment_between_slices, QuPathEntryEntity.class, new QuPathEntryEntity(-1));
-            //mp.selectSlice(mp.getSlices());
+
+            if ((sacs!=null)&&(sacs.length>0)) { // Because the action could have been canceled
+                mp.createSlice(sacs, slice_axis_initial, increment_between_slices, QuPathEntryEntity.class, new QuPathEntryEntity(-1));
+            }
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
