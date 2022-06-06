@@ -17,7 +17,7 @@ In QuPath, provided you have correctly installed the [required extensions](insta
 
 ![Load annotation](assets/img/qupath_import_atlas_regions.png)
 
-When opening the annotation, you will be able to split the regions between left and right hemi-brain, or not.
+When opening the annotation, you will be able to split the regions between left and right hemi-brain, or not. You can press `N` to hide the name of the imported regions. The image will be less cluttered.
 
 If you go to the workflow tab of QuPath, you will see that a worflow step is present and thus you can create a script out of it, such as:
 
