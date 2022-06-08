@@ -131,7 +131,7 @@
 
 		<!--<bio-formats.version>6.9.1</bio-formats.version>-->
 
-		<!--- because xml deserialization with JAXB is not included in Java 11, and we prepare migrating to Java 11 -->
+		<!--because xml deserialization with JAXB is not included in Java 11, and we prepare migrating to Java 11 -->
 		<jakarta.xml.bind-api.version>3.0.1</jakarta.xml.bind-api.version>
 		<jaxb-impl.version>3.0.2</jaxb-impl.version>
 
