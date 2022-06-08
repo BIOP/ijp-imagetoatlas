@@ -10,7 +10,7 @@ import java.util.Map;
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>ABBA - Elastix Registration (Affine)",
         description = "Uses Elastix for affine in plane registration of selected slices")
-public class RegistrationElastixAffineCommand extends RegistrationSingleChannelCommand {
+public class RegistrationElastixAffineCommand extends RegistrationMultiChannelCommand {
 
     @Parameter(label = "Registration re-sampling (micrometers)")
     double pixel_size_micrometer = 40;

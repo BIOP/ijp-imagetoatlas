@@ -105,9 +105,9 @@ public class Elastix2DSplineRegistration extends RealTransformSourceAndConverter
 
             addToFlatParameters(flatParameters,
                     // Fixed image
-                    "sac_fixed",fimg[0],
+                    "sacs_fixed",fimg,
                     // Moving image
-                    "sac_moving", mimg[0],
+                    "sacs_moving", mimg,
                     // Interpolation in resampling
                     "interpolate", true,
                     // Start registration with a 32x32 pixel image

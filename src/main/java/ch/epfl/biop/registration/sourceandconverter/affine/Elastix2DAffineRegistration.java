@@ -96,9 +96,9 @@ public class Elastix2DAffineRegistration extends AffineTransformSourceAndConvert
 
             addToFlatParameters(flatParameters,
                 // Fixed image
-          "sac_fixed",fimg[0],
+          "sacs_fixed", fimg,
                 // Moving image
-                "sac_moving", mimg[0],
+                "sacs_moving", mimg,
                 // No interpolation in resampling
                 "interpolate", false,
                 // Start registration with a 4x4 pixel image
