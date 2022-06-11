@@ -13,6 +13,18 @@ It uses [BigDataViewer](https://imagej.net/plugins/bdv/index) and [BigWarp](http
 
 It has been developed by the [BioImaging & Optics Platform](https://www.epfl.ch/research/facilities/ptbiop/) at EPFL. This page contains the documentation of ABBA (installation and usage). If you require additional help, please post your question on the [image.sc](https://forum.image.sc) forum  and tag your question / issue with `abba` and `fiji` or `qupath`. If you have already installed ABBA, you can also click on `Help > Ask for help in the forum` from the plugin (some helpful information from your local installation will be included in your post).
 
+## Documentation
+
+There's currently three forms of documentation available:
+
+- [Youtube video tutorial](https://www.youtube.com/watch?v=sERGONVw4zE)
+- [Workshop slides](https://docs.google.com/presentation/d/1c5yG-5Rhz5WlR4Hf9TNVkjqb6yD6oukza8P6vHGVZMw)
+- This website:
+  - [How to install ABBA](installation.md)
+  - [How to use ABBA](usage.md)
+
+## Demo datasets
+
 If you want to test this plugin, you can download one of the following test dataset: 
 
 #### Dataset 1, provided by Lucie Dixsaut, [Johannes Gräff lab](https://www.epfl.ch/labs/graefflab/), EPFL
@@ -25,10 +37,31 @@ One animal, 87 serial sections, 2 fluorescent channels (nuclei and autofluoresce
 * [Sample sections  (Zenodo repository, 21 Gb) ](https://doi.org/10.5281/zenodo.4715656) - each section has to be downloaded individually (multiresolution ome.tiff file)
 * [Downsampled sections  (GDrive, 0.4 Gb) ](https://drive.google.com/file/d/1OVb860hy-UZSSXa_u9drWiPKEunWT_a7/view?usp=sharing)
 
-## [Workshop slides](https://docs.google.com/presentation/d/1c5yG-5Rhz5WlR4Hf9TNVkjqb6yD6oukza8P6vHGVZMw)
-## [Installation](installation.md)
-## [Using ABBA](usage.md)
-## [Developer documentation (In progress...)]()
+# Important note on File formats!
+
+**TL; DR: Use calibrated VSI, CZI, OME-TIFF, NDPI, 
+a few others (please read the text below). Otherwise convert you files to pyramidal OME-Tiff files. You can use the Fiji plugin [Kheops](https://github.com/BIOP/ijp-kheops) for instance.**
+
+
+All files need to be properly calibrated (microns, millimeters, etc, but not pixels!). ABBA takes advantage of the  calibration to set appropriate registration parameters.
+
+---
+
+:bulb: It is strongly recommended to work with multiresolution file formats (VSI, OME-TIFF, SVS), since brain slices are usually very big 2d images. ABBA, like QuPath, uses pre-computed downsampled images of these files to speed-up (very significantly) the display and processing of these images. Downsampled images also help for registration, since the registration is made with large scale features (size above  a few cells), which are incorrectly sampled if no downsampled image pre-exists.
+
+---
+
+:warning: Because Fiji is used is the workflow, only Bio-Formats supported formats are correctly handled. You can check on  [the Bio-Formats documentation](https://docs.openmicroscopy.org/bio-formats/6.6.1/supported-formats.html) if your file formats will be correctly handled. This will be the case if `Pyramid` is checked. File which can be opened **only** via [`OpenSlide`](https://openslide.org/) are not supported.
+
+Tested file formats for ABBA :
+
+* CZI (Zeiss, ++, you may have to tick `Split RGB channels` for 16-bits RGB images)
+* VSI (Olympus, +++)
+* LIF (Leica, +, no multiresolution support in bio-formats)
+
+CZI, NDPI, OME-TIFF should work perfectly. Let us know if that's the case in practice and we'll update the list.
+
+RGB images as well as 8-bits and 16-bits images have also been successfully tested.
 
 <!---
 ### Markdown
@@ -64,29 +97,3 @@ Your Pages site will use the layout and styles from the Jekyll theme you have se
 Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
 
 -->
-
-# Important note on File formats!
-
-**TL; DR: Use calibrated VSI, CZI, OME-TIFF, NDPI, 
-a few others (please read the text below). Otherwise convert you files to pyramidal OME-Tiff files. You can use the Fiji plugin [Kheops](https://github.com/BIOP/ijp-kheops) for instance.**
-
-
-All files need to be properly calibrated (microns, millimeters, etc, but not pixels!). ABBA takes advantage of the  calibration to set appropriate registration parameters.
-
----
-
-:bulb: It is strongly recommended to work with multiresolution file formats (VSI, OME-TIFF, SVS), since brain slices are usually very big 2d images. ABBA, like QuPath, uses pre-computed downsampled images of these files to speed-up (very significantly) the display and processing of these images. Downsampled images also help for registration, since the registration is made with large scale features (size above  a few cells), which are incorrectly sampled if no downsampled image pre-exists.
-
----
-
-:warning: Because Fiji is used is the workflow, only Bio-Formats supported formats are correctly handled. You can check on  [the Bio-Formats documentation](https://docs.openmicroscopy.org/bio-formats/6.6.1/supported-formats.html) if your file formats will be correctly handled. This will be the case if `Pyramid` is checked. File which can be opened **only** via [`OpenSlide`](https://openslide.org/) are not supported.
-
-Tested file formats for ABBA :
-
-* CZI (Zeiss, ++, you may have to tick `Split RGB channels` for 16-bits RGB images)
-* VSI (Olympus, +++)
-* LIF (Leica, +, no multiresolution support in bio-formats)
-
-CZI, NDPI, OME-TIFF should work perfectly. Let us know if that's the case in practice and we'll update the list.
-
-RGB images as well as 8-bits and 16-bits images have also been successfully tested.
