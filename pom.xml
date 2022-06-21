@@ -107,7 +107,7 @@
 		<main-class>ch.epfl.biop.abba.ABBALaunchMouse</main-class>
 
 		<bigdataviewer-playground.version>0.5.1</bigdataviewer-playground.version>
-		<bigdataviewer-bioformats.version>0.3.5</bigdataviewer-bioformats.version>
+		<bigdataviewer-bioformats.version>0.3.6</bigdataviewer-bioformats.version>
 
 		<bigdataviewer-playground-display.version>0.2.0</bigdataviewer-playground-display.version>
 		<bigdataviewer-spimdata-extras.version>0.1.6</bigdataviewer-spimdata-extras.version>
