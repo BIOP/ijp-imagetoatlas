@@ -7,7 +7,7 @@ A [Fiji](https://fiji.sc/) plugin for the registration of thin brain slices to v
   Your browser does not support the video tag.
 </video>
 
-Aligning Big Brains & Atlases or ABBA for short, is a Fiji plugin which allows to register adult mouse brain serial sections to several atlases, in coronal, sagittal and horizontal orientations.
+Aligning Big Brains & Atlases or ABBA for short, is a Fiji plugin which allows to register serial sections to several atlases, in coronal, sagittal and horizontal orientations.
 
 It uses [BigDataViewer](https://imagej.net/plugins/bdv/index) and [BigWarp](https://imagej.net/plugins/bigwarp) for the display and on-the-fly computation of spline-transformed multiresolution images (typical output of Whole Slide Imaging).
 
