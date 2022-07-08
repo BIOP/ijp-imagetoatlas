@@ -90,11 +90,7 @@ In Fiji:
 
 ### 3. Install of Elastix / Transformix
 
-For automated registration, ABBA uses the [elastix](https://github.com/SuperElastix/elastix) software, which is independent of Fiji. The location of Elastix (and of its companion transformix) should be specified in Fiji in order for ABBA to use it. The best way is thus to install elastix and transformix on your local machine, as [explained below](installation.md#3a-local-installation-of-elastix).
-
-If you do not manage to install elastix and transformix, don't give up yet! We provide a free public server [snappy.epfl.ch](https://snappy.epfl.ch/) which can perform automated registrations remotely. However, if your registration tests are successful, it is strongly advised to install elastix on your local computer.
-
-#### 3a. Local installation of elastix
+For automated registration, ABBA uses the [elastix](https://github.com/SuperElastix/elastix) software, which is independent of Fiji. The location of Elastix (and of its companion transformix) should be specified in Fiji in order for ABBA to use it. 
 
 * Download the [latest release of elastix for your OS](https://github.com/SuperElastix/elastix/releases/tag/5.0.1). This documentation has been tested for elastix 5.0.1, a later version should also work.
 * Unzip it somewhere convenient ( `C` drive on windows; `Applications` for Mac )
@@ -116,23 +112,11 @@ Nothing particular should be required for linux system.
 
 ![Setting elastix and transformix path in Fiji](./assets/img/fiji_elastix_transformix_path.png)
   
-This message should show up in the ImageJ console : 
+This message should show up in the ImageJ console (and maybe errors for Cellpose, but that's not important): 
 * `[INFO] Transformix	->	set :-)`
 * `Elastix	->	set :-)`
 
 Once elastix is installed, you can run [the following script](https://gist.githubusercontent.com/NicoKiaru/b91f9f3f0069b765a49b5d4629a8b1c7/raw/571954a443d1e1f0597022f6c19f042aefbc0f5a/TestRegister.groovy) in Fiji to test elastix functionality. Save the linked file with a `.groovy` extension, open it in Fiji, and run it.
-
----
-
-:warning: Can't get elastix to work on your local computer ? Don't give up yet, you can try automated registration without a local elastix install. Go to the step 4 of the documentation.
-
----
-
-#### 3b. Remote installation of Elastix
-
-It's possible to install elastix on a server, that can then be used as a central server. For the moment a public freely accessible registration server is available at the address [`https://snappy.epfl.ch`](https://snappy.epfl.ch) and can be used for automated registration.
-
-The procedure to install your own registration server will be detailed in the readme of the registration server github repo : [https://github.com/NicoKiaru/elastix_registration_server](https://github.com/NicoKiaru/elastix_registration_server) (TODO)
 
 ### 4. Setup ABBA in Fiji
 
