@@ -13,13 +13,13 @@ import java.util.Map;
 
 abstract public class SourceAndConverterRegistration implements IABBARegistrationPlugin {
 
-    protected SourceAndConverter[] fimg;
+    protected SourceAndConverter<?>[] fimg;
 
-    protected SourceAndConverter[] mimg;
+    protected SourceAndConverter<?>[] mimg;
 
-    protected SourceAndConverter[] fimg_mask;
+    protected SourceAndConverter<?>[] fimg_mask;
 
-    protected SourceAndConverter[] mimg_mask;
+    protected SourceAndConverter<?>[] mimg_mask;
 
     protected int timePoint = 0;
 

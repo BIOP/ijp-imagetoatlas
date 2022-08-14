@@ -885,13 +885,13 @@ public class MultiSlicePositioner implements Closeable {
         factorySourcesProcessor.registerSubtype(SourcesAffineTransformer.class);
         factorySourcesProcessor.registerSubtype(SourcesChannelsSelect.class);
         factorySourcesProcessor.registerSubtype(SourcesProcessComposer.class);
-        factorySourcesProcessor.registerSubtype(SourcesResampler.class);
+        //factorySourcesProcessor.registerSubtype(SourcesResampler.class);
         factorySourcesProcessor.registerSubtype(SourcesIdentity.class);
 
         gsonbuilder.registerTypeAdapterFactory(factorySourcesProcessor);
         gsonbuilder.registerTypeHierarchyAdapter(SourcesChannelsSelect.class, new SourcesChannelSelectAdapter());
         gsonbuilder.registerTypeHierarchyAdapter(SourcesAffineTransformer.class, new SourcesAffineTransformerAdapter());
-        gsonbuilder.registerTypeHierarchyAdapter(SourcesResampler.class, new SourcesResamplerAdapter());
+        //gsonbuilder.registerTypeHierarchyAdapter(SourcesResampler.class, new SourcesResamplerAdapter());
         gsonbuilder.registerTypeHierarchyAdapter(SourcesProcessComposer.class, new SourcesComposerAdapter());
         gsonbuilder.registerTypeHierarchyAdapter(SourcesIdentity.class, new SourcesIdentityAdapter());
 
@@ -924,7 +924,7 @@ public class MultiSlicePositioner implements Closeable {
         log.accept("All tasks have been performed!");
 
         // First save all sources required in the state
-        List<SourceAndConverter> allSacs = new ArrayList<>();
+        List<SourceAndConverter<?>> allSacs = new ArrayList<>();
 
         getSlices().forEach(sliceSource -> allSacs.addAll(Arrays.asList(sliceSource.getOriginalSources())));
 

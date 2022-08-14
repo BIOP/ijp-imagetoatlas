@@ -47,9 +47,9 @@ public class SacBigWarp2DRegistration extends RealTransformSourceAndConverterReg
     public boolean register() {
         {
 
-            List<SourceAndConverter> movingSacs = Arrays.stream(mimg).collect(Collectors.toList());
+            List<SourceAndConverter<?>> movingSacs = Arrays.stream(mimg).collect(Collectors.toList());
 
-            List<SourceAndConverter> fixedSacs = Arrays.stream(fimg).collect(Collectors.toList());
+            List<SourceAndConverter<?>> fixedSacs = Arrays.stream(fimg).collect(Collectors.toList());
 
             List<ConverterSetup> converterSetups = Arrays.stream(mimg).map(src -> SourceAndConverterServices.getSourceAndConverterService().getConverterSetup(src)).collect(Collectors.toList());
 

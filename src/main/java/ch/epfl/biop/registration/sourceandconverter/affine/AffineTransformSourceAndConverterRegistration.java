@@ -23,7 +23,7 @@ abstract public class AffineTransformSourceAndConverterRegistration extends Sour
     public SourceAndConverter[] getTransformedImageMovingToFixed(SourceAndConverter[] img) {
         SourceAndConverter[] out = new SourceAndConverter[img.length];
         for (int idx = 0;idx<img.length;idx++) {
-            out[idx] = SourceTransformHelper.append(at3d, new SourceAndConverterAndTimeRange(img[idx],timePoint));
+            out[idx] = SourceTransformHelper.createNewTransformedSourceAndConverter(at3d, new SourceAndConverterAndTimeRange(img[idx],timePoint));
         }
         return out;
     }

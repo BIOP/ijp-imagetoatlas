@@ -9,6 +9,8 @@ import ch.epfl.biop.sourceandconverter.processor.SourcesChannelsSelect;
 import ch.epfl.biop.sourceandconverter.processor.SourcesProcessor;
 import ch.epfl.biop.sourceandconverter.processor.SourcesProcessorHelper;
 import ij.ImagePlus;
+import net.imglib2.type.NativeType;
+import net.imglib2.type.numeric.NumericType;
 import org.scijava.ItemIO;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
@@ -23,7 +25,7 @@ import java.util.stream.Collectors;
         description = "Export to ImageJ the original unregistered slice data (for each selected slice)." +
                 "If the image has more than 2GPixels, this will fail. "+
                 "Resolution levels can be specified.")
-public class ExportSlicesOriginalDataToImageJCommand implements Command {
+public class ExportSlicesOriginalDataToImageJCommand<T extends NativeType<T> & NumericType<T>> implements Command {
 
     @Parameter
     MultiSlicePositioner mp;
@@ -73,9 +75,10 @@ public class ExportSlicesOriginalDataToImageJCommand implements Command {
             int index = 0;
             for (SliceSources slice : slicesToExport) {
 
-                List<SourceAndConverter> sliceSources = Arrays.asList(preprocess.apply(slice.getOriginalSources()));
+                List<SourceAndConverter<?>> sliceSources = Arrays.asList(preprocess.apply(slice.getOriginalSources()));
                 CZTRange range = ImagePlusGetter.fromSources(sliceSources, 0, resolution_level);
-                images[index] = ImagePlusGetter.getImagePlus(sliceSources.get(0).getSpimSource().getName(), sliceSources, resolution_level, range, verbose, false, false, null);
+                List<SourceAndConverter<T>> castSources = sliceSources.stream().map(source -> (SourceAndConverter<T>) source).collect(Collectors.toList());
+                images[index] = ImagePlusGetter.getImagePlus(sliceSources.get(0).getSpimSource().getName(), castSources, resolution_level, range, verbose, false, false, null);
                 images[index].show();
                 index++;
             }

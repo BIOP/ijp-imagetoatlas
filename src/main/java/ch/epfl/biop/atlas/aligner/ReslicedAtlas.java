@@ -205,7 +205,7 @@ public class ReslicedAtlas implements RealInterval {
         }
 
         // Wrapped as TransformedSource to adjust slicing
-        slicingModel = new SourceAffineTransformer(nonWrappedSlicingModel, slicingTransfom).getSourceOut();
+        slicingModel = new SourceAffineTransformer(nonWrappedSlicingModel, slicingTransfom).get();
 
         SourceAndConverterServices.getSourceAndConverterService().register(slicingModel);
 

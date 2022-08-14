@@ -44,7 +44,7 @@ public class QuickNiiDemo {
                 ).get().getOutput("spimdata");
 
         // Retrieve sources from the spimdata
-        List<SourceAndConverter> sources = SourceAndConverterServices
+        List<SourceAndConverter<?>> sources = SourceAndConverterServices
                 .getSourceAndConverterService()
                 .getSourceAndConverterFromSpimdata(asd);
 

@@ -231,7 +231,9 @@ public class Elastix2DSplineRegistration extends RealTransformSourceAndConverter
                     ptsTarget.add(ptTarget);
                 }
 
-                RealRandomAccessible<IntegerType> mask = fimg_mask[0].getSpimSource().getInterpolatedSource(timePoint,0, Interpolation.NEARESTNEIGHBOR);
+                RealRandomAccessible rawMask = fimg_mask[0].getSpimSource().getInterpolatedSource(timePoint,0, Interpolation.NEARESTNEIGHBOR);
+
+                RealRandomAccessible<IntegerType> mask = (RealRandomAccessible<IntegerType>) rawMask;
 
                 AffineTransform3D at3D = new AffineTransform3D();
                 fimg_mask[0].getSpimSource().getSourceTransform(timePoint,0,at3D);
@@ -290,9 +292,9 @@ public class Elastix2DSplineRegistration extends RealTransformSourceAndConverter
     @Override
     public boolean edit() {
 
-        List<SourceAndConverter> movingSacs = Arrays.stream(mimg).collect(Collectors.toList());
+        List<SourceAndConverter<?>> movingSacs = Arrays.stream(mimg).collect(Collectors.toList());
 
-        List<SourceAndConverter> fixedSacs = Arrays.stream(fimg).collect(Collectors.toList());
+        List<SourceAndConverter<?>> fixedSacs = Arrays.stream(fimg).collect(Collectors.toList());
 
         List<ConverterSetup> converterSetups = Arrays.stream(mimg).map(src -> SourceAndConverterServices.getSourceAndConverterService().getConverterSetup(src)).collect(Collectors.toList());
 

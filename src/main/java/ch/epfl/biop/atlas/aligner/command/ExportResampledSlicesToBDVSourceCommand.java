@@ -191,16 +191,18 @@ public class ExportResampledSlicesToBDVSourceCommand implements Command {
 
         for (int iCh = 0; iCh<nChannels; iCh++) {
             final int iChannel = iCh;
-            List<SourceAndConverter> sourcesToFuse = slicesToExport.stream()
+
+            List<SourceAndConverter<?>> sourcesToFuse = slicesToExport.stream()
                     .map(SliceSources::getRegisteredSources)
                     .map(preprocess)
                     .map(sources -> sources[iChannel])
-                    .map(sat)
+                    .map(source -> new SourceAffineTransformer(at3D).apply(source))//sat)
                     /*.map(src -> {
                         SourceAndConverterServices.getSourceAndConverterService()
                                 .register(AlphaSourceHelper.getOrBuildAlphaSource(src));
                         return src;
                     })*/
+                    .map(source -> (SourceAndConverter<?>) source)
                     .collect(Collectors.toList());
 
             fusedImages[iCh]
