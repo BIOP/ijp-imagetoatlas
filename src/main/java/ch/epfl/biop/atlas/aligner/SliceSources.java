@@ -505,7 +505,6 @@ public class SliceSources {
         }
 
         registered_sacs = reg.getTransformedImageMovingToFixed(registered_sacs);
-        // TODO: Set ALPHA SOURCE
 
         for (SourceAndConverter sac: registered_sacs) {
             SourceAndConverterServices
@@ -1287,6 +1286,10 @@ public class SliceSources {
         } else {
             return registered_sacs_sequence.get(Math.max(2,registered_sacs_sequence.size() - 1 - stepBack)).sacs;
         }
+    }
+
+    public IAlphaSource getAlpha() {
+        return alphaSource;
     }
 
     public static class RegistrationAndSources {

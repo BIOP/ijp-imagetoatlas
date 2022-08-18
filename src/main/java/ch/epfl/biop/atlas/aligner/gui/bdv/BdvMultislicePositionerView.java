@@ -1850,14 +1850,17 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
         g.setFont(new Font("TimesRoman", Font.BOLD, 16));
         g.setColor(new Color(255, 255, 100, 250));
-        Point mouseLocation = bdvh.getViewerPanel().getMousePosition();
-        if ((ontologyLocation!=null)&&(mouseLocation!=null)) {
-            g.drawString(ontologyLocation.toString(),mouseLocation.x,mouseLocation.y);
+        try {
+            Point mouseLocation = bdvh.getViewerPanel().getMousePosition();
+            if ((ontologyLocation!=null)&&(mouseLocation!=null)) {
+                g.drawString(ontologyLocation.toString(),mouseLocation.x,mouseLocation.y);
+            }
+            if ((mouseLocation!=null)&&(!coordinates.startsWith("[0.00;0.00;0.00]"))) {
+                g.drawString(coordinates, mouseLocation.x, mouseLocation.y - 20);
+            }
+        } catch (NullPointerException npe) {
+            System.out.println("CAUGHT!!!!");
         }
-        if ((mouseLocation!=null)&&(!coordinates.startsWith("[0.00;0.00;0.00]"))) {
-            g.drawString(coordinates, mouseLocation.x, mouseLocation.y - 20);
-        }
-
     }
 
     private void drawSetOfSliceControls(Graphics2D g, AffineTransform3D bdvAt3D, List<SliceSources> slicesCopy) {

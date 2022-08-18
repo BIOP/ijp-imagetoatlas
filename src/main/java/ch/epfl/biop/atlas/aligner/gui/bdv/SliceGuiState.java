@@ -1,15 +1,37 @@
 package ch.epfl.biop.atlas.aligner.gui.bdv;
 
+import bdv.img.WarpedSource;
 import bdv.util.BdvHandle;
+import bdv.util.EmptySource;
+import bdv.util.source.alpha.AlphaSource;
+import bdv.util.source.alpha.AlphaSourceHelper;
+import bdv.util.source.alpha.IAlphaSource;
+import bdv.viewer.Interpolation;
+import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
+import bdv.viewer.render.DefaultMipmapOrdering;
+import bdv.viewer.render.MipmapOrdering;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.bdv.gui.graphicalhandle.CircleGraphicalHandle;
 import ch.epfl.biop.bdv.gui.graphicalhandle.GraphicalHandle;
 import ch.epfl.biop.bdv.gui.graphicalhandle.GraphicalHandleToolTip;
 import ch.epfl.biop.bdv.gui.graphicalhandle.SquareGraphicalHandle;
 import ch.epfl.biop.registration.sourceandconverter.affine.AffineTransformedSourceWrapperRegistration;
+import mpicbg.spim.data.sequence.VoxelDimensions;
+import net.imglib2.FinalInterval;
+import net.imglib2.FinalRealInterval;
+import net.imglib2.Localizable;
+import net.imglib2.RandomAccessible;
+import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealPoint;
+import net.imglib2.RealRandomAccessible;
+import net.imglib2.position.FunctionRandomAccessible;
 import net.imglib2.realtransform.AffineTransform3D;
+import net.imglib2.realtransform.RealViews;
+import net.imglib2.type.numeric.NumericType;
+import net.imglib2.type.numeric.integer.UnsignedShortType;
+import net.imglib2.type.numeric.real.FloatType;
+import net.imglib2.view.Views;
 import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
@@ -22,6 +44,8 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -245,13 +269,16 @@ public class SliceGuiState {
 
     public void sourcesChanged() {
         hide();
-        SourceAndConverter[] displayedSources = getRegisteredSourcesAtStep(stepBack);
+        bdvh.getViewerPanel().repaint();
+        SourceAndConverter[] displayedSources = alphaCulledSources(getRegisteredSourcesAtStep(stepBack), slice.getAlpha());
+        //SourceAndConverter[] displayedSources = getRegisteredSourcesAtStep(stepBack);
         for (int idx = 0; idx<nChannels; idx++) {
             Displaysettings.applyDisplaysettings(ini_sources[idx], displaysettings[idx]);
             Displaysettings.applyDisplaysettings(displayedSources[idx], displaysettings[idx]);
         }
         sources_displayed = slicePositioner.getTransformedImageMovingToFixed(displayedSources);
         show();
+        bdvh.getViewerPanel().repaint();
     }
 
     public void slicePositionChanged() {
@@ -402,4 +429,114 @@ public class SliceGuiState {
             this.displaysettings = state.displaysettings;
         }
     }
+
+    private SourceAndConverter[] alphaCulledSources(SourceAndConverter[] sources, IAlphaSource alpha) {
+        SourceAndConverter[] alphaCulled = new SourceAndConverter[sources.length];
+        for (int i = 0; i<alphaCulled.length; i++) {
+            SourceAndConverter ori = sources[i];
+            if (ori.asVolatile()!=null) {
+                SourceAndConverter sac = new SourceAndConverter(
+                        new AlphaCulledSource(ori.getSpimSource(), alpha),
+                        ori.getConverter(),
+                        new SourceAndConverter(new AlphaCulledSource(ori.asVolatile().getSpimSource(), alpha),
+                                ori.asVolatile().getConverter()));
+                alphaCulled[i] = sac;
+            } else {
+                SourceAndConverter sac = new SourceAndConverter(
+                        new AlphaCulledSource(ori.getSpimSource(), alpha),
+                        ori.getConverter());
+                alphaCulled[i] = sac;
+            }
+        }
+        return alphaCulled;
+    }
+
+    /*
+     * Trick to use the tiled rendering with bigdataviewer-core 10.4+ and warped sources
+     * @param <T>
+     */
+    public static class AlphaCulledSource<T extends NumericType<T>> implements Source<T>, MipmapOrdering {
+
+        final Source<T> origin;
+        final IAlphaSource alpha;
+
+        public AlphaCulledSource(Source<T> origin, IAlphaSource alpha) {
+            this.origin = origin;
+            this.alpha = alpha;
+            sourceMipmapOrdering = MipmapOrdering.class.isInstance( origin ) ?
+                    ( MipmapOrdering ) origin : new DefaultMipmapOrdering( origin );
+        }
+
+        @Override
+        public boolean isPresent(int t) {
+            return origin.isPresent(t);
+        }
+
+        @Override
+        public RandomAccessibleInterval<T> getSource(int t, int level) {
+            //AffineTransform3D transform = new AffineTransform3D();
+            //alpha.getSpimSource().getSourceTransform(t,level,transform);
+            //final FinalRealInterval bb = transform.estimateBounds(alpha.getSpimSource().getSource(t,level));
+            /*BiConsumer<Localizable, T> fun = (l, p) -> p.setZero();
+
+            RandomAccessible<T> ra = new FunctionRandomAccessible<>(3,
+                    fun, this::getType);
+
+            return Views.interval(ra, alpha.getSpimSource().getSource(t,level));*/
+            return (RandomAccessibleInterval<T>) alpha.getSource(t,level); // WRONG! But only the interval is used
+        }
+
+        @Override
+        public RealRandomAccessible<T> getInterpolatedSource(int t, int level, Interpolation interpolation) {
+            AffineTransform3D tOri = new AffineTransform3D();
+            AffineTransform3D tAlpha = new AffineTransform3D();
+            origin.getSourceTransform(t,level,tOri);
+            alpha.getSourceTransform(t,level,tAlpha);
+            tOri.preConcatenate(tAlpha.inverse());
+            return RealViews.affine(origin.getInterpolatedSource(t,level,interpolation),tOri);
+        }
+
+        @Override
+        public void getSourceTransform(int t, int level, AffineTransform3D affineTransform3D) {
+            alpha.getSourceTransform(t,level,affineTransform3D);
+        }
+
+        @Override
+        public T getType() {
+            return origin.getType();
+        }
+
+        @Override
+        public String getName() {
+            return origin.getName();
+        }
+
+        @Override
+        public VoxelDimensions getVoxelDimensions() {
+            return origin.getVoxelDimensions();
+        }
+
+        @Override
+        public int getNumMipmapLevels() {
+            return origin.getNumMipmapLevels();
+        }
+
+        @Override
+        public boolean doBoundingBoxCulling()
+        {
+            return true;
+        }
+
+        /**
+         * This is either the itself, if it implements
+         * {@link MipmapOrdering}, or a {@link DefaultMipmapOrdering}.
+         */
+        private final MipmapOrdering sourceMipmapOrdering;
+
+        @Override
+        public MipmapHints getMipmapHints(AffineTransform3D screenTransform, int timepoint, int previousTimepoint) {
+            return sourceMipmapOrdering.getMipmapHints( screenTransform, timepoint, previousTimepoint );
+        }
+    }
+
 }

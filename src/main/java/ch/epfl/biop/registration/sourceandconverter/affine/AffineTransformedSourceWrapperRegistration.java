@@ -1,5 +1,7 @@
 package ch.epfl.biop.registration.sourceandconverter.affine;
 
+import bdv.tools.transformation.TransformedSource;
+import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
 import net.imglib2.realtransform.AffineTransform3D;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterAndTimeRange;
