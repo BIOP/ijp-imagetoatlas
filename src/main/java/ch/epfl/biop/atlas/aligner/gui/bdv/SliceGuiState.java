@@ -430,7 +430,7 @@ public class SliceGuiState {
         }
     }
 
-    private SourceAndConverter[] alphaCulledSources(SourceAndConverter[] sources, IAlphaSource alpha) {
+    private static SourceAndConverter[] alphaCulledSources(SourceAndConverter[] sources, IAlphaSource alpha) {
         SourceAndConverter[] alphaCulled = new SourceAndConverter[sources.length];
         for (int i = 0; i<alphaCulled.length; i++) {
             SourceAndConverter ori = sources[i];

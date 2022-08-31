@@ -42,7 +42,9 @@ import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.position.FunctionRandomAccessible;
 import net.imglib2.realtransform.*;
 import net.imglib2.realtransform.inverse.WrappedIterativeInvertibleRealTransform;
+import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.IntegerType;
+import net.imglib2.type.numeric.NumericType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.ExtendedRandomAccessibleInterval;
 import net.imglib2.view.Views;
@@ -713,7 +715,7 @@ public class SliceSources {
         }
     }
 
-    void computeLabelImage(AffineTransform3D at3D) {
+    <T extends NumericType<T> & NativeType<T>> void computeLabelImage(AffineTransform3D at3D) {
         labelImageBeingComputed = true;
 
         // 0 - slicing model : empty source but properly defined in space and resolution
@@ -723,20 +725,20 @@ public class SliceSources {
                 1
         ).get();
 
-        SourceResampler resampler = new SourceResampler(null,
+        SourceResampler<T> resampler = new SourceResampler<>(null,
                 singleSliceModel, toString()+"_Model", false, false, false, 0
         );
 
         AffineTransform3D translateZ = new AffineTransform3D();
         translateZ.translate(0, 0, -slicingAxisPosition);
 
-        SourceAndConverter sac =
+        SourceAndConverter<T> sac =
                 mp.reslicedAtlas.nonExtendedSlicedSources[mp.reslicedAtlas.getLabelSourceIndex()]; // By convention the label image is the last one
 
         sac = resampler.apply(sac);
         sac = SourceTransformHelper.createNewTransformedSourceAndConverter(translateZ, new SourceAndConverterAndTimeRange(sac, 0));
 
-        Map<SourceAndConverter, Integer> mapSacToMml = new HashMap<>();
+        Map<SourceAndConverter<T>, Integer> mapSacToMml = new HashMap<>();
         mapSacToMml.put(sac, 0);
 
         List<SourceAndConverter<?>> sourceList = new ArrayList<>();
@@ -770,7 +772,7 @@ public class SliceSources {
         sourceList = new ArrayList<>();
         sourceList.add(sac);
         ImagePlus leftRightImage =
-                ImagePlusHelper.wrap(sourceList.stream().map(s -> (SourceAndConverter) s).collect(Collectors.toList()), mapSacToMml,
+                ImagePlusHelper.wrap(sourceList.stream().map(s -> (SourceAndConverter<T>) s).collect(Collectors.toList()), mapSacToMml,
                         0, 1, 1);
 
         leftRightOrigin.set(ConvertibleRois.labelImageToRoiArrayKeepSinglePixelPrecision(leftRightImage));

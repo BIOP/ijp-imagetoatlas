@@ -1,9 +1,11 @@
 package ch.epfl.biop.atlas.aligner.command;
 
 import bdv.util.BdvHandle;
+import bdv.util.source.alpha.IAlphaSource;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
+import ch.epfl.biop.atlas.aligner.gui.bdv.SliceGuiState;
 import net.imglib2.realtransform.AffineTransform3D;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
@@ -21,8 +23,8 @@ import java.util.stream.Collectors;
         description = "Export registered slices to a BigDataViewer window.")
 public class ExportSlicesToBDVCommand implements Command {
 
-    @Parameter(label = "Select the bdv to append the file - only one")
-    BdvHandle[] bdvh;
+    //@Parameter(label = "Select the bdv to append the file - only one")
+    //BdvHandle[] bdvh;
 
     @Parameter(label = "Enter a tag to identify the registered sources (metadata key = \"ABBA\")" )
     String tag;
@@ -49,17 +51,42 @@ public class ExportSlicesToBDVCommand implements Command {
             SourceAffineTransformer sat = new SourceAffineTransformer(null, at3D);
             slices.forEach(slice -> {
                 for (SourceAndConverter sac : slice.getRegisteredSources()) {
-                    SourceAndConverter source = sat.apply(sac);
+                    SourceAndConverter source = sat.apply(alphaCulledSources(new SourceAndConverter[]{sac}, slice.getAlpha())[0]);
                     sac_service.register(source);
                     sac_service.setMetadata(source, "ABBA", tag);
                     sacsToAppend.add(source);
+
                 }
             });
 
+            BdvHandle bdvh = SourceAndConverterServices
+                    .getBdvDisplayService().getNewBdv();
+
             SourceAndConverterServices
                     .getBdvDisplayService()
-                    .show(bdvh[0], sacsToAppend.toArray(new SourceAndConverter[0]));
+                    .show(bdvh, sacsToAppend.toArray(new SourceAndConverter[0]));
         }
+    }
+
+    private static SourceAndConverter[] alphaCulledSources(SourceAndConverter[] sources, IAlphaSource alpha) {
+        SourceAndConverter[] alphaCulled = new SourceAndConverter[sources.length];
+        for (int i = 0; i<alphaCulled.length; i++) {
+            SourceAndConverter ori = sources[i];
+            if (ori.asVolatile()!=null) {
+                SourceAndConverter sac = new SourceAndConverter(
+                        new SliceGuiState.AlphaCulledSource(ori.getSpimSource(), alpha),
+                        ori.getConverter(),
+                        new SourceAndConverter(new SliceGuiState.AlphaCulledSource(ori.asVolatile().getSpimSource(), alpha),
+                                ori.asVolatile().getConverter()));
+                alphaCulled[i] = sac;
+            } else {
+                SourceAndConverter sac = new SourceAndConverter(
+                        new SliceGuiState.AlphaCulledSource(ori.getSpimSource(), alpha),
+                        ori.getConverter());
+                alphaCulled[i] = sac;
+            }
+        }
+        return alphaCulled;
     }
 
 }

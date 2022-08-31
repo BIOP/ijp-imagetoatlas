@@ -357,8 +357,9 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     private void installBigDataViewerCards() {
 
         bdvh.getCardPanel().addCard("Atlas Information", new AtlasInfoPanel(msp).getPanel(), true);
-
+        //TODO, FIX NULL
         bdvh.getCardPanel().addCard("Atlas Display", ScijavaSwingUI.getPanel(msp.getContext(), AtlasAdjustDisplayCommand.class, "view", this), true);
+
 
         logger.debug("Adding table view");
         addTableView();
@@ -372,6 +373,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         bdvh.getCardPanel().addCard("Define region of interest",
                 ScijavaSwingUI.getPanel(msp.getContext(), SliceDefineROICommand.class, "mp", msp, "view", this),
                 false);
+
         addToCleanUpHook(() -> {
             if (bdvh.getCardPanel()!=null) {
                 bdvh.getCardPanel().removeCard("Atlas Information");
@@ -597,7 +599,6 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             }
         });
     }
-
 
     private void addExtraABBACommands() {
         msp.getContext().getService(PluginService.class)

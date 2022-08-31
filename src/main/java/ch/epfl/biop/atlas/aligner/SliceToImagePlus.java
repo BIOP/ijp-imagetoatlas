@@ -4,6 +4,8 @@ import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.sourceandconverter.processor.SourcesProcessor;
 import ij.ImagePlus;
 import net.imglib2.realtransform.AffineTransform3D;
+import net.imglib2.type.NativeType;
+import net.imglib2.type.numeric.NumericType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
@@ -21,24 +23,24 @@ public class SliceToImagePlus {
 
     static Logger logger = LoggerFactory.getLogger(SliceToImagePlus.class);
 
-    public static ImagePlus export(List<SourceAndConverter> sourceList,
-                                   SliceSources slice,
-                                   SourcesProcessor preprocess,
-                                   double px, double py, double sx, double sy,
-                                   double pixelSizeMillimeter, int timepoint,
-                                   boolean interpolate) {
+    public static <T extends NumericType<T> & NativeType<T>> ImagePlus export(List<SourceAndConverter<?>> sourceList,
+                                                                             SliceSources slice,
+                                                                             SourcesProcessor preprocess,
+                                                                             double px, double py, double sx, double sy,
+                                                                             double pixelSizeMillimeter, int timepoint,
+                                                                             boolean interpolate) {
         AffineTransform3D at3D = new AffineTransform3D();
 
         SourceAndConverter model = createModelSource(slice, px, py, sx, sy, pixelSizeMillimeter, at3D);
 
-        List<SourceAndConverter> resampledSourceList = sourceList
+        List<SourceAndConverter<T>> resampledSourceList = sourceList
                 .stream()
-                .map(sac -> new SourceResampler(sac,model,sac.getSpimSource().getName()+"_ResampledLike_"+model.getSpimSource().getName(), true, false, interpolate,0).get())
+                .map(sac -> (SourceAndConverter<T>) (new SourceResampler(sac,model,sac.getSpimSource().getName()+"_ResampledLike_"+model.getSpimSource().getName(), true, false, interpolate,0).get()))
                 .collect(Collectors.toList());
 
         if ((sourceList.size()>1)) {
 
-            Map<SourceAndConverter, Integer> mapMipmap = new HashMap<>();
+            Map<SourceAndConverter<T>, Integer> mapMipmap = new HashMap<>();
             sourceList.forEach(src -> {
                 int mipmapLevel = SourceAndConverterHelper.bestLevel(src, timepoint, pixelSizeMillimeter);
                 logger.debug("Mipmap level chosen for source ["+src.getSpimSource().getName()+"] : "+mipmapLevel);
@@ -73,7 +75,7 @@ public class SliceToImagePlus {
         }
     }
 
-    public static ImagePlus export(SliceSources slice,
+    public static <T extends NumericType<T> & NativeType<T>> ImagePlus export(SliceSources slice,
                                    SourcesProcessor preprocess,
                                    double px, double py, double sx, double sy,
                                    double pixelSizeMillimeter, int timepoint,
@@ -86,14 +88,14 @@ public class SliceToImagePlus {
 
         SourceAndConverter model = createModelSource(slice, px, py, sx, sy, pixelSizeMillimeter, at3D);
 
-        List<SourceAndConverter> resampledSourceList = sourceList
+        List<SourceAndConverter<T>> resampledSourceList = sourceList
                 .stream()
-                .map(sac -> new SourceResampler(sac,model,sac.getSpimSource().getName()+"_ResampledLike_"+model.getSpimSource().getName(),true, false, interpolate,0).get())
+                .map(sac -> (SourceAndConverter<T>) (new SourceResampler(sac,model,sac.getSpimSource().getName()+"_ResampledLike_"+model.getSpimSource().getName(),true, false, interpolate,0).get()))
                 .collect(Collectors.toList());
 
         if ((sourceList.size()>1)) {
 
-            Map<SourceAndConverter, Integer> mapMipmap = new HashMap<>();
+            Map<SourceAndConverter<T>, Integer> mapMipmap = new HashMap<>();
             sourceList.forEach(src -> {
                 int mipmapLevel = SourceAndConverterHelper.bestLevel(src, timepoint, pixelSizeMillimeter);
                 logger.debug("Mipmap level chosen for source ["+src.getSpimSource().getName()+"] : "+mipmapLevel);
@@ -129,7 +131,7 @@ public class SliceToImagePlus {
 
     }
 
-    public static ImagePlus exportAtlas(MultiSlicePositioner mp, SliceSources slice,
+    public static <T extends NumericType<T> & NativeType<T>> ImagePlus exportAtlas(MultiSlicePositioner mp, SliceSources slice,
                                    SourcesProcessor preprocess,
                                    double px, double py, double sx, double sy,
                                    double pixelSizeMillimeter, int timepoint,
@@ -141,14 +143,14 @@ public class SliceToImagePlus {
 
         SourceAndConverter model = createModelSource(slice, px, py, sx, sy, pixelSizeMillimeter, at3D);
 
-        List<SourceAndConverter> resampledSourceList = sourceList
+        List<SourceAndConverter<T>> resampledSourceList = sourceList
                 .stream()
-                .map(sac -> new SourceResampler(sac,model,sac.getSpimSource().getName()+"_ResampledLike_"+model.getSpimSource().getName(),true, false, interpolate,0).get())
+                .map(sac -> (SourceAndConverter<T>) (new SourceResampler(sac,model,sac.getSpimSource().getName()+"_ResampledLike_"+model.getSpimSource().getName(),true, false, interpolate,0).get()))
                 .collect(Collectors.toList());
 
         if ((sourceList.size()>1)) {
 
-            Map<SourceAndConverter, Integer> mapMipmap = new HashMap<>();
+            Map<SourceAndConverter<T>, Integer> mapMipmap = new HashMap<>();
             sourceList.forEach(src -> {
                 int mipmapLevel = SourceAndConverterHelper.bestLevel(src, timepoint, pixelSizeMillimeter);
                 if (!interpolate) mipmapLevel = 0; // For labels

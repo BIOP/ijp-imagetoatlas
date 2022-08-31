@@ -10,6 +10,8 @@ import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.realtransform.InvertibleRealTransform;
 import net.imglib2.realtransform.InvertibleRealTransformSequence;
 import net.imglib2.realtransform.RealTransform;
+import net.imglib2.type.NativeType;
+import net.imglib2.type.numeric.NumericType;
 import org.scijava.Context;
 import org.scijava.command.Command;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
@@ -247,23 +249,23 @@ public class SimpleRegistrationWrapper implements ExternalABBARegistrationPlugin
     }
 
 
-    public static ImagePlus export(String name, List<SourceAndConverter<?>> sourceList,
-                                   double px, double py, double sx, double sy,
-                                   double pixelSizeMillimeter, int timepoint,
-                                   boolean interpolate) {
+    public static <T extends NumericType<T> & NativeType<T>> ImagePlus export(String name, List<SourceAndConverter<?>> sourceList,
+                                                                             double px, double py, double sx, double sy,
+                                                                             double pixelSizeMillimeter, int timepoint,
+                                                                             boolean interpolate) {
 
         AffineTransform3D at3D = new AffineTransform3D();
 
         SourceAndConverter model = createModelSource(px, py, sx, sy, pixelSizeMillimeter, at3D);
 
-        List<SourceAndConverter> resampledSourceList = sourceList
+        List<SourceAndConverter<T>> resampledSourceList = sourceList
                 .stream()
-                .map(sac -> new SourceResampler(sac,model,sac.getSpimSource().getName()+"_ResampledLike_"+model.getSpimSource().getName(), true, false, interpolate,0).get())
+                .map(sac -> (SourceAndConverter<T>) (new SourceResampler(sac,model,sac.getSpimSource().getName()+"_ResampledLike_"+model.getSpimSource().getName(), true, false, interpolate,0).get()))
                 .collect(Collectors.toList());
 
         if ((sourceList.size()>1)) {
 
-            Map<SourceAndConverter, Integer> mapMipmap = new HashMap<>();
+            Map<SourceAndConverter<T>, Integer> mapMipmap = new HashMap<>();
             sourceList.forEach(src -> {
                 int mipmapLevel = SourceAndConverterHelper.bestLevel(src, timepoint, pixelSizeMillimeter);
                 //logger.debug("Mipmap level chosen for source ["+src.getSpimSource().getName()+"] : "+mipmapLevel);
