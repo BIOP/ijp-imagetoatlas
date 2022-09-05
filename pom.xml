@@ -106,12 +106,14 @@
 		<license.excludes>**/resources/**</license.excludes>
 		<main-class>ch.epfl.biop.abba.ABBALaunchMouse</main-class>
 
+		<scijava-ui-swing.version>0.16.1</scijava-ui-swing.version>
+
 		<bigdataviewer-playground.version>0.6.0</bigdataviewer-playground.version>
 		<bigdataviewer-bioformats.version>0.4.0</bigdataviewer-bioformats.version>
 
 		<bigdataviewer-playground-display.version>0.3.0</bigdataviewer-playground-display.version>
 		<bigdataviewer-spimdata-extras.version>0.2.0</bigdataviewer-spimdata-extras.version>
-		<bigdataviewer-biop-tools.version>0.4.0-SNAPSHOT</bigdataviewer-biop-tools.version>
+		<bigdataviewer-biop-tools.version>0.4.90</bigdataviewer-biop-tools.version>
 
 		<bigdataviewer-selector.version>0.2.1</bigdataviewer-selector.version>
 
@@ -173,7 +175,6 @@
 		<dependency>
 			<groupId>org.scijava</groupId>
 			<artifactId>scijava-ui-swing</artifactId>
-			<version>0.15.1-SNAPSHOT2</version>
 		</dependency>
 
 		<dependency>
