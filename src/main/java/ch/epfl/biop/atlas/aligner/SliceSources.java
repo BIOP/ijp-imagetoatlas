@@ -13,6 +13,7 @@ import ch.epfl.biop.atlas.mouse.allen.ccfv3.command.AllenBrainAdultMouseAtlasCCF
 import ch.epfl.biop.atlas.struct.AtlasHelper;
 import ch.epfl.biop.atlas.struct.AtlasNode;
 import ch.epfl.biop.atlas.struct.AtlasOntology;
+import ch.epfl.biop.bdv.img.legacy.qupath.entity.QuPathEntryEntity;
 import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
 import ch.epfl.biop.java.utilities.roi.SelectToROIKeepLines;
 import ch.epfl.biop.java.utilities.roi.types.CompositeFloatPoly;
@@ -28,7 +29,6 @@ import ch.epfl.biop.sourceandconverter.processor.SourcesIdentity;
 import ch.epfl.biop.sourceandconverter.processor.SourcesProcessComposer;
 import ch.epfl.biop.sourceandconverter.processor.SourcesProcessor;
 import ch.epfl.biop.sourceandconverter.processor.SourcesProcessorHelper;
-import ch.epfl.biop.spimdata.qupath.QuPathEntryEntity;
 import com.google.gson.Gson;
 import ij.ImagePlus;
 import ij.gui.Roi;
