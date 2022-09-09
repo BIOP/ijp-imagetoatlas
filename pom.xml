@@ -112,7 +112,7 @@
 		<bigvolumeviewer.version>0.2.0</bigvolumeviewer.version>
 		<!-- bdv playground related dependencies -->
 		<bigdataviewer-playground.version>0.6.0</bigdataviewer-playground.version>
-		<bigdataviewer-image-loaders.version>0.3.1</bigdataviewer-image-loaders.version>
+		<bigdataviewer-image-loaders.version>0.3.2</bigdataviewer-image-loaders.version>
 		<bigdataviewer-playground-display.version>0.3.0</bigdataviewer-playground-display.version>
 		<bigdataviewer-spimdata-extras.version>0.2.0</bigdataviewer-spimdata-extras.version>
 		<image-transform-converters.version>0.1.5</image-transform-converters.version>
