@@ -3,6 +3,7 @@ package ch.epfl.biop.atlas.aligner;
 import bdv.util.BoundedRealTransform;
 import bdv.util.DefaultInterpolators;
 import bdv.util.QuPathBdvHelper;
+import bdv.util.RealTransformHelper;
 import bdv.util.SourcedRealTransform;
 import bdv.util.source.alpha.AlphaSourceHelper;
 import bdv.util.source.alpha.AlphaSourceRAI;
@@ -197,7 +198,7 @@ public class SliceSources {
         double voxZ = original_sacs[0].getSpimSource().getVoxelDimensions().dimension(0);
         FinalVoxelDimensions voxD = new FinalVoxelDimensions(unit, voxX, voxY, voxZ);
 
-        double transform_field_subsampling = 10;
+        double transform_field_subsampling = 20;
 
         FinalInterval interval = new FinalInterval((int)(mp.nPixX/transform_field_subsampling),
                 (int)(mp.nPixY/transform_field_subsampling),1);
@@ -542,12 +543,12 @@ public class SliceSources {
             }*/
 
             //BoundedRealTransform brt = new BoundedRealTransform((InvertibleRealTransform) sreg.getRealTransform(), si);
-            ITransformFieldSource source = new TransformFieldSource(sreg.getRealTransform(), "BigWarp Transformation");
+            //ITransformFieldSource source = new TransformFieldSource(sreg.getRealTransform(), "BigWarp Transformation");
 
-            ITransformFieldSource cached_transform = new ResampledTransformFieldSource(source, alphaSource, "Cached transform");
-            RealTransform transform = new SourcedRealTransform(cached_transform);
+            //ITransformFieldSource cached_transform = new ResampledTransformFieldSource(source, alphaSource, "Cached transform");
+            //RealTransform transform = new SourcedRealTransform(cached_transform);
             si.updateBox();
-            sreg.setRealTransform(transform);
+            sreg.setRealTransform(RealTransformHelper.resampleTransform(sreg.getRealTransform(), alphaSource));
         }
 
         registered_sacs = reg.getTransformedImageMovingToFixed(registered_sacs);
