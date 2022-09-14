@@ -3,9 +3,13 @@ package ch.epfl.biop.atlas.aligner;
 import bdv.util.BoundedRealTransform;
 import bdv.util.DefaultInterpolators;
 import bdv.util.QuPathBdvHelper;
+import bdv.util.SourcedRealTransform;
 import bdv.util.source.alpha.AlphaSourceHelper;
 import bdv.util.source.alpha.AlphaSourceRAI;
 import bdv.util.source.alpha.IAlphaSource;
+import bdv.util.source.field.ITransformFieldSource;
+import bdv.util.source.field.ResampledTransformFieldSource;
+import bdv.util.source.field.TransformFieldSource;
 import bdv.viewer.Interpolation;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.plugin.RegistrationPluginHelper;
@@ -191,7 +195,11 @@ public class SliceSources {
         double voxY = original_sacs[0].getSpimSource().getVoxelDimensions().dimension(0);
         double voxZ = original_sacs[0].getSpimSource().getVoxelDimensions().dimension(0);
         FinalVoxelDimensions voxD = new FinalVoxelDimensions(unit, voxX, voxY, voxZ);
-        FinalInterval interval = new FinalInterval(mp.nPixX,mp.nPixY,1);
+
+        double transform_field_subsampling = 10;
+
+        FinalInterval interval = new FinalInterval((int)(mp.nPixX/transform_field_subsampling),
+                (int)(mp.nPixY/transform_field_subsampling),1);
 
         alphaSource = new IAlphaSource() {
             @Override
@@ -233,7 +241,7 @@ public class SliceSources {
             @Override
             public void getSourceTransform(int t, int level, AffineTransform3D affineTransform3D) {
                 affineTransform3D.identity();
-                affineTransform3D.scale(mp.sizePixX, mp.sizePixY, thicknessInMm);
+                affineTransform3D.scale(mp.sizePixX*transform_field_subsampling, mp.sizePixY*transform_field_subsampling, thicknessInMm);
                 affineTransform3D.translate(-mp.sX / 2.0, -mp.sY / 2.0, getSlicingAxisPosition()+getZShiftCorrection());
             }
 
@@ -523,11 +531,22 @@ public class SliceSources {
 
         if (reg instanceof RealTransformSourceAndConverterRegistration) {
             RealTransformSourceAndConverterRegistration sreg = (RealTransformSourceAndConverterRegistration) reg;
-            if (!(sreg.getRealTransform() instanceof BoundedRealTransform)) {
+            /*if (!(sreg.getRealTransform() instanceof BoundedRealTransform)) {
                 BoundedRealTransform brt = new BoundedRealTransform((InvertibleRealTransform) sreg.getRealTransform(), si);
+
+
                 si.updateBox();
                 sreg.setRealTransform(brt);
-            }
+
+            }*/
+
+            //BoundedRealTransform brt = new BoundedRealTransform((InvertibleRealTransform) sreg.getRealTransform(), si);
+            ITransformFieldSource source = new TransformFieldSource(sreg.getRealTransform(), "BigWarp Transformation");
+
+            ITransformFieldSource cached_transform = new ResampledTransformFieldSource(source, alphaSource, "Cached transform");
+            RealTransform transform = new SourcedRealTransform(cached_transform);
+            si.updateBox();
+            sreg.setRealTransform(transform);
         }
 
         registered_sacs = reg.getTransformedImageMovingToFixed(registered_sacs);
@@ -937,14 +956,16 @@ public class SliceSources {
     }
 
     boolean isWrapped(RealTransform rt) {
-        return (rt instanceof BoundedRealTransform)
+        return
+                (rt instanceof SourcedRealTransform)
+              ||(rt instanceof BoundedRealTransform)
               ||(rt instanceof WrappedIterativeInvertibleRealTransform)
               ||(rt instanceof Wrapped2DTransformAs3D);
     }
 
     RealTransform getWrapped(RealTransform rt) {
-        if (rt instanceof BoundedRealTransform) {
-            return ((BoundedRealTransform)rt).getTransform();
+        if (rt instanceof SourcedRealTransform) {
+            return ((SourcedRealTransform)rt).getTransform();
         }
         if (rt instanceof WrappedIterativeInvertibleRealTransform) {
             return ((WrappedIterativeInvertibleRealTransform)rt).getTransform();
