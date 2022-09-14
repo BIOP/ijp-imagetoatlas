@@ -54,7 +54,7 @@ UNTESTED!
 The installation consists of four steps detailed in the paragraphs below:
 
 1. Install QuPath and 2 QuPath extensions,
-2. Enable Fiji's ABBA update site,
+2. Enable Fiji's PTBIOP update site,
 3. Install the additional programs required for automated registration (Elastix / Transformix),
 4. Setup ABBA in Fiji:
    * specify the location of elastix and transformix executable files to Fiji
@@ -77,13 +77,13 @@ Install the [QuPath ABBA extension](https://github.com/BIOP/qupath-extension-abb
 
 ![Installed extensions](./assets/img/qupath_installed_extensions.png)
 
-### 2. Install Fiji and enable Fiji's ABBA update site
+### 2. Install Fiji and enable Fiji's PTBIOP update site
 
 Download and install [ImageJ/Fiji](https://fiji.sc/)
 
 In Fiji:
 * Click `Help > Update... > Manage update sites
-* Tick the checkbox `ABBA (experimental)` 
+* Tick the checkbox `PTBIOP` 
 * Click `Close`
 * Click `Apply changes`
 * Restart Fiji
