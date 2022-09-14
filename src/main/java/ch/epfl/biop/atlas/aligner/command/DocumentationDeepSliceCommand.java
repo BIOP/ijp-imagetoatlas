@@ -21,7 +21,7 @@ public class DocumentationDeepSliceCommand implements Command {
     @Override
     public void run() {
         try {
-            ps.open(new URL("https://www.deepslice.com.au/open-guide"));
+            ps.open(new URL("https://www.deepslice.com.au/guide"));
         } catch (IOException e) {
             e.printStackTrace();
         }
