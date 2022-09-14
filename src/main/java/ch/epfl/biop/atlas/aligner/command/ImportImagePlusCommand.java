@@ -2,13 +2,13 @@ package ch.epfl.biop.atlas.aligner.command;
 
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
+import ch.epfl.biop.bdv.img.imageplus.ImagePlusToSpimData;
 import ij.ImagePlus;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
-import spimdata.imageplus.SpimDataFromImagePlusGetter;
 
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Import>ABBA - Import Current ImageJ Window",
@@ -30,7 +30,7 @@ public class ImportImagePlusCommand implements Command {
     @Override
     public void run() {
 
-        AbstractSpimData<?> asd = (new SpimDataFromImagePlusGetter()).apply(image);
+        AbstractSpimData<?> asd = ImagePlusToSpimData.getSpimData(image);
         sac_service.register(asd);
         sac_service.setSpimDataName(asd, image.getTitle());
 

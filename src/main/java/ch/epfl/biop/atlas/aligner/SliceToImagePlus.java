@@ -1,6 +1,7 @@
 package ch.epfl.biop.atlas.aligner;
 
 import bdv.viewer.SourceAndConverter;
+import ch.epfl.biop.bdv.img.imageplus.ImagePlusHelper;
 import ch.epfl.biop.sourceandconverter.processor.SourcesProcessor;
 import ij.ImagePlus;
 import net.imglib2.realtransform.AffineTransform3D;
@@ -11,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
 import sc.fiji.bdvpg.sourceandconverter.importer.EmptySourceAndConverterCreator;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceResampler;
-import spimdata.imageplus.ImagePlusHelper;
 
 import java.util.Arrays;
 import java.util.HashMap;

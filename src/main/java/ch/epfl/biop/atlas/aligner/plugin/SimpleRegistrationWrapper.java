@@ -3,6 +3,7 @@ package ch.epfl.biop.atlas.aligner.plugin;
 import bdv.util.BoundedRealTransform;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
+import ch.epfl.biop.bdv.img.imageplus.ImagePlusHelper;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import ij.ImagePlus;
 import net.imglib2.RealPoint;
@@ -19,7 +20,6 @@ import sc.fiji.bdvpg.sourceandconverter.importer.EmptySourceAndConverterCreator;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceRealTransformer;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceResampler;
 import sc.fiji.persist.ScijavaGsonHelper;
-import spimdata.imageplus.ImagePlusHelper;
 
 import java.util.*;
 import java.util.stream.Collectors;
