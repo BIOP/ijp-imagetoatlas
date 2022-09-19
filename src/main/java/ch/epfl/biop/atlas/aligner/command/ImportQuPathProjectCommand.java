@@ -2,8 +2,8 @@ package ch.epfl.biop.atlas.aligner.command;
 
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
+import ch.epfl.biop.bdv.img.legacy.qupath.command.QuPathProjectToBDVDatasetLegacyCommand;
 import ch.epfl.biop.bdv.img.legacy.qupath.entity.QuPathEntryEntity;
-import ch.epfl.biop.scijava.command.spimdata.QuPathProjectToBDVDatasetCommand;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import org.scijava.command.Command;
 import org.scijava.command.CommandService;
@@ -41,7 +41,7 @@ public class ImportQuPathProjectCommand implements Command {
     public void run() {
         try {
             AbstractSpimData spimdata = (AbstractSpimData) command_service
-                    .run(QuPathProjectToBDVDatasetCommand.class,true,
+                    .run(QuPathProjectToBDVDatasetLegacyCommand.class,true,
                             "quPathProject", qupath_project,
                             "unit", "MILLIMETER").get().getOutput("spimData");
             SourceAndConverter[] sacs =

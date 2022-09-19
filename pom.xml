@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.scijava</groupId>
 		<artifactId>pom-scijava</artifactId>
-		<version>33.1.0</version>
+		<version>33.2.0</version>
 		<relativePath />
 	</parent>
 
@@ -109,18 +109,18 @@
 		<!-- bigdataviewer dependencies -->
 		<bigvolumeviewer.version>0.2.0</bigvolumeviewer.version>
 		<!-- bdv playground related dependencies -->
-		<bigdataviewer-playground.version>0.6.1</bigdataviewer-playground.version>
-		<bigdataviewer-image-loaders.version>0.3.2</bigdataviewer-image-loaders.version>
+		<bigdataviewer-playground.version>0.6.2</bigdataviewer-playground.version>
+		<bigdataviewer-image-loaders.version>0.3.4</bigdataviewer-image-loaders.version>
 		<bigdataviewer-playground-display.version>0.3.0</bigdataviewer-playground-display.version>
 		<bigdataviewer-spimdata-extras.version>0.3.1</bigdataviewer-spimdata-extras.version>
 		<image-transform-converters.version>0.1.5</image-transform-converters.version>
 		<elastix_registration_server.version>0.1.4</elastix_registration_server.version>
-		<bigdataviewer-biop-tools.version>0.5.1</bigdataviewer-biop-tools.version>
+		<bigdataviewer-biop-tools.version>0.5.2</bigdataviewer-biop-tools.version>
 		<bigdataviewer-selector.version>0.2.2</bigdataviewer-selector.version>
 
 		<!-- biop dependencies -->
-		<ijl-utilities-wrappers.version>0.7.0</ijl-utilities-wrappers.version>
-		<ijp-kheops.version>0.3.1</ijp-kheops.version>
+		<ijl-utilities-wrappers.version>0.7.2</ijl-utilities-wrappers.version>
+		<ijp-kheops.version>0.3.2</ijp-kheops.version>
 
 		<!-- maths -->
 		<leastsquares.version>1.0.0</leastsquares.version>
