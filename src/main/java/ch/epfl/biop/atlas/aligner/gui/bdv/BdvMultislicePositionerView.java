@@ -355,34 +355,45 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     }
 
     private void installBigDataViewerCards() {
-
-        bdvh.getCardPanel().addCard("Atlas Information", new AtlasInfoPanel(msp).getPanel(), true);
+        BdvHandleHelper.addCard(bdvh, "Atlas Information", new AtlasInfoPanel(msp).getPanel(), true);
+        //bdvh.getCardPanel().adCard("Atlas Information", new AtlasInfoPanel(msp).getPanel(), true);
         //TODO, FIX NULL
-        bdvh.getCardPanel().addCard("Atlas Display", ScijavaSwingUI.getPanel(msp.getContext(), AtlasAdjustDisplayCommand.class, "view", this), true);
+        BdvHandleHelper.addCard(bdvh, "Atlas Display", ScijavaSwingUI.getPanel(msp.getContext(), AtlasAdjustDisplayCommand.class, "view", this), true);
+        //bdvh.getCardPanel().adCard("Atlas Display", ScijavaSwingUI.getPanel(msp.getContext(), AtlasAdjustDisplayCommand.class, "view", this), true);
 
 
         logger.debug("Adding table view");
         addTableView();
 
-        bdvh.getCardPanel().addCard("Display & Navigation", new NavigationPanel(this).getPanel(), true);
+        BdvHandleHelper.addCard(bdvh, "Display & Navigation", new NavigationPanel(this).getPanel(), true);
+        //bdvh.getCardPanel().adCard("Display & Navigation", new NavigationPanel(this).getPanel(), true);
 
-        bdvh.getCardPanel().addCard("Edit Selected Slices", new EditPanel(msp).getPanel(), true);
+        BdvHandleHelper.addCard(bdvh, "Edit Selected Slices", new EditPanel(msp).getPanel(), true);
+        //bdvh.getCardPanel().adCard("Edit Selected Slices", new EditPanel(msp).getPanel(), true);
 
-        bdvh.getCardPanel().addCard("Atlas Slicing", ScijavaSwingUI.getPanel(msp.getContext(), AtlasSlicingAdjusterCommand.class, "reslicedAtlas", msp.getReslicedAtlas()), true);
+        BdvHandleHelper.addCard(bdvh, "Atlas Slicing", ScijavaSwingUI.getPanel(msp.getContext(), AtlasSlicingAdjusterCommand.class, "reslicedAtlas", msp.getReslicedAtlas()), true);
+        //bdvh.getCardPanel().adCard("Atlas Slicing", ScijavaSwingUI.getPanel(msp.getContext(), AtlasSlicingAdjusterCommand.class, "reslicedAtlas", msp.getReslicedAtlas()), true);
 
-        bdvh.getCardPanel().addCard("Define region of interest",
+        BdvHandleHelper.addCard(bdvh, "Define region of interest",
                 ScijavaSwingUI.getPanel(msp.getContext(), SliceDefineROICommand.class, "mp", msp, "view", this),
                 false);
+        //bdvh.getCardPanel().adCard("Define region of interest",
+        //        ScijavaSwingUI.getPanel(msp.getContext(), SliceDefineROICommand.class, "mp", msp, "view", this),
+        //        false);
 
         addToCleanUpHook(() -> {
+            SwingUtilities.invokeLater(() -> {
             if (bdvh.getCardPanel()!=null) {
-                bdvh.getCardPanel().removeCard("Atlas Information");
-                bdvh.getCardPanel().removeCard("Atlas Display");
-                bdvh.getCardPanel().removeCard("Display & Navigation");
-                bdvh.getCardPanel().removeCard("Edit Selected Slices");
-                bdvh.getCardPanel().removeCard("Atlas Slicing");
-                bdvh.getCardPanel().removeCard("Define region of interest");
+
+                    bdvh.getCardPanel().removeCard("Atlas Information");
+                    bdvh.getCardPanel().removeCard("Atlas Display");
+                    bdvh.getCardPanel().removeCard("Display & Navigation");
+                    bdvh.getCardPanel().removeCard("Edit Selected Slices");
+                    bdvh.getCardPanel().removeCard("Atlas Slicing");
+                    bdvh.getCardPanel().removeCard("Define region of interest");
+
             }
+            });
         });
     }
 
@@ -505,7 +516,8 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     private void addTableView() {
         tableView = new TableView(this);
         msp.addSliceListener(tableView);
-        bdvh.getCardPanel().addCard("Slices Display", tableView.getPanel(), true);
+        BdvHandleHelper.addCard(bdvh, "Slices Display", tableView.getPanel(), true);
+        //bdvh.getCardPanel().adCard("Slices Display", tableView.getPanel(), true);
         addToCleanUpHook(() -> {
             tableView.cleanup();
             if (msp!=null) { // Because cleanup is called 2 times. TODO fix double call
@@ -1260,7 +1272,8 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         if ((rm == null) && (bdvh!=null)) {
             try {
                 rm = new ResourcesMonitor();
-                bdvh.getCardPanel().addCard("Resources Monitor", rm, false);
+                BdvHandleHelper.addCard(bdvh, "Resources Monitor", rm, false);
+                //bdvh.getCardPanel().adCard("Resources Monitor", rm, false);
             } catch (Exception e) {
                 rm = null;
                 logger.debug("Could not start Resources Monitor");
