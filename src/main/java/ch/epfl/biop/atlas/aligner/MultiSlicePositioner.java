@@ -1106,6 +1106,10 @@ public class MultiSlicePositioner implements Closeable {
         return numberOfTasks.get();
     }
 
+    public void converterChanged(SliceSources sliceSources) {
+        listeners.forEach(sliceChangeListener -> sliceChangeListener.converterChanged(sliceSources));
+    }
+
     public interface SliceChangeListener {
         void sliceDeleted(SliceSources slice);
         void sliceCreated(SliceSources slice);
@@ -1125,6 +1129,8 @@ public class MultiSlicePositioner implements Closeable {
         void actionCancelEnqueue(SliceSources slice, CancelableAction action);
         void actionCancelStarted(SliceSources slice, CancelableAction action);
         void actionCancelFinished(SliceSources slice, CancelableAction action, boolean result);
+
+        void converterChanged(SliceSources slice);
     }
 
     public interface MultiSlicePositionerListener {

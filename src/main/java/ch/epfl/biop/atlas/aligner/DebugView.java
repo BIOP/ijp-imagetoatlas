@@ -132,4 +132,9 @@ public class DebugView implements MultiSlicePositioner.SliceChangeListener{
         logger.accept(slice,"Action ["+action.actionClassString()+"] Cancelation Ended. Success ? "+success);
     }
 
+    @Override
+    public void converterChanged(SliceSources slice) {
+        logger.accept(slice,"Slice is converter has changed "+slice.getName());
+    }
+
 }

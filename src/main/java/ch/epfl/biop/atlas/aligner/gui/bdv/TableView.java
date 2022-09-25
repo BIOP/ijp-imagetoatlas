@@ -419,6 +419,13 @@ public class TableView implements MultiSlicePositioner.SliceChangeListener, List
 
     }
 
+    @Override
+    public void converterChanged(SliceSources slice) {
+        int idx = slice.getIndex();
+        if (idx!=-1)
+            ((AbstractTableModel)table.getModel()).fireTableCellUpdated(idx, 0);
+    }
+
     public static class DisplaySettingsRenderer implements TableCellRenderer {
         Border unselectedBorder = null;
         Border selectedBorder = null;

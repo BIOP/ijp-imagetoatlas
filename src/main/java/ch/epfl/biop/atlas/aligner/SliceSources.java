@@ -75,6 +75,7 @@ import sc.fiji.bdvpg.sourceandconverter.importer.EmptySourceAndConverterCreator;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceResampler;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
 import sc.fiji.persist.ScijavaGsonHelper;
+import spimdata.util.Displaysettings;
 //import spimdata.imageplus.ImagePlusHelper;
 
 import java.awt.Color;
@@ -1510,6 +1511,15 @@ public class SliceSources {
         output.smoothenWithConstrains(movablePx);
         cr_out.set(output);
         return cr_out;
+    }
+
+    public void setDisplayRange(int channelIndex, double min, double max) {
+        Displaysettings ds = new Displaysettings(-1);
+        Displaysettings.GetDisplaySettingsFromCurrentConverter(getRegisteredSources()[channelIndex], ds);
+        ds.min = min;
+        ds.max = max;
+        Displaysettings.applyDisplaysettings(getRegisteredSources()[channelIndex],ds);
+        mp.converterChanged(this);
     }
 
 }

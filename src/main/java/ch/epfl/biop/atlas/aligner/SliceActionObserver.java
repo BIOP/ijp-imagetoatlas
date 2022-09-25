@@ -155,4 +155,9 @@ public class SliceActionObserver implements MultiSlicePositioner.SliceChangeList
             logger.debug("Action not removed: "+action);
         }
     }
+
+    @Override
+    public void converterChanged(SliceSources slice) {
+
+    }
 }

@@ -1197,6 +1197,13 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         bdvh.getViewerPanel().getDisplay().repaint(); // Overlay Update
     }
 
+    @Override
+    public void converterChanged(SliceSources slice) {
+        guiState.forEachSlice(sliceGuiState -> {
+            sliceGuiState.updateDisplaySettings();
+        });
+    }
+
     // ----- MULTIPOSITIONER LISTENER METHODS - END
 
     // --------------------------------------------------------- SETTING MODES

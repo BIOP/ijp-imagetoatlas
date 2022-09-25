@@ -411,6 +411,17 @@ public class SliceGuiState {
         show();
     }
 
+    public void updateDisplaySettings() {
+
+        for (int i=0; i<nChannels; i++) {
+            Displaysettings ds = new Displaysettings(-1);
+            Displaysettings.GetDisplaySettingsFromCurrentConverter(slice.getRegisteredSources()[i], ds);
+            displaysettings[i] = ds;
+        }
+
+        this.sliceDisplayChanged();
+    }
+
     public interface FilterDisplay {
         boolean displayChannel(int iChannel);
     }
