@@ -1522,4 +1522,12 @@ public class SliceSources {
         mp.converterChanged(this);
     }
 
+    public void setDisplayColor(int channelIndex, int r, int g, int b, int a) {
+        Displaysettings ds = new Displaysettings(-1);
+        Displaysettings.GetDisplaySettingsFromCurrentConverter(getRegisteredSources()[channelIndex], ds);
+        ds.color = new int[]{r,g,b,a};
+        Displaysettings.applyDisplaysettings(getRegisteredSources()[channelIndex],ds);
+        mp.converterChanged(this);
+    }
+
 }
