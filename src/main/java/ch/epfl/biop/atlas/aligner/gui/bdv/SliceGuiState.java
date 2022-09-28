@@ -409,6 +409,7 @@ public class SliceGuiState {
         }
         sliceVisible = state.sliceVisible;
         show();
+        slice.setDisplaySettings(displaysettings);
     }
 
     public void updateDisplaySettings() {

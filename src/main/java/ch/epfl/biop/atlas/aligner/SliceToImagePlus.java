@@ -4,6 +4,7 @@ import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.bdv.img.imageplus.ImagePlusHelper;
 import ch.epfl.biop.sourceandconverter.processor.SourcesProcessor;
 import ij.ImagePlus;
+import net.imglib2.display.LinearRange;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.NumericType;
@@ -80,7 +81,6 @@ public class SliceToImagePlus {
                                    double px, double py, double sx, double sy,
                                    double pixelSizeMillimeter, int timepoint,
                                    boolean interpolate) {
-
 
         List<SourceAndConverter> sourceList = Arrays.asList(preprocess.apply(slice.getRegisteredSources()));
 

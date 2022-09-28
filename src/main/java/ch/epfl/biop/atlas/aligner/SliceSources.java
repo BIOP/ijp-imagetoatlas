@@ -1518,7 +1518,10 @@ public class SliceSources {
         Displaysettings.GetDisplaySettingsFromCurrentConverter(getRegisteredSources()[channelIndex], ds);
         ds.min = min;
         ds.max = max;
-        Displaysettings.applyDisplaysettings(getRegisteredSources()[channelIndex],ds);
+        registered_sacs_sequence.stream().forEach(registrationAndSources -> {
+            Displaysettings.applyDisplaysettings(registrationAndSources.sacs[channelIndex],ds);
+        });
+        Displaysettings.applyDisplaysettings(registered_sacs[channelIndex],ds);
         mp.converterChanged(this);
     }
 
@@ -1526,8 +1529,20 @@ public class SliceSources {
         Displaysettings ds = new Displaysettings(-1);
         Displaysettings.GetDisplaySettingsFromCurrentConverter(getRegisteredSources()[channelIndex], ds);
         ds.color = new int[]{r,g,b,a};
-        Displaysettings.applyDisplaysettings(getRegisteredSources()[channelIndex],ds);
+        registered_sacs_sequence.stream().forEach(registrationAndSources -> {
+            Displaysettings.applyDisplaysettings(registrationAndSources.sacs[channelIndex],ds);
+        });
+        Displaysettings.applyDisplaysettings(registered_sacs[channelIndex],ds);
         mp.converterChanged(this);
+    }
+
+    public void setDisplaySettings(Displaysettings[] displaysettings) {
+        for (int channelIndex = 0; channelIndex<nChannels; channelIndex++) {
+            for (RegistrationAndSources registrationAndSources: registered_sacs_sequence) {
+                Displaysettings.applyDisplaysettings(registrationAndSources.sacs[channelIndex], displaysettings[channelIndex]);
+            }
+            Displaysettings.applyDisplaysettings(registered_sacs[channelIndex], displaysettings[channelIndex]);
+        }
     }
 
 }
