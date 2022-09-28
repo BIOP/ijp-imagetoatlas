@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 public class ExportSlicesToBDVJsonDatasetCommand implements Command {
 
     @Parameter(label = "Please specify a json file to store the reconstructed data")
-    File dataset_file;
+    File file;
 
     @Parameter(label = "Enter a tag to identify the registered sources (metadata key = \"ABBA\")" )
     String tag;
@@ -58,7 +58,7 @@ public class ExportSlicesToBDVJsonDatasetCommand implements Command {
                     sacs.add(source);
                 }
             });
-            new SourceAndConverterServiceSaver(dataset_file, ctx, sacs).run();
+            new SourceAndConverterServiceSaver(file, ctx, sacs).run();
 
             mp.log.accept("Saved!");
         }

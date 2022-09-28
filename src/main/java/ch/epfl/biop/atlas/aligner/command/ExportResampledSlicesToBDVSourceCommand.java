@@ -1,6 +1,5 @@
 package ch.epfl.biop.atlas.aligner.command;
 
-import bdv.util.source.alpha.AlphaSourceHelper;
 import bdv.util.source.fused.AlphaFusedResampledSource;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
@@ -15,7 +14,6 @@ import org.scijava.ItemIO;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceAffineTransformer;
 
 import java.util.*;
@@ -31,7 +29,7 @@ public class ExportResampledSlicesToBDVSourceCommand implements Command {
     MultiSlicePositioner mp;
 
     @Parameter(label = "Slices channels, 0-based, comma separated, '*' for all channels", description = "'0,2' for channels 0 and 2")
-    String slices_string_channels = "*";
+    String channels = "*";
 
     @Parameter(label = "Exported source name")
     String image_name = "Untitled";
@@ -69,9 +67,6 @@ public class ExportResampledSlicesToBDVSourceCommand implements Command {
     @Parameter(label="Block Size Z")
     int block_size_z = 4;
 
-    @Parameter(label="Number of blocks kept in memory (negative = until RAM is full)")
-    int n_block_bounds = 1000;
-
     @Parameter(label="Number of threads")
     int n_threads = 6;
 
@@ -94,8 +89,8 @@ public class ExportResampledSlicesToBDVSourceCommand implements Command {
 
         SourcesProcessor preprocess = SourcesProcessorHelper.Identity();
 
-        if (!slices_string_channels.trim().equals("*")) {
-            List<Integer> indices = Arrays.stream(slices_string_channels.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
+        if (!channels.trim().equals("*")) {
+            List<Integer> indices = Arrays.stream(channels.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
 
             int maxIndex = indices.stream().mapToInt(e -> e).max().getAsInt();
 
@@ -210,7 +205,7 @@ public class ExportResampledSlicesToBDVSourceCommand implements Command {
                     AlphaFusedResampledSource.SUM,
                     model,
                     image_name+"_ch"+iChannel,
-                    true,true,interpolate,0,block_size_x,block_size_y,block_size_z,n_block_bounds,n_threads).get();
+                    true,true,interpolate,0,block_size_x,block_size_y,block_size_z,-1,n_threads).get();
         }
 
     }

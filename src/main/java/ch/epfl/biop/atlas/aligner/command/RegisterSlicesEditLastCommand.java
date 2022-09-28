@@ -17,9 +17,9 @@ import java.util.stream.Collectors;
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>ABBA - Edit Last Registration",
         description = "Edit the last registration of the current selected slices, if possible.")
-public class RegistrationEditLastCommand implements Command {
+public class RegisterSlicesEditLastCommand implements Command {
 
-    protected static Logger logger = LoggerFactory.getLogger(RegistrationEditLastCommand.class);
+    protected static Logger logger = LoggerFactory.getLogger(RegisterSlicesEditLastCommand.class);
 
     @Parameter
     MultiSlicePositioner mp;
@@ -28,10 +28,10 @@ public class RegistrationEditLastCommand implements Command {
     boolean reuse_original_channels;
 
     @Parameter(label = "Atlas channels, 0-based, comma separated, '*' for all channels", description = "'0,2' for channels 0 and 2")
-    String atlas_string_channels = "*";
+    String atlas_channels_csv = "*";
 
     @Parameter(label = "Slices channels, 0-based, comma separated, '*' for all channels", description = "'0,2' for channels 0 and 2")
-    String slices_string_channels = "*";
+    String slices_channels_csv = "*";
 
     @Override
     public void run() {
@@ -41,8 +41,8 @@ public class RegistrationEditLastCommand implements Command {
 
         SourcesProcessor preprocessAtlas = SourcesProcessorHelper.Identity();
 
-        if (!slices_string_channels.trim().equals("*")) {
-            List<Integer> indices = Arrays.stream(slices_string_channels.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
+        if (!slices_channels_csv.trim().equals("*")) {
+            List<Integer> indices = Arrays.stream(slices_channels_csv.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
             int maxIndex = indices.stream().mapToInt(e -> e).max().getAsInt();
             if (maxIndex>=mp.getChannelBoundForSelectedSlices()) {
                 mp.log.accept("Missing channel in selected slice(s).");
@@ -52,8 +52,8 @@ public class RegistrationEditLastCommand implements Command {
             preprocessSlice = new SourcesChannelsSelect(indices);
         }
 
-        if (!atlas_string_channels.trim().equals("*")) {
-            List<Integer> indices = Arrays.stream(atlas_string_channels.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
+        if (!atlas_channels_csv.trim().equals("*")) {
+            List<Integer> indices = Arrays.stream(atlas_channels_csv.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
             int maxIndex = indices.stream().mapToInt(e -> e).max().getAsInt();
             int maxChannelInAtlas = mp.getReslicedAtlas().nonExtendedSlicedSources.length;
             if (maxIndex>=maxChannelInAtlas) {

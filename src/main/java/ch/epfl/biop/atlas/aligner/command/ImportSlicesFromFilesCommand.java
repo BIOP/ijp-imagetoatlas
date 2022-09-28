@@ -19,7 +19,7 @@ import java.util.concurrent.ExecutionException;
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Import>ABBA - Import With Bio-Formats",
         description = "Import a Bio-Formats compatible file as brain slices")
-public class ImportImageCommand implements Command {
+public class ImportSlicesFromFilesCommand implements Command {
 
     @Parameter
     MultiSlicePositioner mp;
@@ -34,10 +34,10 @@ public class ImportImageCommand implements Command {
     boolean split_rgb_channels = false;
 
     @Parameter(label = "Initial axis position (0 = front, mm units)", style="format:0.000", stepSize = "0.1")
-    double slice_axis_initial;
+    double slice_axis_initial_mm;
 
     @Parameter(label = "Axis increment between slices (mm, can be negative for reverse order)", style="format:0.000", stepSize = "0.02")
-    double increment_between_slices;
+    double increment_between_slices_mm;
 
     @Parameter
     CommandService command_service;
@@ -63,9 +63,9 @@ public class ImportImageCommand implements Command {
                     sac_service.getSourceAndConverterFromSpimdata(spimdata)
                             .toArray(new SourceAndConverter[0]);
 
-            List<SliceSources> slices = mp.createSlice(sacs, slice_axis_initial, increment_between_slices, Tile.class, new Tile(-1));
+            List<SliceSources> slices = mp.createSlice(sacs, slice_axis_initial_mm, increment_between_slices_mm, Tile.class, new Tile(-1));
 
-            slice_axis_initial += (slices.size()+1)* increment_between_slices;
+            slice_axis_initial_mm += (slices.size()+1)* increment_between_slices_mm;
 
             mp.selectSlice(mp.getSlices());
         } catch (InterruptedException e) {

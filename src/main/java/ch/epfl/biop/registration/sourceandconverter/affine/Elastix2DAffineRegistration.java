@@ -1,7 +1,7 @@
 package ch.epfl.biop.registration.sourceandconverter.affine;
 
 import bdv.viewer.SourceAndConverter;
-import ch.epfl.biop.atlas.aligner.command.RegistrationElastixAffineCommand;
+import ch.epfl.biop.atlas.aligner.command.RegisterSlicesElastixAffineCommand;
 import ch.epfl.biop.atlas.aligner.plugin.IABBARegistrationPlugin;
 import ch.epfl.biop.atlas.aligner.plugin.RegistrationTypeProperties;
 import ch.epfl.biop.scijava.command.source.register.Elastix2DAffineRegisterCommand;
@@ -29,7 +29,7 @@ import java.util.concurrent.Future;
         isManual = false,
         isEditable = false,
         userInterface = {
-                RegistrationElastixAffineCommand.class
+                RegisterSlicesElastixAffineCommand.class
                 //RegistrationElastixAffineRemoteCommand.class
         })
 

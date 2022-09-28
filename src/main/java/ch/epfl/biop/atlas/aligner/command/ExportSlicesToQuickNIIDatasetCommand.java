@@ -26,7 +26,7 @@ public class ExportSlicesToQuickNIIDatasetCommand implements Command {
     double px_size_micron = 40;
 
     @Parameter(label = "Slices channels, 0-based, comma separated, '*' for all channels", description = "'0,2' for channels 0 and 2")
-    String slices_string_channels = "*";
+    String channels = "*";
 
     @Parameter(label = "Section Name Prefix")
     String image_name = "Section";
@@ -50,8 +50,8 @@ public class ExportSlicesToQuickNIIDatasetCommand implements Command {
 
         SourcesProcessor preprocess = SourcesProcessorHelper.Identity();
 
-        if (!slices_string_channels.trim().equals("*")) {
-            List<Integer> indices = Arrays.stream(slices_string_channels.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
+        if (!channels.trim().equals("*")) {
+            List<Integer> indices = Arrays.stream(channels.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
 
             int maxIndex = indices.stream().mapToInt(e -> e).max().getAsInt();
 

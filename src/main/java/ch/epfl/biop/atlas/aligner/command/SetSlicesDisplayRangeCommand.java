@@ -2,7 +2,6 @@ package ch.epfl.biop.atlas.aligner.command;
 
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
-import ch.epfl.biop.atlas.aligner.gui.bdv.BdvMultislicePositionerView;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
@@ -14,13 +13,13 @@ import java.util.stream.Collectors;
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Edit>ABBA - Set Slices Min Max Display Range",
         description = "Change min max displayed value (for each selected slice).")
-public class SliceMinMaxDisplaySetCommand implements Command {
+public class SetSlicesDisplayRangeCommand implements Command {
 
     @Parameter
     MultiSlicePositioner mp;
 
     @Parameter(label = "Channels to adjust, '*' for all channels, comma separated, 0-based")//choices = {"Structural Images", "Border only", "Coordinates", "Left / Right", "Labels % 65000" })
-    String atlasStringChannel = "*";//String export_type;
+    String channels_csv = "*";//String export_type;
 
     @Parameter(label = "Min displayed valued")
     double display_min;
@@ -39,8 +38,8 @@ public class SliceMinMaxDisplaySetCommand implements Command {
             return;
         }
 
-        if (!atlasStringChannel.trim().equals("*")) {
-            List<Integer> indices = Arrays.stream(atlasStringChannel.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
+        if (!channels_csv.trim().equals("*")) {
+            List<Integer> indices = Arrays.stream(channels_csv.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
             slicesToModify.stream().forEach(slice -> {
                 for (int iChannel:indices) {
                     slice.setDisplayRange(iChannel, display_min, display_max);

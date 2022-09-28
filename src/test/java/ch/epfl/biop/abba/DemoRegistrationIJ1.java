@@ -6,8 +6,8 @@ import ch.epfl.biop.atlas.aligner.DebugView;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.atlas.aligner.command.ABBAStartCommand;
-import ch.epfl.biop.atlas.aligner.command.ImportImagePlusCommand;
-import ch.epfl.biop.atlas.aligner.command.RegistrationElastixAffineCommand;
+import ch.epfl.biop.atlas.aligner.command.ImportSliceFromImagePlusCommand;
+import ch.epfl.biop.atlas.aligner.command.RegisterSlicesElastixAffineCommand;
 import ch.epfl.biop.atlas.aligner.gui.bdv.BdvMultislicePositionerView;
 import ch.epfl.biop.atlas.mouse.allen.ccfv3.command.AllenBrainAdultMouseAtlasCCF2017Command;
 import ch.epfl.biop.atlas.struct.Atlas;
@@ -40,7 +40,7 @@ public class DemoRegistrationIJ1 {
 
         DebugView debugView = new DebugView(mp); // Logs events in an extra frame
 
-        ij.command().run(ImportImagePlusCommand.class, true,
+        ij.command().run(ImportSliceFromImagePlusCommand.class, true,
                 "mp", mp,
                 "slice_axis", 5).get();
 
@@ -103,7 +103,7 @@ public class DemoRegistrationIJ1 {
 
         mp.selectSlice(slice); // Should be selected to be registered
 
-        ij.command().run(RegistrationElastixAffineCommand.class, true,
+        ij.command().run(RegisterSlicesElastixAffineCommand.class, true,
                     "mp", mp,
                     "show_imageplus_registration_result", true,
                     "background_offset_value_moving", 0,

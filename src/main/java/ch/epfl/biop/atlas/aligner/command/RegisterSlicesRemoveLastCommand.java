@@ -13,9 +13,9 @@ import org.slf4j.LoggerFactory;
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>ABBA - Remove Last Registration",
         description = "Remove the last registration of the current selected slices, if possible.")
-public class RegistrationRemoveLastCommand implements Command {
+public class RegisterSlicesRemoveLastCommand implements Command {
 
-    protected static Logger logger = LoggerFactory.getLogger(RegistrationRemoveLastCommand.class);
+    protected static Logger logger = LoggerFactory.getLogger(RegisterSlicesRemoveLastCommand.class);
 
     @Parameter
     MultiSlicePositioner mp;

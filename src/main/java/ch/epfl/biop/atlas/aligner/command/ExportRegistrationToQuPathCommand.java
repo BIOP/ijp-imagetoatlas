@@ -13,7 +13,7 @@ import java.util.List;
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>ABBA - Export Registrations To QuPath Project",
         description = "Export atlas regions and transformations to QuPath project (for each selected slice)")
-public class ExportToQuPathProjectCommand implements Command {
+public class ExportRegistrationToQuPathCommand implements Command {
 
     @Parameter
     MultiSlicePositioner mp;

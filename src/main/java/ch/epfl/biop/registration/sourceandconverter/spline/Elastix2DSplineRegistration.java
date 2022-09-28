@@ -5,7 +5,7 @@ import bdv.util.BdvHandle;
 import bdv.viewer.DisplayMode;
 import bdv.viewer.Interpolation;
 import bdv.viewer.SourceAndConverter;
-import ch.epfl.biop.atlas.aligner.command.RegistrationElastixSplineCommand;
+import ch.epfl.biop.atlas.aligner.command.RegisterSlicesElastixSplineCommand;
 import ch.epfl.biop.atlas.aligner.plugin.IABBARegistrationPlugin;
 import ch.epfl.biop.atlas.aligner.plugin.RegistrationTypeProperties;
 import ch.epfl.biop.scijava.command.source.register.Elastix2DSplineRegisterCommand;
@@ -40,7 +40,7 @@ import static bdv.util.RealTransformHelper.BigWarpFileFromRealTransform;
         isManual = false,
         isEditable = true,
         userInterface = {
-                RegistrationElastixSplineCommand.class
+                RegisterSlicesElastixSplineCommand.class
                 //RegistrationElastixSplineRemoteCommand.class
         }
 )

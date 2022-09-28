@@ -10,7 +10,7 @@ import java.io.File;
 @Plugin(type = BdvPlaygroundActionCommand.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>ABBA - Preferences",
         description = "Sets actions linked to key / mouse event in ABBA (not functional)")
-public class ABBASettingsCommand implements Command {
+public class ABBASetBDVPreferencesCommand implements Command {
 
     @Override
     public void run() {

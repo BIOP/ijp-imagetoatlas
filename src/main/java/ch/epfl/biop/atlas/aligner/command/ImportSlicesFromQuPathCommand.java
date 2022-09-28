@@ -17,7 +17,7 @@ import java.util.concurrent.ExecutionException;
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Import>ABBA - Import QuPath Project",
         description = "Import images of a QuPath project as slices into ABBA")
-public class ImportQuPathProjectCommand implements Command {
+public class ImportSlicesFromQuPathCommand implements Command {
 
     @Parameter
     MultiSlicePositioner mp;
@@ -26,10 +26,10 @@ public class ImportQuPathProjectCommand implements Command {
     File qupath_project;
 
     @Parameter(label = "Initial axis position (0 = front, mm units)", style="format:0.000", stepSize = "0.1")
-    double slice_axis_initial;
+    double slice_axis_initial_mm;
 
     @Parameter(label = "Axis increment between slices (mm, can be negative for reverse order)", style="format:0.000", stepSize = "0.01")
-    double increment_between_slices;
+    double increment_between_slices_mm;
 
     @Parameter
     CommandService command_service;
@@ -49,7 +49,7 @@ public class ImportQuPathProjectCommand implements Command {
                             .toArray(new SourceAndConverter[0]);
 
             if ((sacs!=null)&&(sacs.length>0)) { // Because the action could have been canceled
-                mp.createSlice(sacs, slice_axis_initial, increment_between_slices, QuPathEntryEntity.class, new QuPathEntryEntity(-1));
+                mp.createSlice(sacs, slice_axis_initial_mm, increment_between_slices_mm, QuPathEntryEntity.class, new QuPathEntryEntity(-1));
             }
         } catch (InterruptedException e) {
             e.printStackTrace();

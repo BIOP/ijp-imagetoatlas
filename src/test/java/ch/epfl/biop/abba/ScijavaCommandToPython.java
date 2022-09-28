@@ -2,11 +2,12 @@ package ch.epfl.biop.abba;
 
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.command.ABBAStartCommand;
-import ch.epfl.biop.atlas.aligner.command.RegistrationDeepSliceCommand;
+import ch.epfl.biop.atlas.aligner.command.RegisterSlicesDeepSliceCommand;
 import org.reflections.Reflections;
 import org.scijava.Context;
 import org.scijava.ItemIO;
 import org.scijava.command.Command;
+import org.scijava.command.DynamicCommand;
 import org.scijava.command.InteractiveCommand;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
@@ -196,9 +197,10 @@ public class ScijavaCommandToPython {
                 reflections.getSubTypesOf(Command.class)
                         .stream()
                         .filter(clazz -> !(InteractiveCommand.class.isAssignableFrom(clazz)))
+                        .filter(clazz -> !(DynamicCommand.class.isAssignableFrom(clazz)))
                         .collect(Collectors.toSet());
 
-        commandClasses.remove(RegistrationDeepSliceCommand.class); // specific to python : no need to keep this one
+        commandClasses.remove(RegisterSlicesDeepSliceCommand.class); // specific to python : no need to keep this one
         commandClasses.remove(ABBAStartCommand.class); // the initialisation is different
 
         HashMap<String, String> methodPerClass = new HashMap<>();

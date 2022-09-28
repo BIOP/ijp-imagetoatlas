@@ -13,13 +13,13 @@ import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Import>ABBA - Import Current ImageJ Window",
         description = "Import the current ImageJ image as a slice into ABBA")
-public class ImportImagePlusCommand implements Command {
+public class ImportSliceFromImagePlusCommand implements Command {
 
     @Parameter
     MultiSlicePositioner mp;
 
     @Parameter(label = "Initial axis position (0 = front, mm units)", style="format:0.000", stepSize = "0.1")
-    double slice_axis;
+    double slice_axis_mm;
 
     @Parameter
     ImagePlus image;
@@ -36,7 +36,7 @@ public class ImportImagePlusCommand implements Command {
 
         SourceAndConverter[] sacs = sac_service.getSourceAndConverterFromSpimdata(asd).toArray(new SourceAndConverter[0]);
 
-        mp.createSlice(sacs, slice_axis);
+        mp.createSlice(sacs, slice_axis_mm);
     }
 
 }

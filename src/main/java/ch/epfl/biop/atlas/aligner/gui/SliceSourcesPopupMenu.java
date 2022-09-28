@@ -5,7 +5,7 @@ import ch.epfl.biop.atlas.aligner.DeleteSliceAction;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.atlas.aligner.action.*;
-import ch.epfl.biop.atlas.aligner.command.RegistrationEditLastCommand;
+import ch.epfl.biop.atlas.aligner.command.RegisterSlicesEditLastCommand;
 import ch.epfl.biop.atlas.aligner.gui.bdv.BdvMultislicePositionerView;
 import org.scijava.command.CommandService;
 import org.slf4j.Logger;
@@ -86,7 +86,7 @@ public class SliceSourcesPopupMenu {
         popup.addSeparator();
 
         addPopupAction(popup, "Edit Last Registration", () -> {
-            mp.getContext().getService(CommandService.class).run(RegistrationEditLastCommand.class,true, "mp", mp);
+            mp.getContext().getService(CommandService.class).run(RegisterSlicesEditLastCommand.class,true, "mp", mp);
         });
 
         addPopupAction(popup, "Remove Last Registration", () -> {
@@ -162,7 +162,7 @@ public class SliceSourcesPopupMenu {
             addPopupLine();
 
             addPopupAction("Edit Last Registration", (slices) -> {
-                mp.getContext().getService(CommandService.class).run(RegistrationEditLastCommand.class,true, "mp", mp);
+                mp.getContext().getService(CommandService.class).run(RegisterSlicesEditLastCommand.class,true, "mp", mp);
             });
 
             addPopupAction("Remove Last Registration", (slices) -> {

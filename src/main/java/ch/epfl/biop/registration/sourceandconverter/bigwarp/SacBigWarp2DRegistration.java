@@ -5,7 +5,7 @@ import bdv.tools.brightness.ConverterSetup;
 import bdv.util.BdvHandle;
 import bdv.viewer.DisplayMode;
 import bdv.viewer.SourceAndConverter;
-import ch.epfl.biop.atlas.aligner.command.RegistrationBigWarpCommand;
+import ch.epfl.biop.atlas.aligner.command.RegisterSlicesBigWarpCommand;
 import ch.epfl.biop.atlas.aligner.plugin.IABBARegistrationPlugin;
 import ch.epfl.biop.atlas.aligner.plugin.RegistrationTypeProperties;
 import ch.epfl.biop.registration.sourceandconverter.spline.RealTransformSourceAndConverterRegistration;
@@ -26,7 +26,7 @@ import static bdv.util.RealTransformHelper.BigWarpFileFromRealTransform;
         isManual = true,
         isEditable = true,
         userInterface = {
-                RegistrationBigWarpCommand.class
+                RegisterSlicesBigWarpCommand.class
         }
 )
 

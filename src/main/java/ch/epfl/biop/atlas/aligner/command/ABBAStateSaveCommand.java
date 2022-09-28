@@ -20,7 +20,7 @@ public class ABBAStateSaveCommand implements Command {
     @Parameter(style = "save", persist = false)
     File state_file;
 
-    @Parameter(persist = false, required = false, type = ItemIO.OUTPUT)
+    @Parameter(type = ItemIO.OUTPUT)
     Boolean success = false;
 
     @Override

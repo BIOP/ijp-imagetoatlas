@@ -1,6 +1,6 @@
 package ch.epfl.biop.atlas.aligner.command;
 
-import ch.epfl.biop.atlas.aligner.action.ExportSliceToImagePlusAction;
+import ch.epfl.biop.atlas.aligner.action.ExportAtlasSliceToImagePlusAction;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.sourceandconverter.processor.SourcesChannelsSelect;
@@ -21,10 +21,9 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Plugin(type = Command.class,
-        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>ABBA - Export Registered Slices to ImageJ",
-        description = "Export registered (deformed) slices in the atlas coordinates. "+
-                      "A pixel size should be specified to resample the registered images.")
-public class ExportSlicesToImageJStackCommand implements Command {
+        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>ABBA - Export Atlas to ImageJ",
+        description = "Export atlas properties as an ImageJ stack (for each selected slice).")
+public class ExportAtlasToImageJCommand implements Command {
 
     @Parameter
     MultiSlicePositioner mp;
@@ -32,11 +31,11 @@ public class ExportSlicesToImageJStackCommand implements Command {
     @Parameter(label="Pixel Size in micron")
     double px_size_micron = 20;
 
-    @Parameter(label = "Slices channels, 0-based, comma separated, '*' for all channels", description = "'0,2' for channels 0 and 2")
-    String slices_string_channels = "*";
+    @Parameter(label = "Channels to export, '*' for all channels")//choices = {"Structural Images", "Border only", "Coordinates", "Left / Right", "Labels % 65000" })
+    String atlas_channels = "*";//String export_type;
 
     @Parameter(label = "Exported image name")
-    String image_name = "Untitled";
+    String image_name = "Atlas";
 
     @Parameter
     boolean interpolate;
@@ -49,22 +48,17 @@ public class ExportSlicesToImageJStackCommand implements Command {
         // TODO : check if tasks are done
         List<SliceSources> slicesToExport = mp.getSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
 
-        if (slicesToExport.size()==0) {
-            mp.log.accept("No slice selected");
-            mp.warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to export");
-            return;
-        }
-
         SourcesProcessor preprocess = SourcesProcessorHelper.Identity();
 
-        if (!slices_string_channels.trim().equals("*")) {
-            List<Integer> indices = Arrays.stream(slices_string_channels.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
+        if (!atlas_channels.trim().equals("*")) {
+            List<Integer> indices = Arrays.stream(atlas_channels.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
 
             int maxIndex = indices.stream().mapToInt(e -> e).max().getAsInt();
 
-            if (maxIndex>=mp.getChannelBoundForSelectedSlices()) {
-                mp.log.accept("Missing channel in selected slice(s).");
-                mp.errlog.accept("Missing channel in selected slice(s)\n One selected slice only has "+mp.getChannelBoundForSelectedSlices()+" channel(s).\n Maximum index : "+(mp.getChannelBoundForSelectedSlices()-1) );
+            int maxChannelInAtlas = mp.getReslicedAtlas().nonExtendedSlicedSources.length;
+            if (maxIndex>=maxChannelInAtlas) {
+                mp.log.accept("Missing channels in atlas.");
+                mp.errlog.accept("The atlas only has "+maxChannelInAtlas+" channel(s).\n Maximum index : "+(maxChannelInAtlas-1) );
                 return;
             }
 
@@ -73,10 +67,10 @@ public class ExportSlicesToImageJStackCommand implements Command {
 
         double[] roi = mp.getROI();
 
-        Map<SliceSources, ExportSliceToImagePlusAction> tasks = new HashMap<>();
+        Map<SliceSources, ExportAtlasSliceToImagePlusAction> tasks = new HashMap<>();
 
         for (SliceSources slice : slicesToExport) {
-            ExportSliceToImagePlusAction export = new ExportSliceToImagePlusAction(mp, slice,
+            ExportAtlasSliceToImagePlusAction export = new ExportAtlasSliceToImagePlusAction(mp, slice,
                     preprocess,
                     roi[0], roi[1], roi[2], roi[3],
                     px_size_micron / 1000.0, 0,interpolate);
@@ -92,7 +86,7 @@ public class ExportSlicesToImageJStackCommand implements Command {
             if (success) {
                 images[i] = tasks.get(slice).getImagePlus();
                 tasks.get(slice).clean();
-                mp.log.accept("Export to ImagePlus of slice "+slice+" done ("+(i+1)+"/"+images.length+")");
+                mp.log.accept("Atlas export to ImagePlus of slice "+slice+" done ("+(i+1)+"/"+images.length+")");
                 images[i].setTitle("Slice_"+i+"_"+slice);
                 images[i].show();
             } else {

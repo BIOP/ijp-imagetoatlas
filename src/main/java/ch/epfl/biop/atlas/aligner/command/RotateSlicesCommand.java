@@ -8,7 +8,7 @@ import org.scijava.plugin.Plugin;
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Edit>ABBA - Rotate",
         description = "To use at the beginning of the registration process only! Rotates the original unregistered selected slices")
-public class SliceRotateCommand implements Command {
+public class RotateSlicesCommand implements Command {
 
     @Parameter
     MultiSlicePositioner mp;
