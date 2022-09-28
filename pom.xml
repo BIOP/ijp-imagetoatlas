@@ -134,6 +134,9 @@
 		<jakarta.xml.bind-api.version>3.0.1</jakarta.xml.bind-api.version>
 		<jaxb-impl.version>3.0.2</jaxb-impl.version>
 
+		<!-- to generate python API, method put in tests -->
+		<reflections.version>0.10.2</reflections.version>
+
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>sign,deploy-to-scijava</releaseProfiles>
 
@@ -259,6 +262,13 @@
 			<groupId>ch.epfl.biop</groupId>
 			<artifactId>atlas</artifactId>
 			<version>${atlas.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.reflections</groupId>
+			<artifactId>reflections</artifactId>
+			<version>${reflections.version}</version>
+			<scope>test</scope>
 		</dependency>
 
 	</dependencies>

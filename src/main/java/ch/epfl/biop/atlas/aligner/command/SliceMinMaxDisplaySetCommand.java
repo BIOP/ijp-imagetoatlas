@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 public class SliceMinMaxDisplaySetCommand implements Command {
 
     @Parameter
-    BdvMultislicePositionerView view;
+    MultiSlicePositioner mp;
 
     @Parameter(label = "Channels to adjust, '*' for all channels, comma separated, 0-based")//choices = {"Structural Images", "Border only", "Coordinates", "Left / Right", "Labels % 65000" })
     String atlasStringChannel = "*";//String export_type;
@@ -31,8 +31,6 @@ public class SliceMinMaxDisplaySetCommand implements Command {
     @Override
     public void run() {
 
-        MultiSlicePositioner mp = view.msp;
-
         List<SliceSources> slicesToModify = mp.getSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
 
         if (slicesToModify.size()==0) {
@@ -45,13 +43,13 @@ public class SliceMinMaxDisplaySetCommand implements Command {
             List<Integer> indices = Arrays.stream(atlasStringChannel.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
             slicesToModify.stream().forEach(slice -> {
                 for (int iChannel:indices) {
-                    view.setSliceDisplayMinMax(slice, iChannel, display_min, display_max);
+                    slice.setDisplayRange(iChannel, display_min, display_max);
                 }
             });
         } else {
             slicesToModify.stream().forEach(slice -> {
                 for (int iChannel=0;iChannel<slice.nChannels;iChannel++) {
-                    view.setSliceDisplayMinMax(slice, iChannel, display_min, display_max);
+                    slice.setDisplayRange(iChannel, display_min, display_max);
                 }
             });
         }
