@@ -22,10 +22,10 @@ abstract public class RegistrationMultiChannelCommand implements Command {
     MultiSlicePositioner mp;
 
     @Parameter(label = "Atlas channels (channels comma separated)")
-    String atlas_channels_csv;
+    String channels_atlas_csv;
 
     @Parameter(label = "Slices channels (channels comma separated)")
-    String slice_channels_csv;
+    String channels_slice_csv;
 
     protected boolean validationError = false;
 
@@ -36,10 +36,10 @@ abstract public class RegistrationMultiChannelCommand implements Command {
     final public void run() {
 
         try {
-            atlas_channels = Arrays.asList(atlas_channels_csv.split(",")).stream()
+            atlas_channels = Arrays.asList(channels_atlas_csv.split(",")).stream()
                     .map(Integer::parseInt)
                     .collect(Collectors.toList());
-            slice_channels = Arrays.asList(slice_channels_csv.split(",")).stream()
+            slice_channels = Arrays.asList(channels_slice_csv.split(",")).stream()
                     .map(Integer::parseInt)
                     .collect(Collectors.toList());
         } catch (NumberFormatException e) {

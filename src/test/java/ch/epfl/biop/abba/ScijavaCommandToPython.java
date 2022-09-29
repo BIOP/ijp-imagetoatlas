@@ -71,8 +71,11 @@ public class ScijavaCommandToPython {
             if (!plugin.description().equals(""))
                 doc+=plugin.description()+"\n";*/
             builder.append("def "+pythonize(c.getSimpleName())+"(self");
-            Field[] fields = filterSkippable(c.getDeclaredFields());
+            List<Field> allFields = new ArrayList<>();
+            allFields.addAll(Arrays.asList(filterSkippable(c.getDeclaredFields())));
+            allFields.addAll(Arrays.asList(filterSkippable(c.getSuperclass().getDeclaredFields())));
 
+            Field[] fields = allFields.toArray(new Field[0]);
 
             Map<String, String> pythonReferences = new HashMap<>();
 

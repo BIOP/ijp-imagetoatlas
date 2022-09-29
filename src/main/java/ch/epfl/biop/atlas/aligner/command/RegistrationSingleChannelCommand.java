@@ -17,17 +17,17 @@ abstract public class RegistrationSingleChannelCommand implements Command {
     MultiSlicePositioner mp;
 
     @Parameter(label = "Atlas channels", min = "0")
-    int atlas_channel;
+    int channel_atlas;
 
     @Parameter(label = "Slices channels", min = "0")
-    int slice_channel;
+    int channel_slice;
 
     protected boolean validationError = false;
 
     @Override
     final public void run() {
         if (!validationError) {
-            if (atlas_channel >=mp.getNumberOfAtlasChannels()) {
+            if (channel_atlas >=mp.getNumberOfAtlasChannels()) {
                 mp.log.accept("The atlas has only "+mp.getNumberOfAtlasChannels()+" channels!");
                 mp.errlog.accept("The atlas has only "+mp.getNumberOfAtlasChannels()+" channels !\n Maximum index : "+(mp.getNumberOfAtlasChannels()-1));
                 return;
@@ -37,7 +37,7 @@ abstract public class RegistrationSingleChannelCommand implements Command {
                 mp.warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to register");
                 return;
             }
-            if (slice_channel >=mp.getChannelBoundForSelectedSlices()) {
+            if (channel_slice >=mp.getChannelBoundForSelectedSlices()) {
                 mp.log.accept("Missing channel in selected slice(s).");
                 mp.errlog.accept("Missing channel in selected slice(s)\n One selected slice only has "+mp.getChannelBoundForSelectedSlices()+" channel(s).\n Maximum index : "+(mp.getChannelBoundForSelectedSlices()-1) );
                 return;
@@ -49,11 +49,11 @@ abstract public class RegistrationSingleChannelCommand implements Command {
     abstract public void runValidated();
 
     public SourcesProcessor getFixedFilter() {
-        return new SourcesChannelsSelect(atlas_channel);
+        return new SourcesChannelsSelect(channel_atlas);
     }
 
     public SourcesProcessor getMovingFilter() {
-        return new SourcesChannelsSelect(slice_channel);
+        return new SourcesChannelsSelect(channel_slice);
     }
 
 }
