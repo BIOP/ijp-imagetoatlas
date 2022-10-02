@@ -40,7 +40,7 @@ One animal, 87 serial sections, 2 fluorescent channels (nuclei and autofluoresce
 # Important note on File formats!
 
 **TL; DR: Use calibrated VSI, CZI, OME-TIFF, NDPI, 
-a few others (please read the text below). Otherwise convert you files to pyramidal OME-Tiff files. You can use the Fiji plugin [Kheops](https://github.com/BIOP/ijp-kheops) for instance.**
+a few others (please read the text below). Otherwise convert your files to pyramidal OME-Tiff files. You can use the Fiji plugin [Kheops](https://github.com/BIOP/ijp-kheops), or the [NGFF converter by Glencoe](https://www.glencoesoftware.com/products/ngff-converter/)(!n5 not supported, choose OME-TIFF). **
 
 
 All files need to be properly calibrated (microns, millimeters, etc, but not pixels!). ABBA takes advantage of the  calibration to set appropriate registration parameters.
