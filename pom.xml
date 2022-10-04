@@ -115,7 +115,7 @@
 		<bigdataviewer-spimdata-extras.version>0.3.1</bigdataviewer-spimdata-extras.version>
 		<image-transform-converters.version>0.1.5</image-transform-converters.version>
 		<elastix_registration_server.version>0.1.4</elastix_registration_server.version>
-		<bigdataviewer-biop-tools.version>0.5.6</bigdataviewer-biop-tools.version>
+		<bigdataviewer-biop-tools.version>0.5.7</bigdataviewer-biop-tools.version>
 		<bigdataviewer-selector.version>0.2.2</bigdataviewer-selector.version>
 
 		<!-- biop dependencies -->
@@ -140,7 +140,7 @@
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>sign,deploy-to-scijava</releaseProfiles>
 
-		<!--scijava.app.directory>C:/Fiji.app</scijava.app.directory-->
+		<scijava.app.directory>C:/Fiji.app</scijava.app.directory>
 	</properties>
 
 	<dependencies>

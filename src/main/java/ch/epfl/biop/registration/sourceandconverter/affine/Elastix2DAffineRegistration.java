@@ -5,7 +5,6 @@ import ch.epfl.biop.atlas.aligner.command.RegisterSlicesElastixAffineCommand;
 import ch.epfl.biop.atlas.aligner.plugin.IABBARegistrationPlugin;
 import ch.epfl.biop.atlas.aligner.plugin.RegistrationTypeProperties;
 import ch.epfl.biop.scijava.command.source.register.Elastix2DAffineRegisterCommand;
-import ch.epfl.biop.scijava.command.source.register.Elastix2DAffineRegisterServerCommand;
 import com.google.gson.Gson;
 import net.imglib2.realtransform.AffineTransform3D;
 import org.scijava.command.Command;
@@ -67,17 +66,7 @@ public class Elastix2DAffineRegistration extends AffineTransformSourceAndConvert
         try {
             Class<? extends Command> registrationCommandClass;
             // Is it supposed to be done on a server ?
-            if (parameters.containsKey("serverURL")) {
-                // Yes -> changes command class name to the server one
-                registrationCommandClass = Elastix2DAffineRegisterServerCommand.class;
-                if (parameters.get("userConsentForServerKeepingData").equals("true")) {
-                    String taskInfo = new Gson().toJson(sliceInfo);
-                    parameters.put("taskInfo", taskInfo);
-                }
-                parameters.remove("userConsentForServerKeepingData");
-            } else {
-                registrationCommandClass = Elastix2DAffineRegisterCommand.class;
-            }
+            registrationCommandClass = Elastix2DAffineRegisterCommand.class;
 
             // Registration success flag
             boolean success = true;

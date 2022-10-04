@@ -9,7 +9,6 @@ import ch.epfl.biop.atlas.aligner.command.RegisterSlicesElastixSplineCommand;
 import ch.epfl.biop.atlas.aligner.plugin.IABBARegistrationPlugin;
 import ch.epfl.biop.atlas.aligner.plugin.RegistrationTypeProperties;
 import ch.epfl.biop.scijava.command.source.register.Elastix2DSplineRegisterCommand;
-import ch.epfl.biop.scijava.command.source.register.Elastix2DSplineRegisterServerCommand;
 import com.google.gson.Gson;
 import ij.gui.WaitForUserDialog;
 import jitk.spline.ThinPlateR2LogRSplineKernelTransform;
@@ -78,18 +77,7 @@ public class Elastix2DSplineRegistration extends RealTransformSourceAndConverter
         try {
             boolean success = true;
             Class<? extends Command> registrationCommandClass;
-            // Is it supposed to be done on a server ?
-            if (parameters.containsKey("serverURL")) {
-                // Yes -> changes command class name
-                registrationCommandClass = Elastix2DSplineRegisterServerCommand.class;
-                if (parameters.get("userConsentForServerKeepingData").equals("true")) {
-                    String taskInfo = new Gson().toJson(sliceInfo);
-                    parameters.put("taskInfo", taskInfo);
-                }
-                parameters.remove("userConsentForServerKeepingData");
-            } else {
-                registrationCommandClass = Elastix2DSplineRegisterCommand.class;
-            }
+            registrationCommandClass = Elastix2DSplineRegisterCommand.class;
 
             // Transforms map into flat String : key1, value1, key2, value2, etc.
             // Necessary for CommandService
