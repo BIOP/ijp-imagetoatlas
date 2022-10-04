@@ -115,12 +115,12 @@
 		<bigdataviewer-spimdata-extras.version>0.3.1</bigdataviewer-spimdata-extras.version>
 		<image-transform-converters.version>0.1.5</image-transform-converters.version>
 		<elastix_registration_server.version>0.1.4</elastix_registration_server.version>
-		<bigdataviewer-biop-tools.version>0.5.5</bigdataviewer-biop-tools.version>
+		<bigdataviewer-biop-tools.version>0.5.6</bigdataviewer-biop-tools.version>
 		<bigdataviewer-selector.version>0.2.2</bigdataviewer-selector.version>
 
 		<!-- biop dependencies -->
-		<ijl-utilities-wrappers.version>0.7.2</ijl-utilities-wrappers.version>
-		<ijp-kheops.version>0.3.2</ijp-kheops.version>
+		<ijl-utilities-wrappers.version>0.7.3</ijl-utilities-wrappers.version>
+		<ijp-kheops.version>0.3.4</ijp-kheops.version>
 
 		<!-- maths -->
 		<leastsquares.version>1.0.0</leastsquares.version>
