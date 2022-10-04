@@ -230,10 +230,10 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
     private void clearBdvDefaults() {
         //bdvh.getCardPanel().removeCard(DEFAULT_SOURCES_CARD); // Cannot do this : errors
-        bdvh.getCardPanel().removeCard(DEFAULT_SOURCEGROUPS_CARD);
-        bdvh.getCardPanel().removeCard(DEFAULT_VIEWERMODES_CARD);
-        bdvh.getCardPanel().setCardExpanded(DEFAULT_SOURCES_CARD, false);
-        BdvScijavaHelper.clearBdvHandleMenuBar(bdvh);
+        BdvHandleHelper.removeCard(bdvh, DEFAULT_SOURCEGROUPS_CARD);
+        BdvHandleHelper.removeCard(bdvh, DEFAULT_VIEWERMODES_CARD);
+        SwingUtilities.invokeLater(() -> bdvh.getCardPanel().setCardExpanded(DEFAULT_SOURCES_CARD, false));
+        SwingUtilities.invokeLater(() -> BdvScijavaHelper.clearBdvHandleMenuBar(bdvh));
     }
 
     private void installBdvMenu(int hierarchyLevelsSkipped) {
