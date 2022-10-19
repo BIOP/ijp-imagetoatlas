@@ -69,7 +69,7 @@ import java.util.stream.Collectors;
 // TODO : fix display settings not updated with the new ABBA structure
 
 @Plugin(type = Command.class,
-        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>ABBA - DeepSlice Registration",
+        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>ABBA - DeepSlice Registration (Web)",
         description = "Uses Deepslice Web interface for affine in plane and axial registration of selected slices")
 public class RegisterSlicesDeepSliceCommand implements Command {
 

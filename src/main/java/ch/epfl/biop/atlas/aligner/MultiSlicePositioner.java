@@ -728,6 +728,7 @@ public class MultiSlicePositioner implements Closeable {
                                        SourcesProcessor preprocessMoving,
                                        Map<String,Object> parameters) {
         if (externalRegistrationPlugins.containsKey(registrationPluginName)) {
+            logger.debug("External registration found: "+registrationPluginName);
             registerSelectedSlices(externalRegistrationPlugins.get(registrationPluginName),
                     preprocessFixed, preprocessMoving, parameters);
         } else {
@@ -753,7 +754,7 @@ public class MultiSlicePositioner implements Closeable {
             warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to register");
             log.accept("Registration ignored : no slice selected");
         } else {
-
+            logger.debug("Putting user defined ROIs");
             // Putting user defined ROIs
             parameters.put("px", roiPX);
             parameters.put("py", roiPY);
@@ -761,22 +762,31 @@ public class MultiSlicePositioner implements Closeable {
             parameters.put("sy", roiSY);
 
             for (SliceSources slice : getSelectedSlices()) {
+                logger.debug("Starting slice registration for "+slice.getName());
                 IABBARegistrationPlugin registration = registrationPluginSupplier.get();
                 if (registration!=null) {
+                    logger.debug("\t slice registration for "+slice.getName()+"- set context");
                     registration.setScijavaContext(scijavaCtx);
 
+                    logger.debug("\t slice registration for "+slice.getName()+"- setSliceInfo");
                     registration.setSliceInfo(new SliceInfo(this, slice));
 
                     // Sends parameters to the registration
+                    logger.debug("\t slice registration for "+slice.getName()+"- setRegistrationParameters");
                     registration.setRegistrationParameters(convertToString(scijavaCtx, parameters));
 
                     // Always set slice at zero position for registration
+                    logger.debug("\t slice registration for "+slice.getName()+"- set slice zero position to zero");
                     parameters.put("pz", 0);
                     AffineTransform3D at3d = new AffineTransform3D();
                     at3d.translate(0, 0, -slice.getSlicingAxisPosition());
                     SourcesAffineTransformer z_zero = new SourcesAffineTransformer(at3d);
 
+
+                    logger.debug("\t slice registration for "+slice.getName()+"- RegisterSliceAction request");
                     new RegisterSliceAction(this, slice, registration, SourcesProcessorHelper.compose(z_zero, preprocessFixed), SourcesProcessorHelper.compose(z_zero, preprocessMoving)).runRequest();
+                } else {
+                    logger.error("NULL registration plugin obtained, ignoring registration.");
                 }
             }
         }
