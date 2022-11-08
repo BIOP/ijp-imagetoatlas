@@ -331,4 +331,9 @@ public class SimpleRegistrationWrapper implements ExternalABBARegistrationPlugin
         return new EmptySourceAndConverterCreator("model", at3D.inverse(), nPx, nPy, nPz).get();
     }
 
+    @Override
+    public String toString() {
+        return registrationTypeName;
+    }
+
 }
