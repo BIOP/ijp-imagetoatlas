@@ -70,9 +70,9 @@ getDetectionObjects().forEach(detection -> {
     MeasurementList ml = detection.getMeasurementList();
     atlasCoordinates.setPosition([detection.getROI().getCentroidX(),detection.getROI().getCentroidY(),0] as double[]);
     pixelToAtlasTransform.apply(atlasCoordinates, atlasCoordinates);
-    ml.addMeasurement("Atlas_X", atlasCoordinates.getDoublePosition(0) )
-    ml.addMeasurement("Atlas_Y", atlasCoordinates.getDoublePosition(1) )
-    ml.addMeasurement("Atlas_Z", atlasCoordinates.getDoublePosition(2) )
+    ml.putMeasurement("Atlas_X", atlasCoordinates.getDoublePosition(0) )
+    ml.putMeasurement("Atlas_Y", atlasCoordinates.getDoublePosition(1) )
+    ml.putMeasurement("Atlas_Z", atlasCoordinates.getDoublePosition(2) )
 })
 
 import qupath.ext.biop.warpy.Warpy
