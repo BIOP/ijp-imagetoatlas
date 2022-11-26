@@ -111,7 +111,7 @@
 		<!-- bdv playground related dependencies -->
 		<bigdataviewer-playground.version>0.6.2</bigdataviewer-playground.version>
 		<bigdataviewer-image-loaders.version>0.3.6</bigdataviewer-image-loaders.version>
-		<bigdataviewer-playground-display.version>0.3.0</bigdataviewer-playground-display.version>
+		<bigdataviewer-playground-display.version>0.3.1</bigdataviewer-playground-display.version>
 		<bigdataviewer-spimdata-extras.version>0.3.1</bigdataviewer-spimdata-extras.version>
 		<image-transform-converters.version>0.1.6</image-transform-converters.version>
 		<elastix_registration_server.version>0.1.4</elastix_registration_server.version>
