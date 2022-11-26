@@ -584,13 +584,13 @@ public class MultiSlicePositioner implements Closeable {
             new MarkActionSequenceBatchAction(this).runRequest();
             for (int i = 0; i < sortedTiles.size(); i++) {
                 T group = sortedTiles.get(i);
-                if (group.getId()!=-1) {
+                //if (group.getId()!=-1) {
                     CreateSliceAction cs = new CreateSliceAction(this, sacsGroups.get(group), slicingAxisPosition + i * axisIncrement,1,0);
                     cs.runRequest();
                     if (cs.getSlice() != null) {
                         out.add(cs.getSlice());
                     }
-                }
+                //}
             }
             new MarkActionSequenceBatchAction(this).runRequest();
 
