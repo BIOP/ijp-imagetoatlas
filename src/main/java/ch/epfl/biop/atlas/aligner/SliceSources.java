@@ -13,6 +13,7 @@ import ch.epfl.biop.atlas.mouse.allen.ccfv3.command.AllenBrainAdultMouseAtlasCCF
 import ch.epfl.biop.atlas.struct.AtlasHelper;
 import ch.epfl.biop.atlas.struct.AtlasNode;
 import ch.epfl.biop.atlas.struct.AtlasOntology;
+import ch.epfl.biop.bdv.img.entity.ImageName;
 import ch.epfl.biop.bdv.img.imageplus.ImagePlusHelper;
 import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
 import ch.epfl.biop.java.utilities.roi.SelectToROIKeepLines;
@@ -270,7 +271,73 @@ public class SliceSources {
         computeZThickness();
 
         try {
-            name = SourceAndConverterHelper.getRootSource(sacs[0].getSpimSource(), new AffineTransform3D()).getName();
+
+
+            SourceAndConverter rootSac = SourceAndConverterInspector.getRootSourceAndConverter(original_sacs[0]);
+            if (SourceAndConverterServices.getSourceAndConverterService()
+                    .getMetadata(rootSac, SourceAndConverterService.SPIM_DATA_INFO)==null) {
+                // Not linked to a spimdata
+                name =rootSac.getSpimSource().getName();
+            } else {
+                AbstractSpimData asd =
+                        ((SourceAndConverterService.SpimDataInfo)SourceAndConverterServices.getSourceAndConverterService()
+                                .getMetadata(rootSac, SourceAndConverterService.SPIM_DATA_INFO)).asd;
+
+                int viewSetupId = ((SourceAndConverterService.SpimDataInfo)SourceAndConverterServices.getSourceAndConverterService()
+                        .getMetadata(rootSac, SourceAndConverterService.SPIM_DATA_INFO)).setupId;
+
+                BasicViewSetup bvs = (BasicViewSetup) asd.getSequenceDescription().getViewSetups().get(viewSetupId);
+
+                // TODO : keep in sync name with QuPath -> for that, read imagename through opener
+
+                if (bvs.getAttribute(ImageName.class)!=null) {
+                    name = bvs.getAttribute(ImageName.class).getName();
+                } else {
+                    name =rootSac.getSpimSource().getName();
+                }
+
+            }
+
+
+            /*
+            if (SourceAndConverterServices.getSourceAndConverterService()
+                    .getMetadata(rootSac, SourceAndConverterService.SPIM_DATA_INFO)==null) {
+                //sliceInfo+="No information available";
+            } else {
+                AbstractSpimData asd =
+                        ((SourceAndConverterService.SpimDataInfo)SourceAndConverterServices.getSourceAndConverterService()
+                                .getMetadata(rootSac, SourceAndConverterService.SPIM_DATA_INFO)).asd;
+
+                int viewSetupId = ((SourceAndConverterService.SpimDataInfo)SourceAndConverterServices.getSourceAndConverterService()
+                        .getMetadata(rootSac, SourceAndConverterService.SPIM_DATA_INFO)).setupId;
+
+                Collection<String> datasetKeys = SourceAndConverterServices.getSourceAndConverterService().getMetadataKeys(asd);
+
+                if (datasetKeys!=null) {
+                    StringBuilder sb = new StringBuilder();
+                    datasetKeys.forEach(key -> {
+                        String value = "";
+                        Object v = SourceAndConverterServices.getSourceAndConverterService().getMetadata(asd,key);
+                        if (v!=null) value = v.toString();
+                        sb.append(key+":"+value+"\n");
+                    });
+                    sliceInfo+=sb.toString();
+                }
+
+                BasicViewSetup bvs = (BasicViewSetup) asd.getSequenceDescription().getViewSetups().get(viewSetupId);
+
+                if (bvs.hasName()) {
+                    sliceInfo+="viewsetup:"+bvs.getName()+" ["+bvs.getId()+"]\n";
+                }
+
+                if (QuPathBdvHelper.isSourceLinkedToQuPath(original_sacs[0])) {
+                    int entryId = QuPathBdvHelper.getEntryId(original_sacs[0]);
+                    sliceInfo+="Project: "+QuPathBdvHelper.getProjectFile(this.original_sacs[0]).getAbsolutePath()+"\n";
+                    sliceInfo+="- Entry Id: "+entryId;//qpent.getName()+" ["+qpent.getId()+"]";
+                }*/
+
+
+
         } catch(Exception e) {
             mp.errlog.accept("Couldn't name slice");
             e.printStackTrace();
