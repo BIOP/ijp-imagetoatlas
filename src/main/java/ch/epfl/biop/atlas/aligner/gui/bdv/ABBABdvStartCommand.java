@@ -16,6 +16,8 @@ import org.scijava.command.CommandService;
 import org.scijava.object.ObjectService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
+import sc.fiji.bdvpg.bdv.supplier.DefaultBdvSupplier;
+import sc.fiji.bdvpg.bdv.supplier.SerializableBdvOptions;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
 
 import java.util.List;
@@ -48,7 +50,7 @@ public class ABBABdvStartCommand implements Command, Initializable {
                     .get()
                     .getOutput("mp");
 
-            BdvHandle bdvh = SourceAndConverterServices.getBdvDisplayService().getNewBdv();
+            BdvHandle bdvh = new DefaultBdvSupplier(new SerializableBdvOptions()).get();//. SourceAndConverterServices.getBdvDisplayService().getNewBdv();
             view = new BdvMultislicePositionerView(mp, bdvh);
 
         } catch (Exception e) {

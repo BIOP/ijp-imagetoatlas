@@ -1016,7 +1016,7 @@ public class SliceSources {
             dataEntryFolder = QuPathBdvHelper.getDataEntryFolder(original_sacs[0]);
             logger.debug("DataEntryFolder = "+dataEntryFolder);
 
-            String projectFolderPath = QuPathBdvHelper.getQuPathProjectFile(original_sacs[0]).getParent();
+            String projectFolderPath = QuPathBdvHelper.getProjectFile(original_sacs[0]).getParent();
             logger.debug("QuPath Project Folder = "+projectFolderPath);
 
             File f = new File(dataEntryFolder, "ABBA-RoiSet-"+mp.getAtlas().getName()+".zip");
