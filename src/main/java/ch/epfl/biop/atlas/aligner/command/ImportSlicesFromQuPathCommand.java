@@ -2,8 +2,8 @@ package ch.epfl.biop.atlas.aligner.command;
 
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
-import ch.epfl.biop.bdv.img.legacy.qupath.command.QuPathProjectToBDVDatasetLegacyCommand;
-import ch.epfl.biop.bdv.img.legacy.qupath.entity.QuPathEntryEntity;
+import ch.epfl.biop.bdv.img.qupath.command.CreateBdvDatasetQuPathCommand;
+import ch.epfl.biop.bdv.img.qupath.entity.QuPathEntryIdEntity;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import org.scijava.command.Command;
 import org.scijava.command.CommandService;
@@ -41,7 +41,7 @@ public class ImportSlicesFromQuPathCommand implements Command {
     public void run() {
         try {
             AbstractSpimData spimdata = (AbstractSpimData) command_service
-                    .run(QuPathProjectToBDVDatasetLegacyCommand.class,true,
+                    .run(CreateBdvDatasetQuPathCommand.class,true,
                             "quPathProject", qupath_project,
                             "unit", "MILLIMETER").get().getOutput("spimData");
             SourceAndConverter[] sacs =
@@ -49,7 +49,7 @@ public class ImportSlicesFromQuPathCommand implements Command {
                             .toArray(new SourceAndConverter[0]);
 
             if ((sacs!=null)&&(sacs.length>0)) { // Because the action could have been canceled
-                mp.createSlice(sacs, slice_axis_initial_mm, increment_between_slices_mm, QuPathEntryEntity.class, new QuPathEntryEntity(-1));
+                mp.createSlice(sacs, slice_axis_initial_mm, increment_between_slices_mm, QuPathEntryIdEntity.class, new QuPathEntryIdEntity(-1));
             }
         } catch (InterruptedException e) {
             e.printStackTrace();

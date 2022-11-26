@@ -567,7 +567,11 @@ public class MultiSlicePositioner implements Closeable {
                             SourceAndConverterService.SpimDataInfo sdi = (SourceAndConverterService.SpimDataInfo) SourceAndConverterServices.getSourceAndConverterService().getMetadata(sac, SPIM_DATA_INFO);
                             AbstractSpimData<AbstractSequenceDescription<BasicViewSetup, ?, ?>> asd = (AbstractSpimData<AbstractSequenceDescription<BasicViewSetup, ?, ?>>) sdi.asd;
                             BasicViewSetup bvs = asd.getSequenceDescription().getViewSetups().get(sdi.setupId);
-                            return bvs.getAttribute(attributeClass);
+                            if (bvs.getAttribute(attributeClass) == null) {
+                                return defaultEntity;
+                            } else {
+                                return bvs.getAttribute(attributeClass);
+                            }
                         } else {
                             return defaultEntity;
                         }

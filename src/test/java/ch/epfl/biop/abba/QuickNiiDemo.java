@@ -1,6 +1,7 @@
 package ch.epfl.biop.abba;
 
 import bdv.viewer.SourceAndConverter;
+import ch.epfl.biop.bdv.img.bioformats.command.CreateBdvDatasetBioFormatsCommand;
 import ch.epfl.biop.bdv.img.legacy.bioformats.command.BasicOpenFilesWithBigdataviewerBioformatsBridgeCommand;
 import ch.epfl.biop.quicknii.QuickNIISeries;
 import ch.epfl.biop.quicknii.QuickNIISlice;
@@ -37,7 +38,7 @@ public class QuickNiiDemo {
                 .toArray(File[]::new);
 
         // Creates a spimdata object
-        AbstractSpimData asd = (AbstractSpimData) ij.command().run(BasicOpenFilesWithBigdataviewerBioformatsBridgeCommand.class,true,
+        AbstractSpimData asd = (AbstractSpimData) ij.command().run(CreateBdvDatasetBioFormatsCommand.class,true,
                 "unit", "MILLIMETER",
                 "splitrgbchannels", false,
                 "files", files

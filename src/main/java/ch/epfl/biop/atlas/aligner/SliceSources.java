@@ -14,7 +14,6 @@ import ch.epfl.biop.atlas.struct.AtlasHelper;
 import ch.epfl.biop.atlas.struct.AtlasNode;
 import ch.epfl.biop.atlas.struct.AtlasOntology;
 import ch.epfl.biop.bdv.img.imageplus.ImagePlusHelper;
-import ch.epfl.biop.bdv.img.legacy.qupath.entity.QuPathEntryEntity;
 import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
 import ch.epfl.biop.java.utilities.roi.SelectToROIKeepLines;
 import ch.epfl.biop.java.utilities.roi.types.CompositeFloatPoly;
@@ -1273,13 +1272,22 @@ public class SliceSources {
                 sliceInfo+="viewsetup:"+bvs.getName()+" ["+bvs.getId()+"]\n";
             }
 
-            if (bvs.getAttribute(QuPathEntryEntity.class)!=null) {
-                QuPathEntryEntity qpent = bvs.getAttribute(QuPathEntryEntity.class);
-                sliceInfo+="QuPath project:"+qpent.getQuPathProjectionLocation()+"\n";
-                sliceInfo+=qpent.getName()+" ["+qpent.getId()+"]";
+            if (QuPathBdvHelper.isSourceLinkedToQuPath(original_sacs[0])) {
+                int entryId = QuPathBdvHelper.getEntryId(original_sacs[0]);
+                sliceInfo+="Project: "+QuPathBdvHelper.getProjectFile(this.original_sacs[0]).getAbsolutePath()+"\n";
+                sliceInfo+="- Entry Id: "+entryId;//qpent.getName()+" ["+qpent.getId()+"]";
+            }
+            /*if ((bvs.getAttribute(QuPathEntryEntity.class)!=null)&&(bvs.getAttribute(QuPathEntryEntity.class).getId()!=-1)) {
+                TODO : make sure it works with legacy project!!
+
+                // QuPathEntryEntity qpent = bvs.getAttribute(QuPathEntryEntity.class);
+                // QuPathBdvHelper.getProjectFile(this.original_sacs[0]).getAbsolutePath();
+                int entryId = QuPathBdvHelper.getEntryId(original_sacs[0]);
+                sliceInfo+="Project: "+QuPathBdvHelper.getProjectFile(this.original_sacs[0]).getAbsolutePath()+"\n";
+                sliceInfo+="- Entry Id: "+entryId;//qpent.getName()+" ["+qpent.getId()+"]";
             } else {
                 //QuPathEntryEntity not found
-            }
+            }*/
         }
         return sliceInfo;
     }

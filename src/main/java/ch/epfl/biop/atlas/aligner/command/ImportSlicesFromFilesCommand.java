@@ -3,6 +3,7 @@ package ch.epfl.biop.atlas.aligner.command;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
+import ch.epfl.biop.bdv.img.bioformats.command.CreateBdvDatasetBioFormatsCommand;
 import ch.epfl.biop.bdv.img.legacy.bioformats.command.BasicOpenFilesWithBigdataviewerBioformatsBridgeCommand;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import mpicbg.spim.data.sequence.Tile;
@@ -50,7 +51,7 @@ public class ImportSlicesFromFilesCommand implements Command {
         try {
             AbstractSpimData<?> spimdata = (AbstractSpimData<?>)
                     command_service.run(
-                                BasicOpenFilesWithBigdataviewerBioformatsBridgeCommand.class,
+                                CreateBdvDatasetBioFormatsCommand.class,
                                 true, "files", files,
                                 "datasetname", datasetname,
                                 "unit", "MILLIMETER",
