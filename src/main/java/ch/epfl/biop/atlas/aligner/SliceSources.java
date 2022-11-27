@@ -289,6 +289,7 @@ public class SliceSources {
                 BasicViewSetup bvs = (BasicViewSetup) asd.getSequenceDescription().getViewSetups().get(viewSetupId);
 
                 // TODO : keep in sync name with QuPath -> for that, read imagename through opener
+                // TODO BUT MAKE SURE IT WORKS WITH LEGACY QUPATH IMAGE LOADER!
 
                 if (bvs.getAttribute(ImageName.class)!=null) {
                     name = bvs.getAttribute(ImageName.class).getName();

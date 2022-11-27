@@ -16,6 +16,7 @@ import mpicbg.spim.data.generic.base.Entity;
 import mpicbg.spim.data.generic.sequence.AbstractSequenceDescription;
 import mpicbg.spim.data.generic.sequence.BasicViewSetup;
 import net.imglib2.realtransform.AffineTransform3D;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.scijava.Context;
 import org.scijava.InstantiableException;
@@ -35,6 +36,9 @@ import sc.fiji.persist.ScijavaGsonHelper;
 
 import javax.swing.*;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -43,8 +47,12 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 import static sc.fiji.bdvpg.scijava.services.SourceAndConverterService.SPIM_DATA_INFO;
+import static sc.fiji.bdvpg.services.ISourceAndConverterService.SPIM_DATA_LOCATION;
 
 /**
  * All specific methods and fields dedicated to the multislice positioner
@@ -922,60 +930,281 @@ public class MultiSlicePositioner implements Closeable {
         return stateChangedSinceLastSave;
     }
 
-    public boolean saveState(File stateFile, boolean overwrite) {
-        addTask();
+    /**
+     * Stores the state as a single zipped file with the .abba extension
+     * @param stateFileIn indicates the location of the file with the state that should be saved
+     * @param overwrite allows to overwrite the stateFileIn if the path already exists
+     * @return a successful operation flag
+     */
+    public boolean saveState(File stateFileIn, boolean overwrite) {
+
+        // First, let's do a few checks (fastest to longest):
+
+        // -0. there's at least a slice
         if (slices.size() == 0) {
             errorMessageForUser.accept("No Slices To Save", "No slices are present. Nothing saved");
-            removeTask();
             return false;
         }
 
-        slices.get(0).waitForEndOfTasks();
+        // -1. put a '.abba' extension on the file
+        File abbaFile = stateFileIn;
+        //return legacySaveState(stateFile, overwrite);
+        if (!FilenameUtils.getExtension(stateFileIn.getAbsolutePath()).equals("abba")) {
+            abbaFile = new File(FilenameUtils.removeExtension(stateFileIn.getAbsolutePath())+".abba");
+        }
 
-        // Wait patiently for all tasks to be performed
-        log.accept("Waiting for all tasks to be finished ... ");
+        // -2. there's no file with the same name OR, it's ok to overwrite it.
+        if (abbaFile.exists() && overwrite == false) {
+            errorMessageForUser.accept("Saving aborted", "The state file "+abbaFile.getAbsolutePath()+" already exists!");
+            return false;
+        }
+
+        // -3. the tasks are finished
+        log.accept("Waiting for all tasks to be finished before saving ... ");
         getSlices().forEach(SliceSources::waitForEndOfTasks);
         log.accept("All tasks have been performed!");
 
-        // First save all sources required in the state
-        List<SourceAndConverter<?>> allSacs = new ArrayList<>();
-
-        getSlices().forEach(sliceSource -> allSacs.addAll(Arrays.asList(sliceSource.getOriginalSources())));
-
-        String fileNoExt = FilenameUtils.removeExtension(stateFile.getAbsolutePath());
-        File sacsFile = new File(fileNoExt+"_sources.json");
-
-        if (sacsFile.exists()&&(!overwrite)) {
-            logger.error("File "+sacsFile.getAbsolutePath()+" already exists. Abort command");
+        // We prepare the saving of the state, so that's a task:
+        addTask();
+        // Meaning:
+        // - 0. Creating a temporary folder, that needs to be deleted at the end
+        String tmpDirsLocation = System.getProperty("java.io.tmpdir");
+        Path path = Paths.get(FileUtils.getTempDirectory().getAbsolutePath(), UUID.randomUUID().toString());
+        File tmpdir;
+        try {
+            tmpdir = Files.createDirectories(path).toFile();
+        } catch (IOException e) {
+            errorMessageForUser.accept("Error", "Java can't create a temporary folder in the folder "+tmpDirsLocation);
             removeTask();
             return false;
         }
 
-        SourceAndConverterServiceSaver sacss = new SourceAndConverterServiceSaver(sacsFile,this.scijavaCtx,allSacs);
-        sacss.run();
-        List<SourceAndConverter> serialized_sources = new ArrayList<>();
-
-        sacss.getSacToId().values().stream().sorted().forEach(i -> serialized_sources.add(sacss.getIdToSac().get(i)));
-
         try {
+
+            // In the temp folder, write the following files:
+
+            // All sources required in the state
+            // - the sources
+            // - the xml bdv datasets (all of them)
+            List<SourceAndConverter<?>> allSacs = new ArrayList<>();
+            getSlices().forEach(sliceSource -> allSacs.addAll(Arrays.asList(sliceSource.getOriginalSources())));
+            File sourcesFile = new File(tmpdir, "sources.json");
+
+            // Make sure the spimdata are all re-serialized in the target folder, using the useRelativePaths flag to true
+
+            SourceAndConverterServiceSaver sacss = new SourceAndConverterServiceSaver(sourcesFile,
+                    this.scijavaCtx,
+                    allSacs, true);
+
+            sacss.run();
+
+            List<SourceAndConverter> serialized_sources = new ArrayList<>();
+            sacss.getSacToId().values().stream().sorted().forEach(i -> serialized_sources.add(sacss.getIdToSac().get(i)));
+
+            File stateFile = new File(tmpdir, "state.json");
+            // - the actions
             FileWriter writer = new FileWriter(stateFile.getAbsolutePath());
             AlignerState alignerState = new AlignerState(this);
             alignerState.version = VersionUtils.getVersion(AlignerState.class);
             getGsonStateSerializer(serialized_sources).toJson(alignerState, writer);
             writer.flush();
             writer.close();
+
+            // Then zip everything into the target file with abba extension,
+            pack(tmpdir.getAbsolutePath(), abbaFile.getAbsolutePath());
+
             stateChangedSinceLastSave = false;
             removeTask();
             return true;
         } catch (IOException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
+            errlog.accept(e.getMessage());
             removeTask();
             return false;
+        } finally {
+            // Delete temp folder
+            try {
+                FileUtils.deleteDirectory(tmpdir);
+            } catch (IOException e) {
+                errlog.accept("Could not delete temp folder "+tmpdir.getAbsolutePath()+". Error: "+e.getMessage());
+            }
         }
 
     }
 
-    public boolean loadState(File stateFile) {
+    private static void pack(String sourceDirPath, String zipFilePath) throws IOException {
+        Path p = Files.createFile(Paths.get(zipFilePath));
+        try (ZipOutputStream zs = new ZipOutputStream(Files.newOutputStream(p))) {
+            Path pp = Paths.get(sourceDirPath);
+            Files.walk(pp)
+                    .filter(path -> !Files.isDirectory(path))
+                    .forEach(path -> {
+                        ZipEntry zipEntry = new ZipEntry(pp.relativize(path).toString());
+                        try {
+                            zs.putNextEntry(zipEntry);
+                            Files.copy(path, zs);
+                            zs.closeEntry();
+                        } catch (IOException e) {
+                            logger.error(e.getMessage());
+                        }
+                    });
+        }
+    }
+
+    private static final int BUFFER_SIZE = 4096;
+    /**
+     * Extracts a zip file specified by the zipFilePath to a directory specified by
+     * destDirectory (will be created if does not exists)
+     * @param zipFilePath
+     * @param destDirectory
+     * @throws IOException
+     */
+    public void unpack(String zipFilePath, String destDirectory) throws IOException {
+        File destDir = new File(destDirectory);
+        if (!destDir.exists()) {
+            destDir.mkdir();
+        }
+        ZipInputStream zipIn = new ZipInputStream(new FileInputStream(zipFilePath));
+        ZipEntry entry = zipIn.getNextEntry();
+        // iterates over entries in the zip file
+        while (entry != null) {
+            String filePath = destDirectory + File.separator + entry.getName();
+            if (!entry.isDirectory()) {
+                // if the entry is a file, extracts it
+                extractFile(zipIn, filePath);
+            } else {
+                // if the entry is a directory, make the directory
+                File dir = new File(filePath);
+                dir.mkdirs();
+            }
+            zipIn.closeEntry();
+            entry = zipIn.getNextEntry();
+        }
+        zipIn.close();
+    }
+    /**
+     * Extracts a zip entry (file entry)
+     * @param zipIn
+     * @param filePath
+     * @throws IOException
+     */
+    private void extractFile(ZipInputStream zipIn, String filePath) throws IOException {
+        BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath));
+        byte[] bytesIn = new byte[BUFFER_SIZE];
+        int read = 0;
+        while ((read = zipIn.read(bytesIn)) != -1) {
+            bos.write(bytesIn, 0, read);
+        }
+        bos.close();
+    }
+
+    public boolean loadState(File stateFileAbba) {
+        if (!stateFileAbba.getAbsolutePath().endsWith(".abba")) {
+            return legacyLoadState(stateFileAbba);
+        }
+
+        boolean emptyState = this.slices.size()==0;
+        // TODO : add a clock as an overlay
+        getSlices().forEach(SliceSources::waitForEndOfTasks);
+        // We prepare the loading of the state, so that's a task:
+        addTask();
+        // Meaning:
+        // - 0. Creating a temporary folder, that needs to be deleted at the end
+        String tmpDirsLocation = System.getProperty("java.io.tmpdir");
+        Path path = Paths.get(FileUtils.getTempDirectory().getAbsolutePath(), UUID.randomUUID().toString());
+        File tmpdir;
+        try {
+            tmpdir = Files.createDirectories(path).toFile();
+        } catch (IOException e) {
+            errorMessageForUser.accept("Error", "Java can't create a temporary folder in the folder "+tmpDirsLocation);
+            removeTask();
+            return false;
+        }
+
+        try {
+            // We need to unpack the file
+            unpack(stateFileAbba.getAbsolutePath(), tmpdir.getAbsolutePath());
+            File sacsFile = new File(tmpdir, "sources.json");
+
+            SourceAndConverterServiceLoader sacsl =
+                    new SourceAndConverterServiceLoader(sacsFile.getAbsolutePath(),
+                            sacsFile.getParent(), this.scijavaCtx, false, true);
+            sacsl.run();
+            List<SourceAndConverter> serialized_sources = new ArrayList<>();
+
+            sacsl.getSacToId().values().stream().sorted().forEach(i -> serialized_sources.add(sacsl.getIdToSac().get(i)));
+
+            Gson gson = getGsonStateSerializer(serialized_sources);
+
+            File stateFile = new File(tmpdir, "state.json");
+
+            if (stateFile.exists()) {
+                try {
+                    FileReader fileReader = new FileReader(stateFile);
+
+                    JsonObject element = gson.fromJson(fileReader, JsonObject.class);
+                    // Didn't have the foresight to add a version number from the start...
+                    String version = element.get("version").getAsString();
+
+                    AlignerState state = gson.fromJson(element, AlignerState.class); // actions are executed during deserialization
+                    fileReader.close();
+
+                    String warningMessageForUser = "";
+
+                    DecimalFormat df = new DecimalFormat("###.000");
+
+                    Function<Double, String> a = (d) -> df.format(d*180/Math.PI);
+
+                    if (state.rotationX!=reslicedAtlas.getRotateX()) {
+                        warningMessageForUser+="Current X Angle : "+a.apply(reslicedAtlas.getRotateX())+" has been updated to "+a.apply(state.rotationX)+"\n";
+                        reslicedAtlas.setRotateX(state.rotationX);
+                    }
+
+                    if (state.rotationY!=reslicedAtlas.getRotateY()) {
+                        warningMessageForUser+="Current Y Angle : "+a.apply(reslicedAtlas.getRotateY())+" has been updated to "+a.apply(state.rotationY)+"\n";
+                        reslicedAtlas.setRotateY(state.rotationY);
+                    }
+
+                    if (!warningMessageForUser.equals("")) {
+                        this.warningMessageForUser.accept("Warning", warningMessageForUser);
+                    }
+
+                    state.slices_state_list.forEach(sliceState -> {
+                        sliceState.slice.waitForEndOfTasks();
+                        sliceState.slice.transformSourceOrigin((AffineTransform3D) (sliceState.preTransform));
+                    });
+
+                    if (emptyState) stateChangedSinceLastSave = false; // loaded state has not been changed, and it was the only one loaded
+
+                } catch (Exception e) {
+                    removeTask();
+                    errlog.accept(e.getMessage());
+                    e.printStackTrace();
+                    return false;
+                }
+            } else {
+                removeTask();
+                errlog.accept("Error : file "+stateFile.getAbsolutePath()+" not found!");
+                return false;
+            }
+            removeTask();
+            return true;
+        } catch (IOException e) {
+            removeTask();
+            errlog.accept(e.getMessage());
+            return false;
+        } finally {
+            // Delete temp folder
+            try {
+                FileUtils.deleteDirectory(tmpdir);
+            } catch (IOException e) {
+                errlog.accept("Could not delete temp folder "+tmpdir.getAbsolutePath()+". Error: "+e.getMessage());
+            }
+        }
+
+    }
+
+    private boolean legacyLoadState(File stateFile) {
         addTask();
         boolean emptyState = this.slices.size()==0;
         // TODO : add a clock as an overlay
