@@ -1727,7 +1727,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             AffineTransform3D bdvAt3D = new AffineTransform3D();
             bdvh.getViewerPanel().state().getViewerTransform(bdvAt3D);
 
-            drawDragAndDropRectangle(g, bdvAt3D);
+            drawDragAndDropRectangle(g, bdvAt3D); // honestly it's not used!
 
             guiState.forEachSlice(sliceGuiState -> {
                 sliceGuiState.drawGraphicalHandles(g);
@@ -1961,6 +1961,11 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         Stroke dashed = new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL,
                 0, new float[]{9}, 0);
         g.setStroke(dashed);
+
+        // Needs manual clipping or the time it takes to draw lines is abysmal
+        int w = bdvh.getViewerPanel().getWidth();
+        int h = bdvh.getViewerPanel().getHeight();
+
         // draw dashed line from handle
         slicesCopy.forEach(slice -> {
 
@@ -1972,13 +1977,21 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             if (slice.isSelected()) {
                 g.setColor(colorSelected);
             } else {
-
                 g.setColor(colorNotSelected);
             }
 
-            g.drawLine(coordSliceCenter[0], coordSliceCenter[1],
-                    (int) handlePoint.getDoublePosition(0), (int) handlePoint.getDoublePosition(1));
+            if ((coordSliceCenter[0]>0) && (coordSliceCenter[0]<w)) {
+                if (coordSliceCenter[1]>0) {
+                    if ((int) handlePoint.getDoublePosition(1)<h) {
+                        g.drawLine(coordSliceCenter[0], Math.min(h,coordSliceCenter[1]),
+                                (int) handlePoint.getDoublePosition(0), Math.max(0,(int) handlePoint.getDoublePosition(1)));
+                    }
+                }
+            }
 
+            /*g.drawLine(coordSliceCenter[0], coordSliceCenter[1],
+                    (int) handlePoint.getDoublePosition(0), (int) handlePoint.getDoublePosition(1));
+            */
         });
     }
 
