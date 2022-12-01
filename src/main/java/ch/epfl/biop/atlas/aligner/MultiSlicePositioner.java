@@ -1224,6 +1224,8 @@ public class MultiSlicePositioner implements Closeable {
         } catch (Exception e) {
             errlog.accept(e.getMessage());
         }
+
+
         List<SourceAndConverter> serialized_sources = new ArrayList<>();
 
         sacsl.getSacToId().values().stream().sorted().forEach(i -> serialized_sources.add(sacsl.getIdToSac().get(i)));

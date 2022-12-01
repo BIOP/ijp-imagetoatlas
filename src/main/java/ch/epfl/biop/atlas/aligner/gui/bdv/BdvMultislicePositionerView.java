@@ -1,15 +1,60 @@
 package ch.epfl.biop.atlas.aligner.gui.bdv;
 
-import bdv.util.*;
+
+import bdv.util.BdvFunctions;
+import bdv.util.BdvHandle;
+import bdv.util.BdvHandleFrame;
+import bdv.util.BdvOptions;
+import bdv.util.BdvOverlay;
+import bdv.util.BdvStackSource;
 import bdv.viewer.Interpolation;
 import bdv.viewer.SourceAndConverter;
 import bdv.viewer.ViewerPanel;
 import ch.epfl.biop.ResourcesMonitor;
-import ch.epfl.biop.atlas.aligner.*;
+import ch.epfl.biop.atlas.aligner.CancelableAction;
+import ch.epfl.biop.atlas.aligner.CreateSliceAction;
+import ch.epfl.biop.atlas.aligner.DeleteSliceAction;
+import ch.epfl.biop.atlas.aligner.MoveSliceAction;
+import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
+import ch.epfl.biop.atlas.aligner.RegisterSliceAction;
+import ch.epfl.biop.atlas.aligner.ReslicedAtlas;
+import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.atlas.aligner.adapter.AlignerState;
-import ch.epfl.biop.atlas.aligner.gui.bdv.card.*;
-import ch.epfl.biop.atlas.aligner.command.*;
+import ch.epfl.biop.atlas.aligner.command.ABBADocumentationCommand;
+import ch.epfl.biop.atlas.aligner.command.ABBAForumHelpCommand;
+import ch.epfl.biop.atlas.aligner.command.ABBAStateLoadCommand;
+import ch.epfl.biop.atlas.aligner.command.ABBAStateSaveCommand;
+import ch.epfl.biop.atlas.aligner.command.ABBAUserFeedbackCommand;
+import ch.epfl.biop.atlas.aligner.command.AtlasSlicingAdjusterCommand;
+import ch.epfl.biop.atlas.aligner.command.DeepSliceDocumentationCommand;
+import ch.epfl.biop.atlas.aligner.command.ExportAtlasToImageJCommand;
+import ch.epfl.biop.atlas.aligner.command.ExportDeformationFieldToImageJCommand;
+import ch.epfl.biop.atlas.aligner.command.ExportRegionsToRoiManagerCommand;
+import ch.epfl.biop.atlas.aligner.command.ExportRegionsToRoisetFileCommand;
+import ch.epfl.biop.atlas.aligner.command.ExportRegistrationToQuPathCommand;
+import ch.epfl.biop.atlas.aligner.command.ExportResampledSlicesToBDVSourceCommand;
+import ch.epfl.biop.atlas.aligner.command.ExportSlicesOriginalDataToImageJCommand;
+import ch.epfl.biop.atlas.aligner.command.ExportSlicesToBDVCommand;
+import ch.epfl.biop.atlas.aligner.command.ExportSlicesToBDVJsonDatasetCommand;
+import ch.epfl.biop.atlas.aligner.command.ExportSlicesToImageJCommand;
+import ch.epfl.biop.atlas.aligner.command.ExportSlicesToQuickNIIDatasetCommand;
+import ch.epfl.biop.atlas.aligner.command.ImportSliceFromImagePlusCommand;
+import ch.epfl.biop.atlas.aligner.command.ImportSlicesFromFilesCommand;
+import ch.epfl.biop.atlas.aligner.command.ImportSlicesFromQuPathCommand;
+import ch.epfl.biop.atlas.aligner.command.RegisterSlicesDeepSliceCommand;
+import ch.epfl.biop.atlas.aligner.command.RegisterSlicesEditLastCommand;
+import ch.epfl.biop.atlas.aligner.command.RegisterSlicesRemoveLastCommand;
+import ch.epfl.biop.atlas.aligner.command.RotateSlicesCommand;
+import ch.epfl.biop.atlas.aligner.command.SetSlicesDisplayRangeCommand;
+import ch.epfl.biop.atlas.aligner.command.SetSlicesThicknessCommand;
+import ch.epfl.biop.atlas.aligner.command.SetSlicesThicknessMatchNeighborsCommand;
+import ch.epfl.biop.atlas.aligner.command.SliceAffineTransformCommand;
 import ch.epfl.biop.atlas.aligner.gui.MultiSliceContextMenuClickBehaviour;
+import ch.epfl.biop.atlas.aligner.gui.bdv.card.AtlasAdjustDisplayCommand;
+import ch.epfl.biop.atlas.aligner.gui.bdv.card.AtlasInfoPanel;
+import ch.epfl.biop.atlas.aligner.gui.bdv.card.EditPanel;
+import ch.epfl.biop.atlas.aligner.gui.bdv.card.NavigationPanel;
+import ch.epfl.biop.atlas.aligner.gui.bdv.card.SliceDefineROICommand;
 import ch.epfl.biop.atlas.aligner.plugin.ABBACommand;
 import ch.epfl.biop.atlas.aligner.plugin.IABBARegistrationPlugin;
 import ch.epfl.biop.atlas.aligner.plugin.RegistrationPluginHelper;
@@ -38,7 +83,11 @@ import org.scijava.command.CommandModule;
 import org.scijava.command.CommandService;
 import org.scijava.object.ObjectService;
 import org.scijava.plugin.PluginService;
-import org.scijava.ui.behaviour.*;
+import org.scijava.ui.behaviour.Behaviour;
+import org.scijava.ui.behaviour.BehaviourMap;
+import org.scijava.ui.behaviour.ClickBehaviour;
+import org.scijava.ui.behaviour.InputTrigger;
+import org.scijava.ui.behaviour.InputTriggerMap;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
 import org.slf4j.Logger;
@@ -755,10 +804,14 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                     return;
                 }
             }
-
-            CommandModule cm = msp.getContext().getService(CommandService.class)
-                    .run(ABBAStateLoadCommand.class, true,"mp", msp).get();
-
+            CommandModule cm;
+            try {
+                blockBdvRepaint();
+                cm = msp.getContext().getService(CommandService.class)
+                        .run(ABBAStateLoadCommand.class, true, "mp", msp).get();
+            } finally {
+                resumeBdvRepaint();
+            }
             msp.waitForTasks();
 
             File f = (File) cm.getInput("state_file");
@@ -815,6 +868,22 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private boolean updateBdv = true;
+
+    private void blockBdvRepaint() {
+        updateBdv = false;
+    }
+
+    private void resumeBdvRepaint() {
+        updateBdv = true;
+        bdvh.getViewerPanel().getDisplay().repaint();
+        bdvh.getViewerPanel().requestRepaint();
+    }
+
+    protected boolean bdvRepaintEnabled() {
+        return updateBdv;
     }
 
     public void saveState() {
@@ -875,22 +944,24 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         boolean previousStateModification = msp.isModifiedSinceLastSave();
         boolean previousTimeReady = msp.getNumberOfTasks()==0;
         while ((!stopMonitoring)&&(bdvh!=null)) {
-            MultiSlicePositioner current_msp = this.msp;
-            if (current_msp!=null) {
-                if (previousStateModification != current_msp.isModifiedSinceLastSave()) {
-                    previousStateModification = current_msp.isModifiedSinceLastSave();
-                    BdvHandleHelper.setWindowTitle(bdvh, getViewName());
-                }
-                if (current_msp.getNumberOfTasks()>0) {
-                    if (bdvh!=null) {
-                        bdvh.getViewerPanel().getDisplay().repaint();
-                        previousTimeReady = false;
+            if (bdvRepaintEnabled()) {
+                MultiSlicePositioner current_msp = this.msp;
+                if (current_msp != null) {
+                    if (previousStateModification != current_msp.isModifiedSinceLastSave()) {
+                        previousStateModification = current_msp.isModifiedSinceLastSave();
+                        BdvHandleHelper.setWindowTitle(bdvh, getViewName());
                     }
-                } else {
-                    if (!previousTimeReady) {
-                        if (bdvh!=null) {
-                            bdvh.getViewerPanel().getDisplay().repaint();
-                            previousTimeReady = true;
+                    if (current_msp.getNumberOfTasks() > 0) {
+                        if (bdvh != null) {
+                            bdvh.getViewerPanel().getDisplay().repaint(); // OK
+                            previousTimeReady = false;
+                        }
+                    } else {
+                        if (!previousTimeReady) {
+                            if (bdvh != null) {
+                                bdvh.getViewerPanel().getDisplay().repaint(); // OK
+                                previousTimeReady = true;
+                            }
                         }
                     }
                 }
@@ -1024,7 +1095,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                 }
             }
         }
-        bdvh.getViewerPanel().requestRepaint();
+        if (bdvRepaintEnabled()) {bdvh.getViewerPanel().requestRepaint();} // OK
     }
 
     public void recenterBdvh() {
@@ -1120,7 +1191,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     // Error : sometimes this does not return
     @Override
     public void sliceZPositionChanged(SliceSources slice) { // should not be sync : slices lock is already locked
-        debug.accept(slice.getName()+ " z position changed");
+        debug.accept(slice.getName() + " z position changed");
         guiState.runSlice(slice, guiState -> {
             guiState.slicePositionChanged();
             updateSliceDisplayedPosition(guiState); // fail!! TODO FIX
@@ -1130,35 +1201,45 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
     @Override
     public void sliceSelected(SliceSources slice) {
-        debug.accept(slice.getName()+ " selected");
-        bdvh.getViewerPanel().getDisplay().repaint();
+        if (bdvRepaintEnabled()) {
+            debug.accept(slice.getName() + " selected");
+            bdvh.getViewerPanel().getDisplay().repaint();
+        }
     }
 
     @Override
     public void sliceDeselected(SliceSources slice) {
-        debug.accept(slice.getName()+ " deselected");
-        bdvh.getViewerPanel().getDisplay().repaint();
+        if (bdvRepaintEnabled()) {
+            debug.accept(slice.getName() + " deselected");
+            bdvh.getViewerPanel().getDisplay().repaint();
+        }
     }
 
     @Override
     public void sliceSourcesChanged(SliceSources slice) {
-        debug.accept(slice.getName()+ " slices changed");
+        debug.accept(slice.getName() + " slices changed");
         guiState.runSlice(slice, SliceGuiState::sourcesChanged);
     }
 
     @Override
     public void slicePretransformChanged(SliceSources sliceSources) {
-        bdvh.getViewerPanel().requestRepaint();
+        if (bdvRepaintEnabled()) {
+            bdvh.getViewerPanel().requestRepaint();
+        }
     }
 
     @Override
     public void sliceKeyOn(SliceSources slice) {
-        bdvh.getViewerPanel().getDisplay().repaint();
+        if (bdvRepaintEnabled()) {
+            bdvh.getViewerPanel().getDisplay().repaint();
+        }
     }
 
     @Override
     public void sliceKeyOff(SliceSources slice) {
-        bdvh.getViewerPanel().getDisplay().repaint();
+        if (bdvRepaintEnabled()) {
+            bdvh.getViewerPanel().getDisplay().repaint();
+        }
     }
 
     // --- ROI
@@ -1177,39 +1258,49 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
     @Override
     public void actionEnqueue(SliceSources slice, CancelableAction action) {
-        bdvh.getViewerPanel().getDisplay().repaint(); // Overlay Update
+        if (bdvRepaintEnabled()) {
+            bdvh.getViewerPanel().getDisplay().repaint(); // Overlay Update
+        }
     }
 
     @Override
     public void actionStarted(SliceSources slice, CancelableAction action) {
-        bdvh.getViewerPanel().getDisplay().repaint(); // Overlay Update
+        if (bdvRepaintEnabled()) {
+            bdvh.getViewerPanel().getDisplay().repaint(); // Overlay Update
+        }
     }
 
     @Override
     public void actionFinished(SliceSources slice, CancelableAction action, boolean result) {
-        bdvh.getViewerPanel().getDisplay().repaint(); // Overlay Update
+        if (bdvRepaintEnabled()) {
+            bdvh.getViewerPanel().getDisplay().repaint(); // Overlay Update
+        }
     }
 
     @Override
     public void actionCancelEnqueue(SliceSources slice, CancelableAction action) {
-        bdvh.getViewerPanel().getDisplay().repaint(); // Overlay Update
+        if (bdvRepaintEnabled()) {
+            bdvh.getViewerPanel().getDisplay().repaint(); // Overlay Update
+        }
     }
 
     @Override
     public void actionCancelStarted(SliceSources slice, CancelableAction action) {
-        bdvh.getViewerPanel().getDisplay().repaint(); // Overlay Update
+        if (bdvRepaintEnabled()) {
+            bdvh.getViewerPanel().getDisplay().repaint(); // Overlay Update
+        }
     }
 
     @Override
     public void actionCancelFinished(SliceSources slice, CancelableAction action, boolean result) {
-        bdvh.getViewerPanel().getDisplay().repaint(); // Overlay Update
+        if (bdvRepaintEnabled()) {
+            bdvh.getViewerPanel().getDisplay().repaint(); // Overlay Update // OK
+        }
     }
 
     @Override
     public void converterChanged(SliceSources slice) {
-        guiState.forEachSlice(sliceGuiState -> {
-            sliceGuiState.updateDisplaySettings();
-        });
+        guiState.forEachSlice(SliceGuiState::updateDisplaySettings);
     }
 
     // ----- MULTIPOSITIONER LISTENER METHODS - END
@@ -1472,7 +1563,10 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         AffineTransform3D at3d = BdvHandleHelper.getViewerTransformWithNewCenter(bdvh, centerSlice.positionAsDoubleArray());
 
         bdvh.getViewerPanel().state().setViewerTransform(at3d);
-        bdvh.getViewerPanel().requestRepaint();
+
+        if (bdvRepaintEnabled()) {
+            bdvh.getViewerPanel().requestRepaint();
+        }
 
     }
 
@@ -1888,12 +1982,11 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                 g.drawString(coordinates, mouseLocation.x, mouseLocation.y - 20);
             }
         } catch (NullPointerException npe) {
-            System.out.println("CAUGHT!!!!");
+            System.out.println("NPE CAUGHT!!!!");
         }
     }
 
     private void drawSetOfSliceControls(Graphics2D g, AffineTransform3D bdvAt3D, List<SliceSources> slicesCopy) {
-
 
         if (slicesCopy.stream().anyMatch(SliceSources::isSelected)) {
 
@@ -1951,18 +2044,15 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             ghs.forEach(gh -> gh.draw(g));
         }
 
-
         Color colorNotSelected = new Color(255, 255, 0, 64);
         Color colorSelected = new Color(0, 255, 0, 180);
-        //Stroke stroke = new BasicStroke(4);
-
 
         // Set the stroke of the copy, not the original
         Stroke dashed = new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL,
                 0, new float[]{9}, 0);
         g.setStroke(dashed);
 
-        // Needs manual clipping or the time it takes to draw lines is abysmal
+        // Needs manual clipping because otherwise the time it takes to draw lines is abysmal
         int w = bdvh.getViewerPanel().getWidth();
         int h = bdvh.getViewerPanel().getHeight();
 
@@ -1988,10 +2078,6 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                     }
                 }
             }
-
-            /*g.drawLine(coordSliceCenter[0], coordSliceCenter[1],
-                    (int) handlePoint.getDoublePosition(0), (int) handlePoint.getDoublePosition(1));
-            */
         });
     }
 
@@ -2100,7 +2186,9 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             iSliceNoStep = (int) (pt3d.getDoublePosition(0) / sX);
 
             //Repaint the overlay only
-            bdvh.getViewerPanel().getDisplay().repaint();
+            if (bdvRepaintEnabled()) {
+                bdvh.getViewerPanel().getDisplay().repaint();
+            }
         }
 
         /**
@@ -2163,10 +2251,10 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         //synchronized
         void runSlice(SliceSources slice, Consumer<SliceGuiState> consumer) {
             SliceGuiState slice_gui = sliceGuiState.get(slice);
-            if (slice_gui!=null) {
+            if (slice_gui != null) {
                 consumer.accept(slice_gui);
             } else {
-                logger.debug("Unavailable slice state, cannot perform operation "+consumer+" on slice "+slice);
+                logger.debug("Unavailable slice state, cannot perform operation " + consumer + " on slice " + slice);
             }
         }
 
