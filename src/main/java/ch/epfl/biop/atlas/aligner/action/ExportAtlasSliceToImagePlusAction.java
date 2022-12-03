@@ -44,7 +44,12 @@ public class ExportAtlasSliceToImagePlusAction extends CancelableAction {
 
     @Override
     protected boolean run() {
-        resultImage = SliceToImagePlus.exportAtlas(getMP(),slice,preprocess,px,py,sx,sy,pixel_size_mm,timepoint,interpolate);
+        try {
+            resultImage = SliceToImagePlus.exportAtlas(getMP(), slice, preprocess, px, py, sx, sy, pixel_size_mm, timepoint, interpolate);
+        } catch (UnsupportedOperationException exception) {
+            System.err.println(exception.getMessage());
+            return false;
+        }
         return resultImage!=null;
     }
 
@@ -60,6 +65,10 @@ public class ExportAtlasSliceToImagePlusAction extends CancelableAction {
 
     public void clean() {
         resultImage = null;
+    }
+
+    public boolean isValid() {
+        return resultImage!=null;
     }
 
     public void drawAction(Graphics2D g, double px, double py, double scale) {

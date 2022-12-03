@@ -1018,7 +1018,7 @@ public class MultiSlicePositioner implements Closeable {
             return true;
         } catch (IOException e) {
             //e.printStackTrace();
-            errlog.accept(e.getMessage());
+            errorMessageForUser.accept("Error during state saving", e.getMessage());
             removeTask();
             return false;
         } finally {

@@ -113,8 +113,10 @@ public class ExportAtlasToImageJCommand implements Command {
         } else {
             image = images[0];
         }
-        image.show();
-        image.setTitle(image_name);
+        if (image!=null) {
+            image.show();
+            image.setTitle(image_name);
+        }
     }
 
 }

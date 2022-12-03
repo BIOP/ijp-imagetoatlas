@@ -131,6 +131,9 @@ public class SliceActionObserver implements MultiSlicePositioner.SliceChangeList
             }
             logger.debug("Action registered in observer: "+action);
         }
+        if (!action.isValid()) {
+            sliceSortedActions.get(action.getSliceSources()).remove(action); // Invalid = to remove ? TODO : check
+        }
         if (action instanceof DeleteSliceAction) {
             sliceSortedActions.get(action.getSliceSources()).remove(action); // Causes issues otherwise
         }

@@ -3,17 +3,24 @@ package ch.epfl.biop.atlas.aligner;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.bdv.img.imageplus.ImagePlusHelper;
 import ch.epfl.biop.sourceandconverter.processor.SourcesProcessor;
+import ij.IJ;
 import ij.ImagePlus;
 import net.imglib2.display.LinearRange;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.NativeType;
+import net.imglib2.type.Type;
+import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.NumericType;
+import net.imglib2.type.numeric.integer.UnsignedByteType;
+import net.imglib2.type.numeric.integer.UnsignedShortType;
+import net.imglib2.type.numeric.real.FloatType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
 import sc.fiji.bdvpg.sourceandconverter.importer.EmptySourceAndConverterCreator;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceResampler;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -135,9 +142,28 @@ public class SliceToImagePlus {
                                    SourcesProcessor preprocess,
                                    double px, double py, double sx, double sy,
                                    double pixelSizeMillimeter, int timepoint,
-                                   boolean interpolate) {
+                                   boolean interpolate) throws UnsupportedOperationException {
 
-        List<SourceAndConverter> sourceList = Arrays.asList(preprocess.apply(mp.getReslicedAtlas().nonExtendedSlicedSources));//slice.getRegisteredSources()));
+        List<SourceAndConverter<?>> sourceList = Arrays.asList(preprocess.apply(mp.getReslicedAtlas().nonExtendedSlicedSources));//slice.getRegisteredSources()));
+
+        // Put this validation as a static helper function  TODO
+        Class<?> firstSourceType = sourceList.get(0).getSpimSource().getType().getClass();
+
+        List<Class<?>> allowedClasses = new ArrayList<>();
+        allowedClasses.add(UnsignedShortType.class);
+        allowedClasses.add(UnsignedByteType.class);
+        allowedClasses.add(FloatType.class);
+        allowedClasses.add(ARGBType.class);
+
+        if (!allowedClasses.contains(firstSourceType)) {
+            throw new UnsupportedOperationException("Can't export pixel type "+firstSourceType.getClass().getSimpleName()+" to ImagePlus");
+        }
+
+        for (SourceAndConverter<?> source : sourceList) {
+            if (source.getSpimSource().getType().getClass()!=firstSourceType) {
+                throw new UnsupportedOperationException("Can't export combined pixel types ("+firstSourceType.getSimpleName()+") and ("+source.getSpimSource().getType().getClass().getSimpleName()+"). Please select less channels.");
+            }
+        }
 
         AffineTransform3D at3D = new AffineTransform3D();
 
