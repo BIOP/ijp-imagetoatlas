@@ -1,10 +1,6 @@
 package ch.epfl.biop.atlas.aligner.gui.bdv;
 
-import bdv.img.WarpedSource;
 import bdv.util.BdvHandle;
-import bdv.util.EmptySource;
-import bdv.util.source.alpha.AlphaSource;
-import bdv.util.source.alpha.AlphaSourceHelper;
 import bdv.util.source.alpha.IAlphaSource;
 import bdv.viewer.Interpolation;
 import bdv.viewer.Source;
@@ -18,20 +14,12 @@ import ch.epfl.biop.bdv.gui.graphicalhandle.GraphicalHandleToolTip;
 import ch.epfl.biop.bdv.gui.graphicalhandle.SquareGraphicalHandle;
 import ch.epfl.biop.registration.sourceandconverter.affine.AffineTransformedSourceWrapperRegistration;
 import mpicbg.spim.data.sequence.VoxelDimensions;
-import net.imglib2.FinalInterval;
-import net.imglib2.FinalRealInterval;
-import net.imglib2.Localizable;
-import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealPoint;
 import net.imglib2.RealRandomAccessible;
-import net.imglib2.position.FunctionRandomAccessible;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.realtransform.RealViews;
 import net.imglib2.type.numeric.NumericType;
-import net.imglib2.type.numeric.integer.UnsignedShortType;
-import net.imglib2.type.numeric.real.FloatType;
-import net.imglib2.view.Views;
 import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
@@ -39,13 +27,10 @@ import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
 import spimdata.util.Displaysettings;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
