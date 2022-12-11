@@ -35,6 +35,15 @@ public class AtlasSlicingAdjusterCommand extends InteractiveCommand implements I
         rotateY = reslicedAtlas.getRotateY() * 180.0 / Math.PI;
         oldRotateY = rotateY;
 
+        // TODO : check if this does not create a memory leak
+        reslicedAtlas.addListener(() -> {
+            if ((reslicedAtlas.getRotateX() != rotateX / 180.0 * Math.PI)||(reslicedAtlas.getRotateY()!= rotateY / 180.0 * Math.PI)) {
+                this.setInput("rotateX", reslicedAtlas.getRotateX() * 180.0 / Math.PI);
+                this.setInput("oldRotateX", reslicedAtlas.getRotateX() * 180.0 / Math.PI);
+                this.setInput("rotateY", reslicedAtlas.getRotateY() * 180.0 / Math.PI);
+                this.setInput("oldRotateY", reslicedAtlas.getRotateY() * 180.0 / Math.PI);
+            }
+        });
     }
 
     public void run() {

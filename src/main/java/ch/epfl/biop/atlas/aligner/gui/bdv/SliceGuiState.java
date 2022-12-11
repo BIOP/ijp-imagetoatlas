@@ -387,14 +387,15 @@ public class SliceGuiState {
 
     public void setState(State state) {
         hide();
-        assert state.channelVisible.length == nChannels;
-        for (int i = 0; i< nChannels; i++) {
-            channelVisible[i] = state.channelVisible[i];
-            displaysettings[i] = state.displaysettings[i];
+        if (state.channelVisible.length == nChannels) {
+            for (int i = 0; i< nChannels; i++) {
+                channelVisible[i] = state.channelVisible[i];
+                displaysettings[i] = state.displaysettings[i];
+            }
+            sliceVisible = state.sliceVisible;
+            show();
+            slice.setDisplaySettings(displaysettings);
         }
-        sliceVisible = state.sliceVisible;
-        show();
-        slice.setDisplaySettings(displaysettings);
     }
 
     public void updateDisplaySettings() {

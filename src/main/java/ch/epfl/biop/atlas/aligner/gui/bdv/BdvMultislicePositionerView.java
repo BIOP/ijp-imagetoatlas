@@ -81,6 +81,8 @@ import org.scijava.cache.CacheService;
 import org.scijava.command.Command;
 import org.scijava.command.CommandModule;
 import org.scijava.command.CommandService;
+import org.scijava.command.InteractiveCommand;
+import org.scijava.module.Module;
 import org.scijava.object.ObjectService;
 import org.scijava.plugin.PluginService;
 import org.scijava.ui.behaviour.Behaviour;
@@ -90,6 +92,9 @@ import org.scijava.ui.behaviour.InputTrigger;
 import org.scijava.ui.behaviour.InputTriggerMap;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
+import org.scijava.ui.swing.widget.SwingInputHarvester;
+import org.scijava.ui.swing.widget.SwingInputPanel;
+import org.scijava.widget.InputPanel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sc.fiji.bdvpg.bdv.BdvHandleHelper;
@@ -104,6 +109,7 @@ import javax.swing.ImageIcon;
 import javax.swing.InputMap;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -447,7 +453,21 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         BdvHandleHelper.addCard(bdvh, "Edit Selected Slices", new EditPanel(msp).getPanel(), true);
         //bdvh.getCardPanel().adCard("Edit Selected Slices", new EditPanel(msp).getPanel(), true);
 
-        BdvHandleHelper.addCard(bdvh, "Atlas Slicing", ScijavaSwingUI.getPanel(msp.getContext(), AtlasSlicingAdjusterCommand.class, "reslicedAtlas", msp.getReslicedAtlas()), true);
+        try {
+            Module module = ScijavaSwingUI.createModule(msp.getContext(), AtlasSlicingAdjusterCommand.class, "reslicedAtlas", msp.getReslicedAtlas());
+            SwingInputHarvester swingInputHarvester = new SwingInputHarvester();
+            msp.getContext().inject(swingInputHarvester);
+            InputPanel<JPanel, JPanel> inputPanel = new SwingInputPanel();
+            swingInputHarvester.buildPanel(inputPanel, module);
+            BdvHandleHelper.addCard(bdvh, "Atlas Slicing", inputPanel.getComponent(), true);
+            msp.getReslicedAtlas().addListener(() -> {
+                inputPanel.getWidget("rotateX").refreshWidget();
+                inputPanel.getWidget("rotateY").refreshWidget();
+            });
+        } catch (Exception e) {
+            msp.errorMessageForUser.accept("GUI Initialisation error", e.getMessage());
+        }
+
         //bdvh.getCardPanel().adCard("Atlas Slicing", ScijavaSwingUI.getPanel(msp.getContext(), AtlasSlicingAdjusterCommand.class, "reslicedAtlas", msp.getReslicedAtlas()), true);
 
         BdvHandleHelper.addCard(bdvh, "Define region of interest",
