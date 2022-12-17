@@ -1579,16 +1579,23 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
         RealPoint offset = new RealPoint(3);
 
+        RealPoint centerScreen = getCurrentBdvCenter();
+
         if ((maintainoffset)&&(previous_slice!=null)) {
 
             RealPoint oldCenter = getDisplayedCenter(previous_slice);
 
-            RealPoint centerScreen = getCurrentBdvCenter();
-            offset.setPosition(-oldCenter.getDoublePosition(0) + centerScreen.getDoublePosition(0), 0);
-            offset.setPosition(-oldCenter.getDoublePosition(1) + centerScreen.getDoublePosition(1), 1);
 
-            if (Math.abs(offset.getDoublePosition(0))>msp.sX/2.0) {maintainoffset = false;}
-            if (Math.abs(offset.getDoublePosition(1))>msp.sY/2.0) {maintainoffset = false;}
+            offset.setPosition(- oldCenter.getDoublePosition(0) + centerScreen.getDoublePosition(0), 0);
+
+            if (mode == REVIEW_MODE_INT) {
+                offset.setPosition(-oldCenter.getDoublePosition(1) + centerScreen.getDoublePosition(1), 1);
+            } else {
+                offset.setPosition(0, 1);
+            }
+
+            if (Math.abs(offset.getDoublePosition(0))>msp.sX*1.5) {maintainoffset = false;}
+            if (Math.abs(offset.getDoublePosition(1))>msp.sY*1.5) {maintainoffset = false;}
 
         } else {
             maintainoffset = false;
@@ -1597,7 +1604,11 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         RealPoint centerSlice = getDisplayedCenter(current_slice);
 
         if(maintainoffset) {
-            centerSlice.move(offset);
+            if (mode == REVIEW_MODE_INT) {
+                centerSlice.move(offset);
+            } else {
+                centerSlice.setPosition(centerScreen.getDoublePosition(1), 1);
+            }
         }
         AffineTransform3D at3d = BdvHandleHelper.getViewerTransformWithNewCenter(bdvh, centerSlice.positionAsDoubleArray());
 
