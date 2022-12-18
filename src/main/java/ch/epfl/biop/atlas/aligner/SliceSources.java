@@ -1375,10 +1375,12 @@ public class SliceSources {
         return alphaSource;
     }
 
+    LinkedList<SourceAndConverter<?>[]> sourcesDeformationFieldNonRasterized = new LinkedList<>();
+
     LinkedList<SourceAndConverter<?>[]> sourcesNonRasterized = new LinkedList<>();
 
     protected void pushRasterDeformation(double gridSpacingInMicrometer) {
-        sourcesNonRasterized.push(registered_sacs);
+        sourcesDeformationFieldNonRasterized.push(registered_sacs);
 
         RealTransformSequence rts = new RealTransformSequence();
         InvertibleRealTransformSequence irts = new InvertibleRealTransformSequence();
@@ -1496,6 +1498,45 @@ public class SliceSources {
     }
 
     protected void popRasterDeformation() {
+        registered_sacs = sourcesDeformationFieldNonRasterized.pop();
+    }
+
+    public void pushRasterSlice(double voxelSpacingInMicrometer, boolean interpolate) {
+        SourceAndConverter<?>[] oriSources = registered_sacs;
+        sourcesNonRasterized.push(registered_sacs);
+
+        RealTransformSequence rts = new RealTransformSequence();
+        InvertibleRealTransformSequence irts = new InvertibleRealTransformSequence();
+
+        this.addAllRegistrations(rts, irts, getTolerance(), getMaxIteration());
+
+        // Let's do the stuff
+        // registered_sacs = this.registered_sacs_sequence.get(2).sacs; // Just to test
+        Source<?> model = getModelWithGridSize(voxelSpacingInMicrometer);
+
+        SourceAndConverter<?> modelSac = SourceAndConverterHelper.createSourceAndConverter(model);
+
+        SourceResampler resampler = new SourceResampler(null, modelSac,"Undef", true, true, interpolate, 0);
+
+        registered_sacs = new SourceAndConverter[nChannels]; // Compulsory or the push is useless!
+
+        for (int iChannel = 0; iChannel < this.nChannels; iChannel++) {
+            registered_sacs[iChannel] = resampler.apply(oriSources[iChannel]);
+        }
+
+        for (SourceAndConverter sac: registered_sacs) {
+            SourceAndConverterServices
+                    .getSourceAndConverterService()
+                    .register(sac);
+            if (alphaSource!=null) {
+                AlphaSourceHelper.setAlphaSource(sac, alphaSource);
+            }
+        }
+
+        si.updateBox();
+    }
+
+    public void popRasterSlice() {
         registered_sacs = sourcesNonRasterized.pop();
     }
 

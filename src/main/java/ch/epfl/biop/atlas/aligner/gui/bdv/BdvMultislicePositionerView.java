@@ -41,6 +41,7 @@ import ch.epfl.biop.atlas.aligner.command.ExportSlicesToQuickNIIDatasetCommand;
 import ch.epfl.biop.atlas.aligner.command.ImportSliceFromImagePlusCommand;
 import ch.epfl.biop.atlas.aligner.command.ImportSlicesFromFilesCommand;
 import ch.epfl.biop.atlas.aligner.command.ImportSlicesFromQuPathCommand;
+import ch.epfl.biop.atlas.aligner.command.RasterSlicesCommand;
 import ch.epfl.biop.atlas.aligner.command.RasterSlicesDeformationCommand;
 import ch.epfl.biop.atlas.aligner.command.RegisterSlicesDeepSliceCommand;
 import ch.epfl.biop.atlas.aligner.command.RegisterSlicesEditLastCommand;
@@ -394,6 +395,8 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RotateSlicesCommand.class, hierarchyLevelsSkipped,"mp", msp);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RasterSlicesDeformationCommand.class, hierarchyLevelsSkipped,"mp", msp);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RasterSlicesCommand.class, hierarchyLevelsSkipped,"mp", msp);
+
 
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), SliceAffineTransformCommand.class, hierarchyLevelsSkipped,"mp", msp);
 
