@@ -37,9 +37,9 @@ public class RegisterSliceAdapter implements JsonSerializer<RegisterSliceAction>
         Registration<SourceAndConverter<?>[]> reg = jsonDeserializationContext.deserialize(obj.get("registration"), Registration.class); // isDone should be true when deserialized
 
         SourcesProcessor fixed_sources_preprocess = jsonDeserializationContext.deserialize(obj.get("fixed_sources_preprocess"), SourcesProcessor.class);
-        SourcesProcessor moving_souces_preprocess = jsonDeserializationContext.deserialize(obj.get("moving_sources_preprocess"), SourcesProcessor.class);
+        SourcesProcessor moving_sources_preprocess = jsonDeserializationContext.deserialize(obj.get("moving_sources_preprocess"), SourcesProcessor.class);
 
-        RegisterSliceAction registerSlice = new RegisterSliceAction(mp, currentSliceGetter.get(), reg, fixed_sources_preprocess, moving_souces_preprocess);
+        RegisterSliceAction registerSlice = new RegisterSliceAction(mp, currentSliceGetter.get(), reg, fixed_sources_preprocess, moving_sources_preprocess);
 
         registerSlice.setRegistration(reg);
         return registerSlice;

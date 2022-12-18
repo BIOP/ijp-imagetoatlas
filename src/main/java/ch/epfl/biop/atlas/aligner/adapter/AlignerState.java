@@ -60,6 +60,7 @@ public class AlignerState {
         serializableActions.add(RegisterSliceAction.class);
         serializableActions.add(KeySliceOnAction.class);
         serializableActions.add(KeySliceOffAction.class);
+        //serializableActions.add(RasterDeformationAction.class);
 
         Set<Class<? extends CancelableAction>> skipableActions = new HashSet<>();
         skipableActions.add(ExportSliceRegionsToFileAction.class);
@@ -67,6 +68,7 @@ public class AlignerState {
         skipableActions.add(ExportSliceRegionsToRoiManagerAction.class);
         skipableActions.add(EditLastRegistrationAction.class); //TODO : make it serializable ? serializable or not ?
         skipableActions.add(ExportAtlasSliceToImagePlusAction.class);
+        skipableActions.add(RasterDeformationAction.class);
 
         List<CancelableAction> compiledActions = new ArrayList<>();
         if ((ini_actions == null)||(ini_actions.size()==0)) {

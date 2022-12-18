@@ -875,6 +875,7 @@ public class MultiSlicePositioner implements Closeable {
         factoryActions.registerSubtype(RegisterSliceAction.class);
         factoryActions.registerSubtype(KeySliceOnAction.class);
         factoryActions.registerSubtype(KeySliceOffAction.class);
+        factoryActions.registerSubtype(RasterDeformationAction.class);
 
         gsonbuilder.registerTypeAdapterFactory(factoryActions);
         gsonbuilder.registerTypeHierarchyAdapter(CreateSliceAction.class, new CreateSliceAdapter(this));
@@ -1173,6 +1174,7 @@ public class MultiSlicePositioner implements Closeable {
                     state.slices_state_list.forEach(sliceState -> {
                         sliceState.slice.waitForEndOfTasks();
                         sliceState.slice.transformSourceOrigin((AffineTransform3D) (sliceState.preTransform));
+                        sliceState.slice.sourcesChanged();
                     });
 
                     if (emptyState) stateChangedSinceLastSave = false; // loaded state has not been changed, and it was the only one loaded

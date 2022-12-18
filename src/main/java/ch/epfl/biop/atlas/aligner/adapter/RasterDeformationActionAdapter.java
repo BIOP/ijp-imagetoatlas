@@ -37,7 +37,7 @@ public class RasterDeformationActionAdapter implements JsonSerializer<RasterDefo
     public JsonElement serialize(RasterDeformationAction rasterDeformation, Type type, JsonSerializationContext jsonSerializationContext) {
         JsonObject obj = new JsonObject();
         obj.addProperty("type", RasterDeformationAction.class.getSimpleName());
-        obj.addProperty("location", rasterDeformation.getGridSpacingInMicrometer());
+        obj.addProperty("gridSpacingInMicrometer", rasterDeformation.getGridSpacingInMicrometer());
         return obj;
     }
 }

@@ -126,7 +126,7 @@ public class SliceSources {
     public final int nChannels;
 
     // Used for registration : like 3D, but tilt and roll ignored because it is handled on the fixed source side
-    private SourceAndConverter<?>[] registered_sacs;
+    private volatile SourceAndConverter<?>[] registered_sacs;
 
     private final List<RegistrationAndSources> registered_sacs_sequence = new ArrayList<>();
 
@@ -1380,18 +1380,16 @@ public class SliceSources {
     protected void pushRasterDeformation(double gridSpacingInMicrometer) {
         sourcesNonRasterized.push(registered_sacs);
 
-        // Let's do the stuff
-        // registered_sacs = this.registered_sacs_sequence.get(2).sacs; // Just to test
-        Source<?> model = getModelWithGridSize(gridSpacingInMicrometer);
-
-        //RealTransform rasterTransform = ((InvertibleRealTransform)getSlicePixToCCFRealTransform()).inverse();//RealTransformHelper.resampleTransform(getSlicePixToCCFRealTransform(), model.getSpimSource());
-
         RealTransformSequence rts = new RealTransformSequence();
         InvertibleRealTransformSequence irts = new InvertibleRealTransformSequence();
 
         this.addAllRegistrations(rts, irts, getTolerance(), getMaxIteration());
 
         SourceRealTransformer srt;
+        // Let's do the stuff
+        // registered_sacs = this.registered_sacs_sequence.get(2).sacs; // Just to test
+        Source<?> model = getModelWithGridSize(gridSpacingInMicrometer);
+
         if (irts!=null) {
             srt = new SourceRealTransformer<>(RealTransformHelper.resampleTransform(irts, model));
         } else {
