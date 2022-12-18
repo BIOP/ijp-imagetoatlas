@@ -879,6 +879,7 @@ public class MultiSlicePositioner implements Closeable {
         gsonbuilder.registerTypeAdapterFactory(factoryActions);
         gsonbuilder.registerTypeHierarchyAdapter(CreateSliceAction.class, new CreateSliceAdapter(this));
         gsonbuilder.registerTypeHierarchyAdapter(MoveSliceAction.class, new MoveSliceAdapter(this, this::currentSliceGetter));
+        gsonbuilder.registerTypeHierarchyAdapter(RasterDeformationAction.class, new RasterDeformationActionAdapter(this, this::currentSliceGetter));
         gsonbuilder.registerTypeHierarchyAdapter(RegisterSliceAction.class, new RegisterSliceAdapter(this, this::currentSliceGetter));
         gsonbuilder.registerTypeHierarchyAdapter(KeySliceOnAction.class, new KeySliceOnAdapter(this, this::currentSliceGetter));
         gsonbuilder.registerTypeHierarchyAdapter(KeySliceOffAction.class, new KeySliceOffAdapter(this, this::currentSliceGetter));

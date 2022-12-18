@@ -3,10 +3,12 @@ package ch.epfl.biop.atlas.aligner;
 import bdv.util.BoundedRealTransform;
 import bdv.util.DefaultInterpolators;
 import bdv.util.QuPathBdvHelper;
+import bdv.util.RealTransformHelper;
 import bdv.util.source.alpha.AlphaSourceHelper;
 import bdv.util.source.alpha.AlphaSourceRAI;
 import bdv.util.source.alpha.IAlphaSource;
 import bdv.viewer.Interpolation;
+import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.plugin.RegistrationPluginHelper;
 import ch.epfl.biop.atlas.mouse.allen.ccfv3.command.AllenBrainAdultMouseAtlasCCF2017Command;
@@ -72,6 +74,7 @@ import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterAndTimeRange;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
 import sc.fiji.bdvpg.sourceandconverter.importer.EmptySourceAndConverterCreator;
+import sc.fiji.bdvpg.sourceandconverter.transform.SourceRealTransformer;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceResampler;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
 import sc.fiji.persist.ScijavaGsonHelper;
@@ -92,6 +95,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -190,8 +194,8 @@ public class SliceSources {
 
         String unit = original_sacs[0].getSpimSource().getVoxelDimensions().unit();
         double voxX = original_sacs[0].getSpimSource().getVoxelDimensions().dimension(0);
-        double voxY = original_sacs[0].getSpimSource().getVoxelDimensions().dimension(0);
-        double voxZ = original_sacs[0].getSpimSource().getVoxelDimensions().dimension(0);
+        double voxY = original_sacs[0].getSpimSource().getVoxelDimensions().dimension(1);
+        double voxZ = original_sacs[0].getSpimSource().getVoxelDimensions().dimension(2);
         FinalVoxelDimensions voxD = new FinalVoxelDimensions(unit, voxX, voxY, voxZ);
         FinalInterval interval = new FinalInterval(mp.nPixX,mp.nPixY,1);
 
@@ -561,7 +565,7 @@ public class SliceSources {
         for (SourceAndConverter sac: registered_sacs) {
             SourceAndConverterServices
                     .getSourceAndConverterService()
-                    .register(sac);
+                    .register(sac); // TODO : Check if necessary...
             if (alphaSource!=null) {
                 AlphaSourceHelper.setAlphaSource(sac, alphaSource);
             }
@@ -959,7 +963,7 @@ public class SliceSources {
     }
 
     public RealTransform getSlicePixToCCFRealTransform() {
-        return getSlicePixToCCFRealTransform(0,mp.getAtlas().getMap().getAtlasPrecisionInMillimeter()/5.0, 200);
+        return getSlicePixToCCFRealTransform(0,getTolerance(), getMaxIteration());
     }
 
     boolean isWrapped(RealTransform rt) {
@@ -993,6 +997,14 @@ public class SliceSources {
         }
     }
 
+    double getTolerance() {
+        return mp.getAtlas().getMap().getAtlasPrecisionInMillimeter()/5.0;
+    }
+
+    int getMaxIteration() {
+        return 200;
+    }
+
     public RealTransform getSlicePixToCCFRealTransform(int resolutionLevel, double tolerance, int maxIteration) {
         RealTransformSequence rts = new RealTransformSequence();
         InvertibleRealTransformSequence irts = new InvertibleRealTransformSequence();
@@ -1004,11 +1016,26 @@ public class SliceSources {
         rts.add(at3D.inverse().copy());
         irts.add(at3D.inverse().copy());
 
+        addAllRegistrations(rts, irts, tolerance, maxIteration);
+
+        this.original_sacs[0].getSpimSource().getSourceTransform(0,resolutionLevel,at3D);
+
+        rts.add(at3D.inverse().copy());
+        if (irts!=null) irts.add(at3D.inverse().copy());
+
+        return (irts==null)?rts:irts;
+    }
+
+    private void addAllRegistrations(RealTransformSequence rts, InvertibleRealTransformSequence irts, double tolerance, int maxIteration) {
+
         Collections.reverse(this.registrations);
 
         for (Registration reg : this.registrations) {
             RealTransform current = reg.getTransformAsRealTransform();
-            if (current == null) return null;
+            if (current == null) {
+                mp.errlog.accept("Error : null registration found!");
+                return;
+            }
             RealTransform copied = current.copy();
             fixOptimizer(copied, tolerance, maxIteration);
             rts.add(copied);
@@ -1020,13 +1047,6 @@ public class SliceSources {
         }
 
         Collections.reverse(this.registrations);
-
-        this.original_sacs[0].getSpimSource().getSourceTransform(0,resolutionLevel,at3D);
-
-        rts.add(at3D.inverse().copy());
-        if (irts!=null) irts.add(at3D.inverse().copy());
-
-        return (irts==null)?rts:irts;
     }
 
     private void storeInQuPathProjectIfExists(ImageJRoisFile ijroisfile, boolean erasePreviousFile) {
@@ -1353,6 +1373,132 @@ public class SliceSources {
 
     public IAlphaSource getAlpha() {
         return alphaSource;
+    }
+
+    LinkedList<SourceAndConverter<?>[]> sourcesNonRasterized = new LinkedList<>();
+
+    protected void pushRasterDeformation(double gridSpacingInMicrometer) {
+        sourcesNonRasterized.push(registered_sacs);
+
+        // Let's do the stuff
+        // registered_sacs = this.registered_sacs_sequence.get(2).sacs; // Just to test
+        Source<?> model = getModelWithGridSize(gridSpacingInMicrometer);
+
+        //RealTransform rasterTransform = ((InvertibleRealTransform)getSlicePixToCCFRealTransform()).inverse();//RealTransformHelper.resampleTransform(getSlicePixToCCFRealTransform(), model.getSpimSource());
+
+        RealTransformSequence rts = new RealTransformSequence();
+        InvertibleRealTransformSequence irts = new InvertibleRealTransformSequence();
+
+        this.addAllRegistrations(rts, irts, getTolerance(), getMaxIteration());
+
+        SourceRealTransformer srt;
+        if (irts!=null) {
+            srt = new SourceRealTransformer<>(RealTransformHelper.resampleTransform(irts, model));
+        } else {
+            srt = new SourceRealTransformer<>(RealTransformHelper.resampleTransform(rts, model));
+        }
+
+        registered_sacs = new SourceAndConverter[nChannels]; // Compulsory or the push is useless!
+
+        for (int iChannel = 0; iChannel < this.nChannels; iChannel++) {
+            registered_sacs[iChannel] = srt.apply(original_sacs[iChannel]);
+        }
+
+        for (SourceAndConverter sac: registered_sacs) {
+            SourceAndConverterServices
+                    .getSourceAndConverterService()
+                    .register(sac);
+            if (alphaSource!=null) {
+                AlphaSourceHelper.setAlphaSource(sac, alphaSource);
+            }
+        }
+
+        si.updateBox();
+    }
+
+    private Source<?> getModelWithGridSize(double gridSpacingInMicrometer) {
+
+        double transform_field_subsampling = gridSpacingInMicrometer/(mp.getAtlas().getMap().getAtlasPrecisionInMillimeter()*1000.0);
+
+        System.out.println("Subsampling factor = "+transform_field_subsampling);
+
+        FinalInterval interval = new FinalInterval((int)(mp.nPixX/transform_field_subsampling),
+                (int)(mp.nPixY/transform_field_subsampling),1);
+
+        String unit = original_sacs[0].getSpimSource().getVoxelDimensions().unit();
+        double voxX = original_sacs[0].getSpimSource().getVoxelDimensions().dimension(0);
+        double voxY = original_sacs[0].getSpimSource().getVoxelDimensions().dimension(1);
+        double voxZ = original_sacs[0].getSpimSource().getVoxelDimensions().dimension(2);
+        FinalVoxelDimensions voxD = new FinalVoxelDimensions(unit, voxX, voxY, voxZ);
+
+        return new IAlphaSource() {
+            @Override
+            public boolean doBoundingBoxCulling()
+            {
+                return false;
+            }
+
+            @Override
+            public boolean intersectBox(AffineTransform3D affineTransform, Interval cell, int timepoint) {
+                // Let's try a simplebox computation and see if there are intersections.
+                AlphaSourceRAI.Box3D box_cell = new AlphaSourceRAI.Box3D(affineTransform, cell);
+                AffineTransform3D affineTransform3D = new AffineTransform3D();
+                getSourceTransform(timepoint,0,affineTransform3D);
+                AlphaSourceRAI.Box3D box_this = new AlphaSourceRAI.Box3D(affineTransform3D, this.getSource(timepoint,0));
+                return box_this.intersects(box_cell);
+            }
+
+            @Override
+            public boolean isPresent(int t) {
+                return t==0;
+            }
+
+            @Override
+            public RandomAccessibleInterval<FloatType> getSource(int t, int level) {
+                final RandomAccessible< FloatType > randomAccessible =
+                        new FunctionRandomAccessible<>( 3, () -> (loc, out) -> out.setReal( 1f ), FloatType::new );
+                return Views.interval(randomAccessible, interval);
+            }
+
+            @Override
+            public RealRandomAccessible<FloatType> getInterpolatedSource(int t, int level, Interpolation interpolation) {
+                ExtendedRandomAccessibleInterval<FloatType, RandomAccessibleInterval< FloatType >>
+                        eView = Views.extendZero(getSource( t, level ));
+                RealRandomAccessible< FloatType > realRandomAccessible = Views.interpolate( eView, interpolators.get(Interpolation.NEARESTNEIGHBOR) );
+                return realRandomAccessible;
+            }
+
+            @Override
+            public void getSourceTransform(int t, int level, AffineTransform3D affineTransform3D) {
+                affineTransform3D.identity();
+                affineTransform3D.scale(mp.sizePixX*transform_field_subsampling, mp.sizePixY*transform_field_subsampling, thicknessInMm);
+                affineTransform3D.translate(-mp.sX / 2.0, -mp.sY / 2.0, getSlicingAxisPosition()+getZShiftCorrection());
+            }
+
+            @Override
+            public FloatType getType() {
+                return new FloatType();
+            }
+
+            @Override
+            public String getName() {
+                return "alpha-slice";
+            }
+
+            @Override
+            public VoxelDimensions getVoxelDimensions() {
+                return voxD;
+            }
+
+            @Override
+            public int getNumMipmapLevels() {
+                return 1;
+            }
+        };
+    }
+
+    protected void popRasterDeformation() {
+        registered_sacs = sourcesNonRasterized.pop();
     }
 
     public static class RegistrationAndSources {
