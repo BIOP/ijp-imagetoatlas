@@ -19,7 +19,7 @@ public class CenterZeroRegistration extends AffineTransformSourceAndConverterReg
 
         SourceAndConverter sac = mimg[0];
 
-        RealPoint center = SourceAndConverterHelper.getSourceAndConverterCenterPoint(sac);
+        RealPoint center = SourceAndConverterHelper.getSourceAndConverterCenterPoint(sac,0);
 
         at3d = new AffineTransform3D();
 
