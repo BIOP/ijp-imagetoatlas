@@ -142,6 +142,24 @@ public class TableView implements MultiSlicePositioner.SliceChangeListener, List
                 }
             }
         });
+
+        table.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                super.mousePressed(e);
+                JTable table = (JTable) e.getSource();
+                Point point = e.getPoint();
+                int row = table.rowAtPoint(point);
+                int col = table.columnAtPoint(point);
+                if ((e.getClickCount()==2) && (col == 0)) {
+                    // Is there a slice which is being double clicked ?
+                    if (row<getSlices().size()) {
+                        SliceSources slice =  getSlices().get(row);
+                        view.navigateSlice(slice);
+                    }
+                }
+            }
+        });
     }
 
     int currentIndex = -1;

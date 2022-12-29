@@ -1577,6 +1577,29 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         }
     }
 
+    public void navigateSlice(SliceSources slice) {
+        int previousSliceIndex = iCurrentSlice;
+        List<SliceSources> sortedSlices = msp.getSlices();
+        iCurrentSlice = sortedSlices.indexOf(slice);
+
+        if (iCurrentSlice < 0) {
+            return;
+        }
+
+        if (sortedSlices.size() > 0) {
+            SliceSources previousSlice = null;
+            if ((previousSliceIndex>=0)&&(previousSliceIndex<sortedSlices.size())) {
+                previousSlice = sortedSlices.get(previousSliceIndex);
+            }
+            if ((previousSliceIndex>=0)&&(previousSliceIndex<sortedSlices.size())) { // Could have been deleted
+                guiState.runSlice(sortedSlices.get(previousSliceIndex), SliceGuiState::isNotCurrent);
+            }
+            guiState.runSlice(sortedSlices.get(iCurrentSlice), SliceGuiState::isCurrent);
+            if (overlapMode==2) updateSliceDisplayedPosition(null);
+            centerBdvViewOn(sortedSlices.get(iCurrentSlice), true, previousSlice);
+        }
+    }
+
     public void centerBdvViewOn(SliceSources slice) {
         centerBdvViewOn(slice, false, null);
     }
