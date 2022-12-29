@@ -61,6 +61,7 @@ import ch.epfl.biop.atlas.aligner.plugin.ABBACommand;
 import ch.epfl.biop.atlas.aligner.plugin.IABBARegistrationPlugin;
 import ch.epfl.biop.atlas.aligner.plugin.RegistrationPluginHelper;
 import ch.epfl.biop.atlas.mouse.allen.ccfv3.command.AllenBrainAdultMouseAtlasCCF2017Command;
+import ch.epfl.biop.atlas.mouse.allen.ccfv3p1.command.AllenBrainAdultMouseAtlasCCF2017v3p1Command;
 import ch.epfl.biop.atlas.struct.Atlas;
 import ch.epfl.biop.atlas.struct.AtlasNode;
 import ch.epfl.biop.bdv.gui.graphicalhandle.GraphicalHandle;
@@ -371,7 +372,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
         logger.debug("Installing DeepSlice command");
         //DeepSliceCommand
-        if ((msp.getAtlas() instanceof AllenBrainAdultMouseAtlasCCF2017Command)) {
+        if ((msp.getAtlas() instanceof AllenBrainAdultMouseAtlasCCF2017Command) || (msp.getAtlas() instanceof AllenBrainAdultMouseAtlasCCF2017v3p1Command)) {
             BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RegisterSlicesDeepSliceCommand.class, hierarchyLevelsSkipped, "mp", msp);
         }
 

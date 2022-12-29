@@ -7,7 +7,7 @@ import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.atlas.aligner.command.ABBAStartCommand;
 import ch.epfl.biop.atlas.aligner.gui.bdv.BdvMultislicePositionerView;
 import ch.epfl.biop.atlas.aligner.plugin.SimpleRegistrationWrapper;
-import ch.epfl.biop.atlas.mouse.allen.ccfv3.command.AllenBrainAdultMouseAtlasCCF2017Command;
+import ch.epfl.biop.atlas.mouse.allen.ccfv3p1.command.AllenBrainAdultMouseAtlasCCF2017v3p1Command;
 import ch.epfl.biop.atlas.struct.Atlas;
 import ch.epfl.biop.scijava.command.spimdata.SourceFromImagePlusCommand;
 import ch.epfl.biop.sourceandconverter.processor.SourcesChannelsSelect;
@@ -27,7 +27,7 @@ public class TestExternalRegistrationPlugin {
         final ImageJ ij = new ImageJ();
         ij.ui().showUI();
 
-        Atlas mouseAtlas = (Atlas) ij.command().run(AllenBrainAdultMouseAtlasCCF2017Command.class, true).get().getOutput("ba");
+        Atlas mouseAtlas = (Atlas) ij.command().run(AllenBrainAdultMouseAtlasCCF2017v3p1Command.class, true).get().getOutput("ba");
 
         String identityRegName = "ext.IdentityRegistration";
 
