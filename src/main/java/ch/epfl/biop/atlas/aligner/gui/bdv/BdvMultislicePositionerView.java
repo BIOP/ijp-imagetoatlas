@@ -1583,7 +1583,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     // Center bdv on a slice
     public void centerBdvViewOn(SliceSources current_slice, boolean maintainoffset, SliceSources previous_slice) {
 
-        /*RealPoint offset = new RealPoint(3);
+        RealPoint offset = new RealPoint(3);
 
         RealPoint centerScreen = getCurrentBdvCenter();
 
@@ -1595,10 +1595,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
             offset.setPosition((- oldCenter.getDoublePosition(1) + centerScreen.getDoublePosition(1)), 1);
 
-            System.out.println("OffsZ = "+((- oldCenter.getDoublePosition(1) + centerScreen.getDoublePosition(1))));
-
             offset.setPosition(0, 2);
-
 
             if (mode == REVIEW_MODE_INT) {
                 } else {
@@ -1630,41 +1627,15 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
         if (bdvRepaintEnabled()) {
             bdvh.getViewerPanel().requestRepaint();
-        }*/
-        RealPoint offset = new RealPoint(3);
-
-        if ((maintainoffset)&&(previous_slice!=null)) {
-
-            RealPoint oldCenter = getDisplayedCenter(previous_slice);
-
-            RealPoint centerScreen = getCurrentBdvCenter();
-            offset.setPosition(-oldCenter.getDoublePosition(0) + centerScreen.getDoublePosition(0), 0);
-            offset.setPosition(-oldCenter.getDoublePosition(1) + centerScreen.getDoublePosition(1), 1);
-
-            if (Math.abs(offset.getDoublePosition(0))>msp.sX/2.0) {maintainoffset = false;}
-            if (Math.abs(offset.getDoublePosition(1))>msp.sY/2.0) {maintainoffset = false;}
-
-        } else {
-            maintainoffset = false;
         }
-
-        RealPoint centerSlice = getDisplayedCenter(current_slice);
-
-        if(maintainoffset) {
-            centerSlice.move(offset);
-        }
-        AffineTransform3D at3d = BdvHandleHelper.getViewerTransformWithNewCenter(bdvh, centerSlice.positionAsDoubleArray());
-
-        bdvh.getViewerPanel().state().setViewerTransform(at3d);
-        bdvh.getViewerPanel().requestRepaint();
 
     }
 
     RealPoint getCurrentBdvCenter() {
         RealPoint centerBdv = new RealPoint(3);
 
-        double px = bdvh.getViewerPanel().getDisplay().getWidth() / 2.0;
-        double py = bdvh.getViewerPanel().getDisplay().getHeight() / 2.0;
+        double px = bdvh.getViewerPanel().getWidth() / 2.0;
+        double py = bdvh.getViewerPanel().getHeight() / 2.0;
         bdvh.getViewerPanel().displayToGlobalCoordinates(px,py,centerBdv);
 
         return centerBdv;
