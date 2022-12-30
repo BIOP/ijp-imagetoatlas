@@ -393,7 +393,7 @@ public class SliceGuiState {
                 displaysettings[i] = state.displaysettings[i];
             }
             sliceVisible = state.sliceVisible;
-            show();
+            //show();
             slice.setDisplaySettings(displaysettings);
         }
     }

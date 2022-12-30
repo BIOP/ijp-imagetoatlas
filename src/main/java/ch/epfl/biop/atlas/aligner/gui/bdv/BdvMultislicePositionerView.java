@@ -2189,7 +2189,8 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             if (mode==REVIEW_MODE_INT) yOffset = 130;
             if (slice.isKeySlice()) name += " [Key]";
             DecimalFormat df = new DecimalFormat("00.000");
-            g.drawString("Z: "+df.format(slice.getSlicingAxisPosition()-msp.getReslicedAtlas().getZOffset())+" mm", 15, yOffset+20);
+            DecimalFormat df2 = new DecimalFormat(".0");
+            g.drawString("Z: "+df.format(slice.getSlicingAxisPosition()-msp.getReslicedAtlas().getZOffset())+" mm (Thickness: "+df2.format(slice.getThicknessInMm()*1000.0)+" um)", 15, yOffset+20);
             g.drawString(name, 15, yOffset);
             List<CancelableAction> actions = new ArrayList<>(msp.getActionsFromSlice(slice)); // Copy useful ?
             actions = AlignerState.filterSerializedActions(actions); // To get rid of useless actions for the user
