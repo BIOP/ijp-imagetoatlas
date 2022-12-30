@@ -834,17 +834,8 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         try {
 
             if ((msp.getSlices()!=null)&&(msp.getSlices().size()>0)) {
-                /*JFrame frame = BdvHandleHelper.getJFrame(bdvh);
-                int confirmed = JOptionPane.showConfirmDialog(frame,
-                        "It is advised to close and reopen ABBA because slices are already present. Proceed anyway ?", "Other slices present!",
-                        JOptionPane.YES_NO_OPTION);
-                if (confirmed == JOptionPane.NO_OPTION) {
-                    return;
-                }*/
                 msp.errorMessageForUser.accept("Slices are already present!", "You can't open a state file if slices are already present in ABBA.");
-                //errorMessageForUser.accept("Slices are already present!", "You can't open a state file if slices are already present in ABBA.");
-                return;
-
+                 return;
             }
             CommandModule cm;
             try {
@@ -1075,7 +1066,8 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             double lastPositionAlongX = -Double.MAX_VALUE;
             double stairIndex = 0;
             List<SliceSources> slices = msp.getSlices();
-            synchronized (this) { // synchronize after getting the slices to avoid deadlock
+            double globalOffsY = 0.35;
+            synchronized (this) { // synchronize after getting the slices to avoid thread deadlock
                 int current = iCurrentSlice;
                 if ((current > 0) && (current < slices.size())) {
                     for (int i = current; i < slices.size(); i++) {
@@ -1087,11 +1079,11 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                                 if (posX >= (lastPositionAlongX + msp.sX / overlapFactorX)) {
                                     stairIndex = 0;
                                     lastPositionAlongX = posX;
-                                    guiState.runSlice(slice, guiState -> guiState.setYShift(0.5+overlapFactorY));
+                                    guiState.runSlice(slice, guiState -> guiState.setYShift(globalOffsY+overlapFactorY));
                                 } else {
                                     stairIndex += overlapFactorY;
                                     final double finalStairIndex = stairIndex;
-                                    guiState.runSlice(slice, guiState -> guiState.setYShift(0.5+overlapFactorY + finalStairIndex));
+                                    guiState.runSlice(slice, guiState -> guiState.setYShift(globalOffsY+overlapFactorY + finalStairIndex));
                                 }
                             }
                         }
@@ -1107,11 +1099,11 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                                 if (posX <= (lastPositionAlongX - msp.sX / overlapFactorX)) {
                                     stairIndex = 0;
                                     lastPositionAlongX = posX;
-                                    guiState.runSlice(slice, guiState -> guiState.setYShift(0.5+overlapFactorY));
+                                    guiState.runSlice(slice, guiState -> guiState.setYShift(globalOffsY+overlapFactorY));
                                 } else {
                                     stairIndex += overlapFactorY;
                                     final double finalStairIndex = stairIndex;
-                                    guiState.runSlice(slice, guiState -> guiState.setYShift(0.5+overlapFactorY + finalStairIndex));
+                                    guiState.runSlice(slice, guiState -> guiState.setYShift(globalOffsY+overlapFactorY + finalStairIndex));
                                 }
                             }
                         }
@@ -1126,11 +1118,11 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                                 if (posX >= (lastPositionAlongX + msp.sX / overlapFactorX)) {
                                     stairIndex = 0;
                                     lastPositionAlongX = posX;
-                                    guiState.runSlice(slice, guiState -> guiState.setYShift(0.5+overlapFactorY));
+                                    guiState.runSlice(slice, guiState -> guiState.setYShift(globalOffsY+overlapFactorY));
                                 } else {
                                     stairIndex += overlapFactorY;
                                     final double finalStairIndex = stairIndex;
-                                    guiState.runSlice(slice, guiState -> guiState.setYShift(0.5+overlapFactorY + finalStairIndex));
+                                    guiState.runSlice(slice, guiState -> guiState.setYShift(globalOffsY+overlapFactorY + finalStairIndex));
                                 }
                             }
                         }
