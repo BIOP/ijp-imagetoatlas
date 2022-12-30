@@ -834,13 +834,17 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         try {
 
             if ((msp.getSlices()!=null)&&(msp.getSlices().size()>0)) {
-                JFrame frame = BdvHandleHelper.getJFrame(bdvh);
+                /*JFrame frame = BdvHandleHelper.getJFrame(bdvh);
                 int confirmed = JOptionPane.showConfirmDialog(frame,
                         "It is advised to close and reopen ABBA because slices are already present. Proceed anyway ?", "Other slices present!",
                         JOptionPane.YES_NO_OPTION);
                 if (confirmed == JOptionPane.NO_OPTION) {
                     return;
-                }
+                }*/
+                msp.errorMessageForUser.accept("Slices are already present!", "You can't open a state file if slices are already present in ABBA.");
+                //errorMessageForUser.accept("Slices are already present!", "You can't open a state file if slices are already present in ABBA.");
+                return;
+
             }
             CommandModule cm;
             try {
