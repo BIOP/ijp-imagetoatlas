@@ -5,6 +5,7 @@ import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.bdv.img.qupath.command.CreateBdvDatasetQuPathCommand;
 import ch.epfl.biop.bdv.img.qupath.entity.QuPathEntryIdEntity;
 import mpicbg.spim.data.generic.AbstractSpimData;
+import org.scijava.ItemVisibility;
 import org.scijava.command.Command;
 import org.scijava.command.CommandService;
 import org.scijava.plugin.Parameter;
@@ -19,6 +20,9 @@ import java.util.concurrent.ExecutionException;
         description = "Import images of a QuPath project as slices into ABBA")
 public class ImportSlicesFromQuPathCommand implements Command {
 
+    @Parameter(style = "message", visibility = ItemVisibility.MESSAGE)
+    String message = "<html><b>WARNING:</b> Do not delete or add any image in <br>"+
+            " the QuPath project after it has been imported in ABBA!";
     @Parameter
     MultiSlicePositioner mp;
 
