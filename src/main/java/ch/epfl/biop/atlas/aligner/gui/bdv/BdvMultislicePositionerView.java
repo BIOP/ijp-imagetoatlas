@@ -84,7 +84,6 @@ import org.scijava.cache.CacheService;
 import org.scijava.command.Command;
 import org.scijava.command.CommandModule;
 import org.scijava.command.CommandService;
-import org.scijava.command.InteractiveCommand;
 import org.scijava.module.Module;
 import org.scijava.object.ObjectService;
 import org.scijava.plugin.PluginService;
@@ -2190,7 +2189,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             if (mode==REVIEW_MODE_INT) yOffset = 130;
             if (slice.isKeySlice()) name += " [Key]";
             DecimalFormat df = new DecimalFormat("00.000");
-            g.drawString("Z: "+df.format(slice.getSlicingAxisPosition())+" mm", 15, yOffset+20);
+            g.drawString("Z: "+df.format(slice.getSlicingAxisPosition()-msp.getReslicedAtlas().getZOffset())+" mm", 15, yOffset+20);
             g.drawString(name, 15, yOffset);
             List<CancelableAction> actions = new ArrayList<>(msp.getActionsFromSlice(slice)); // Copy useful ?
             actions = AlignerState.filterSerializedActions(actions); // To get rid of useless actions for the user

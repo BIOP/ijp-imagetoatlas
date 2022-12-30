@@ -23,6 +23,14 @@ import java.util.List;
 
 public class ReslicedAtlas implements RealInterval {
 
+    // When reslicing the atlas, changing the tilt angle can cause the
+    // atlas to go out of the reslicing box. To avoid this, the
+    // atlas is sliced in a larger box than its original size.
+    // By how much ? Well by this factor (default: 15 %)
+    final static double BOX_MARGIN = 0.15;
+
+    double zMarginOffset = 0;
+
     protected static Logger logger = LoggerFactory.getLogger(ReslicedAtlas.class);
 
     final public Atlas ba;
@@ -83,6 +91,10 @@ public class ReslicedAtlas implements RealInterval {
 
     double minYAxis = Double.MAX_VALUE;
     double maxYAxis = -Double.MAX_VALUE;
+
+    public double getZOffset() {
+        return zMarginOffset;
+    }
 
     void computeReslicedSources() {
         if ((slicingTransfom==null)||(slicingResolution<=0)) {
@@ -153,24 +165,26 @@ public class ReslicedAtlas implements RealInterval {
 
                 }
 
-        // Adds a margin of 15 % for tilt correction
+        // Adds a margin of BOX_MARGIN (def to 15%) for tilt correction
         cZ = (minZAxis+maxZAxis)/2.0;
         double dZ = (maxZAxis-minZAxis)/2.0;
-        minZAxis = cZ - dZ*1.15;
-        maxZAxis = cZ + dZ*1.15;
+        minZAxis = cZ - dZ*(1.0 + BOX_MARGIN);
+        maxZAxis = cZ + dZ*(1.0 + BOX_MARGIN);
 
-        // Adds margin XY 15 % also for correct registration
+        zMarginOffset = dZ * BOX_MARGIN;
+
+        // Adds margin XY BOX_MARGIN (def to 15%) also for correct registration
         cX = (maxXAxis+minXAxis)/2.0;
         cY = (maxYAxis+minYAxis)/2.0;
 
         double dX = (maxXAxis-minXAxis)/2.0;
         double dY = (maxYAxis-minYAxis)/2.0;
 
-        maxXAxis = cX+dX*1.15;
-        maxYAxis = cY+dY*1.15;
+        maxXAxis = cX+dX*(1.0 + BOX_MARGIN);
+        maxYAxis = cY+dY*(1.0 + BOX_MARGIN);
 
-        minXAxis = cX-dX*1.15;
-        minYAxis = cY-dY*1.15;
+        minXAxis = cX-dX*(1.0 + BOX_MARGIN);
+        minYAxis = cY-dY*(1.0 + BOX_MARGIN);
 
         RealPoint realCenter = new RealPoint(cX, cY, cZ);
 
