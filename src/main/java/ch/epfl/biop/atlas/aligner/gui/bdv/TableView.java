@@ -5,9 +5,11 @@ import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.atlas.aligner.CancelableAction;
 import ch.epfl.biop.atlas.aligner.command.DisplaySettingsCommand;
 import ch.epfl.biop.atlas.aligner.gui.SliceSourcesPopupMenu;
+import ch.epfl.biop.atlas.aligner.gui.bdv.card.SliceInformationPanel;
 import org.scijava.command.CommandService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sc.fiji.bdvpg.bdv.BdvHandleHelper;
 import spimdata.util.Displaysettings;
 
 import javax.swing.*;
@@ -62,7 +64,10 @@ public class TableView implements MultiSlicePositioner.SliceChangeListener, List
 
         table.setComponentPopupMenu(SliceSourcesPopupMenu.createFinalPopupMenu(view.msp, view));
 
-        paneDisplay.add(new JLabel("Click table header to modify selected slices"), BorderLayout.NORTH);
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.add(new SliceInformationPanel(view).getPanel(), BorderLayout.CENTER);
+        panel.add(new JLabel("Click table header to modify selected slices"), BorderLayout.SOUTH);
+        paneDisplay.add(panel, BorderLayout.NORTH);
         paneDisplay.add(new JScrollPane(table), BorderLayout.CENTER);
         //paneDisplay.add(panelDisplayOptions, BorderLayout.SOUTH);
 

@@ -1291,7 +1291,7 @@ public class SliceSources {
                 .getMetadata(rootSac, SourceAndConverterService.SPIM_DATA_INFO)==null) {
             sliceInfo+="No information available";
         } else {
-            AbstractSpimData asd =
+            /*AbstractSpimData asd =
                     ((SourceAndConverterService.SpimDataInfo)SourceAndConverterServices.getSourceAndConverterService()
                             .getMetadata(rootSac, SourceAndConverterService.SPIM_DATA_INFO)).asd;
 
@@ -1315,12 +1315,12 @@ public class SliceSources {
 
             if (bvs.hasName()) {
                 sliceInfo+="viewsetup:"+bvs.getName()+" ["+bvs.getId()+"]\n";
-            }
+            }*/
 
             if (QuPathBdvHelper.isSourceLinkedToQuPath(original_sacs[0])) {
                 int entryId = QuPathBdvHelper.getEntryId(original_sacs[0]);
-                sliceInfo+="Project: "+QuPathBdvHelper.getProjectFile(this.original_sacs[0]).getAbsolutePath()+"\n";
-                sliceInfo+="- Entry Id: "+entryId;//qpent.getName()+" ["+qpent.getId()+"]";
+                sliceInfo+="QuPath Project: "+QuPathBdvHelper.getProjectFile(this.original_sacs[0]).getParent()+"\n";
+                sliceInfo+="Entry Id: "+entryId;//qpent.getName()+" ["+qpent.getId()+"]";
             }
             /*if ((bvs.getAttribute(QuPathEntryEntity.class)!=null)&&(bvs.getAttribute(QuPathEntryEntity.class).getId()!=-1)) {
                 TODO : make sure it works with legacy project!!
@@ -1420,7 +1420,7 @@ public class SliceSources {
 
         double transform_field_subsampling = gridSpacingInMicrometer/(mp.getAtlas().getMap().getAtlasPrecisionInMillimeter()*1000.0);
 
-        System.out.println("Subsampling factor = "+transform_field_subsampling);
+        //System.out.println("Subsampling factor = "+transform_field_subsampling);
 
         FinalInterval interval = new FinalInterval((int)(mp.nPixX/transform_field_subsampling),
                 (int)(mp.nPixY/transform_field_subsampling),1);

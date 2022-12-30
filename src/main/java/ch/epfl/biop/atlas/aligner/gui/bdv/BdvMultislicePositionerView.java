@@ -57,6 +57,7 @@ import ch.epfl.biop.atlas.aligner.gui.bdv.card.AtlasInfoPanel;
 import ch.epfl.biop.atlas.aligner.gui.bdv.card.EditPanel;
 import ch.epfl.biop.atlas.aligner.gui.bdv.card.NavigationPanel;
 import ch.epfl.biop.atlas.aligner.gui.bdv.card.SliceDefineROICommand;
+import ch.epfl.biop.atlas.aligner.gui.bdv.card.SliceInformationPanel;
 import ch.epfl.biop.atlas.aligner.plugin.ABBACommand;
 import ch.epfl.biop.atlas.aligner.plugin.IABBARegistrationPlugin;
 import ch.epfl.biop.atlas.aligner.plugin.RegistrationPluginHelper;
@@ -444,20 +445,16 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
     private void installBigDataViewerCards() {
         BdvHandleHelper.addCard(bdvh, "Atlas Information", new AtlasInfoPanel(msp).getPanel(), true);
-        //bdvh.getCardPanel().adCard("Atlas Information", new AtlasInfoPanel(msp).getPanel(), true);
+
         //TODO, FIX NULL
         BdvHandleHelper.addCard(bdvh, "Atlas Display", ScijavaSwingUI.getPanel(msp.getContext(), AtlasAdjustDisplayCommand.class, "view", this), true);
-        //bdvh.getCardPanel().adCard("Atlas Display", ScijavaSwingUI.getPanel(msp.getContext(), AtlasAdjustDisplayCommand.class, "view", this), true);
-
 
         logger.debug("Adding table view");
         addTableView();
 
         BdvHandleHelper.addCard(bdvh, "Display & Navigation", new NavigationPanel(this).getPanel(), true);
-        //bdvh.getCardPanel().adCard("Display & Navigation", new NavigationPanel(this).getPanel(), true);
 
         BdvHandleHelper.addCard(bdvh, "Edit Selected Slices", new EditPanel(msp).getPanel(), true);
-        //bdvh.getCardPanel().adCard("Edit Selected Slices", new EditPanel(msp).getPanel(), true);
 
         try {
             Module module = ScijavaSwingUI.createModule(msp.getContext(), AtlasSlicingAdjusterCommand.class, "reslicedAtlas", msp.getReslicedAtlas());
@@ -474,14 +471,9 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             msp.errorMessageForUser.accept("GUI Initialisation error", e.getMessage());
         }
 
-        //bdvh.getCardPanel().adCard("Atlas Slicing", ScijavaSwingUI.getPanel(msp.getContext(), AtlasSlicingAdjusterCommand.class, "reslicedAtlas", msp.getReslicedAtlas()), true);
-
         BdvHandleHelper.addCard(bdvh, "Define region of interest",
                 ScijavaSwingUI.getPanel(msp.getContext(), SliceDefineROICommand.class, "mp", msp, "view", this),
                 false);
-        //bdvh.getCardPanel().adCard("Define region of interest",
-        //        ScijavaSwingUI.getPanel(msp.getContext(), SliceDefineROICommand.class, "mp", msp, "view", this),
-        //        false);
 
         addToCleanUpHook(() -> {
             SwingUtilities.invokeLater(() -> {
@@ -493,6 +485,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                     bdvh.getCardPanel().removeCard("Edit Selected Slices");
                     bdvh.getCardPanel().removeCard("Atlas Slicing");
                     bdvh.getCardPanel().removeCard("Define region of interest");
+                    bdvh.getCardPanel().removeCard("Current slice info");
 
             }
             });
@@ -964,6 +957,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             vs.bdvView = bdvh.getViewerPanel().state().getViewerTransform().getRowPackedCopy();
             vs.atlasSlicingStep = (int) msp.getReslicedAtlas().getStep();
             vs.iCurrentSlice = iCurrentSlice;
+            notifyCurrentSliceListeners();
 
             FileWriter writer = new FileWriter(viewFile.getAbsolutePath());
             new GsonBuilder().setPrettyPrinting().create().toJson(vs, writer);
@@ -1524,6 +1518,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                 centerBdvViewOn(sortedSlices.get(iCurrentSlice));
             }
         }
+        notifyCurrentSliceListeners();
     }
 
     /**
@@ -1548,6 +1543,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             if (overlapMode==2) updateSliceDisplayedPosition(null);
             centerBdvViewOn(sortedSlices.get(iCurrentSlice), true, previousSlice);
         }
+        notifyCurrentSliceListeners();
     }
 
     /**
@@ -1574,6 +1570,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             if (overlapMode==2) updateSliceDisplayedPosition(null);
             centerBdvViewOn(sortedSlices.get(iCurrentSlice), true, previousSlice);
         }
+        notifyCurrentSliceListeners();
     }
 
     public void navigateSlice(SliceSources slice) {
@@ -1597,6 +1594,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             if (overlapMode==2) updateSliceDisplayedPosition(null);
             centerBdvViewOn(sortedSlices.get(iCurrentSlice), true, previousSlice);
         }
+        notifyCurrentSliceListeners();
     }
 
     public void centerBdvViewOn(SliceSources slice) {
@@ -1735,6 +1733,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         if (sortedSlices.size()>0) {
             if (iCurrentSlice >= sortedSlices.size()) {
                 iCurrentSlice = 0;
+                notifyCurrentSliceListeners();
             }
             return sortedSlices.get(iCurrentSlice);
         } else {
@@ -2403,6 +2402,35 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         Integer iCurrentSlice;
         double overlapFactorX = 1.0;
         double overlapFactorY = 1.0;
+    }
+
+    //-------------------- Current slice listener
+    final List<CurrentSliceListener> currentSliceListeners = new ArrayList<>();
+
+    void notifyCurrentSliceListeners() {
+        synchronized (currentSliceListeners) {
+            Object currentSlice = this.getCurrentSlice();
+            if (currentSlice instanceof SliceSources) {
+                SliceSources slice = (SliceSources) currentSlice;
+                currentSliceListeners.forEach(listener -> listener.currentSliceChanged(slice));
+            }
+        }
+    }
+
+    public interface CurrentSliceListener {
+        void currentSliceChanged(SliceSources slice);
+    }
+
+    public void addCurrentSliceListener(CurrentSliceListener listener) {
+        synchronized (currentSliceListeners) {
+            currentSliceListeners.add(listener);
+        }
+    }
+
+    public void removeCurrentSliceListener(CurrentSliceListener listener) {
+        synchronized (currentSliceListeners) {
+            currentSliceListeners.remove(listener);
+        }
     }
 
 }
