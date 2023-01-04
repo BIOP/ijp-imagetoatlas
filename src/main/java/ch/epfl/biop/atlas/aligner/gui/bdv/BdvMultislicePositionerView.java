@@ -370,15 +370,11 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ImportSliceFromImagePlusCommand.class, hierarchyLevelsSkipped,"mp", msp );
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ImportSlicesFromFilesCommand.class, hierarchyLevelsSkipped,"mp", msp );
 
-        logger.debug("Installing DeepSlice command");
-        //DeepSliceCommand
-        if ((msp.getAtlas() instanceof AllenBrainAdultMouseAtlasCCF2017Command) || (msp.getAtlas() instanceof AllenBrainAdultMouseAtlasCCF2017v3p1Command)) {
-            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RegisterSlicesDeepSliceCommand.class, hierarchyLevelsSkipped, "mp", msp);
-        }
-
         logger.debug("Installing java registration plugins ui");
-        installRegistrationPluginUI(hierarchyLevelsSkipped);
+
         // Adds registration plugin commands : discovered via scijava plugin autodiscovery mechanism
+        installRegistrationPluginUI(hierarchyLevelsSkipped);
+
 
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RegisterSlicesEditLastCommand.class, hierarchyLevelsSkipped,"mp", msp);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RegisterSlicesRemoveLastCommand.class, hierarchyLevelsSkipped,"mp", msp ); // TODO
@@ -409,6 +405,13 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ABBADocumentationCommand.class, hierarchyLevelsSkipped);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ABBAUserFeedbackCommand.class, hierarchyLevelsSkipped);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), DeepSliceDocumentationCommand.class, hierarchyLevelsSkipped);
+
+
+        //DeepSliceCommand
+        if ((msp.getAtlas() instanceof AllenBrainAdultMouseAtlasCCF2017Command) || (msp.getAtlas() instanceof AllenBrainAdultMouseAtlasCCF2017v3p1Command)) {
+            logger.debug("Installing DeepSlice Web command");
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RegisterSlicesDeepSliceCommand.class, hierarchyLevelsSkipped, "mp", msp);
+        }
 
     }
 
@@ -1862,6 +1865,21 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         tableView.sliceDisplaySettingsChanged(slice);
     }
 
+    public void setSliceChannelVisibility(SliceSources slice, int iChannel, boolean visible) {
+        guiState.runSlice(slice, sliceGuiState -> sliceGuiState.setChannelVisibility(iChannel, visible));
+        tableView.sliceDisplaySettingsChanged(slice);
+    }
+
+    public void setSelectedSlicesVisibility(int iChannel, boolean visible) {
+        guiState.forEachSelectedSlice(sliceGuiState -> sliceGuiState.setChannelVisibility(iChannel, visible));
+        msp.getSelectedSlices().forEach(slice -> tableView.sliceDisplaySettingsChanged(slice));
+    }
+
+    public void setSelectedSlicesVisibility(Boolean visible) {
+        guiState.forEachSelectedSlice(sliceGuiState -> sliceGuiState.setSliceVisibility(visible));
+        msp.getSelectedSlices().forEach(slice -> tableView.sliceDisplaySettingsChanged(slice));
+    }
+
     double overlapFactorX = 1.0;
     double overlapFactorY = 1.0;
 
@@ -2326,6 +2344,10 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         //synchronized
         void forEachSlice(Consumer<SliceGuiState> consumer) {
             sliceGuiState.values().forEach(consumer);
+        }
+
+        void forEachSelectedSlice(Consumer<SliceGuiState> consumer) {
+            sliceGuiState.values().stream().filter(sliceGuiState -> sliceGuiState.slice.isSelected()).forEach(consumer);
         }
 
         //synchronized

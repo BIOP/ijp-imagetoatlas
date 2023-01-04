@@ -69,7 +69,7 @@ import java.util.stream.Collectors;
 // TODO : fix display settings not updated with the new ABBA structure
 
 @Plugin(type = Command.class,
-        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>ABBA - DeepSlice Registration (Web)",
+        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>ABBA - DeepSlice Registration",
         description = "Uses Deepslice Web interface for affine in plane and axial registration of selected slices")
 public class RegisterSlicesDeepSliceCommand implements Command {
 
@@ -126,81 +126,86 @@ public class RegisterSlicesDeepSliceCommand implements Command {
     @Override
     public void run() {
 
-        List<SliceSources> slicesToExport = mp.getSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
-
-        if (slicesToExport.size()==0) {
-            mp.log.accept("No slice selected");
-            mp.warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to register");
-            return;
-        }
-
-        exportDownsampledDataset(slicesToExport);
-
-        File deepSliceResult;
-
-        if (deepSliceProcessor==null) {
-            IJ.log("Dataset exported in folder " + dataset_folder.getAbsolutePath());
-            new WaitForUserDialog("Now opening DeepSlice webpage",
-                    "Drag and drop all slices into the webpage.")
-                    .show();
-            try {
-                ps.open(new URL("https://www.deepslice.com.au/"));
-                ps.open(dataset_folder.toURI().toURL());
-            } catch (Exception e) {
-                mp.errorMessageForUser.accept("Couldn't open DeepSlice from Fiji, ",
-                        "please go to https://www.deepslice.com.au/ and drag and drop your images located in " + dataset_folder.getAbsolutePath());
-            }
-            new WaitForUserDialog("DeepSlice result",
-                    "Put the 'results.xml' file into " + dataset_folder.getAbsolutePath() + " then press ok.")
-                    .show();
-            deepSliceResult = new File(dataset_folder, "results.xml");
-        } else {
-            deepSliceResult = deepSliceProcessor.apply(dataset_folder);//, "results.xml");
-        }
-
-        if (!deepSliceResult.exists()) {
-            mp.errorMessageForUser.accept("Deep Slice registration aborted",
-                    "Could not find DeepSlice result file "+deepSliceResult.getAbsolutePath()
-                    );
-            return;
-        }
-
-        // Ok, now comes the big deal. First, real xml file
-
         try {
-            JAXBContext context = JAXBContext.newInstance(QuickNIISeries.class);
-            Unmarshaller unm = context.createUnmarshaller();
-            unm.setEventHandler(new jakarta.xml.bind.helpers.DefaultValidationEventHandler());
-            series = (QuickNIISeries) unm.unmarshal(new FileReader(deepSliceResult.getAbsolutePath()));
-        } catch (Exception e) {
-            mp.errorMessageForUser.accept("Deep Slice Command error","Could not parse xml file "+deepSliceResult.getAbsolutePath());
-            e.printStackTrace();
-            return;
-        }
+            mp.addTask();
+            List<SliceSources> slicesToExport = mp.getSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
 
-        if (series.slices.length!=slicesToExport.size()) {
-            mp.errorMessageForUser.accept("Deep Slice Command error","Please retry the command, DeepSlice returned less images than present in the input ("+(slicesToExport.size()-series.slices.length)+" missing) ! ");
-            return;
-        }
-
-        double nPixX = 1000.0 * mp.getROI()[2] / px_size_micron;
-        double nPixY = 1000.0 * mp.getROI()[3] / px_size_micron;
-
-        if (allow_slicing_angle_change) {
-            logger.debug("Slices pixel number = "+nPixX+" : "+nPixY);
-            adjustSlicingAngle(10, slicesToExport, nPixX, nPixY); //
-        }
-
-        if (allow_change_slicing_position) {
-            adjustSlicesZPosition(slicesToExport, nPixX, nPixY);
-        }
-
-        if (affine_transform) {
-            try {
-                affineTransformInPlane(slicesToExport, nPixX, nPixY);
-            } catch (InstantiableException e) {
-                e.printStackTrace();
+            if (slicesToExport.size() == 0) {
+                mp.log.accept("No slice selected");
+                mp.warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to register");
+                return;
             }
+
+            exportDownsampledDataset(slicesToExport);
+
+            File deepSliceResult;
+
+            if (deepSliceProcessor == null) {
+                IJ.log("Dataset exported in folder " + dataset_folder.getAbsolutePath());
+                new WaitForUserDialog("Now opening DeepSlice webpage",
+                        "Drag and drop all slices into the webpage.")
+                        .show();
+                try {
+                    ps.open(new URL("https://www.deepslice.com.au/"));
+                    ps.open(dataset_folder.toURI().toURL());
+                } catch (Exception e) {
+                    mp.errorMessageForUser.accept("Couldn't open DeepSlice from Fiji, ",
+                            "please go to https://www.deepslice.com.au/ and drag and drop your images located in " + dataset_folder.getAbsolutePath());
+                }
+                new WaitForUserDialog("DeepSlice result",
+                        "Put the 'results.xml' file into " + dataset_folder.getAbsolutePath() + " then press ok.")
+                        .show();
+                deepSliceResult = new File(dataset_folder, "results.xml");
+            } else {
+                deepSliceResult = deepSliceProcessor.apply(dataset_folder);//, "results.xml");
+            }
+
+            if (!deepSliceResult.exists()) {
+                mp.errorMessageForUser.accept("Deep Slice registration aborted",
+                        "Could not find DeepSlice result file " + deepSliceResult.getAbsolutePath()
+                );
+                return;
+            }
+
+            // Ok, now comes the big deal. First, real xml file
+
+            try {
+                JAXBContext context = JAXBContext.newInstance(QuickNIISeries.class);
+                Unmarshaller unm = context.createUnmarshaller();
+                unm.setEventHandler(new jakarta.xml.bind.helpers.DefaultValidationEventHandler());
+                series = (QuickNIISeries) unm.unmarshal(new FileReader(deepSliceResult.getAbsolutePath()));
+            } catch (Exception e) {
+                mp.errorMessageForUser.accept("Deep Slice Command error", "Could not parse xml file " + deepSliceResult.getAbsolutePath());
+                e.printStackTrace();
+                return;
+            }
+
+            if (series.slices.length != slicesToExport.size()) {
+                mp.errorMessageForUser.accept("Deep Slice Command error", "Please retry the command, DeepSlice returned less images than present in the input (" + (slicesToExport.size() - series.slices.length) + " missing) ! ");
+                return;
+            }
+
+            double nPixX = 1000.0 * mp.getROI()[2] / px_size_micron;
+            double nPixY = 1000.0 * mp.getROI()[3] / px_size_micron;
+
+            if (allow_slicing_angle_change) {
+                logger.debug("Slices pixel number = " + nPixX + " : " + nPixY);
+                adjustSlicingAngle(10, slicesToExport, nPixX, nPixY); //
+            }
+
+            if (allow_change_slicing_position) {
+                adjustSlicesZPosition(slicesToExport, nPixX, nPixY);
+            }
+
+            if (affine_transform) {
+                try {
+                    affineTransformInPlane(slicesToExport, nPixX, nPixY);
+                } catch (InstantiableException e) {
+                    e.printStackTrace();
+                }
+            }
+        } finally {
+            mp.removeTask();
         }
 
     }

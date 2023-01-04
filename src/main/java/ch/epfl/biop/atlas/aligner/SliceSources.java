@@ -1516,11 +1516,12 @@ public class SliceSources {
 
         SourceAndConverter<?> modelSac = SourceAndConverterHelper.createSourceAndConverter(model);
 
-        SourceResampler resampler = new SourceResampler(null, modelSac,"Undef", true, true, interpolate, 0);
 
         registered_sacs = new SourceAndConverter[nChannels]; // Compulsory or the push is useless!
 
         for (int iChannel = 0; iChannel < this.nChannels; iChannel++) {
+            SourceResampler resampler = new SourceResampler(null, modelSac,
+                    oriSources[iChannel].getSpimSource().getName()+"_raster_"+voxelSpacingInMicrometer+"_um", true, true, interpolate, 0);
             registered_sacs[iChannel] = resampler.apply(oriSources[iChannel]);
         }
 
