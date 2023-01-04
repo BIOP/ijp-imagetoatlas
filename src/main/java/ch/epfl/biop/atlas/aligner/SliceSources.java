@@ -355,7 +355,7 @@ public class SliceSources {
             return;
         }
         setSliceThickness(zEndInMm-zBeginInMm);
-        zShiftCorrection = ((zEndInMm+zBeginInMm) / 2) - slicingAxisPosition;
+        zShiftCorrection = ((zEndInMm+zBeginInMm) / 2.0) - slicingAxisPosition;
         updateZPosition();
     }
 
@@ -424,6 +424,9 @@ public class SliceSources {
         double currentZSliceOccupancy = Math.abs(pt1.getDoublePosition(2)-pt2.getDoublePosition(2));
 
         thicknessInMm = zThicknessCorrection * currentZSliceOccupancy;
+
+        //System.out.println(this.getName()+" currentZSliceOccupancy = "+currentZSliceOccupancy);
+        //System.out.println(this.getName()+" thickness = "+thicknessInMm);
 
     }
 

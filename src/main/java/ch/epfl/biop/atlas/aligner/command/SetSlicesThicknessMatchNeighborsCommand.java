@@ -2,6 +2,7 @@ package ch.epfl.biop.atlas.aligner.command;
 
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
+import ij.IJ;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
@@ -42,7 +43,7 @@ public class SetSlicesThicknessMatchNeighborsCommand implements Command {
                                 SliceSources sliceAfter = allSlices.get(i+1);
                                 zEnd = (sliceAfter.getSlicingAxisPosition()+currentSlice.getSlicingAxisPosition())/2.0;
                                 zBegin = currentPosition-(zEnd-currentPosition);
-                                currentSlice.setSliceThickness(zBegin, zEnd);
+                                setSliceThicknessWithValidation(mp, currentSlice, zBegin, zEnd);
                             }
                         } else if (i==allSlices.size()-1) {
                             // No slice before -> we need to look at the one after
@@ -53,14 +54,14 @@ public class SetSlicesThicknessMatchNeighborsCommand implements Command {
                                 SliceSources sliceBefore = allSlices.get(i-1);
                                 zBegin = (sliceBefore.getSlicingAxisPosition()+currentSlice.getSlicingAxisPosition())/2.0;
                                 zEnd = currentPosition+(currentPosition-zBegin);
-                                currentSlice.setSliceThickness(zBegin, zEnd);
+                                setSliceThicknessWithValidation(mp, currentSlice, zBegin, zEnd);
                             }
                         } else {
                             SliceSources sliceBefore = allSlices.get(i-1);
                             SliceSources sliceAfter = allSlices.get(i+1);
                             zBegin = (sliceBefore.getSlicingAxisPosition()+currentSlice.getSlicingAxisPosition())/2.0;
                             zEnd = (sliceAfter.getSlicingAxisPosition()+currentSlice.getSlicingAxisPosition())/2.0;
-                            currentSlice.setSliceThickness(zBegin, zEnd);
+                            setSliceThicknessWithValidation(mp, currentSlice, zBegin, zEnd);
                         }
 
                     }
@@ -68,4 +69,22 @@ public class SetSlicesThicknessMatchNeighborsCommand implements Command {
             }
         }
     }
+
+    private static void setSliceThicknessWithValidation(MultiSlicePositioner mp, SliceSources currentSlice, double zBegin, double zEnd) {
+        double minThickness = mp.getAtlas().getMap().getAtlasPrecisionInMillimeter();
+        double thickness = (zEnd-zBegin);
+        if (thickness<minThickness) {
+            IJ.log("Slice "+currentSlice.getName()+" too thin, thickness set to atlas resolution.");
+            double mid = (zEnd+zBegin)/2.0;
+            zBegin = mid-minThickness/2.0;
+            zEnd = mid+minThickness/2.0;
+            //System.out.println("Slice = "+currentSlice.getName());
+            //System.out.println("Thick = "+(zEnd-zBegin)+" zBegin = "+zBegin+" zEnd = "+zEnd);
+            currentSlice.setSliceThickness(zBegin, zEnd);
+        } else {
+            currentSlice.setSliceThickness(zBegin, zEnd);
+        }
+
+    }
+
 }
