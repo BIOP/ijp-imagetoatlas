@@ -650,7 +650,24 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                     Atlas atlas = msp.getAtlas();
                     msp.close();
                     ctx.getService(ObjectService.class).removeObject(msp);
-                    ctx.getService(ObjectService.class).removeObject(atlas);
+                    //ctx.getService(ObjectService.class).removeObject(atlas);
+                    /*
+                    * This line is buggy with pyimagej:
+                    *
+                        Exception in thread "AWT-EventQueue-0" java.lang.ClassCastException: com.sun.proxy.$Proxy16 cannot be cast to org.scijava.Prioritized
+                            at org.scijava.Prioritized.compareTo(Prioritized.java:39)
+                            at org.jpype.proxy.JPypeProxy.hostInvoke(Native Method)
+                            at org.jpype.proxy.JPypeProxy.invoke(Unknown Source)
+                            at com.sun.proxy.$Proxy16.equals(Unknown Source)
+                            at java.util.ArrayList.remove(ArrayList.java:534)
+                            at org.scijava.object.ObjectIndex.removeFromList(ObjectIndex.java:337)
+                            at org.scijava.object.ObjectIndex.remove(ObjectIndex.java:323)
+                            at org.scijava.object.ObjectIndex.remove(ObjectIndex.java:282)
+                            at org.scijava.object.ObjectIndex.remove(ObjectIndex.java:196)
+                            at org.scijava.object.ObjectService.removeObject(ObjectService.java:97)
+                            at ch.epfl.biop.atlas.aligner.gui.bdv.BdvMultislicePositionerView.lambda$addCleanAllHook$47(BdvMultislicePositionerView.java:653)
+
+                    * */
 
                     // Remove all sources - TODO : make this more specific!
                     SourceAndConverterServices

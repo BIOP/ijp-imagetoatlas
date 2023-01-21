@@ -4,6 +4,7 @@ import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.CreateSliceAction;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import com.google.gson.*;
+import net.imglib2.realtransform.AffineTransform3D;
 
 import java.lang.reflect.Type;
 import java.util.Arrays;
