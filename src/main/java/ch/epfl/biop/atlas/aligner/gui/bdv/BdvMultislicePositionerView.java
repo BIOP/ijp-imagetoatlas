@@ -671,12 +671,12 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                     * */
 
                     // Remove all sources - TODO : make this more specific!
-                    /*SourceAndConverterServices
+                    SourceAndConverterServices
                             .getSourceAndConverterService()
                             .remove(
                                     SourceAndConverterServices
                                             .getSourceAndConverterService().getSourceAndConverters().toArray(new SourceAndConverter[0])
-                            );*/
+                            );
 
                     //System.gc();
                 }
