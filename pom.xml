@@ -109,7 +109,7 @@
 		<!-- bigdataviewer dependencies -->
 		<bigvolumeviewer.version>0.2.0</bigvolumeviewer.version>
 		<!-- bdv playground related dependencies -->
-		<bigdataviewer-playground.version>0.6.5</bigdataviewer-playground.version>
+		<bigdataviewer-playground.version>0.6.6-SNAPSHOT</bigdataviewer-playground.version>
 		<bigdataviewer-image-loaders.version>0.4.1</bigdataviewer-image-loaders.version>
 		<bigdataviewer-playground-display.version>0.3.2</bigdataviewer-playground-display.version>
 		<bigdataviewer-spimdata-extras.version>0.3.1</bigdataviewer-spimdata-extras.version>

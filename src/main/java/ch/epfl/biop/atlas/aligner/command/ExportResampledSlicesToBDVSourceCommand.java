@@ -1,5 +1,6 @@
 package ch.epfl.biop.atlas.aligner.command;
 
+import bdv.util.source.alpha.AlphaSourceHelper;
 import bdv.util.source.fused.AlphaFusedResampledSource;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
@@ -14,6 +15,7 @@ import org.scijava.ItemIO;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
+import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceAffineTransformer;
 
 import java.util.*;
@@ -87,6 +89,8 @@ public class ExportResampledSlicesToBDVSourceCommand implements Command {
             return;
         }
 
+        slicesToExport.forEach(SliceSources::setAlphaSources); // Should make things faster
+        
         SourcesProcessor preprocess = SourcesProcessorHelper.Identity();
 
         if (!channels.trim().equals("*")) {

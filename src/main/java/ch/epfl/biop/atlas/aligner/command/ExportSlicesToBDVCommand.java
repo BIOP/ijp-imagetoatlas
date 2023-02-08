@@ -46,6 +46,7 @@ public class ExportSlicesToBDVCommand implements Command {
         if (slices.size()==0) {
             mp.errorMessageForUser.accept("No slice selected", "You did not select any slice to export");
         } else {
+            //slices.forEach(SliceSources::setAlphaSources); // Should make things faster
             List<SourceAndConverter> sacsToAppend = new ArrayList<>();
             AffineTransform3D at3D = mp.getAffineTransformFromAlignerToAtlas();
             SourceAffineTransformer sat = new SourceAffineTransformer(null, at3D);

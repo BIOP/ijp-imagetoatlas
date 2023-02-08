@@ -23,6 +23,7 @@ import net.imglib2.type.numeric.NumericType;
 import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
+import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
 import spimdata.util.Displaysettings;
@@ -213,11 +214,19 @@ public class SliceGuiState {
 
         SourceAndConverter[] sources = sourcesToDisplay.toArray(new SourceAndConverter[sourcesToDisplay.size()]);
 
+        for (SourceAndConverter<?> source:sources) {
+            SourceAndConverterServices
+                    .getSourceAndConverterService()
+                    .register(source, "no tree");
+        }
+
         if (sources.length>0) {
             SourceAndConverterServices
                     .getBdvDisplayService()
                     .show(bdvh, sources);
         }
+
+        bdvh.getViewerPanel().state().addSources(sourcesToDisplay);
     }
 
     private void hide() {

@@ -79,7 +79,6 @@ import sc.fiji.bdvpg.sourceandconverter.transform.SourceResampler;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
 import sc.fiji.persist.ScijavaGsonHelper;
 import spimdata.util.Displaysettings;
-//import spimdata.imageplus.ImagePlusHelper;
 
 import java.awt.Color;
 import java.io.File;
@@ -564,15 +563,16 @@ public class SliceSources {
         }
 
         registered_sacs = reg.getTransformedImageMovingToFixed(registered_sacs);
-
-        for (SourceAndConverter sac: registered_sacs) {
+        /*
+        for (SourceAndConverter<?> sac: registered_sacs) {
+            mp.bindSource(sac);
             SourceAndConverterServices
                     .getSourceAndConverterService()
-                    .register(sac); // TODO : Check if necessary...
+                    .register(sac, "no tree"); // TODO : Check if necessary...
             if (alphaSource!=null) {
                 AlphaSourceHelper.setAlphaSource(sac, alphaSource);
             }
-        }
+        }*/
 
         registered_sacs_sequence.add(new RegistrationAndSources(reg, registered_sacs));
         registrations.add(reg);
@@ -1407,14 +1407,16 @@ public class SliceSources {
             registered_sacs[iChannel] = srt.apply(original_sacs[iChannel]);
         }
 
+        /*
         for (SourceAndConverter sac: registered_sacs) {
-            SourceAndConverterServices
+            mp.bindSource(sac);
+            /*SourceAndConverterServices
                     .getSourceAndConverterService()
-                    .register(sac);
-            if (alphaSource!=null) {
+                    .register(sac);*/
+        /*    if (alphaSource!=null) {
                 AlphaSourceHelper.setAlphaSource(sac, alphaSource);
             }
-        }
+        }*/
 
         si.updateBox();
     }
@@ -1528,6 +1530,21 @@ public class SliceSources {
             registered_sacs[iChannel] = resampler.apply(oriSources[iChannel]);
         }
 
+        /*
+        for (SourceAndConverter sac: registered_sacs) {
+            mp.bindSource(sac);
+            /*SourceAndConverterServices
+                    .getSourceAndConverterService()
+                    .register(sac);*/
+        /*    if (alphaSource!=null) {
+                AlphaSourceHelper.setAlphaSource(sac, alphaSource);
+            }
+        }*/
+
+        si.updateBox();
+    }
+
+    public void setAlphaSources() {
         for (SourceAndConverter sac: registered_sacs) {
             SourceAndConverterServices
                     .getSourceAndConverterService()
@@ -1536,8 +1553,6 @@ public class SliceSources {
                 AlphaSourceHelper.setAlphaSource(sac, alphaSource);
             }
         }
-
-        si.updateBox();
     }
 
     public void popRasterSlice() {

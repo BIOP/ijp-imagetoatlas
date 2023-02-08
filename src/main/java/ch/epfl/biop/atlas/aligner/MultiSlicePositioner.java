@@ -28,6 +28,7 @@ import org.scijava.util.VersionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
+import sc.fiji.bdvpg.scijava.services.ui.SourceFilterNode;
 import sc.fiji.bdvpg.services.SourceAndConverterServiceLoader;
 import sc.fiji.bdvpg.services.SourceAndConverterServiceSaver;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
@@ -219,7 +220,7 @@ public class MultiSlicePositioner implements Closeable {
         mpListeners.forEach(l -> l.closing(this));
         mpListeners.clear();
         scijavaCtx.getService(ObjectService.class).removeObject(this);
-        logger.info("Closing multipositioner bdv window, releasing some resources.");
+        logger.info("Closing multipositioner, releasing some resources.");
         if (mso!=null) this.mso.clear();
         if (userActions!=null) this.userActions.clear();
         if (slices!=null) this.slices.clear();
@@ -230,6 +231,7 @@ public class MultiSlicePositioner implements Closeable {
         this.mso = null;
         this.reslicedAtlas = null;
         currentSerializedSlice = null;
+        //removeBoundSources();
     }
 
     // -------------------------------------------------------- NAVIGATION ( BOTH MODES )
