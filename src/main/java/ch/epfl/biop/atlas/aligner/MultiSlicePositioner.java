@@ -878,6 +878,7 @@ public class MultiSlicePositioner implements Closeable {
         factoryActions.registerSubtype(KeySliceOnAction.class);
         factoryActions.registerSubtype(KeySliceOffAction.class);
         factoryActions.registerSubtype(RasterDeformationAction.class);
+        factoryActions.registerSubtype(UnMirrorSliceAction.class);
 
         gsonbuilder.registerTypeAdapterFactory(factoryActions);
         gsonbuilder.registerTypeHierarchyAdapter(CreateSliceAction.class, new CreateSliceAdapter(this));
@@ -886,6 +887,7 @@ public class MultiSlicePositioner implements Closeable {
         gsonbuilder.registerTypeHierarchyAdapter(RegisterSliceAction.class, new RegisterSliceAdapter(this, this::currentSliceGetter));
         gsonbuilder.registerTypeHierarchyAdapter(KeySliceOnAction.class, new KeySliceOnAdapter(this, this::currentSliceGetter));
         gsonbuilder.registerTypeHierarchyAdapter(KeySliceOffAction.class, new KeySliceOffAdapter(this, this::currentSliceGetter));
+        gsonbuilder.registerTypeHierarchyAdapter(UnMirrorSliceAction.class, new UnMirrorAdapter(this, this::currentSliceGetter));
 
         // For registration registration
         RuntimeTypeAdapterFactory<Registration> factoryRegistrations = RuntimeTypeAdapterFactory.of(Registration.class);

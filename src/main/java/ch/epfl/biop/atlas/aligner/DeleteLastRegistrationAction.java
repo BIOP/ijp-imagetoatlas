@@ -1,6 +1,6 @@
 package ch.epfl.biop.atlas.aligner;
 
-import java.awt.*;
+import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.List;
 

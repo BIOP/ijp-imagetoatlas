@@ -60,6 +60,7 @@ public class AlignerState {
         serializableActions.add(RegisterSliceAction.class);
         serializableActions.add(KeySliceOnAction.class);
         serializableActions.add(KeySliceOffAction.class);
+        serializableActions.add(UnMirrorSliceAction.class);
         //serializableActions.add(RasterDeformationAction.class);
 
         Set<Class<? extends CancelableAction>> skipableActions = new HashSet<>();

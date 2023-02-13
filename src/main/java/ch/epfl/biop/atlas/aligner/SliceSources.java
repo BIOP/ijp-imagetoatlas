@@ -1,5 +1,6 @@
 package ch.epfl.biop.atlas.aligner;
 
+import bdv.img.WarpedSource;
 import bdv.util.BoundedRealTransform;
 import bdv.util.DefaultInterpolators;
 import bdv.util.QuPathBdvHelper;
@@ -26,6 +27,7 @@ import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import ch.epfl.biop.registration.Registration;
 import ch.epfl.biop.registration.sourceandconverter.affine.AffineTransformedSourceWrapperRegistration;
 import ch.epfl.biop.registration.sourceandconverter.affine.CenterZeroRegistration;
+import ch.epfl.biop.registration.sourceandconverter.mirror.MirrorXTransform;
 import ch.epfl.biop.registration.sourceandconverter.spline.RealTransformSourceAndConverterRegistration;
 import ch.epfl.biop.sourceandconverter.processor.SourcesChannelsSelect;
 import ch.epfl.biop.sourceandconverter.processor.SourcesIdentity;
@@ -424,9 +426,6 @@ public class SliceSources {
 
         thicknessInMm = zThicknessCorrection * currentZSliceOccupancy;
 
-        //System.out.println(this.getName()+" currentZSliceOccupancy = "+currentZSliceOccupancy);
-        //System.out.println(this.getName()+" thickness = "+thicknessInMm);
-
     }
 
     public SourceAndConverter<?>[] getOriginalSources() {
@@ -445,7 +444,7 @@ public class SliceSources {
             this.isSelected = false;
             mp.sliceDeselected(this);
         }
-    } // TODO : thread lock!
+    } // TODO : fix thread deadlock!
 
     public boolean isSelected() {
         return this.isSelected;
@@ -551,14 +550,85 @@ public class SliceSources {
         return registrations.size()-3;
     }
 
+    protected boolean hideLastMirrorRegistration() {
+        boolean performed = false;
+        for (int iReg = registered_sacs_sequence.size()-1; iReg>0; iReg--) {
+            RegistrationAndSources ras = registered_sacs_sequence.get(iReg);
+            if (ras.sacs[0].getSpimSource() instanceof WarpedSource) {
+                WarpedSource<?> ws = (WarpedSource<?>) ras.sacs[0].getSpimSource();
+
+                RealTransform transform = ws.getTransform();
+
+                if (transform instanceof BoundedRealTransform) {
+                    transform = ((BoundedRealTransform) transform).getTransform();
+                }
+
+                if (transform instanceof MirrorXTransform) {
+                    if (ws.isTransformed()) {
+                        // Ok, remove it!
+                        performed = true;
+                        for (int iCh = 0; iCh<ras.sacs.length; iCh++) {
+                            ((WarpedSource<?>)ras.sacs[iCh].getSpimSource()).setIsTransformed(false);
+                            if (ras.sacs[iCh].asVolatile()!=null) {
+                                ((WarpedSource<?>)ras.sacs[iCh].asVolatile().getSpimSource()).setIsTransformed(false);
+                            }
+                        }
+                        break;
+                    }
+                    //this.removeRegistration(ras.reg);
+                }
+            }
+        }
+        if (!performed) {
+            logger.error("No mirror transformation found!");
+        }
+        return performed;
+    }
+
+    protected boolean restoreLastMirrorRegistration() {
+        boolean performed = false;
+        for (int iReg = 0; iReg<registered_sacs_sequence.size(); iReg++) {
+            RegistrationAndSources ras = registered_sacs_sequence.get(iReg);
+            if (ras.sacs[0].getSpimSource() instanceof WarpedSource) {
+                WarpedSource<?> ws = (WarpedSource<?>) ras.sacs[0].getSpimSource();
+
+                RealTransform transform = ws.getTransform();
+
+                if (transform instanceof BoundedRealTransform) {
+                    transform = ((BoundedRealTransform) transform).getTransform();
+                }
+
+                if (transform instanceof MirrorXTransform) {
+                    if (!ws.isTransformed()) {
+                        // Ok, do it!
+                        performed = true;
+                        for (int iCh = 0; iCh<ras.sacs.length; iCh++) {
+                            ((WarpedSource<?>)ras.sacs[iCh].getSpimSource()).setIsTransformed(true);
+                            if (ras.sacs[iCh].asVolatile()!=null) {
+                                ((WarpedSource<?>)ras.sacs[iCh].asVolatile().getSpimSource()).setIsTransformed(true);
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+        if (!performed) {
+            logger.error("No mirror transformation to restore!");
+        }
+        return performed;
+    }
+
     protected void appendRegistration(Registration<SourceAndConverter<?>[]> reg) {
 
         if (reg instanceof RealTransformSourceAndConverterRegistration) {
             RealTransformSourceAndConverterRegistration sreg = (RealTransformSourceAndConverterRegistration) reg;
             if (!(sreg.getRealTransform() instanceof BoundedRealTransform)) {
-                BoundedRealTransform brt = new BoundedRealTransform((InvertibleRealTransform) sreg.getRealTransform(), si);
-                si.updateBox();
-                sreg.setRealTransform(brt);
+                if (sreg.getRealTransform() instanceof InvertibleRealTransform) {
+                    BoundedRealTransform brt = new BoundedRealTransform((InvertibleRealTransform) sreg.getRealTransform(), si);
+                    si.updateBox();
+                    sreg.setRealTransform(brt);
+                }
             }
         }
 
@@ -640,9 +710,11 @@ public class SliceSources {
 
                 return true;
             } else {
+                logger.error("Could not remove a registration which is not the last one.");
                 return false;
             }
         } else {
+            logger.error("Registration not found, can't remove it.");
             return false;
         }
     }
@@ -682,6 +754,8 @@ public class SliceSources {
                     }
                     mapActionTask.remove(action);
                     mp.userActions.remove(action);
+                    //mp.mso.getActionsFromSlice(this).remove(action);
+                    mp.getActionsFromSlice(this).remove(action);
                 }
                 mp.removeTask();
                 return result;
@@ -693,6 +767,7 @@ public class SliceSources {
                 }
                 mapActionTask.remove(action);
                 mp.userActions.remove(action);
+                mp.getActionsFromSlice(this).remove(action);
                 return false;
             }
         }));
@@ -1035,17 +1110,19 @@ public class SliceSources {
 
         for (Registration reg : this.registrations) {
             RealTransform current = reg.getTransformAsRealTransform();
-            if (current == null) {
-                mp.errlog.accept("Error : null registration found!");
-                return;
-            }
-            RealTransform copied = current.copy();
-            fixOptimizer(copied, tolerance, maxIteration);
-            rts.add(copied);
-            if ((copied instanceof InvertibleRealTransform) && (irts != null)) {
-                irts.add((InvertibleRealTransform) copied);
-            } else {
-                irts = null;
+            if (!(current instanceof MirrorXTransform)) { // We should not take the mirror transform into account
+                if (current == null) {
+                    mp.errlog.accept("Error : null registration found!");
+                    return;
+                }
+                RealTransform copied = current.copy();
+                fixOptimizer(copied, tolerance, maxIteration);
+                rts.add(copied);
+                if ((copied instanceof InvertibleRealTransform) && (irts != null)) {
+                    irts.add((InvertibleRealTransform) copied);
+                } else {
+                    irts = null;
+                }
             }
         }
 

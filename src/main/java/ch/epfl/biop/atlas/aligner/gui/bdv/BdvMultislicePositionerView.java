@@ -41,6 +41,7 @@ import ch.epfl.biop.atlas.aligner.command.ExportSlicesToQuickNIIDatasetCommand;
 import ch.epfl.biop.atlas.aligner.command.ImportSliceFromImagePlusCommand;
 import ch.epfl.biop.atlas.aligner.command.ImportSlicesFromFilesCommand;
 import ch.epfl.biop.atlas.aligner.command.ImportSlicesFromQuPathCommand;
+import ch.epfl.biop.atlas.aligner.command.MirrorUndoCommand;
 import ch.epfl.biop.atlas.aligner.command.RasterSlicesCommand;
 import ch.epfl.biop.atlas.aligner.command.RasterSlicesDeformationCommand;
 import ch.epfl.biop.atlas.aligner.command.RegisterSlicesDeepSliceCommand;
@@ -426,6 +427,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                 BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), commandUI, hierarchyLevelsSkipped,"mp", msp);
             }
         });
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), MirrorUndoCommand.class, hierarchyLevelsSkipped,"mp", msp);
 
         logger.debug("Installing external registration plugins ui");
         msp.getExternalRegistrationPluginsUI().keySet().forEach(externalRegistrationType -> {
