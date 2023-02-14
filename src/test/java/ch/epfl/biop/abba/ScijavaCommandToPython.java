@@ -184,8 +184,7 @@ public class ScijavaCommandToPython {
                         return false;
                     }
                     return true;
-                })
-                .collect(Collectors.toList()).toArray(new Field[0]);
+                }).toArray(Field[]::new);
     }
 
     public static void main(String... args) {

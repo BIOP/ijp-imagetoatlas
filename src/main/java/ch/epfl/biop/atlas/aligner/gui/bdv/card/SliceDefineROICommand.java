@@ -95,11 +95,6 @@ public class SliceDefineROICommand extends InteractiveCommand implements Initial
                     RealPoint p2 = (RealPoint) cm.getOutput("p2");
 
                     {
-
-                        //logger.debug("pts.get(0).getDoublePosition(0) = "+pts.get(0).getDoublePosition(0));
-
-                        //logger.debug("pts.get(1).getDoublePosition(0) = "+pts.get(1).getDoublePosition(0));
-
                         sx = Math.abs(p1.getDoublePosition(0) - p2.getDoublePosition(0));
                         sy = Math.abs(p1.getDoublePosition(1) - p2.getDoublePosition(1));
 

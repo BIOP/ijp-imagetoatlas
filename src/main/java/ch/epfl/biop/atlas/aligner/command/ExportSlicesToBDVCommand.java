@@ -23,9 +23,6 @@ import java.util.stream.Collectors;
         description = "Export registered slices to a BigDataViewer window.")
 public class ExportSlicesToBDVCommand implements Command {
 
-    //@Parameter(label = "Select the bdv to append the file - only one")
-    //BdvHandle[] bdvh;
-
     @Parameter(label = "Enter a tag to identify the registered sources (metadata key = \"ABBA\")" )
     String tag;
 

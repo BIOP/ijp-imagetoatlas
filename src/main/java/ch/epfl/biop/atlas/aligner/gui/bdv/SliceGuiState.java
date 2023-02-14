@@ -44,7 +44,7 @@ public class SliceGuiState {
     // Visible to the user in slicing mode
     private SourceAndConverter<?>[] sources_displayed; // For Positioning mode
 
-    private SourceAndConverter<?>[] ini_sources; // For Positioning mode
+    private final SourceAndConverter<?>[] ini_sources; // For Positioning mode
 
     AffineTransformedSourceWrapperRegistration slicePositioner;
 
@@ -98,7 +98,7 @@ public class SliceGuiState {
         GraphicalHandle gh = new CircleGraphicalHandle(view,
                 new Behaviours(new InputTriggerConfig()),
                 view.bdvh.getTriggerbindings(),
-                this.toString()+"_gh", // pray for unicity ? TODO : do better than thoughts and prayers
+                this+"_gh", // pray for unicity ? TODO : do better than thoughts and prayers
                 this::getSliceHandleCoords,
                 this::getBdvHandleRadius,
                 this::getBdvHandleColor
@@ -109,17 +109,17 @@ public class SliceGuiState {
 
         final Behaviours behavioursHandleSlice = new Behaviours(new InputTriggerConfig());
         behavioursHandleSlice.behaviour(new SliceDragBehaviour(view, slice),//mp.getSelectedSourceDragBehaviour(slice),
-                "dragSelectedSources" + this.toString(), "button1");
+                "dragSelectedSources" + this, "button1");
         behavioursHandleSlice.behaviour((ClickBehaviour) (x, y) -> {
             slice.deSelect();
             view.getBdvh().getViewerPanel().requestRepaint();
-        }, "deselectedSources" + this.toString(), "button3", "ctrl button1");
+        }, "deselectedSources" + this, "button3", "ctrl button1");
 
 
         keyHandle = new SquareGraphicalHandle(view,
                 behavioursHandleSlice,
                 view.getBdvh().getTriggerbindings(),
-                this.toString()+"_keyHandle", // assumes unicity
+                this+"_keyHandle", // assumes unicity
                 () -> {
                     AffineTransform3D bdvAt3D = new AffineTransform3D();
                     view.getBdvh().getViewerPanel().state().getViewerTransform(bdvAt3D);
@@ -481,15 +481,6 @@ public class SliceGuiState {
 
         @Override
         public RandomAccessibleInterval<T> getSource(int t, int level) {
-            //AffineTransform3D transform = new AffineTransform3D();
-            //alpha.getSpimSource().getSourceTransform(t,level,transform);
-            //final FinalRealInterval bb = transform.estimateBounds(alpha.getSpimSource().getSource(t,level));
-            /*BiConsumer<Localizable, T> fun = (l, p) -> p.setZero();
-
-            RandomAccessible<T> ra = new FunctionRandomAccessible<>(3,
-                    fun, this::getType);
-
-            return Views.interval(ra, alpha.getSpimSource().getSource(t,level));*/
             return (RandomAccessibleInterval<T>) alpha.getSource(t,level); // WRONG! But only the interval is used
         }
 

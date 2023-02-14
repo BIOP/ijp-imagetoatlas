@@ -169,5 +169,5 @@ public interface Registration<T> {
      */
     default String getRegistrationTypeName() {
       return this.getClass().getSimpleName();
-    };
+    }
 }

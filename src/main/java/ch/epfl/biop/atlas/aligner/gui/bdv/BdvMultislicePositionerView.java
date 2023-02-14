@@ -180,7 +180,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     // Selection layer : responsible to listen to mouse drawing events that select sources
     private SelectionLayer selectionLayer;
 
-    private Runnable atlasSlicingListener;
+    private final Runnable atlasSlicingListener;
 
     protected SynchronizedSliceGuiState guiState = new SynchronizedSliceGuiState();
 
@@ -410,6 +410,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
 
         //DeepSliceCommand
+        //noinspection deprecation
         if ((msp.getAtlas() instanceof AllenBrainAdultMouseAtlasCCF2017Command) || (msp.getAtlas() instanceof AllenBrainAdultMouseAtlasCCF2017v3p1Command)) {
             logger.debug("Installing DeepSlice Web command");
             BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RegisterSlicesDeepSliceCommand.class, hierarchyLevelsSkipped, "mp", msp);
@@ -576,16 +577,6 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                         mscClick = null;
                     }
                     extraCleanUp.forEach(Runnable::run);
-
-                    if (msp!=null) {
-                        // NPE!!, and not necessary anyway
-                        /*bdvh.getTriggerbindings().removeInputTriggerMap(REVIEW_BEHAVIOURS_KEY);
-                        bdvh.getTriggerbindings().removeBehaviourMap(REVIEW_BEHAVIOURS_KEY);
-                        bdvh.getTriggerbindings().removeInputTriggerMap(POSITIONING_BEHAVIOURS_KEY);
-                        bdvh.getTriggerbindings().removeBehaviourMap(POSITIONING_BEHAVIOURS_KEY);
-                        bdvh.getTriggerbindings().removeInputTriggerMap(COMMON_BEHAVIOURS_KEY);
-                        bdvh.getTriggerbindings().removeBehaviourMap(COMMON_BEHAVIOURS_KEY);*/
-                    }
 
                     if (msp!=null) {
                         this.common_behaviours = null;
@@ -2083,7 +2074,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             while (node.parent()!=null) {
                 node = node.parent();
                 if (node!=null) {
-                    ontologyLocation.append("<").append(node.toString());
+                    ontologyLocation.append("<").append(node);
                 }
             }
         }

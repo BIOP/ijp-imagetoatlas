@@ -278,8 +278,6 @@ public class ReslicedAtlas implements RealInterval {
             }
 
             reslicedSac = new SourceAffineTransformer(null, centerTransform).apply(reslicedSac);
-            //SourceAndConverterServices.getSourceAndConverterService()
-            //        .register(reslicedSac);
             extendedSlicedSources[index] = reslicedSac;
         }
 

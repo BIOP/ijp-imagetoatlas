@@ -1250,8 +1250,6 @@ public class MultiSlicePositioner implements Closeable {
                     log.accept("Old state version, conversion required.");
                     element = (JsonObject) AlignerState.convertOldJson(element);
                     log.accept("Conversion done.");
-                    // throw new IllegalArgumentException("Older-style project is not compatible with this current FIJI QuPath bridge ");
-                    //				return LegacyProject.readFromFile(fileProject, cls);
                 }
 
                 AlignerState state = gson.fromJson(element, AlignerState.class); // actions are executed during deserialization

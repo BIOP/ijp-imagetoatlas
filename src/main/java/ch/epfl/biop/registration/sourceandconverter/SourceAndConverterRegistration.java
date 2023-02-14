@@ -93,7 +93,7 @@ abstract public class SourceAndConverterRegistration implements IABBARegistratio
 
     public void setSliceInfo(MultiSlicePositioner.SliceInfo sliceInfo){
         this.sliceInfo = sliceInfo;
-    };
+    }
 
     protected static void addToFlatParameters(List<Object> flatParameters, Object... args) {
         flatParameters.addAll(Arrays.asList(args));

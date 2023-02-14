@@ -45,10 +45,6 @@ public class DemoTransform {
                 .getBdvDisplayService()
                 .show(bdvh2, slice0.getOriginalSources());
 
-        /*SourceAndConverterServices
-                .getBdvDisplayService()
-                .show(bdvh2, slice10.getRegisteredSources());*/
-
         AffineTransform3D at3D = mp.getAffineTransformFromAlignerToAtlas();
 
         InvertibleRealTransformSequence irts = new InvertibleRealTransformSequence();
@@ -57,13 +53,8 @@ public class DemoTransform {
 
         SourceAffineTransformer sat = new SourceAffineTransformer(null, at3D);
 
-
-
         for (SourceAndConverter sac : slice10.getRegisteredSources()) {
             SourceAndConverter source = sat.apply(sac);
-            //sac_service.register(source);
-            //sac_service.setMetadata(source, "ABBA", tag);
-            //sacsToAppend.add(source);
             SourceAndConverterServices
                     .getBdvDisplayService()
                     .show(bdvh2, source);

@@ -30,13 +30,13 @@ public class DebugView implements MultiSlicePositioner.SliceChangeListener{
         JButton writeUserActions = new JButton("Write User Actions");
         writeUserActions.addActionListener((e) -> {
             //logger.accept("User actions: ");
-            msp.userActions.forEach(action -> logger.accept(action.getSliceSources(),"\t"+action.toString()));
+            msp.userActions.forEach(action -> logger.accept(action.getSliceSources(),"\t"+action));
         });
 
         JButton writeRedoableUserActions = new JButton("Write Redoable User Actions");
         writeRedoableUserActions.addActionListener((e) -> {
             //logger.accept("Redoable user actions: ");
-            msp.redoableUserActions.forEach(action -> logger.accept(action.getSliceSources(), "\t"+action.toString()));
+            msp.redoableUserActions.forEach(action -> logger.accept(action.getSliceSources(), "\t"+action));
         });
 
         debugActions.add(writeUserActions);

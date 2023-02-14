@@ -13,10 +13,6 @@ import sc.fiji.bdvpg.services.SourceAndConverterServices;
 
 public class ABBALaunchMouse {
 
-    /*static {
-        LegacyInjector.preinit();
-    }*/
-
     public static void main(String[] args) throws Exception{
         final ImageJ ij = new ImageJ();
         ij.ui().showUI();

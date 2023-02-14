@@ -174,17 +174,6 @@ public class Elastix2DSplineRegistration extends RealTransformSourceAndConverter
             wrappedInvertible = true;
         }
 
-        /*if (rt_in instanceof BoundedRealTransform) {
-            rt_in = ((BoundedRealTransform)rt_in).getTransform();
-            if (rt_in instanceof Wrapped2DTransformAs3D) {
-                rt_in = ((Wrapped2DTransformAs3D)rt_in).transform;
-            }
-
-            if (rt_in instanceof WrappedIterativeInvertibleRealTransform) {
-                rt_in = ((WrappedIterativeInvertibleRealTransform)rt_in).getTransform();
-            }
-        }*/
-
         if (!(rt_in instanceof ThinplateSplineTransform)) {
             System.err.println("Cannot edit the transform : it's not of class thinplatesplinetransform");
             return input;

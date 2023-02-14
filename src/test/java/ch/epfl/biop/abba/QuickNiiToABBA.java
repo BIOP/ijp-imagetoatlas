@@ -93,7 +93,7 @@ public class QuickNiiToABBA {
                 zy /= zNorm;
                 zz /= zNorm;
 
-                //System.out.println("[" + zx + ", " + zy + ",  " + zz + "]");
+                //("[" + zx + ", " + zy + ",  " + zz + "]");
 
                 double ry = Math.asin(zx);
                 double rx = Math.asin(zy);
@@ -101,7 +101,7 @@ public class QuickNiiToABBA {
                 rxs[i] = rx;
                 rys[i] = ry;
 
-                //System.out.println("rx = " + (int) (rx * 180.0 / Math.PI) + " ry = " + (int) (ry * 180.0 / Math.PI));
+                //("rx = " + (int) (rx * 180.0 / Math.PI) + " ry = " + (int) (ry * 180.0 / Math.PI));
 
             }
 
@@ -138,19 +138,6 @@ public class QuickNiiToABBA {
             flat.set(nonFlat);
 
             double zLocation = nonFlat.get(2,3);
-
-            /*System.out.println("slice ["+i+"], zpos = "+nonFlat.get(2,3));
-
-            flat.set(0,2,0);
-            flat.set(0,2,1);
-            flat.set(1,2,2);
-            flat.set(0,2,3);
-
-            //AffineTransform3D toMm = new AffineTransform3D();
-            //toMm.scale(0.04); // 40 microns per pixel exported*/
-
-            //SourceTransformHelper.append(nonFlat,
-            //            new SourceAndConverterAndTimeRange(source, 0));
 
             mp.createSlice(new SourceAndConverter[]{source}, zLocation ); // This doesn't work because the slice is recentered on creation
 

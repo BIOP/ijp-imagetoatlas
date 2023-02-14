@@ -509,7 +509,7 @@ public class SliceSources {
                 lastTask.get();
             } catch (Exception e) {
                 e.printStackTrace();
-                mp.errlog.accept("Tasks were cancelled for slice "+this.toString()+" Error:"+e.getMessage());
+                mp.errlog.accept("Tasks were cancelled for slice "+this+" Error:"+e.getMessage());
             }
         }
     }
@@ -633,16 +633,6 @@ public class SliceSources {
         }
 
         registered_sacs = reg.getTransformedImageMovingToFixed(registered_sacs);
-        /*
-        for (SourceAndConverter<?> sac: registered_sacs) {
-            mp.bindSource(sac);
-            SourceAndConverterServices
-                    .getSourceAndConverterService()
-                    .register(sac, "no tree"); // TODO : Check if necessary...
-            if (alphaSource!=null) {
-                AlphaSourceHelper.setAlphaSource(sac, alphaSource);
-            }
-        }*/
 
         registered_sacs_sequence.add(new RegistrationAndSources(reg, registered_sacs));
         registrations.add(reg);
@@ -858,7 +848,7 @@ public class SliceSources {
         ).get();
 
         SourceResampler<T> resampler = new SourceResampler<>(null,
-                singleSliceModel, toString()+"_Model", false, false, false, 0
+                singleSliceModel, this+"_Model", false, false, false, 0
         );
 
         AffineTransform3D translateZ = new AffineTransform3D();
@@ -1017,7 +1007,7 @@ public class SliceSources {
 
         //--------------------
 
-        File f = new File(dirOutput, toString()+".zip");
+        File f = new File(dirOutput, this+".zip");
         try {
 
             if (f.exists()) {
@@ -1154,6 +1144,7 @@ public class SliceSources {
                     writeOntotogyIfNotPresent(mp, projectFolderPath);
                     //----------------- LEGACY
                     // For compatibility with previous versions
+                    //noinspection deprecation
                     if (mp.getAtlas() instanceof AllenBrainAdultMouseAtlasCCF2017Command) {
                         // Save it the old fashioned way
                         f = new File(dataEntryFolder, "ABBA-RoiSet.zip");
@@ -1171,6 +1162,7 @@ public class SliceSources {
                 Files.copy(Paths.get(ijroisfile.f.getAbsolutePath()),Paths.get(f.getAbsolutePath()));
                 writeOntotogyIfNotPresent(mp, projectFolderPath);
                 //----------------- LEGACY
+                //noinspection deprecation
                 if (mp.getAtlas() instanceof AllenBrainAdultMouseAtlasCCF2017Command) {
                     // Save it the old fashioned way
                     f = new File(dataEntryFolder, "ABBA-RoiSet.zip");
@@ -1201,6 +1193,7 @@ public class SliceSources {
                         writer.flush();
                         writer.close();
                         //----------------- LEGACY
+                        //noinspection deprecation
                         if (mp.getAtlas() instanceof AllenBrainAdultMouseAtlasCCF2017Command) {
                             // Save it the old fashioned way
                             ftransform = new File(dataEntryFolder, "ABBA-Transform.json");
@@ -1219,6 +1212,7 @@ public class SliceSources {
                     writer.flush();
                     writer.close();
                     //----------------- LEGACY
+                    //noinspection deprecation
                     if (mp.getAtlas() instanceof AllenBrainAdultMouseAtlasCCF2017Command) {
                         // Save it the old fashioned way
                         ftransform = new File(dataEntryFolder, "ABBA-Transform.json");
@@ -1242,6 +1236,7 @@ public class SliceSources {
             AtlasHelper.saveOntologyToJsonFile(mp.getAtlas().getOntology(), ontology.getAbsolutePath());
         }
         //---------------- LEGACY
+        //noinspection deprecation
         if (mp.getAtlas() instanceof AllenBrainAdultMouseAtlasCCF2017Command) {
             ontology = new File(quPathFilePath, "AllenMouseBrainOntology.json");
             if (!ontology.exists()) {
@@ -1371,48 +1366,11 @@ public class SliceSources {
                 .getMetadata(rootSac, SourceAndConverterService.SPIM_DATA_INFO)==null) {
             sliceInfo+="No information available";
         } else {
-            /*AbstractSpimData asd =
-                    ((SourceAndConverterService.SpimDataInfo)SourceAndConverterServices.getSourceAndConverterService()
-                            .getMetadata(rootSac, SourceAndConverterService.SPIM_DATA_INFO)).asd;
-
-            int viewSetupId = ((SourceAndConverterService.SpimDataInfo)SourceAndConverterServices.getSourceAndConverterService()
-                    .getMetadata(rootSac, SourceAndConverterService.SPIM_DATA_INFO)).setupId;
-
-            Collection<String> datasetKeys = SourceAndConverterServices.getSourceAndConverterService().getMetadataKeys(asd);
-
-            if (datasetKeys!=null) {
-                StringBuilder sb = new StringBuilder();
-                datasetKeys.forEach(key -> {
-                    String value = "";
-                    Object v = SourceAndConverterServices.getSourceAndConverterService().getMetadata(asd,key);
-                    if (v!=null) value = v.toString();
-                    sb.append(key+":"+value+"\n");
-                });
-                sliceInfo+=sb.toString();
-            }
-
-            BasicViewSetup bvs = (BasicViewSetup) asd.getSequenceDescription().getViewSetups().get(viewSetupId);
-
-            if (bvs.hasName()) {
-                sliceInfo+="viewsetup:"+bvs.getName()+" ["+bvs.getId()+"]\n";
-            }*/
-
             if (QuPathBdvHelper.isSourceLinkedToQuPath(original_sacs[0])) {
                 int entryId = QuPathBdvHelper.getEntryId(original_sacs[0]);
                 sliceInfo+="QuPath Project: "+QuPathBdvHelper.getProjectFile(this.original_sacs[0]).getParent()+"\n";
                 sliceInfo+="Entry Id: "+entryId;//qpent.getName()+" ["+qpent.getId()+"]";
             }
-            /*if ((bvs.getAttribute(QuPathEntryEntity.class)!=null)&&(bvs.getAttribute(QuPathEntryEntity.class).getId()!=-1)) {
-                TODO : make sure it works with legacy project!!
-
-                // QuPathEntryEntity qpent = bvs.getAttribute(QuPathEntryEntity.class);
-                // QuPathBdvHelper.getProjectFile(this.original_sacs[0]).getAbsolutePath();
-                int entryId = QuPathBdvHelper.getEntryId(original_sacs[0]);
-                sliceInfo+="Project: "+QuPathBdvHelper.getProjectFile(this.original_sacs[0]).getAbsolutePath()+"\n";
-                sliceInfo+="- Entry Id: "+entryId;//qpent.getName()+" ["+qpent.getId()+"]";
-            } else {
-                //QuPathEntryEntity not found
-            }*/
         }
         return sliceInfo;
     }
@@ -1468,8 +1426,7 @@ public class SliceSources {
         this.addAllRegistrations(rts, irts, getTolerance(), getMaxIteration());
 
         SourceRealTransformer srt;
-        // Let's do the stuff
-        // registered_sacs = this.registered_sacs_sequence.get(2).sacs; // Just to test
+
         Source<?> model = getModelWithGridSize(gridSpacingInMicrometer);
 
         if (irts!=null) {
@@ -1484,25 +1441,12 @@ public class SliceSources {
             registered_sacs[iChannel] = srt.apply(original_sacs[iChannel]);
         }
 
-        /*
-        for (SourceAndConverter sac: registered_sacs) {
-            mp.bindSource(sac);
-            /*SourceAndConverterServices
-                    .getSourceAndConverterService()
-                    .register(sac);*/
-        /*    if (alphaSource!=null) {
-                AlphaSourceHelper.setAlphaSource(sac, alphaSource);
-            }
-        }*/
-
         si.updateBox();
     }
 
     private Source<?> getModelWithGridSize(double gridSpacingInMicrometer) {
 
         double transform_field_subsampling = gridSpacingInMicrometer/(mp.getAtlas().getMap().getAtlasPrecisionInMillimeter()*1000.0);
-
-        //System.out.println("Subsampling factor = "+transform_field_subsampling);
 
         FinalInterval interval = new FinalInterval((int)(mp.nPixX/transform_field_subsampling),
                 (int)(mp.nPixY/transform_field_subsampling),1);
