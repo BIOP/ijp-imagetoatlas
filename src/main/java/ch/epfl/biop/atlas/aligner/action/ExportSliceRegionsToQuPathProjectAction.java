@@ -10,10 +10,10 @@ import java.awt.*;
 
 public class ExportSliceRegionsToQuPathProjectAction extends CancelableAction {
 
-    protected static Logger logger = LoggerFactory.getLogger(ExportSliceRegionsToQuPathProjectAction.class);
+    protected static final Logger logger = LoggerFactory.getLogger(ExportSliceRegionsToQuPathProjectAction.class);
 
     final SliceSources slice;
-    boolean erasePreviousFile;
+    final boolean erasePreviousFile;
 
     public ExportSliceRegionsToQuPathProjectAction(MultiSlicePositioner mp, SliceSources slice, boolean erasePreviousFile) {
         super(mp);

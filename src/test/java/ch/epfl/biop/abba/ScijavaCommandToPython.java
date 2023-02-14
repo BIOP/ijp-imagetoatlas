@@ -207,9 +207,7 @@ public class ScijavaCommandToPython {
 
         HashMap<String, String> methodPerClass = new HashMap<>();
 
-        commandClasses.forEach(c -> {
-            methodPerClass.put(c.getSimpleName(), getPythonCode(c, providedByPython));
-        });
+        commandClasses.forEach(c -> methodPerClass.put(c.getSimpleName(), getPythonCode(c, providedByPython)));
 
         Object[] keys = methodPerClass.keySet().toArray();
         Arrays.sort(keys);

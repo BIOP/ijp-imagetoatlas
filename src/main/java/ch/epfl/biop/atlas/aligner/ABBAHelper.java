@@ -2,7 +2,6 @@ package ch.epfl.biop.atlas.aligner;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import ij.Prefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +17,7 @@ import java.net.URL;
 
 public class ABBAHelper {
 
-    protected static Logger logger = LoggerFactory.getLogger(ABBAHelper.class);
+    protected static final Logger logger = LoggerFactory.getLogger(ABBAHelper.class);
 
     public static void displayABBALogo(int ms) {
         JFrame frameStart = new JFrame();

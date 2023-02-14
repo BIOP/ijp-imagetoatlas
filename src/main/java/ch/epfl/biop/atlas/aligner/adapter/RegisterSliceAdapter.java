@@ -21,10 +21,10 @@ import java.util.function.Supplier;
 public class RegisterSliceAdapter implements JsonSerializer<RegisterSliceAction>,
         JsonDeserializer<RegisterSliceAction> {
 
-    protected static Logger logger = LoggerFactory.getLogger(RegisterSliceAdapter.class);
+    protected static final Logger logger = LoggerFactory.getLogger(RegisterSliceAdapter.class);
 
     final MultiSlicePositioner mp;
-    Supplier<SliceSources> currentSliceGetter;
+    final Supplier<SliceSources> currentSliceGetter;
 
     public RegisterSliceAdapter(MultiSlicePositioner mp, Supplier<SliceSources> sliceGetter) {
         this.mp = mp;

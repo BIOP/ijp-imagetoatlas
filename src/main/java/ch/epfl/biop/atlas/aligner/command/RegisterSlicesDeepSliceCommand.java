@@ -40,25 +40,20 @@ import java.util.stream.Collectors;
 /**
  * Command which is using the amazing DeepSlice workflow by Harry Carey, and William Redmond, in Simon McMullan group
  * (https://researchers.mq.edu.au/en/publications/deepslice-a-deep-neural-network-for-fully-automatic-alignment-of-)
- *
  * You will need an internet connection (https://www.deepslice.com.au/)
  * in order to use this command, and there's some manual interaction
  * required (but it's worth!)
  * Contrary to other registration command, the slices are not registered independently, because
  * it's easier to drag many files at once in the DeepSlice web interface.
- *
  * It is possible to forbid the angle adjustement.
- *
  * Contrary to other registration methods, DeepSlice can help defining the location in Z of slices.
  * However, sometimes, DeepSlice is swapping slices incorrectly. So there is an option that maintains the
  * slices order in the process. Briefly, if this options is checked, the slice with the biggest difference
- * of rank after DeepSlice registration is moved until no difference of rnak exist.
- *
+ * of rank after DeepSlice registration is moved until no difference of rank exist.
  * DeepSlice provides the fastest way to have an initial:
- * * correct positioning in Z
- * * slicing angle
- * * affine in-plane registration
- *
+ * - correct positioning in Z
+ * - slicing angle
+ * - affine in-plane registration
  * By default, ABBA downsamples to 30 microns per pixel for DeepSlice and saves as an 8 bit jpeg image.
  * Make sure you have multiresolution files if you don't want your downscaling to look bad! Also
  * this is currently the only registration method where the display settings matter for the registration.
@@ -68,6 +63,7 @@ import java.util.stream.Collectors;
 // TODO: allow only in coronal and AB atlas
 // TODO : fix display settings not updated with the new ABBA structure
 
+@SuppressWarnings("CanBeFinal")
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>ABBA - DeepSlice Registration",
         description = "Uses Deepslice Web interface for affine in plane and axial registration of selected slices")

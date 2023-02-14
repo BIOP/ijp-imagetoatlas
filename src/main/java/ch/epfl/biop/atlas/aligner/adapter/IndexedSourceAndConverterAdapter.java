@@ -11,7 +11,7 @@ import java.util.List;
 public class IndexedSourceAndConverterAdapter implements JsonSerializer<SourceAndConverter>,
         JsonDeserializer<SourceAndConverter> {
 
-    protected static Logger logger = LoggerFactory.getLogger(IndexedSourceAndConverterAdapter.class);
+    protected static final Logger logger = LoggerFactory.getLogger(IndexedSourceAndConverterAdapter.class);
 
     final List<SourceAndConverter> list_sacs;
 

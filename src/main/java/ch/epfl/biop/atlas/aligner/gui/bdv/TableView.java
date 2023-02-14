@@ -9,7 +9,6 @@ import ch.epfl.biop.atlas.aligner.gui.bdv.card.SliceInformationPanel;
 import org.scijava.command.CommandService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sc.fiji.bdvpg.bdv.BdvHandleHelper;
 import spimdata.util.Displaysettings;
 
 import javax.swing.*;
@@ -33,7 +32,7 @@ public class TableView implements MultiSlicePositioner.SliceChangeListener, List
 
     final JPanel paneDisplay;
 
-    protected static Logger logger = LoggerFactory.getLogger(TableView.class);
+    protected static final Logger logger = LoggerFactory.getLogger(TableView.class);
 
     final JTable table;
 
@@ -453,7 +452,7 @@ public class TableView implements MultiSlicePositioner.SliceChangeListener, List
         Border unselectedBorder = null;
         Border selectedBorder = null;
         boolean isBordered;
-        JLabel label = new JLabel();
+        final JLabel label = new JLabel();
 
         public DisplaySettingsRenderer(boolean isBordered) {
             this.isBordered = isBordered;

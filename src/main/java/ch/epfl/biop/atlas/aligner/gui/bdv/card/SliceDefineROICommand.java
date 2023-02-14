@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
         description = "Defines a rectangular ROI that will be considered for registrations")
 public class SliceDefineROICommand extends InteractiveCommand implements Initializable {
 
-    protected static Logger logger = LoggerFactory.getLogger(SliceDefineROICommand.class);
+    protected static final Logger logger = LoggerFactory.getLogger(SliceDefineROICommand.class);
 
     @Parameter
     MultiSlicePositioner mp;

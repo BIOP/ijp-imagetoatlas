@@ -7,7 +7,7 @@ import org.scijava.plugin.Plugin;
 
 import java.io.IOException;
 import java.net.URL;
-
+@SuppressWarnings("unused")
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Help>ABBA - Give your feedback",
         description = "Open an ABBA feedback form")

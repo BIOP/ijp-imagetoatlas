@@ -58,7 +58,6 @@ import ch.epfl.biop.atlas.aligner.gui.bdv.card.AtlasInfoPanel;
 import ch.epfl.biop.atlas.aligner.gui.bdv.card.EditPanel;
 import ch.epfl.biop.atlas.aligner.gui.bdv.card.NavigationPanel;
 import ch.epfl.biop.atlas.aligner.gui.bdv.card.SliceDefineROICommand;
-import ch.epfl.biop.atlas.aligner.gui.bdv.card.SliceInformationPanel;
 import ch.epfl.biop.atlas.aligner.plugin.ABBACommand;
 import ch.epfl.biop.atlas.aligner.plugin.IABBARegistrationPlugin;
 import ch.epfl.biop.atlas.aligner.plugin.RegistrationPluginHelper;
@@ -105,7 +104,6 @@ import sc.fiji.bdvpg.bdv.BdvHandleHelper;
 import sc.fiji.bdvpg.scijava.BdvScijavaHelper;
 import sc.fiji.bdvpg.scijava.ScijavaSwingUI;
 import sc.fiji.bdvpg.scijava.services.SourceAndConverterBdvDisplayService;
-import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
 import sc.fiji.bdvpg.scijava.services.ui.swingdnd.BdvTransferHandler;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import spimdata.util.Displaysettings;
@@ -154,13 +152,13 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
     public MultiSlicePositioner msp; // TODO : make accessor
     final BdvHandle bdvh;
-    final SourceAndConverterBdvDisplayService displayService;
+    //final SourceAndConverterBdvDisplayService displayService;
 
     TableView tableView;
 
-    Consumer<String> debug = (str) -> {};//System.out::println;
+    final Consumer<String> debug = (str) -> {};//System.out::println;
 
-    protected static Logger logger = LoggerFactory.getLogger(MultiSlicePositioner.class);
+    protected static final Logger logger = LoggerFactory.getLogger(MultiSlicePositioner.class);
 
     protected int mode;
 
@@ -182,7 +180,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
     private final Runnable atlasSlicingListener;
 
-    protected SynchronizedSliceGuiState guiState = new SynchronizedSliceGuiState();
+    protected final SynchronizedSliceGuiState guiState = new SynchronizedSliceGuiState();
 
     private MultiSliceContextMenuClickBehaviour mscClick;
 
@@ -201,7 +199,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
     private int previouszStep;
 
-    List<Runnable> extraCleanUp = new ArrayList<>();
+    final List<Runnable> extraCleanUp = new ArrayList<>();
 
     private int iCurrentSlice = 0;
 
@@ -236,10 +234,10 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     };
 
     // Maximum right position of the selected slices
-    Integer[] rightPosition = new Integer[]{0, 0, 0};
+    final Integer[] rightPosition = new Integer[]{0, 0, 0};
 
     // Maximum left position of the selected slices
-    Integer[] leftPosition = new Integer[]{0, 0, 0};
+    final Integer[] leftPosition = new Integer[]{0, 0, 0};
 
     private int sliceDisplayMode = 0;
 
@@ -256,7 +254,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
     Set<GraphicalHandle> ghs = new HashSet<>();
 
-    Set<GraphicalHandle> gh_below_mouse = new HashSet<>();
+    final Set<GraphicalHandle> gh_below_mouse = new HashSet<>();
 
     // --------------- METHODS FOR INITIALISATION
 
@@ -331,8 +329,8 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         // And uses the rest to make the hierarchy of the top menu in the bdv window
 
         // Load and Save state
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"File>ABBA - Save State (+View)",0, () -> new Thread(() -> saveState()).start());
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"File>ABBA - Load State (+View)",0, () -> new Thread(() -> loadState()).start());
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"File>ABBA - Save State (+View)",0, () -> new Thread(this::saveState).start());
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"File>ABBA - Load State (+View)",0, () -> new Thread(this::loadState).start());
 
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>ABBA - Positioning Mode",0, () -> setDisplayMode(POSITIONING_MODE_INT));
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>ABBA - Review Mode",0, () -> setDisplayMode(REVIEW_MODE_INT));
@@ -431,21 +429,21 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), MirrorUndoCommand.class, hierarchyLevelsSkipped,"mp", msp);
 
         logger.debug("Installing external registration plugins ui");
-        msp.getExternalRegistrationPluginsUI().keySet().forEach(externalRegistrationType -> {
+        msp.getExternalRegistrationPluginsUI().keySet().forEach(externalRegistrationType ->
             msp.getExternalRegistrationPluginsUI().get(externalRegistrationType).forEach( ui -> {
                         logger.info("External registration plugin "+ui+" added in bdv user interface");
-                        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh, "Align>"+ui, 0, () -> {
-                            (msp.getContext().getService(CommandService.class)).run(ui, true, "mp", msp);
-                        });
+                        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh, "Align>"+ui, 0, () ->
+                            (msp.getContext().getService(CommandService.class)).run(ui, true, "mp", msp)
+                        );
                     }
-            );
-        });
+            )
+        );
 
 
         logger.debug("Adding interactive transform");
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh, "Align>ABBA - Interactive Transform", 0, () -> {
-            (msp.getContext().getService(CommandService.class)).run(SliceAffineTransformCommand.class, true, "mp", msp);
-        });
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh, "Align>ABBA - Interactive Transform", 0, () ->
+            (msp.getContext().getService(CommandService.class)).run(SliceAffineTransformCommand.class, true, "mp", msp)
+        );
         //BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), SliceAffineTransformCommand.class, hierarchyLevelsSkipped,"mp", msp);
 
     }
@@ -482,7 +480,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                 ScijavaSwingUI.getPanel(msp.getContext(), SliceDefineROICommand.class, "mp", msp, "view", this),
                 false);
 
-        addToCleanUpHook(() -> {
+        addToCleanUpHook(() ->
             SwingUtilities.invokeLater(() -> {
             if (bdvh.getCardPanel()!=null) {
 
@@ -495,8 +493,8 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                     bdvh.getCardPanel().removeCard("Current slice info");
 
             }
-            });
-        });
+            })
+        );
     }
 
     private void displayAtlas() {
@@ -749,7 +747,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         this.sX = msp.sX;
         this.sY = msp.sY;
         roiChanged(); // initialize roi
-        this.displayService = msp.getContext().getService(SourceAndConverterBdvDisplayService.class);
+        //this.displayService = msp.getContext().getService(SourceAndConverterBdvDisplayService.class);
 
         excludedKeys.add("X");
         excludedKeys.add("Y");
@@ -1916,8 +1914,8 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
     class InnerOverlay extends BdvOverlay {
         int drawCounter = 0;
-        Color color = new Color(128,112,50,200);
-        Stroke stroke = new BasicStroke(4);
+        final Color color = new Color(128,112,50,200);
+        final Stroke stroke = new BasicStroke(4);
         @Override
         protected void draw(Graphics2D g) {
             drawCounter++;
@@ -1938,24 +1936,22 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                 if (actions!=null) {
                     int iPos = 0;
                     int totalNumberOfRegistration = 0;
-                    for (int idx = 0; idx<actions.size(); idx ++) {
-                        CancelableAction action = actions.get(idx);
+                    for (CancelableAction action : actions) {
                         if (!action.isHidden()) {
                             if (action instanceof RegisterSliceAction) {
                                 if (action.getSliceSources().getActionState(action).equals("(done)"))
-                                totalNumberOfRegistration++;
+                                    totalNumberOfRegistration++;
                             }
                         }
                     }
                     int countNumberOfRegistration = 0;
-                    for (int idx = 0; idx<actions.size(); idx ++) {
-                        CancelableAction action = actions.get(idx);
+                    for (CancelableAction action : actions) {
                         if (!action.isHidden()) {
                             iPos++;
                             if (action instanceof RegisterSliceAction) {
                                 // Is it viewed or not ? How to know this
                                 countNumberOfRegistration++;
-                                if (totalNumberOfRegistration-registrationStepBack<countNumberOfRegistration) {
+                                if (totalNumberOfRegistration - registrationStepBack < countNumberOfRegistration) {
                                     if (action.getSliceSources().getActionState(action).equals("(done)")) {
                                         action.drawAction(g, pos[0], pos[1] + iPos * 10, 0.85);
                                     } else {
@@ -2006,12 +2002,12 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         }
     }
 
-    Object getSourceValueAt(SourceAndConverter sac, RealPoint pt) {
-        RealRandomAccessible rra_ible = sac.getSpimSource().getInterpolatedSource(0, 0, Interpolation.NEARESTNEIGHBOR);
+    Object getSourceValueAt(SourceAndConverter<?> sac, RealPoint pt) {
+        RealRandomAccessible<?> rra_ible = sac.getSpimSource().getInterpolatedSource(0, 0, Interpolation.NEARESTNEIGHBOR);
         if (rra_ible != null) {
             AffineTransform3D sourceTransform = new AffineTransform3D();
             sac.getSpimSource().getSourceTransform(0, 0, sourceTransform);
-            RealRandomAccess rra = rra_ible.realRandomAccess();
+            RealRandomAccess<?> rra = rra_ible.realRandomAccess();
             RealPoint iPt = new RealPoint(3);
             sourceTransform.inverse().apply(pt, iPt);
             rra.setPosition(iPt);
@@ -2030,9 +2026,9 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         float[] coords = new float[3];
         if (mode==POSITIONING_MODE_INT) {
 
-            SourceAndConverter label = reslicedAtlas.extendedSlicedSources[reslicedAtlas.getLabelSourceIndex()]; // By convention the label image is the last one (OK)
+            SourceAndConverter<?> label = reslicedAtlas.extendedSlicedSources[reslicedAtlas.getLabelSourceIndex()]; // By convention the label image is the last one (OK)
             labelValue = ((IntegerType<?>) getSourceValueAt(label, globalMouseCoordinates)).getInteger();
-            SourceAndConverter lrSource = reslicedAtlas.extendedSlicedSources[reslicedAtlas.getLeftRightSourceIndex()]; // By convention the left right indicator image is the next to last one
+            SourceAndConverter<?> lrSource = reslicedAtlas.extendedSlicedSources[reslicedAtlas.getLeftRightSourceIndex()]; // By convention the left right indicator image is the next to last one
             leftRight = ((IntegerType<?>) getSourceValueAt(lrSource, globalMouseCoordinates)).getInteger();
 
             SourceAndConverter<FloatType> xSource = reslicedAtlas.extendedSlicedSources[reslicedAtlas.getCoordinateSourceIndex(0)]; // 0 = X
@@ -2044,10 +2040,10 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             coords[2] = ((FloatType) getSourceValueAt(zSource, globalMouseCoordinates)).get();
         } else {
             assert mode == REVIEW_MODE_INT;
-            SourceAndConverter label = reslicedAtlas.nonExtendedSlicedSources[reslicedAtlas.getLabelSourceIndex()]; // By convention the label image is the last one
-            labelValue = ((IntegerType) getSourceValueAt(label, globalMouseCoordinates)).getInteger();
-            SourceAndConverter lrSource = reslicedAtlas.nonExtendedSlicedSources[reslicedAtlas.getLeftRightSourceIndex()]; // By convention the left right indicator image is the next to last one
-            leftRight = ((IntegerType) getSourceValueAt(lrSource, globalMouseCoordinates)).getInteger();
+            SourceAndConverter<?> label = reslicedAtlas.nonExtendedSlicedSources[reslicedAtlas.getLabelSourceIndex()]; // By convention the label image is the last one
+            labelValue = ((IntegerType<?>) getSourceValueAt(label, globalMouseCoordinates)).getInteger();
+            SourceAndConverter<?> lrSource = reslicedAtlas.nonExtendedSlicedSources[reslicedAtlas.getLeftRightSourceIndex()]; // By convention the left right indicator image is the next to last one
+            leftRight = ((IntegerType<?>) getSourceValueAt(lrSource, globalMouseCoordinates)).getInteger();
 
             SourceAndConverter<FloatType> xSource = reslicedAtlas.nonExtendedSlicedSources[reslicedAtlas.getCoordinateSourceIndex(0)]; // 0 = X
             SourceAndConverter<FloatType> ySource = reslicedAtlas.nonExtendedSlicedSources[reslicedAtlas.getCoordinateSourceIndex(1)]; // By convention the left right indicator image is the next to last one
@@ -2121,7 +2117,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
                 if (i == 0) {
                     RealPoint handleLeftPoint = this.getDisplayedCenter(slice);
-                    handleLeftPoint.setPosition(+sY/2.0, 1);
+                    handleLeftPoint.setPosition(sY/2.0, 1);
                     bdvAt3D.apply(handleLeftPoint, handleLeftPoint);
 
                     leftPosition[0] = (int) handleLeftPoint.getDoublePosition(0);
@@ -2130,7 +2126,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
                 if (i == sortedSelected.size() - 1) {
                     RealPoint handleRightPoint = this.getDisplayedCenter(slice);
-                    handleRightPoint.setPosition(+sY/2.0, 1);
+                    handleRightPoint.setPosition(sY/2.0, 1);
                     bdvAt3D.apply(handleRightPoint, handleRightPoint);
 
                     rightPosition[0] = (int) handleRightPoint.getDoublePosition(0);
@@ -2170,7 +2166,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             Integer[] coordSliceCenter = guiState.getSliceHandleCoords(slice);
 
             RealPoint handlePoint = this.getDisplayedCenter(slice);
-            handlePoint.setPosition(+sY/2.0, 1);
+            handlePoint.setPosition(sY/2.0, 1);
             bdvAt3D.apply(handlePoint, handlePoint);
             if (slice.isSelected()) {
                 g.setColor(colorSelected);
@@ -2232,7 +2228,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
     // ----- MODE CHANGE LISTENERS
 
-    List<ModeListener> modeListeners = new ArrayList<>();
+    final List<ModeListener> modeListeners = new ArrayList<>();
 
     public void addModeListener(ModeListener modeListener) {
         modeListeners.add(modeListener);
@@ -2420,6 +2416,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         }
     }
 
+    @SuppressWarnings("CanBeFinal")
     public static class ViewState {
         List<SliceGuiState.State> slicesStates;
         double[] bdvView;
@@ -2429,6 +2426,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         boolean showInfo;
         int atlasSlicingStep;
         Integer iCurrentSlice;
+
         double overlapFactorX = 1.0;
         double overlapFactorY = 1.0;
     }

@@ -11,11 +11,8 @@ import java.awt.*;
  * Makes a JPanel which monitors:
  * - current Memory usage
  * - current CPU usage
- *
  * This panel is updated every second
- *
  * The monitoring has be stopped 'manually' by calling {@link ResourcesMonitor#stop()}
- *
  * And a button which can trigger a garbage collection (gc) request
  */
 

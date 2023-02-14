@@ -1,12 +1,9 @@
 package ch.epfl.biop.quicknii;
 
 import jakarta.xml.bind.annotation.*;
-import java.util.List;
 
 /**
  * Pfou....... XMl stuff, I need to learn xml, let's try JAXB (https://www.baeldung.com/jaxb)
- *
- *
  */
 
 @XmlRootElement(name = "series")

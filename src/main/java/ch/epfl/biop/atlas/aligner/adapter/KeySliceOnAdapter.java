@@ -12,7 +12,7 @@ public class KeySliceOnAdapter implements JsonSerializer<KeySliceOnAction>,
         JsonDeserializer<KeySliceOnAction> {
 
     final MultiSlicePositioner mp;
-    Supplier<SliceSources> currentSliceGetter;
+    final Supplier<SliceSources> currentSliceGetter;
 
     public KeySliceOnAdapter(MultiSlicePositioner mp, Supplier<SliceSources> sliceGetter) {
         this.mp = mp;

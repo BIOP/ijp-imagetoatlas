@@ -8,7 +8,7 @@ import java.net.URL;
 
 public class EditPanel {
 
-    JPanel paneEdit;
+    final JPanel paneEdit;
 
     public EditPanel(MultiSlicePositioner mp) {
         paneEdit = new JPanel(new FlowLayout());

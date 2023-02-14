@@ -1,7 +1,5 @@
 package ch.epfl.biop.registration.sourceandconverter.affine;
 
-import bdv.tools.transformation.TransformedSource;
-import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
 import net.imglib2.realtransform.AffineTransform3D;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterAndTimeRange;
@@ -17,7 +15,7 @@ import java.util.Map;
  */
 public class AffineTransformedSourceWrapperRegistration extends AffineTransformSourceAndConverterRegistration {
 
-    Map<SourceAndConverter, SourceAndConverter> alreadyTransformedSources = new HashMap<>();
+    Map<SourceAndConverter<?>, SourceAndConverter<?>> alreadyTransformedSources = new HashMap<>();
 
     @Override
     public boolean register() {
@@ -32,9 +30,7 @@ public class AffineTransformedSourceWrapperRegistration extends AffineTransformS
      */
     public void setAffineTransform(AffineTransform3D at3d_in) {
         this.at3d = at3d_in;
-        alreadyTransformedSources.keySet().forEach(sac -> {
-                SourceTransformHelper.set(at3d_in, new SourceAndConverterAndTimeRange(alreadyTransformedSources.get(sac), timePoint));
-        });
+        alreadyTransformedSources.keySet().forEach(sac -> SourceTransformHelper.set(at3d_in, new SourceAndConverterAndTimeRange<>(alreadyTransformedSources.get(sac), timePoint)));
     }
 
     public AffineTransform3D getAffineTransform() {
@@ -49,16 +45,16 @@ public class AffineTransformedSourceWrapperRegistration extends AffineTransformS
      * @return mutates the transform
      */
     @Override
-    public SourceAndConverter[] getTransformedImageMovingToFixed(SourceAndConverter[] img) {
+    public SourceAndConverter<?>[] getTransformedImageMovingToFixed(SourceAndConverter<?>[] img) {
 
-        SourceAndConverter[] out = new SourceAndConverter[img.length];
+        SourceAndConverter<?>[] out = new SourceAndConverter[img.length];
 
         for (int idx = 0;idx<img.length;idx++) {
             if (alreadyTransformedSources.containsKey(img[idx])) {
                 out[idx] = alreadyTransformedSources.get(img[idx]);
-                SourceTransformHelper.set(at3d, new SourceAndConverterAndTimeRange(out[idx], timePoint));
+                SourceTransformHelper.set(at3d, new SourceAndConverterAndTimeRange<>(out[idx], timePoint));
             } else {
-                out[idx] = SourceTransformHelper.createNewTransformedSourceAndConverter(at3d, new SourceAndConverterAndTimeRange(img[idx], timePoint));
+                out[idx] = SourceTransformHelper.createNewTransformedSourceAndConverter(at3d, new SourceAndConverterAndTimeRange<>(img[idx], timePoint));
                 alreadyTransformedSources.put(img[idx], out[idx]);
             }
         }

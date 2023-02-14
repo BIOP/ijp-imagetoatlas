@@ -28,7 +28,6 @@ import org.scijava.util.VersionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
-import sc.fiji.bdvpg.scijava.services.ui.SourceFilterNode;
 import sc.fiji.bdvpg.services.SourceAndConverterServiceLoader;
 import sc.fiji.bdvpg.services.SourceAndConverterServiceSaver;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
@@ -53,18 +52,14 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import static sc.fiji.bdvpg.scijava.services.SourceAndConverterService.SPIM_DATA_INFO;
-import static sc.fiji.bdvpg.services.ISourceAndConverterService.SPIM_DATA_LOCATION;
 
 /**
  * All specific methods and fields dedicated to the multislice positioner
- *
  * There is:
- *
  * - a positioning mode
  *      This is mostly useful at the beginning of the registration
  *      Slices can be moved along the axis / stretched and shrunk
  *      Only certain sections of the atlas are shown to improve global overview, based on the user need
- *
  * - a review mode
  *      This is mostly useful for reviewing the quality of registration
  *      Only one slice is visible at a time
@@ -73,7 +68,7 @@ import static sc.fiji.bdvpg.services.ISourceAndConverterService.SPIM_DATA_LOCATI
 
 public class MultiSlicePositioner implements Closeable {
 
-    protected static Logger logger = LoggerFactory.getLogger(MultiSlicePositioner.class);
+    protected static final Logger logger = LoggerFactory.getLogger(MultiSlicePositioner.class);
 
     /**
      * Object which serves as a lock in order to allow
@@ -366,7 +361,7 @@ public class MultiSlicePositioner implements Closeable {
     }
 
     private void sortSlices() { // should always be called within a synchronized slicesLock block
-        slices.forEach(slice -> slice.setTempSlicingAxisPosition()); // To avoid problems during the sorting
+        slices.forEach(SliceSources::setTempSlicingAxisPosition); // To avoid problems during the sorting
         slices.sort(Comparator.comparingDouble(SliceSources::getTempSlicingAxisPosition)); // the axis position may change within the loop... -> Error!!
 
         // Sending index info to slices each time this function is called
@@ -1061,8 +1056,8 @@ public class MultiSlicePositioner implements Closeable {
     /**
      * Extracts a zip file specified by the zipFilePath to a directory specified by
      * destDirectory (will be created if does not exists)
-     * @param zipFilePath
-     * @param destDirectory
+     * @param zipFilePath zip file path
+     * @param destDirectory dest directory
      * @throws IOException
      */
     public void unpack(String zipFilePath, String destDirectory) throws IOException {
@@ -1305,7 +1300,7 @@ public class MultiSlicePositioner implements Closeable {
         return currentSerializedSlice;
     }
 
-    volatile List<SliceChangeListener> listeners = new ArrayList<>();
+    final List<SliceChangeListener> listeners = new ArrayList<>();
 
     public void addSliceListener(SliceChangeListener listener) {
         logger.debug("Adding slice change listener :"+listener+" of class"+listener.getClass().getSimpleName());
@@ -1325,7 +1320,7 @@ public class MultiSlicePositioner implements Closeable {
         listeners.forEach(sliceChangeListener -> sliceChangeListener.slicePretransformChanged(sliceSources));
     }
 
-    protected AtomicInteger numberOfTasks = new AtomicInteger();
+    protected final AtomicInteger numberOfTasks = new AtomicInteger();
 
     /**
      * Simply indicates that a task is current being performed.
@@ -1387,7 +1382,7 @@ public class MultiSlicePositioner implements Closeable {
         void closing(MultiSlicePositioner msp);
     }
 
-    List<MultiSlicePositionerListener> mpListeners = new ArrayList<>();
+    final List<MultiSlicePositionerListener> mpListeners = new ArrayList<>();
 
     public void addMultiSlicePositionerListener(MultiSlicePositionerListener listener) {
         mpListeners.add(listener);
@@ -1400,6 +1395,7 @@ public class MultiSlicePositioner implements Closeable {
     /**
      * Informations sent to the registration server (provided the user agrees)
      */
+    @SuppressWarnings("CanBeFinal")
     public static class SliceInfo {
 
         public SliceInfo(MultiSlicePositioner mp, SliceSources slice) {
@@ -1436,7 +1432,7 @@ public class MultiSlicePositioner implements Closeable {
 
     //---------------------- For PyImageJ extensions
 
-    static Map<String, Supplier<? extends IABBARegistrationPlugin>> externalRegistrationPlugins = new HashMap<>();
+    static final Map<String, Supplier<? extends IABBARegistrationPlugin>> externalRegistrationPlugins = new HashMap<>();
 
     /**
      * Register an external registration plugin, for instance performed by a python function
@@ -1456,7 +1452,7 @@ public class MultiSlicePositioner implements Closeable {
         return externalRegistrationPlugins.get(name);
     }
 
-    static Map<String, List<String>> externalRegistrationPluginsUI = new HashMap<>();
+    static final Map<String, List<String>> externalRegistrationPluginsUI = new HashMap<>();
 
     public Map<String, List<String>> getExternalRegistrationPluginsUI() {
         return externalRegistrationPluginsUI;

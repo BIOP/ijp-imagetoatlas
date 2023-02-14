@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 
+@SuppressWarnings("CanBeFinal")
 @Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>ABBA - Export Registered Slices to Quick NII Dataset")
 public class ExportSlicesToQuickNIIDatasetCommand implements Command {
 

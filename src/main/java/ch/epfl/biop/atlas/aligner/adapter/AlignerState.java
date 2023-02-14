@@ -17,7 +17,7 @@ import java.util.Set;
 
 public class AlignerState {
 
-    protected static Logger logger = LoggerFactory.getLogger(AlignerState.class);
+    protected static final Logger logger = LoggerFactory.getLogger(AlignerState.class);
 
     public AlignerState(MultiSlicePositioner mp) {
 
@@ -38,7 +38,7 @@ public class AlignerState {
 
     public double rotationY;
 
-    public List<SliceSourcesState> slices_state_list = new ArrayList<>();
+    public final List<SliceSourcesState> slices_state_list = new ArrayList<>();
 
     public static class SliceSourcesState {
         transient public SliceSources slice;
@@ -114,7 +114,7 @@ public class AlignerState {
     }
 
 
-    static Set<String> toReplace = new HashSet<>();
+    static final Set<String> toReplace = new HashSet<>();
 
     static {
         toReplace.add("MoveSlice");
@@ -127,10 +127,9 @@ public class AlignerState {
     /**
      * In the previous ABBA version, CreateSliceAction was named CreateSlice, etc.
      * All these need to be changed before being open.
-     *
      * Function is there for legacy reasons.
-     * @param element
-     * @return
+     * @param element a json element to convert
+     * @return converted json element
      */
     public static JsonElement convertOldJson(JsonElement element) {
         if (element.isJsonObject()) {

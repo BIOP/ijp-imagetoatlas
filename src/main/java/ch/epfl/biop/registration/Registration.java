@@ -120,7 +120,6 @@ public interface Registration<T> {
      * Reverse transforms a list of points. This function takes a list
      * of points given in the fixed coordinates system, inverse transform
      * their coordinates according to the result of the registration.
-     *
      * The points can be mutated
      * @param pts points to transform from fixed to moving system coordinates
      * @return the transformed points
@@ -143,7 +142,6 @@ public interface Registration<T> {
     /**
      * Function used to bypass the real registration process (run)
      * in order to set directly the result of the registration.
-     *
      * This is used when:
      * - loading a registration from a state file
      * - restore if needed a previous transformed state after an edition

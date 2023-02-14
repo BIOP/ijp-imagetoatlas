@@ -15,7 +15,7 @@ import java.awt.*;
  */
 public class RegisterSliceAction extends CancelableAction {
 
-    protected static Logger logger = LoggerFactory.getLogger(RegisterSliceAction.class);
+    protected static final Logger logger = LoggerFactory.getLogger(RegisterSliceAction.class);
 
     final SliceSources slice;
     Registration<SourceAndConverter<?>[]> registration;

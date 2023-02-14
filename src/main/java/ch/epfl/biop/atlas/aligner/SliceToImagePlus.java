@@ -3,12 +3,9 @@ package ch.epfl.biop.atlas.aligner;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.bdv.img.imageplus.ImagePlusHelper;
 import ch.epfl.biop.sourceandconverter.processor.SourcesProcessor;
-import ij.IJ;
 import ij.ImagePlus;
-import net.imglib2.display.LinearRange;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.NativeType;
-import net.imglib2.type.Type;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.NumericType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
@@ -29,7 +26,7 @@ import java.util.stream.Collectors;
 
 public class SliceToImagePlus {
 
-    static Logger logger = LoggerFactory.getLogger(SliceToImagePlus.class);
+    static final Logger logger = LoggerFactory.getLogger(SliceToImagePlus.class);
 
     public static <T extends NumericType<T> & NativeType<T>> ImagePlus export(List<SourceAndConverter<?>> sourceList,
                                                                              SliceSources slice,

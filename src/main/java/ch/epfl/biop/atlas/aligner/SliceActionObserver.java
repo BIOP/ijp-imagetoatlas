@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class SliceActionObserver implements MultiSlicePositioner.SliceChangeListener {
 
-    protected static Logger logger = LoggerFactory.getLogger(SliceActionObserver.class);
+    protected static final Logger logger = LoggerFactory.getLogger(SliceActionObserver.class);
 
     MultiSlicePositioner mp;
 

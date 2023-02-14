@@ -1,6 +1,5 @@
 package ch.epfl.biop.registration.sourceandconverter.affine;
 
-import bdv.util.RealTransformHelper;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import ch.epfl.biop.registration.sourceandconverter.SourceAndConverterRegistration;
@@ -17,13 +16,14 @@ abstract public class AffineTransformSourceAndConverterRegistration extends Sour
 
     protected AffineTransform3D at3d = new AffineTransform3D();
 
+    @SuppressWarnings("CanBeFinal")
     public int timePoint = 0;
 
     @Override
-    public SourceAndConverter[] getTransformedImageMovingToFixed(SourceAndConverter[] img) {
-        SourceAndConverter[] out = new SourceAndConverter[img.length];
+    public SourceAndConverter<?>[] getTransformedImageMovingToFixed(SourceAndConverter<?>[] img) {
+        SourceAndConverter<?>[] out = new SourceAndConverter[img.length];
         for (int idx = 0;idx<img.length;idx++) {
-            out[idx] = SourceTransformHelper.createNewTransformedSourceAndConverter(at3d, new SourceAndConverterAndTimeRange(img[idx],timePoint));
+            out[idx] = SourceTransformHelper.createNewTransformedSourceAndConverter(at3d, new SourceAndConverterAndTimeRange<>(img[idx],timePoint));
         }
         return out;
     }

@@ -5,6 +5,7 @@ import net.imglib2.realtransform.InvertibleRealTransform;
 
 import java.util.Map;
 
+@SuppressWarnings("SameReturnValue")
 public interface SimpleABBARegistrationPlugin {
 
     /**

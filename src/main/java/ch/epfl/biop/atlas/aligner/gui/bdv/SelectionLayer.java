@@ -97,8 +97,8 @@ public class SelectionLayer {
         }
     }
 
-    Stroke normalStroke = new BasicStroke();
-    Color backColor = new Color(0xF7BF18);
+    final Stroke normalStroke = new BasicStroke();
+    final Color backColor = new Color(0xF7BF18);
 
     public void draw(Graphics2D g) {
         if (isCurrentlySelecting) {

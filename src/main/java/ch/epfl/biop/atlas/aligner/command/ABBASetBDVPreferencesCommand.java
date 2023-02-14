@@ -8,7 +8,7 @@ import sc.fiji.bdvpg.bdv.config.BdvSettingsGUISetter;
 import sc.fiji.bdvpg.scijava.command.BdvPlaygroundActionCommand;
 
 import java.io.File;
-
+@SuppressWarnings("unused")
 @Plugin(type = BdvPlaygroundActionCommand.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>ABBA - Preferences",
         description = "Sets actions linked to key / mouse event in ABBA (not functional)")

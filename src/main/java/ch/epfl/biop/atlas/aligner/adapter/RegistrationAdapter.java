@@ -16,11 +16,11 @@ import java.util.Map;
 public class RegistrationAdapter implements JsonSerializer<Registration>,
         JsonDeserializer<Registration> {
 
-    protected static Logger logger = LoggerFactory.getLogger(RegistrationAdapter.class);
+    protected static final Logger logger = LoggerFactory.getLogger(RegistrationAdapter.class);
 
-    Context scijavacontext;
+    final Context scijavacontext;
 
-    MultiSlicePositioner msp;
+    final MultiSlicePositioner msp;
     public RegistrationAdapter(Context context, MultiSlicePositioner mp) {
         this.scijavacontext = context;
         this.msp = mp;

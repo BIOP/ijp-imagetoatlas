@@ -5,7 +5,7 @@ import ch.epfl.biop.atlas.aligner.plugin.ABBACommand;
 import ij.IJ;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-
+@SuppressWarnings("unused")
 @Plugin(type = ABBACommand.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Plugin>[List slices - Demo ABBA plugin]",
         description = "Plugin example for ABBA.")

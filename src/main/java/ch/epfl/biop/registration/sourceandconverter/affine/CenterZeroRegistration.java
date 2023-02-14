@@ -17,7 +17,7 @@ public class CenterZeroRegistration extends AffineTransformSourceAndConverterReg
     @Override
     public boolean register() {
 
-        SourceAndConverter sac = mimg[0];
+        SourceAndConverter<?> sac = mimg[0];
 
         RealPoint center = SourceAndConverterHelper.getSourceAndConverterCenterPoint(sac,0);
 
@@ -38,10 +38,10 @@ public class CenterZeroRegistration extends AffineTransformSourceAndConverterReg
      * @return transformed images (new source created)
      */
     @Override
-    public SourceAndConverter[] getTransformedImageMovingToFixed(SourceAndConverter[] img) {
-        SourceAndConverter[] out = new SourceAndConverter[img.length];
+    public SourceAndConverter<?>[] getTransformedImageMovingToFixed(SourceAndConverter<?>[] img) {
+        SourceAndConverter<?>[] out = new SourceAndConverter[img.length];
         for (int idx = 0;idx<img.length;idx++) {
-            out[idx] = SourceTransformHelper.createNewTransformedSourceAndConverter(at3d, new SourceAndConverterAndTimeRange(img[idx], timePoint));
+            out[idx] = SourceTransformHelper.createNewTransformedSourceAndConverter(at3d, new SourceAndConverterAndTimeRange<>(img[idx], timePoint));
         }
         return out;
     }

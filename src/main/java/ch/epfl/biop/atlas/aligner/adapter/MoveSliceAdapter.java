@@ -12,7 +12,7 @@ public class MoveSliceAdapter implements JsonSerializer<MoveSliceAction>,
         JsonDeserializer<MoveSliceAction> {
 
     final MultiSlicePositioner mp;
-    Supplier<SliceSources> currentSliceGetter;
+    final Supplier<SliceSources> currentSliceGetter;
 
     public MoveSliceAdapter(MultiSlicePositioner mp, Supplier<SliceSources> sliceGetter) {
         this.mp = mp;

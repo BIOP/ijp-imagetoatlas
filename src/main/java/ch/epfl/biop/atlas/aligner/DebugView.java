@@ -6,9 +6,7 @@ import java.sql.Timestamp;
 import java.util.function.BiConsumer;
 public class DebugView implements MultiSlicePositioner.SliceChangeListener{
 
-    //public static DebugView instance;
-
-    BiConsumer<SliceSources,String> logger = this::append;
+    final BiConsumer<SliceSources,String> logger = this::append;
 
     private synchronized void append(SliceSources slice, String s) {
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
@@ -21,7 +19,7 @@ public class DebugView implements MultiSlicePositioner.SliceChangeListener{
 
     final MultiSlicePositioner msp;
 
-    JTextArea area = new JTextArea();
+    final JTextArea area = new JTextArea();
 
     public DebugView(MultiSlicePositioner msp) {
         JFrame debug = new JFrame("Debug MultiSlicePositioner "+msp);

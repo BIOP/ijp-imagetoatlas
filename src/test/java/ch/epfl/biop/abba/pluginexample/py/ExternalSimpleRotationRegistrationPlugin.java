@@ -16,9 +16,7 @@ public class ExternalSimpleRotationRegistrationPlugin implements SimpleABBARegis
 
     @Override
     public void setRegistrationParameters(Map<String, String> parameters) {
-        parameters.forEach((k,v) -> {
-            System.out.println(k+":\t"+v);
-        });
+        parameters.forEach((k,v) -> System.out.println(k+":\t"+v));
     }
 
     @Override

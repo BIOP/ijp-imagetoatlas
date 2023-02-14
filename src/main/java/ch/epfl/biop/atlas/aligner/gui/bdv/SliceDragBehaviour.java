@@ -18,7 +18,7 @@ public class SliceDragBehaviour implements DragBehaviour {
 
     List<SliceSources> affectedSlices = new ArrayList<>();
     final SliceSources sliceDragged;
-    Map<SliceSources, Double> initialAxisPositions = new HashMap<>();
+    final Map<SliceSources, Double> initialAxisPositions = new HashMap<>();
     double rangeBefore;
     double rangeAfter;
     double lastAxisPos;

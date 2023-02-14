@@ -23,7 +23,6 @@ import net.imglib2.type.numeric.NumericType;
 import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
-import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
 import spimdata.util.Displaysettings;
@@ -46,18 +45,18 @@ public class SliceGuiState {
 
     private final SourceAndConverter<?>[] ini_sources; // For Positioning mode
 
-    AffineTransformedSourceWrapperRegistration slicePositioner;
+    final AffineTransformedSourceWrapperRegistration slicePositioner;
 
     final BdvHandle bdvh;
 
     final BdvMultislicePositionerView view;
 
     // Display name of slice
-    GraphicalHandleToolTip tt;
+    final GraphicalHandleToolTip tt;
 
     final List<GraphicalHandle> ghs = new ArrayList<>();
 
-    SquareGraphicalHandle keyHandle;
+    final SquareGraphicalHandle keyHandle;
 
     final boolean[] channelVisible;
 
@@ -69,7 +68,7 @@ public class SliceGuiState {
 
     double xShift = 0;
 
-    List<FilterDisplay> displayFilters = new ArrayList<>();
+    final List<FilterDisplay> displayFilters = new ArrayList<>();
 
     public SliceGuiState(BdvMultislicePositionerView view, SliceSources slice, BdvHandle bdvh) {
         this.view = view;
@@ -125,7 +124,7 @@ public class SliceGuiState {
                     view.getBdvh().getViewerPanel().state().getViewerTransform(bdvAt3D);
                     RealPoint handlePoint = view.getDisplayedCenter(slice);
                     double yShift = getBdvHandleRadius();
-                    handlePoint.setPosition(+view.msp.sY / 2.0, 1);
+                    handlePoint.setPosition(view.msp.sY / 2.0, 1);
                     bdvAt3D.apply(handlePoint, handlePoint);
                     return new Integer[]{(int) handlePoint.getDoublePosition(0), (int) (handlePoint.getDoublePosition(1)+(slice.isSelected()?-0.6:+0.6)*yShift), (int) handlePoint.getDoublePosition(2)};
                 },

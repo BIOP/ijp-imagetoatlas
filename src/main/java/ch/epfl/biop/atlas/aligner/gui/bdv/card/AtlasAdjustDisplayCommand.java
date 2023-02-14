@@ -2,7 +2,6 @@ package ch.epfl.biop.atlas.aligner.gui.bdv.card;
 
 import bdv.tools.brightness.ConverterSetup;
 import bdv.viewer.SourceAndConverter;
-import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.gui.bdv.BdvMultislicePositionerView;
 import org.scijava.Initializable;
 import org.scijava.command.Command;
@@ -10,13 +9,11 @@ import org.scijava.command.InteractiveCommand;
 import org.scijava.module.MutableModuleItem;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import sc.fiji.bdvpg.scijava.services.SourceAndConverterBdvDisplayService;
 import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
 
-import java.util.ArrayList;
 import java.util.List;
-
+@SuppressWarnings("unused")
 @Plugin(type = Command.class)
 public class AtlasAdjustDisplayCommand extends InteractiveCommand implements
         Initializable, BdvMultislicePositionerView.ModeListener {

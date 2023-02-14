@@ -3,8 +3,13 @@ package ch.epfl.biop.atlas.aligner.adapter;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.CreateSliceAction;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
-import com.google.gson.*;
-import net.imglib2.realtransform.AffineTransform3D;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 
 import java.lang.reflect.Type;
 import java.util.Arrays;
@@ -21,7 +26,7 @@ public class CreateSliceAdapter implements JsonSerializer<CreateSliceAction>,
     @Override
     public CreateSliceAction deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
         JsonObject obj = jsonElement.getAsJsonObject();
-        SourceAndConverter[] sacs = jsonDeserializationContext.deserialize(obj.get("original_sources"), SourceAndConverter[].class);
+        SourceAndConverter<?>[] sacs = jsonDeserializationContext.deserialize(obj.get("original_sources"), SourceAndConverter[].class);
         double location = obj.get("original_location").getAsDouble();
         double thicknessCorrection = obj.get("final_thicknessCorrection").getAsDouble();
         double zShiftCorrection = obj.get("final_zShiftCorrection").getAsDouble();

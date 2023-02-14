@@ -10,10 +10,10 @@ import java.awt.*;
 
 public class ExportSliceRegionsToRoiManagerAction extends CancelableAction {
 
-    protected static Logger logger = LoggerFactory.getLogger(ExportSliceRegionsToRoiManagerAction.class);
+    protected static final Logger logger = LoggerFactory.getLogger(ExportSliceRegionsToRoiManagerAction.class);
 
     final SliceSources slice;
-    String namingChoice;
+    final String namingChoice;
 
     public ExportSliceRegionsToRoiManagerAction(MultiSlicePositioner mp, SliceSources slice, String namingChoice) {
         super(mp);

@@ -5,7 +5,6 @@ import ch.epfl.biop.atlas.aligner.command.RegisterSlicesElastixAffineCommand;
 import ch.epfl.biop.atlas.aligner.plugin.IABBARegistrationPlugin;
 import ch.epfl.biop.atlas.aligner.plugin.RegistrationTypeProperties;
 import ch.epfl.biop.scijava.command.source.register.Elastix2DAffineRegisterCommand;
-import com.google.gson.Gson;
 import net.imglib2.realtransform.AffineTransform3D;
 import org.scijava.command.Command;
 import org.scijava.command.CommandModule;
@@ -35,7 +34,7 @@ import java.util.concurrent.Future;
 public class Elastix2DAffineRegistration extends AffineTransformSourceAndConverterRegistration{
 
 
-    protected static Logger logger = LoggerFactory.getLogger(Elastix2DAffineRegistration.class);
+    protected static final Logger logger = LoggerFactory.getLogger(Elastix2DAffineRegistration.class);
 
     @Override
     public void setFixedImage(SourceAndConverter[] fimg) {

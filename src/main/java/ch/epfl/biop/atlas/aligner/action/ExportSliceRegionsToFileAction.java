@@ -11,12 +11,12 @@ import java.io.File;
 
 public class ExportSliceRegionsToFileAction extends CancelableAction {
 
-    protected static Logger logger = LoggerFactory.getLogger(ExportSliceRegionsToFileAction.class);
+    protected static final Logger logger = LoggerFactory.getLogger(ExportSliceRegionsToFileAction.class);
 
     final SliceSources slice;
-    String namingChoice;
-    File dirOutput;
-    boolean erasePreviousFile;
+    final String namingChoice;
+    final File dirOutput;
+    final boolean erasePreviousFile;
 
     public ExportSliceRegionsToFileAction(MultiSlicePositioner mp, SliceSources slice, String namingChoice, File dirOutput, boolean erasePreviousFile) {
         super(mp);

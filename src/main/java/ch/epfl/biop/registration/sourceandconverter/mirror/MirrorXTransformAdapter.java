@@ -32,8 +32,7 @@ public class MirrorXTransformAdapter implements IClassRuntimeAdapter<RealTransfo
     public MirrorXTransform deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
         JsonObject obj = jsonElement.getAsJsonObject();
         double xFactor = obj.getAsJsonPrimitive("xFactor").getAsDouble();
-        MirrorXTransform transform = new MirrorXTransform(xFactor);
-        return transform;
+        return new MirrorXTransform(xFactor);
     }
 
     @Override

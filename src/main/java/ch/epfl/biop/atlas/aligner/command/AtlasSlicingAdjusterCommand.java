@@ -6,6 +6,7 @@ import org.scijava.command.InteractiveCommand;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
+@SuppressWarnings({"CanBeFinal", "unused"})
 @Plugin(type = InteractiveCommand.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>ABBA - Adjust Slicing")
 public class AtlasSlicingAdjusterCommand extends InteractiveCommand implements Initializable {

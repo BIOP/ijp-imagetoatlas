@@ -33,6 +33,7 @@ public class QuickNIISlice {
         return "anchor:"+new Anchor(anchoring)+" fName="+filename+"[w:"+width+" h:"+height+"]("+nr+")";
     }
 
+    @SuppressWarnings("CanBeFinal")
     public static class Anchor {
         double ox, oy, oz;
         double ux, uy, uz;

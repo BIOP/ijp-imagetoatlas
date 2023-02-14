@@ -15,7 +15,7 @@ import org.scijava.plugin.Plugin;
 import sc.fiji.bdvpg.bdv.supplier.DefaultBdvSupplier;
 import sc.fiji.bdvpg.bdv.supplier.SerializableBdvOptions;
 
-
+@SuppressWarnings("unused")
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>ABBA - Align Big Brains and Atlases (BDV)",
         description = "Starts ABBA from an Atlas with a BDV View")

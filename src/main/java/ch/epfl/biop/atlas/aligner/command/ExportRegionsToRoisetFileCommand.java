@@ -3,7 +3,6 @@ package ch.epfl.biop.atlas.aligner.command;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.atlas.aligner.action.ExportSliceRegionsToFileAction;
-import ch.epfl.biop.atlas.aligner.action.ExportSliceRegionsToRoiManagerAction;
 import ch.epfl.biop.atlas.aligner.action.MarkActionSequenceBatchAction;
 import org.scijava.Initializable;
 import org.scijava.command.Command;

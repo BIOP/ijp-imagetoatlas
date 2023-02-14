@@ -2,14 +2,11 @@ package ch.epfl.biop.atlas.aligner;
 
 import bdv.tools.transformation.TransformedSource;
 import bdv.viewer.SourceAndConverter;
-import ch.epfl.biop.atlas.struct.AtlasHelper;
 import ch.epfl.biop.atlas.struct.AtlasMap;
 import ch.epfl.biop.atlas.struct.Atlas;
-import ch.epfl.biop.atlas.struct.AtlasNode;
 import ch.epfl.biop.sourceandconverter.EmptyMultiResolutionSourceAndConverterCreator;
 import ch.epfl.biop.registration.sourceandconverter.affine.AffineTransformedSourceWrapperRegistration;
 import ch.epfl.biop.sourceandconverter.transform.SourceMosaicZSlicer;
-import ij.process.ImageProcessor;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealInterval;
 import net.imglib2.RealPoint;
@@ -23,7 +20,6 @@ import sc.fiji.bdvpg.sourceandconverter.transform.SourceResampler;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class ReslicedAtlas implements RealInterval {
 
@@ -35,7 +31,7 @@ public class ReslicedAtlas implements RealInterval {
 
     double zMarginOffset = 0;
 
-    protected static Logger logger = LoggerFactory.getLogger(ReslicedAtlas.class);
+    protected static final Logger logger = LoggerFactory.getLogger(ReslicedAtlas.class);
 
     final public Atlas ba;
 
@@ -51,7 +47,7 @@ public class ReslicedAtlas implements RealInterval {
 
     AffineTransform3D centerTransform;
 
-    AffineTransformedSourceWrapperRegistration nonExtendedAffineTransform = new AffineTransformedSourceWrapperRegistration();
+    final AffineTransformedSourceWrapperRegistration nonExtendedAffineTransform = new AffineTransformedSourceWrapperRegistration();
 
     private volatile int zStep = 1;
 
@@ -63,7 +59,7 @@ public class ReslicedAtlas implements RealInterval {
 
     private double cX, cY, cZ;
 
-    List<Runnable> listeners = new ArrayList<>();
+    final List<Runnable> listeners = new ArrayList<>();
 
     public ReslicedAtlas(Atlas ba) {
         this.ba = ba;

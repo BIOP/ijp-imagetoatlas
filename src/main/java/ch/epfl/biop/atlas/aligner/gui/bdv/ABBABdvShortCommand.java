@@ -5,10 +5,13 @@ import org.scijava.command.CommandService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
+
+@SuppressWarnings("unused")
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>ABBA - ABBA Start",
         description = "Starts ABBA from an Atlas with a BDV View")
 public class ABBABdvShortCommand implements Command {
+
 
     @Parameter
     CommandService cs;

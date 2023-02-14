@@ -10,12 +10,13 @@ import org.scijava.plugin.Plugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("CanBeFinal")
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>ABBA - Remove Last Registration",
         description = "Remove the last registration of the current selected slices, if possible.")
 public class RegisterSlicesRemoveLastCommand implements Command {
 
-    protected static Logger logger = LoggerFactory.getLogger(RegisterSlicesRemoveLastCommand.class);
+    protected final static Logger logger = LoggerFactory.getLogger(RegisterSlicesRemoveLastCommand.class);
 
     @Parameter
     MultiSlicePositioner mp;

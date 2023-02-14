@@ -5,6 +5,7 @@ import org.scijava.command.Command;
  * An registration plugin interface without any annotation - useful
  * mostly useful in order to add a plugin from PyImageJ
  */
+@SuppressWarnings("SameReturnValue")
 public interface ExternalABBARegistrationPlugin extends IABBARegistrationPlugin {
 
     /**

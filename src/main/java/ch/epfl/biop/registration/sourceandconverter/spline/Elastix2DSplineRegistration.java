@@ -9,7 +9,6 @@ import ch.epfl.biop.atlas.aligner.command.RegisterSlicesElastixSplineCommand;
 import ch.epfl.biop.atlas.aligner.plugin.IABBARegistrationPlugin;
 import ch.epfl.biop.atlas.aligner.plugin.RegistrationTypeProperties;
 import ch.epfl.biop.scijava.command.source.register.Elastix2DSplineRegisterCommand;
-import com.google.gson.Gson;
 import ij.gui.WaitForUserDialog;
 import jitk.spline.ThinPlateR2LogRSplineKernelTransform;
 import net.imglib2.RealPoint;
@@ -46,7 +45,7 @@ import static bdv.util.RealTransformHelper.BigWarpFileFromRealTransform;
 
 public class Elastix2DSplineRegistration extends RealTransformSourceAndConverterRegistration {
 
-    protected static Logger logger = LoggerFactory.getLogger(Elastix2DSplineRegistration.class);
+    protected static final Logger logger = LoggerFactory.getLogger(Elastix2DSplineRegistration.class);
 
     Future<CommandModule> task;
 
@@ -156,7 +155,7 @@ public class Elastix2DSplineRegistration extends RealTransformSourceAndConverter
      * This function removes the landmarks located outside the atlas,
      * meaning where the atlas 3d image value is zero
      * 4 landmarks are kept
-     * @param rt_in
+     * @param rt_in the realtransfrom spline to prune
      * @return same transform with landmarks pruned
      */
     private RealTransform pruneLandMarksOutsideAtlas(RealTransform rt_in) {

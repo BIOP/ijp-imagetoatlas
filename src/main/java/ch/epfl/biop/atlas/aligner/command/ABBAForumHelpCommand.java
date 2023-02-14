@@ -23,7 +23,7 @@ import sc.fiji.bdvpg.services.SourceAndConverterServices;
 
 import java.net.URL;
 import java.util.Map;
-
+@SuppressWarnings("unused")
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Help>ABBA - Ask for help in the forum",
         description = "Open a new post in the image.sc forum with current install information")
@@ -44,9 +44,7 @@ public class ABBAForumHelpCommand implements Command {
 
             sites.values().stream()
                     .filter(site -> us.getUpdateSite(site.getName()).isActive())
-                    .forEach(site -> {
-                        sites_string.append(site.getName()+"+");
-                    });
+                    .forEach(site -> sites_string.append(site.getName()+"+"));
 
             String nl = "%0D%0A"; // new line in url get
             String imageScForumUrl = "https://forum.image.sc/";

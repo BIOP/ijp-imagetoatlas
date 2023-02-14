@@ -5,9 +5,7 @@ import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.atlas.aligner.gui.bdv.BdvMultislicePositionerView;
 import org.scijava.ui.behaviour.ClickBehaviour;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.function.Supplier;
 
 public class MultiSliceContextMenuClickBehaviour implements ClickBehaviour {

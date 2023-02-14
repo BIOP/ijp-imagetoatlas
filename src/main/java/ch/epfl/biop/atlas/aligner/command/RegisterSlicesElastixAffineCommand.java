@@ -7,6 +7,7 @@ import org.scijava.plugin.Plugin;
 import java.util.HashMap;
 import java.util.Map;
 
+@SuppressWarnings("CanBeFinal")
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>ABBA - Elastix Registration (Affine)",
         description = "Uses Elastix for affine in plane registration of selected slices")

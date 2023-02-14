@@ -9,7 +9,7 @@ import java.util.List;
 
 public class DeleteSliceAction extends CancelableAction {
 
-    protected static Logger logger = LoggerFactory.getLogger(DeleteSliceAction.class);
+    protected static final Logger logger = LoggerFactory.getLogger(DeleteSliceAction.class);
 
     private final SliceSources sliceSource;
 

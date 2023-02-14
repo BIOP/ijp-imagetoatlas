@@ -108,16 +108,13 @@ import java.util.stream.Collectors;
 
 /**
  * Class which contains the current registered SourceAndConverter array
- *
  * Each element of the array is a channel
- *
  * This class should be UI independent (no show / bdvhandle, etc)
- *
  */
 
 public class SliceSources {
 
-    protected static Logger logger = LoggerFactory.getLogger(SliceSources.class);
+    protected static final Logger logger = LoggerFactory.getLogger(SliceSources.class);
 
     //final private SliceSourcesGUIState guiState; // in here ? GOod idea ?
 
@@ -496,9 +493,7 @@ public class SliceSources {
 
     protected boolean isContainingAny(Collection<SourceAndConverter<?>> sacs) {
         Set<SourceAndConverter> originalSacsSet = new HashSet<>();
-        for (SourceAndConverter sac : original_sacs) {
-            originalSacsSet.add(sac);
-        }
+        originalSacsSet.addAll(Arrays.asList(original_sacs));
         return (sacs.stream().distinct().anyMatch(originalSacsSet::contains));
     }
 
@@ -587,8 +582,7 @@ public class SliceSources {
 
     protected boolean restoreLastMirrorRegistration() {
         boolean performed = false;
-        for (int iReg = 0; iReg<registered_sacs_sequence.size(); iReg++) {
-            RegistrationAndSources ras = registered_sacs_sequence.get(iReg);
+        for (RegistrationAndSources ras : registered_sacs_sequence) {
             if (ras.sacs[0].getSpimSource() instanceof WarpedSource) {
                 WarpedSource<?> ws = (WarpedSource<?>) ras.sacs[0].getSpimSource();
 
@@ -602,10 +596,10 @@ public class SliceSources {
                     if (!ws.isTransformed()) {
                         // Ok, do it!
                         performed = true;
-                        for (int iCh = 0; iCh<ras.sacs.length; iCh++) {
-                            ((WarpedSource<?>)ras.sacs[iCh].getSpimSource()).setIsTransformed(true);
-                            if (ras.sacs[iCh].asVolatile()!=null) {
-                                ((WarpedSource<?>)ras.sacs[iCh].asVolatile().getSpimSource()).setIsTransformed(true);
+                        for (int iCh = 0; iCh < ras.sacs.length; iCh++) {
+                            ((WarpedSource<?>) ras.sacs[iCh].getSpimSource()).setIsTransformed(true);
+                            if (ras.sacs[iCh].asVolatile() != null) {
+                                ((WarpedSource<?>) ras.sacs[iCh].asVolatile().getSpimSource()).setIsTransformed(true);
                             }
                         }
                         break;
@@ -1069,6 +1063,7 @@ public class SliceSources {
         return mp.getAtlas().getMap().getAtlasPrecisionInMillimeter()/5.0;
     }
 
+    @SuppressWarnings("SameReturnValue")
     int getMaxIteration() {
         return 200;
     }
@@ -1413,9 +1408,9 @@ public class SliceSources {
         return alphaSource;
     }
 
-    LinkedList<SourceAndConverter<?>[]> sourcesDeformationFieldNonRasterized = new LinkedList<>();
+    final LinkedList<SourceAndConverter<?>[]> sourcesDeformationFieldNonRasterized = new LinkedList<>();
 
-    LinkedList<SourceAndConverter<?>[]> sourcesNonRasterized = new LinkedList<>();
+    final LinkedList<SourceAndConverter<?>[]> sourcesNonRasterized = new LinkedList<>();
 
     protected void pushRasterDeformation(double gridSpacingInMicrometer) {
         sourcesDeformationFieldNonRasterized.push(registered_sacs);
@@ -1591,12 +1586,12 @@ public class SliceSources {
         }
     }
 
-    SliceInterval si = new SliceInterval();
+    final SliceInterval si = new SliceInterval();
 
     class SliceInterval implements RealInterval {
 
-        RealPoint ptMin = new RealPoint(3);
-        RealPoint ptMax = new RealPoint(3);
+        final RealPoint ptMin = new RealPoint(3);
+        final RealPoint ptMax = new RealPoint(3);
 
         void updateBox() {
             ptMin.setPosition(mp.reslicedAtlas.realMin(0),0);
@@ -1725,7 +1720,7 @@ public class SliceSources {
         while (containsLeaf) {
             List<Integer> leavesValues = existingIdValues
                     .stream()
-                    .filter(v -> isLeaf.contains(v))
+                    .filter(isLeaf::contains)
                     .collect(Collectors.toList());
             leavesValues.forEach(v -> {
                         fp.setThreshold( Float.intBitsToFloat(v), Float.intBitsToFloat(v), ImageProcessor.NO_LUT_UPDATE);
@@ -1760,7 +1755,7 @@ public class SliceSources {
                         }
                     }
             );
-            containsLeaf = existingIdValues.stream().anyMatch(v -> isLeaf.contains(v));
+            containsLeaf = existingIdValues.stream().anyMatch(isLeaf::contains);
         }
 
         ConvertibleRois cr_out = new ConvertibleRois();
@@ -1776,9 +1771,7 @@ public class SliceSources {
         Displaysettings.GetDisplaySettingsFromCurrentConverter(getRegisteredSources()[channelIndex], ds);
         ds.min = min;
         ds.max = max;
-        registered_sacs_sequence.stream().forEach(registrationAndSources -> {
-            Displaysettings.applyDisplaysettings(registrationAndSources.sacs[channelIndex],ds);
-        });
+        registered_sacs_sequence.stream().forEach(registrationAndSources -> Displaysettings.applyDisplaysettings(registrationAndSources.sacs[channelIndex],ds));
         Displaysettings.applyDisplaysettings(registered_sacs[channelIndex],ds);
         mp.converterChanged(this);
     }
@@ -1787,9 +1780,7 @@ public class SliceSources {
         Displaysettings ds = new Displaysettings(-1);
         Displaysettings.GetDisplaySettingsFromCurrentConverter(getRegisteredSources()[channelIndex], ds);
         ds.color = new int[]{r,g,b,a};
-        registered_sacs_sequence.stream().forEach(registrationAndSources -> {
-            Displaysettings.applyDisplaysettings(registrationAndSources.sacs[channelIndex],ds);
-        });
+        registered_sacs_sequence.stream().forEach(registrationAndSources -> Displaysettings.applyDisplaysettings(registrationAndSources.sacs[channelIndex],ds));
         Displaysettings.applyDisplaysettings(registered_sacs[channelIndex],ds);
         mp.converterChanged(this);
     }

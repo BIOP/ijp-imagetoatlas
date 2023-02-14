@@ -12,7 +12,7 @@ import java.util.function.Consumer;
 
 public class SliceSourcesStateDeserializer implements JsonDeserializer<AlignerState.SliceSourcesState> {
 
-    Consumer<SliceSources> sliceSourceConsumer;
+    final Consumer<SliceSources> sliceSourceConsumer;
 
     public SliceSourcesStateDeserializer(Consumer<SliceSources> sliceSourceConsumer) {
         this.sliceSourceConsumer = sliceSourceConsumer;

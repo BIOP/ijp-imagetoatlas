@@ -18,7 +18,7 @@ public class UnMirrorAdapter implements JsonSerializer<UnMirrorSliceAction>,
         JsonDeserializer<UnMirrorSliceAction> {
 
     final MultiSlicePositioner mp;
-    Supplier<SliceSources> currentSliceGetter;
+    final Supplier<SliceSources> currentSliceGetter;
 
     public UnMirrorAdapter(MultiSlicePositioner mp, Supplier<SliceSources> sliceGetter) {
         this.mp = mp;

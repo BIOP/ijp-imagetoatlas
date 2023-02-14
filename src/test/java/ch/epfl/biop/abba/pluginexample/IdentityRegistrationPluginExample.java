@@ -16,7 +16,6 @@ import java.util.function.Consumer;
 
 /**
  * Example plugin which shows the extensibility of ABBA
- *
  * A {@link SourceAndConverter} is the data structure used to represent a single channel of an image
  * since potentially multiple channels can be used for registration, each being send to the plugin
  * is an array of SourceAndConverter, each element of the array being a single channel.
@@ -30,7 +29,7 @@ import java.util.function.Consumer;
 )
 public class IdentityRegistrationPluginExample implements IABBARegistrationPlugin{
 
-    public static Consumer<String> defaultLog = (string) -> System.out.println(IdentityRegistrationPluginExample.class.getSimpleName()+":"+string);
+    public static final Consumer<String> defaultLog = (string) -> System.out.println(IdentityRegistrationPluginExample.class.getSimpleName()+":"+string);
 
     public static Consumer<String> log = defaultLog;
 
@@ -222,6 +221,7 @@ public class IdentityRegistrationPluginExample implements IABBARegistrationPlugi
             log.accept("Transform set in "+this+" : "+jsonString);
         }
 
+        @SuppressWarnings("SameReturnValue")
         public String getJson() {
             // do stuff
             log.accept("Transform get in "+this);

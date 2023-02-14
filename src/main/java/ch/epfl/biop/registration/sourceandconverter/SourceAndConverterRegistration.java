@@ -27,22 +27,22 @@ abstract public class SourceAndConverterRegistration implements IABBARegistratio
     protected Context context;
 
     @Override
-    public void setFixedImage(SourceAndConverter[] fimg) {
+    public void setFixedImage(SourceAndConverter<?>[] fimg) {
         this.fimg = fimg;
     }
 
     @Override
-    public void setMovingImage(SourceAndConverter[] mimg) {
+    public void setMovingImage(SourceAndConverter<?>[] mimg) {
         this.mimg = mimg;
     }
 
     @Override
-    public void setFixedMask(SourceAndConverter[] fimg) {
+    public void setFixedMask(SourceAndConverter<?>[] fimg) {
         this.fimg_mask = fimg;
     }
 
     @Override
-    public void setMovingMask(SourceAndConverter[] mimg) {
+    public void setMovingMask(SourceAndConverter<?>[] mimg) {
         this.mimg_mask = mimg;
     }
 

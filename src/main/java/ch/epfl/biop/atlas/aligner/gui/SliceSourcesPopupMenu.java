@@ -85,9 +85,7 @@ public class SliceSourcesPopupMenu {
 
         popup.addSeparator();
 
-        addPopupAction(popup, "Edit Last Registration", () -> {
-            mp.getContext().getService(CommandService.class).run(RegisterSlicesEditLastCommand.class,true, "mp", mp);
-        });
+        addPopupAction(popup, "Edit Last Registration", () -> mp.getContext().getService(CommandService.class).run(RegisterSlicesEditLastCommand.class,true, "mp", mp));
 
         addPopupAction(popup, "Remove Last Registration", () -> {
             SliceSources[] slices = mp.getSelectedSlices().toArray(new SliceSources[0]);
@@ -161,9 +159,7 @@ public class SliceSourcesPopupMenu {
 
             addPopupLine();
 
-            addPopupAction("Edit Last Registration", (slices) -> {
-                mp.getContext().getService(CommandService.class).run(RegisterSlicesEditLastCommand.class,true, "mp", mp);
-            });
+            addPopupAction("Edit Last Registration", (slices) -> mp.getContext().getService(CommandService.class).run(RegisterSlicesEditLastCommand.class,true, "mp", mp));
 
             addPopupAction("Remove Last Registration", (slices) -> {
                 if (slices.length>1) new MarkActionSequenceBatchAction(mp).runRequest();

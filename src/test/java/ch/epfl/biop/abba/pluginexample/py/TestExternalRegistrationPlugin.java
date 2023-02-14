@@ -34,7 +34,7 @@ public class TestExternalRegistrationPlugin {
         // ----------------- DEMO PROGRAMMATICALLY ADDING REGISTRATION PLUGIN (Statically added)
         // Fully flexible registration plugin
         MultiSlicePositioner
-                .registerRegistrationPlugin(identityRegName, () -> new ExternalIdentityRegistrationPlugin());
+                .registerRegistrationPlugin(identityRegName, ExternalIdentityRegistrationPlugin::new);
 
         addDefaultUI("External - Identity Registration", identityRegName, ij.context());
 

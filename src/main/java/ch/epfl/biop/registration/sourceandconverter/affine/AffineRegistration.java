@@ -25,12 +25,12 @@ public class AffineRegistration extends AffineTransformSourceAndConverterRegistr
     protected static Logger logger = LoggerFactory.getLogger(AffineRegistration.class);
 
     @Override
-    public void setFixedImage(SourceAndConverter[] fimg) {
+    public void setFixedImage(SourceAndConverter<?>[] fimg) {
         super.setFixedImage(fimg);
     }
 
     @Override
-    public void setMovingImage(SourceAndConverter[] mimg) {
+    public void setMovingImage(SourceAndConverter<?>[] mimg) {
         super.setMovingImage(mimg);
     }
 

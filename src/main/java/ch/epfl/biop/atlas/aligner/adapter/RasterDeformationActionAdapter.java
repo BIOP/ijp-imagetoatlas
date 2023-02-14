@@ -1,6 +1,5 @@
 package ch.epfl.biop.atlas.aligner.adapter;
 
-import ch.epfl.biop.atlas.aligner.MoveSliceAction;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.RasterDeformationAction;
 import ch.epfl.biop.atlas.aligner.SliceSources;
@@ -19,7 +18,7 @@ public class RasterDeformationActionAdapter implements JsonSerializer<RasterDefo
         JsonDeserializer<RasterDeformationAction> {
 
     final MultiSlicePositioner mp;
-    Supplier<SliceSources> currentSliceGetter;
+    final Supplier<SliceSources> currentSliceGetter;
 
     public RasterDeformationActionAdapter(MultiSlicePositioner mp, Supplier<SliceSources> sliceGetter) {
         this.mp = mp;

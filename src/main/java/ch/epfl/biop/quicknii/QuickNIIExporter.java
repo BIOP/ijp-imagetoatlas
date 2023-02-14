@@ -119,7 +119,7 @@ public class QuickNIIExporter {
 
         double[] roi;
 
-        Consumer<String> logger = System.out::println;
+        final Consumer<String> logger = System.out::println;
 
         String imageName = "Section";
 
