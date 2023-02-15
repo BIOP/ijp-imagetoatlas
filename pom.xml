@@ -110,24 +110,24 @@
 		<bigvolumeviewer.version>0.2.0</bigvolumeviewer.version>
 		<!-- bdv playground related dependencies -->
 		<bigdataviewer-playground.version>0.6.6</bigdataviewer-playground.version>
-		<bigdataviewer-image-loaders.version>0.4.2</bigdataviewer-image-loaders.version>
-		<bigdataviewer-playground-display.version>0.3.2</bigdataviewer-playground-display.version>
+		<bigdataviewer-image-loaders.version>0.4.4</bigdataviewer-image-loaders.version>
+		<bigdataviewer-playground-display.version>0.3.3</bigdataviewer-playground-display.version>
 		<bigdataviewer-spimdata-extras.version>0.3.1</bigdataviewer-spimdata-extras.version>
 		<image-transform-converters.version>0.1.6</image-transform-converters.version>
 		<elastix_registration_server.version>0.1.4</elastix_registration_server.version>
-		<bigdataviewer-biop-tools.version>0.5.11</bigdataviewer-biop-tools.version>
+		<bigdataviewer-biop-tools.version>0.5.12</bigdataviewer-biop-tools.version>
 		<bigdataviewer-selector.version>0.2.2</bigdataviewer-selector.version>
 
 		<!-- biop dependencies -->
 		<ijl-utilities-wrappers.version>0.7.10</ijl-utilities-wrappers.version>
-		<ijp-kheops.version>0.3.6T</ijp-kheops.version>
+		<ijp-kheops.version>0.3.7</ijp-kheops.version>
 
 		<!-- maths -->
 		<leastsquares.version>1.0.0</leastsquares.version>
 
 		<!-- ABBA specific -->
 		<pyimagej-scijava-command.version>0.1.6</pyimagej-scijava-command.version>
-		<atlas.version>0.1.10-SNAPSHOT</atlas.version>
+		<atlas.version>0.1.10</atlas.version>
 		<oshi-core.version>5.5.1</oshi-core.version>
 
 		<!--because xml deserialization with JAXB is not included in Java 11, and we prepare migrating to Java 11 -->
