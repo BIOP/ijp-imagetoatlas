@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.*;
+import java.util.function.Supplier;
 
 /**
  * Performs registration set in registration tab to
@@ -18,7 +19,8 @@ public class RegisterSliceAction extends CancelableAction {
     protected static final Logger logger = LoggerFactory.getLogger(RegisterSliceAction.class);
 
     final SliceSources slice;
-    Registration<SourceAndConverter<?>[]> registration;
+    Registration<SourceAndConverter<?>[]> registration = null;
+    Supplier<Registration<SourceAndConverter<?>[]>> registrationSupplier = null;
     final SourcesProcessor preprocessFixed;
     final SourcesProcessor preprocessMoving;
 
@@ -47,6 +49,18 @@ public class RegisterSliceAction extends CancelableAction {
         this.preprocessMoving = preprocessMoving;
     }
 
+    public RegisterSliceAction(MultiSlicePositioner mp,
+                               SliceSources slice,
+                               Supplier<Registration<SourceAndConverter<?>[]>> registrationSupplier,
+                               SourcesProcessor preprocessFixed,
+                               SourcesProcessor preprocessMoving) {
+        super(mp);
+        this.slice = slice;
+        this.registrationSupplier = registrationSupplier;
+        this.preprocessFixed = preprocessFixed;
+        this.preprocessMoving = preprocessMoving;
+    }
+
     public SourcesProcessor getFixedSourcesProcessor() {
         return preprocessFixed;
     }
@@ -59,6 +73,9 @@ public class RegisterSliceAction extends CancelableAction {
 
     @Override
     protected boolean run() { //
+        if (registration == null) {
+            registration = registrationSupplier.get();
+        }
         if (registration.isRegistrationDone()&&isValid()) {
             slice.appendRegistration(registration);
             slice.sourcesChanged();
@@ -77,6 +94,9 @@ public class RegisterSliceAction extends CancelableAction {
     }
 
     public String toString() {
+        if (registration == null) {
+            return "Future<Registration>";
+        }
         return registration.toString() + " "+preprocessFixed.toString()+".Atlas // "+preprocessMoving.toString()+".Section)] " + slice.getActionState(this);
     }
 
@@ -97,7 +117,7 @@ public class RegisterSliceAction extends CancelableAction {
                     g.setColor(new Color(255, 255, 0, 200));
                     break;
             }
-            if (RegistrationPluginHelper.isManual(registration)) {
+            if ((registration != null) && (RegistrationPluginHelper.isManual(registration))) {
                 g.fillRect((int) (px - size), (int) (py - size), (int) (2.0*size), (int) (2.0*size));
             } else {
                 g.fillOval((int) (px - size), (int) (py - size), (int) (2.0*size), (int) (2.0*size));

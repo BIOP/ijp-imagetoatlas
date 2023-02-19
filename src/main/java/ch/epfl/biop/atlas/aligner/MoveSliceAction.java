@@ -2,6 +2,7 @@ package ch.epfl.biop.atlas.aligner;
 
 import java.awt.*;
 import java.text.DecimalFormat;
+import java.util.function.Supplier;
 
 /**
  * Moves a slice to a new position along the slicing axis
@@ -9,14 +10,23 @@ import java.text.DecimalFormat;
 public class MoveSliceAction extends CancelableAction {
 
     private final SliceSources sliceSource;
-    private final double oldSlicingAxisPosition;
-    private final double newSlicingAxisPosition;
+    private double oldSlicingAxisPosition;
+    private double newSlicingAxisPosition;
+    Supplier<Double> slicingAxisPositionSupplier = null;
 
     public MoveSliceAction(MultiSlicePositioner mp, SliceSources sliceSource, double slicingAxisPosition) {
         super(mp);
         this.sliceSource = sliceSource;
         this.oldSlicingAxisPosition = sliceSource.getSlicingAxisPosition();
         this.newSlicingAxisPosition = slicingAxisPosition;
+        hide();
+    }
+
+    // Delayed position - only known when run is started, this is for DeepSliceRegistration
+    public MoveSliceAction(MultiSlicePositioner mp, SliceSources sliceSource, Supplier<Double> slicingAxisPositionSupplier) {
+        super(mp);
+        this.sliceSource = sliceSource;
+        this.slicingAxisPositionSupplier = slicingAxisPositionSupplier;
         hide();
     }
 
@@ -31,6 +41,10 @@ public class MoveSliceAction extends CancelableAction {
     }
 
     protected boolean run() {
+        oldSlicingAxisPosition = sliceSource.getSlicingAxisPosition();
+        if (slicingAxisPositionSupplier!=null) {
+            newSlicingAxisPosition = slicingAxisPositionSupplier.get();
+        }
         sliceSource.setSlicingAxisPosition(newSlicingAxisPosition);
         return true;
     }

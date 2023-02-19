@@ -281,7 +281,7 @@ public class SliceGuiState {
 
             slicingModePositionAffineTransform.translate(
                     center.getDoublePosition(0), center.getDoublePosition(1), -slice.getSlicingAxisPosition());
-            slicePositioner.setAffineTransform(slicingModePositionAffineTransform);
+            slicePositioner.setAffineTransform(slicingModePositionAffineTransform); // Concurrent modification possible. TODO : fic
         } else {
             assert view.mode == BdvMultislicePositionerView.REVIEW_MODE_INT;
             slicePositioner.setAffineTransform(new AffineTransform3D());

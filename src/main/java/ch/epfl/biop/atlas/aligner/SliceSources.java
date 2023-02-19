@@ -103,6 +103,8 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Collectors;
 
 
@@ -340,7 +342,12 @@ public class SliceSources {
 
     protected void setSlicingAxisPosition(double newSlicingAxisPosition) {
         slicingAxisPosition = newSlicingAxisPosition;
-        updateZPosition();
+        try {
+            updateZPosition();
+        } catch (Exception e) {
+            System.out.println("CAUGHT ERROR IN UPDATE POSITION (You can safely ignore it, it will just affect the display temporarily)"+e.getMessage());
+            //e.printStackTrace();
+        }
     }
 
     public void setSliceThickness(double zBeginInMm, double zEndInMm) {
@@ -703,6 +710,8 @@ public class SliceSources {
         }
     }
 
+    Executor executor = ForkJoinPool.commonPool();
+
     protected void enqueueRunAction(CancelableAction action, Runnable postRun) {
         CompletableFuture<Boolean> startingPoint;
         if (tasks.size() == 0) {
@@ -710,6 +719,10 @@ public class SliceSources {
         } else {
             startingPoint = tasks.get(tasks.size() - 1);
         }
+        Executor e = executor;
+        // Otherwise the synchronisation mechanism is locked forever...
+        // This way of synchronizing is costly, and will not scale for a number of section > 1000, but we'll live with that
+        if (action instanceof LockAndRunOnceSliceAction) e = new ThreadPerTaskExecutor();
         tasks.add(startingPoint.thenApplyAsync((out) -> {
             if (out) {
                 mp.addTask();
@@ -754,8 +767,12 @@ public class SliceSources {
                 mp.getActionsFromSlice(this).remove(action);
                 return false;
             }
-        }));
+        }, e));
         mapActionTask.put(action, tasks.get(tasks.size() - 1));
+    }
+
+    static final class ThreadPerTaskExecutor implements Executor {
+        public void execute(Runnable r) { new Thread(r).start(); }
     }
 
     protected void enqueueCancelAction(CancelableAction action, Runnable postRun) {

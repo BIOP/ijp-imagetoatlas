@@ -70,6 +70,7 @@ public class AlignerState {
         skipableActions.add(EditLastRegistrationAction.class); //TODO : make it serializable ? serializable or not ?
         skipableActions.add(ExportAtlasSliceToImagePlusAction.class);
         skipableActions.add(RasterDeformationAction.class);
+        skipableActions.add(LockAndRunOnceSliceAction.class);
 
         List<CancelableAction> compiledActions = new ArrayList<>();
         if ((ini_actions == null)||(ini_actions.size()==0)) {

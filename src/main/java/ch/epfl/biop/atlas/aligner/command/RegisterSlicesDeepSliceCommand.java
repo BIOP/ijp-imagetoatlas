@@ -1,5 +1,8 @@
 package ch.epfl.biop.atlas.aligner.command;
 
+import bdv.viewer.SourceAndConverter;
+import ch.epfl.biop.atlas.aligner.LockAndRunOnceSliceAction;
+import ch.epfl.biop.atlas.aligner.MoveSliceAction;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.RegisterSliceAction;
 import ch.epfl.biop.atlas.aligner.SliceSources;
@@ -7,6 +10,7 @@ import ch.epfl.biop.atlas.aligner.plugin.IABBARegistrationPlugin;
 import ch.epfl.biop.quicknii.QuickNIIExporter;
 import ch.epfl.biop.quicknii.QuickNIISeries;
 import ch.epfl.biop.quicknii.QuickNIISlice;
+import ch.epfl.biop.registration.Registration;
 import ch.epfl.biop.registration.sourceandconverter.affine.AffineRegistration;
 import ch.epfl.biop.sourceandconverter.processor.SourcesAffineTransformer;
 import ch.epfl.biop.sourceandconverter.processor.SourcesChannelsSelect;
@@ -32,10 +36,14 @@ import java.io.FileReader;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.function.Supplier;
 
 /**
  * Command which is using the amazing DeepSlice workflow by Harry Carey, and William Redmond, in Simon McMullan group
@@ -121,18 +129,25 @@ public class RegisterSlicesDeepSliceCommand implements Command {
 
     @Override
     public void run() {
+        List<SliceSources> slicesToRegister = mp.getSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
 
-        try {
-            mp.addTask();
-            List<SliceSources> slicesToExport = mp.getSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
+        if (slicesToRegister.size() == 0) {
+            mp.log.accept("No slice selected");
+            mp.warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to register");
+            return;
+        }
 
-            if (slicesToExport.size() == 0) {
-                mp.log.accept("No slice selected");
-                mp.warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to register");
-                return;
-            }
+        Map<SliceSources, Holder<Double>> newAxisPosition = new HashMap<>();
+        Map<SliceSources, Holder<Registration<SourceAndConverter<?>[]>>> newSliceRegistration = new HashMap<>();
 
-            exportDownsampledDataset(slicesToExport);
+        for (SliceSources slice: slicesToRegister) {
+            newAxisPosition.put(slice, new Holder<>());
+            newSliceRegistration.put(slice, new Holder<>());
+        }
+
+        Supplier<Boolean> deepSliceRunner =  () -> {
+
+            exportDownsampledDataset(slicesToRegister);
 
             File deepSliceResult;
 
@@ -160,7 +175,7 @@ public class RegisterSlicesDeepSliceCommand implements Command {
                 mp.errorMessageForUser.accept("Deep Slice registration aborted",
                         "Could not find DeepSlice result file " + deepSliceResult.getAbsolutePath()
                 );
-                return;
+                return false;
             }
 
             // Ok, now comes the big deal. First, real xml file
@@ -173,12 +188,12 @@ public class RegisterSlicesDeepSliceCommand implements Command {
             } catch (Exception e) {
                 mp.errorMessageForUser.accept("Deep Slice Command error", "Could not parse xml file " + deepSliceResult.getAbsolutePath());
                 e.printStackTrace();
-                return;
+                return false;
             }
 
-            if (series.slices.length != slicesToExport.size()) {
-                mp.errorMessageForUser.accept("Deep Slice Command error", "Please retry the command, DeepSlice returned less images than present in the input (" + (slicesToExport.size() - series.slices.length) + " missing) ! ");
-                return;
+            if (series.slices.length != slicesToRegister.size()) {
+                mp.errorMessageForUser.accept("Deep Slice Command error", "Please retry the command, DeepSlice returned less images than present in the input (" + (slicesToRegister.size() - series.slices.length) + " missing) ! ");
+                return false;
             }
 
             double nPixX = 1000.0 * mp.getROI()[2] / px_size_micron;
@@ -186,24 +201,39 @@ public class RegisterSlicesDeepSliceCommand implements Command {
 
             if (allow_slicing_angle_change) {
                 logger.debug("Slices pixel number = " + nPixX + " : " + nPixY);
-                adjustSlicingAngle(10, slicesToExport, nPixX, nPixY); //
+                adjustSlicingAngle(10, slicesToRegister, nPixX, nPixY); //
             }
 
             if (allow_change_slicing_position) {
-                adjustSlicesZPosition(slicesToExport, nPixX, nPixY);
+                adjustSlicesZPosition(slicesToRegister, nPixX, nPixY, newAxisPosition);
             }
 
             if (affine_transform) {
                 try {
-                    affineTransformInPlane(slicesToExport, nPixX, nPixY);
+                    affineTransformInPlane(slicesToRegister, nPixX, nPixY, newSliceRegistration);//, newSliceAffineTransformer);
                 } catch (InstantiableException e) {
                     e.printStackTrace();
                 }
             }
-        } finally {
-            mp.removeTask();
-        }
+            return true;
+        };
+        AtomicInteger counter = new AtomicInteger();
+        counter.set(0);
 
+        AtomicBoolean result = new AtomicBoolean();
+        for (SliceSources slice: slicesToRegister) {
+            new LockAndRunOnceSliceAction(mp, slice, counter, slicesToRegister.size(), deepSliceRunner, result).runRequest();
+            if (allow_change_slicing_position) {
+                new MoveSliceAction(mp, slice, newAxisPosition.get(slice)).runRequest();
+            }
+            if (affine_transform) {
+                Holder<Registration<SourceAndConverter<?>[]>> regSupplier = newSliceRegistration.get(slice);
+                new RegisterSliceAction(mp, slice, regSupplier,
+                        SourcesProcessorHelper.Identity(),
+                        SourcesProcessorHelper.Identity()).runRequest();
+            }
+
+        }
     }
 
     QuickNIISeries series;
@@ -266,7 +296,7 @@ public class RegisterSlicesDeepSliceCommand implements Command {
 
     }
 
-    private void adjustSlicesZPosition(final List<SliceSources> slices, double nPixX, double nPixY) {
+    private void adjustSlicesZPosition(final List<SliceSources> slices, double nPixX, double nPixY, Map<SliceSources, Holder<Double>> newAxisPosition) {
         // The "slices" list is sorted according to the z axis, before deepslice action
 
         final String regex = "(.*)"+image_name_prefix +"_s([0-9]+).*";
@@ -337,11 +367,14 @@ public class RegisterSlicesDeepSliceCommand implements Command {
         }
 
         for (SliceSources slice : slices) {
-            mp.moveSlice(slice, slicesNewPosition.get(slice));
+            newAxisPosition.get(slice).accept(slicesNewPosition.get(slice));
         }
     }
 
-    private void affineTransformInPlane(final List<SliceSources> slices, double nPixX, double nPixY) throws InstantiableException {
+    private void  affineTransformInPlane(final List<SliceSources> slices, double nPixX, double nPixY,
+                                         Map<SliceSources, Holder<Registration<SourceAndConverter<?>[]>>> newSliceTransfomr
+    //                                     Map<SliceSources, Holder<SourcesAffineTransformer>> newSAT
+    ) throws InstantiableException {
         AffineTransform3D toABBA = mp.getReslicedAtlas().getSlicingTransformToAtlas().inverse();
 
         // Transform sources according to anchoring
@@ -403,7 +436,8 @@ public class RegisterSlicesDeepSliceCommand implements Command {
             // Sends parameters to the registration
             registration.setRegistrationParameters(MultiSlicePositioner.convertToString(ctx,parameters));
 
-            new RegisterSliceAction(mp, slices.get(iSliceSource), registration, SourcesProcessorHelper.compose(z_zero, SourcesProcessorHelper.Identity()), SourcesProcessorHelper.compose(z_zero, SourcesProcessorHelper.Identity())).runRequest();
+            newSliceTransfomr.get(slices.get(iSliceSource)).accept( registration );
+            //newSAT.get(slices.get(iSliceSource)).accept( z_zero );
 
         }
 
@@ -455,6 +489,26 @@ public class RegisterSlicesDeepSliceCommand implements Command {
         else
             median = array[array.length/2];
         return median;
+    }
+
+    public static class Holder<T> implements Supplier<T>, Consumer<T> {
+        T t;
+        public Holder(T t) {
+            this.t = t;
+        }
+
+        public Holder() {
+
+        }
+
+        public T get() {
+            return t;
+        }
+
+        @Override
+        public void accept(T t) {
+            this.t = t;
+        }
     }
 
 }

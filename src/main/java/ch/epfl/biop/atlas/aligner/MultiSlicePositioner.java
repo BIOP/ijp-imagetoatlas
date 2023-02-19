@@ -41,6 +41,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -464,8 +465,8 @@ public class MultiSlicePositioner implements Closeable {
                     redoableUserActions.clear();
                 }
             }
-            logger.debug("Action "+action+" on slice "+action.getSliceSources()+" info sending to MultiSliceObserver.");
-            logger.debug("Action "+action+" on slice "+action.getSliceSources()+" info sent to MultiSliceObserver!");
+            //logger.debug("Action "+action+" on slice "+action.getSliceSources()+" info sending to MultiSliceObserver.");
+            //logger.debug("Action "+action+" on slice "+action.getSliceSources()+" info sent to MultiSliceObserver!");
         } else {
             logger.error("Invalid action "+action+" on slice "+action.getSliceSources());
         }

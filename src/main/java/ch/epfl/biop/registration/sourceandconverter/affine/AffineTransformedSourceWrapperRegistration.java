@@ -7,6 +7,7 @@ import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Fake registration which simply wraps a transform which is used to modify either:
@@ -15,7 +16,7 @@ import java.util.Map;
  */
 public class AffineTransformedSourceWrapperRegistration extends AffineTransformSourceAndConverterRegistration {
 
-    Map<SourceAndConverter<?>, SourceAndConverter<?>> alreadyTransformedSources = new HashMap<>();
+    Map<SourceAndConverter<?>, SourceAndConverter<?>> alreadyTransformedSources = new ConcurrentHashMap<>();
 
     @Override
     public boolean register() {
@@ -28,7 +29,7 @@ public class AffineTransformedSourceWrapperRegistration extends AffineTransformS
      * unnecessary affinetransform
      * @param at3d_in affine transform
      */
-    public void setAffineTransform(AffineTransform3D at3d_in) {
+    public synchronized void setAffineTransform(AffineTransform3D at3d_in) {
         this.at3d = at3d_in;
         alreadyTransformedSources.keySet().forEach(sac -> SourceTransformHelper.set(at3d_in, new SourceAndConverterAndTimeRange<>(alreadyTransformedSources.get(sac), timePoint)));
     }
