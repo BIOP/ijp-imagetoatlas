@@ -1931,37 +1931,42 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
             guiState.forEachSlice(sliceGuiState -> {
                 sliceGuiState.drawGraphicalHandles(g);
-                List<CancelableAction> actions = msp.getActionsFromSlice(sliceGuiState.slice);
-                Integer[] pos = sliceGuiState.getSliceHandleCoords();
-                if (actions!=null) {
-                    int iPos = 0;
-                    int totalNumberOfRegistration = 0;
-                    for (CancelableAction action : actions) {
-                        if (!action.isHidden()) {
-                            if (action instanceof RegisterSliceAction) {
-                                if (action.getSliceSources().getActionState(action).equals("(done)"))
-                                    totalNumberOfRegistration++;
+                List<CancelableAction> actionsRaw = msp.getActionsFromSlice(sliceGuiState.slice);
+                if (actionsRaw==null) {
+                    System.err.println("Error : actions null for slice "+sliceGuiState.slice);
+                } else {
+                    List<CancelableAction> actions = new ArrayList<>(actionsRaw);
+                    Integer[] pos = sliceGuiState.getSliceHandleCoords();
+                    if (actions != null) {
+                        int iPos = 0;
+                        int totalNumberOfRegistration = 0;
+                        for (CancelableAction action : actions) {
+                            if (!action.isHidden()) {
+                                if (action instanceof RegisterSliceAction) {
+                                    if (action.getSliceSources().getActionState(action).equals("(done)"))
+                                        totalNumberOfRegistration++;
+                                }
                             }
                         }
-                    }
-                    int countNumberOfRegistration = 0;
-                    for (CancelableAction action : actions) {
-                        if (!action.isHidden()) {
-                            iPos++;
-                            if (action instanceof RegisterSliceAction) {
-                                // Is it viewed or not ? How to know this
-                                countNumberOfRegistration++;
-                                if (totalNumberOfRegistration - registrationStepBack < countNumberOfRegistration) {
-                                    if (action.getSliceSources().getActionState(action).equals("(done)")) {
-                                        action.drawAction(g, pos[0], pos[1] + iPos * 10, 0.85);
+                        int countNumberOfRegistration = 0;
+                        for (CancelableAction action : actions) {
+                            if (!action.isHidden()) {
+                                iPos++;
+                                if (action instanceof RegisterSliceAction) {
+                                    // Is it viewed or not ? How to know this
+                                    countNumberOfRegistration++;
+                                    if (totalNumberOfRegistration - registrationStepBack < countNumberOfRegistration) {
+                                        if (action.getSliceSources().getActionState(action).equals("(done)")) {
+                                            action.drawAction(g, pos[0], pos[1] + iPos * 10, 0.85);
+                                        } else {
+                                            action.drawAction(g, pos[0], pos[1] + iPos * 10, 1.2);
+                                        }
                                     } else {
                                         action.drawAction(g, pos[0], pos[1] + iPos * 10, 1.2);
                                     }
                                 } else {
-                                    action.drawAction(g, pos[0], pos[1] + iPos * 10, 1.2);
+                                    action.drawAction(g, pos[0], pos[1] + iPos * 10, 1.0);
                                 }
-                            } else {
-                                action.drawAction(g, pos[0], pos[1] + iPos * 10, 1.0);
                             }
                         }
                     }

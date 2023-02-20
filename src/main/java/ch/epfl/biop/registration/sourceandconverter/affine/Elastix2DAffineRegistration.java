@@ -41,9 +41,6 @@ public class Elastix2DAffineRegistration extends AffineTransformSourceAndConvert
         if (fimg.length==0) {
             logger.error("Error, no fixed image set in class "+this.getClass().getSimpleName());
         }
-        if (fimg.length>1) {
-            logger.warn("Multichannel image registration not supported for class "+this.getClass().getSimpleName());
-        }
         super.setFixedImage(fimg);
     }
 
@@ -51,9 +48,6 @@ public class Elastix2DAffineRegistration extends AffineTransformSourceAndConvert
     public void setMovingImage(SourceAndConverter[] mimg) {
         if (mimg.length==0) {
             logger.error("Error, no fixed image set in class "+this.getClass().getSimpleName());
-        }
-        if (mimg.length>1) {
-            logger.warn("Multichannel image registration not supported for class "+this.getClass().getSimpleName());
         }
         super.setMovingImage(mimg);
     }

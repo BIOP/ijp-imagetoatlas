@@ -679,10 +679,10 @@ public class SliceSources {
             //Waiting for manual lock release...
             synchronized (MultiSlicePositioner.manualActionLock) {
                 //Manual lock released
-                return performRegistration(reg,preprocessFixed, preprocessMoving);
+                return performRegistration(reg, preprocessFixed, preprocessMoving);
             }
         } else {
-            return performRegistration(reg,preprocessFixed, preprocessMoving);
+            return performRegistration(reg, preprocessFixed, preprocessMoving);
         }
     }
 
@@ -712,7 +712,7 @@ public class SliceSources {
 
     Executor executor = ForkJoinPool.commonPool();
 
-    protected void enqueueRunAction(CancelableAction action, Runnable postRun) {
+    protected void enqueueRunAction(CancelableAction action, Runnable postRun, boolean runInExtraThread) {
         CompletableFuture<Boolean> startingPoint;
         if (tasks.size() == 0) {
             startingPoint = CompletableFuture.supplyAsync(() -> true);
@@ -722,7 +722,7 @@ public class SliceSources {
         Executor e = executor;
         // Otherwise the synchronisation mechanism is locked forever...
         // This way of synchronizing is costly, and will not scale for a number of section > 1000, but we'll live with that
-        if (action instanceof LockAndRunOnceSliceAction) e = new ThreadPerTaskExecutor();
+        if (runInExtraThread) e = new ThreadPerTaskExecutor();
         tasks.add(startingPoint.thenApplyAsync((out) -> {
             if (out) {
                 mp.addTask();

@@ -43,7 +43,12 @@ public abstract class CancelableAction {
     abstract public SliceSources getSliceSources();
 
     final public void runRequest() {
-        mp.runRequest(this);
+        //mp.runRequest(this);
+        runRequest(false);
+    }
+
+    final public void runRequest(boolean launchInExtraThread) {
+        mp.runRequest(this, launchInExtraThread);
     }
 
     final public void cancelRequest() {

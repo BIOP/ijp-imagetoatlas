@@ -33,7 +33,7 @@ public class LockAndRunOnceSliceAction extends CancelableAction {
         this.counterTarget = counterTarget;
         this.runnable = runnable;
         this.result = result;
-        //hide();
+        hide();
     }
 
     @Override

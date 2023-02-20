@@ -166,6 +166,11 @@ public class RegisterSlicesDeepSliceCommand implements Command {
                 new WaitForUserDialog("DeepSlice result",
                         "Put the 'results.xml' file into " + dataset_folder.getAbsolutePath() + " then press ok.")
                         .show();
+                try {
+                    Thread.sleep(7000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
                 deepSliceResult = new File(dataset_folder, "results.xml");
             } else {
                 deepSliceResult = deepSliceProcessor.apply(dataset_folder);//, "results.xml");
@@ -222,15 +227,15 @@ public class RegisterSlicesDeepSliceCommand implements Command {
 
         AtomicBoolean result = new AtomicBoolean();
         for (SliceSources slice: slicesToRegister) {
-            new LockAndRunOnceSliceAction(mp, slice, counter, slicesToRegister.size(), deepSliceRunner, result).runRequest();
+            new LockAndRunOnceSliceAction(mp, slice, counter, slicesToRegister.size(), deepSliceRunner, result).runRequest(true);
             if (allow_change_slicing_position) {
-                new MoveSliceAction(mp, slice, newAxisPosition.get(slice)).runRequest();
+                new MoveSliceAction(mp, slice, newAxisPosition.get(slice)).runRequest(true);
             }
             if (affine_transform) {
                 Holder<Registration<SourceAndConverter<?>[]>> regSupplier = newSliceRegistration.get(slice);
                 new RegisterSliceAction(mp, slice, regSupplier,
                         SourcesProcessorHelper.Identity(),
-                        SourcesProcessorHelper.Identity()).runRequest();
+                        SourcesProcessorHelper.Identity()).runRequest(true);
             }
 
         }

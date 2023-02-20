@@ -31,6 +31,8 @@ import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
 import sc.fiji.bdvpg.services.SourceAndConverterServiceLoader;
 import sc.fiji.bdvpg.services.SourceAndConverterServiceSaver;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
+import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterAndTimeRange;
+import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
 import sc.fiji.persist.RuntimeTypeAdapterFactory;
 import sc.fiji.persist.ScijavaGsonHelper;
 
@@ -436,11 +438,11 @@ public class MultiSlicePositioner implements Closeable {
         return redoableUserActions.size();
     }
 
-    protected void runRequest(CancelableAction action) {
+    protected void runRequest(CancelableAction action, boolean launchInExtraThread) {
         if ((action.getSliceSources()!=null)) {
             logger.debug("Action "+action+" on slice "+action.getSliceSources()+" requested (async).");
             listeners.forEach(sliceChangeListener -> sliceChangeListener.actionEnqueue(action.getSliceSources(), action));
-            action.getSliceSources().enqueueRunAction(action, () -> {} );
+            action.getSliceSources().enqueueRunAction(action, () -> {}, launchInExtraThread );
         } else {
             // Not asynchronous
             logger.debug("Action "+action+" on slice "+action.getSliceSources()+" run (non async).");
@@ -788,17 +790,49 @@ public class MultiSlicePositioner implements Closeable {
                     // Always set slice at zero position for registration
                     logger.debug("\t slice registration for "+slice.getName()+"- set slice zero position to zero");
                     parameters.put("pz", 0);
-                    AffineTransform3D at3d = new AffineTransform3D();
-                    at3d.translate(0, 0, -slice.getSlicingAxisPosition());
-                    SourcesAffineTransformer z_zero = new SourcesAffineTransformer(at3d);
-
 
                     logger.debug("\t slice registration for "+slice.getName()+"- RegisterSliceAction request");
-                    new RegisterSliceAction(this, slice, registration, SourcesProcessorHelper.compose(z_zero, preprocessFixed), SourcesProcessorHelper.compose(z_zero, preprocessMoving)).runRequest();
+                    new RegisterSliceAction(this, slice, registration,
+                            SourcesProcessorHelper.compose(new ZZero(slice), preprocessFixed),
+                            SourcesProcessorHelper.compose(new ZZero(slice), preprocessMoving)).runRequest();
+
                 } else {
                     logger.error("NULL registration plugin obtained, ignoring registration.");
                 }
             }
+        }
+    }
+
+    public static class ZZero implements SourcesProcessor {
+        final SliceSources slice;
+        boolean iniWithTransform = false;
+        public AffineTransform3D at3d = new AffineTransform3D();
+
+        public ZZero(SliceSources slice) {
+            this.slice = slice;
+        }
+
+        public ZZero(AffineTransform3D transform) {
+            slice = null;
+            iniWithTransform = true;
+            at3d = transform.copy();
+        }
+
+        @Override
+        public SourceAndConverter<?>[] apply(SourceAndConverter<?>[] sourceAndConverters) {
+            SourceAndConverter<?>[] out = new SourceAndConverter<?>[sourceAndConverters.length];
+            if (!iniWithTransform) {
+                at3d.translate(0, 0, -slice.getSlicingAxisPosition());
+            }
+            for (int i = 0;i<out.length;i++) {
+                out[i] = SourceTransformHelper.createNewTransformedSourceAndConverter(at3d, new SourceAndConverterAndTimeRange(sourceAndConverters[i], 0));
+            }
+            return out;
+        }
+
+
+        public String toString() {
+            return "M";
         }
     }
 
