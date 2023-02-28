@@ -31,8 +31,6 @@ import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
 import sc.fiji.bdvpg.services.SourceAndConverterServiceLoader;
 import sc.fiji.bdvpg.services.SourceAndConverterServiceSaver;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
-import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterAndTimeRange;
-import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
 import sc.fiji.persist.RuntimeTypeAdapterFactory;
 import sc.fiji.persist.ScijavaGsonHelper;
 
@@ -43,7 +41,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -793,46 +790,13 @@ public class MultiSlicePositioner implements Closeable {
 
                     logger.debug("\t slice registration for "+slice.getName()+"- RegisterSliceAction request");
                     new RegisterSliceAction(this, slice, registration,
-                            SourcesProcessorHelper.compose(new ZZero(slice), preprocessFixed),
-                            SourcesProcessorHelper.compose(new ZZero(slice), preprocessMoving)).runRequest();
+                            SourcesProcessorHelper.compose(new SourcesZOffset(slice), preprocessFixed),
+                            SourcesProcessorHelper.compose(new SourcesZOffset(slice), preprocessMoving)).runRequest();
 
                 } else {
                     logger.error("NULL registration plugin obtained, ignoring registration.");
                 }
             }
-        }
-    }
-
-    public static class ZZero implements SourcesProcessor {
-        final SliceSources slice;
-        boolean iniWithTransform = false;
-        public AffineTransform3D at3d = new AffineTransform3D();
-
-        public ZZero(SliceSources slice) {
-            this.slice = slice;
-        }
-
-        public ZZero(AffineTransform3D transform) {
-            slice = null;
-            iniWithTransform = true;
-            at3d = transform.copy();
-        }
-
-        @Override
-        public SourceAndConverter<?>[] apply(SourceAndConverter<?>[] sourceAndConverters) {
-            SourceAndConverter<?>[] out = new SourceAndConverter<?>[sourceAndConverters.length];
-            if (!iniWithTransform) {
-                at3d.translate(0, 0, -slice.getSlicingAxisPosition());
-            }
-            for (int i = 0;i<out.length;i++) {
-                out[i] = SourceTransformHelper.createNewTransformedSourceAndConverter(at3d, new SourceAndConverterAndTimeRange(sourceAndConverters[i], 0));
-            }
-            return out;
-        }
-
-
-        public String toString() {
-            return "M";
         }
     }
 
@@ -945,6 +909,7 @@ public class MultiSlicePositioner implements Closeable {
         factorySourcesProcessor.registerSubtype(SourcesProcessComposer.class);
         //factorySourcesProcessor.registerSubtype(SourcesResampler.class);
         factorySourcesProcessor.registerSubtype(SourcesIdentity.class);
+        factorySourcesProcessor.registerSubtype(SourcesZOffset.class);
 
         gsonbuilder.registerTypeAdapterFactory(factorySourcesProcessor);
         gsonbuilder.registerTypeHierarchyAdapter(SourcesChannelsSelect.class, new SourcesChannelSelectAdapter());
@@ -952,6 +917,7 @@ public class MultiSlicePositioner implements Closeable {
         //gsonbuilder.registerTypeHierarchyAdapter(SourcesResampler.class, new SourcesResamplerAdapter());
         gsonbuilder.registerTypeHierarchyAdapter(SourcesProcessComposer.class, new SourcesComposerAdapter());
         gsonbuilder.registerTypeHierarchyAdapter(SourcesIdentity.class, new SourcesIdentityAdapter());
+        gsonbuilder.registerTypeHierarchyAdapter(SourcesZOffset.class, new SourcesZOffsetAdapter());
 
         return gsonbuilder.create();
     }
