@@ -26,6 +26,7 @@ public class SourcesZOffset implements SourcesProcessor {
         SourceAndConverter<?>[] out = new SourceAndConverter<?>[sourceAndConverters.length];
         if (!iniWithTransform) {
             at3d.translate(0, 0, -slice.getSlicingAxisPosition());
+            iniWithTransform = true; // or problem with multichannel!!
         }
         for (int i = 0; i < out.length; i++) {
             out[i] = SourceTransformHelper.createNewTransformedSourceAndConverter(at3d, new SourceAndConverterAndTimeRange(sourceAndConverters[i], 0));

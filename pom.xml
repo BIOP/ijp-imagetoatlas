@@ -127,7 +127,7 @@
 
 		<!-- ABBA specific -->
 		<pyimagej-scijava-command.version>0.1.6</pyimagej-scijava-command.version>
-		<atlas.version>0.1.12-SNAPSHOT</atlas.version>
+		<atlas.version>0.1.12</atlas.version>
 		<oshi-core.version>5.5.1</oshi-core.version>
 
 		<!--because xml deserialization with JAXB is not included in Java 11, and we prepare migrating to Java 11 -->
