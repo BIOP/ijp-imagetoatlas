@@ -950,7 +950,6 @@ public class MultiSlicePositioner implements Closeable {
 
         // -1. put a '.abba' extension on the file
         File abbaFile = stateFileIn;
-        //return legacySaveState(stateFile, overwrite);
         if (!FilenameUtils.getExtension(stateFileIn.getAbsolutePath()).equals("abba")) {
             abbaFile = new File(FilenameUtils.removeExtension(stateFileIn.getAbsolutePath())+".abba");
         }
@@ -965,73 +964,71 @@ public class MultiSlicePositioner implements Closeable {
         log.accept("Waiting for all tasks to be finished before saving ... ");
         getSlices().forEach(SliceSources::waitForEndOfTasks);
         log.accept("All tasks have been performed!");
-
-        // We prepare the saving of the state, so that's a task:
-        addTask();
-        // Meaning:
-        // - 0. Creating a temporary folder, that needs to be deleted at the end
-        String tmpDirsLocation = System.getProperty("java.io.tmpdir");
-        Path path = Paths.get(FileUtils.getTempDirectory().getAbsolutePath(), UUID.randomUUID().toString());
-        File tmpdir;
         try {
-            tmpdir = Files.createDirectories(path).toFile();
-        } catch (IOException e) {
-            errorMessageForUser.accept("Error", "Java can't create a temporary folder in the folder "+tmpDirsLocation);
-            removeTask();
-            return false;
-        }
-
-        try {
-
-            // In the temp folder, write the following files:
-
-            // All sources required in the state
-            // - the sources
-            // - the xml bdv datasets (all of them)
-            List<SourceAndConverter<?>> allSacs = new ArrayList<>();
-            getSlices().forEach(sliceSource -> allSacs.addAll(Arrays.asList(sliceSource.getOriginalSources())));
-            File sourcesFile = new File(tmpdir, "sources.json");
-
-            // Make sure the spimdata are all re-serialized in the target folder, using the useRelativePaths flag to true
-
-            SourceAndConverterServiceSaver sacss = new SourceAndConverterServiceSaver(sourcesFile,
-                    this.scijavaCtx,
-                    allSacs, true);
-
-            sacss.run();
-
-            List<SourceAndConverter> serialized_sources = new ArrayList<>();
-            sacss.getSacToId().values().stream().sorted().forEach(i -> serialized_sources.add(sacss.getIdToSac().get(i)));
-
-            File stateFile = new File(tmpdir, "state.json");
-            // - the actions
-            FileWriter writer = new FileWriter(stateFile.getAbsolutePath());
-            AlignerState alignerState = new AlignerState(this);
-            alignerState.version = VersionUtils.getVersion(AlignerState.class);
-            getGsonStateSerializer(serialized_sources).toJson(alignerState, writer);
-            writer.flush();
-            writer.close();
-
-            // Then zip everything into the target file with abba extension,
-            pack(tmpdir.getAbsolutePath(), abbaFile.getAbsolutePath());
-
-            stateChangedSinceLastSave = false;
-            removeTask();
-            return true;
-        } catch (IOException e) {
-            //e.printStackTrace();
-            errorMessageForUser.accept("Error during state saving", e.getMessage());
-            removeTask();
-            return false;
-        } finally {
-            // Delete temp folder
+            // We prepare the saving of the state, so that's a task:
+            addTask();
+            // Meaning:
+            // - 0. Creating a temporary folder, that needs to be deleted at the end
+            String tmpDirsLocation = System.getProperty("java.io.tmpdir");
+            Path path = Paths.get(FileUtils.getTempDirectory().getAbsolutePath(), UUID.randomUUID().toString());
+            File tmpdir;
             try {
-                FileUtils.deleteDirectory(tmpdir);
+                tmpdir = Files.createDirectories(path).toFile();
             } catch (IOException e) {
-                errlog.accept("Could not delete temp folder "+tmpdir.getAbsolutePath()+". Error: "+e.getMessage());
+                errorMessageForUser.accept("Error", "Java can't create a temporary folder in the folder " + tmpDirsLocation);
+                return false;
             }
-        }
 
+            try {
+
+                // In the temp folder, write the following files:
+
+                // All sources required in the state
+                // - the sources
+                // - the xml bdv datasets (all of them)
+                List<SourceAndConverter<?>> allSacs = new ArrayList<>();
+                getSlices().forEach(sliceSource -> allSacs.addAll(Arrays.asList(sliceSource.getOriginalSources())));
+                File sourcesFile = new File(tmpdir, "sources.json");
+
+                // Make sure the spimdata are all re-serialized in the target folder, using the useRelativePaths flag to true
+
+                SourceAndConverterServiceSaver sacss = new SourceAndConverterServiceSaver(sourcesFile,
+                        this.scijavaCtx,
+                        allSacs, true);
+
+                sacss.run();
+
+                List<SourceAndConverter> serialized_sources = new ArrayList<>();
+                sacss.getSacToId().values().stream().sorted().forEach(i -> serialized_sources.add(sacss.getIdToSac().get(i)));
+
+                File stateFile = new File(tmpdir, "state.json");
+                // - the actions
+                FileWriter writer = new FileWriter(stateFile.getAbsolutePath());
+                AlignerState alignerState = new AlignerState(this);
+                alignerState.version = VersionUtils.getVersion(AlignerState.class);
+                getGsonStateSerializer(serialized_sources).toJson(alignerState, writer);
+                writer.flush();
+                writer.close();
+
+                // Then zip everything into the target file with abba extension,
+                pack(tmpdir.getAbsolutePath(), abbaFile.getAbsolutePath());
+
+                stateChangedSinceLastSave = false;
+                return true;
+            } catch (IOException e) {
+                errorMessageForUser.accept("Error during state saving", e.getMessage());
+                return false;
+            } finally {
+                // Delete temp folder
+                try {
+                    FileUtils.deleteDirectory(tmpdir);
+                } catch (IOException e) {
+                    errlog.accept("Could not delete temp folder " + tmpdir.getAbsolutePath() + ". Error: " + e.getMessage());
+                }
+            }
+        } finally {
+            removeTask();
+        }
     }
 
     private static void pack(String sourceDirPath, String zipFilePath) throws IOException {
