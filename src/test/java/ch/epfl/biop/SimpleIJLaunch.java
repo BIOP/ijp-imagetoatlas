@@ -9,6 +9,7 @@ public class SimpleIJLaunch {
         DebugTools.enableLogging ("INFO");
         //DebugTools.enableLogging ("DEBUG");
         ij.ui().showUI();
+
         //RemoteElastixTask.timeOutInMs = 100000;
         //AlphaBlendedResampledSource
     }
