@@ -1,67 +1,131 @@
-## [EXPERIMENTAL] [ABBA](https://www.youtube.com/watch?v=8haRfsY4-_s) - Aligning Big Brains & Atlases
+## [ABBA](https://www.youtube.com/watch?v=8haRfsY4-_s) - Aligning Big Brains & Atlases
 
-A [Fiji](https://fiji.sc/) plugin for the registration of thin brain slices to various atlases ([3D mouse Allen Brain atlas](http://atlas.brain-map.org/atlas?atlas=602630314), [Waxholm Space Atlas of the Sprague Dawley Rat Brain](https://www.nitrc.org/projects/whs-sd-atlas), and [BrainGlobe atlases (WIP)](https://github.com/NicoKiaru/ABBA-Python)) + [QuPath](https://qupath.github.io) associated tools.
+-----
+
+Aligning Big Brains & Atlases or ABBA for short, is a Fiji plugin which allows to register thin serial sections to several atlases, in coronal, sagittal and horizontal orientations.
+
+Within Fiji, you have access to the [3D mouse Allen Brain atlas](http://atlas.brain-map.org/atlas?atlas=602630314), and the [Waxholm Space Atlas of the Sprague Dawley Rat Brain](https://www.nitrc.org/projects/whs-sd-atlas). With [ABBA-Python](https://github.com/NicoKiaru/ABBA-Python), you can access all [BrainGlobe atlases](https://github.com/NicoKiaru/ABBA-Python).
+
+ABBA is typically used in conjunction with [QuPath](https://qupath.github.io): a QuPath project can serve as an input for ABBA, and the registration results can be imported back into QuPath for downstream processing.
 
 <video autoplay loop muted style="width: 100%;">
   <source src="https://user-images.githubusercontent.com/20223054/149301605-07b27dd0-4010-4ca4-b415-f5a9acc8963d.mp4" type="video/mp4">
   Your browser does not support the video tag.
 </video>
 
-Aligning Big Brains & Atlases or ABBA for short, is a Fiji plugin which allows to register serial sections to several atlases, in coronal, sagittal and horizontal orientations.
+-----
 
-It uses [BigDataViewer](https://imagej.net/plugins/bdv/index) and [BigWarp](https://imagej.net/plugins/bigwarp) for the display and on-the-fly computation of spline-transformed multiresolution images (typical output of Whole Slide Imaging).
 
-It has been developed by the [BioImaging & Optics Platform](https://www.epfl.ch/research/facilities/ptbiop/) at EPFL. This page contains the documentation of ABBA (installation and usage). If you require additional help, please post your question on the [image.sc](https://forum.image.sc) forum  and tag your question / issue with `abba` and `fiji` or `qupath`. If you have already installed ABBA, you can also click on `Help > Ask for help in the forum` from the plugin (some helpful information from your local installation will be included in your post).
+ABBA uses [BigDataViewer](https://imagej.net/plugins/bdv/index) and [BigWarp](https://imagej.net/plugins/bigwarp) for the display and on-the-fly computation of spline-transformed multiresolution images (typical output of Whole Slide Imaging).
+
+It has been developed by the [BioImaging & Optics Platform](https://www.epfl.ch/research/facilities/ptbiop/) at EPFL. This page contains the reference documentation of ABBA. If you require additional help, please check the troubleshooting section at the bottom of this page.
 
 ## Documentation
 
-There's currently three forms of documentation available:
+There's three forms of documentation:
 
-- [Youtube video tutorial](https://www.youtube.com/watch?v=sERGONVw4zE)
-- [Workshop slides](https://docs.google.com/presentation/d/1c5yG-5Rhz5WlR4Hf9TNVkjqb6yD6oukza8P6vHGVZMw)
-- This website:
-  - [How to install ABBA](installation.md)
-  - [How to use ABBA](usage.md)
+### 1. Youtube tutorial
 
-## Demo datasets
+A video tutorial is nice to see ABBA in action, and to check the little details which may have been missed in other documentation forms. However, the version presented is not completely up-to-date: a video tutorial is a lot of work. It requires more work to be updated.
 
-If you want to test this plugin, you can download one of the following test dataset: 
+* [Youtube video tutorial (March 2022)](https://www.youtube.com/watch?v=sERGONVw4zE).
 
-#### Dataset 1, provided by Lucie Dixsaut, [Johannes Gräff lab](https://www.epfl.ch/labs/graefflab/), EPFL
-One animal, 85 serial sections, 3 fluorescent channels (DAPI - nuclei, FITC - autofluorescence, mCherry - labelled sparse cells)
-* [Direct download (8Gb zip file)](https://zenodo.org/record/5018719/files/MouseBrainCoronalSerialSections.zip?download=1) - multiresolution Olympus VSI files  
-* [Zenodo repository](https://zenodo.org/record/5018719#.YNNYJEzRYuU) 
+### 2. Workshop slides
 
-#### Dataset 2, provided by Bianca A. Silva, [Johannes Gräff lab](https://www.epfl.ch/labs/graefflab/), EPFL
-One animal, 87 serial sections, 2 fluorescent channels (nuclei and autofluorescence)
-* [Sample sections  (Zenodo repository, 21 Gb) ](https://doi.org/10.5281/zenodo.4715656) - each section has to be downloaded individually (multiresolution ome.tiff file)
-* [Downsampled sections  (GDrive, 0.4 Gb) ](https://drive.google.com/file/d/1OVb860hy-UZSSXa_u9drWiPKEunWT_a7/view?usp=sharing)
+A step by step tutorial that details how to register a demo dataset. Installation instructions are also linked in this presentation.
+[Workshop slides](https://docs.google.com/presentation/d/1c5yG-5Rhz5WlR4Hf9TNVkjqb6yD6oukza8P6vHGVZMw)
 
-# Important note on File formats!
+### 3. This website / reference documentation
 
-**TL; DR: Use calibrated VSI, CZI, OME-TIFF, NDPI, 
-a few others (please read the text below). Otherwise convert your files to pyramidal OME-Tiff files. You can use the Fiji plugin [Kheops](https://github.com/BIOP/ijp-kheops), or the [NGFF converter by Glencoe](https://www.glencoesoftware.com/products/ngff-converter/)(!n5 not supported, choose OME-TIFF). **
+* [**Installation**](installation.md)
 
 
-All files need to be properly calibrated (microns, millimeters, etc, but not pixels!). ABBA takes advantage of the  calibration to set appropriate registration parameters.
+* [**Data source**](dataset_prerequisite.md)
+  * [File formats requirements](dataset_prerequisite.md)
+    * [Bio-Formats readable](dataset_prerequisite.md#1-any-bio-formats-supported-file-format)
+    * [Pyramidal/Multi-resolution file format preferred](dataset_prerequisite.md#2-ideally-multi-resolution--bio-formats-supported--)
+    * [Calibration required](dataset_prerequisite.md#3-and-calibrated)
+  * [Other sources (OMERO, QuPath, n5...)](dataset_prerequisite.md#more-technicalities)
 
----
 
-:bulb: It is strongly recommended to work with multiresolution file formats (VSI, OME-TIFF, SVS), since brain slices are usually very big 2d images. ABBA, like QuPath, uses pre-computed downsampled images of these files to speed-up (very significantly) the display and processing of these images. Downsampled images also help for registration, since the registration is made with large scale features (size above  a few cells), which are incorrectly sampled if no downsampled image pre-exists.
+* [**Example datasets**](example_datasets.md)
 
----
 
-:warning: Because Fiji is used is the workflow, only Bio-Formats supported formats are correctly handled. You can check on  [the Bio-Formats documentation](https://docs.openmicroscopy.org/bio-formats/6.6.1/supported-formats.html) if your file formats will be correctly handled. This will be the case if `Pyramid` is checked. File which can be opened **only** via [`OpenSlide`](https://openslide.org/) are not supported.
+* [**Creating a QuPath project for ABBA**](create_qupath_dataset.md)
 
-Tested file formats for ABBA :
+- [**Registration workflow**](usage.md) < the core of ABBA
+  
 
-* CZI (Zeiss, ++, you may have to tick `Split RGB channels` for 16-bits RGB images)
-* VSI (Olympus, +++)
-* LIF (Leica, +, no multiresolution support in bio-formats)
 
-CZI, NDPI, OME-TIFF should work perfectly. Let us know if that's the case in practice and we'll update the list.
 
-RGB images as well as 8-bits and 16-bits images have also been successfully tested.
+
+* **Post registration analysis**
+  * With QuPath
+    * [Export ABBA's registration results to the QuPath project](qupath_analysis.md)
+      * [Import registration results as QuPath annotations](qupath_analysis.md#importing-abba-registration-results-in-qupath)
+      * [(Optional) Correct the registration for some slices in ABBA and re-export the new result to QuPath](registration.md#editing-a-registration)
+      * [Detect cells in QuPath](qupath_analysis.md#analysis-in-qupath)
+      * [Append CCF coordinates in QuPath detected cells measurements](qupath_analysis.md#export-result-into-common-coordinates-of-the-allen-brain-atlas-ccfv3)
+      * [Export a table containing, for all cells, their measurements as well as their location in the brain atlas CCF](qupath_analysis.md#display-results)
+
+  * With Python TODO
+  * Other export modalities
+    * [**Export modalities other than QuPath (warped slices, etc.)**](export.md)
+
+
+* **ABBA advanced features** (TODO)
+  * Headless ABBA
+    * Fiji scripting
+    * Python scripting
+  * 3D Reconstruction
+    * Slice rasterization
+  * Creating a plugin for ABBA
+    * With Java
+    * With Python
+  * Creating a registration plugin for ABBA
+    * With Java
+    * With Python
+  * How registrations are stored 
+
+
+
+# Troubleshooting
+
+If you have an issue with ABBA:
+1. Check [Frequently Asked Questions](index.md#frequent-issues--frequently-asked-questions), and have a quick look at the documentation if possible.
+2. Look if the answer is not present in the list of [ABBA questions in the Image.sc forum](https://forum.image.sc/tag/abba).
+3. Ask for help in the [image.sc forum](forum.image.sc/) (add `abba` and `fiji` or `qupath` tags). If you have already installed ABBA, you can also click on `Help > ABBA - Ask for help in the forum` from the plugin (some helpful information from your local installation will be included in your post). You will need to create an account on the forum.
+4. You can also [open an issue in GitHub](https://github.com/BIOP/ijp-imagetoatlas/issues)
+
+## Frequent issues / Frequently asked questions
+### The sections are gigantic when opened in ABBA
+
+Most probably, your images are either not calibrated, or bio-formats cannot read the calibration. If you are using QuPath, you can [override the pixel size in QuPath **BEFORE** opening the project in ABBA](create_dataset_and_open.md#define-a-dataset-of-brain-sections-in-qupath), or, if your files are not pyramidal, you can convert your files to pyramidal OME-Tiff by using [Kheops](https://github.com/BIOP/ijp-kheops) and set the correct voxel size in the conversion process.
+
+### I only have hemi-brain sections. Can I use ABBA ?
+
+Yes, you can restrict the registration to a certain rectangular region of interest. Please have a look at [this question](https://forum.image.sc/t/abba-experimental-a-fiji-qupath-workflow-for-mouse-brain-slice-registration-to-the-allen-brain-atlas-ccfv3/54345/15) and the [answer just below](https://forum.image.sc/t/abba-experimental-a-fiji-qupath-workflow-for-mouse-brain-slice-registration-to-the-allen-brain-atlas-ccfv3/54345/16). Also, there is the possibility to virtual mirror the hemisection. You can then register the whole 'virtual section', and remove the virtual extra half at the end.
+
+### I can't start any elastix registrations
+Either the elastix executable file location is not set, or you are missing a library, or you are missing some access rights. The installation of external dependencies on multiple OS is pain. To narrow down the issue, you can try to [execute this groovy script](https://gist.githubusercontent.com/NicoKiaru/b91f9f3f0069b765a49b5d4629a8b1c7/raw/0744676341b16ee4f37ed203130f0e0b761c08c8/TestRegister.groovy)  in Fiji ([video of how it should look here](https://forum.image.sc/t/abba-experimental-a-fiji-qupath-workflow-for-mouse-brain-slice-registration-to-the-allen-brain-atlas-ccfv3/54345/28)). If this did not help you solve the issue, please report the problem in the forum by using `Help > ABBA - Ask for help in the forum`.
+
+### I cannot see any image after I import my Qupath project
+
+It’s could be because the slices are invisible by default (for faster loading). Select all the slices in the table and click on the header line to make them visible, as well as the channels you want to see, and increa the contrast if necessary. There is a [step by step documentation accessible here](https://docs.google.com/presentation/d/1c5yG-5Rhz5WlR4Hf9TNVkjqb6yD6oukza8P6vHGVZMw/edit#slide=id.p1), check from slice 53 for the display options.
+
+### I want to use another atlas than the ones available
+
+The atlases currently available are:
+* the [adult Allen Mouse Brain atlas CCFv3](https://zenodo.org/record/4486659/#.YngkMlRBziE)
+* the [Waxholm Space atlas of the Sprague Dawley Rat Brain V4](https://zenodo.org/record/5644162#.YngkTVRBziE)
+* through [ABBA-Python](https://github.com/NicoKiaru/ABBA-Python), all [BrainGlobe](https://github.com/brainglobe) atlases
+
+There are other atlases, of course, but adding them in ABBA still requires some work because there is no unified way of accessing labels, properties and hierarchical structure (unless it is implemented within BrainGlobe). This is an effort I can make, but there needs to be:
+1. several users needing it - and you can do your request through ABBA `Help > ABBA - Give your feedback`
+2. If not implemented in BrainGlobe, the atlas data need to be publicly accessible and shareable. I need to be allowed to repackage it in a different file format and make it accessible through Zenodo like the other ones.
+3. I need time.
+
+There's also [a script](https://forum.image.sc/t/custom-atlas-in-abba/77206) that allows to create a fake atlas from an image, but no ontology is imported.
 
 <!---
 ### Markdown

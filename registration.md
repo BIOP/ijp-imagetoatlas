@@ -1,5 +1,9 @@
 # Registration of mouse brain slices with ABBA
 
+-----
+[**Back to registration workflow**](usage.md)
+
+-----
 Once your dataset is opened in ABBA. You will be able to position slices first along the slicing axis (position multiple slices along "z"), then to perform 2d adjustment for each slice (tilt and roll atlas slicing correction, 2d affine and spline in-plane registrations).
 
 When you start ABBA, you will be in the `Positioning mode`, where the Allen brain atlas is displayed with slices regularly spaced on top of the slices present on your dataset. 
@@ -220,22 +224,35 @@ It is possible (and advised) to perform several successive registration. You wil
 ### Affine registration (Automated)
 
 You can select the slices you want to register and start an affine registration by clicking, in the top menu bar: 
-`Align > ABBA - Elastix Registration (Affine)`, if you managed to install Elastix, or `Align > ABBA - Elastix Registration (Affine) on Server`, if elastix is not locally installed.
+`Align > ABBA - Elastix Registration (Affine)`.
 
-You will need to select a single channel for both the atlas and the sections for this affine registration. Multichannel registration is not supported for automated registrations.
+You will need to select one or several channels for both the atlas and the sections for this affine registration.
 
 ![Affine elastix registration](assets/img/fiji_elastix_affine_registration.png)
 
 In a lot of cases, an affine registration on the DAPI channel of your sections vs the atlas Nissl atlas channel (0) is a good choice for a first registration.
 
+Multichannel registration is also supported. Each channel contributes equally to the 'cost' function that is optimized for the registration. It is not rare to have a channel which is autofluorescent as part of a dataset. This will be good idea to register to the ARA channel of the Allen Brain Atlas. But what is even better is use several channels at the same time. For instance, in the first test dataset of the documentation, the channel 0, DAPI, matches the Nissl channel, while the channel 1 has significant autofluorescence, thus matching channel 1 (Ara) of the atlas. 
+
+![Multi Channels](assets/img/fiji_registration_multichannel_images.png)
+
+Here's how to set up a registration taking both channels into consideration:
+
+![Affine elastix registration multi channel](assets/img/fiji_elastix_affine_registration_multichannel.png)
+
+If you have several channels matching a channel from the atlas, you can repeat the atlas channel. You can even repeat one of your data channel if needed. Suppose your channel 1 and 3 are both nuclear signals, you could fill in the registration parameters like this:
+
+![Affine elastix registration multi channel other](assets/img/fiji_elastix_affine_registration_multichannel_other.png)
+
 A few extra options are available:
+* `Registration re-sampling (micrometers)` specified in micrometer, is the pixel size of the images that will be send to Elastix for the registration task. Check  `Show registration results as ImagePlus` to see how the resampled images look like.
 * `Show registration results as ImagePlus`, if checked, will display the raw data used for elastix registration
 * `Background offset value` can be left at zero in most cases. If your camera has a significant zero offset value in comparison to the channel intensities, this offset can be specified here for a better registration.
 
 ### Spline registration (Automated)
 
 You can select the slices you want to register and start a spline registration by clicking, in the top menu bar:
-`Align > ABBA - Elastix Registration (Spline)`, if you managed to install Elastix, or `Align > ABBA - Elastix Registration (Spline) on Server`, if elastix is not locally installed.
+`Align > ABBA - Elastix Registration (Spline)`
 
 ![Spline registration parameters](assets/img/fiji_elastix_spline_registration.png)
 
@@ -265,7 +282,7 @@ BigWarp commands summary:
 * `f` = display fused transform and fixed image (toggle)
 * `t` = transform the image or not (toggle)
 
-You can check [BigWarp documentation](https://imagej.net/plugins/bigwarp) for more information about its interface.
+You can check [BigWarp documentation](https://imagej.net/plugins/bigwarp) for more information about its interface, or look at the [relevant part in the youtube tutorial](https://www.youtube.com/watch?v=sERGONVw4zE&t=2534s).
 
 After editing a registration, you can export it again (to QuPath for instance), and reload it.
 
@@ -291,9 +308,8 @@ The registration methods (BigWarp, Elastix spline, affine...) are plugins automa
 
 A typical registration may be obtained using the following successive steps, performed on all slices:
 
-* affine registration on DAPI vs Atlas Nissl (Ch 0)
-* spline registration on an Autofluorescent channel vs Atlas Autofluorescent (Ch 1) (15 control points)
-* spline registration on DAPI vs Atlas Nissl (Ch 0) (15 control points)
+* affine registration on DAPI vs Atlas Nissl (Ch 0) + Autofluorescence vs Atlas Ara (Ch. 1)
+* spline registration on DAPI vs Atlas Nissl (Ch 0) + Autofluorescent channel vs Atlas Autofluorescent (Ch 1) (15 control points)
 
 This takes about 10 minutes for 50 slices on a laptop.
 
@@ -301,14 +317,19 @@ This takes about 10 minutes for 50 slices on a laptop.
 
 At each step of the workflow, you can save the current state of your work (as long as no job is being processed).
 
-To save your project, you can click, in the top menu bar `File > Save State [Experimental]`, and specify a file with a `.json` extension. One or several extra files will be stored on top of the json file. All files are text files, which are fast to save and rather small (in comparison to the images...). So do not hesitate to save multiple successive files all along your workflow. Consider your work done when you have obtained regions in QuPath, but the ABBA state file has less guarantee on the long term.
+To save your project, you can click, in the top menu bar `File > ABBA - Save State (+View)`. An `.abba` extension will be automatically added to the filename. This abba file in fact a set of text files zipped together.
 
-To open a project where you left it, it is compulsory close ABBA session and restart it. Once restarted, click in the top menu bar `File > Load State [Experimental]`, and select your previously saved `.json` file.
+All files are text files, which are fast to save and rather small (in comparison to the images...). So do not hesitate to save multiple successive files all along your workflow. Consider your work done when you have obtained regions in QuPath, but the ABBA state file has less guarantee on the long term.
 
----
-
-:warning: If you move your image files, your qupath project, or the other files associated to the state file, ABBA won't be able to find your images because absolute file path are used. If you opened images from a QuPath project, fix URIs in QuPath first before reopening ABBA.
+To open a project where you left it, it is compulsory to close ABBA session and restart it. Once restarted, click in the top menu bar `File > ABBA - Load State (+View)`, and select your previously saved `.abba` file.
 
 ---
 
-[**Back to step by step tutorial**](usage.md)
+:warning: If you move your image files, your qupath project, or the other files associated to the state file, ABBA may not be able to find your images because absolute file path are used. If you opened images from a QuPath project, fix URIs in QuPath first before reopening ABBA.
+
+---
+
+-----
+[**Back to registration workflow**](usage.md)
+
+-----

@@ -1,5 +1,11 @@
 # Exporting ABBA's registration results
 
+-----
+[**Back to registration workflow**](usage.md)
+
+-----
+
+
 Probably the most useful way to use ABBA's result is to continue the analysis in QuPath (provided that you started on QuPath). In the QuPath workflow, the atlas regions are transformed into the original slice coordinates. For this procedure, please go to [analysis in qupath](qupath_analysis.md).
 
 However, other export options are available within Fiji which are explained below.
@@ -124,4 +130,7 @@ Here a gif demoing this possibility:
 
 ![Exporting regions to the ROI Manager](assets/gif/fiji_export_ij1_roi_manager.gif)
 
-[**Back to step by step tutorial**](usage.md)
+-----
+[**Back to registration workflow**](usage.md)
+
+-----

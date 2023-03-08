@@ -1,19 +1,33 @@
 # Using DeepSlice in ABBA
 
+-----
+[**Back to registration workflow**](usage.md)
+
+-----
+
 [DeepSlice](https://www.deepslice.com.au/guide) is a deep learning based tool for automatic alignment of whole mouse brain histological sections. It is developed in the McMullan lab group by [Harry Carey](https://github.com/polarbean/) at [Macquarie University](https://www.mq.edu.au/), Sydney, Australia. It was designed to work primarily with [QuickNII](https://www.nitrc.org/projects/quicknii).
 
 A [preprint is available](https://www.biorxiv.org/content/10.1101/2022.04.28.489953v1.full), the tool is [directly accessible via a web interface](https://www.deepslice.com.au/), and [its source code is on github](https://github.com/PolarBean/DeepSlice).
 
-It is currently limited to registrations with the Allen mouse brain atlas and coronal sections. 
+It can work with the Allen mouse brain atlas and the Rat Waxholm atlas, in coronal orientation. However, only the Allen mouse Brain atlas has been tested so far with ABBA. 
 
----
-ABBA can facilitate the use of DeepSlice by generating low resolution sections and by reading back the QuickNII result XML file. Using DeepSlice within ABBA thus gives very fast results and automates many initial steps of the alignement:
+Using DeepSlice within ABBA thus gives very fast results and automates many initial steps of the alignment:
 
 * atlas cutting angle estimation
 * initial positioning of slices along the axis
 * in-plane affine registration (DeepSlice does not deform beyond affine transformation)
 
-After DeepSlice, ABBA can be used to further refine the alignement, for instance by applying an in-plane non-linear step with BigWarp or Elastix.
+After DeepSlice, ABBA can be used to further refine the alignment, for instance by applying an in-plane non-linear step with BigWarp or Elastix.
+
+---
+
+At this point, either you managed to run ABBA with Python (windows installer, or notebooks from github), or you are using ABBA with a standard Fiji install.
+
+Depending on your configuration, you will able to use ABBA with the web interface, or directly offline with an embedded python - a much better way to automate your workflow.
+
+## Use DeepSlice web interface from ABBA
+
+ABBA can facilitate the use of DeepSlice by generating low resolution sections and by reading back the QuickNII result XML file. 
 
 ---
 
@@ -21,11 +35,12 @@ After DeepSlice, ABBA can be used to further refine the alignement, for instance
 
 ---
 
-## Using DeepSlice in ABBA: step by step procedure
+### Using DeepSlice in ABBA: step by step procedure
 * select all the slices you want to register
-* click in the top menu bar: `Align > DeepSlice Registration`
+* click in the top menu bar: `Align > ABBA - DeepSlice Registration`
 
 You get the following window:
+
 ![ABBA DeepSlice options](assets/img/fiji_deepslice_options.png)
 
 * `Slices channels, 0-based` - used to select the channels you want to export to DeepSlice. You can for instance export a nuclear channel only. You can export the first and third channel by writing `0,2`.
@@ -70,4 +85,19 @@ Then click ok in the small DeepSlice result window. You will see, if you selecte
 
 You can adjust then, review, regularly space the slices position and perform non linear registrations with the rest of ABBA functionalities.
 
-[**Back to step by step tutorial**](usage.md)
+
+## Use DeepSlice with ABBA-Python
+
+If you have this option, a line `ABBA - DeepSlice Registration (Python)` should be present in the Align menu:
+
+![DeepSlice line python](assets/img/fiji_deepslice_python.png)
+
+The options are similar to the ones described above.
+
+DeepSlice is usually pretty fast, it should take around 1 minute for 100 sections, even with a not very powerful laptop.
+
+
+-----
+[**Back to registration workflow**](usage.md)
+
+-----

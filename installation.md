@@ -1,16 +1,38 @@
 ## Installation
 
+-----
+[**Back to documentation main page**](index.md)
+
+-----
+
+
 ---
 
-:warning: ABBA should be used with QuPath v0.3+!
+:warning: ABBA should be used with QuPath v0.4+ (v0.3+ still possible)!
 
 ---
 
-You can choose between the two installation methods, automated or manual. My advice : start with the automated one, and troubleshoot with the manual one if needed.
+You can choose between several installation methods, depending on your OS.
+
+Windows:
+- one-click installer (Fiji + BrainGlobe + DeepSlice)
+- automated bash scripts (Fiji) 
+
+Mac OSX:
+- automated bash scripts (Fiji)
+
+All Oses (Win, Mac, Linux):
+- manual installation (Fiji)
+- from ABBA-Python github repository (Fiji + Brainglobe + DeepSlice + Python)
+
+My advice : on windows, use the installer. Otherwise, use automated bash scripts. Troubleshoot issues by reading the manual installation.
+## Standalone installer
+
+A [windows installer](https://github.com/NicoKiaru/ABBA-Python/releases/tag/v0.5.1-win) exists, which is still in its early phase of testing (released March 2023). This is by far the easiest way to install ABBA. It also brings the advantage of including DeepSlice and BrainGlobe directly into ABBA, because it ships a suitable conda environment in parallel with Fiji. 
 
 ## Automated installation
 
-Bash installation scripts for ABBA are available and have been tested (in May 2022) for Windows 10, 11 and Mac OSX.
+Bash installation scripts for ABBA are available and have been tested for Windows 10, 11 and Mac OSX.
 You will need a decent internet connection! Several gigabytes need to be downloaded (mainly Fiji, QuPath and the atlases).
 
 ### For Windows
@@ -53,7 +75,8 @@ UNTESTED!
 ## Step by step manual installation
 The installation consists of four steps detailed in the paragraphs below:
 
-1. Install QuPath and 2 QuPath extensions,
+1. Install QuPath and its 2 required extensions,
+2. Optional: install QuPath OMERO Raw extension for OMERO data stream support
 2. Enable Fiji's PTBIOP update site,
 3. Install the additional programs required for automated registration (Elastix / Transformix),
 4. Setup ABBA in Fiji:
@@ -61,7 +84,7 @@ The installation consists of four steps detailed in the paragraphs below:
 
 ### 1.  Install QuPath extensions
 
-Install [QuPath version 0.3+](https://qupath.github.io/).
+Install [QuPath version 0.4+](https://qupath.github.io/).
 
 Install the [QuPath Warpy extension](https://github.com/BIOP/qupath-extension-warpy) (and its dependencies):
 * Go to the [latest release](https://github.com/BIOP/qupath-extension-warpy/releases)
@@ -71,11 +94,17 @@ Install the [QuPath Warpy extension](https://github.com/BIOP/qupath-extension-wa
 Install the [QuPath ABBA extension](https://github.com/BIOP/qupath-extension-abba) (and its dependencies):
 * Go to the [latest release](https://github.com/BIOP/qupath-extension-abba/releases)
     * Download `qupath-extension-abba-x.y.z.jar`
-    * Drag this jar file into the main QuPath window
+    * Drag this jar file into the main QuPath 
 
-* Restart QuPath: in `Extensions>Installed extensions` you should see both extensions installed:
+Install the [QuPath OMERO RAW extension](https://github.com/BIOP/qupath-extension-biop-omero) (and its dependencies):
+* Read the [readme](https://github.com/BIOP/qupath-extension-biop-omero/blob/omero-raw/README.md) for installation instructions
 
-![Installed extensions](./assets/img/qupath_installed_extensions.png)
+
+Restart QuPath: in `Extensions>Installed extensions` you should see the following extensions installed:
+  * ABBA
+  * Image Combiner Warpy
+  * Warpy
+  * OMERO BIOP
 
 ### 2. Install Fiji and enable Fiji's PTBIOP update site
 
@@ -136,4 +165,8 @@ The allen brain atlas and associated files will be cached in your user folder un
 
 If the initial atlas download failed, because you had no access to internet or for any other reason, you can restart the command and let empty fields to trigger again the download from Zenodo.
 
-[**Back to documentation**](index.md)
+-----
+[**Back to documentation main page**](index.md)
+
+-----
+
