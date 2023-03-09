@@ -5,6 +5,15 @@
 
 -----
 
+<!-- TOC -->
+* [Using DeepSlice in ABBA](#using-deepslice-in-abba)
+  * [Use DeepSlice web interface from ABBA](#use-deepslice-web-interface-from-abba)
+    * [Using DeepSlice in ABBA: step by step procedure](#using-deepslice-in-abba--step-by-step-procedure)
+  * [Use DeepSlice with ABBA-Python](#use-deepslice-with-abba-python)
+<!-- TOC -->
+
+-----
+
 [DeepSlice](https://www.deepslice.com.au/guide) is a deep learning based tool for automatic alignment of whole mouse brain histological sections. It is developed in the McMullan lab group by [Harry Carey](https://github.com/polarbean/) at [Macquarie University](https://www.mq.edu.au/), Sydney, Australia. It was designed to work primarily with [QuickNII](https://www.nitrc.org/projects/quicknii).
 
 A [preprint is available](https://www.biorxiv.org/content/10.1101/2022.04.28.489953v1.full), the tool is [directly accessible via a web interface](https://www.deepslice.com.au/), and [its source code is on github](https://github.com/PolarBean/DeepSlice).

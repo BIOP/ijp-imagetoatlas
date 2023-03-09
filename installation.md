@@ -5,6 +5,23 @@
 
 -----
 
+<!-- TOC -->
+  * [Installation](#installation)
+  * [Standalone installer](#standalone-installer)
+  * [Automated installation](#automated-installation)
+    * [For Windows](#for-windows)
+    * [For Mac OSX](#for-mac-osx)
+    * [For Linux](#for-linux)
+  * [Step by step manual installation](#step-by-step-manual-installation)
+    * [1.  Install QuPath extensions](#1-install-qupath-extensions)
+    * [2. Install Fiji and enable Fiji's PTBIOP update site](#2-install-fiji-and-enable-fijis-ptbiop-update-site)
+    * [3. Install of Elastix / Transformix](#3-install-of-elastix--transformix)
+        * [Windows](#windows)
+        * [Mac](#mac)
+        * [Linux (not tested)](#linux--not-tested-)
+        * [Indicate `elastix` and `transformix` executable location in Fiji:](#indicate-elastix-and-transformix-executable-location-in-fiji-)
+    * [4. Setup ABBA in Fiji](#4-setup-abba-in-fiji)
+<!-- TOC -->
 
 ---
 
@@ -105,7 +122,7 @@ Install the [QuPath ABBA extension](https://github.com/BIOP/qupath-extension-abb
     * Download `qupath-extension-abba-x.y.z.jar`
     * Drag this jar file into the main QuPath 
 
-Install the [QuPath OMERO RAW extension](https://github.com/BIOP/qupath-extension-biop-omero) (and its dependencies):
+Optional: if you want to work on data coming from an OMERO database, install the [QuPath OMERO RAW extension](https://github.com/BIOP/qupath-extension-biop-omero) (and its dependencies):
 * Read the [readme](https://github.com/BIOP/qupath-extension-biop-omero/blob/omero-raw/README.md) for installation instructions
 
 

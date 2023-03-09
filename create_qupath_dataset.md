@@ -5,6 +5,14 @@
 
 -----
 
+<!-- TOC -->
+  * [Defining a QuPath project compatible with ABBA](#defining-a-qupath-project-compatible-with-abba)
+* [Dataset pre-requisites](#dataset-pre-requisites)
+    * [Define a dataset of brain sections in QuPath](#define-a-dataset-of-brain-sections-in-qupath)
+<!-- TOC -->
+
+-----
+
 
 :warning: Do not modify the images present in the project once it has been opened and used in ABBA. ABBA has not been tested if the number of images present in the QuPath project are changed.
 

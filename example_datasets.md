@@ -6,6 +6,14 @@
 
 -----
 
+<!-- TOC -->
+* [Demo datasets](#demo-datasets)
+  * [Dataset 1, provided by Lucie Dixsaut, Johannes Gräff lab, EPFL](#dataset-1-provided-by-lucie-dixsaut-johannes-gräff-lab--epfl)
+  * [Dataset 2, provided by Bianca A. Silva, Johannes Gräff lab, EPFL](#dataset-2-provided-by-bianca-a-silva-johannes-gräff-lab--epfl)
+<!-- TOC -->
+
+-----
+
 If you want to test ABBA, you can download one of the following dataset:
 
 ## Dataset 1, provided by Lucie Dixsaut, [Johannes Gräff lab](https://www.epfl.ch/labs/graefflab/), EPFL

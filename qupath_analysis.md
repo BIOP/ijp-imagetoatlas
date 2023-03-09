@@ -1,5 +1,23 @@
 # Using ABBA's registration in QuPath
 
+-----
+[**Back to documentation main page**](index.md)
+
+-----
+
+<!-- TOC -->
+* [Using ABBA's registration in QuPath](#using-abbas-registration-in-qupath)
+  * [Exporting ABBA registration results](#exporting-abba-registration-results)
+  * [Importing ABBA registration results in QuPath](#importing-abba-registration-results-in-qupath)
+  * [Analysis in QuPath](#analysis-in-qupath)
+  * [Compute the location of detections into the Atlas coordinates](#compute-the-location-of-detections-into-the-atlas-coordinates)
+    * [Allen Brain CCFv3 coordinates](#allen-brain-ccfv3-coordinates)
+  * [Repositories for data analysis](#repositories-for-data-analysis)
+  * [Display results in 3D](#display-results-in-3d)
+<!-- TOC -->
+
+-----
+
 ## Exporting ABBA registration results
 When a registration is done in ABBA, and if the slices have been opened from a QuPath project, it is possible to re-export the registration results into the original QuPath project.
 
@@ -93,7 +111,7 @@ For the particular case of the Adult Mouse Allen Brain Atlas CCFv3, coordinates 
 
 Mind the axes names and orientations!
 
-## Analysis in QuPath
+## Repositories for data analysis
 
 You can use the scripts developed by [@enassar](https://github.com/enassar) and [@nickdelgrosso](https://github.com/nickdelgrosso) in this repository: https://github.com/nickdelgrosso/ABBA-QuPath-utility-scripts in order to automate cell detection and export.
 
@@ -109,4 +127,7 @@ Some analysis scripts are also available in https://github.com/nickdelgrosso/ABB
 
 To be done... combining [PaQuo](https://paquo.readthedocs.io/en/latest/quickstart.html) and [BrainRender](https://github.com/brainglobe/brainrender) looks like the best option for this task. 
 
-[**Back to step by step tutorial**](usage.md)
+-----
+[**Back to documentation main page**](index.md)
+
+-----

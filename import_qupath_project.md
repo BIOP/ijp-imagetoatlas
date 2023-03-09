@@ -5,6 +5,19 @@
 
 -----
 
+<!-- TOC -->
+* [Getting started with ABBA](#getting-started-with-abba)
+  * [ABBA Navigation](#abba-navigation)
+  * [Allen Brain Atlas display options](#allen-brain-atlas-display-options)
+  * [Import a QuPath project in ABBA](#import-a-qupath-project-in-abba)
+  * [Other imports](#other-imports)
+    * [Current ImageJ window](#current-imagej-window)
+    * [Direct opening of a file](#direct-opening-of-a-file)
+    * [Sources from BigDataViewer Playground](#sources-from-bigdataviewer-playground)
+<!-- TOC -->
+
+-----
+
 
 Note : you will  need a mouse, since navigating with a trackpad can be very frustrating.
 

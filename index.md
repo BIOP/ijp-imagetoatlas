@@ -2,6 +2,23 @@
 
 -----
 
+<!-- TOC -->
+  * [ABBA - Aligning Big Brains & Atlases](#abba---aligning-big-brains--atlases)
+  * [Documentation](#documentation)
+    * [1. Youtube tutorial](#1-youtube-tutorial)
+    * [2. Workshop slides](#2-workshop-slides)
+    * [3. This website / reference documentation](#3-this-website--reference-documentation)
+* [Troubleshooting](#troubleshooting)
+  * [Frequent issues / Frequently asked questions](#frequent-issues--frequently-asked-questions)
+    * [The sections are gigantic when opened in ABBA](#the-sections-are-gigantic-when-opened-in-abba)
+    * [I only have hemi-brain sections. Can I use ABBA ?](#i-only-have-hemi-brain-sections-can-i-use-abba-)
+    * [I can't start any elastix registrations](#i-cant-start-any-elastix-registrations)
+    * [I cannot see any image after I import my Qupath project](#i-cannot-see-any-image-after-i-import-my-qupath-project)
+    * [I want to use another atlas than the ones available](#i-want-to-use-another-atlas-than-the-ones-available)
+<!-- TOC -->
+
+-----
+
 Aligning Big Brains & Atlases or ABBA for short, is a Fiji plugin which allows to register thin serial sections to several atlases, in coronal, sagittal and horizontal orientations.
 
 Within Fiji, you have access to the [3D mouse Allen Brain atlas](http://atlas.brain-map.org/atlas?atlas=602630314), and the [Waxholm Space Atlas of the Sprague Dawley Rat Brain](https://www.nitrc.org/projects/whs-sd-atlas). With [ABBA-Python](https://github.com/NicoKiaru/ABBA-Python), you can access all [BrainGlobe atlases](https://brainglobe.info/).

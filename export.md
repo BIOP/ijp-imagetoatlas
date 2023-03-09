@@ -1,7 +1,20 @@
 # Exporting ABBA's registration results
 
 -----
-[**Back to registration workflow**](usage.md)
+[**Back to documentation main page**](index.md)
+
+-----
+
+<!-- TOC -->
+* [Exporting ABBA's registration results](#exporting-abbas-registration-results)
+  * [Principle](#principle)
+  * [1. Warping slices onto the atlas](#1-warping-slices-onto-the-atlas)
+    * [Why it is not so obvious](#why-it-is-not-so-obvious)
+    * [Export warped slices](#export-warped-slices)
+  * [2. Warping atlas onto the slice](#2-warping-atlas-onto-the-slice)
+  * [3. Export an image of the atlas coordinates onto the slice](#3-export-an-image-of-the-atlas-coordinates-onto-the-slice)
+  * [4. Export atlas regions in the Roi Manager](#4-export-atlas-regions-in-the-roi-manager)
+<!-- TOC -->
 
 -----
 
@@ -131,6 +144,6 @@ Here a gif demoing this possibility:
 ![Exporting regions to the ROI Manager](assets/gif/fiji_export_ij1_roi_manager.gif)
 
 -----
-[**Back to registration workflow**](usage.md)
+[**Back to documentation main page**](index.md)
 
 -----

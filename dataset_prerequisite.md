@@ -5,6 +5,16 @@
 
 -----
 
+<!-- TOC -->
+* [Which data source can be used by ABBA ?](#which-data-source-can-be-used-by-abba-)
+  * [1. Any Bio-Formats supported file format,](#1-any-bio-formats-supported-file-format)
+  * [2. ideally multi-resolution (Bio-Formats supported),](#2-ideally-multi-resolution--bio-formats-supported--)
+  * [3. and calibrated.](#3-and-calibrated)
+* [Tested file formats](#tested-file-formats)
+* [More technicalities](#more-technicalities)
+<!-- TOC -->
+
+-----
 
 ABBA can read data [from many sources](dataset_prerequisite.md#more-technicalities), but these two sources are the most commonly used:
 - [Bio-Formats](https://bio-formats.readthedocs.io/en/latest/supported-formats.html) compatible files
@@ -56,7 +66,7 @@ If you want to avoid the conversion step and keep using uncalibrated files, you 
 ---
 
 
-## Tested file formats
+# Tested file formats
 
 File formats  which are known to work:
 - Olympus / Evident `.vsi`
@@ -75,7 +85,7 @@ According to bio-formats, these formats should be optimal as well:
 
 Note that Leica `.lif` files are not well supported because their multi-resolution data are not handled by Bio-Formats.
 
-## More technicalities
+# More technicalities
 
 Hidden somewhere in the state of an ABBA instance, one or several BigDataViewer dataset are used. BigDataViewer dataset can use different backends, which are implementing the java `ImageLoader` interface. See this [youtube video](https://youtu.be/LHI7vXiUUms?t=280) for more details.
 

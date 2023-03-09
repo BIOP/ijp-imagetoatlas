@@ -4,6 +4,35 @@
 [**Back to registration workflow**](usage.md)
 
 -----
+
+<!-- TOC -->
+* [Registration of mouse brain slices with ABBA](#registration-of-mouse-brain-slices-with-abba)
+  * [Slices selection](#slices-selection)
+  * [Slices display options](#slices-display-options)
+  * [Registration to Allen Brain Atlas (2017 CCF v3)](#registration-to-allen-brain-atlas--2017-ccf-v3-)
+    * [Flip and/or rotate slices](#flip-andor-rotate-slices)
+    * [Manual interactive transformation of slices (Scale, Translate, Rotate)](#manual-interactive-transformation-of-slices--scale-translate-rotate-)
+    * [Registration of the slices along the Atlas axis (manual)](#registration-of-the-slices-along-the-atlas-axis--manual-)
+        * [Drag selected slices](#drag-selected-slices)
+        * [Distribute spacing between selected slices](#distribute-spacing-between-selected-slices)
+        * [Manual positioning of the slices along the Atlas axis + locking position of "key slices"](#manual-positioning-of-the-slices-along-the-atlas-axis--locking-position-of--key-slices-)
+        * [Using the review mode to investigate the position of slices along the atlas](#using-the-review-mode-to-investigate-the-position-of-slices-along-the-atlas)
+      * [Correcting atlas slicing orientation](#correcting-atlas-slicing-orientation)
+    * [Registration of the slices along the Atlas axis (automated)](#registration-of-the-slices-along-the-atlas-axis--automated-)
+    * [In-plane slices registration](#in-plane-slices-registration)
+      * [Affine registration (Automated)](#affine-registration--automated-)
+      * [Spline registration (Automated)](#spline-registration--automated-)
+      * [BigWarp registration (Manual)](#bigwarp-registration--manual-)
+      * [Editing a registration](#editing-a-registration)
+      * [Canceling / removing a registration](#canceling--removing-a-registration)
+    * [Browsing registration steps](#browsing-registration-steps)
+    * [Development - adding a registration method of your own](#development---adding-a-registration-method-of-your-own)
+    * [Registration workflow example](#registration-workflow-example)
+  * [Saving / opening registrations results](#saving--opening-registrations-results)
+<!-- TOC -->
+
+-----
+
 Once your dataset is opened in ABBA. You will be able to position slices first along the slicing axis (position multiple slices along "z"), then to perform 2d adjustment for each slice (tilt and roll atlas slicing correction, 2d affine and spline in-plane registrations).
 
 When you start ABBA, you will be in the `Positioning mode`, where the Allen brain atlas is displayed with slices regularly spaced on top of the slices present on your dataset. 
@@ -74,9 +103,7 @@ warning: If your slices are of sufficient quality, do not forget to check [**ABB
 
 In order to position each slice approximately along the slicing axis, ABBA tries to provide a convenient interface to manipulate series of slices.
 
-### First coarse positioning
-
-#### Rotate / flip slices
+### Flip and/or rotate slices
 
 It could happen that the acquired slices were flipped or rotated compared to the atlas. The tab `Edit Selected Slices` provides 4 actions which can be used to correct this:
 
@@ -86,7 +113,7 @@ The first two buttons rotate selected slices by 90 degrees CW or CCW. The next t
 
 Contrary to a lot of other actions in ABBA, these actions (flip rotate) are not undone with `ctrl+Z` (and redone with `ctrl+shift+z`). These actions can be easily reversed by applying an opposite rotation / flip.
 
-#### Manual interactive transformation of slices (Scale, Translate, Rotate)
+### Manual interactive transformation of slices (Scale, Translate, Rotate)
 
 In the top menu bar `Edit>ABBA - Interactive Transform` can be used to apply a transformation on the selected slices. You can rotate, translate and scale anisotropically the sections (which are often shrunk in Y by about 20 % because of the slicing).
 
@@ -96,11 +123,12 @@ This can be convenient if you need a fast visual feedback to the transformations
 
 Contrary to a lot of other actions in ABBA, this interactive command cannot be undone with `ctrl+Z` (and redone with `ctrl+shift+z`). However, you can restore the original transformation if you click the `Restore initial settings` button.
 
-#### Correct location of slices along the axis
+### Registration of the slices along the Atlas axis (manual)
 
 Before any registration can be started, you will need to position the slices along the Z axis, and also correct the atlas slicing angles to match those of your dataset. The atlas slicing angle will be the same for all  slices, which is the reason why it's convenient to register one animal at a time.
 
 ##### Drag selected slices
+
 First of all, it may happen that your slices are not sorted correctly along the atlas axis. If this is the case, you can select slices which are not at their correct position and drag them along the axis. You can create some interval if necessary in between two slices in order to let others in between if needed.
 
 You can select one or several slices and then, by dragging the rectangles located below the atlas, you can shift selected slices along the slicing axis:
@@ -115,7 +143,7 @@ In order to apply the same spacing between each selected slices, you can either 
 
 When no slice is a key slice ( see next section ), `distribute spacing` keeps constant the position of the first and last selected slices.
 
-##### Lock the position of slices by setting "key slices"
+##### Manual positioning of the slices along the Atlas axis + locking position of "key slices"
 
 By using ABBA interface, you will be able (and will need), to switch between a zoomed-out overview and a zoomed-in view where you look precisely at how a particular slice matches the atlas.
 
@@ -175,7 +203,7 @@ If you notice a problem in the review mode, you can switch back any time to the 
 
 --- 
 
-##### Correcting atlas slicing orientation
+#### Correcting atlas slicing orientation
 
 A card named `Atlas Slicing` contains two sliders which allow to tune the atlas slicing angles:
 
@@ -183,7 +211,11 @@ A card named `Atlas Slicing` contains two sliders which allow to tune the atlas 
 
 You can use slices with recognizable features to orient the atlas slicing. The atlas slicing angles will identical for all sections. It is possible to tilt the atlas, but not to "bend" it.
 
-## Slices registration 
+### Registration of the slices along the Atlas axis (automated)
+
+If you are using the Allen Brain Atlas and registering coronal sections, you can use [DeepSlice](registration_with_deepslice.md) to automate this first part of the workflow.
+
+### In-plane slices registration 
 
 Once the slices have been correctly oriented and positioned along the slicing axis, they can be registered to the atlas in 2D, linearly or in a non-linear way.
 
@@ -221,7 +253,7 @@ It is possible (and advised) to perform several successive registration. You wil
 
 ---
 
-### Affine registration (Automated)
+#### Affine registration (Automated)
 
 You can select the slices you want to register and start an affine registration by clicking, in the top menu bar: 
 `Align > ABBA - Elastix Registration (Affine)`.
@@ -249,7 +281,7 @@ A few extra options are available:
 * `Show registration results as ImagePlus`, if checked, will display the raw data used for elastix registration
 * `Background offset value` can be left at zero in most cases. If your camera has a significant zero offset value in comparison to the channel intensities, this offset can be specified here for a better registration.
 
-### Spline registration (Automated)
+#### Spline registration (Automated)
 
 You can select the slices you want to register and start a spline registration by clicking, in the top menu bar:
 `Align > ABBA - Elastix Registration (Spline)`
@@ -259,11 +291,11 @@ You can select the slices you want to register and start a spline registration b
 In spline registration, a grid of size "`Number of control points along X`" is used to perform a spline registration between selected slice and the atlas. Again only a single channel registration is supported. 
 It is advised to use a value for control point between 5 (25 max total number of landmarks) to 20 (400 max total number of landmarks). 
 
-### BigWarp registration (Manual)
+#### BigWarp registration (Manual)
 
 [BigWarp](https://imagej.github.io/plugins/bigwarp) can be used if you want to have a full control over the registration. This method allows to place your own landmarks manually. Since this method is manual, slices are processed sequentially by the user.
 
-### Editing a registration
+#### Editing a registration
 
 When the last registration of a slice is either a BigWarp registration or a spline registration, the result can be manually edited by selected the slice and then clicking in the top menu bar `Align > ABBA - Edit Last Registration`.
 
@@ -288,7 +320,7 @@ After editing a registration, you can export it again (to QuPath for instance), 
 
 ![Bigwarp transform](assets/gif/fiji_bigwarp_edit.gif)
 
-### Canceling / removing a registration
+#### Canceling / removing a registration
 
 If you are not happy with the result of a registration, you can select the slices where you want to remove the last registration, and:
 * click, top menu bar : `Align > ABBA - Remove Last registration`
