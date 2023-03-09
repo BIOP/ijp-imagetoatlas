@@ -7,12 +7,12 @@
 
 
 ABBA can read data [from many sources](dataset_prerequisite.md#more-technicalities), but these two sources are the most commonly used:
-- Bio-Formats compatible files
+- [Bio-Formats](https://bio-formats.readthedocs.io/en/latest/supported-formats.html) compatible files
 - Images from an [OMERO](https://www.openmicroscopy.org/omero/) database
 
 This section deals with the file formats requirements. 
 
-:warn: While ABBA can [open files directly](TODO), it is highly recommended to package all files from a single animal into a QuPath project, as explained in the [create QuPath dataset section](create_qupath_dataset.md).
+:warning: While ABBA can [open files directly](import_qupath_project.html#direct-opening-of-a-file), it is highly recommended to package all files from a single animal into a QuPath project, as explained in the [create QuPath dataset section](create_qupath_dataset.md).
 
 In short ABBA can use any [Bio-Formats supported file format](dataset_prerequisite.md#1-any-bio-formats-supported-file-format), [ideally multi-resolution](dataset_prerequisite.md#2-ideally-multi-resolution--bio-formats-supported--), and [calibrated](dataset_prerequisite.md#3-and-calibrated).
 
@@ -43,7 +43,7 @@ RGB images as well as fluorescent 8-bits and 16-bits images have been successful
 
 ## 3. and calibrated.
 
-All files need to be properly calibrated (microns, millimeters, etc, but not pixels!). ABBA takes advantage of the  calibration to set appropriate registration parameters. To knoe if your images are properly calibrated, you can for instance open them in QuPath, using a Bio-Formats image server, and check that the pixel size is set and correct.
+All files need to be properly calibrated (microns, millimeters, etc, but not pixels!). ABBA takes advantage of the  calibration to set appropriate registration parameters. To know if your images are properly calibrated, you can for instance open them in QuPath, using a Bio-Formats image server, and check that the pixel size is set and correct.
 
 If your images are uncalibrated, ABBA will assume that each pixel has a size of 1mm, which will lead to gigantic images. To correct for this issue, you can re-save your images with the proper metadata and make sure that the metadata is recognized by bio-formats. This can be done with [Kheops](https://github.com/BIOP/ijp-kheops), which offers an option to override the pixel size while an OME-TIFF version is re-exported.
 

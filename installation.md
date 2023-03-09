@@ -28,7 +28,16 @@ All Oses (Win, Mac, Linux):
 My advice : on windows, use the installer. Otherwise, use automated bash scripts. Troubleshoot issues by reading the manual installation.
 ## Standalone installer
 
-A [windows installer](https://github.com/NicoKiaru/ABBA-Python/releases/tag/v0.5.1-win) exists, which is still in its early phase of testing (released March 2023). This is by far the easiest way to install ABBA. It also brings the advantage of including DeepSlice and BrainGlobe directly into ABBA, because it ships a suitable conda environment in parallel with Fiji. 
+A [windows installer](https://github.com/NicoKiaru/ABBA-Python/releases/tag/v0.5.1-win) exists, which is still in its early phase of testing (released March 2023). This is by far the easiest way to install ABBA. It also brings the advantage of including DeepSlice and BrainGlobe directly into ABBA, because it ships a suitable conda environment in parallel with Fiji, and uses [PyImageJ](https://pyimagej.readthedocs.io/en/latest/) to communicate between both.
+
+This installer do not install QuPath and its extensions. To install these:
+
+* Install [Git for Windows](https://gitforwindows.org/) with standard options (just hit next on the installer)
+* Download the [install scripts](https://github.com/BIOP/biop-bash-scripts/archive/refs/heads/main.zip) that comes from [this repository](https://github.com/BIOP/biop-bash-scripts)
+* Unzip them
+* Double click on the script `full_install_abba.sh`
+* It is recommended to choose `C:/` as the install path
+* Wait until the script ends
 
 ## Automated installation
 
@@ -38,7 +47,7 @@ You will need a decent internet connection! Several gigabytes need to be downloa
 ### For Windows
 
 * Install [Git for Windows](https://gitforwindows.org/) with standard options (just hit next on the installer)
-* Download the [install scripts](https://github.com/BIOP/biop-bash-scripts/archive/refs/heads/main.zip)
+* Download the [install scripts](https://github.com/BIOP/biop-bash-scripts/archive/refs/heads/main.zip) that comes from [this repository](https://github.com/BIOP/biop-bash-scripts)
 * Unzip them
 * Double click on the script `full_install_abba.sh`
 * It is recommended to choose `C:/` as the install path
@@ -159,11 +168,15 @@ These are the two atlases present by default. If this is the first time you laun
 
 ![Allen atlas download progress bar](./assets/img/fiji_atlas_download_progress_bar.png)
 
-The allen brain atlas and associated files will be cached in your user folder under the directory `\cached_atlas`. These data are directly  downloaded from zenodo repositories:
+The allen brain atlas and associated files will be cached:
+* in your user folder under the directory `\cached_atlas` (Allen Brain CCFv3 and Waxholm Rat v4) (in `C:\ProgramData\abba-atlas` if you used the windows installer)
+* in your user folder under the directory `\.brainglobe` for brainglobe atlases
+
+For non-brainglobe atlases, data are downloaded from zenodo repositories:
 - [Mouse atlas repository](https://zenodo.org/record/4486659#.YnfL81RBziE)
 - [Rat atlas repository](https://zenodo.org/record/5644162#.YZrUnroo8uU)
 
-If the initial atlas download failed, because you had no access to internet or for any other reason, you can restart the command and let empty fields to trigger again the download from Zenodo.
+If the initial atlas download failed, because you had no access to internet or for any other reason, you can restart the command to trigger again the download from Zenodo.
 
 -----
 [**Back to documentation main page**](index.md)
