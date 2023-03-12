@@ -38,7 +38,7 @@ Windows:
 Mac OSX:
 - automated bash scripts (Fiji)
 
-All Oses (Win, Mac, Linux):
+All OS (Win, Mac, Linux):
 - manual installation (Fiji)
 - from ABBA-Python github repository (Fiji + Brainglobe + DeepSlice + Python)
 

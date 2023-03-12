@@ -83,7 +83,7 @@ A step by step tutorial that details how to register a demo dataset. Installatio
       * [(Optional) Correct the registration for some slices in ABBA and re-export the new result to QuPath](registration.md#editing-a-registration)
       * [Detect cells in QuPath](qupath_analysis.md#analysis-in-qupath)
       * [Append CCF coordinates in QuPath detected cells measurements](qupath_analysis.md#export-result-into-common-coordinates-of-the-allen-brain-atlas-ccfv3)
-      * [Export a table containing, for all cells, their measurements as well as their location in the brain atlas CCF](qupath_analysis.md#display-results)
+      * [Export a table containing, for all cells, their measurements as well as their location in the brain atlas CCF](qupath_analysis.md#compute-the-location-of-detections-into-the-atlas-coordinates)
 
   * With Python TODO
   * Other export modalities
