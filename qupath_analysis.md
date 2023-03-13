@@ -114,7 +114,7 @@ Mind the axes names and orientations!
 
 A typical workflow will consist of detecting cells in a particular region of the brain and exporting these results for all slices.
 
-You can find the full QuPath documentation at https://qupath.readthedocs.io/en/0.4/, and get some support in https://forum.image.sc. But here are a few basic scripts to get you started:
+You can find the full QuPath documentation at [https://qupath.readthedocs.io/en/0.4/](https://qupath.readthedocs.io/en/0.4/), and get some support in [https://forum.image.sc](https://forum.image.sc). But here are a few basic scripts to get you started:
 
 ### Basic QuPath scripts
 
