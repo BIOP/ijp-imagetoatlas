@@ -54,43 +54,31 @@ A step by step tutorial that details how to register a demo dataset. Installatio
 
 ### 3. This website / reference documentation
 
-* [**Installation**](installation.md)
-
-
-* [**Data source**](dataset_prerequisite.md)
+* [Installation](installation.md)
+* [Using ABBA with Python](abba_python.md)
+* [Data source](dataset_prerequisite.md)
   * [File formats requirements](dataset_prerequisite.md)
     * [Bio-Formats readable](dataset_prerequisite.md#1-any-bio-formats-supported-file-format)
     * [Pyramidal/Multi-resolution file format preferred](dataset_prerequisite.md#2-ideally-multi-resolution--bio-formats-supported--)
     * [Calibration required](dataset_prerequisite.md#3-and-calibrated)
   * [Other sources (OMERO, QuPath, n5...)](dataset_prerequisite.md#more-technicalities)
-
-
-* [**Example datasets**](example_datasets.md)
-
-
-* [**Creating a QuPath project for ABBA**](create_qupath_dataset.md)
-
-- [**Registration workflow**](usage.md) < the core of ABBA
-  
-
-
-
-
-* **Post registration analysis**
+* [Example datasets](example_datasets.md)
+* [Creating a QuPath project for ABBA](create_qupath_dataset.md)
+* [Registration workflow](usage.md) < the core of ABBA
+* Post registration analysis
   * With QuPath
-    * [Export ABBA's registration results to the QuPath project](qupath_analysis.md)
+    * [Using ABBA's registration in QuPath](qupath_analysis.md)
       * [Import registration results as QuPath annotations](qupath_analysis.md#importing-abba-registration-results-in-qupath)
       * [(Optional) Correct the registration for some slices in ABBA and re-export the new result to QuPath](registration.md#editing-a-registration)
       * [Detect cells in QuPath](qupath_analysis.md#analysis-in-qupath)
       * [Append CCF coordinates in QuPath detected cells measurements](qupath_analysis.md#export-result-into-common-coordinates-of-the-allen-brain-atlas-ccfv3)
       * [Export a table containing, for all cells, their measurements as well as their location in the brain atlas CCF](qupath_analysis.md#compute-the-location-of-detections-into-the-atlas-coordinates)
-
-  * With Python TODO
+  * With Python
+    * [Using ABBA's registration with Python](python_analysis.md) 
   * Other export modalities
-    * [**Export modalities other than QuPath (warped slices, etc.)**](export.md)
+    * [Export modalities other than QuPath (warped slices, etc.)](export.md)
 
-
-* **ABBA advanced features** (TODO)
+* ABBA advanced features (TODO)
   * Headless ABBA
     * Fiji scripting
     * Python scripting
@@ -102,9 +90,7 @@ A step by step tutorial that details how to register a demo dataset. Installatio
   * Creating a registration plugin for ABBA
     * With Java
     * With Python
-  * How registrations are stored 
-
-
+  * How registrations are stored
 
 # Troubleshooting
 
