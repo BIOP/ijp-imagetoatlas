@@ -55,7 +55,8 @@ public class ImportSlicesFromFilesCommand implements Command {
                                 true, "files", files,
                                 "datasetname", datasetname,
                                 "unit", "MILLIMETER",
-                                "splitrgbchannels", split_rgb_channels
+                                "split_rgb_channels", split_rgb_channels,
+                                "plane_origin_convention", "TOP LEFT"
                             )
                             .get()
                             .getOutput("spimdata");
