@@ -8,11 +8,20 @@
 <!-- TOC -->
 * [Using ABBA's registration in QuPath](#using-abbas-registration-in-qupath)
   * [Exporting ABBA registration results](#exporting-abba-registration-results)
-  * [Importing ABBA registration results in QuPath](#importing-abba-registration-results-in-qupath)
-  * [Analysis in QuPath](#analysis-in-qupath)
-  * [Compute the location of detections into the Atlas coordinates](#compute-the-location-of-detections-into-the-atlas-coordinates)
+  * [Importing ABBA registration results: creating Atlas regions as QuPath annotations](#importing-abba-registration-results--creating-atlas-regions-as-qupath-annotations)
+  * [Importing ABBA registration results: adding Atlas coordinates to QuPath detections measurements](#importing-abba-registration-results--adding-atlas-coordinates-to-qupath-detections-measurements)
     * [Allen Brain CCFv3 coordinates](#allen-brain-ccfv3-coordinates)
-  * [Repositories for data analysis](#repositories-for-data-analysis)
+  * [Analysis in QuPath](#analysis-in-qupath)
+    * [Basic QuPath scripts](#basic-qupath-scripts)
+      * [1. Clear all objects (cells, annotations)](#1-clear-all-objects--cells-annotations-)
+      * [2. Clear annotations only (Atlas regions)](#2-clear-annotations-only--atlas-regions-)
+      * [3. Import atlas regions (take care to not import it several times: clear the objects before)](#3-import-atlas-regions--take-care-to-not-import-it-several-times--clear-the-objects-before-)
+      * [4. Collect and select a subregion (example with the acronym ‘CTXpl’)](#4-collect-and-select-a-subregion--example-with-the-acronym-ctxpl-)
+      * [5. same as 4., but restricted to the left part of the brain](#5-same-as-4-but-restricted-to-the-left-part-of-the-brain)
+      * [6. to collect and select subregions from a list](#6-to-collect-and-select-subregions-from-a-list)
+      * [7. to collect all regions except the ones on a list](#7-to-collect-all-regions-except-the-ones-on-a-list)
+      * [8. Removing objects](#8-removing-objects)
+  * [Other repositories for data analysis](#other-repositories-for-data-analysis)
   * [Display results in 3D](#display-results-in-3d)
 <!-- TOC -->
 
@@ -139,7 +148,7 @@ Here's the result:
 
 ![Regions just imported in QuPath](assets/img/qupath_regions_just_imported.png)
 
-#### 4. Collect and select a subregion (here the only with the acronym ‘CTXpl’)
+#### 4. Collect and select a subregion (example with the acronym ‘CTXpl’)
 
 ```
 // Gets all annotations (=regions) named CTXpl (left and right)
