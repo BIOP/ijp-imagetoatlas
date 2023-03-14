@@ -75,8 +75,7 @@ A step by step tutorial that details how to register a demo dataset. Installatio
       * [Export a table containing, for all cells, their measurements as well as their location in the brain atlas CCF](qupath_analysis.md#compute-the-location-of-detections-into-the-atlas-coordinates)
   * With Python
     * [Using ABBA's registration with Python](python_analysis.md) 
-  * Other export modalities
-    * [Export modalities other than QuPath (warped slices, etc.)](export.md)
+  * [Export modalities](export.md)
 
 * ABBA advanced features (TODO)
   * Headless ABBA
@@ -90,7 +89,8 @@ A step by step tutorial that details how to register a demo dataset. Installatio
   * Creating a registration plugin for ABBA
     * With Java
     * With Python
-  * How registrations are stored
+  * ABBA state file and registration specs
+    * [State file, registration format](registration_storage.md) 
 
 # Troubleshooting
 
@@ -129,6 +129,8 @@ There are other atlases, of course, but adding them in ABBA still requires some 
 3. I need time.
 
 There's also [a script](https://forum.image.sc/t/custom-atlas-in-abba/77206) that allows to create a fake atlas from an image, but no ontology is imported.
+
+Check also [this forum post](https://forum.image.sc/t/customizing-atlas-labels-of-ccf2017-for-use-in-abba/78523/5) if you want to do modifications to the original Allen Brain CCFv3 atlas.
 
 <!---
 ### Markdown

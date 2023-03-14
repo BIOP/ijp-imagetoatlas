@@ -5,7 +5,7 @@
 
 -----
 
-At this point of the documentation, you're supposed to have created a QuPath project, compatible with ABBA as detailed from the documentation. The QuPath contains the sections coming from a single animal.
+At this point of the documentation, you're supposed to have created a QuPath project, compatible with ABBA as detailed from the documentation. The QuPath project contains sections coming from a single animal.
 
 * [**Getting started with Fiji's ABBA plugin**](import_qupath_project.md)
   * [BigDataViewer navigation](import_qupath_project.md#abba-navigation)
