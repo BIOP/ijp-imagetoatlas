@@ -15,6 +15,7 @@
     * [I can't start any elastix registrations](#i-cant-start-any-elastix-registrations)
     * [I cannot see any image after I import my Qupath project](#i-cannot-see-any-image-after-i-import-my-qupath-project)
     * [I want to use another atlas than the ones available](#i-want-to-use-another-atlas-than-the-ones-available)
+* [Javadoc](#javadoc)
 <!-- TOC -->
 
 -----
