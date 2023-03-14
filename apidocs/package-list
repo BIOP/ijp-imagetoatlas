@@ -1,0 +1,16 @@
+ch.epfl.biop
+ch.epfl.biop.atlas.aligner
+ch.epfl.biop.atlas.aligner.action
+ch.epfl.biop.atlas.aligner.adapter
+ch.epfl.biop.atlas.aligner.command
+ch.epfl.biop.atlas.aligner.gui
+ch.epfl.biop.atlas.aligner.gui.bdv
+ch.epfl.biop.atlas.aligner.gui.bdv.card
+ch.epfl.biop.atlas.aligner.plugin
+ch.epfl.biop.quicknii
+ch.epfl.biop.registration
+ch.epfl.biop.registration.sourceandconverter
+ch.epfl.biop.registration.sourceandconverter.affine
+ch.epfl.biop.registration.sourceandconverter.bigwarp
+ch.epfl.biop.registration.sourceandconverter.mirror
+ch.epfl.biop.registration.sourceandconverter.spline
