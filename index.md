@@ -132,6 +132,11 @@ There's also [a script](https://forum.image.sc/t/custom-atlas-in-abba/77206) tha
 
 Check also [this forum post](https://forum.image.sc/t/customizing-atlas-labels-of-ccf2017-for-use-in-abba/78523/5) if you want to do modifications to the original Allen Brain CCFv3 atlas.
 
+# Javadoc
+
+[Link to Javadoc](apidocs/index.html)
+
+
 <!---
 ### Markdown
 
