@@ -44,9 +44,23 @@ In QuPath, provided you have correctly installed the [required extensions](insta
 
 ![Load annotation](assets/img/qupath_import_atlas_regions.png)
 
-When opening the annotation, you will be able to split the regions between left and right hemi-brain, or not. You can press `N` to hide the name of the imported regions. The image will be less cluttered.
+### Display tips
+The region boundaries are displayed. If you do not split between the left and right hemi-brain, the annotation labels are all along the middle of the image and overlapping
 
-If you go to the workflow tab of QuPath, you will see that a workflow step is present and thus you can create a script out of it, such as:
+If you split the regions between left and right hemi-brain, the display will be less cluttered. Moreover, you can press `N` to hide the name of the imported regions.
+
+You can also use the transparency slider to change the opacity of the regions.
+
+
+
+    Is there a way to get the text label to display on the actual region?
+
+If you put a low transparency, double-click on a region and have the hierarchy tab activated, you will see in yellow the region selected, and the region selected will be synchronized on the hierarchy tab:
+
+![Sync between hierarchy tab and annotations](assets/qupath_sync_hierarchy_annotations.png)
+
+### Automating the import for all slices
+If you go to the workflow tab of QuPath, you will see that a workflow step is present. You can create a script out of it, such as:
 
 ```
 setImageType('FLUORESCENCE');
@@ -54,7 +68,7 @@ clearAllObjects();
 qupath.ext.biop.abba.AtlasTools.loadWarpedAtlasAnnotations(getCurrentImageData(), "acronym", false);
 ```
 
-This script can be ran in batch to import the regions for all slices present in the QuPath project.
+This script can be run in batch to import the regions for all slices present in the QuPath project.
 
 
 ## Importing ABBA registration results: adding Atlas coordinates to QuPath detections measurements

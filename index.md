@@ -69,7 +69,7 @@ A step by step tutorial that details how to register a demo dataset. Installatio
 * Post registration analysis
   * With QuPath
     * [Using ABBA's registration in QuPath](qupath_analysis.md)
-      * [Import registration results as QuPath annotations](qupath_analysis.md#importing-abba-registration-results-in-qupath)
+      * [Import registration results as QuPath annotations](qupath_analysis.md#importing-abba-registration-results--creating-atlas-regions-as-qupath-annotations)
       * [(Optional) Correct the registration for some slices in ABBA and re-export the new result to QuPath](registration.md#editing-a-registration)
       * [Detect cells in QuPath](qupath_analysis.md#analysis-in-qupath)
       * [Append CCF coordinates in QuPath detected cells measurements](qupath_analysis.md#export-result-into-common-coordinates-of-the-allen-brain-atlas-ccfv3)
