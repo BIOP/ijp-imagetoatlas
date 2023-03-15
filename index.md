@@ -135,10 +135,22 @@ There's also [a script](https://forum.image.sc/t/custom-atlas-in-abba/77206) tha
 
 Check also [this forum post](https://forum.image.sc/t/customizing-atlas-labels-of-ccf2017-for-use-in-abba/78523/5) if you want to do modifications to the original Allen Brain CCFv3 atlas.
 
-# Javadoc
+### I can't open my state file anymore
 
-[Link to Javadoc](apidocs/index.html)
+This issue occurred many times. In most cases, the state can be recovered by editing the ABBA state file(s). Here are the various causes of the issue:
+* files being moved around (or drive letter being changed) ([post](https://forum.image.sc/t/issue-loading-saved-states/75223/7))
+* entries being deleted from QuPath project after an ABBA state was created ([post](https://forum.image.sc/t/help-for-abba-in-fiji-could-not-load-saved-state/71477/7))
+* Bio-Formats memoization [storing the absolute file path of an old location](https://github.com/BIOP/ijp-imagetoatlas/issues/154#issuecomment-1419904570)
+* before ABBA v0.5, the abba state was stored in three different files. Any of them missing was a problem 
 
+Any project created after ABBA v0.5+ will be less susceptible to these issues: 
+* an ABBA state is not split in three files anymore, but stored [in a zipped file with an `.abba` extension](registration_storage.md#abba-state-files). This also allows to remove some absolute path.
+* when required, the absolute path is written as few times as possible, and there's a mechanism that ask users to update their files if their location is not valid anymore.
+* if an entry is removed in QuPath, the state file can nonetheless be opened in ABBA.
+
+You should still fix first your file location in QuPath before fixing the QuPath project path in ABBA
+
+Side note: the new state mechanism allow to share much more easily a registration between collaborators, or even with a publication. A few changes in file path, and you're done.
 
 <!---
 ### Markdown
