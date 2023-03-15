@@ -78,20 +78,22 @@ A step by step tutorial that details how to register a demo dataset. Installatio
     * [Using ABBA's registration with Python](python_analysis.md) 
   * [Export modalities](export.md)
 
-* ABBA advanced features (TODO)
+* ABBA advanced documentation
   * Headless ABBA
-    * Fiji scripting
-    * Python scripting
+    * Fiji scripting (TODO)
+    * Python scripting (TODO)
   * 3D Reconstruction
-    * Slice rasterization
+    * Slice rasterization (TODO)
   * Creating a plugin for ABBA
-    * With Java
-    * With Python
+    * With Java (TODO)
+    * With Python (TODO)
   * Creating a registration plugin for ABBA
-    * With Java
-    * With Python
+    * With Java (TODO)
+    * With Python (TODO)
   * ABBA state file and registration specs
     * [State file, registration format](registration_storage.md) 
+  * Javadoc
+    * [ABBA Javadoc](apidocs/index.html)
 
 # Troubleshooting
 
