@@ -42,11 +42,43 @@ It has been developed by the [BioImaging & Optics Platform](https://www.epfl.ch/
 
 There are three forms of documentation:
 
-### 1. Youtube tutorial
+### 1. [Youtube tutorial](https://www.youtube.com/watch?v=sERGONVw4zE)
 
 A video tutorial is nice to see ABBA in action, and to check the little details which may have been missed in other documentation forms. However, the version presented is not completely up-to-date: a video tutorial is a lot of work. It requires more work to be updated.
 
-* [Youtube video tutorial (March 2022)](https://www.youtube.com/watch?v=sERGONVw4zE).
+There's no information about DeepSlice in the video, and no information about QuPath post processing.
+
+[Youtube video tutorial (March 2022)](https://www.youtube.com/watch?v=sERGONVw4zE).
+
+- [0:00 Introduction](https://www.youtube.com/watch?v=sERGONVw4zE&t=0s)
+- [0:30 Installation](https://www.youtube.com/watch?v=sERGONVw4zE&t=30s)
+- [1:27 Dataset presentation](https://www.youtube.com/watch?v=sERGONVw4zE&t=87s)
+- [2:25 Dataset definition in QuPath](https://www.youtube.com/watch?v=sERGONVw4zE&t=145s)
+- [4:58 Bdv navigation and Atlas display options](https://www.youtube.com/watch?v=sERGONVw4zE&t=298s)
+- [7:52 QuPath project import](https://www.youtube.com/watch?v=sERGONVw4zE&t=472s)
+- [9:06 Short description of ABBA's interface (Bdv view, table view)](https://www.youtube.com/watch?v=sERGONVw4zE&t=566s)
+- [9:56 How to display the sections + how to remove unwanted sections](https://www.youtube.com/watch?v=sERGONVw4zE&t=594s)
+- [13:46 Selecting sections in the Bdv view](https://www.youtube.com/watch?v=sERGONVw4zE&t=826s)
+- [15:20 Translating sections along the Z atlas axis (antero-posterior position)](https://www.youtube.com/watch?v=sERGONVw4zE&t=920s)
+- [16:05 Tip: reversing section order](https://www.youtube.com/watch?v=sERGONVw4zE&t=965s)
+- [17:14 How to cancel an action](https://www.youtube.com/watch?v=sERGONVw4zE&t=1034s)
+- [17:38 First key slice](https://www.youtube.com/watch?v=sERGONVw4zE&t=1058s)
+- [19:19 Second key slice (+atlas cutting angle adjustment)](https://www.youtube.com/watch?v=sERGONVw4zE&t=1159s)
+- [21:54 Third key slice](https://www.youtube.com/watch?v=sERGONVw4zE&t=1314s)
+- [23:00 Distribute spacing between sections](https://www.youtube.com/watch?v=sERGONVw4zE&t=1380s)
+- [23:43 How to save your work (state file)](https://www.youtube.com/watch?v=sERGONVw4zE&t=1423s)
+- [24:04 Closing and reopening from a state file](https://www.youtube.com/watch?v=sERGONVw4zE&t=1444s)
+- [24:51 Introducing positioning and review modes](https://www.youtube.com/watch?v=sERGONVw4zE&t=1491s)
+- [26:00 Browsing sections in review mode](https://www.youtube.com/watch?v=sERGONVw4zE&t=1560s)
+- [27:15 Manual affine in-plane registration](https://www.youtube.com/watch?v=sERGONVw4zE&t=1635s)
+- [29:50 Automated affine in-plane registration](https://www.youtube.com/watch?v=sERGONVw4zE&t=1790s)
+- [33:28 Automated spline in-plane registration](https://www.youtube.com/watch?v=sERGONVw4zE&t=2008s)
+- [35:30 Browsing registration steps](https://www.youtube.com/watch?v=sERGONVw4zE&t=2130s)
+- [37:30 What you can attempt to improve the registration quality](https://www.youtube.com/watch?v=sERGONVw4zE&t=2250s)
+- [39:29 Export registration results from Fiji to QuPath](https://www.youtube.com/watch?v=sERGONVw4zE&t=2369s)
+- [40:04 Import registration results in QuPath](https://www.youtube.com/watch?v=sERGONVw4zE&t=2404s)
+- [42:14 How to correct a registration result with BigWarp](https://www.youtube.com/watch?v=sERGONVw4zE&t=2534s)
+- [46:42 Conclusion](https://www.youtube.com/watch?v=sERGONVw4zE&t=2802s)
 
 ### 2. Workshop slides
 
