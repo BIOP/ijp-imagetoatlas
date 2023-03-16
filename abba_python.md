@@ -1,5 +1,10 @@
 # [ABBA-Python](https://github.com/NicoKiaru/ABBA-Python)
 
+-----
+[**Back to documentation main page**](index.md)
+
+-----
+
 ABBA, which is Java based, can be used in conjunction with Python. This allows to use Python functionalities (BrainGlobe, DeepSlice) during the registration, but also to run python code for analysis after the registration. The 'glue' between Java and Python is made with [`JPype`](https://github.com/jpype-project/jpype) and [`PyImageJ`](https://github.com/imagej/pyimagej). There are different ways to use ABBA-Python as explained below.
 
 ## Windows installer
@@ -27,4 +32,9 @@ To know the function available from Python with an Abba object, you can browse [
 There's also an intrinsic difficulty if you want to access all the available API: the Python is discovered fine, but JPype can also import Java classes on the fly, and the Java methods available from these Java classes can't be automatically discovered in the Python IDE. In practice, when I need to access both what's available in Python and in Java, I have PyCharm opened on the ABBA-Python repository, and IntelliJ opened on the original [Java ABBA repository](https://github.com/BIOP/ijp-imagetoatlas). Yep, that's not very straightforward. 
 
 There are probably some possibilities to make PyCharm discover automatically Java classes and method, I've heard of them, but I do not know them, and are they easy to use ?
+
+-----
+[**Back to documentation main page**](index.md)
+
+-----
  

@@ -1,5 +1,10 @@
 # ABBA state file and registration formats 
 
+-----
+[**Back to documentation main page**](index.md)
+
+-----
+
 <!-- TOC -->
 * [ABBA state file and registration formats](#abba-state-file-and-registration-formats)
   * [ABBA state files](#abba-state-files)
@@ -224,3 +229,10 @@ A json transform file will fit this structure:
 * `transform_{n}`: from micrometer to pixel, with a (0,0) original
 
 In most cases you will not need to understand and reverse engineer this file, but directly use java or python functions that know how to read this file.
+
+(see also [this issue](https://github.com/BIOP/ijp-imagetoatlas/issues/160) for a discussion about the transformation sequence)
+
+-----
+[**Back to documentation main page**](index.md)
+
+-----
