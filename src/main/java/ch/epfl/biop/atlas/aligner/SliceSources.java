@@ -1322,6 +1322,11 @@ public class SliceSources {
         return alphaSource;
     }
 
+    public IJShapeRoiArray getOriginalAtlasRegions(String namingChoice) {
+        prepareExport(namingChoice);
+        return (IJShapeRoiArray) cvtRoisOrigin.to(IJShapeRoiArray.class);
+    }
+
     public static class RegistrationAndSources {
 
         final Registration reg;
