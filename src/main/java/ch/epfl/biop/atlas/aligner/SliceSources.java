@@ -1010,6 +1010,11 @@ public class SliceSources {
         storeInQuPathProjectIfExists(ijroisfile, erasePreviousFile);
     }
 
+    public IJShapeRoiArray getOriginalAtlasRegions(String namingChoice) {
+        prepareExport(namingChoice);
+        return (IJShapeRoiArray) cvtRoisOrigin.to(IJShapeRoiArray.class);
+    }
+
     public void exportRegionsToFile(String namingChoice, File dirOutput, boolean erasePreviousFile) {
 
         prepareExport(namingChoice);
