@@ -44,7 +44,16 @@ ABBA can facilitate the use of DeepSlice by generating low resolution sections a
 
 ---
 
+---
+
+:warning: Set the slices display settings to avoid oversaturated pixels!
+
+---
+
+DeepSlice works with 8-bits RGB images. ABBA always rescales intensities according to the user display settings. Please make sure that the display settings are not completely off, resulting in an oversaturated image, or in an almost fully black image. When more features are visible, the registration quality will improve.
+
 ### Using DeepSlice in ABBA: step by step procedure
+* set the slices display settings to avoid oversaturated pixels
 * select all the slices you want to register
 * click in the top menu bar: `Align > ABBA - DeepSlice Registration`
 
