@@ -11,7 +11,7 @@
 
 	<groupId>ch.epfl.biop</groupId>
 	<artifactId>ImageToAtlasRegister</artifactId>
-	<version>0.5.4-SNAPSHOT</version>
+	<version>0.5.4</version>
 
 	<name>Plugin To Register Images to Atlases</name>
 	<description>Collection of tools to register images to atlases in FIJI.</description>
@@ -78,7 +78,7 @@
 		<connection>scm:git:https://github.com/BIOP/ijp-imagetoatlas</connection>
 		<developerConnection>scm:git:git@github.com:BIOP/ijp-imagetoatlas</developerConnection>
 		<url>https://github.com/BIOP/ijp-imagetoatlas</url>
-		<tag>HEAD</tag>
+		<tag>ImageToAtlasRegister-0.5.4</tag>
 	</scm>
 
 	<issueManagement>
