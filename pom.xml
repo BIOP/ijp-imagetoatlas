@@ -127,7 +127,7 @@
 
 		<!-- ABBA specific -->
 		<pyimagej-scijava-command.version>0.1.6</pyimagej-scijava-command.version>
-		<atlas.version>0.1.12</atlas.version>
+		<atlas.version>0.1.14</atlas.version>
 		<oshi-core.version>5.5.1</oshi-core.version>
 
 		<!--because xml deserialization with JAXB is not included in Java 11, and we prepare migrating to Java 11 -->
@@ -140,7 +140,7 @@
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>sign,deploy-to-scijava</releaseProfiles>
 
-		<!--scijava.app.directory>C:/Fiji.app</scijava.app.directory-->
+		<scijava.app.directory>C:/Fiji.app</scijava.app.directory>
 		<!--scijava.app.directory>C:/Users/nicol/Dropbox/BIOP/ABBA-Python/constructor/Fiji.app</scijava.app.directory-->
 
 	</properties>
