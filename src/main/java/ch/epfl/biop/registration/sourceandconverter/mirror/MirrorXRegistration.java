@@ -43,8 +43,9 @@ public class MirrorXRegistration extends RealTransformSourceAndConverterRegistra
 
     }
 
+    final public static String MIRROR_X_REGISTRATION_NAME = "Mirror X";
     public String toString() {
-        return "Mirror X";
+        return MIRROR_X_REGISTRATION_NAME;
     }
 
 }

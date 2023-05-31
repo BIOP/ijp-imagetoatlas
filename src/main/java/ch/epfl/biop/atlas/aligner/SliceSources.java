@@ -27,6 +27,7 @@ import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import ch.epfl.biop.registration.Registration;
 import ch.epfl.biop.registration.sourceandconverter.affine.AffineTransformedSourceWrapperRegistration;
 import ch.epfl.biop.registration.sourceandconverter.affine.CenterZeroRegistration;
+import ch.epfl.biop.registration.sourceandconverter.mirror.MirrorXRegistration;
 import ch.epfl.biop.registration.sourceandconverter.mirror.MirrorXTransform;
 import ch.epfl.biop.registration.sourceandconverter.spline.RealTransformSourceAndConverterRegistration;
 import ch.epfl.biop.sourceandconverter.processor.SourcesChannelsSelect;
@@ -1312,8 +1313,10 @@ public class SliceSources {
         Collections.reverse(this.registrations);
 
         for (Registration reg : this.registrations) {
-            listRegions = reg.getTransformedPtsFixedToMoving(listRegions);
-            listLeftRight = reg.getTransformedPtsFixedToMoving(listLeftRight);
+            if (!(reg instanceof MirrorXRegistration)) {// Skips mirror registration
+                listRegions = reg.getTransformedPtsFixedToMoving(listRegions);
+                listLeftRight = reg.getTransformedPtsFixedToMoving(listLeftRight);
+            }
         }
         
         Collections.reverse(this.registrations);
