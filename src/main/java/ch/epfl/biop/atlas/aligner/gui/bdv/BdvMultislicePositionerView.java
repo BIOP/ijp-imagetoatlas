@@ -932,22 +932,46 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     }
 
     public void saveState() {
+        saveState(null);
+    }
+    public void saveState(File stateFileIn) {
+
         //BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ABBAStateSaveCommand.class, hierarchyLevelsSkipped,"mp", msp );
         try {
-            CommandModule cm = msp.getContext().getService(CommandService.class)
-                    .run(ABBAStateSaveCommand.class, true,"mp", msp).get();
+            if (stateFileIn==null) {
+                CommandModule cm = msp.getContext().getService(CommandService.class)
+                        .run(ABBAStateSaveCommand.class, true, "mp", msp).get();
 
-            msp.waitForTasks();
+                msp.waitForTasks();
 
-            boolean success = (Boolean) (cm.getOutput("success"));
+                boolean success = (Boolean) (cm.getOutput("success"));
 
-            if (!success) {
-                errorMessageForUser.accept("State not saved!", "Something went wrong");
-                return;
+                if (!success) {
+                    errorMessageForUser.accept("State not saved!", "Something went wrong");
+                    return;
+                }
+
+                stateFileIn = (File) cm.getInput("state_file");
+            } else {
+                String extension = FilenameUtils.getExtension(stateFileIn.getAbsolutePath());
+                if ((extension==null)||(extension.trim().equals(""))) {
+                    msp.log.accept("Adding abba extension to state file");
+                    stateFileIn = new File(stateFileIn.getAbsolutePath()+".abba");
+                }
+
+                if (stateFileIn.exists()) {
+                    msp.errlog.accept("Error, this file already exists!");
+                    return;
+                } else {
+                    boolean success = msp.saveState(stateFileIn, true);
+                    if (!success) {
+                        errorMessageForUser.accept("State not saved!", "Something went wrong");
+                        return;
+                    }
+                }
             }
 
-            File f = (File) cm.getInput("state_file");
-            String fileNoExt = FilenameUtils.removeExtension(f.getAbsolutePath());
+            String fileNoExt = FilenameUtils.removeExtension(stateFileIn.getAbsolutePath());
             File viewFile = new File(fileNoExt+"_bdv_view.json");
 
             // Ok, let's save the view File
@@ -971,8 +995,8 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             writer.flush();
             writer.close();
 
-            if ((f.exists())&& (Files.size(Paths.get(f.getAbsolutePath()))>0)) {
-                infoMessageForUser.accept("State saved", "Path:" + f.getAbsolutePath());
+            if ((stateFileIn.exists())&& (Files.size(Paths.get(stateFileIn.getAbsolutePath()))>0)) {
+                infoMessageForUser.accept("State saved", "Path:" + stateFileIn.getAbsolutePath());
             } else {
                 errorMessageForUser.accept("State not saved!", "Something went wrong");
             }
