@@ -60,7 +60,7 @@ public class ImportSlicesFromQuPathCommand implements Command {
         } catch (ExecutionException e) {
             mp.errorMessageForUser.accept("QuPath Import Error",
                     "QuPath project couldn't be imported.\n"+
-                       "Check whether the project can be opened in QuPath (v0.2+), fix URI if necessary.\n"+
+                       "Check whether the project can be opened in QuPath, fix URI if necessary.\n"+
                        "Only (rotated) Bio-Formats image server are supported.");
             e.printStackTrace();
         }

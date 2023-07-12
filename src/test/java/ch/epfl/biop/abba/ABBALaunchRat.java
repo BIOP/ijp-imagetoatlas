@@ -5,7 +5,7 @@ import ch.epfl.biop.atlas.aligner.DebugView;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.command.ABBAStartCommand;
 import ch.epfl.biop.atlas.aligner.gui.bdv.BdvMultislicePositionerView;
-import ch.epfl.biop.atlas.rat.waxholm.spraguedawley.v4p1.command.WaxholmSpragueDawleyRatV4p1Command;
+import ch.epfl.biop.atlas.rat.waxholm.spraguedawley.v4p2.command.WaxholmSpragueDawleyRatV4p2Command;
 import ch.epfl.biop.atlas.struct.Atlas;
 import loci.common.DebugTools;
 import net.imagej.ImageJ;
@@ -21,7 +21,7 @@ public class ABBALaunchRat {
         ij.ui().showUI();
         DebugTools.enableLogging ("OFF");
 
-        Atlas ratAtlas = (Atlas) ij.command().run(WaxholmSpragueDawleyRatV4p1Command.class, true).get().getOutput("ba");
+        Atlas ratAtlas = (Atlas) ij.command().run(WaxholmSpragueDawleyRatV4p2Command.class, true).get().getOutput("ba");
 
         MultiSlicePositioner mp = (MultiSlicePositioner) (ij.command()
                 .run(ABBAStartCommand.class, true,
