@@ -68,7 +68,6 @@ public class ABBAForumHelpCommand implements Command {
             body +="Biop Wrappers "+VersionUtils.getVersion(ElastixTask.class)+nl;
             body +="Registration Server "+VersionUtils.getVersion(RemoteElastixTask.class)+nl;
             //noinspection deprecation
-            body +="(Legacy) Bdv BioFormats "+VersionUtils.getVersion(BioFormatsTools.class)+nl;
             body +="Updates sites: "+sites_string+nl;
             body +="```";
 

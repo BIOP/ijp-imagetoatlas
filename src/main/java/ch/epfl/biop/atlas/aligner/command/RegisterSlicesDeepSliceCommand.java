@@ -21,6 +21,7 @@ import ij.gui.WaitForUserDialog;
 import net.imglib2.realtransform.AffineTransform3D;
 import org.scijava.Context;
 import org.scijava.InstantiableException;
+import org.scijava.ItemVisibility;
 import org.scijava.command.Command;
 import org.scijava.platform.PlatformService;
 import org.scijava.plugin.Parameter;
@@ -78,6 +79,9 @@ import java.util.function.Supplier;
 public class RegisterSlicesDeepSliceCommand implements Command {
 
     static Logger logger = LoggerFactory.getLogger(RegisterSlicesDeepSliceCommand.class);
+
+    @Parameter(visibility = ItemVisibility.MESSAGE)
+    public String message = "<html><b>Don't forget to adjust min/max display settings!</b> <br>  Almost 50% of images sent by ABBA users to DeepSlice are over-saturated. <br> (and thus, badly registered) </html>";
 
     @Parameter
     MultiSlicePositioner mp;

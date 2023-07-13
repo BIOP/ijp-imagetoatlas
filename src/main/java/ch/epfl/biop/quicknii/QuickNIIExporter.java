@@ -1,5 +1,6 @@
 package ch.epfl.biop.quicknii;
 
+import ij.process.ColorProcessor;
 import ch.epfl.biop.atlas.aligner.SliceToImagePlus;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.sourceandconverter.processor.SourcesProcessor;
@@ -79,10 +80,15 @@ public class QuickNIIExporter {
 
             if (convertTo8Bits) {
                 new ImageConverter(imp).convertToGray8();
+
             }
 
             if (convertToJpeg) {
-
+                /*double ratioSaturated = calculateSaturatedPixelRatio(imp);
+                IJ.log(imp.getTitle()+" - Saturation Ratio = "+(int) (ratioSaturated*100)+" %");
+                if (ratioSaturated > 0.15) {
+                    IJ.log("Image "+imp.getTitle()+" is oversaturated! (>15%), please adjust B&C of the channel before export!! ");
+                }*/
                 IJ.saveAs(imp,"jpeg",
                         datasetFolder.getAbsolutePath() + File.separator + // Folder
                                 imageName + "_s" + df.format(i) + ".jpg" // image name, three digits, and underscore s
@@ -101,6 +107,35 @@ public class QuickNIIExporter {
         logger.accept("Export as QuickNii Dataset done - Folder : "+datasetFolder.getAbsolutePath());
 
     }
+
+    // See https://github.com/BIOP/ijp-imagetoatlas/issues/164
+    /*public static double calculateSaturatedPixelRatio(ImagePlus image) {
+        if (!(image.getProcessor() instanceof ColorProcessor)) {
+            return 0;
+        }
+        ColorProcessor processor = (ColorProcessor) image.getProcessor();
+        int width = processor.getWidth();
+        int height = processor.getHeight();
+        int saturatedPixelCount = 0;
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int pixel = processor.getPixel(x, y);
+                int red = (pixel >> 16) & 0xFF;
+                int green = (pixel >> 8) & 0xFF;
+                int blue = pixel & 0xFF;
+
+                if (red == 255 || green == 255 || blue == 255) {
+                    saturatedPixelCount++;
+                }
+            }
+        }
+
+        double totalPixels = width * height;
+        double saturatedPixelRatio = saturatedPixelCount / totalPixels;
+
+        return saturatedPixelRatio;
+    }*/
 
     public static class Builder {
         File datasetFolder;
