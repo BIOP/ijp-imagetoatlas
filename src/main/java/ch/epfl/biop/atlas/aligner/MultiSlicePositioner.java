@@ -34,8 +34,15 @@ import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import sc.fiji.persist.RuntimeTypeAdapterFactory;
 import sc.fiji.persist.ScijavaGsonHelper;
 
-import javax.swing.*;
-import java.io.*;
+
+import java.io.BufferedOutputStream;
+import java.io.Closeable;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -128,16 +135,18 @@ public class MultiSlicePositioner implements Closeable {
             logger.error(title+":"+message);
 
     /**
-     * Blocking error message for users
+     * Blocking error message for users TODO
      */
     public BiConsumer<String, String> errorMessageForUser = (title, message) ->
-            JOptionPane.showMessageDialog(new JFrame(), message, title, JOptionPane.ERROR_MESSAGE);
+            logger.error(title+":"+message);
+            //JOptionPane.showMessageDialog(new JFrame(), message, title, JOptionPane.ERROR_MESSAGE); // Headless exception
 
     /**
      * Blocking warning message for users
      */
     public BiConsumer<String, String> warningMessageForUser = (title, message) ->
-            JOptionPane.showMessageDialog(new JFrame(), message, title, JOptionPane.WARNING_MESSAGE);
+            logger.warn(title+":"+message);
+            //JOptionPane.showMessageDialog(new JFrame(), message, title, JOptionPane.WARNING_MESSAGE);
 
     public Consumer<String> errlog = (message) -> {
         logger.error("Multipositioner : "+message);
