@@ -25,7 +25,10 @@
 
 ---
 
-:warning: ABBA should be used with QuPath v0.4+ (v0.3+ still possible)!
+
+# ABBA should be used with **QuPath 0.4.4**
+
+:warning: ABBA should be used with **QuPath 0.4.4** (or above). If you are using QuPath 0.4.0, 0.4.1, 0.4.2 or 0.4.3 you NEED TO UPDATE IT!
 
 ---
 
