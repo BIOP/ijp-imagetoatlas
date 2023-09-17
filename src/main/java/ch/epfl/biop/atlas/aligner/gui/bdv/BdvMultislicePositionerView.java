@@ -63,10 +63,14 @@ import ch.epfl.biop.atlas.aligner.plugin.IABBARegistrationPlugin;
 import ch.epfl.biop.atlas.aligner.plugin.RegistrationPluginHelper;
 import ch.epfl.biop.atlas.mouse.allen.ccfv3.command.AllenBrainAdultMouseAtlasCCF2017Command;
 import ch.epfl.biop.atlas.mouse.allen.ccfv3p1.command.AllenBrainAdultMouseAtlasCCF2017v3p1Command;
+import ch.epfl.biop.atlas.rat.waxholm.spraguedawley.v4.WaxholmSpragueDawleyRatV4Atlas;
+import ch.epfl.biop.atlas.rat.waxholm.spraguedawley.v4p2.WaxholmSpragueDawleyRatV4p2Atlas;
+import ch.epfl.biop.atlas.rat.waxholm.spraguedawley.v4p2.command.WaxholmSpragueDawleyRatV4p2Command;
 import ch.epfl.biop.atlas.struct.Atlas;
 import ch.epfl.biop.atlas.struct.AtlasNode;
 import ch.epfl.biop.bdv.gui.graphicalhandle.GraphicalHandle;
 import ch.epfl.biop.bdv.gui.graphicalhandle.GraphicalHandleListener;
+import ch.epfl.biop.wrappers.deepslice.ij2commands.DeepSlicePrefsSet;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import ij.IJ;
@@ -141,6 +145,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static bdv.ui.BdvDefaultCards.DEFAULT_SOURCEGROUPS_CARD;
@@ -410,9 +415,19 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         //DeepSliceCommand
         //noinspection deprecation
         if ((msp.getAtlas() instanceof AllenBrainAdultMouseAtlasCCF2017Command) || (msp.getAtlas() instanceof AllenBrainAdultMouseAtlasCCF2017v3p1Command)) {
-            logger.debug("Installing DeepSlice Web command");
-            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RegisterSlicesDeepSliceCommand.class, hierarchyLevelsSkipped, "mp", msp);
+
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), DeepSlicePrefsSet.class, 2);
+            logger.debug("Installing DeepSlice Command");
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RegisterSlicesDeepSliceCommand.class, hierarchyLevelsSkipped, "mp", msp, "model", "mouse");
         }
+
+        // TODO: Rat support
+        /*if ((msp.getAtlas() instanceof WaxholmSpragueDawleyRatV4p2Atlas) || (msp.getAtlas() instanceof WaxholmSpragueDawleyRatV4Atlas)) {
+
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), DeepSlicePrefsSet.class, 2);
+            logger.debug("Installing DeepSlice Command");
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RegisterSlicesDeepSliceCommand.class, hierarchyLevelsSkipped, "mp", msp, "model", "rat");
+        }*/
 
     }
 

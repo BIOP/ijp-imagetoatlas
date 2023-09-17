@@ -7,6 +7,7 @@ import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.RegisterSliceAction;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.atlas.aligner.plugin.IABBARegistrationPlugin;
+import ch.epfl.biop.java.utilities.TempDirectory;
 import ch.epfl.biop.quicknii.QuickNIIExporter;
 import ch.epfl.biop.quicknii.QuickNIISeries;
 import ch.epfl.biop.quicknii.QuickNIISlice;
@@ -16,6 +17,8 @@ import ch.epfl.biop.sourceandconverter.processor.SourcesAffineTransformer;
 import ch.epfl.biop.sourceandconverter.processor.SourcesChannelsSelect;
 import ch.epfl.biop.sourceandconverter.processor.SourcesProcessor;
 import ch.epfl.biop.sourceandconverter.processor.SourcesProcessorHelper;
+import ch.epfl.biop.wrappers.deepslice.DeepSliceTaskSettings;
+import ch.epfl.biop.wrappers.deepslice.DefaultDeepSliceTask;
 import ij.IJ;
 import ij.gui.WaitForUserDialog;
 import net.imglib2.realtransform.AffineTransform3D;
@@ -98,10 +101,10 @@ public class RegisterSlicesDeepSliceCommand implements Command {
     @Parameter(label = "Slices channels, 0-based, comma separated, '*' for all channels", description = "'0,2' for channels 0 and 2")
     String channels = "*";
 
-    @Parameter(label = "Section Name Prefix")
+    //@Parameter(label = "Section Name Prefix")
     String image_name_prefix = "Section";
 
-    @Parameter(label = "QuickNII dataset folder", style="directory")
+    //@Parameter(label = "QuickNII dataset folder", style="directory")
     File dataset_folder;
 
     @Parameter(label = "Allow change of atlas slicing angle")
@@ -128,11 +131,34 @@ public class RegisterSlicesDeepSliceCommand implements Command {
     //@Parameter
     boolean interpolate = false;
 
+    @Parameter(choices = {"mouse", "rat"}, label = "Mouse or Rat ?")
+    String model;
+
+    @Parameter(choices = {"Web", "Local"}, label = "Local Conda Env or Web ?")
+    String run_mode;
+
     @Parameter(required = false, persist = false)
     Function<File,File> deepSliceProcessor = null;
 
     @Override
     public void run() {
+        if (model.equals("rat")) {
+            throw new UnsupportedOperationException("Rat model unsupported yet!");
+        }
+
+        TempDirectory td = new TempDirectory("deepslice");
+        dataset_folder = td.getPath().toFile();
+        td.deleteOnExit();
+
+        if (deepSliceProcessor == null) {
+            switch (run_mode) {
+                case "Local":deepSliceProcessor =
+                        (input_folder) -> RegisterSlicesDeepSliceCommand.deepSliceLocalRunner(model, input_folder);
+                break;
+                default:deepSliceProcessor = this::deepSliceWebRunner;break;
+            }
+        }
+
         List<SliceSources> slicesToRegister = mp.getSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
 
         if (slicesToRegister.size() == 0) {
@@ -153,32 +179,7 @@ public class RegisterSlicesDeepSliceCommand implements Command {
 
             exportDownsampledDataset(slicesToRegister);
 
-            File deepSliceResult;
-
-            if (deepSliceProcessor == null) {
-                IJ.log("Dataset exported in folder " + dataset_folder.getAbsolutePath());
-                new WaitForUserDialog("Now opening DeepSlice webpage",
-                        "Drag and drop all slices into the webpage.")
-                        .show();
-                try {
-                    ps.open(new URL("https://www.deepslice.com.au/"));
-                    ps.open(dataset_folder.toURI().toURL());
-                } catch (Exception e) {
-                    mp.errorMessageForUser.accept("Couldn't open DeepSlice from Fiji, ",
-                            "please go to https://www.deepslice.com.au/ and drag and drop your images located in " + dataset_folder.getAbsolutePath());
-                }
-                new WaitForUserDialog("DeepSlice result",
-                        "Put the 'results.xml' file into " + dataset_folder.getAbsolutePath() + " then press ok.")
-                        .show();
-                try {
-                    Thread.sleep(7000);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-                deepSliceResult = new File(dataset_folder, "results.xml");
-            } else {
-                deepSliceResult = deepSliceProcessor.apply(dataset_folder);//, "results.xml");
-            }
+            File deepSliceResult = deepSliceProcessor.apply(dataset_folder);
 
             if (!deepSliceResult.exists()) {
                 mp.errorMessageForUser.accept("Deep Slice registration aborted",
@@ -187,7 +188,7 @@ public class RegisterSlicesDeepSliceCommand implements Command {
                 return false;
             }
 
-            // Ok, now comes the big deal. First, real xml file
+            // Ok, now comes the big deal. First, read xml file
 
             try {
                 JAXBContext context = JAXBContext.newInstance(QuickNIISeries.class);
@@ -226,6 +227,7 @@ public class RegisterSlicesDeepSliceCommand implements Command {
             }
             return true;
         };
+
         AtomicInteger counter = new AtomicInteger();
         counter.set(0);
 
@@ -241,7 +243,6 @@ public class RegisterSlicesDeepSliceCommand implements Command {
                         SourcesProcessorHelper.Identity(),
                         SourcesProcessorHelper.Identity()).runRequest(true);
             }
-
         }
     }
 
@@ -518,6 +519,51 @@ public class RegisterSlicesDeepSliceCommand implements Command {
         public void accept(T t) {
             this.t = t;
         }
+    }
+
+    public static File deepSliceLocalRunner(String model, File input_folder) {
+        DeepSliceTaskSettings settings = new DeepSliceTaskSettings();
+        settings.model = model;
+        settings.input_folder = input_folder.getAbsolutePath();
+        settings.output_folder = null;
+        settings.propagate_angles = false;
+        settings.section_numbers = false;
+        settings.enforce_index_spacing = -1;
+        settings.enforce_index_order = false;
+        settings.ensemble = false;
+        DefaultDeepSliceTask task = new DefaultDeepSliceTask();
+        task.setSettings(settings);
+        try {
+            task.run();
+        } catch (Exception e) {
+            IJ.log("Could not run DeepSlice: "+e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+        return new File(input_folder, "results.xml");
+    }
+
+    public File deepSliceWebRunner(File input_folder) {
+        IJ.log("Dataset exported in folder " + input_folder.getAbsolutePath());
+        new WaitForUserDialog("Now opening DeepSlice webpage",
+                "Drag and drop all slices into the webpage.")
+                .show();
+        try {
+            ps.open(new URL("https://www.deepslice.com.au/"));
+            ps.open(input_folder.toURI().toURL());
+        } catch (Exception e) {
+            mp.errorMessageForUser.accept("Couldn't open DeepSlice from Fiji, ",
+                    "please go to https://www.deepslice.com.au/ and drag and drop your images located in " + dataset_folder.getAbsolutePath());
+        }
+        new WaitForUserDialog("DeepSlice result",
+                "Put the 'results.xml' file into " + input_folder.getAbsolutePath() + " then press ok.")
+                .show();
+        try {
+            Thread.sleep(7000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        return new File(input_folder, "results.xml");
     }
 
 }
