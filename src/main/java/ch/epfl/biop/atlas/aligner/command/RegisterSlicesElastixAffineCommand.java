@@ -1,5 +1,6 @@
 package ch.epfl.biop.atlas.aligner.command;
 
+import ch.epfl.biop.scijava.command.source.register.ElastixHelper;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
@@ -25,6 +26,8 @@ public class RegisterSlicesElastixAffineCommand extends RegistrationMultiChannel
     double background_offset_value_fixed = 0;
 
     public void runValidated() {
+
+        ElastixHelper.checkOrSetLocal(this.mp.getContext());
 
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("showImagePlusRegistrationResult", show_imageplus_registration_result);

@@ -1,5 +1,6 @@
 package ch.epfl.biop.atlas.aligner.command;
 
+import ch.epfl.biop.scijava.command.source.register.ElastixHelper;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
@@ -28,11 +29,14 @@ public class RegisterSlicesElastixSplineCommand extends RegistrationMultiChannel
     boolean show_imageplus_registration_result;
 
     public void runValidated() {
+
         if (nb_control_points_x <2) {
             mp.errorMessageForUser.accept("Cannot start registration", "Number of control points too low.");
             validationError = true;
             return;
         }
+
+        ElastixHelper.checkOrSetLocal(this.mp.getContext());
 
         //mp.registerElastixSpline(getFixedFilter(), getMovingFilter(), nbControlPointsX, showIJ1Result);
         Map<String, Object> parameters = new HashMap<>();
