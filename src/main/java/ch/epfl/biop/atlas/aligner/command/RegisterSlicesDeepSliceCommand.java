@@ -10,7 +10,6 @@ import ch.epfl.biop.atlas.aligner.plugin.IABBARegistrationPlugin;
 import ch.epfl.biop.java.utilities.TempDirectory;
 import ch.epfl.biop.quicknii.QuickNIIExporter;
 import ch.epfl.biop.quicknii.QuickNIISeries;
-import ch.epfl.biop.quicknii.QuickNIISlice;
 import ch.epfl.biop.registration.Registration;
 import ch.epfl.biop.registration.sourceandconverter.affine.AffineRegistration;
 import ch.epfl.biop.sourceandconverter.processor.SourcesAffineTransformer;
@@ -19,6 +18,7 @@ import ch.epfl.biop.sourceandconverter.processor.SourcesProcessor;
 import ch.epfl.biop.sourceandconverter.processor.SourcesProcessorHelper;
 import ch.epfl.biop.wrappers.deepslice.DeepSliceTaskSettings;
 import ch.epfl.biop.wrappers.deepslice.DefaultDeepSliceTask;
+import com.google.gson.Gson;
 import ij.IJ;
 import ij.gui.WaitForUserDialog;
 import net.imglib2.realtransform.AffineTransform3D;
@@ -33,8 +33,6 @@ import org.scijava.plugin.PluginService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.xml.bind.JAXBContext;
-import jakarta.xml.bind.Unmarshaller;
 import java.io.File;
 import java.io.FileReader;
 import java.net.URL;
@@ -188,21 +186,18 @@ public class RegisterSlicesDeepSliceCommand implements Command {
                 return false;
             }
 
-            // Ok, now comes the big deal. First, read xml file
+            // Ok, now comes the big deal. First, read json file
 
             try {
-                JAXBContext context = JAXBContext.newInstance(QuickNIISeries.class);
-                Unmarshaller unm = context.createUnmarshaller();
-                unm.setEventHandler(new jakarta.xml.bind.helpers.DefaultValidationEventHandler());
-                series = (QuickNIISeries) unm.unmarshal(new FileReader(deepSliceResult.getAbsolutePath()));
+                series = new Gson().fromJson(new FileReader(deepSliceResult.getAbsolutePath()), QuickNIISeries.class);
             } catch (Exception e) {
-                mp.errorMessageForUser.accept("Deep Slice Command error", "Could not parse xml file " + deepSliceResult.getAbsolutePath());
+                mp.errorMessageForUser.accept("Deep Slice Command error", "Could not parse json file " + deepSliceResult.getAbsolutePath());
                 e.printStackTrace();
                 return false;
             }
 
-            if (series.slices.length != slicesToRegister.size()) {
-                mp.errorMessageForUser.accept("Deep Slice Command error", "Please retry the command, DeepSlice returned less images than present in the input (" + (slicesToRegister.size() - series.slices.length) + " missing) ! ");
+            if (series.slices.size() != slicesToRegister.size()) {
+                mp.errorMessageForUser.accept("Deep Slice Command error", "Please retry the command, DeepSlice returned less images than present in the input (" + (slicesToRegister.size() - series.slices.size()) + " missing) ! ");
                 return false;
             }
 
@@ -262,9 +257,9 @@ public class RegisterSlicesDeepSliceCommand implements Command {
             double[] rys = new double[slices.size()];
 
             for (int i = 0; i < slices.size(); i++) {
-                QuickNIISlice slice = series.slices[i];
+                QuickNIISeries.SliceInfo slice = series.slices.get(i);
 
-                AffineTransform3D toCCFv3 = QuickNIISlice.getTransformInCCFv3(slice,nPixX,nPixY);
+                AffineTransform3D toCCFv3 = QuickNIISeries.getTransformInCCFv3(slice,nPixX,nPixY);
 
                 AffineTransform3D nonFlat = toCCFv3.preConcatenate(toABBA);
 
@@ -316,7 +311,7 @@ public class RegisterSlicesDeepSliceCommand implements Command {
 
         AffineTransform3D toABBA = mp.getReslicedAtlas().getSlicingTransformToAtlas().inverse();
         for (int i = 0; i < slices.size(); i++) {
-            QuickNIISlice slice = series.slices[i];
+            QuickNIISeries.SliceInfo slice = series.slices.get(i);
 
             final Matcher matcher = pattern.matcher(slice.filename);
 
@@ -326,7 +321,7 @@ public class RegisterSlicesDeepSliceCommand implements Command {
 
             logger.debug("Slice QuickNii "+i+" correspond to initial slice "+iSliceSource);
 
-            AffineTransform3D toCCFv3 = QuickNIISlice.getTransformInCCFv3(slice, nPixX, nPixY);
+            AffineTransform3D toCCFv3 = QuickNIISeries.getTransformInCCFv3(slice, nPixX, nPixY);
 
             AffineTransform3D nonFlat = toCCFv3.preConcatenate(toABBA);
 
@@ -392,9 +387,9 @@ public class RegisterSlicesDeepSliceCommand implements Command {
         final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
 
         for (int i = 0; i < slices.size(); i++) {
-            QuickNIISlice slice = series.slices[i];
+            QuickNIISeries.SliceInfo slice = series.slices.get(i);
 
-            AffineTransform3D toCCFv3 = QuickNIISlice.getTransformInCCFv3(slice,nPixX,nPixY);
+            AffineTransform3D toCCFv3 = QuickNIISeries.getTransformInCCFv3(slice,nPixX,nPixY);
 
             AffineTransform3D flat = toCCFv3.preConcatenate(toABBA);
 
@@ -540,7 +535,7 @@ public class RegisterSlicesDeepSliceCommand implements Command {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
-        return new File(input_folder, "results.xml");
+        return new File(input_folder, "results.json");
     }
 
     public File deepSliceWebRunner(File input_folder) {
@@ -556,14 +551,14 @@ public class RegisterSlicesDeepSliceCommand implements Command {
                     "please go to https://www.deepslice.com.au/ and drag and drop your images located in " + dataset_folder.getAbsolutePath());
         }
         new WaitForUserDialog("DeepSlice result",
-                "Put the 'results.xml' file into " + input_folder.getAbsolutePath() + " then press ok.")
+                "Put the 'results.json' file into " + input_folder.getAbsolutePath() + " then press ok.")
                 .show();
         try {
             Thread.sleep(7000);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        return new File(input_folder, "results.xml");
+        return new File(input_folder, "results.json");
     }
 
 }

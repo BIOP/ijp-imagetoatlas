@@ -9,7 +9,7 @@ import ch.epfl.biop.atlas.mouse.allen.ccfv3p1.command.AllenBrainAdultMouseAtlasC
 import ch.epfl.biop.atlas.struct.Atlas;
 import ch.epfl.biop.bdv.img.bioformats.command.CreateBdvDatasetBioFormatsCommand;
 import ch.epfl.biop.quicknii.QuickNIISeries;
-import ch.epfl.biop.quicknii.QuickNIISlice;
+import com.google.gson.Gson;
 import loci.common.DebugTools;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import net.imagej.ImageJ;
@@ -24,6 +24,7 @@ import java.io.FileReader;
 import java.util.Arrays;
 import java.util.List;
 
+// Pfou - do not work
 public class QuickNiiToABBA {
 
     public static void main(String... args) throws Exception {
@@ -40,18 +41,21 @@ public class QuickNiiToABBA {
 
         String path = "src/test/resources/quicknii/";
 
-        JAXBContext context = JAXBContext.newInstance(QuickNIISeries.class);
-        QuickNIISeries series = (QuickNIISeries) context.createUnmarshaller()
-                .unmarshal(new FileReader(path+"results2022-03-01.xml"));
+        /*
+        String data = FileUtils.readFileToString(new File(path + "2023-09-18_results.json"), "UTF-8");
+        QuickNIISeries series = (new Gson()).fromJson(data, QuickNIISeries.class);
+         */
 
-        File[] files = Arrays.stream(series.slices)
+        QuickNIISeries series = new Gson().fromJson(new FileReader(path+"2023-09-18_results.json"), QuickNIISeries.class);
+
+        File[] files = series.slices.stream()
                 .map(slice -> new File(path, slice.filename))
                 .toArray(File[]::new);
 
         // Creates a spimdata object
         AbstractSpimData asd = (AbstractSpimData) ij.command().run(CreateBdvDatasetBioFormatsCommand.class,true,
                 "unit", "MILLIMETER",
-                "splitrgbchannels", false,
+                "split_rgb_channels", false,
                 "files", files
         ).get().getOutput("spimdata");
 
@@ -72,10 +76,10 @@ public class QuickNiiToABBA {
             double[] rys = new double[sources.size()];
 
             for (int i = 0; i < sources.size(); i++) {
-                QuickNIISlice slice = series.slices[i];
+                QuickNIISeries.SliceInfo slice = series.slices.get(i);
                 SourceAndConverter source = sources.get(i);
 
-                AffineTransform3D toCCFv3 = QuickNIISlice.getTransformInCCFv3(slice,
+                AffineTransform3D toCCFv3 = QuickNIISeries.getTransformInCCFv3(slice,
                         (double) source.getSpimSource().getSource(0, 0).dimension(0),
                         (double) source.getSpimSource().getSource(0, 0).dimension(1));
 
@@ -119,10 +123,10 @@ public class QuickNiiToABBA {
         AffineTransform3D toABBA = mp.getReslicedAtlas().getSlicingTransformToAtlas().inverse();
 
         for (int i = 0; i < sources.size(); i++) {
-            QuickNIISlice slice = series.slices[i];
+            QuickNIISeries.SliceInfo slice = series.slices.get(i);
             SourceAndConverter source = sources.get(i);
 
-            AffineTransform3D toCCFv3 = QuickNIISlice.getTransformInCCFv3(slice,
+            AffineTransform3D toCCFv3 = QuickNIISeries.getTransformInCCFv3(slice,
                     (double) source.getSpimSource().getSource(0, 0).dimension(0),
                     (double) source.getSpimSource().getSource(0, 0).dimension(1));
 

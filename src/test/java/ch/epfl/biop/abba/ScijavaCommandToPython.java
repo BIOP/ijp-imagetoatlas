@@ -202,7 +202,7 @@ public class ScijavaCommandToPython {
                         .filter(clazz -> !(DynamicCommand.class.isAssignableFrom(clazz)))
                         .collect(Collectors.toSet());
 
-        commandClasses.remove(RegisterSlicesDeepSliceCommand.class); // specific to python : no need to keep this one
+        //commandClasses.remove(RegisterSlicesDeepSliceCommand.class); // specific to python : no need to keep this one
         commandClasses.remove(ABBAStartCommand.class); // the initialisation is different
 
         HashMap<String, String> methodPerClass = new HashMap<>();

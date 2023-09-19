@@ -1,36 +1,95 @@
 package ch.epfl.biop.quicknii;
 
-import jakarta.xml.bind.annotation.*;
+import net.imglib2.realtransform.AffineTransform3D;
 
-/**
- * Pfou....... XMl stuff, I need to learn xml, let's try JAXB (https://www.baeldung.com/jaxb)
- */
+import java.text.DecimalFormat;
+import java.util.List;
 
-@XmlRootElement(name = "series")
-@XmlType(propOrder = { "first", "last", "name", "slices"})
 public class QuickNIISeries {
-
-    @XmlAttribute
-    public String first;
-
-    @XmlAttribute
-    public String last;
-
-    @XmlAttribute
     public String name;
-
-    @XmlAttribute
+    public String target;
     public String aligner;
-
-    @XmlElement(name="slice")
-    public QuickNIISlice[] slices;
-
-    public String toString() {
-        String str = "First:"+first+" Last:"+last+" Name:"+name+"\n";
-        for (QuickNIISlice slice : slices) {
-            str+=slice.toString()+"\n";
-        }
-        return str;
+    public List<SliceInfo> slices;
+    public static class SliceInfo {
+        public String filename;
+        public double[] anchoring;
+        public double height;
+        public double width;
+        public int nr;
+        // "markers": [] <- ignored for now
     }
 
+
+    /**
+     *
+     * @param slice
+     * @param imgWidth given because deepslice returns a wrong size in the dataset
+     * @param imgHeight
+     * @return
+     */
+    public static AffineTransform3D getTransformInCCFv3(SliceInfo slice, double imgWidth, double imgHeight) {
+
+        // https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0216796
+
+        AffineTransform3D transform = new AffineTransform3D();
+        Anchor anchor = new Anchor(slice.anchoring);
+        // Divide by 100 -> allen 10 um per pixel to physical coordinates in mm
+
+        double[] u = {anchor.ux/imgWidth, anchor.uy/imgWidth, anchor.uz/imgWidth};
+
+        double[] v = {anchor.vx/imgHeight,anchor.vy/imgHeight,anchor.vz/imgHeight};
+
+        double[] w = {u[1]*v[2]-u[2]*v[1], u[2]*v[0]-u[0]*v[2], u[0]*v[1]-u[1]*v[0]};
+
+        double norm = Math.sqrt(w[0]*w[0]+w[1]*w[1]+w[2]*w[2]);
+
+        w[0]*=1.0/norm;
+        w[1]*=1.0/norm;
+        w[2]*=1.0/norm;
+
+        transform.set(
+                u[0],v[0], w[0],anchor.ox,
+                u[1],v[1], w[1],anchor.oy,
+                u[2],v[2], w[2],anchor.oz
+        );
+
+        AffineTransform3D toCCF = new AffineTransform3D();
+
+        toCCF.set(0.0, -0.025, 0.0, 13.2,
+                0.0, 0.0, -0.025, 8.0,
+                0.025, 0.0, 0.0, 0.0);
+
+        return transform.preConcatenate(toCCF);
+    }
+
+    public static class Anchor {
+        double ox, oy, oz;
+        double ux, uy, uz;
+        double vx, vy, vz;
+
+        static DecimalFormat df = new DecimalFormat("###.##");
+
+        public Anchor(double[] values) {
+
+            ox = values[0];
+            oy = values[1];
+            oz = values[2];
+
+            ux = values[3];
+            uy = values[4];
+            uz = values[5];
+
+            vx = values[6];
+            vy = values[7];
+            vz = values[8];
+
+        }
+
+        public String toString() {
+            return "o["+df.format(ox)+","+df.format(oy)+","+df.format(oz)+"]"+
+                    " u["+df.format(ux)+","+df.format(uy)+","+df.format(uz)+"]"+
+                    " v["+df.format(vx)+","+df.format(vy)+","+df.format(vz)+"]";
+        }
+
+    }
 }

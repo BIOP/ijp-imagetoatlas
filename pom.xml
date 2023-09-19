@@ -119,7 +119,7 @@
 		<bigdataviewer-selector.version>0.2.3</bigdataviewer-selector.version>
 
 		<!-- biop dependencies -->
-		<ijl-utilities-wrappers.version>0.9.0</ijl-utilities-wrappers.version>
+		<ijl-utilities-wrappers.version>0.9.1</ijl-utilities-wrappers.version>
 		<ijp-kheops.version>0.4.0</ijp-kheops.version>
 
 		<!-- maths -->
