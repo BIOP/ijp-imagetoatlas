@@ -140,7 +140,7 @@
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>sign,deploy-to-scijava</releaseProfiles>
 
-		<scijava.app.directory>C:/Fiji.app</scijava.app.directory>
+		<!--<scijava.app.directory>C:/Fiji.app</scijava.app.directory>-->
 		<!-- scijava.app.directory>C:/Users/nicol/Dropbox/BIOP/ABBA-Python/constructor/Fiji.app</scijava.app.directory -->
 
 	</properties>

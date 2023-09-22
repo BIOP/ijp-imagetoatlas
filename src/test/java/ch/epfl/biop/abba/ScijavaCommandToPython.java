@@ -6,6 +6,7 @@ import ch.epfl.biop.atlas.aligner.command.RegisterSlicesDeepSliceCommand;
 import org.reflections.Reflections;
 import org.scijava.Context;
 import org.scijava.ItemIO;
+import org.scijava.ItemVisibility;
 import org.scijava.command.Command;
 import org.scijava.command.DynamicCommand;
 import org.scijava.command.InteractiveCommand;
@@ -57,6 +58,7 @@ public class ScijavaCommandToPython {
         commandClassName = commandClassName.replace("QuickNII", "Quicknii");
         commandClassName = commandClassName.replace("BigWarp", "Bigwarp");
         commandClassName = commandClassName.replace("ABBA", "Abba");
+        commandClassName = commandClassName.replace("DeepSlice", "Deepslice");
         return commandClassName;
     }
 
@@ -85,6 +87,10 @@ public class ScijavaCommandToPython {
                         Parameter p = f.getAnnotation(Parameter.class);
                         return (p.type() == ItemIO.INPUT) || (p.type() == ItemIO.BOTH);
                     })
+                    .filter(f -> {
+                        Parameter p = f.getAnnotation(Parameter.class);
+                        return (p.visibility() != ItemVisibility.MESSAGE);
+                    })
                     .filter(f ->{
                         // Is this field provided by the python object ?
                         if (providedByPython.containsKey(f.getType())) {
@@ -100,7 +106,7 @@ public class ScijavaCommandToPython {
                 for (int i=0; i<inputFields.size(); i++) {
                     Field f = inputFields.get(i);
                     builder.append("\t\t"+f.getName().toLowerCase());
-                    addTypeHintIfPossible(builder, f);
+                    addTypeHintIfPossible(builder, f, false);
 
                     if (i<inputFields.size()-1) {
                         builder.append(",\n");
@@ -114,6 +120,39 @@ public class ScijavaCommandToPython {
             } else {
                 builder.append("):\n");
             }
+
+
+            /* Doc string
+                """
+                Description of the function and its arguments.
+
+                Parameters:
+                param1 (type): Description of the first parameter.
+                param2 (type): Description of the second parameter.
+
+                Returns:
+                return_type: Description of the return value.
+                """*/
+            builder.append("\t\"\"\"\n");
+            builder.append("\t"+plugin.description()+"\n\n");
+            if (inputFields.size()>0) {
+                builder.append("\tParameters:\n");
+                for (int i=0; i<inputFields.size(); i++) {
+                    Field f = inputFields.get(i);
+                    builder.append("\t"+f.getName().toLowerCase()+" ");
+                    addTypeHintIfPossible(builder, f, true);
+                    builder.append(": ");
+                    builder.append(f.getAnnotation(Parameter.class).label());
+                    builder.append("\n");
+
+                    //doc += "* ["+f.getType().getSimpleName()+"] **" + f.getName() + "**:" + f.getAnnotation(Parameter.class).label() + "\n";
+                    //doc += f.getAnnotation(Parameter.class).description() + "\n";
+                }
+
+            }
+            //builder.append("\t@return:\n");
+            //builder.append("\t\tNone\n");
+            builder.append("\t\"\"\"\n");
 
             builder.append("\t"+c.getSimpleName()+" = jimport('"+c.getName()+"')\n");
 
@@ -167,9 +206,13 @@ public class ScijavaCommandToPython {
         javaToPythonType = Collections.unmodifiableMap(aMap);
     }
 
-    private static void addTypeHintIfPossible(StringBuilder builder, Field f) {
+    private static void addTypeHintIfPossible(StringBuilder builder, Field f, boolean docString) {
         if (javaToPythonType.containsKey(f.getType())) {
-            builder.append(": "+javaToPythonType.get(f.getType()));
+            if (docString) {
+                builder.append("(" + javaToPythonType.get(f.getType())+")");
+            } else {
+                builder.append(": " + javaToPythonType.get(f.getType()));
+            }
         }
     }
 
@@ -202,7 +245,6 @@ public class ScijavaCommandToPython {
                         .filter(clazz -> !(DynamicCommand.class.isAssignableFrom(clazz)))
                         .collect(Collectors.toSet());
 
-        //commandClasses.remove(RegisterSlicesDeepSliceCommand.class); // specific to python : no need to keep this one
         commandClasses.remove(ABBAStartCommand.class); // the initialisation is different
 
         HashMap<String, String> methodPerClass = new HashMap<>();
@@ -215,6 +257,9 @@ public class ScijavaCommandToPython {
             String k = (String) key;
             System.out.println(methodPerClass.get(k));
         }
+
+        //System.out.println("TAKE CARE!!! BIND AGAIN DEEP AND SLICE IN THE API: deep_slice -> deepslice.");
+        //System.out.println("2 events: deep_slice register and deep_slice_documentation");
     }
 
 }

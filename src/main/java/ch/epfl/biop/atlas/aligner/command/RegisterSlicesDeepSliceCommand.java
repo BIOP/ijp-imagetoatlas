@@ -16,6 +16,7 @@ import ch.epfl.biop.sourceandconverter.processor.SourcesAffineTransformer;
 import ch.epfl.biop.sourceandconverter.processor.SourcesChannelsSelect;
 import ch.epfl.biop.sourceandconverter.processor.SourcesProcessor;
 import ch.epfl.biop.sourceandconverter.processor.SourcesProcessorHelper;
+import ch.epfl.biop.wrappers.deepslice.DeepSlice;
 import ch.epfl.biop.wrappers.deepslice.DeepSliceTaskSettings;
 import ch.epfl.biop.wrappers.deepslice.DefaultDeepSliceTask;
 import com.google.gson.Gson;
@@ -26,10 +27,12 @@ import org.scijava.Context;
 import org.scijava.InstantiableException;
 import org.scijava.ItemVisibility;
 import org.scijava.command.Command;
+import org.scijava.command.CommandService;
 import org.scijava.platform.PlatformService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.plugin.PluginService;
+import org.scijava.ui.UIService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,6 +41,7 @@ import java.io.FileReader;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -129,13 +133,13 @@ public class RegisterSlicesDeepSliceCommand implements Command {
     //@Parameter
     boolean interpolate = false;
 
-    @Parameter(choices = {"mouse", "rat"}, label = "Mouse or Rat ?")
+    @Parameter(choices = {"mouse", "rat"}, label = "('mouse', 'rat') Mouse or Rat ?")
     String model;
 
-    @Parameter(choices = {"Web", "Local"}, label = "Local Conda Env or Web ?")
+    @Parameter(choices = {"web", "local"}, label = "('local', 'web') Local Conda Env or Web ?")
     String run_mode;
 
-    @Parameter(required = false, persist = false)
+    //@Parameter(required = false, persist = false)
     Function<File,File> deepSliceProcessor = null;
 
     @Override
@@ -149,11 +153,32 @@ public class RegisterSlicesDeepSliceCommand implements Command {
         td.deleteOnExit();
 
         if (deepSliceProcessor == null) {
-            switch (run_mode) {
-                case "Local":deepSliceProcessor =
-                        (input_folder) -> RegisterSlicesDeepSliceCommand.deepSliceLocalRunner(model, input_folder);
+            switch (run_mode.trim().toLowerCase()) {
+                case "local":
+                    if (new File(DeepSlice.envDirPath).exists()) {
+                        deepSliceProcessor =
+                                (input_folder) -> RegisterSlicesDeepSliceCommand.deepSliceLocalRunner(model, input_folder);
+                    } else {
+                        mp.log.accept("Invalid deepSlice local environment: "+DeepSlice.envDirPath);
+                        mp.log.accept("Please setup the environment location with 'Plugins>BIOP>DeepSlice>DeepSlice setup...' or the API");
+                        mp.log.accept("Attempt to use Web interface instead...");
+                        if (!ctx.getService(UIService.class).isHeadless()) {
+                            mp.log.accept("Fall back to Web interface successful.");
+                            deepSliceProcessor = this::deepSliceWebRunner;
+                        } else {
+                            mp.errlog.accept("Can't use Web interface in headless mode, aborting DeepSlice registration");
+                            return;
+                        }
+                    }
                 break;
-                default:deepSliceProcessor = this::deepSliceWebRunner;break;
+                case "web":
+                default:
+                    if (!ctx.getService(UIService.class).isHeadless()) {
+                        deepSliceProcessor = this::deepSliceWebRunner;
+                    } else {
+                        mp.errlog.accept("Can't use Web interface in headless mode, aborting DeepSlice registration");
+                        return;
+                    }
             }
         }
 
