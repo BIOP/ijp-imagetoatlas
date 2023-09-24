@@ -258,8 +258,7 @@ public class ScijavaCommandToPython {
             System.out.println(methodPerClass.get(k));
         }
 
-        //System.out.println("TAKE CARE!!! BIND AGAIN DEEP AND SLICE IN THE API: deep_slice -> deepslice.");
-        //System.out.println("2 events: deep_slice register and deep_slice_documentation");
+        System.out.println("TAKE CARE!!! ADD JSTRING IN THE API for deepslice, and add JString(','.join(map(str, channels)))");
     }
 
 }
