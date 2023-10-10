@@ -259,6 +259,14 @@ public class ScijavaCommandToPython {
         }
 
         System.out.println("TAKE CARE!!! ADD JSTRING IN THE API for deepslice, and add JString(','.join(map(str, channels)))");
+        System.out.println("also put defaults in  def register_slices_elastix_affine(self,\n" +
+                "                                       channels_atlas_csv: str,\n" +
+                "                                       channels_slice_csv: str,\n" +
+                "                                       pixel_size_micrometer: float,\n" +
+                "                                       background_offset_value_moving: float = 0,\n" +
+                "                                       show_imageplus_registration_result: bool = False):");
+
+        System.out.println("Also add : .getOutput('success') to state open and state save");
     }
 
 }

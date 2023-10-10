@@ -411,15 +411,14 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ABBAUserFeedbackCommand.class, hierarchyLevelsSkipped);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), DeepSliceDocumentationCommand.class, hierarchyLevelsSkipped);
 
-
-        //DeepSliceCommand
-        //noinspection deprecation
-        if ((msp.getAtlas() instanceof AllenBrainAdultMouseAtlasCCF2017Command) || (msp.getAtlas() instanceof AllenBrainAdultMouseAtlasCCF2017v3p1Command)) {
-
+        if (isDeepSliceMouseCompatible(msp)) {
             BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), DeepSlicePrefsSet.class, 2);
             logger.debug("Installing DeepSlice Command");
             BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RegisterSlicesDeepSliceCommand.class, hierarchyLevelsSkipped, "mp", msp, "model", "mouse");
         }
+
+        //DeepSliceCommand
+        //noinspection deprecation
 
         // TODO: Rat support
         /*if ((msp.getAtlas() instanceof WaxholmSpragueDawleyRatV4p2Atlas) || (msp.getAtlas() instanceof WaxholmSpragueDawleyRatV4Atlas)) {
@@ -429,6 +428,29 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RegisterSlicesDeepSliceCommand.class, hierarchyLevelsSkipped, "mp", msp, "model", "rat");
         }*/
 
+    }
+
+    private boolean isDeepSliceMouseCompatible(MultiSlicePositioner msp) {
+        if ((msp.getAtlas() instanceof AllenBrainAdultMouseAtlasCCF2017Command) || (msp.getAtlas() instanceof AllenBrainAdultMouseAtlasCCF2017v3p1Command)) {
+            return true;
+        }
+        switch (msp.getAtlas().getName()) {
+            case "example_mouse_100um":
+            case "allen_mouse_100um":
+            case "allen_mouse_50um":
+            case "allen_mouse_25um":
+            case "allen_mouse_10um":
+            case "kim_mouse_100um":
+            case "kim_mouse_50um":
+            case "kim_mouse_25um":
+            case "kim_mouse_10um":
+            case "osten_mouse_100um":
+            case "osten_mouse_50um":
+            case "osten_mouse_25um":
+            case "osten_mouse_10um":
+                return true;
+        }
+        return false;
     }
 
     private void installRegistrationPluginUI(int hierarchyLevelsSkipped) {
