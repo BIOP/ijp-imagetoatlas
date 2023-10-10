@@ -115,7 +115,7 @@
 		<bigdataviewer-spimdata-extras.version>0.4.0</bigdataviewer-spimdata-extras.version>
 		<image-transform-converters.version>0.1.6</image-transform-converters.version>
 		<elastix_registration_server.version>0.1.4</elastix_registration_server.version>
-		<bigdataviewer-biop-tools.version>0.7.0</bigdataviewer-biop-tools.version>
+		<bigdataviewer-biop-tools.version>0.7.2</bigdataviewer-biop-tools.version>
 		<bigdataviewer-selector.version>0.2.3</bigdataviewer-selector.version>
 
 		<!-- biop dependencies -->
