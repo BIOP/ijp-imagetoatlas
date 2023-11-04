@@ -1,10 +1,14 @@
 package ch.epfl.biop.atlas.aligner;
 
+import bdv.AbstractSpimSource;
+import bdv.SpimSource;
 import bdv.img.WarpedSource;
+import bdv.tools.transformation.TransformedSource;
 import bdv.util.BoundedRealTransform;
 import bdv.util.DefaultInterpolators;
 import bdv.util.QuPathBdvHelper;
 import bdv.util.RealTransformHelper;
+import bdv.util.ResampledSource;
 import bdv.util.source.alpha.AlphaSourceHelper;
 import bdv.util.source.alpha.AlphaSourceRAI;
 import bdv.util.source.alpha.IAlphaSource;
@@ -18,6 +22,7 @@ import ch.epfl.biop.atlas.struct.AtlasNode;
 import ch.epfl.biop.atlas.struct.AtlasOntology;
 import ch.epfl.biop.bdv.img.entity.ImageName;
 import ch.epfl.biop.bdv.img.imageplus.ImagePlusHelper;
+import ch.epfl.biop.bdv.img.legacy.qupath.entity.QuPathEntryEntity;
 import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
 import ch.epfl.biop.java.utilities.roi.SelectToROIKeepLines;
 import ch.epfl.biop.java.utilities.roi.types.CompositeFloatPoly;
@@ -1006,9 +1011,197 @@ public class SliceSources {
     }
 
     public void exportToQuPathProject(boolean erasePreviousFile) {
+
         prepareExport("id");
         ImageJRoisFile ijroisfile = (ImageJRoisFile) cvtRoisTransformed.to(ImageJRoisFile.class);
-        storeInQuPathProjectIfExists(ijroisfile, erasePreviousFile);
+        //storeInQuPathProjectIfExists(ijroisfile, erasePreviousFile);
+        if (simpleQuPathExportCase()) {
+          //  prepareExport("id");
+          //  ImageJRoisFile ijroisfile = (ImageJRoisFile) cvtRoisTransformed.to(ImageJRoisFile.class);
+            storeInQuPathProjectIfExists(ijroisfile, erasePreviousFile);
+        } else {
+            // That's complicated
+            Set<File> dataEntries = new HashSet<>();
+            for (int iCh = 0; iCh<nChannels; iCh++) {
+                SourceAndConverter<?> source = original_sacs[iCh];
+                if (!QuPathBdvHelper.isSourceLinkedToQuPath(source)) {
+                    continue;
+                }
+                File dataEntryFolderTest = QuPathBdvHelper.getDataEntryFolder(source);
+                if (dataEntries.contains(dataEntryFolderTest)) {
+                    continue;
+                }
+                dataEntries.add(dataEntryFolderTest);
+
+                exportToQuPathProjectAdvanced(iCh, erasePreviousFile, ijroisfile);
+
+            }
+        }
+    }
+
+    private InvertibleRealTransform getTransformedSequenceToRoot(SourceAndConverter<?> source) {
+        // Remove the transform coming from
+        //AffineTransform3D lastTransform = new AffineTransform3D();
+        //source.getSpimSource().getSourceTransform(0,0, lastTransform);
+        InvertibleRealTransformSequence irts = new InvertibleRealTransformSequence();
+        //irts.add(lastTransform.inverse());
+        appendPreviousTransform(source.getSpimSource(), irts);
+        return irts;
+    }
+
+    private void appendPreviousTransform(Source<?> source, InvertibleRealTransformSequence sequence) {
+        if (source.getClass().equals(SpimSource.class)) { // end condition
+            AbstractSpimSource<?> castSource = ((AbstractSpimSource<?>)source);
+            AffineTransform3D transform = new AffineTransform3D();
+            castSource.getSourceTransform(0,0,transform);
+            sequence.add(transform.inverse());
+        } else if (source.getClass().equals(TransformedSource.class)) {
+            TransformedSource<?> castSource = ((TransformedSource<?>)source);
+            AffineTransform3D transform = new AffineTransform3D();
+            castSource.getSourceTransform(0,0,transform);
+            sequence.add(transform.inverse());
+            appendPreviousTransform(castSource.getWrappedSource(), sequence);
+        } else if (source.getClass().equals(WarpedSource.class)) {
+            WarpedSource<?> castSource = ((WarpedSource<?>)source);
+            RealTransform rt = castSource.getTransform().copy();
+            if (rt instanceof InvertibleRealTransform) {
+                sequence.add((InvertibleRealTransform) rt);
+                appendPreviousTransform(castSource.getWrappedSource(), sequence);
+            } else {
+                logger.error("The transform of the warped source is not invertible! ");
+            }
+        }else if (source.getClass().equals(ResampledSource.class)) {
+            logger.error("Unhandled source of type "+source.getClass().getSimpleName());
+        } else {
+            logger.error("Unknown source of type "+source.getClass().getSimpleName());
+        }
+    }
+
+    private void exportToQuPathProjectAdvanced(int iCh, boolean erasePreviousFile, ImageJRoisFile ijroisfile) {
+        // This gets complicated...
+        // This needs to get fixed!!
+        //prepareExport("id");
+        // TO FIX!!
+        //ImageJRoisFile ijroisfile = (ImageJRoisFile) cvtRoisTransformed.to(ImageJRoisFile.class);
+        SourceAndConverter<?> source = original_sacs[iCh];
+        File dataEntryFolder = QuPathBdvHelper.getDataEntryFolder(source);
+        logger.debug("DataEntryFolder = "+dataEntryFolder);
+
+        // There's an extra sequence of transform to go from original_sacs[iCh] to the QuPath source.
+        // We have to build this sequence, and get the transformations at each step
+        // That's going to be complicated
+
+        InvertibleRealTransform irts = getTransformedSequenceToRoot(source);
+
+        //System.out.println("Channel "+iCh+"\n"+mp.getGsonStateSerializer(new ArrayList<>()).toJson(irts));
+
+        try {
+
+            String projectFolderPath = QuPathBdvHelper.getProjectFile(original_sacs[iCh]).getParent();
+            logger.debug("QuPath Project Folder = "+projectFolderPath);
+
+            File f = new File(dataEntryFolder, "ABBA-RoiSet-"+mp.getAtlas().getName()+".zip");
+            mp.log.accept("Save slice ROI to quPath project " + f.getAbsolutePath());
+
+            if (f.exists()&&(!erasePreviousFile)) {
+                mp.errlog.accept("Error : QuPath ROI file already exists");
+            }
+
+            if ((!f.exists())||(erasePreviousFile)) {
+                if (f.exists()) {
+                    Files.delete(Paths.get(f.getAbsolutePath()));
+                }
+                Files.copy(Paths.get(ijroisfile.f.getAbsolutePath()),Paths.get(f.getAbsolutePath()));
+                writeOntotogyIfNotPresent(mp, projectFolderPath);
+            }
+
+        } catch (Exception e) {
+            mp.errlog.accept("Error in QuPath export: "+e.getMessage());
+            e.printStackTrace();
+        }
+
+        try {
+            RealTransform transform = getSlicePhysicalToCCFRealTransform(0, getTolerance(), getMaxIteration());
+            // Adds the pretransformation
+            RealTransform fullSequence;
+            if (transform instanceof InvertibleRealTransform) {
+                fullSequence = new InvertibleRealTransformSequence();
+                ((InvertibleRealTransformSequence)fullSequence).add((InvertibleRealTransform) transform);
+                ((InvertibleRealTransformSequence)fullSequence).add(irts);
+            } else {
+                fullSequence = new RealTransformSequence();
+                ((RealTransformSequence)fullSequence).add(transform);
+                ((RealTransformSequence)fullSequence).add(irts);
+            }
+            // end of adding the pretransform sequence
+            if (fullSequence!=null) {
+                File ftransform = new File(dataEntryFolder, "ABBA-Transform-"+mp.getAtlas().getName()+".json");
+                mp.log.accept("Save transformation to quPath project " + ftransform.getAbsolutePath());
+                Gson gson = ScijavaGsonHelper.getGsonBuilder(mp.scijavaCtx, false).setPrettyPrinting().create();
+                String transform_string = gson.toJson(fullSequence, RealTransform.class);
+
+                if (ftransform.exists()) {
+                    if (erasePreviousFile) {
+                        Files.delete(Paths.get(ftransform.getAbsolutePath()));
+                        FileWriter writer = new FileWriter(ftransform.getAbsolutePath());
+                        writer.write(transform_string);writer.flush();writer.close();
+                    } else {
+                        mp.errlog.accept("Error : Transformation file already exists");
+                    }
+                } else {
+                    FileWriter writer = new FileWriter(ftransform.getAbsolutePath());
+                    writer.write(transform_string);writer.flush();writer.close();
+                }
+            }
+        } catch (Exception e) {
+            mp.errlog.accept("Error while saving transform file!");
+        }
+
+    }
+
+    private boolean simpleQuPathExportCase() {
+        // It is a simple case of export if:
+        // - All sources from this slice are DIRECTLY coming a from single QuPath entry
+        // - DIRECTLY means that the slices are not warped or wrapped into transfomed sources beforehand
+
+        File dataEntryFolder = null;
+
+
+        for (SourceAndConverter<?> source: original_sacs) {
+            // All linked to QuPath ?
+            if (!QuPathBdvHelper.isSourceLinkedToQuPath(source)) {
+                mp.errlog.accept("Slice "+this+" not linked to a QuPath dataset");
+                return false;
+            }
+
+            // Same entry ?
+            try {
+                File dataEntryFolderTest = QuPathBdvHelper.getDataEntryFolder(source);
+                if (dataEntryFolder == null) {
+                    dataEntryFolder = dataEntryFolderTest;
+                } else {
+                    if (!dataEntryFolder.equals(dataEntryFolderTest)) {
+                        // There are two entries from the same project -> complex case
+                        logger.info("Slice "+this+" targets multiple QuPath entries.");
+                        return false;
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                mp.errlog.accept(e.getMessage());
+                return false;
+            };
+        }
+
+        // No wrapping ?
+        for (SourceAndConverter<?> source: original_sacs) {
+            if (SourceAndConverterServices.getSourceAndConverterService().getMetadata(source, "SPIMDATA") == null) {
+                logger.info("Slice "+this+" is not directly a QuPath project entry. It could have been transformed before being imported in ABBA");
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public IJShapeRoiArray getOriginalAtlasRegions(String namingChoice) {
@@ -1105,12 +1298,32 @@ public class SliceSources {
         addAllRegistrations(rts, irts, tolerance, maxIteration);
 
         this.original_sacs[0].getSpimSource().getSourceTransform(0,resolutionLevel,at3D);
-
         rts.add(at3D.inverse().copy());
         if (irts!=null) irts.add(at3D.inverse().copy());
 
         return (irts==null)?rts:irts;
     }
+
+    public RealTransform getSlicePhysicalToCCFRealTransform(int resolutionLevel, double tolerance, int maxIteration) {
+        RealTransformSequence rts = new RealTransformSequence();
+        InvertibleRealTransformSequence irts = new InvertibleRealTransformSequence();
+
+        AffineTransform3D at3D;
+
+        at3D = mp.getAffineTransformFromAlignerToAtlas();
+
+        rts.add(at3D.inverse().copy());
+        irts.add(at3D.inverse().copy());
+
+        addAllRegistrations(rts, irts, tolerance, maxIteration);
+
+        //this.original_sacs[0].getSpimSource().getSourceTransform(0,resolutionLevel,at3D);
+        //rts.add(at3D.inverse().copy());
+        //if (irts!=null) irts.add(at3D.inverse().copy());
+
+        return (irts==null)?rts:irts;
+    }
+
 
     private void addAllRegistrations(RealTransformSequence rts, InvertibleRealTransformSequence irts, double tolerance, int maxIteration) {
 
