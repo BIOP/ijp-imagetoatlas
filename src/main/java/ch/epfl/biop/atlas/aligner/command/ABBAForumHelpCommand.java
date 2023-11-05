@@ -5,10 +5,8 @@ import bdv.util.BdvHandle;
 import bigwarp.BigWarp;
 import ch.epfl.biop.atlas.aligner.ABBAHelper;
 import ch.epfl.biop.bdv.img.bioformats.BioFormatsHelper;
-import ch.epfl.biop.bdv.img.legacy.bioformats.BioFormatsTools;
 import ch.epfl.biop.sourceandconverter.register.Elastix2DSplineRegister;
 import ch.epfl.biop.wrappers.elastix.ElastixTask;
-import ch.epfl.biop.wrappers.elastix.RemoteElastixTask;
 import ij.IJ;
 import net.imagej.ImageJ;
 import net.imagej.updater.UpdateService;
@@ -66,7 +64,6 @@ public class ABBAForumHelpCommand implements Command {
             body +="Bdv Playground "+VersionUtils.getVersion(SourceAndConverterServices.class)+nl;
             body +="Biop Image Loader "+VersionUtils.getVersion(BioFormatsHelper.class)+nl;
             body +="Biop Wrappers "+VersionUtils.getVersion(ElastixTask.class)+nl;
-            body +="Registration Server "+VersionUtils.getVersion(RemoteElastixTask.class)+nl;
             //noinspection deprecation
             body +="Updates sites: "+sites_string+nl;
             body +="```";

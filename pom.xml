@@ -106,27 +106,16 @@
 		<license.excludes>**/resources/**</license.excludes>
 		<main-class>ch.epfl.biop.abba.ABBALaunchMouse</main-class>
 
-		<!-- bigdataviewer dependencies -->
-		<bigvolumeviewer.version>0.3.1</bigvolumeviewer.version>
 		<!-- bdv playground related dependencies -->
 		<bigdataviewer-playground.version>0.8.0</bigdataviewer-playground.version>
 		<bigdataviewer-image-loaders.version>0.6.1</bigdataviewer-image-loaders.version>
-		<!--<bigdataviewer-playground-display.version>0.4.0</bigdataviewer-playground-display.version>-->
-		<bigdataviewer-spimdata-extras.version>0.4.0</bigdataviewer-spimdata-extras.version>
-		<image-transform-converters.version>0.1.6</image-transform-converters.version>
-		<elastix_registration_server.version>0.1.4</elastix_registration_server.version>
-		<bigdataviewer-biop-tools.version>0.7.3-SNAPSHOT</bigdataviewer-biop-tools.version>
+		<bigdataviewer-biop-tools.version>0.7.3</bigdataviewer-biop-tools.version>
 		<bigdataviewer-selector.version>0.2.3</bigdataviewer-selector.version>
-
-		<!-- biop dependencies -->
-		<ijl-utilities-wrappers.version>0.9.3</ijl-utilities-wrappers.version>
-		<ijp-kheops.version>0.4.2</ijp-kheops.version>
 
 		<!-- maths -->
 		<leastsquares.version>1.0.0</leastsquares.version>
 
 		<!-- ABBA specific -->
-		<pyimagej-scijava-command.version>0.2.0</pyimagej-scijava-command.version>
 		<atlas.version>0.2.0</atlas.version>
 		<oshi-core.version>5.5.1</oshi-core.version>
 
@@ -136,6 +125,7 @@
 
 		<!-- to generate python API, method put in tests -->
 		<reflections.version>0.10.2</reflections.version>
+		<pyimagej-scijava-command.version>0.2.0</pyimagej-scijava-command.version>
 
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>sign,deploy-to-scijava</releaseProfiles>
@@ -177,11 +167,11 @@
             <artifactId>imagej</artifactId>
         </dependency>
 
-		<dependency>
+		<!--<dependency>
 			<groupId>ch.epfl.biop</groupId>
 			<artifactId>ijl-utilities-wrappers</artifactId>
 			<version>${ijl-utilities-wrappers.version}</version>
-		</dependency>
+		</dependency>-->
 
 		<dependency>
 			<groupId>sc.fiji</groupId>
@@ -205,15 +195,10 @@
 			<version>${bigdataviewer-playground.version}</version>
 		</dependency>
 
-		<!--<dependency>
-			<groupId>sc.fiji.bigdataviewer</groupId>
-			<artifactId>bigdataviewer-playground-display</artifactId>
-			<version>${bigdataviewer-playground-display.version}</version>
-		</dependency>-->
-
 		<dependency>
 			<groupId>net.imagej</groupId>
 			<artifactId>imagej-omero</artifactId>
+			<scope>test</scope>
 		</dependency>
 
 		<dependency>
@@ -226,18 +211,6 @@
 					<artifactId>serializer</artifactId>
 				</exclusion>
 			</exclusions>
-		</dependency>
-
-		<!--<dependency>
-			<groupId>ch.epfl.biop</groupId>
-			<artifactId>bigdataviewer-spimdata-extras</artifactId>
-			<version>${bigdataviewer-spimdata-extras.version}</version>
-		</dependency>-->
-
-		<dependency>
-			<groupId>ch.epfl.biop</groupId>
-			<artifactId>elastix_registration_server</artifactId>
-			<version>${elastix_registration_server.version}</version>
 		</dependency>
 
 		<dependency>
