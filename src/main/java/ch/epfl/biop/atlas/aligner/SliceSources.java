@@ -22,7 +22,6 @@ import ch.epfl.biop.atlas.struct.AtlasNode;
 import ch.epfl.biop.atlas.struct.AtlasOntology;
 import ch.epfl.biop.bdv.img.entity.ImageName;
 import ch.epfl.biop.bdv.img.imageplus.ImagePlusHelper;
-import ch.epfl.biop.bdv.img.legacy.qupath.entity.QuPathEntryEntity;
 import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
 import ch.epfl.biop.java.utilities.roi.SelectToROIKeepLines;
 import ch.epfl.biop.java.utilities.roi.types.CompositeFloatPoly;
@@ -930,7 +929,7 @@ public class SliceSources {
     double rotXLastExport = Double.MAX_VALUE;
     double rotYLastExport = Double.MAX_VALUE;
 
-    void prepareExport(String namingChoice) {
+    void prepareExport(String namingChoice, int iChannel) {
         // Need to raster the label image
         AffineTransform3D at3D = new AffineTransform3D();
         at3D.translate(-mp.nPixX / 2.0, -mp.nPixY / 2.0, 0);
@@ -957,7 +956,7 @@ public class SliceSources {
             logger.debug("Slice "+this+": Computing label image END.");
         }
 
-        computeTransformedRois();
+        computeTransformedRois(iChannel);
 
         // Renaming
         IJShapeRoiArray roiList = (IJShapeRoiArray) cvtRoisTransformed.to(IJShapeRoiArray.class);
@@ -996,12 +995,12 @@ public class SliceSources {
     }
 
     public void exportRegionsToROIManager(String namingChoice) {
-        prepareExport(namingChoice);
+        prepareExport(namingChoice, 0);
         cvtRoisTransformed.to(RoiManager.class);
     }
 
     public List<Roi> getRois(String namingChoice) {
-        prepareExport(namingChoice);
+        prepareExport(namingChoice, 0);
         IJShapeRoiArray roiArray = (IJShapeRoiArray) cvtRoisTransformed.to(IJShapeRoiArray.class);
         List<Roi> rois = new ArrayList<>();
         for (CompositeFloatPoly cfp: roiArray.rois) {
@@ -1011,13 +1010,10 @@ public class SliceSources {
     }
 
     public void exportToQuPathProject(boolean erasePreviousFile) {
-
-        prepareExport("id");
-        ImageJRoisFile ijroisfile = (ImageJRoisFile) cvtRoisTransformed.to(ImageJRoisFile.class);
         //storeInQuPathProjectIfExists(ijroisfile, erasePreviousFile);
         if (simpleQuPathExportCase()) {
-          //  prepareExport("id");
-          //  ImageJRoisFile ijroisfile = (ImageJRoisFile) cvtRoisTransformed.to(ImageJRoisFile.class);
+            prepareExport("id", 0);
+            ImageJRoisFile ijroisfile = (ImageJRoisFile) cvtRoisTransformed.to(ImageJRoisFile.class);
             storeInQuPathProjectIfExists(ijroisfile, erasePreviousFile);
         } else {
             // That's complicated
@@ -1033,7 +1029,7 @@ public class SliceSources {
                 }
                 dataEntries.add(dataEntryFolderTest);
 
-                exportToQuPathProjectAdvanced(iCh, erasePreviousFile, ijroisfile);
+                exportToQuPathProjectAdvanced(iCh, erasePreviousFile);
 
             }
         }
@@ -1077,12 +1073,13 @@ public class SliceSources {
         }
     }
 
-    private void exportToQuPathProjectAdvanced(int iCh, boolean erasePreviousFile, ImageJRoisFile ijroisfile) {
+    private void exportToQuPathProjectAdvanced(int iCh, boolean erasePreviousFile) {
         // This gets complicated...
         // This needs to get fixed!!
-        //prepareExport("id");
+        prepareExport("id", iCh);
         // TO FIX!!
-        //ImageJRoisFile ijroisfile = (ImageJRoisFile) cvtRoisTransformed.to(ImageJRoisFile.class);
+        ImageJRoisFile ijroisfile = (ImageJRoisFile) cvtRoisTransformed.to(ImageJRoisFile.class);
+
         SourceAndConverter<?> source = original_sacs[iCh];
         File dataEntryFolder = QuPathBdvHelper.getDataEntryFolder(source);
         logger.debug("DataEntryFolder = "+dataEntryFolder);
@@ -1205,13 +1202,13 @@ public class SliceSources {
     }
 
     public IJShapeRoiArray getOriginalAtlasRegions(String namingChoice) {
-        prepareExport(namingChoice);
+        prepareExport(namingChoice, 0);
         return (IJShapeRoiArray) cvtRoisOrigin.to(IJShapeRoiArray.class);
     }
 
     public void exportRegionsToFile(String namingChoice, File dirOutput, boolean erasePreviousFile) {
 
-        prepareExport(namingChoice);
+        prepareExport(namingChoice, 0);
 
         ImageJRoisFile ijroisfile = (ImageJRoisFile) cvtRoisTransformed.to(ImageJRoisFile.class);
 
@@ -1496,7 +1493,7 @@ public class SliceSources {
         }
     }
 
-    private void computeTransformedRois() {
+    private void computeTransformedRois(int iChannel) {
         cvtRoisTransformed = new ConvertibleRois();
 
         leftRightTranformed = new ConvertibleRois();
@@ -1516,9 +1513,9 @@ public class SliceSources {
         at3D.translate(-mp.nPixX / 2.0, -mp.nPixY / 2.0, 0);
         at3D.scale(mp.sizePixX, mp.sizePixY, mp.sizePixZ);
         at3D.translate(0, 0, slicingAxisPosition);
-        listRegions = getTransformedPtsFixedToMoving(listRegions, at3D.inverse());
+        listRegions = transformPoints(listRegions, at3D);
 
-        listLeftRight = getTransformedPtsFixedToMoving(listLeftRight, at3D.inverse());
+        listLeftRight = transformPoints(listLeftRight, at3D);
 
         // Reversing the transformations is somehow cheating...
         // There's something weird in the fact that affine transforms and realtransforms do not behave the same way
@@ -1534,9 +1531,11 @@ public class SliceSources {
         
         Collections.reverse(this.registrations);
 
-        this.original_sacs[0].getSpimSource().getSourceTransform(0,0,at3D);
-        listRegions = getTransformedPtsFixedToMoving(listRegions, at3D);
-        listLeftRight = getTransformedPtsFixedToMoving(listLeftRight, at3D);
+        InvertibleRealTransform transform = getTransformedSequenceToRoot(original_sacs[iChannel]);
+
+        //this.original_sacs[0].getSpimSource().getSourceTransform(0,0,at3D);
+        listRegions = transformPoints(listRegions, transform);
+        listLeftRight = transformPoints(listLeftRight, transform);
 
         cvtRoisTransformed.clear();
         listRegions.shapeRoiList = new IJShapeRoiArray(arrayIniRegions);
@@ -1545,16 +1544,15 @@ public class SliceSources {
         listLeftRight.shapeRoiList = new IJShapeRoiArray(arrayIniLeftRight);
 
         cvtRoisTransformed.set(listRegions);
-
         leftRightTranformed.set(listLeftRight);
     }
 
-    public RealPointList getTransformedPtsFixedToMoving(RealPointList pts, AffineTransform3D at3d) {
+    private static RealPointList transformPoints(RealPointList pts, InvertibleRealTransform transform) {
         ArrayList<RealPoint> cvtList = new ArrayList<>();
         for (RealPoint p : pts.ptList) {
             RealPoint pt3d = new RealPoint(3);
             pt3d.setPosition(new double[]{p.getDoublePosition(0), p.getDoublePosition(1),0});
-            at3d.inverse().apply(pt3d, pt3d);
+            transform.apply(pt3d, pt3d);
             RealPoint cpt = new RealPoint(pt3d.getDoublePosition(0), pt3d.getDoublePosition(1));
             cvtList.add(cpt);
         }
