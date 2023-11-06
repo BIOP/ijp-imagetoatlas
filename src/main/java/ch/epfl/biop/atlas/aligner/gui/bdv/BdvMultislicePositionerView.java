@@ -39,6 +39,7 @@ import ch.epfl.biop.atlas.aligner.command.ExportSlicesToBDVJsonDatasetCommand;
 import ch.epfl.biop.atlas.aligner.command.ExportSlicesToImageJCommand;
 import ch.epfl.biop.atlas.aligner.command.ExportSlicesToQuickNIIDatasetCommand;
 import ch.epfl.biop.atlas.aligner.command.ImportSliceFromImagePlusCommand;
+import ch.epfl.biop.atlas.aligner.command.ImportSliceFromSourcesCommand;
 import ch.epfl.biop.atlas.aligner.command.ImportSlicesFromFilesCommand;
 import ch.epfl.biop.atlas.aligner.command.ImportSlicesFromQuPathCommand;
 import ch.epfl.biop.atlas.aligner.command.MirrorUndoCommand;
@@ -374,6 +375,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ImportSlicesFromQuPathCommand.class, hierarchyLevelsSkipped,"mp", msp );
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ImportSliceFromImagePlusCommand.class, hierarchyLevelsSkipped,"mp", msp );
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ImportSlicesFromFilesCommand.class, hierarchyLevelsSkipped,"mp", msp );
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ImportSliceFromSourcesCommand.class, hierarchyLevelsSkipped,"mp", msp );
 
         logger.debug("Installing java registration plugins ui");
 
