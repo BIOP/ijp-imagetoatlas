@@ -635,6 +635,13 @@ public class SliceSources {
                     si.updateBox();
                     sreg.setRealTransform(brt);
                 }
+            } else {
+                // We need to set the right interval! During deserialisation, the interval is not set correctly
+                // That's also required when one wants to transfer a registration sequence from one slice to another one
+                RealTransform rt = ((BoundedRealTransform) sreg.getRealTransform()).getTransform();
+                BoundedRealTransform brt = new BoundedRealTransform((InvertibleRealTransform) rt, si);
+                si.updateBox();
+                sreg.setRealTransform(brt);
             }
         }
 

@@ -45,6 +45,7 @@ import ch.epfl.biop.atlas.aligner.command.ImportSlicesFromQuPathCommand;
 import ch.epfl.biop.atlas.aligner.command.MirrorUndoCommand;
 import ch.epfl.biop.atlas.aligner.command.RasterSlicesCommand;
 import ch.epfl.biop.atlas.aligner.command.RasterSlicesDeformationCommand;
+import ch.epfl.biop.atlas.aligner.command.RegisterSlicesCopyAndApplyCommand;
 import ch.epfl.biop.atlas.aligner.command.RegisterSlicesDeepSliceCommand;
 import ch.epfl.biop.atlas.aligner.command.RegisterSlicesEditLastCommand;
 import ch.epfl.biop.atlas.aligner.command.RegisterSlicesRemoveLastCommand;
@@ -384,7 +385,9 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
 
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RegisterSlicesEditLastCommand.class, hierarchyLevelsSkipped,"mp", msp);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RegisterSlicesRemoveLastCommand.class, hierarchyLevelsSkipped,"mp", msp ); // TODO
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RegisterSlicesRemoveLastCommand.class, hierarchyLevelsSkipped,"mp", msp );
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RegisterSlicesCopyAndApplyCommand.class, hierarchyLevelsSkipped,"mp", msp );
+
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ExportRegionsToRoiManagerCommand.class, hierarchyLevelsSkipped,"mp", msp);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ExportRegionsToRoisetFileCommand.class, hierarchyLevelsSkipped,"mp", msp);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ExportRegistrationToQuPathCommand.class, hierarchyLevelsSkipped,"mp", msp);

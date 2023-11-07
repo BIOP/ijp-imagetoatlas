@@ -40,8 +40,6 @@ public class RegisterSlicesCopyAndApplyCommand implements Command {
     boolean skip_pre_transform = false;
 
 
-
-
     public void run() {
 
         List<SliceSources> selectedSlices = mp.getSelectedSlices();
