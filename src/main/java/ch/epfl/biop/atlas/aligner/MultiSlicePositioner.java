@@ -454,11 +454,14 @@ public class MultiSlicePositioner implements Closeable {
             logger.debug("Action "+action+" on slice "+action.getSliceSources()+" run (non async).");
             listeners.forEach(sliceChangeListener -> sliceChangeListener.actionEnqueue(action.getSliceSources(), action));
             listeners.forEach(sliceChangeListener -> sliceChangeListener.actionStarted(action.getSliceSources(), action));
-            addTask();
-            boolean result = action.run();
-            removeTask();
-            listeners.forEach(sliceChangeListener -> sliceChangeListener.actionFinished(action.getSliceSources(), action, result));
-            logger.debug("Action "+action+" on slice "+action.getSliceSources()+" done.");
+            try {
+                addTask();
+                boolean result = action.run();
+                listeners.forEach(sliceChangeListener -> sliceChangeListener.actionFinished(action.getSliceSources(), action, result));
+                logger.debug("Action "+action+" on slice "+action.getSliceSources()+" done.");
+            } finally {
+                removeTask();
+            }
         }
         if (action.isValid()) {
             logger.debug("Action "+action+" on slice "+action.getSliceSources()+" is valid.");
@@ -1115,7 +1118,7 @@ public class MultiSlicePositioner implements Closeable {
         // TODO : add a clock as an overlay
         getSlices().forEach(SliceSources::waitForEndOfTasks);
         // We prepare the loading of the state, so that's a task:
-        addTask();
+
         // Meaning:
         // - 0. Creating a temporary folder, that needs to be deleted at the end
         String tmpDirsLocation = System.getProperty("java.io.tmpdir");
@@ -1125,11 +1128,11 @@ public class MultiSlicePositioner implements Closeable {
             tmpdir = Files.createDirectories(path).toFile();
         } catch (IOException e) {
             errorMessageForUser.accept("Error", "Java can't create a temporary folder in the folder "+tmpDirsLocation);
-            removeTask();
             return false;
         }
 
         try {
+            addTask();
             // We need to unpack the file
             unpack(stateFileAbba.getAbsolutePath(), tmpdir.getAbsolutePath());
             File sacsFile = new File(tmpdir, "sources.json");
@@ -1186,23 +1189,20 @@ public class MultiSlicePositioner implements Closeable {
                     if (emptyState) stateChangedSinceLastSave = false; // loaded state has not been changed, and it was the only one loaded
 
                 } catch (Exception e) {
-                    removeTask();
                     errlog.accept(e.getMessage());
                     e.printStackTrace();
                     return false;
                 }
             } else {
-                removeTask();
                 errlog.accept("Error : file "+stateFile.getAbsolutePath()+" not found!");
                 return false;
             }
-            removeTask();
             return true;
         } catch (IOException e) {
-            removeTask();
             errlog.accept(e.getMessage());
             return false;
         } finally {
+            removeTask();
             // Delete temp folder
             try {
                 FileUtils.deleteDirectory(tmpdir);
@@ -1214,89 +1214,91 @@ public class MultiSlicePositioner implements Closeable {
     }
 
     private boolean legacyLoadState(File stateFile) {
-        addTask();
-        boolean emptyState = this.slices.size()==0;
-        // TODO : add a clock as an overlay
-        getSlices().forEach(SliceSources::waitForEndOfTasks);
-
-        String fileNoExt = FilenameUtils.removeExtension(stateFile.getAbsolutePath());
-        File sacsFile = new File(fileNoExt+"_sources.json");
-
-        if (!sacsFile.exists()) {
-            errlog.accept("File "+sacsFile.getAbsolutePath()+" not found!");
-            return false;
-        }
-
-        SourceAndConverterServiceLoader sacsl = new SourceAndConverterServiceLoader(sacsFile.getAbsolutePath(), sacsFile.getParent(), this.scijavaCtx, false);
         try {
-            sacsl.run();
-        } catch (Exception e) {
-            errlog.accept(e.getMessage());
-        }
+            addTask();
 
+            boolean emptyState = this.slices.size()==0;
+            // TODO : add a clock as an overlay
+            getSlices().forEach(SliceSources::waitForEndOfTasks);
 
-        List<SourceAndConverter> serialized_sources = new ArrayList<>();
+            String fileNoExt = FilenameUtils.removeExtension(stateFile.getAbsolutePath());
+            File sacsFile = new File(fileNoExt+"_sources.json");
 
-        sacsl.getSacToId().values().stream().sorted().forEach(i -> serialized_sources.add(sacsl.getIdToSac().get(i)));
-
-        Gson gson = getGsonStateSerializer(serialized_sources);
-
-        if (stateFile.exists()) {
-            try {
-                FileReader fileReader = new FileReader(stateFile);
-
-                JsonObject element = gson.fromJson(fileReader, JsonObject.class);
-                // Didn't have the foresight to add a version number from the start...
-                String version = element.has("version") ? element.get("version").getAsString() : null;
-                if (version == null) {
-                    log.accept("Old state version, conversion required.");
-                    element = (JsonObject) AlignerState.convertOldJson(element);
-                    log.accept("Conversion done.");
-                }
-
-                AlignerState state = gson.fromJson(element, AlignerState.class); // actions are executed during deserialization
-                fileReader.close();
-
-                String warningMessageForUser = "";
-
-                DecimalFormat df = new DecimalFormat("###.000");
-
-                Function<Double, String> a = (d) -> df.format(d*180/Math.PI);
-
-                if (state.rotationX!=reslicedAtlas.getRotateX()) {
-                    warningMessageForUser+="Current X Angle : "+a.apply(reslicedAtlas.getRotateX())+" has been updated to "+a.apply(state.rotationX)+"\n";
-                    reslicedAtlas.setRotateX(state.rotationX);
-                }
-
-                if (state.rotationY!=reslicedAtlas.getRotateY()) {
-                    warningMessageForUser+="Current Y Angle : "+a.apply(reslicedAtlas.getRotateY())+" has been updated to "+a.apply(state.rotationY)+"\n";
-                    reslicedAtlas.setRotateY(state.rotationY);
-                }
-
-                if (!warningMessageForUser.equals("")) {
-                    this.warningMessageForUser.accept("Warning", warningMessageForUser);
-                }
-
-                state.slices_state_list.forEach(sliceState -> {
-                    sliceState.slice.waitForEndOfTasks();
-                    sliceState.slice.transformSourceOrigin((AffineTransform3D) (sliceState.preTransform));
-                });
-
-                if (emptyState) stateChangedSinceLastSave = false; // loaded state has not been changed, and it was the only one loaded
-
-            } catch (Exception e) {
-                removeTask();
-                errlog.accept(e.getMessage());
-                e.printStackTrace();
+            if (!sacsFile.exists()) {
+                errlog.accept("File "+sacsFile.getAbsolutePath()+" not found!");
                 return false;
             }
-        } else {
+
+            SourceAndConverterServiceLoader sacsl = new SourceAndConverterServiceLoader(sacsFile.getAbsolutePath(), sacsFile.getParent(), this.scijavaCtx, false);
+            try {
+                sacsl.run();
+            } catch (Exception e) {
+                errlog.accept(e.getMessage());
+            }
+
+
+            List<SourceAndConverter> serialized_sources = new ArrayList<>();
+
+            sacsl.getSacToId().values().stream().sorted().forEach(i -> serialized_sources.add(sacsl.getIdToSac().get(i)));
+
+            Gson gson = getGsonStateSerializer(serialized_sources);
+
+            if (stateFile.exists()) {
+                try {
+                    FileReader fileReader = new FileReader(stateFile);
+
+                    JsonObject element = gson.fromJson(fileReader, JsonObject.class);
+                    // Didn't have the foresight to add a version number from the start...
+                    String version = element.has("version") ? element.get("version").getAsString() : null;
+                    if (version == null) {
+                        log.accept("Old state version, conversion required.");
+                        element = (JsonObject) AlignerState.convertOldJson(element);
+                        log.accept("Conversion done.");
+                    }
+
+                    AlignerState state = gson.fromJson(element, AlignerState.class); // actions are executed during deserialization
+                    fileReader.close();
+
+                    String warningMessageForUser = "";
+
+                    DecimalFormat df = new DecimalFormat("###.000");
+
+                    Function<Double, String> a = (d) -> df.format(d*180/Math.PI);
+
+                    if (state.rotationX!=reslicedAtlas.getRotateX()) {
+                        warningMessageForUser+="Current X Angle : "+a.apply(reslicedAtlas.getRotateX())+" has been updated to "+a.apply(state.rotationX)+"\n";
+                        reslicedAtlas.setRotateX(state.rotationX);
+                    }
+
+                    if (state.rotationY!=reslicedAtlas.getRotateY()) {
+                        warningMessageForUser+="Current Y Angle : "+a.apply(reslicedAtlas.getRotateY())+" has been updated to "+a.apply(state.rotationY)+"\n";
+                        reslicedAtlas.setRotateY(state.rotationY);
+                    }
+
+                    if (!warningMessageForUser.equals("")) {
+                        this.warningMessageForUser.accept("Warning", warningMessageForUser);
+                    }
+
+                    state.slices_state_list.forEach(sliceState -> {
+                        sliceState.slice.waitForEndOfTasks();
+                        sliceState.slice.transformSourceOrigin((AffineTransform3D) (sliceState.preTransform));
+                    });
+
+                    if (emptyState) stateChangedSinceLastSave = false; // loaded state has not been changed, and it was the only one loaded
+
+                } catch (Exception e) {
+                    errlog.accept(e.getMessage());
+                    e.printStackTrace();
+                    return false;
+                }
+            } else {
+                errlog.accept("Error : file "+stateFile.getAbsolutePath()+" not found!");
+                return false;
+            }
+            return true;
+        } finally {
             removeTask();
-            errlog.accept("Error : file "+stateFile.getAbsolutePath()+" not found!");
-            return false;
         }
-        removeTask();
-        return true;
     }
 
     volatile private SliceSources currentSerializedSlice = null;
