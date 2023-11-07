@@ -2375,11 +2375,8 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
          */
         @Override
         public void importSourcesAndConverters(TransferSupport support, List<SourceAndConverter<?>> sacs) {
-            Optional<BdvHandle> bdvh = getBdvHandleFromViewerPanel(((bdv.viewer.ViewerPanel) support.getComponent()));
-            if (bdvh.isPresent()) {
-                double slicingAxisPosition = iSliceNoStep * msp.sizePixX * (int) msp.getReslicedAtlas().getStep();
-                msp.createSlice(sacs.toArray(new SourceAndConverter[0]), slicingAxisPosition, msp.getAtlas().getMap().getAtlasPrecisionInMillimeter(), Tile.class, new Tile(-1));
-            }
+            double slicingAxisPosition = iSliceNoStep * msp.sizePixX * (int) msp.getReslicedAtlas().getStep();
+            msp.createSlice(sacs.toArray(new SourceAndConverter[0]), slicingAxisPosition, msp.getAtlas().getMap().getAtlasPrecisionInMillimeter(), Tile.class, new Tile(-1));
         }
     }
 
