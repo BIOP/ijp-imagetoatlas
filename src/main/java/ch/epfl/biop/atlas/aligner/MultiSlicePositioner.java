@@ -858,7 +858,7 @@ public class MultiSlicePositioner implements Closeable {
 
     // ------------------------------------------------ Serialization / Deserialization
 
-    Gson getGsonStateSerializer(List<SourceAndConverter> serialized_sources) {
+    public Gson getGsonStateSerializer(List<SourceAndConverter> serialized_sources) {
         GsonBuilder gsonbuilder = new GsonBuilder()
                 .setPrettyPrinting()
                 .registerTypeAdapter(SourceAndConverter.class, new IndexedSourceAndConverterAdapter(serialized_sources))

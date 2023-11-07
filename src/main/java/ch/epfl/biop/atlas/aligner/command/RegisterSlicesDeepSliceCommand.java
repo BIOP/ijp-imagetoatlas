@@ -27,7 +27,6 @@ import org.scijava.Context;
 import org.scijava.InstantiableException;
 import org.scijava.ItemVisibility;
 import org.scijava.command.Command;
-import org.scijava.command.CommandService;
 import org.scijava.platform.PlatformService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
@@ -41,7 +40,6 @@ import java.io.FileReader;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -80,7 +78,7 @@ import java.util.function.Supplier;
 @SuppressWarnings("CanBeFinal")
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>ABBA - DeepSlice Registration",
-        description = "Uses Deepslice Web interface for affine in plane and axial registration of selected slices")
+        description = "Uses Deepslice for affine in plane and axial registration of selected slices")
 public class RegisterSlicesDeepSliceCommand implements Command {
 
     static Logger logger = LoggerFactory.getLogger(RegisterSlicesDeepSliceCommand.class);
