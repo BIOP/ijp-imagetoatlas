@@ -24,7 +24,7 @@ This section deals with the file formats requirements.
 
 :warning: While ABBA can [open files directly](import_qupath_project.html#direct-opening-of-a-file), it is highly recommended to package all files from a single animal into a QuPath project, as explained in the [create QuPath dataset section](create_qupath_dataset.md).
 
-In short ABBA can use any [Bio-Formats supported file format](dataset_prerequisite.md#1-any-bio-formats-supported-file-format), [ideally multi-resolution](dataset_prerequisite.md#2-ideally-multi-resolution--bio-formats-supported--), and [calibrated](dataset_prerequisite.md#3-and-calibrated).
+In short ABBA can use any [Bio-Formats supported file format](dataset_prerequisite.md#1-any-bio-formats-supported-file-format), [ideally multi-resolution](dataset_prerequisite.md#2-ideally-multi-resolution--bio-formats-supported--), and [calibrated](dataset_prerequisite.md#3-and-calibrated). It can also stream images for an OMERO database.
 
 ## 1. Any Bio-Formats supported file format,
 All Bio-Formats readable file formats are supported. You can check in the [Bio-Formats documentation](https://bio-formats.readthedocs.io/en/latest/supported-formats.html) if your files are supported. 
@@ -46,7 +46,7 @@ If your images are not pyramidal, we advise to convert your files to pyrimadal O
 - [Kheops](https://github.com/BIOP/ijp-kheops) Fiji plugin ,
 - [NGFF converter by Glencoe](https://www.glencoesoftware.com/products/ngff-converter/) (!n5 not supported, choose OME-TIFF).
 
-Alternatively, if you have access to an OMERO database, you can upload your images to OMERO, and the pyramidal levels will by computed by the server ([TODO] : get confirmation of this). 
+Alternatively, if you have access to an OMERO database, you can upload your images to OMERO, and the pyramidal levels will by computed by the server. 
 
 RGB images as well as fluorescent 8-bits and 16-bits images have been successfully tested.
 
@@ -57,7 +57,7 @@ All files need to be properly calibrated (microns, millimeters, etc, but not pix
 
 If your images are uncalibrated, ABBA will assume that each pixel has a size of 1mm, which will lead to gigantic images. To correct for this issue, you can re-save your images with the proper metadata and make sure that the metadata is recognized by bio-formats. This can be done with [Kheops](https://github.com/BIOP/ijp-kheops), which offers an option to override the pixel size while an OME-TIFF version is re-exported.
 
-If you want to avoid the conversion step and keep using uncalibrated files, you can assemble your files in a QuPath  project, then [set each image pixel size](https://qupath.readthedocs.io/en/0.4/docs/starting/first_steps.html#setting-the-pixel-size). ABBA will then read the qupath metadata, and ignore the original bio-formats metadata.
+If you want to avoid the conversion step and keep using uncalibrated files, you can assemble your files in a QuPath  project, then [set each image pixel size](https://qupath.readthedocs.io/en/0.4/docs/starting/first_steps.html#setting-the-pixel-size). ABBA will then read the QuPath metadata, and ignore the original bio-formats metadata.
 
 ---
 
@@ -110,8 +110,6 @@ Now, using ABBA, the easiest way is again to make a QuPath project with Bio-Form
 While other sources from other image loaders should work almost 'out of the box', there is no very direct way to do that because it's not in the GUI of ABBA. If you need other sources coming from different loaders, please write an issue on GitHub or open a post on the forum. 
 
 One option is to open an xml bdv dataset with BigDataViewer-Playground and [drag and drop sources into ABBA's BigDataViewer Playground window](import_qupath_project.md#sources-from-bigdataviewer-playground).
-
-
 
 -----
 [**Back to documentation main page**](index.md)

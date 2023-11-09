@@ -9,6 +9,8 @@
 * [Using ABBA's registration in QuPath](#using-abbas-registration-in-qupath)
   * [Exporting ABBA registration results](#exporting-abba-registration-results)
   * [Importing ABBA registration results: creating Atlas regions as QuPath annotations](#importing-abba-registration-results--creating-atlas-regions-as-qupath-annotations)
+    * [Display tips](#display-tips)
+    * [Automating the import for all slices](#automating-the-import-for-all-slices)
   * [Importing ABBA registration results: adding Atlas coordinates to QuPath detections measurements](#importing-abba-registration-results--adding-atlas-coordinates-to-qupath-detections-measurements)
     * [Allen Brain CCFv3 coordinates](#allen-brain-ccfv3-coordinates)
   * [Analysis in QuPath](#analysis-in-qupath)
@@ -21,7 +23,6 @@
       * [6. to collect and select subregions from a list](#6-to-collect-and-select-subregions-from-a-list)
       * [7. to collect all regions except the ones on a list](#7-to-collect-all-regions-except-the-ones-on-a-list)
       * [8. Removing objects](#8-removing-objects)
-  * [Other repositories for data analysis](#other-repositories-for-data-analysis)
   * [Display results in 3D](#display-results-in-3d)
 <!-- TOC -->
 

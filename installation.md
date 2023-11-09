@@ -7,7 +7,6 @@
 
 <!-- TOC -->
   * [Installation](#installation)
-  * [Standalone installer](#standalone-installer)
   * [Automated installation](#automated-installation)
     * [For Windows](#for-windows)
     * [For Mac OSX](#for-mac-osx)
@@ -18,7 +17,7 @@
     * [3. Install of Elastix / Transformix](#3-install-of-elastix--transformix)
         * [Windows](#windows)
         * [Mac](#mac)
-        * [Linux (not tested)](#linux--not-tested-)
+        * [Linux](#linux)
         * [Indicate `elastix` and `transformix` executable location in Fiji:](#indicate-elastix-and-transformix-executable-location-in-fiji-)
     * [4. Setup ABBA in Fiji](#4-setup-abba-in-fiji)
 <!-- TOC -->
@@ -37,14 +36,16 @@ Windows:
 Mac OSX:
 - automated bash scripts (Fiji)
 
+Linux:
+- automated bash scripts (Fiji) (thanks to [Jean-Emmanuel Longueville](https://github.com/hedjour))
+
 All OS (Win, Mac, Linux):
 - manual installation (Fiji)
 - from [abba_python](https://github.com/BIOP/abba_python) github repository (Fiji + Brainglobe + DeepSlice + Python)
 
 ## Automated installation
 
-Bash installation scripts for ABBA are available and have been tested for Windows 10, 11 and Mac OSX.
-You will need a decent internet connection! Several gigabytes need to be downloaded (mainly Fiji, QuPath and the atlases).
+You will need a decent internet connection! About 5Gb will be downloaded (mainly Fiji, QuPath and two atlases).
 
 ### For Windows
 
@@ -80,7 +81,8 @@ Then follow the operation explained in [https://osxdaily.com/2018/10/09/fix-oper
 
 ### For Linux
 
-UNTESTED!
+* Download the [install scripts](https://github.com/BIOP/biop-bash-scripts/archive/refs/heads/main.zip)
+* Unzip them
 * Run `full_install_abba.sh`
 
 ## Step by step manual installation
@@ -132,7 +134,7 @@ In Fiji:
 
 For automated registration, ABBA uses the [elastix](https://github.com/SuperElastix/elastix) software, which is independent of Fiji. The location of Elastix (and of its companion transformix) should be specified in Fiji in order for ABBA to use it. 
 
-* Download the [latest release of elastix for your OS](https://github.com/SuperElastix/elastix/releases/tag/5.0.1). This documentation has been tested for elastix 5.0.1, a later version should also work.
+* Download the [elastix 5.0.1 for your OS](https://github.com/SuperElastix/elastix/releases/tag/5.0.1). There's a [known bug](https://github.com/BIOP/ijp-imagetoatlas/issues/171) that prevents using a more recent version.
 * Unzip it somewhere convenient ( `C` drive on windows; `Applications` for Mac )
 
 ##### Windows
@@ -143,7 +145,7 @@ For windows users, you also need to install [Visual C++ redistributable](https:/
 
 Fiji will be calling the elastix executables, which are recognized as ‘unknown developers’ by Mac OS. Thus you need to [make security exceptions for both elastix and transformix](https://support.apple.com/en-hk/guide/mac-help/mh40616/mac) to avoid clicking indefinitely on the OS warning messages.
 
-##### Linux (not tested)
+##### Linux
 Nothing particular should be required for linux system.
 
 ##### Indicate `elastix` and `transformix` executable location in Fiji:
@@ -179,6 +181,11 @@ For non-brainglobe atlases, data are downloaded from zenodo repositories:
 - [Rat atlas repository](https://zenodo.org/record/5644162#.YZrUnroo8uU)
 
 If the initial atlas download failed, because you had no access to internet or for any other reason, you can restart the command to trigger again the download from Zenodo.
+
+
+## Installing DeepSlice to run it locally
+
+It is now possible to run DeepSlice locally on your computer instead of using the web interface, even with Fiji in pure Java. For this option to work, you will need to follow the installation instructions specified in the [BIOP wrappers repository](https://github.com/BIOP/ijl-utilities-wrappers#deepslice).
 
 -----
 [**Back to documentation main page**](index.md)

@@ -5,9 +5,9 @@
 
 -----
 
-## Using ABBA-Python
+## Using ABBA with Python
 
-Please check the section about [ABBA-Python](abba_python.md), in particular the section about [jupyter notebooks](abba_python.md#with-jupyter-notebooks).
+Please check the section about [abba_python](abba_python.md), in particular the section about [jupyter notebooks](abba_python.md#with-jupyter-notebooks).
 
 ## Other repositories for data analysis
 

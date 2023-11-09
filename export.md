@@ -18,16 +18,15 @@
 
 -----
 
-
 Probably the most useful way to use ABBA's result is to continue the analysis in QuPath (provided that you started on QuPath). In the QuPath workflow, the atlas regions are transformed into the original slice coordinates. For this procedure, please go to [analysis in qupath](qupath_analysis.md).
 
 However, other export options are available within Fiji which are explained below.
 
 ## Principle
 
-Briefly, in ABBA, the registration that is stored for each slice is a function that's capable to match a point located in the atlas to a pixel coordinates in a slice. (forward transform)
+Briefly, in ABBA, the registration that is stored for each slice is a function that's capable to match a point located in the atlas to a pixel coordinates in a slice. (forward transform).
 
-If the registration is not too weird, it is possible to inverse this function, and thus have a way to match a pixel of a slice to its corresponding atlas coordinates. (backward transform)
+If the registration is not too weird, it is possible to invert this function, and thus have a way to match a pixel of a slice to its corresponding atlas coordinates. (backward transform)
 
 With this invertible transform in hand, the export possibilities are of many types:
 

@@ -31,14 +31,16 @@ Now, let's discuss a bit what sort of images can be used. ABBA can:
 
 ### Define a dataset of brain sections in QuPath 
 
-As in the recommended workflow, you first need to create a qupath project that contains all the brain slices that you want to register - usually from one animal.
+As in the recommended workflow, you first need to create a QuPath project that contains all the brain slices that you want to register - usually from one animal.
 
 You can check the [full documentation of QuPath](https://qupath.readthedocs.io/en/latest/).
 
-For a quick setup with the first demo dataset:
+For a quick setup with the [demo dataset](https://zenodo.org/records/6553641):
 * create a project by dragging and dropping an empty folder into QuPath
 * drag and drop your images to import them into a QuPath project
 * select `Bio-Formats builder` and then click Import
+
+Note: you can also work with OMERO images, as long as they are loaded through the [OMERO-RAW QuPath extension](https://github.com/BIOP/qupath-extension-biop-omero).
 
 ![creating a project with slices in QuPath](assets/gif/qupath_create_project.gif)
 
@@ -52,7 +54,7 @@ Also please make sure to read the message about [pyramidal file formats requirem
 
 ---
 
-You are done for now on the QuPath side. You can let QuPath open while performing Fiji's part of the workflow.
+You are done for now on the QuPath side. You can let QuPath open while performing the rest of the workflow.
 
 ---
 

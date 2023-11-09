@@ -30,17 +30,17 @@ After DeepSlice, ABBA can be used to further refine the alignment, for instance 
 
 ---
 
-At this point, either you managed to run ABBA with Python (windows installer, or notebooks from github), or you are using ABBA with a standard Fiji install.
-
-Depending on your configuration, you will able to use ABBA with the web interface, or directly offline with an embedded python - a much better way to automate your workflow.
-
-## Use DeepSlice web interface from ABBA
-
-ABBA can facilitate the use of DeepSlice by generating low resolution sections and by reading back the QuickNII result XML file. 
+ABBA can facilitate the use of DeepSlice by generating low resolution sections and by reading back the QuickNII json result file. 
 
 ---
 
 :warning: make sure that all the slices belong to the same animal
+
+---
+
+---
+
+:warning: make sure that your slices are not saturated when they are displayed!
 
 ---
 
@@ -53,12 +53,14 @@ You get the following window:
 ![ABBA DeepSlice options](assets/img/fiji_deepslice_options.png)
 
 * `Slices channels, 0-based` - used to select the channels you want to export to DeepSlice. You can for instance export a nuclear channel only. You can export the first and third channel by writing `0,2`.
-* `Section Name Prefix` - prefix of the image name when exported
-* `QuickNII dataset folder` - choose an empty folder: exported sections will be put in this empty folder. At the end of the procedure, you will need to put back in this folder the resulting xml file given by DeepSlice web interface (it has to be named **exactly** `results.xml`)
 * `Allow change of atlas slicing angle` - When checked, ABBA will adapt the atlas slicing angle based on the median slicing angles given by DeepSlice. If you don't want to modify the atlas slicing angle, you can uncheck this box.
 * `Allow change of position along the slicing axis` - you probably want to let this box checked. If not, the slices will stay at their location along the axis.
 * `Maintain the rank of the slices` - if you allow to change the position of slices along the axis (checkbox above), it may occur that deepslice swap some slices position (Slices 1-2-3-4-5 might be reordered  1-2-4-3-5 for instance). If you are sure of your slice order, you may want to avoid such change and let this box checked.
 * `Affine transform in plane` - allow to transform the slices in plane. There may be rare cases where you want to avoid it, but I don't know which ones, so let it checked.
+* `Local conda env or Web` - if you managed to install a Conda env containing [DeepSlice locally as explained in the installation](installation.md#installing-deepslice-to-run-it-locally), you can run DeepSlice directly. If not, you can use the Web interface.
+
+
+# Using the Web interface
 
 After pressing ok, you get this window:
 
@@ -76,11 +78,9 @@ You can drag and drop the content of your dataset folder into this page, and the
 
 ---
 
-When the registration is done, you can download the result xml file:
+When the registration is done, you can download the result json file.
 
-![DeepSlice result file](assets/img/deepslice_result.png)
-
-Put back the xml file in the result folder (and name it `results.xml` if that's not the case).
+Put back the json file in the result folder.
 
 Then click ok in the small DeepSlice result window. You will see, if you selected the option, a window stating that slicing angles have been adjusted. After pressing ok again, the slices will be moved and transformed to their new position.
 
@@ -93,18 +93,6 @@ Then click ok in the small DeepSlice result window. You will see, if you selecte
 ![After deepslice](assets/img/fiji_after_deepslice.png)
 
 You can adjust then, review, regularly space the slices position and perform non linear registrations with the rest of ABBA functionalities.
-
-
-## Use DeepSlice with ABBA-Python
-
-If you have this option, a line `ABBA - DeepSlice Registration (Python)` should be present in the Align menu:
-
-![DeepSlice line python](assets/img/fiji_deepslice_python.png)
-
-The options are similar to the ones described above.
-
-DeepSlice is usually pretty fast, it should take around 1 minute for 100 sections, even with a not very powerful laptop.
-
 
 -----
 [**Back to registration workflow**](usage.md)
