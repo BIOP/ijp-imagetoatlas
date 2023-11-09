@@ -7,9 +7,8 @@
 
 <!-- TOC -->
 * [Using DeepSlice in ABBA](#using-deepslice-in-abba)
-  * [Use DeepSlice web interface from ABBA](#use-deepslice-web-interface-from-abba)
     * [Using DeepSlice in ABBA: step by step procedure](#using-deepslice-in-abba--step-by-step-procedure)
-  * [Use DeepSlice with ABBA-Python](#use-deepslice-with-abba-python)
+  * [Using the Web interface](#using-the-web-interface)
 <!-- TOC -->
 
 -----
@@ -40,11 +39,16 @@ ABBA can facilitate the use of DeepSlice by generating low resolution sections a
 
 ---
 
-:warning: make sure that your slices are not saturated when they are displayed!
+
+:warning: Set the slices display settings to avoid oversaturated pixels!
 
 ---
 
+DeepSlice works with 8-bits RGB images. ABBA always rescales intensities according to the user display settings. Please make sure that the display settings are not completely off, resulting in an oversaturated image, or in an almost fully black image. When more features are visible, the registration quality will improve.
+
+
 ### Using DeepSlice in ABBA: step by step procedure
+* set the slices display settings to avoid oversaturated pixels
 * select all the slices you want to register
 * click in the top menu bar: `Align > ABBA - DeepSlice Registration`
 
@@ -60,7 +64,7 @@ You get the following window:
 * `Local conda env or Web` - if you managed to install a Conda env containing [DeepSlice locally as explained in the installation](installation.md#installing-deepslice-to-run-it-locally), you can run DeepSlice directly. If not, you can use the Web interface.
 
 
-# Using the Web interface
+## Using the Web interface
 
 After pressing ok, you get this window:
 

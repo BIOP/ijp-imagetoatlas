@@ -24,7 +24,10 @@
 
 ---
 
-:warning: ABBA should be used with QuPath v0.4+ (v0.3+ still possible)!
+
+# ABBA should be used with **QuPath 0.4.4**
+
+:warning: ABBA should be used with **QuPath 0.4.4** (or above). If you are using QuPath 0.4.0, 0.4.1, 0.4.2 or 0.4.3 you NEED TO UPDATE IT!
 
 ---
 
@@ -134,7 +137,8 @@ In Fiji:
 
 For automated registration, ABBA uses the [elastix](https://github.com/SuperElastix/elastix) software, which is independent of Fiji. The location of Elastix (and of its companion transformix) should be specified in Fiji in order for ABBA to use it. 
 
-* Download the [elastix 5.0.1 for your OS](https://github.com/SuperElastix/elastix/releases/tag/5.0.1). There's a [known bug](https://github.com/BIOP/ijp-imagetoatlas/issues/171) that prevents using a more recent version.
+* Download the [release 5.0.1 of elastix for your OS](https://github.com/SuperElastix/elastix/releases/tag/5.0.1). This documentation has been tested for elastix 5.0.1. The version [5.1.0 currently fails](https://github.com/BIOP/ijp-imagetoatlas/issues/171)!
+
 * Unzip it somewhere convenient ( `C` drive on windows; `Applications` for Mac )
 
 ##### Windows
