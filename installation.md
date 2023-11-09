@@ -32,7 +32,6 @@
 You can choose between several installation methods, depending on your OS.
 
 Windows:
-- one-click installer (Fiji + BrainGlobe + DeepSlice)
 - automated bash scripts (Fiji) 
 
 Mac OSX:
@@ -40,21 +39,7 @@ Mac OSX:
 
 All OS (Win, Mac, Linux):
 - manual installation (Fiji)
-- from ABBA-Python github repository (Fiji + Brainglobe + DeepSlice + Python)
-
-My advice : on windows, use the installer. Otherwise, use automated bash scripts. Troubleshoot issues by reading the manual installation.
-## Standalone installer
-
-A [windows installer](https://github.com/NicoKiaru/ABBA-Python/releases/tag/v0.5.1-win) exists, which is still in its early phase of testing (released March 2023). This is by far the easiest way to install ABBA. It also brings the advantage of including DeepSlice and BrainGlobe directly into ABBA, because it ships a suitable conda environment in parallel with Fiji, and uses [PyImageJ](https://pyimagej.readthedocs.io/en/latest/) to communicate between both.
-
-This installer do not install QuPath and its extensions. To install these:
-
-* Install [Git for Windows](https://gitforwindows.org/) with standard options (just hit next on the installer)
-* Download the [install scripts](https://github.com/BIOP/biop-bash-scripts/archive/refs/heads/main.zip) that comes from [this repository](https://github.com/BIOP/biop-bash-scripts)
-* Unzip them
-* Double click on the script `full_install_abba.sh`
-* It is recommended to choose `C:/` as the install path
-* Wait until the script ends
+- from [abba_python](https://github.com/BIOP/abba_python) github repository (Fiji + Brainglobe + DeepSlice + Python)
 
 ## Automated installation
 

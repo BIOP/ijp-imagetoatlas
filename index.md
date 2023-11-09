@@ -22,7 +22,7 @@
 
 Aligning Big Brains & Atlases or ABBA for short, is a Fiji plugin which allows to register thin serial sections to several atlases, in coronal, sagittal and horizontal orientations.
 
-Within Fiji, you have access to the [3D mouse Allen Brain atlas](http://atlas.brain-map.org/atlas?atlas=602630314), and the [Waxholm Space Atlas of the Sprague Dawley Rat Brain](https://www.nitrc.org/projects/whs-sd-atlas). With [ABBA-Python](https://github.com/NicoKiaru/ABBA-Python), you can access all [BrainGlobe atlases](https://brainglobe.info/).
+Within Fiji, you have access to the [3D mouse Allen Brain atlas](http://atlas.brain-map.org/atlas?atlas=602630314), and the [Waxholm Space Atlas of the Sprague Dawley Rat Brain](https://www.nitrc.org/projects/whs-sd-atlas). With [abba_python](https://github.com/BIOP/abba_python), you can access all [BrainGlobe atlases](https://brainglobe.info/).
 
 ABBA is typically used in conjunction with [QuPath](https://qupath.github.io): a QuPath project can serve as an input for ABBA, and the registration results can be imported back into QuPath for downstream processing.
 
@@ -156,7 +156,7 @@ It’s could be because the slices are invisible by default (for faster loading)
 The atlases currently available are:
 * the [adult Allen Mouse Brain atlas CCFv3](https://zenodo.org/record/4486659/#.YngkMlRBziE)
 * the [Waxholm Space atlas of the Sprague Dawley Rat Brain V4](https://zenodo.org/record/5644162#.YngkTVRBziE)
-* through [ABBA-Python](https://github.com/NicoKiaru/ABBA-Python), all [BrainGlobe](https://github.com/brainglobe) atlases
+* through [abba_python](https://github.com/BIOP/abba_python), all [BrainGlobe](https://github.com/brainglobe) atlases
 
 There are other atlases, of course, but adding them in ABBA still requires some work because there is no unified way of accessing labels, properties and hierarchical structure (unless it is implemented within BrainGlobe). This is an effort I can make, but there needs to be:
 1. several users needing it - and you can do your request through ABBA `Help > ABBA - Give your feedback`
