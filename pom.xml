@@ -14,7 +14,7 @@
 	<version>0.7.5-SNAPSHOT</version>
 
 	<name>Plugin To Register Images to Atlases</name>
-	<description>Collection of tools to register images to atlases in FIJI.</description>
+	<description>Collection of tools to register images to atlases in Fiji.</description>
 	<url>http://biop.epfl.ch</url>
 	<inceptionYear>2018</inceptionYear>
 	<organization>
@@ -108,8 +108,8 @@
 
 		<!-- bdv playground related dependencies -->
 		<bigdataviewer-playground.version>0.8.0</bigdataviewer-playground.version>
-		<bigdataviewer-image-loaders.version>0.6.1</bigdataviewer-image-loaders.version>
-		<bigdataviewer-biop-tools.version>0.7.3</bigdataviewer-biop-tools.version>
+		<bigdataviewer-image-loaders.version>0.6.2</bigdataviewer-image-loaders.version>
+		<bigdataviewer-biop-tools.version>0.7.4</bigdataviewer-biop-tools.version>
 		<bigdataviewer-selector.version>0.2.3</bigdataviewer-selector.version>
 
 		<!-- maths -->
@@ -130,7 +130,7 @@
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>sign,deploy-to-scijava</releaseProfiles>
 
-		<!--<scijava.app.directory>C:/Fiji.app</scijava.app.directory>-->
+		<!-- <scijava.app.directory>C:/Fiji.app</scijava.app.directory> -->
 		<!-- scijava.app.directory>C:/Users/nicol/Dropbox/BIOP/ABBA-Python/constructor/Fiji.app</scijava.app.directory -->
 
 	</properties>
