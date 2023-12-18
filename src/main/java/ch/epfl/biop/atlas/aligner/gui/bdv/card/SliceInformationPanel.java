@@ -7,6 +7,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import java.awt.Component;
@@ -28,6 +29,7 @@ public class SliceInformationPanel implements BdvMultislicePositionerView.Curren
         sliceInfo = new JTextArea("Slice Info");
         sliceInfo.setAlignmentX( Component.LEFT_ALIGNMENT );
         sliceInfo.setEditable(false);
+        JScrollPane scrollPane = new JScrollPane(sliceInfo);
 
 
         bdvView.addCurrentSliceListener(this);
@@ -36,24 +38,10 @@ public class SliceInformationPanel implements BdvMultislicePositionerView.Curren
         JSeparator separator1 = new JSeparator();
         separator1.setAlignmentX( Component.LEFT_ALIGNMENT );
         paneDisplay.add(separator1);
-        paneDisplay.add(sliceInfo);
+        paneDisplay.add(scrollPane);//sliceInfo);
         JSeparator separator2 = new JSeparator();
         separator2.setAlignmentX( Component.LEFT_ALIGNMENT );
         paneDisplay.add(separator2);
-
-    }
-
-    public static JPanel box(boolean alongX,JComponent... components) {
-        JPanel box = new JPanel();
-        if (alongX) {
-            box.setLayout(new GridLayout(1, components.length));
-        } else {
-            box.setLayout(new GridLayout(components.length, 1));//new BoxLayout(box, BoxLayout.Y_AXIS));
-        }
-        for(JComponent component : components) {
-            box.add(component);
-        }
-        return box;
     }
 
     public JPanel getPanel() {

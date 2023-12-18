@@ -108,8 +108,8 @@
 
 		<!-- bdv playground related dependencies -->
 		<bigdataviewer-playground.version>0.8.0</bigdataviewer-playground.version>
-		<bigdataviewer-image-loaders.version>0.6.2</bigdataviewer-image-loaders.version>
-		<bigdataviewer-biop-tools.version>0.7.4</bigdataviewer-biop-tools.version>
+		<bigdataviewer-image-loaders.version>0.6.3</bigdataviewer-image-loaders.version>
+		<bigdataviewer-biop-tools.version>0.8.0</bigdataviewer-biop-tools.version>
 		<bigdataviewer-selector.version>0.2.3</bigdataviewer-selector.version>
 
 		<!-- maths -->
