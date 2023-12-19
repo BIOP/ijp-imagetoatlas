@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.scijava</groupId>
 		<artifactId>pom-scijava</artifactId>
-		<version>36.0.0</version>
+		<version>37.0.0</version>
 		<relativePath />
 	</parent>
 
@@ -107,16 +107,16 @@
 		<main-class>ch.epfl.biop.abba.ABBALaunchMouse</main-class>
 
 		<!-- bdv playground related dependencies -->
-		<bigdataviewer-playground.version>0.8.0</bigdataviewer-playground.version>
-		<bigdataviewer-image-loaders.version>0.6.3</bigdataviewer-image-loaders.version>
-		<bigdataviewer-biop-tools.version>0.8.0</bigdataviewer-biop-tools.version>
-		<bigdataviewer-selector.version>0.2.3</bigdataviewer-selector.version>
+		<bigdataviewer-playground.version>0.8.1</bigdataviewer-playground.version>
+		<bigdataviewer-image-loaders.version>0.6.4</bigdataviewer-image-loaders.version>
+		<bigdataviewer-biop-tools.version>0.8.1</bigdataviewer-biop-tools.version>
+		<bigdataviewer-selector.version>0.2.4</bigdataviewer-selector.version>
 
 		<!-- maths -->
 		<leastsquares.version>1.0.0</leastsquares.version>
 
 		<!-- ABBA specific -->
-		<atlas.version>0.2.0</atlas.version>
+		<atlas.version>0.2.1</atlas.version>
 		<oshi-core.version>5.5.1</oshi-core.version>
 
 		<!--because xml deserialization with JAXB is not included in Java 11, and we prepare migrating to Java 11 -->
@@ -125,7 +125,7 @@
 
 		<!-- to generate python API, method put in tests -->
 		<reflections.version>0.10.2</reflections.version>
-		<pyimagej-scijava-command.version>0.2.0</pyimagej-scijava-command.version>
+		<pyimagej-scijava-command.version>0.2.1</pyimagej-scijava-command.version>
 
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>sign,deploy-to-scijava</releaseProfiles>
