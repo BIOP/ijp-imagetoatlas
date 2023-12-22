@@ -57,7 +57,7 @@ All files need to be properly calibrated (microns, millimeters, etc, but not pix
 
 If your images are uncalibrated, ABBA will assume that each pixel has a size of 1mm, which will lead to gigantic images. To correct for this issue, you can re-save your images with the proper metadata and make sure that the metadata is recognized by bio-formats. This can be done with [Kheops](https://github.com/BIOP/ijp-kheops), which offers an option to override the pixel size while an OME-TIFF version is re-exported.
 
-If you want to avoid the conversion step and keep using uncalibrated files, you can assemble your files in a QuPath  project, then [set each image pixel size](https://qupath.readthedocs.io/en/0.4/docs/starting/first_steps.html#setting-the-pixel-size). ABBA will then read the QuPath metadata, and ignore the original bio-formats metadata.
+If you want to avoid the conversion step and keep using uncalibrated files, you can assemble your files in a QuPath  project, then [set each image pixel size](https://qupath.readthedocs.io/en/0.5/docs/starting/first_steps.html#setting-the-pixel-size). ABBA will then read the QuPath metadata, and ignore the original bio-formats metadata.
 
 ---
 

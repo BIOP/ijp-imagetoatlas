@@ -20,14 +20,12 @@
         * [Linux](#linux)
         * [Indicate `elastix` and `transformix` executable location in Fiji:](#indicate-elastix-and-transformix-executable-location-in-fiji-)
     * [4. Setup ABBA in Fiji](#4-setup-abba-in-fiji)
+  * [Installing DeepSlice to run it locally](#installing-deepslice-to-run-it-locally)
 <!-- TOC -->
 
 ---
 
-
-# ABBA should be used with **QuPath 0.4.4**
-
-:warning: ABBA should be used with **QuPath 0.4.4** (or above). If you are using QuPath 0.4.0, 0.4.1, 0.4.2 or 0.4.3 you NEED TO UPDATE IT!
+:warning: If you are using QuPath 0.4.0, 0.4.1, 0.4.2 or 0.4.3 you NEED TO UPDATE IT!
 
 ---
 
@@ -100,23 +98,19 @@ The installation consists of four steps detailed in the paragraphs below:
 
 ### 1.  Install QuPath extensions
 
-Install [QuPath version 0.4+](https://qupath.github.io/).
-
-Install the [QuPath Warpy extension](https://github.com/BIOP/qupath-extension-warpy) (and its dependencies):
-* Go to the [latest release](https://github.com/BIOP/qupath-extension-warpy/releases)
-  * Download `qupath-extension-warpy-x.y.z.zip` and unzip it
-  * Drag its contained files into the main QuPath window
+Install [QuPath version 0.5+](https://qupath.github.io/).
 
 Install the [QuPath ABBA extension](https://github.com/BIOP/qupath-extension-abba) (and its dependencies):
 * Go to the [latest release](https://github.com/BIOP/qupath-extension-abba/releases)
-    * Download `qupath-extension-abba-x.y.z.jar`
-    * Drag this jar file into the main QuPath 
+    * Download `qupath-extension-abba-x.y.z.zip`
+    * Unzip it
+    * Drag jar files into the main QuPath window 
 
 Optional: if you want to work on data coming from an OMERO database, install the [QuPath OMERO RAW extension](https://github.com/BIOP/qupath-extension-biop-omero) (and its dependencies):
 * Read the [readme](https://github.com/BIOP/qupath-extension-biop-omero/blob/omero-raw/README.md) for installation instructions
 
 
-Restart QuPath: in `Extensions>Installed extensions` you should see the following extensions installed:
+Restart QuPath: in `Extensions>Managed extensions` you should see the following extensions installed:
   * ABBA
   * Image Combiner Warpy
   * Warpy
@@ -143,7 +137,7 @@ For automated registration, ABBA uses the [elastix](https://github.com/SuperElas
 
 ##### Windows
 
-For windows users, you also need to install [Visual C++ redistributable](https://support.microsoft.com/en-us/topic/the-latest-supported-visual-c-downloads-2647da03-1eea-4433-9aff-95f26a218cc0), (choose `vc_redist.x64.exe` for a 64-bit system).
+For windows users, you also need to install [Visual C++ redistributable](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170), (choose `vc_redist.x64.exe` for a 64-bit system).
 
 ##### Mac
 
@@ -162,7 +156,7 @@ This message should show up in the ImageJ console (and maybe errors for Cellpose
 * `[INFO] Transformix	->	set :-)`
 * `Elastix	->	set :-)`
 
-Once elastix is installed, you can run [the following script](https://gist.githubusercontent.com/NicoKiaru/b91f9f3f0069b765a49b5d4629a8b1c7/raw/571954a443d1e1f0597022f6c19f042aefbc0f5a/TestRegister.groovy) in Fiji to test elastix functionality. Save the linked file with a `.groovy` extension, open it in Fiji, and run it.
+Once elastix is installed, you can run [the following script](https://gist.github.com/NicoKiaru/b91f9f3f0069b765a49b5d4629a8b1c7) in Fiji to test elastix functionality. Save the linked file with a `.groovy` extension, open it in Fiji, and run it.
 
 ### 4. Setup ABBA in Fiji
 
@@ -177,7 +171,7 @@ These are the two atlases present by default. If this is the first time you laun
 ![Allen atlas download progress bar](./assets/img/fiji_atlas_download_progress_bar.png)
 
 The allen brain atlas and associated files will be cached:
-* in your user folder under the directory `\cached_atlas` (Allen Brain CCFv3 and Waxholm Rat v4) (in `C:\ProgramData\abba-atlas` if you used the windows installer)
+* in your user folder under the directory `\cached_atlas` (Allen Brain CCFv3 and Waxholm Rat v4)
 * in your user folder under the directory `\.brainglobe` for brainglobe atlases
 
 For non-brainglobe atlases, data are downloaded from zenodo repositories:

@@ -35,7 +35,7 @@ As in the recommended workflow, you first need to create a QuPath project that c
 
 You can check the [full documentation of QuPath](https://qupath.readthedocs.io/en/latest/).
 
-For a quick setup with the [demo dataset](https://zenodo.org/records/6553641):
+For a quick setup with a [demo dataset](example_datasets.md):
 * create a project by dragging and dropping an empty folder into QuPath
 * drag and drop your images to import them into a QuPath project
 * select `Bio-Formats builder` and then click Import

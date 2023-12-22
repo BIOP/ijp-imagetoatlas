@@ -328,6 +328,12 @@ If you are not happy with the result of a registration, you can select the slice
 
 This removal can be cancelled.
 
+#### Applying the registration sequence from one slice to another
+
+See [the use case in this issue](https://github.com/BIOP/ijp-imagetoatlas/issues/174). Suppose you want to duplicate the registration sequence from one slice to another. It is possible with the command `ABBA - Copy and Apply Registration`:
+
+![fiji_copy_apply_registration.png](assets%2Fimg%2Ffiji_copy_apply_registration.png)
+
 ### Browsing registration steps
 
 If you want to investigate quickly the different registration steps, you can click in the card `Display & Navigation`: Browse: `View Previous [P]` and `View Next [N]`. Note how the registrations indicators are switching from green to gray when they are ignored in the display.
