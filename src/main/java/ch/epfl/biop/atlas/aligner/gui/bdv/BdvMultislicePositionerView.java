@@ -63,15 +63,11 @@ import ch.epfl.biop.atlas.aligner.gui.bdv.card.SliceDefineROICommand;
 import ch.epfl.biop.atlas.aligner.plugin.ABBACommand;
 import ch.epfl.biop.atlas.aligner.plugin.IABBARegistrationPlugin;
 import ch.epfl.biop.atlas.aligner.plugin.RegistrationPluginHelper;
-import ch.epfl.biop.atlas.mouse.allen.ccfv3.command.AllenBrainAdultMouseAtlasCCF2017Command;
-import ch.epfl.biop.atlas.mouse.allen.ccfv3p1.command.AllenBrainAdultMouseAtlasCCF2017v3p1Command;
-import ch.epfl.biop.atlas.rat.waxholm.spraguedawley.v4.WaxholmSpragueDawleyRatV4Atlas;
-import ch.epfl.biop.atlas.rat.waxholm.spraguedawley.v4p2.WaxholmSpragueDawleyRatV4p2Atlas;
-import ch.epfl.biop.atlas.rat.waxholm.spraguedawley.v4p2.command.WaxholmSpragueDawleyRatV4p2Command;
 import ch.epfl.biop.atlas.struct.Atlas;
 import ch.epfl.biop.atlas.struct.AtlasNode;
 import ch.epfl.biop.bdv.gui.graphicalhandle.GraphicalHandle;
 import ch.epfl.biop.bdv.gui.graphicalhandle.GraphicalHandleListener;
+import ch.epfl.biop.quicknii.QuickNIISeries;
 import ch.epfl.biop.wrappers.deepslice.ij2commands.DeepSlicePrefsSet;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -109,7 +105,6 @@ import org.slf4j.LoggerFactory;
 import sc.fiji.bdvpg.bdv.BdvHandleHelper;
 import sc.fiji.bdvpg.scijava.BdvScijavaHelper;
 import sc.fiji.bdvpg.scijava.ScijavaSwingUI;
-import sc.fiji.bdvpg.scijava.services.SourceAndConverterBdvDisplayService;
 import sc.fiji.bdvpg.scijava.services.ui.swingdnd.BdvTransferHandler;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import spimdata.util.Displaysettings;
@@ -147,7 +142,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static bdv.ui.BdvDefaultCards.DEFAULT_SOURCEGROUPS_CARD;
@@ -416,46 +410,18 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ABBAUserFeedbackCommand.class, hierarchyLevelsSkipped);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), DeepSliceDocumentationCommand.class, hierarchyLevelsSkipped);
 
-        if (isDeepSliceMouseCompatible(msp)) {
+        if (QuickNIISeries.isDeepSliceMouseCompatible(msp.getReslicedAtlas().ba.getName())) {
             BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), DeepSlicePrefsSet.class, 2);
             logger.debug("Installing DeepSlice Command");
             BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RegisterSlicesDeepSliceCommand.class, hierarchyLevelsSkipped, "mp", msp, "model", "mouse");
         }
 
-        //DeepSliceCommand
-        //noinspection deprecation
-
-        // TODO: Rat support
-        /*if ((msp.getAtlas() instanceof WaxholmSpragueDawleyRatV4p2Atlas) || (msp.getAtlas() instanceof WaxholmSpragueDawleyRatV4Atlas)) {
-
+        if (QuickNIISeries.isDeepSliceRatCompatible(msp.getReslicedAtlas().ba.getName())) {
             BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), DeepSlicePrefsSet.class, 2);
             logger.debug("Installing DeepSlice Command");
             BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RegisterSlicesDeepSliceCommand.class, hierarchyLevelsSkipped, "mp", msp, "model", "rat");
-        }*/
-
-    }
-
-    private boolean isDeepSliceMouseCompatible(MultiSlicePositioner msp) {
-        if ((msp.getAtlas() instanceof AllenBrainAdultMouseAtlasCCF2017Command) || (msp.getAtlas() instanceof AllenBrainAdultMouseAtlasCCF2017v3p1Command)) {
-            return true;
         }
-        switch (msp.getAtlas().getName()) {
-            case "example_mouse_100um":
-            case "allen_mouse_100um":
-            case "allen_mouse_50um":
-            case "allen_mouse_25um":
-            case "allen_mouse_10um":
-            case "kim_mouse_100um":
-            case "kim_mouse_50um":
-            case "kim_mouse_25um":
-            case "kim_mouse_10um":
-            case "osten_mouse_100um":
-            case "osten_mouse_50um":
-            case "osten_mouse_25um":
-            case "osten_mouse_10um":
-                return true;
-        }
-        return false;
+
     }
 
     private void installRegistrationPluginUI(int hierarchyLevelsSkipped) {

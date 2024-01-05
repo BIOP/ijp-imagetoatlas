@@ -142,9 +142,6 @@ public class RegisterSlicesDeepSliceCommand implements Command {
 
     @Override
     public void run() {
-        if (model.equals("rat")) {
-            throw new UnsupportedOperationException("Rat model unsupported yet!");
-        }
 
         TempDirectory td = new TempDirectory("deepslice");
         dataset_folder = td.getPath().toFile();
@@ -282,7 +279,7 @@ public class RegisterSlicesDeepSliceCommand implements Command {
             for (int i = 0; i < slices.size(); i++) {
                 QuickNIISeries.SliceInfo slice = series.slices.get(i);
 
-                AffineTransform3D toCCFv3 = QuickNIISeries.getTransformInCCFv3(slice,nPixX,nPixY);
+                AffineTransform3D toCCFv3 = QuickNIISeries.getTransform(mp.getReslicedAtlas().ba.getName(), slice,nPixX,nPixY);
 
                 AffineTransform3D nonFlat = toCCFv3.preConcatenate(toABBA);
 
@@ -344,7 +341,7 @@ public class RegisterSlicesDeepSliceCommand implements Command {
 
             logger.debug("Slice QuickNii "+i+" correspond to initial slice "+iSliceSource);
 
-            AffineTransform3D toCCFv3 = QuickNIISeries.getTransformInCCFv3(slice, nPixX, nPixY);
+            AffineTransform3D toCCFv3 = QuickNIISeries.getTransform(mp.getReslicedAtlas().ba.getName(), slice, nPixX, nPixY);
 
             AffineTransform3D nonFlat = toCCFv3.preConcatenate(toABBA);
 
@@ -412,7 +409,7 @@ public class RegisterSlicesDeepSliceCommand implements Command {
         for (int i = 0; i < slices.size(); i++) {
             QuickNIISeries.SliceInfo slice = series.slices.get(i);
 
-            AffineTransform3D toCCFv3 = QuickNIISeries.getTransformInCCFv3(slice,nPixX,nPixY);
+            AffineTransform3D toCCFv3 = QuickNIISeries.getTransform(mp.getReslicedAtlas().ba.getName(), slice,nPixX,nPixY);
 
             AffineTransform3D flat = toCCFv3.preConcatenate(toABBA);
 

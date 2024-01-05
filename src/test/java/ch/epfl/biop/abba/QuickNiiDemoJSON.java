@@ -15,12 +15,14 @@ import java.io.File;
 import java.util.List;
 
 /** DO NOT WORK, use QuickNiiToABBA instead **/
+
+@Deprecated // Maybe I should just delete it
 public class QuickNiiDemoJSON {
 
     public static void main(String... args) throws Exception {
         // Un marshall xml
 
-        String path = "src/test/resources/quicknii/";
+        String path = "src/test/resources/quicknii/mouse/";
         String data = FileUtils.readFileToString(new File(path + "2023-09-18_results.json"), "UTF-8");
 
 
@@ -51,7 +53,7 @@ public class QuickNiiDemoJSON {
         for (int i=0; i<sources.size(); i++) {
             QuickNIISeries.SliceInfo slice = series.slices.get(i);
             SourceAndConverter source = sources.get(i);
-            SourceTransformHelper.append(QuickNIISeries.getTransformInCCFv3(slice,
+            SourceTransformHelper.append(QuickNIISeries.getTransform("Adult Mouse Brain - Allen Brain Atlas V3p1", slice,
                     (double) source.getSpimSource().getSource(0,0).dimension(0),
                     (double) source.getSpimSource().getSource(0,0).dimension(1)), new SourceAndConverterAndTimeRange(source, 0));
         }

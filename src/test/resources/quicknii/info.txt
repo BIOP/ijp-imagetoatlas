@@ -1,0 +1,7 @@
+Source of mouse dataset:
+
+https://zenodo.org/records/6553641
+
+Source of rat datset (H108):
+
+https://search.kg.ebrains.eu/instances/0bf058d2-6bf7-4e0f-8067-345e07109bf8

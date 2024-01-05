@@ -18,14 +18,13 @@ import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterAndTimeRange;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
 
-import javax.xml.bind.JAXBContext;
 import java.io.File;
 import java.io.FileReader;
 import java.util.Arrays;
 import java.util.List;
 
 // Pfou - do not work
-public class QuickNiiToABBA {
+public class QuickNiiMouseToABBA {
 
     public static void main(String... args) throws Exception {
         final ImageJ ij = new ImageJ();
@@ -39,7 +38,7 @@ public class QuickNiiToABBA {
                         "ba", mouseAtlas,
                         "slicing_mode", "coronal").get().getOutput("mp"));
 
-        String path = "src/test/resources/quicknii/";
+        String path = "src/test/resources/quicknii/mouse/";
 
         /*
         String data = FileUtils.readFileToString(new File(path + "2023-09-18_results.json"), "UTF-8");
@@ -79,7 +78,7 @@ public class QuickNiiToABBA {
                 QuickNIISeries.SliceInfo slice = series.slices.get(i);
                 SourceAndConverter source = sources.get(i);
 
-                AffineTransform3D toCCFv3 = QuickNIISeries.getTransformInCCFv3(slice,
+                AffineTransform3D toCCFv3 = QuickNIISeries.getTransform(mp.getReslicedAtlas().ba.getName(), slice,
                         (double) source.getSpimSource().getSource(0, 0).dimension(0),
                         (double) source.getSpimSource().getSource(0, 0).dimension(1));
 
@@ -126,9 +125,9 @@ public class QuickNiiToABBA {
             QuickNIISeries.SliceInfo slice = series.slices.get(i);
             SourceAndConverter source = sources.get(i);
 
-            AffineTransform3D toCCFv3 = QuickNIISeries.getTransformInCCFv3(slice,
-                    (double) source.getSpimSource().getSource(0, 0).dimension(0),
-                    (double) source.getSpimSource().getSource(0, 0).dimension(1));
+            AffineTransform3D toCCFv3 = QuickNIISeries.getTransform(mp.getReslicedAtlas().ba.getName(), slice,
+                    (double) source.getSpimSource().getSource(0, 0).dimension(0)/1000.,
+                    (double) source.getSpimSource().getSource(0, 0).dimension(1)/1000.);
 
             SourceTransformHelper.append(toCCFv3,
                                 new SourceAndConverterAndTimeRange(source, 0));
