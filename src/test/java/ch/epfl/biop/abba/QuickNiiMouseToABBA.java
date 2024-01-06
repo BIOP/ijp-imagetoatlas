@@ -23,6 +23,10 @@ import java.io.FileReader;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * do not work
+ */
+
 // Pfou - do not work
 public class QuickNiiMouseToABBA {
 
@@ -79,8 +83,8 @@ public class QuickNiiMouseToABBA {
                 SourceAndConverter source = sources.get(i);
 
                 AffineTransform3D toCCFv3 = QuickNIISeries.getTransform(mp.getReslicedAtlas().ba.getName(), slice,
-                        (double) source.getSpimSource().getSource(0, 0).dimension(0),
-                        (double) source.getSpimSource().getSource(0, 0).dimension(1));
+                        (double) source.getSpimSource().getSource(0, 0).dimension(0)/1000.,
+                        (double) source.getSpimSource().getSource(0, 0).dimension(1)/1000.);
 
                 AffineTransform3D nonFlat = toCCFv3.preConcatenate(toABBA);
 
