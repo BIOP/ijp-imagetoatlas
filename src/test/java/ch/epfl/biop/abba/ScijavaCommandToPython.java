@@ -2,7 +2,6 @@ package ch.epfl.biop.abba;
 
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.command.ABBAStartCommand;
-import ch.epfl.biop.atlas.aligner.command.RegisterSlicesDeepSliceCommand;
 import org.reflections.Reflections;
 import org.scijava.Context;
 import org.scijava.ItemIO;

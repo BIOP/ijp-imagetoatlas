@@ -109,7 +109,7 @@
 		<!-- bdv playground related dependencies -->
 		<bigdataviewer-playground.version>0.8.1</bigdataviewer-playground.version>
 		<bigdataviewer-image-loaders.version>0.6.4</bigdataviewer-image-loaders.version>
-		<bigdataviewer-biop-tools.version>0.8.1</bigdataviewer-biop-tools.version>
+		<bigdataviewer-biop-tools.version>0.8.2</bigdataviewer-biop-tools.version>
 		<bigdataviewer-selector.version>0.2.4</bigdataviewer-selector.version>
 
 		<!-- maths -->
@@ -166,12 +166,6 @@
             <groupId>net.imagej</groupId>
             <artifactId>imagej</artifactId>
         </dependency>
-
-		<!--<dependency>
-			<groupId>ch.epfl.biop</groupId>
-			<artifactId>ijl-utilities-wrappers</artifactId>
-			<version>${ijl-utilities-wrappers.version}</version>
-		</dependency>-->
 
 		<dependency>
 			<groupId>sc.fiji</groupId>

@@ -1,27 +1,23 @@
 package ch.epfl.biop.atlas.aligner.command;
 
 import bdv.viewer.SourceAndConverter;
+import ch.epfl.biop.atlas.aligner.DeepSliceHelper;
 import ch.epfl.biop.atlas.aligner.LockAndRunOnceSliceAction;
 import ch.epfl.biop.atlas.aligner.MoveSliceAction;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.RegisterSliceAction;
 import ch.epfl.biop.atlas.aligner.SliceSources;
+import ch.epfl.biop.atlas.aligner.action.MarkActionSequenceBatchAction;
 import ch.epfl.biop.atlas.aligner.plugin.IABBARegistrationPlugin;
 import ch.epfl.biop.java.utilities.TempDirectory;
 import ch.epfl.biop.quicknii.QuickNIIExporter;
 import ch.epfl.biop.quicknii.QuickNIISeries;
 import ch.epfl.biop.registration.Registration;
 import ch.epfl.biop.registration.sourceandconverter.affine.AffineRegistration;
-import ch.epfl.biop.sourceandconverter.processor.SourcesAffineTransformer;
 import ch.epfl.biop.sourceandconverter.processor.SourcesChannelsSelect;
 import ch.epfl.biop.sourceandconverter.processor.SourcesProcessor;
 import ch.epfl.biop.sourceandconverter.processor.SourcesProcessorHelper;
-import ch.epfl.biop.wrappers.deepslice.DeepSlice;
-import ch.epfl.biop.wrappers.deepslice.DeepSliceTaskSettings;
-import ch.epfl.biop.wrappers.deepslice.DefaultDeepSliceTask;
 import com.google.gson.Gson;
-import ij.IJ;
-import ij.gui.WaitForUserDialog;
 import net.imglib2.realtransform.AffineTransform3D;
 import org.scijava.Context;
 import org.scijava.InstantiableException;
@@ -29,35 +25,28 @@ import org.scijava.ItemVisibility;
 import org.scijava.command.Command;
 import org.scijava.platform.PlatformService;
 import org.scijava.plugin.Parameter;
-import org.scijava.plugin.Plugin;
 import org.scijava.plugin.PluginService;
-import org.scijava.ui.UIService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileReader;
-import java.net.URL;
 import java.text.DecimalFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.function.Supplier;
 
 /**
  * Command which is using the amazing DeepSlice workflow by Harry Carey, and William Redmond, in Simon McMullan group
- * (https://researchers.mq.edu.au/en/publications/deepslice-a-deep-neural-network-for-fully-automatic-alignment-of-)
- * You will need an internet connection (https://www.deepslice.com.au/)
- * in order to use this command, and there's some manual interaction
- * required (but it's worth!)
- * Contrary to other registration command, the slices are not registered independently, because
- * it's easier to drag many files at once in the DeepSlice web interface.
- * It is possible to forbid the angle adjustement.
+ * (<a href="https://doi.org/10.1038/s41467-023-41645-4">DeepSlice publication</a>)
  * Contrary to other registration methods, DeepSlice can help defining the location in Z of slices.
  * However, sometimes, DeepSlice is swapping slices incorrectly. So there is an option that maintains the
  * slices order in the process. Briefly, if this options is checked, the slice with the biggest difference
@@ -66,22 +55,20 @@ import java.util.function.Supplier;
  * - correct positioning in Z
  * - slicing angle
  * - affine in-plane registration
- * By default, ABBA downsamples to 30 microns per pixel for DeepSlice and saves as an 8 bit jpeg image.
+ * By default, ABBA downsamples to 30 microns (mouse) or 60 microns (rat)
+ * per pixel for DeepSlice and saves as an 8 bit rgb jpeg image. Also, make sure that the min max display settings
+ * are set correctly, otherwise the images will be saturated upon export and will be registered badly.
  * Make sure you have multiresolution files if you don't want your downscaling to look bad! Also
  * this is currently the only registration method where the display settings matter for the registration.
  *
+ * There are two concrete class of this abstract class, one that can run DeepSlice locally (provided a conda env
+ * exists with DeepSlice and is specified with the command
+ * {@link ch.epfl.biop.wrappers.deepslice.ij2commands.DeepSlicePrefsSet}) and one that can be used in conjunction
+ * with the DeepSlice web interface.
  */
 
-// TODO: allow only in coronal and AB atlas
-// TODO : fix display settings not updated with the new ABBA structure
-
 @SuppressWarnings("CanBeFinal")
-@Plugin(type = Command.class,
-        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>ABBA - DeepSlice Registration",
-        description = "Uses Deepslice for affine in plane and axial registration of selected slices")
-public class RegisterSlicesDeepSliceCommand implements Command {
-
-    static Logger logger = LoggerFactory.getLogger(RegisterSlicesDeepSliceCommand.class);
+abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command {
 
     @Parameter(visibility = ItemVisibility.MESSAGE)
     public String message = "<html><b>Don't forget to adjust min/max display settings!</b> <br>  Almost 50% of images sent by ABBA users to DeepSlice are over-saturated. <br> (and thus, badly registered) </html>";
@@ -98,86 +85,39 @@ public class RegisterSlicesDeepSliceCommand implements Command {
     @Parameter
     PluginService pluginService;
 
+    @Parameter(choices = {"mouse", "rat"}, label = "('mouse', 'rat') Mouse or Rat ?")
+    String model;
+
     @Parameter(label = "Slices channels, 0-based, comma separated, '*' for all channels", description = "'0,2' for channels 0 and 2")
     String channels = "*";
-
-    //@Parameter(label = "Section Name Prefix")
-    String image_name_prefix = "Section";
-
-    //@Parameter(label = "QuickNII dataset folder", style="directory")
-    File dataset_folder;
 
     @Parameter(label = "Allow change of atlas slicing angle")
     boolean allow_slicing_angle_change = true;
 
-    @Parameter(label = "Allow change of position along the slicing axis")
     boolean allow_change_slicing_position = true;
-
-    @Parameter(label = "Maintain the rank of the slices")
-    boolean maintain_slices_order = true;
-
-    @Parameter(label = "Affine transform in plane")
+    boolean maintain_rank = true;
     boolean affine_transform = true;
-
-    //@Parameter(label = "pixel size in micrometer")
-    double px_size_micron = 30;
-
-    //@Parameter(label = "Convert to 8 bit image")
+    double px_size_micron = Double.NaN; // Pixel size in micrometer for the resampling, 30 for mouse, 60 for rat
     boolean convert_to_8_bits = false;
-
-    //@Parameter(label = "Convert to jpg (single channel recommended)")
     boolean convert_to_jpg = true;
-
-    //@Parameter
     boolean interpolate = false;
-
-    @Parameter(choices = {"mouse", "rat"}, label = "('mouse', 'rat') Mouse or Rat ?")
-    String model;
-
-    @Parameter(choices = {"web", "local"}, label = "('local', 'web') Local Conda Env or Web ?")
-    String run_mode;
-
-    //@Parameter(required = false, persist = false)
+    String image_name_prefix = "Section";
+    File dataset_folder;
     Function<File,File> deepSliceProcessor = null;
+    QuickNIISeries series;
 
-    @Override
     public void run() {
 
-        TempDirectory td = new TempDirectory("deepslice");
-        dataset_folder = td.getPath().toFile();
-        td.deleteOnExit();
+        List<SliceSources> iniList = mp.getSlices().stream().filter(SliceSources::isSelected)
+                .collect(Collectors.toList());
 
-        if (deepSliceProcessor == null) {
-            switch (run_mode.trim().toLowerCase()) {
-                case "local":
-                    if (new File(DeepSlice.envDirPath).exists()) {
-                        deepSliceProcessor =
-                                (input_folder) -> RegisterSlicesDeepSliceCommand.deepSliceLocalRunner(model, input_folder);
-                    } else {
-                        mp.log.accept("Invalid deepSlice local environment: "+DeepSlice.envDirPath);
-                        mp.log.accept("Please setup the environment location with 'Plugins>BIOP>DeepSlice>DeepSlice setup...' or the API");
-                        mp.log.accept("Attempt to use Web interface instead...");
-                        if (!ctx.getService(UIService.class).isHeadless()) {
-                            mp.log.accept("Fall back to Web interface successful.");
-                            deepSliceProcessor = this::deepSliceWebRunner;
-                        } else {
-                            mp.errlog.accept("Can't use Web interface in headless mode, aborting DeepSlice registration");
-                            return;
-                        }
-                    }
-                break;
-                case "web":
-                default:
-                    if (!ctx.getService(UIService.class).isHeadless()) {
-                        deepSliceProcessor = this::deepSliceWebRunner;
-                    } else {
-                        mp.errlog.accept("Can't use Web interface in headless mode, aborting DeepSlice registration");
-                        return;
-                    }
-            }
+        // We need to reverse the order because DeepSlice expects the slices to be sorted from caudal to rostral
+
+        List<SliceSources> slicesToRegister = new ArrayList<>();
+
+        for (int i = iniList.size()-1; i>=0; i--) {
+            slicesToRegister.add(iniList.get(i));
         }
-
-        List<SliceSources> slicesToRegister = mp.getSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
 
         if (slicesToRegister.size() == 0) {
             mp.log.accept("No slice selected");
@@ -185,12 +125,20 @@ public class RegisterSlicesDeepSliceCommand implements Command {
             return;
         }
 
-        Map<SliceSources, Holder<Double>> newAxisPosition = new HashMap<>();
-        Map<SliceSources, Holder<Registration<SourceAndConverter<?>[]>>> newSliceRegistration = new HashMap<>();
+        setPixelSizeFromModel();
+
+        TempDirectory td = new TempDirectory("deepslice");
+        dataset_folder = td.getPath().toFile();
+        td.deleteOnExit();
+
+        if (!setSettings()) return;
+
+        Map<SliceSources, DeepSliceHelper.Holder<Double>> newAxisPosition = new HashMap<>();
+        Map<SliceSources, DeepSliceHelper.Holder<Registration<SourceAndConverter<?>[]>>> newSliceRegistration = new HashMap<>();
 
         for (SliceSources slice: slicesToRegister) {
-            newAxisPosition.put(slice, new Holder<>());
-            newSliceRegistration.put(slice, new Holder<>());
+            newAxisPosition.put(slice, new DeepSliceHelper.Holder<>());
+            newSliceRegistration.put(slice, new DeepSliceHelper.Holder<>());
         }
 
         Supplier<Boolean> deepSliceRunner =  () -> {
@@ -225,7 +173,7 @@ public class RegisterSlicesDeepSliceCommand implements Command {
             double nPixY = 1000.0 * mp.getROI()[3] / px_size_micron;
 
             if (allow_slicing_angle_change) {
-                logger.debug("Slices pixel number = " + nPixX + " : " + nPixY);
+                //logger.debug("Slices pixel number = " + nPixX + " : " + nPixY);
                 adjustSlicingAngle(10, slicesToRegister, nPixX, nPixY); //
             }
 
@@ -247,23 +195,27 @@ public class RegisterSlicesDeepSliceCommand implements Command {
         counter.set(0);
 
         AtomicBoolean result = new AtomicBoolean();
+
+        new MarkActionSequenceBatchAction(mp).runRequest();
         for (SliceSources slice: slicesToRegister) {
             new LockAndRunOnceSliceAction(mp, slice, counter, slicesToRegister.size(), deepSliceRunner, result).runRequest(true);
             if (allow_change_slicing_position) {
                 new MoveSliceAction(mp, slice, newAxisPosition.get(slice)).runRequest(true);
             }
             if (affine_transform) {
-                Holder<Registration<SourceAndConverter<?>[]>> regSupplier = newSliceRegistration.get(slice);
+                DeepSliceHelper.Holder<Registration<SourceAndConverter<?>[]>> regSupplier = newSliceRegistration.get(slice);
                 new RegisterSliceAction(mp, slice, regSupplier,
                         SourcesProcessorHelper.Identity(),
                         SourcesProcessorHelper.Identity()).runRequest(true);
             }
         }
+        new MarkActionSequenceBatchAction(mp).runRequest();
+
     }
 
-    QuickNIISeries series;
+    abstract boolean setSettings();
 
-    private void adjustSlicingAngle(int nIterations, List<SliceSources> slices, double nPixX, double nPixY) {
+    protected void adjustSlicingAngle(int nIterations, List<SliceSources> slices, double nPixX, double nPixY) {
 
         double oldX = mp.getReslicedAtlas().getRotateX();
         double oldY = mp.getReslicedAtlas().getRotateY();
@@ -303,11 +255,11 @@ public class RegisterSlicesDeepSliceCommand implements Command {
 
             }
 
-            logger.debug("Round "+nAdjust);
-            logger.debug("rotation x =" + getMedian(rxs));
-            logger.debug("rotation y =" + getMedian(rys));
-            mp.getReslicedAtlas().setRotateY(mp.getReslicedAtlas().getRotateY() - getMedian(rys) / 2.0);
-            mp.getReslicedAtlas().setRotateX(mp.getReslicedAtlas().getRotateX() + getMedian(rxs) / 2.0);
+            /*logger.debug("Round "+nAdjust);
+            logger.debug("rotation x =" + DeepSliceHelper.getMedian(rxs));
+            logger.debug("rotation y =" + DeepSliceHelper.getMedian(rys));*/
+            mp.getReslicedAtlas().setRotateY(mp.getReslicedAtlas().getRotateY() - DeepSliceHelper.getMedian(rys) / 2.0);
+            mp.getReslicedAtlas().setRotateX(mp.getReslicedAtlas().getRotateX() + DeepSliceHelper.getMedian(rxs) / 2.0);
         }
 
         String angleUpdatedMessage = "";
@@ -321,7 +273,7 @@ public class RegisterSlicesDeepSliceCommand implements Command {
 
     }
 
-    private void adjustSlicesZPosition(final List<SliceSources> slices, double nPixX, double nPixY, Map<SliceSources, Holder<Double>> newAxisPosition) {
+    protected void adjustSlicesZPosition(final List<SliceSources> slices, double nPixX, double nPixY, Map<SliceSources, DeepSliceHelper.Holder<Double>> newAxisPosition) {
         // The "slices" list is sorted according to the z axis, before deepslice action
 
         final String regex = "(.*)"+image_name_prefix +"_s([0-9]+).*";
@@ -339,7 +291,7 @@ public class RegisterSlicesDeepSliceCommand implements Command {
 
             int iSliceSource = Integer.parseInt(matcher.group(2));
 
-            logger.debug("Slice QuickNii "+i+" correspond to initial slice "+iSliceSource);
+            //logger.debug("Slice QuickNii "+i+" correspond to initial slice "+iSliceSource);
 
             AffineTransform3D toCCFv3 = QuickNIISeries.getTransform(mp.getReslicedAtlas().ba.getName(), slice, nPixX, nPixY);
 
@@ -351,7 +303,7 @@ public class RegisterSlicesDeepSliceCommand implements Command {
         }
 
         Map<Integer, SliceSources> mapNewRankToSlices = new HashMap<>();
-        if (maintain_slices_order) {
+        if (maintain_rank) {
             // We should swap the position of the one slice with the biggest rank difference until there's no rank difference
             int biggestRankDifference = -1;
             int indexOfSliceWithBiggestRankDifference = -1;
@@ -365,7 +317,7 @@ public class RegisterSlicesDeepSliceCommand implements Command {
                     indicesNewlyOrdered[i] = i;
                 }
 
-                Arrays.sort(indicesNewlyOrdered, Comparator.comparingDouble(i -> slicesNewPosition.get(slices.get(i))));
+                Arrays.sort(indicesNewlyOrdered, Comparator.comparingDouble(i -> -1 * slicesNewPosition.get(slices.get(i)))); // -1 for caudal to rostral convention
 
                 for (int i = 0; i < indicesNewlyOrdered.length; i++) {
                     mapNewRankToSlices.put(i,slices.get(indicesNewlyOrdered[i]));
@@ -383,8 +335,8 @@ public class RegisterSlicesDeepSliceCommand implements Command {
                 if (biggestRankDifference!=0) { // Why move anything if everything is alright ?
                     // Moving slice indexOfSliceWithBiggestRankDifference to a new rank targetIndex
                     double targetLocation = slicesNewPosition.get(mapNewRankToSlices.get(targetIndex)); // NPE !!
-                    if (direction < 0) targetLocation += mp.getAtlas().getMap().getAtlasPrecisionInMillimeter()/10.0;
-                    if (direction > 0) targetLocation -= mp.getAtlas().getMap().getAtlasPrecisionInMillimeter()/10.0;
+                    if (direction < 0) targetLocation -= mp.getAtlas().getMap().getAtlasPrecisionInMillimeter()/10.0;
+                    if (direction > 0) targetLocation += mp.getAtlas().getMap().getAtlasPrecisionInMillimeter()/10.0;
                     slicesNewPosition.put(slices.get(indexOfSliceWithBiggestRankDifference), targetLocation);
                 }
             }
@@ -396,8 +348,8 @@ public class RegisterSlicesDeepSliceCommand implements Command {
         }
     }
 
-    private void  affineTransformInPlane(final List<SliceSources> slices, double nPixX, double nPixY,
-                                         Map<SliceSources, Holder<Registration<SourceAndConverter<?>[]>>> newSliceTransfomr
+    protected void  affineTransformInPlane(final List<SliceSources> slices, double nPixX, double nPixY,
+                                         Map<SliceSources, DeepSliceHelper.Holder<Registration<SourceAndConverter<?>[]>>> newSliceTransform
     //                                     Map<SliceSources, Holder<SourcesAffineTransformer>> newSAT
     ) throws InstantiableException {
         AffineTransform3D toABBA = mp.getReslicedAtlas().getSlicingTransformToAtlas().inverse();
@@ -438,7 +390,7 @@ public class RegisterSlicesDeepSliceCommand implements Command {
 
             int iSliceSource = Integer.parseInt(matcher.group(2));
 
-            logger.debug("Slice QuickNii "+i+" correspond to initial slice "+iSliceSource);
+            //logger.debug("Slice QuickNii "+i+" correspond to initial slice "+iSliceSource);
 
             IABBARegistrationPlugin registration = (IABBARegistrationPlugin)
                     pluginService.getPlugin(AffineRegistration.class).createInstance();
@@ -456,19 +408,19 @@ public class RegisterSlicesDeepSliceCommand implements Command {
             parameters.put("pz", 0);
             AffineTransform3D at3d = new AffineTransform3D();
             at3d.translate(0,0,-slices.get(iSliceSource).getSlicingAxisPosition());
-            SourcesAffineTransformer z_zero = new SourcesAffineTransformer(at3d);
 
             // Sends parameters to the registration
             registration.setRegistrationParameters(MultiSlicePositioner.convertToString(ctx,parameters));
 
-            newSliceTransfomr.get(slices.get(iSliceSource)).accept( registration );
-            //newSAT.get(slices.get(iSliceSource)).accept( z_zero );
+            newSliceTransform.get(slices.get(iSliceSource)).accept( registration );
 
         }
 
     }
 
-    private void exportDownsampledDataset(List<SliceSources> slices) {
+    protected void exportDownsampledDataset(List<SliceSources> slices) {
+
+        // todo: inverser les slices pour deepslice (ordre ros) (with caudal to rostral being positive)!!
 
         SourcesProcessor preprocess = SourcesProcessorHelper.Identity();
 
@@ -506,79 +458,12 @@ public class RegisterSlicesDeepSliceCommand implements Command {
         }
     }
 
-    public static double getMedian(double[] array) {
-        Arrays.sort(array);
-        double median;
-        if (array.length % 2 == 0)
-            median = (array[array.length/2] + array[array.length/2 - 1])/2;
-        else
-            median = array[array.length/2];
-        return median;
-    }
-
-    public static class Holder<T> implements Supplier<T>, Consumer<T> {
-        T t;
-        public Holder(T t) {
-            this.t = t;
+    private void setPixelSizeFromModel() {
+        if (model.equals("mouse")) {
+            px_size_micron = 30;
+        } else if (model.equals("rat")) {
+            px_size_micron = 60;
         }
-
-        public Holder() {
-
-        }
-
-        public T get() {
-            return t;
-        }
-
-        @Override
-        public void accept(T t) {
-            this.t = t;
-        }
-    }
-
-    public static File deepSliceLocalRunner(String model, File input_folder) {
-        DeepSliceTaskSettings settings = new DeepSliceTaskSettings();
-        settings.model = model;
-        settings.input_folder = input_folder.getAbsolutePath();
-        settings.output_folder = null;
-        settings.propagate_angles = false;
-        settings.section_numbers = false;
-        settings.enforce_index_spacing = -1;
-        settings.enforce_index_order = false;
-        settings.ensemble = false;
-        DefaultDeepSliceTask task = new DefaultDeepSliceTask();
-        task.setSettings(settings);
-        try {
-            task.run();
-        } catch (Exception e) {
-            IJ.log("Could not run DeepSlice: "+e.getMessage());
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
-        return new File(input_folder, "results.json");
-    }
-
-    public File deepSliceWebRunner(File input_folder) {
-        IJ.log("Dataset exported in folder " + input_folder.getAbsolutePath());
-        new WaitForUserDialog("Now opening DeepSlice webpage",
-                "Drag and drop all slices into the webpage.")
-                .show();
-        try {
-            ps.open(new URL("https://www.deepslice.com.au/"));
-            ps.open(input_folder.toURI().toURL());
-        } catch (Exception e) {
-            mp.errorMessageForUser.accept("Couldn't open DeepSlice from Fiji, ",
-                    "please go to https://www.deepslice.com.au/ and drag and drop your images located in " + dataset_folder.getAbsolutePath());
-        }
-        new WaitForUserDialog("DeepSlice result",
-                "Put the 'results.json' file into " + input_folder.getAbsolutePath() + " then press ok.")
-                .show();
-        try {
-            Thread.sleep(7000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        return new File(input_folder, "results.json");
     }
 
 }

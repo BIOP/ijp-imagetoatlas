@@ -1,5 +1,6 @@
 package ch.epfl.biop.quicknii;
 
+import ch.epfl.biop.atlas.aligner.DeepSliceHelper;
 import net.imglib2.realtransform.AffineTransform3D;
 
 import java.text.DecimalFormat;
@@ -21,11 +22,12 @@ public class QuickNIISeries {
 
 
     /**
-     * Use getTransform(atlas name, ...) instead
-     * @param slice
-     * @param imgWidth given because deepslice returns a wrong size in the dataset
-     * @param imgHeight
-     * @return
+     * Deprecated, use {@link QuickNIISeries#getTransform(String, SliceInfo, double, double)} instead
+     *
+     * @param slice the registered slice in question
+     * @param imgWidth image width in pixel (given because DeepSlice returns a wrong size in the dataset)
+     * @param imgHeight image height in pixel
+     * @return the transform to apply on the slice to match DeepSlice results
      */
     @Deprecated
     public static AffineTransform3D getTransformInCCFv3(SliceInfo slice, double imgWidth, double imgHeight) {
@@ -33,11 +35,11 @@ public class QuickNIISeries {
     }
 
     /**
-     *
-     * @param slice
-     * @param imgWidth given because deepslice returns a wrong size in the dataset
-     * @param imgHeight
-     * @return
+     * @param atlasName, brainglobe atlas name or Java ABBA atlas name
+     * @param slice the registered slice in question
+     * @param imgWidth image width in pixel (given because DeepSlice returns a wrong size in the dataset)
+     * @param imgHeight image height in pixel
+     * @return the transform to apply on the slice to match DeepSlice results
      */
     public static AffineTransform3D getTransform(String atlasName, SliceInfo slice, double imgWidth, double imgHeight) {
 
@@ -67,11 +69,11 @@ public class QuickNIISeries {
 
         AffineTransform3D toCCF = new AffineTransform3D();
 
-        if (isDeepSliceMouseCompatible(atlasName)) {
+        if (DeepSliceHelper.isDeepSliceMouseCompatible(atlasName)) {
             toCCF.set(0.0, -0.025, 0.0, 13.2,
                     0.0, 0.0, -0.025, 8.0,
                     0.025, 0.0, 0.0, 0.0);
-        } else if (isDeepSliceRatCompatible(atlasName)) {
+        } else if (DeepSliceHelper.isDeepSliceRatCompatible(atlasName)) {
             toCCF.set(0.0390625, 0.0, 0.0, -9.53125,
                     0.0, 0.0390625, 0.0, -24.3359375,
                     0.0, 0.0, 0.0390625, -9.6875);
@@ -111,37 +113,6 @@ public class QuickNIISeries {
                     " v["+df.format(vx)+","+df.format(vy)+","+df.format(vz)+"]";
         }
 
-    }
-
-    public static boolean isDeepSliceMouseCompatible(String atlasName) {
-        switch (atlasName) {
-            case "example_mouse_100um":
-            case "allen_mouse_100um":
-            case "allen_mouse_50um":
-            case "allen_mouse_25um":
-            case "allen_mouse_10um":
-            case "kim_mouse_100um":
-            case "kim_mouse_50um":
-            case "kim_mouse_25um":
-            case "kim_mouse_10um":
-            case "osten_mouse_100um":
-            case "osten_mouse_50um":
-            case "osten_mouse_25um":
-            case "osten_mouse_10um":
-            case "Adult Mouse Brain - Allen Brain Atlas V3":
-            case "Adult Mouse Brain - Allen Brain Atlas V3p1":
-                return true;
-        }
-        return false;
-    }
-
-    public static boolean isDeepSliceRatCompatible(String atlasName) {
-        switch (atlasName) {
-            case "Rat - Waxholm Sprague Dawley V4":
-            case "Rat - Waxholm Sprague Dawley V4p2":
-                return true;
-        }
-        return false;
     }
 
 }

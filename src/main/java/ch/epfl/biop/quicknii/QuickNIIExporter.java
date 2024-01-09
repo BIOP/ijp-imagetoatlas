@@ -1,6 +1,5 @@
 package ch.epfl.biop.quicknii;
 
-import ij.process.ColorProcessor;
 import ch.epfl.biop.atlas.aligner.SliceToImagePlus;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.sourceandconverter.processor.SourcesProcessor;
@@ -76,7 +75,7 @@ public class QuickNIIExporter {
                     roi[0], roi[1], roi[2], roi[3],
                     pxSizeMicron/1000.0, 0,interpolate );
 
-            imp.setTitle(imageName+"_s"+df.format(i));
+            imp.setTitle(imageName+"_s"+(df.format(i)));
 
             if (convertTo8Bits) {
                 new ImageConverter(imp).convertToGray8();

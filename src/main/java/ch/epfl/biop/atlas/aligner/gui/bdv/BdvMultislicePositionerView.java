@@ -13,6 +13,7 @@ import bdv.viewer.ViewerPanel;
 import ch.epfl.biop.ResourcesMonitor;
 import ch.epfl.biop.atlas.aligner.CancelableAction;
 import ch.epfl.biop.atlas.aligner.CreateSliceAction;
+import ch.epfl.biop.atlas.aligner.DeepSliceHelper;
 import ch.epfl.biop.atlas.aligner.DeleteSliceAction;
 import ch.epfl.biop.atlas.aligner.MoveSliceAction;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
@@ -46,7 +47,8 @@ import ch.epfl.biop.atlas.aligner.command.MirrorUndoCommand;
 import ch.epfl.biop.atlas.aligner.command.RasterSlicesCommand;
 import ch.epfl.biop.atlas.aligner.command.RasterSlicesDeformationCommand;
 import ch.epfl.biop.atlas.aligner.command.RegisterSlicesCopyAndApplyCommand;
-import ch.epfl.biop.atlas.aligner.command.RegisterSlicesDeepSliceCommand;
+import ch.epfl.biop.atlas.aligner.command.RegisterSlicesDeepSliceWebCommand;
+import ch.epfl.biop.atlas.aligner.command.RegisterSlicesDeepSliceLocalCommand;
 import ch.epfl.biop.atlas.aligner.command.RegisterSlicesEditLastCommand;
 import ch.epfl.biop.atlas.aligner.command.RegisterSlicesRemoveLastCommand;
 import ch.epfl.biop.atlas.aligner.command.RotateSlicesCommand;
@@ -67,7 +69,6 @@ import ch.epfl.biop.atlas.struct.Atlas;
 import ch.epfl.biop.atlas.struct.AtlasNode;
 import ch.epfl.biop.bdv.gui.graphicalhandle.GraphicalHandle;
 import ch.epfl.biop.bdv.gui.graphicalhandle.GraphicalHandleListener;
-import ch.epfl.biop.quicknii.QuickNIISeries;
 import ch.epfl.biop.wrappers.deepslice.ij2commands.DeepSlicePrefsSet;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -313,14 +314,15 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         if (SwingUtilities.isEventDispatchThread()) {
             bdvh.getCardPanel().setCardExpanded(DEFAULT_SOURCES_CARD, false);
             BdvScijavaHelper.clearBdvHandleMenuBar(bdvh);
-        } else
-        try {
-            SwingUtilities.invokeAndWait(() -> {
-                bdvh.getCardPanel().setCardExpanded(DEFAULT_SOURCES_CARD, false);
-                BdvScijavaHelper.clearBdvHandleMenuBar(bdvh);
-            });
-        } catch (Exception e) {
-            errlog.accept(e.getMessage());
+        } else {
+            try {
+                SwingUtilities.invokeAndWait(() -> {
+                    bdvh.getCardPanel().setCardExpanded(DEFAULT_SOURCES_CARD, false);
+                    BdvScijavaHelper.clearBdvHandleMenuBar(bdvh);
+                });
+            } catch (Exception e) {
+                errlog.accept(e.getMessage());
+            }
         }
     }
 
@@ -408,18 +410,27 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ABBAForumHelpCommand.class, hierarchyLevelsSkipped);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ABBADocumentationCommand.class, hierarchyLevelsSkipped);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ABBAUserFeedbackCommand.class, hierarchyLevelsSkipped);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), DeepSliceDocumentationCommand.class, hierarchyLevelsSkipped);
 
-        if (QuickNIISeries.isDeepSliceMouseCompatible(msp.getReslicedAtlas().ba.getName())) {
+        if (DeepSliceHelper.isDeepSliceMouseCompatible(msp.getReslicedAtlas().ba.getName())) {
+
+            logger.debug("Installing DeepSlice Command for Mouse");
             BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), DeepSlicePrefsSet.class, 2);
-            logger.debug("Installing DeepSlice Command");
-            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RegisterSlicesDeepSliceCommand.class, hierarchyLevelsSkipped, "mp", msp, "model", "mouse");
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), DeepSliceDocumentationCommand.class, 2);
+
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RegisterSlicesDeepSliceWebCommand.class, hierarchyLevelsSkipped, "mp", msp, "model", "mouse");
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RegisterSlicesDeepSliceLocalCommand.class, hierarchyLevelsSkipped, "mp", msp, "model", "mouse");
+
         }
 
-        if (QuickNIISeries.isDeepSliceRatCompatible(msp.getReslicedAtlas().ba.getName())) {
+        if (DeepSliceHelper.isDeepSliceRatCompatible(msp.getReslicedAtlas().ba.getName())) {
+
+            logger.debug("Installing DeepSlice Command for Rat");
             BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), DeepSlicePrefsSet.class, 2);
-            logger.debug("Installing DeepSlice Command");
-            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RegisterSlicesDeepSliceCommand.class, hierarchyLevelsSkipped, "mp", msp, "model", "rat");
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), DeepSliceDocumentationCommand.class, 2);
+
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RegisterSlicesDeepSliceWebCommand.class, hierarchyLevelsSkipped, "mp", msp, "model", "rat");
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RegisterSlicesDeepSliceLocalCommand.class, hierarchyLevelsSkipped, "mp", msp, "model", "rat");
+
         }
 
     }
@@ -647,7 +658,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             if (cleanAllOnExit) {
                 if (msp!=null) {
                     Context ctx = msp.getContext();
-                    Atlas atlas = msp.getAtlas();
+                    //Atlas atlas = msp.getAtlas();
                     msp.close();
                     ctx.getService(ObjectService.class).removeObject(msp);
                     //ctx.getService(ObjectService.class).removeObject(atlas);
@@ -850,9 +861,9 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
      * Saves the current view on top of the state file
      */
     public void loadState() {
-
         try {
-
+            msp.addTask();
+            bdvh.getViewerPanel().requestRepaint();
             if ((msp.getSlices()!=null)&&(msp.getSlices().size()>0)) {
                 msp.errorMessageForUser.accept("Slices are already present!", "You can't open a state file if slices are already present in ABBA.");
                  return;
@@ -920,6 +931,8 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            msp.removeTask();
         }
     }
 

@@ -11,7 +11,7 @@ import java.net.URL;
 // TODO: link this command to Allen Brain Atlas Coronal only
 
 @Plugin(type = Command.class,
-        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Help>ABBA - DeepSlice Info",
+        menuPath = "Plugins>BIOP>DeepSlice>DeepSlice Info",
         description = "Open deep slice reference webpage.")
 public class DeepSliceDocumentationCommand implements Command {
 
