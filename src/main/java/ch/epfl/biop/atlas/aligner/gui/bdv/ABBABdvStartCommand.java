@@ -75,12 +75,12 @@ public class ABBABdvStartCommand implements Command, Initializable {
     }
 
     public void initialize() {
-        String keyMessagePref = "ch.epfl.biop.atlas.aligner.startupmessage.skip";
+        /*String keyMessagePref = "ch.epfl.biop.atlas.aligner.startupmessage.skip";
         boolean messageSkip = ij.Prefs.get(keyMessagePref, false);
         if (!messageSkip) {
             messageSkip = showWarningMessageWithCheckbox("Please read!","<html>If you are using ABBA in QuPath, please update to v0.4.4!<br> See https://go.epfl.ch/abba-update for more information.");
             ij.Prefs.set(keyMessagePref, messageSkip);
-        }
+        }*/
         ABBAHelper.displayABBALogo(1500);
     }
 
