@@ -1,6 +1,6 @@
 [![](https://github.com/BIOP/ijp-imagetoatlas/actions/workflows/build-main.yml/badge.svg)](https://github.com/BIOP/ijp-imagetoatlas/actions/workflows/build-main.yml)
 
-# ABBA should be used with **QuPath 0.4.4**
+# ABBA should be used with **QuPath 0.4.4** or **QuPath 0.5.x**
 
 > [!WARNING]  
 > ABBA should be used with **QuPath 0.4.4** (or above). If you are using QuPath 0.4.0, 0.4.1, 0.4.2 or 0.4.3 you NEED TO UPDATE IT!
