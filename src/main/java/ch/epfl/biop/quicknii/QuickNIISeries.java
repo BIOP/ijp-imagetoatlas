@@ -73,10 +73,26 @@ public class QuickNIISeries {
             toCCF.set(0.0, -0.025, 0.0, 13.2,
                     0.0, 0.0, -0.025, 8.0,
                     0.025, 0.0, 0.0, 0.0);
+            if (!atlasName.startsWith("Adult Mouse Brain - Allen Brain Atlas V3")) {
+                AffineTransform3D toBrainGlobe = new AffineTransform3D();
+                toBrainGlobe.set(0.0, 0, 1.0, 0,
+                        0.0, 1.0, 0.0, 0,
+                        -1.0, 0.0, 0.0, 11.4);
+                toCCF.preConcatenate(toBrainGlobe.inverse());
+            }
+
         } else if (DeepSliceHelper.isDeepSliceRatCompatible(atlasName)) {
             toCCF.set(0.0390625, 0.0, 0.0, -9.53125,
                     0.0, 0.0390625, 0.0, -24.3359375,
                     0.0, 0.0, 0.0390625, -9.6875);
+            if (!atlasName.startsWith("Rat - Waxholm Sprague Dawley V4")) {
+                AffineTransform3D toBrainGlobe = new AffineTransform3D();
+                toBrainGlobe.set(-1.0,  0.0,  0.0, 10.45,
+                        0.0,  0.0, -1.0, 10.26,
+                        0.0, -1.0,  0.0, 15.565);
+                toCCF.preConcatenate(toBrainGlobe);
+            }
+
         } else {
             System.err.println("Unknown or unsupported atlas named "+atlasName);
         }
