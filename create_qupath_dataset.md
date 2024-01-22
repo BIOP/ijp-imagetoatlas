@@ -13,9 +13,7 @@
 
 -----
 
-
 :warning: Do not modify the images present in the project once it has been opened and used in ABBA. ABBA has not been tested if the number of images present in the QuPath project are changed.
-
 
 # Dataset pre-requisites
 

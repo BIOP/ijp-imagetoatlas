@@ -1,4 +1,4 @@
-# Using ABBA's registration with Python
+# Using ABBA with Python
 
 -----
 [**Back to documentation main page**](index.md)
@@ -7,7 +7,12 @@
 
 ## Using ABBA with Python
 
-Please check the section about [abba_python](abba_python.md), in particular the section about [jupyter notebooks](abba_python.md#with-jupyter-notebooks).
+ABBA, which is Java based, can be used in conjunction with Python. This allows to use Python functionalities (BrainGlobe, DeepSlice) during the registration, but also to run python code for analysis after the registration. The 'glue' between Java and Python is made with [`JPype`](https://github.com/jpype-project/jpype) and [`PyImageJ`](https://github.com/imagej/pyimagej).
+
+
+To enable that, you need to install ABBA via pip. Please check [the installation guide](installation.md).
+
+There are [example jupyter notebooks](https://github.com/BIOP/abba_python/tree/main/example_notebooks) in the abba python repository.
 
 ## Other repositories for data analysis
 
@@ -17,7 +22,7 @@ You can use the scripts developed by [@enassar](https://github.com/enassar) and 
 
 An alternative repository which allows to do additional processing is available in https://github.com/bmi-lsym/ABBA-QuPath-post_processing
 
-Note that these set of scripts may not have been yet update to the most recent version of ABBA.
+Note that these set of scripts may not have been yet updated to the most recent version of ABBA.
 
 
 -----
