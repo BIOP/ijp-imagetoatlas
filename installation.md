@@ -1,54 +1,166 @@
-## Installation
+## Installation overview
 
------
-[**Back to documentation main page**](index.md)
+ABBA consists of:
+* a Fiji plugin and 
+* an extension for QuPath 
 
------
+The QuPath extension, and in general, the use of QuPath is optional in ABBA but strongly encouraged.
+
+:warning: NEW (Jan 2024) ! If you are using Windows, [a standalone installer is available](https://github.com/BIOP/ijp-imagetoatlas/releases/).
+
 
 <!-- TOC -->
-  * [Installation](#installation)
-  * [Automated installation](#automated-installation)
-    * [For Windows](#for-windows)
-    * [For Mac OSX](#for-mac-osx)
-    * [For Linux](#for-linux)
-  * [Step by step manual installation](#step-by-step-manual-installation)
-    * [1.  Install QuPath extensions](#1-install-qupath-extensions)
-    * [2. Install Fiji and enable Fiji's PTBIOP update site](#2-install-fiji-and-enable-fijis-ptbiop-update-site)
-    * [3. Install of Elastix / Transformix](#3-install-of-elastix--transformix)
+  * [Installation overview](#installation-overview)
+* [Installing QuPath and its ABBA extension](#installing-qupath-and-its-abba-extension)
+* [Fiji's ABBA plugin installation methods](#fijis-abba-plugin-installation-methods)
+  * [Option 1 - Installing ABBA plugin with an installer (Windows only)](#option-1---installing-abba-plugin-with-an-installer--windows-only-)
+  * [Option 2 - Installing ABBA plugin in Fiji](#option-2---installing-abba-plugin-in-fiji)
+    * [1. Download and install Fiji](#1-download-and-install-fiji)
+    * [2. Activate the PTBIOP update site](#2-activate-the-ptbiop-update-site)
+    * [3. If you use OMERO, activate the OMERO 5.5-5.6 update site](#3-if-you-use-omero-activate-the-omero-55-56-update-site)
+    * [4. Install elastix/transformix](#4-install-elastixtransformix)
         * [Windows](#windows)
         * [Mac](#mac)
         * [Linux](#linux)
         * [Indicate `elastix` and `transformix` executable location in Fiji:](#indicate-elastix-and-transformix-executable-location-in-fiji-)
-    * [4. Setup ABBA in Fiji](#4-setup-abba-in-fiji)
-  * [Installing DeepSlice to run it locally](#installing-deepslice-to-run-it-locally)
+    * [5. Installing DeepSlice locally (optional)](#5-installing-deepslice-locally--optional-)
+  * [Option 3 - Installing ABBA plugin in python](#option-3---installing-abba-plugin-in-python)
+* [Alternative installation - bash scripts](#alternative-installation---bash-scripts)
+  * [Windows](#windows-1)
+  * [Mac OSX](#mac-osx)
+  * [Linux](#linux-1)
 <!-- TOC -->
 
+# Installing QuPath and its ABBA extension
+
+1. Install [QuPath](https://qupath.github.io/)
+2. Download [QuPath's ABBA extension zip file](https://github.com/BIOP/qupath-extension-abba/releases/latest) (named `qupath-extension-warpy-x.y.z.zip`)
+3. Unzip it
+4. Drag and drop the jar files it contains into QuPath's main graphical user interface
+
+---
+Optional: if you want to work on data coming from an OMERO database, install the [QuPath OMERO RAW extension](https://github.com/BIOP/qupath-extension-biop-omero). Please check its [readme](https://github.com/BIOP/qupath-extension-biop-omero/blob/omero-raw/README.md) for installation instructions.
+
 ---
 
-:warning: If you are using QuPath 0.4.0, 0.4.1, 0.4.2 or 0.4.3 you NEED TO UPDATE IT!
+5. Restart QuPath: in `Extensions>Managed extensions` you should see the following extensions installed:
+  * ABBA
+  * Image Combiner Warpy
+  * Warpy
+  * OMERO BIOP
 
----
+# Fiji's ABBA plugin installation methods
 
-You can choose between several installation methods, depending on your OS.
+ABBA is a Fiji plugin that can be installed easily, however, a bare ABBA plugin will lack key features. In particular ABBA is supposed to interact with these components:
 
-Windows:
-- automated bash scripts (Fiji) 
+* [DeepSlice](https://www.deepslice.com.au/): a deep-learning registration method that automatically register coronal sections to mouse and rat brain atlases
+* [elastix/transformix](https://github.com/SuperElastix/elastix): the software that automates 2D in-plane registration
+* [BrainGlobe](https://brainglobe.info/documentation/bg-atlasapi/index.html): a python library that standardized a set of atlases, and the way to access their data
 
-Mac OSX:
-- automated bash scripts (Fiji)
+There are 3 main ways to install ABBA, that correspond to different parts of the documentation:
+* Using an installer (available for Windows only) ([Option 1.](#option-1---installing-abba-plugin-with-an-installer--windows-only-))
+* Using [Fiji](https://fiji.sc/) ([Option 2.](#option-2---installing-abba-plugin-in-fiji))
+* Using python with the pip dependency [abba_python](https://pypi.org/project/abba-python/) ([Option 3.](#option-3---installing-abba-plugin-in-python))
 
-Linux:
-- automated bash scripts (Fiji) (thanks to [Jean-Emmanuel Longueville](https://github.com/hedjour))
 
-All OS (Win, Mac, Linux):
-- manual installation (Fiji)
-- from [abba_python](https://github.com/BIOP/abba_python) github repository (Fiji + Brainglobe + DeepSlice + Python)
+Here's a summary of the supported functionality depending on how ABBA is installed and on the OS:
 
-## Automated installation
+|                                                                          | Headless | GUI | Mouse and Rat atlases | Brainglobe Atlases | DeepSlice (Local) |
+|--------------------------------------------------------------------------|----------|-----|-----------------------|--------------------|-------------------|
+| Opt 1. ABBA installer (Win only)                                         | [x]      | [x] | [x]                   | [x]                | [x]               |
+| Opt 2. Fiji + PTBIOP update site (Win, Mac, Linux)                       | [x]      | [x] | [x]                   |                    |                   |
+| Opt 2. Fiji + PTBIOP update site + DeepSlice conda env (Win, Mac, Linux) | [x]      | [x] | [x]                   |                    | [x]               |
+| Opt 3. abba_python (Win, Linux)                                          | [x]      | [x] | [x]                   | [x]                |                   |
+| Opt 3. abba_python + DeepSlice conda env (Win, Linux)                    | [x]      | [x] | [x]                   | [x]                | [x]               |
+| Opt 3. abba_python (Mac)                                                 | [x]      |     | [x]                   | [x]                |                   |
+| Opt 3. abba_python + DeepSlice conda env (Mac)                           | [x]      |     | [x]                   | [x]                | [x]               |
 
-You will need a decent internet connection! About 5Gb will be downloaded (mainly Fiji, QuPath and two atlases).
+## Option 1 - Installing ABBA plugin with an installer (Windows only)
 
-### For Windows
+This possibility is the easiest one. It is available only if you are working with windows:
+
+[https://github.com/BIOP/ijp-imagetoatlas/releases/latest](https://github.com/BIOP/ijp-imagetoatlas/releases/latest)
+
+Be aware that you need an internet connection if you run the installer because at some point in the process some dependencies have to be downloaded from PyPI. Also, the first time you run ABBA, you will have to download the atlas you'd like to use from internet.
+
+## Option 2 - Installing ABBA plugin in Fiji
+
+### 1. Download and install Fiji
+If you do not have Fiji already, download it and install it at [fiji.sc](https://fiji.sc/).
+
+### 2. Activate the PTBIOP update site
+* Click `Help > Update... > Manage update sites`
+* Tick the checkbox `PTBIOP`
+* Click `Apply and close`
+* Click `Apply changes`
+* Close and restart Fiji
+
+### 3. If you use OMERO, activate the OMERO 5.5-5.6 update site
+* Click `Help > Update... > Manage update sites`
+* Tick the checkbox `OMERO 5.5-5.6`
+* Click `Apply and close`
+* Click `Apply changes`
+* Close and restart Fiji
+
+### 4. Install elastix/transformix
+
+For automated 2D in-plane registration, ABBA uses the [elastix](https://github.com/SuperElastix/elastix) software, which is independent of Fiji. To use it, elastix should be installed, and its executable location (elastix and transformix) should be specified in Fiji.
+
+* Download the [release 5.0.1 of elastix for your OS](https://github.com/SuperElastix/elastix/releases/tag/5.0.1). This documentation has been tested for elastix 5.0.1. The version [5.1.0 currently fails](https://github.com/BIOP/ijp-imagetoatlas/issues/171)!
+
+* Unzip it somewhere convenient ( `C` drive on windows; `Applications` for Mac )
+
+##### Windows
+
+For windows users, you also need to install [Visual C++ redistributable](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170), (choose `vc_redist.x64.exe` for a 64-bit system).
+
+##### Mac
+
+Fiji will be calling the elastix executables, which are recognized as ‘unknown developers’ by Mac OS. Thus you need to [make security exceptions for both elastix and transformix](https://support.apple.com/en-hk/guide/mac-help/mh40616/mac) to avoid clicking indefinitely on the OS warning messages.
+
+##### Linux
+Nothing particular should be required for linux system.
+
+##### Indicate `elastix` and `transformix` executable location in Fiji:
+
+* In Fiji, execute `Plugins › BIOP › Set and Check Wrappers` then indicate the proper location of executable files, for instance:
+
+![Setting elastix and transformix path in Fiji](./assets/img/fiji_elastix_transformix_path.png)
+
+This message should show up in the ImageJ console (and maybe errors for Cellpose, but that's not important):
+* `[INFO] Transformix	->	set :-)`
+* `Elastix	->	set :-)`
+
+Once elastix is installed, you can run [the following script](https://gist.github.com/NicoKiaru/b91f9f3f0069b765a49b5d4629a8b1c7) in Fiji to test elastix functionality. Save the linked file with a `.groovy` extension, open it in Fiji, and run it.
+
+### 5. Installing DeepSlice locally (optional)
+
+It is always possible to use the web interface of DeepSlice, without any further installation. However, it is convenient to have it installed locally since it will require less user manipulation and enable the registration procedure to be fully automated.
+
+To install DeepSlice locally, please follow the instructions specified in the [BIOP wrappers repository](https://github.com/BIOP/ijl-utilities-wrappers#deepslice). In brief, the installation consists of:
+* installing miniforge
+* creating a conda environment for deepslice
+* adding conda to the PATH environement variable (windows)
+* specifying the conda environment location in Fiji
+
+
+## Option 3 - Installing ABBA plugin in python
+
+ABBA is available as a PyPI dependency. If you want to use this dependency, please check the installation instruction and startup command in the [readme of abba_python](https://github.com/BIOP/abba_python). 
+
+# Alternative installation - bash scripts
+
+The procedure described in this section installs:
+- QuPath
+- QuPath ABBA extension
+- Fiji
+- Fiji ABBA plugin
+- elastix / transformix
+
+However, it does not install DeepSlice, nor will you be able to use BrainGlobe atlases.
+The procedure works for all OSes with minor variations explained below.
+
+## Windows
 
 * Install [Git for Windows](https://gitforwindows.org/) with standard options (just hit next on the installer)
 * Download the [install scripts](https://github.com/BIOP/biop-bash-scripts/archive/refs/heads/main.zip) that comes from [this repository](https://github.com/BIOP/biop-bash-scripts)
@@ -57,7 +169,7 @@ You will need a decent internet connection! About 5Gb will be downloaded (mainly
 * It is recommended to choose `C:/` as the install path
 * Wait until the script ends
 
-### For Mac OSX
+## Mac OSX
 
 You will need to know your admin password.
 
@@ -80,110 +192,11 @@ shell-init: error retrieving current directory: getcwd: cannot access parent dir
 
 Then follow the operation explained in [https://osxdaily.com/2018/10/09/fix-operation-not-permitted-terminal-error-macos/](https://osxdaily.com/2018/10/09/fix-operation-not-permitted-terminal-error-macos/) and restart the script.
 
-### For Linux
+## Linux
 
 * Download the [install scripts](https://github.com/BIOP/biop-bash-scripts/archive/refs/heads/main.zip)
 * Unzip them
 * Run `full_install_abba.sh`
-
-## Step by step manual installation
-The installation consists of four steps detailed in the paragraphs below:
-
-1. Install QuPath and its 2 required extensions,
-2. Optional: install QuPath OMERO Raw extension for OMERO data stream support
-2. Enable Fiji's PTBIOP update site,
-3. Install the additional programs required for automated registration (Elastix / Transformix),
-4. Setup ABBA in Fiji:
-   * specify the location of elastix and transformix executable files to Fiji
-
-### 1.  Install QuPath extensions
-
-Install [QuPath version 0.5+](https://qupath.github.io/).
-
-Install the [QuPath ABBA extension](https://github.com/BIOP/qupath-extension-abba) (and its dependencies):
-* Go to the [latest release](https://github.com/BIOP/qupath-extension-abba/releases)
-    * Download `qupath-extension-abba-x.y.z.zip`
-    * Unzip it
-    * Drag jar files into the main QuPath window 
-
-Optional: if you want to work on data coming from an OMERO database, install the [QuPath OMERO RAW extension](https://github.com/BIOP/qupath-extension-biop-omero) (and its dependencies):
-* Read the [readme](https://github.com/BIOP/qupath-extension-biop-omero/blob/omero-raw/README.md) for installation instructions
-
-
-Restart QuPath: in `Extensions>Managed extensions` you should see the following extensions installed:
-  * ABBA
-  * Image Combiner Warpy
-  * Warpy
-  * OMERO BIOP
-
-### 2. Install Fiji and enable Fiji's PTBIOP update site
-
-Download and install [ImageJ/Fiji](https://fiji.sc/)
-
-In Fiji:
-* Click `Help > Update... > Manage update sites
-* Tick the checkbox `PTBIOP` 
-* Click `Close`
-* Click `Apply changes`
-* Restart Fiji
-
-### 3. Install of Elastix / Transformix
-
-For automated registration, ABBA uses the [elastix](https://github.com/SuperElastix/elastix) software, which is independent of Fiji. The location of Elastix (and of its companion transformix) should be specified in Fiji in order for ABBA to use it. 
-
-* Download the [release 5.0.1 of elastix for your OS](https://github.com/SuperElastix/elastix/releases/tag/5.0.1). This documentation has been tested for elastix 5.0.1. The version [5.1.0 currently fails](https://github.com/BIOP/ijp-imagetoatlas/issues/171)!
-
-* Unzip it somewhere convenient ( `C` drive on windows; `Applications` for Mac )
-
-##### Windows
-
-For windows users, you also need to install [Visual C++ redistributable](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170), (choose `vc_redist.x64.exe` for a 64-bit system).
-
-##### Mac
-
-Fiji will be calling the elastix executables, which are recognized as ‘unknown developers’ by Mac OS. Thus you need to [make security exceptions for both elastix and transformix](https://support.apple.com/en-hk/guide/mac-help/mh40616/mac) to avoid clicking indefinitely on the OS warning messages.
-
-##### Linux
-Nothing particular should be required for linux system.
-
-##### Indicate `elastix` and `transformix` executable location in Fiji:
-
-* In Fiji, execute `Plugins › BIOP › Set and Check Wrappers` then indicate the proper location of executable files, for instance:
-
-![Setting elastix and transformix path in Fiji](./assets/img/fiji_elastix_transformix_path.png)
-  
-This message should show up in the ImageJ console (and maybe errors for Cellpose, but that's not important): 
-* `[INFO] Transformix	->	set :-)`
-* `Elastix	->	set :-)`
-
-Once elastix is installed, you can run [the following script](https://gist.github.com/NicoKiaru/b91f9f3f0069b765a49b5d4629a8b1c7) in Fiji to test elastix functionality. Save the linked file with a `.groovy` extension, open it in Fiji, and run it.
-
-### 4. Setup ABBA in Fiji
-
-Start Fiji, type `ABBA Start` in the command search bar or navigate and click ` Plugins › BIOP › Atlas › ABBA - ABBA Start`:
-![Look for and start ABBA](./assets/img/fiji_launch_abba_start.png)
-You will get the following window on startup:
-
-![ABBA chose atlas](./assets/img/fiji_open_atlas.png)
-
-These are the two atlases present by default. If this is the first time you launch ABBA, the atlas data will be downloaded and saved in your user folder inside a `cached_atlas` folder (3Gb. for the mouse brain atlas, 500 Mb for the rat atlas).
-
-![Allen atlas download progress bar](./assets/img/fiji_atlas_download_progress_bar.png)
-
-The allen brain atlas and associated files will be cached:
-* in your user folder under the directory `\cached_atlas` (Allen Brain CCFv3 and Waxholm Rat v4)
-* in your user folder under the directory `\.brainglobe` for brainglobe atlases
-
-For non-brainglobe atlases, data are downloaded from zenodo repositories:
-- [Mouse atlas repository](https://zenodo.org/record/4486659#.YnfL81RBziE)
-- [Rat atlas repository](https://zenodo.org/record/5644162#.YZrUnroo8uU)
-
-If the initial atlas download failed, because you had no access to internet or for any other reason, you can restart the command to trigger again the download from Zenodo.
-
-
-## Installing DeepSlice to run it locally
-
-It is now possible to run DeepSlice locally on your computer instead of using the web interface, even with Fiji in pure Java. For this option to work, you will need to follow the installation instructions specified in the [BIOP wrappers repository](https://github.com/BIOP/ijl-utilities-wrappers#deepslice).
 
 -----
 [**Back to documentation main page**](index.md)

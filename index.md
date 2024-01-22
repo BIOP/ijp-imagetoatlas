@@ -1,18 +1,36 @@
-## [ABBA](https://www.youtube.com/watch?v=8haRfsY4-_s) - Aligning Big Brains & Atlases
+## ABBA - Aligning Big Brains & Atlases
 
-# ABBA should be used with **QuPath 0.4.4**
+ABBA is a set of software component which allows to register images of thin serial biological tissue sections, cut in any orientation (coronal, sagittal or horizontal) to atlases, usually brain atlases. It has been developed by the [BioImaging & Optics Platform](https://www.epfl.ch/research/facilities/ptbiop/) at EPFL
 
-:warning: ABBA should be used with **QuPath 0.4.4** (or above). If you are using QuPath 0.4.0, 0.4.1, 0.4.2 or 0.4.3 you NEED TO UPDATE IT!
+ABBA consists of a [Fiji](https://fiji.sc/) plugin for the registration part, which is best used in conjunction with [QuPath](https://qupath.github.io). Typically, a set of serial sections is defined as a QuPath project, that is registered within Fiji. The registration results are imported back into QuPath for downstream processing (cell detection and classification, cell counting per region, etc.).
+
+Available atlases are the [3D mouse Allen Brain atlas](http://atlas.brain-map.org/atlas?atlas=602630314), and the [Waxholm Space Atlas of the Sprague Dawley Rat Brain](https://www.nitrc.org/projects/whs-sd-atlas). Depending on the way you install ABBA, you may also use all [BrainGlobe atlases](https://brainglobe.info/documentation/bg-atlasapi/index.html).
+
+<video autoplay loop muted style="width: 100%;">
+  <source src="https://user-images.githubusercontent.com/20223054/149301605-07b27dd0-4010-4ca4-b415-f5a9acc8963d.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
 
 -----
 
 <!-- TOC -->
   * [ABBA - Aligning Big Brains & Atlases](#abba---aligning-big-brains--atlases)
   * [Documentation](#documentation)
+    * [Installation](#installation)
+    * [Data sources & file formats requirements](#data-sources--file-formats-requirements)
+    * [Example datasets](#example-datasets)
+    * [Creating a QuPath project for ABBA](#creating-a-qupath-project-for-abba)
+    * [Registration workflow & registration export](#registration-workflow--registration-export)
+    * [Other export modalities](#other-export-modalities)
+    * [Post-registration analysis in QuPath](#post-registration-analysis-in-qupath)
+    * [Post-registration analysis in Python](#post-registration-analysis-in-python)
+    * [Advanced documentation](#advanced-documentation)
+      * [State file & registration format](#state-file--registration-format)
+      * [Javadoc](#javadoc)
+  * [Other forms of documentation](#other-forms-of-documentation)
     * [1. Youtube tutorial](#1-youtube-tutorial)
     * [2. Workshop slides](#2-workshop-slides)
-    * [3. This website / reference documentation](#3-this-website--reference-documentation)
-* [Troubleshooting](#troubleshooting)
+  * [Troubleshooting](#troubleshooting)
   * [Frequent issues / Frequently asked questions](#frequent-issues--frequently-asked-questions)
     * [The sections are gigantic when opened in ABBA](#the-sections-are-gigantic-when-opened-in-abba)
     * [I only have hemi-brain sections. Can I use ABBA ?](#i-only-have-hemi-brain-sections-can-i-use-abba-)
@@ -24,45 +42,44 @@
 
 -----
 
-Aligning Big Brains & Atlases or ABBA for short, is a Fiji plugin which allows to register thin serial sections to several atlases, in coronal, sagittal and horizontal orientations.
-
-Within Fiji, you have access to the [3D mouse Allen Brain atlas](http://atlas.brain-map.org/atlas?atlas=602630314), and the [Waxholm Space Atlas of the Sprague Dawley Rat Brain](https://www.nitrc.org/projects/whs-sd-atlas). With [abba_python](https://github.com/BIOP/abba_python), you can access all [BrainGlobe atlases](https://brainglobe.info/).
-
-ABBA is typically used in conjunction with [QuPath](https://qupath.github.io): a QuPath project can serve as an input for ABBA, and the registration results can be imported back into QuPath for downstream processing.
-
-<video autoplay loop muted style="width: 100%;">
-  <source src="https://user-images.githubusercontent.com/20223054/149301605-07b27dd0-4010-4ca4-b415-f5a9acc8963d.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
-
------
-
-
-ABBA uses [BigDataViewer](https://imagej.net/plugins/bdv/index) and [BigWarp](https://imagej.net/plugins/bigwarp) for the display and on-the-fly computation of spline-transformed multiresolution images (typical output of Whole Slide Imaging).
-
-It has been developed by the [BioImaging & Optics Platform](https://www.epfl.ch/research/facilities/ptbiop/) at EPFL. This page contains the reference documentation of ABBA. If you require additional help, please check the troubleshooting section at the bottom of this page.
-
 ## Documentation
 
-There are three forms of documentation:
+### [Installation](installation.md)
+### [Data sources & file formats requirements](dataset_prerequisite.md)
+### [Example datasets](example_datasets.md)
+### [Creating a QuPath project for ABBA](create_qupath_dataset.md)
+### [Registration workflow & registration export](usage.md)
+### [Other export modalities](export.md)
+### [Post-registration analysis in QuPath](qupath_analysis.md)
+### [Post-registration analysis in Python](python_analysis.md)
+
+### Advanced documentation
+#### [State file & registration format](registration_storage.md)
+#### [Javadoc](apidocs/index.html)
+
+## Other forms of documentation
 
 ### 1. [Youtube tutorial](https://www.youtube.com/watch?v=sERGONVw4zE)
 
-A video tutorial is nice to see ABBA in action, and to check the little details which may have been missed in other documentation forms. However, the version presented is not completely up-to-date: a video tutorial is a lot of work. It requires more work to be updated.
+A video tutorial is nice to see ABBA in action, and to check the little details which may have been missed in other documentation forms. However, be aware that, while not very different, the version presented in the video tutorial is not up-to-date with this documentation.
 
-There's no information about DeepSlice in the video, and no information about QuPath post processing.
+Also, there's no information about DeepSlice neither QuPath post-processing in the video.
 
 [Youtube video tutorial (March 2022)](https://www.youtube.com/watch?v=sERGONVw4zE).
 
+- Introduction and installation
 - [0:00 Introduction](https://www.youtube.com/watch?v=sERGONVw4zE&t=0s)
 - [0:30 Installation](https://www.youtube.com/watch?v=sERGONVw4zE&t=30s)
+-  Dataset definition, atlas display, and QuPath project import
 - [1:27 Dataset presentation](https://www.youtube.com/watch?v=sERGONVw4zE&t=87s)
 - [2:25 Dataset definition in QuPath](https://www.youtube.com/watch?v=sERGONVw4zE&t=145s)
 - [4:58 Bdv navigation and Atlas display options](https://www.youtube.com/watch?v=sERGONVw4zE&t=298s)
 - [7:52 QuPath project import](https://www.youtube.com/watch?v=sERGONVw4zE&t=472s)
+- Description of ABBA's interface
 - [9:06 Short description of ABBA's interface (Bdv view, table view)](https://www.youtube.com/watch?v=sERGONVw4zE&t=566s)
 - [9:56 How to display the sections + how to remove unwanted sections](https://www.youtube.com/watch?v=sERGONVw4zE&t=594s)
 - [13:46 Selecting sections in the Bdv view](https://www.youtube.com/watch?v=sERGONVw4zE&t=826s)
+- Manual registration of sections along Z
 - [15:20 Translating sections along the Z atlas axis (antero-posterior position)](https://www.youtube.com/watch?v=sERGONVw4zE&t=920s)
 - [16:05 Tip: reversing section order](https://www.youtube.com/watch?v=sERGONVw4zE&t=965s)
 - [17:14 How to cancel an action](https://www.youtube.com/watch?v=sERGONVw4zE&t=1034s)
@@ -70,15 +87,19 @@ There's no information about DeepSlice in the video, and no information about Qu
 - [19:19 Second key slice (+atlas cutting angle adjustment)](https://www.youtube.com/watch?v=sERGONVw4zE&t=1159s)
 - [21:54 Third key slice](https://www.youtube.com/watch?v=sERGONVw4zE&t=1314s)
 - [23:00 Distribute spacing between sections](https://www.youtube.com/watch?v=sERGONVw4zE&t=1380s)
+- Saving your work
 - [23:43 How to save your work (state file)](https://www.youtube.com/watch?v=sERGONVw4zE&t=1423s)
 - [24:04 Closing and reopening from a state file](https://www.youtube.com/watch?v=sERGONVw4zE&t=1444s)
+- In-plane registrations of the sections (manual & automated, linear & non-linear)
 - [24:51 Introducing positioning and review modes](https://www.youtube.com/watch?v=sERGONVw4zE&t=1491s)
 - [26:00 Browsing sections in review mode](https://www.youtube.com/watch?v=sERGONVw4zE&t=1560s)
 - [27:15 Manual affine in-plane registration](https://www.youtube.com/watch?v=sERGONVw4zE&t=1635s)
 - [29:50 Automated affine in-plane registration](https://www.youtube.com/watch?v=sERGONVw4zE&t=1790s)
 - [33:28 Automated spline in-plane registration](https://www.youtube.com/watch?v=sERGONVw4zE&t=2008s)
+- Review and improve your registrations if necessary
 - [35:30 Browsing registration steps](https://www.youtube.com/watch?v=sERGONVw4zE&t=2130s)
 - [37:30 What you can attempt to improve the registration quality](https://www.youtube.com/watch?v=sERGONVw4zE&t=2250s)
+- Export results to QuPath
 - [39:29 Export registration results from Fiji to QuPath](https://www.youtube.com/watch?v=sERGONVw4zE&t=2369s)
 - [40:04 Import registration results in QuPath](https://www.youtube.com/watch?v=sERGONVw4zE&t=2404s)
 - [42:14 How to correct a registration result with BigWarp](https://www.youtube.com/watch?v=sERGONVw4zE&t=2534s)
@@ -89,82 +110,41 @@ There's no information about DeepSlice in the video, and no information about Qu
 A step by step tutorial that details how to register a demo dataset. Installation instructions are also linked in this presentation.
 [Workshop slides](https://docs.google.com/presentation/d/1c5yG-5Rhz5WlR4Hf9TNVkjqb6yD6oukza8P6vHGVZMw)
 
-### 3. This website / reference documentation
-
-* [Installation](installation.md)
-* [Using ABBA with Python](abba_python.md)
-* [Data source](dataset_prerequisite.md)
-  * [File formats requirements](dataset_prerequisite.md)
-    * [Bio-Formats readable](dataset_prerequisite.md#1-any-bio-formats-supported-file-format)
-    * [Pyramidal/Multi-resolution file format preferred](dataset_prerequisite.md#2-ideally-multi-resolution--bio-formats-supported--)
-    * [Calibration required](dataset_prerequisite.md#3-and-calibrated)
-  * [Other sources (OMERO, QuPath, n5...)](dataset_prerequisite.md#more-technicalities)
-* [Example datasets](example_datasets.md)
-* [Creating a QuPath project for ABBA](create_qupath_dataset.md)
-* [Registration workflow](usage.md) < the core of ABBA
-* Post registration analysis
-  * With QuPath
-    * [Using ABBA's registration in QuPath](qupath_analysis.md)
-      * [Import registration results as QuPath annotations](qupath_analysis.md#importing-abba-registration-results--creating-atlas-regions-as-qupath-annotations)
-      * [(Optional) Correct the registration for some slices in ABBA and re-export the new result to QuPath](registration.md#editing-a-registration)
-      * [Detect cells in QuPath](qupath_analysis.md#analysis-in-qupath)
-      * [Append CCF coordinates in QuPath detected cells measurements](qupath_analysis.md#export-result-into-common-coordinates-of-the-allen-brain-atlas-ccfv3)
-      * [Export a table containing, for all cells, their measurements as well as their location in the brain atlas CCF](qupath_analysis.md#compute-the-location-of-detections-into-the-atlas-coordinates)
-  * With Python
-    * [Using ABBA's registration with Python](python_analysis.md) 
-  * [Export modalities](export.md)
-
-* ABBA advanced documentation
-  * Headless ABBA
-    * Fiji scripting (TODO)
-    * Python scripting (TODO)
-  * 3D Reconstruction
-    * Slice rasterization (TODO)
-  * Creating a plugin for ABBA
-    * With Java (TODO)
-    * With Python (TODO)
-  * Creating a registration plugin for ABBA
-    * With Java (TODO)
-    * With Python (TODO)
-  * ABBA state file and registration specs
-    * [State file, registration format](registration_storage.md) 
-  * Javadoc
-    * [ABBA Javadoc](apidocs/index.html)
-
-# Troubleshooting
+## Troubleshooting
 
 If you have an issue with ABBA:
-1. Check [Frequently Asked Questions](index.md#frequent-issues--frequently-asked-questions), and have a quick look at the documentation if possible.
-2. Look if the answer is not present in the list of [ABBA questions in the Image.sc forum](https://forum.image.sc/tag/abba).
-3. Ask for help in the [image.sc forum](forum.image.sc/) (add `abba` and `fiji` or `qupath` tags). If you have already installed ABBA, you can also click on `Help > ABBA - Ask for help in the forum` from the plugin (some helpful information from your local installation will be included in your post). You will need to create an account on the forum.
-4. You can also [open an issue in GitHub](https://github.com/BIOP/ijp-imagetoatlas/issues)
+1. Check first [Frequently Asked Questions](index.md#frequent-issues--frequently-asked-questions), and have a look at the documentation if possible.
+2. Maybe your issue was already posted and fixed ? Please look at the list of [questions about ABBA already asked in the Image.sc forum](https://forum.image.sc/tag/abba).
+3. Still no luck? Ask for help in the [image.sc forum](https://forum.image.sc/) (add `abba` and `fiji` or `qupath` tags). If you have already installed ABBA in your Fiji, you can also run the command `ABBA - Ask for help in the forum`. You will find it either in the Help menu of ABBA, or by typing `ask for help`in Fiji's search bar. With this command, some helpful information from your local installation will be included in your post (note that you will need to create an account on the forum if you don't have already one).
+4. If you feel your question is more tech / dev oriented, and you're familiar with github, you can also [open an issue.](https://github.com/BIOP/ijp-imagetoatlas/issues)
 
 ## Frequent issues / Frequently asked questions
 ### The sections are gigantic when opened in ABBA
 
-Most probably, your images are either not calibrated, or bio-formats cannot read the calibration. If you are using QuPath, you can [override the pixel size in QuPath **BEFORE** opening the project in ABBA](create_dataset_and_open.md#define-a-dataset-of-brain-sections-in-qupath), or, if your files are not pyramidal, you can convert your files to pyramidal OME-Tiff by using [Kheops](https://github.com/BIOP/ijp-kheops) and set the correct voxel size in the conversion process.
+Most probably, your images are either not calibrated, or bio-formats cannot read the calibration. If you are using QuPath, you can [override the pixel size in QuPath **BEFORE** opening the project in Fiji's ABBA plugin](create_qupath_dataset.md#define-a-dataset-of-brain-sections-in-qupath), or, if your files are not pyramidal, you can convert your files to pyramidal OME-Tiff by using [Kheops](https://github.com/BIOP/ijp-kheops) and set the correct voxel size in the conversion process.
 
 ### I only have hemi-brain sections. Can I use ABBA ?
 
-Yes, you can restrict the registration to a certain rectangular region of interest. Please have a look at [this question](https://forum.image.sc/t/abba-experimental-a-fiji-qupath-workflow-for-mouse-brain-slice-registration-to-the-allen-brain-atlas-ccfv3/54345/15) and the [answer just below](https://forum.image.sc/t/abba-experimental-a-fiji-qupath-workflow-for-mouse-brain-slice-registration-to-the-allen-brain-atlas-ccfv3/54345/16). Also, there is the possibility to virtual mirror the hemisection. You can then register the whole 'virtual section', and remove the virtual extra half at the end.
+Yes, you can restrict the registration to a certain rectangular region of interest. Please have a look at [this question](https://forum.image.sc/t/abba-experimental-a-fiji-qupath-workflow-for-mouse-brain-slice-registration-to-the-allen-brain-atlas-ccfv3/54345/15) and the [answer just below](https://forum.image.sc/t/abba-experimental-a-fiji-qupath-workflow-for-mouse-brain-slice-registration-to-the-allen-brain-atlas-ccfv3/54345/16). Also, there is the possibility to [virtually mirror the hemi-section (check point 3)](https://forum.image.sc/t/abba-aligning-big-brains-and-atlases-v0-5-3-released/80732). You can then register the whole 'virtual section', and remove the virtual extra half at the end.
 
 ### I can't start any elastix registrations
 Either the elastix executable file location is not set, or you are missing a library, or you are missing some access rights. The installation of external dependencies on multiple OS is pain. To narrow down the issue, you can try to [execute this groovy script](https://gist.githubusercontent.com/NicoKiaru/b91f9f3f0069b765a49b5d4629a8b1c7/raw/0744676341b16ee4f37ed203130f0e0b761c08c8/TestRegister.groovy)  in Fiji ([video of how it should look here](https://forum.image.sc/t/abba-experimental-a-fiji-qupath-workflow-for-mouse-brain-slice-registration-to-the-allen-brain-atlas-ccfv3/54345/28)). If this did not help you solve the issue, please report the problem in the forum by using `Help > ABBA - Ask for help in the forum`.
 
 ### I cannot see any image after I import my Qupath project
 
-It’s could be because the slices are invisible by default (for faster loading). Select all the slices in the table and click on the header line to make them visible, as well as the channels you want to see, and increa the contrast if necessary. There is a [step by step documentation accessible here](https://docs.google.com/presentation/d/1c5yG-5Rhz5WlR4Hf9TNVkjqb6yD6oukza8P6vHGVZMw/edit#slide=id.p1), check from slice 53 for the display options.
+It could be because the slices are invisible by default (for faster loading). Select all the slices in the table and click on the header line to make them visible, as well as the channels you want to see, and increase the contrast if necessary. There is a [step by step documentation accessible here](https://docs.google.com/presentation/d/1c5yG-5Rhz5WlR4Hf9TNVkjqb6yD6oukza8P6vHGVZMw/edit#slide=id.p1), check from slice 53 for the display options.
 
 ### I want to use another atlas than the ones available
 
 The atlases currently available are:
 * the [adult Allen Mouse Brain atlas CCFv3](https://zenodo.org/record/4486659/#.YngkMlRBziE)
 * the [Waxholm Space atlas of the Sprague Dawley Rat Brain V4](https://zenodo.org/record/5644162#.YngkTVRBziE)
-* through [abba_python](https://github.com/BIOP/abba_python), all [BrainGlobe](https://github.com/brainglobe) atlases
+* depending on your installation, all [BrainGlobe](https://brainglobe.info/documentation/bg-atlasapi/index.html) atlases
 
 There are other atlases, of course, but adding them in ABBA still requires some work because there is no unified way of accessing labels, properties and hierarchical structure (unless it is implemented within BrainGlobe). This is an effort I can make, but there needs to be:
 1. several users needing it - and you can do your request through ABBA `Help > ABBA - Give your feedback`
 2. If not implemented in BrainGlobe, the atlas data need to be publicly accessible and shareable. I need to be allowed to repackage it in a different file format and make it accessible through Zenodo like the other ones.
+3. ABBA can't swallow all atlases, there are a number of atlases which consists of well annotated 2d sections, but which are not fully 3D. Such atlases can't be used within ABBA.
 3. I need time.
 
 There's also [a script](https://forum.image.sc/t/custom-atlas-in-abba/77206) that allows to create a fake atlas from an image, but no ontology is imported.
