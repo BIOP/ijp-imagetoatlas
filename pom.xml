@@ -107,9 +107,9 @@
 		<main-class>ch.epfl.biop.abba.ABBALaunchMouse</main-class>
 
 		<!-- bdv playground related dependencies -->
-		<bigdataviewer-playground.version>0.8.1</bigdataviewer-playground.version>
+		<bigdataviewer-playground.version>0.9.1</bigdataviewer-playground.version>
 		<bigdataviewer-image-loaders.version>0.6.4</bigdataviewer-image-loaders.version>
-		<bigdataviewer-biop-tools.version>0.8.2</bigdataviewer-biop-tools.version>
+		<bigdataviewer-biop-tools.version>0.9.1</bigdataviewer-biop-tools.version>
 		<bigdataviewer-selector.version>0.2.4</bigdataviewer-selector.version>
 
 		<!-- maths -->
@@ -132,6 +132,26 @@
 
 		<!-- <scijava.app.directory>C:/Fiji.app</scijava.app.directory> -->
 		<!-- scijava.app.directory>C:/Users/nicol/Dropbox/BIOP/ABBA-Python/constructor/Fiji.app</scijava.app.directory -->
+
+
+		<n5.version>3.1.1</n5.version>
+		<n5-hdf5.version>2.1.0</n5-hdf5.version>
+		<n5-zarr.version>1.2.0</n5-zarr.version>
+		<n5-ij.version>4.0.1</n5-ij.version>
+		<n5-universe.version>1.3.1</n5-universe.version>
+		<n5-zstandard.version>1.0.2</n5-zstandard.version>
+		<org.janelia.n5-zstandard.version>${n5-zstandard.version}</org.janelia.n5-zstandard.version>
+
+		<bigwarp.version>9.1.2</bigwarp.version>
+		<bigwarp_fiji.version>9.1.2</bigwarp_fiji.version>
+		<bigdataviewer-core.version>10.4.13</bigdataviewer-core.version>
+		<bigdataviewer-vistools.version>1.0.0-beta-34</bigdataviewer-vistools.version>
+		<imglib2-realtransform.version>4.0.2</imglib2-realtransform.version>
+
+		<ejml-core.version>0.41</ejml-core.version>
+		<ejml-ddense.version>0.41</ejml-ddense.version>
+
+		<jitk-tps.version>3.0.4</jitk-tps.version>
 
 	</properties>
 

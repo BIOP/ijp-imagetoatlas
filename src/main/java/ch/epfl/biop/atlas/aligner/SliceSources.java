@@ -61,6 +61,7 @@ import net.imglib2.converter.Converters;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.position.FunctionRandomAccessible;
 import net.imglib2.realtransform.AffineTransform3D;
+import net.imglib2.realtransform.BoundingBoxEstimation;
 import net.imglib2.realtransform.InvertibleRealTransform;
 import net.imglib2.realtransform.InvertibleRealTransformSequence;
 import net.imglib2.realtransform.RealTransform;
@@ -111,6 +112,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Collectors;
+
+import static net.imglib2.realtransform.BoundingBoxEstimation.Method.CORNERS;
+import static net.imglib2.realtransform.BoundingBoxEstimation.Method.FACES;
+import static net.imglib2.realtransform.BoundingBoxEstimation.Method.VOLUME;
 
 
 /**
@@ -1677,6 +1682,10 @@ public class SliceSources {
 
         for (int iChannel = 0; iChannel < this.nChannels; iChannel++) {
             registered_sacs[iChannel] = srt.apply(original_sacs[iChannel]);
+            // Attempt to fix issue with transformation caching, but it's not working
+            //((WarpedSource<?>)registered_sacs[iChannel].getSpimSource()).setBoundingBoxEstimator(new BoundingBoxEstimation(CORNERS));
+            //((WarpedSource<?>)registered_sacs[iChannel].getSpimSource()).setBoundingBoxEstimator(new BoundingBoxEstimation(FACES));
+            //((WarpedSource<?>)registered_sacs[iChannel].getSpimSource()).setBoundingBoxEstimator(new BoundingBoxEstimation(VOLUME));
         }
 
         si.updateBox();
