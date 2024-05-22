@@ -36,14 +36,29 @@ abstract public class RegistrationMultiChannelCommand implements Command {
     final public void run() {
 
         try {
-            atlas_channels = Arrays.asList(channels_atlas_csv.split(",")).stream()
+            atlas_channels = Arrays.stream(channels_atlas_csv.split(","))
                     .map(Integer::parseInt)
                     .collect(Collectors.toList());
-            slice_channels = Arrays.asList(channels_slice_csv.split(",")).stream()
+            slice_channels = Arrays.stream(channels_slice_csv.split(","))
                     .map(Integer::parseInt)
                     .collect(Collectors.toList());
         } catch (NumberFormatException e) {
             mp.errlog.accept("Number parsing exception "+e.getMessage());
+            return;
+        }
+
+        if (atlas_channels.size()==0) {
+            mp.errlog.accept("Error, you did not specify any atlas channel.");
+            return;
+        }
+
+        if (slice_channels.size()==0) {
+            mp.errlog.accept("Error, you did not specify any slice channel.");
+            return;
+        }
+
+        if (atlas_channels.size()!=slice_channels.size()) {
+            mp.errlog.accept("The number of slice channel(s) should be equal to the number of atlas channel(s).");
             return;
         }
 
