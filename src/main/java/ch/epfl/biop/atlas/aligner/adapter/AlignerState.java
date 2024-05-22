@@ -97,12 +97,21 @@ public class AlignerState {
                 } else {
                     if (nextAction instanceof DeleteLastRegistrationAction) {
                         // For now...
-                        if (compiledActions.get(idxCompiledActions-1) instanceof RegisterSliceAction) {
-                            compiledActions.remove(idxCompiledActions-1);
-                            idxCompiledActions--;
-                            idxIniActions++;
+                        int idxLastRegistration = idxCompiledActions-1;
+                        while ((idxLastRegistration>0)&&!(compiledActions.get(idxLastRegistration) instanceof RegisterSliceAction)) {
+                            idxLastRegistration--;
+                        }
+                        if (idxLastRegistration>=0) {
+                            if (compiledActions.get(idxLastRegistration) instanceof RegisterSliceAction) {
+                                compiledActions.remove(idxLastRegistration);
+                                idxCompiledActions--;
+                                idxIniActions++;
+                            } else {
+                                logger.error("Error : issue with DeleteLastRegistrationAction action!!!!");
+                                idxIniActions++;
+                            }
                         } else {
-                            logger.warn("Error : issue with filtering serializable actions");
+                            logger.error("Error : issue with DeleteLastRegistrationAction action!!!!");
                             idxIniActions++;
                         }
                     } else {
