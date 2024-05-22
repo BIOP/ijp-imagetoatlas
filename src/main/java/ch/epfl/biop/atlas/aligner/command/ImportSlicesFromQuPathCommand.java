@@ -44,11 +44,16 @@ public class ImportSlicesFromQuPathCommand implements Command {
     @Override
     public void run() {
         try {
-            AbstractSpimData spimdata = (AbstractSpimData) command_service
+            if (increment_between_slices_mm == 0) {
+               mp.warningMessageForUser.accept("Spacing between slices: 0", "Please specify a non-zero spacing between slices.");
+               increment_between_slices_mm = mp.getAtlas().getMap().getAtlasPrecisionInMillimeter()*10;
+               mp.warningMessageForUser.accept("Spacing between slices: 0", "Spacing overridden to "+increment_between_slices_mm+" mm");
+            }
+            AbstractSpimData<?> spimdata = (AbstractSpimData<?>) command_service
                     .run(CreateBdvDatasetQuPathCommand.class,true,
                             "quPathProject", qupath_project,
                             "unit", "MILLIMETER").get().getOutput("spimData");
-            SourceAndConverter[] sacs =
+            SourceAndConverter<?>[] sacs =
                     sac_service.getSourceAndConverterFromSpimdata(spimdata)
                             .toArray(new SourceAndConverter[0]);
 
@@ -61,7 +66,7 @@ public class ImportSlicesFromQuPathCommand implements Command {
             mp.errorMessageForUser.accept("QuPath Import Error",
                     "QuPath project couldn't be imported.\n"+
                        "Check whether the project can be opened in QuPath, fix URI if necessary.\n"+
-                       "Only (rotated) Bio-Formats image server are supported.");
+                       "OpenSlide and ImageJ image servers are unsupported.");
             e.printStackTrace();
         }
     }
