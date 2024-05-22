@@ -107,16 +107,16 @@
 		<main-class>ch.epfl.biop.abba.ABBALaunchMouse</main-class>
 
 		<!-- bdv playground related dependencies -->
-		<bigdataviewer-playground.version>0.9.1</bigdataviewer-playground.version>
-		<bigdataviewer-image-loaders.version>0.6.4</bigdataviewer-image-loaders.version>
-		<bigdataviewer-biop-tools.version>0.9.1</bigdataviewer-biop-tools.version>
-		<bigdataviewer-selector.version>0.2.4</bigdataviewer-selector.version>
+		<bigdataviewer-playground.version>0.10.1</bigdataviewer-playground.version>
+		<bigdataviewer-image-loaders.version>0.7.1</bigdataviewer-image-loaders.version>
+		<bigdataviewer-biop-tools.version>0.9.4</bigdataviewer-biop-tools.version>
+		<bigdataviewer-selector.version>0.2.6</bigdataviewer-selector.version>
 
 		<!-- maths -->
 		<leastsquares.version>1.0.0</leastsquares.version>
 
 		<!-- ABBA specific -->
-		<atlas.version>0.2.1</atlas.version>
+		<atlas.version>0.2.2</atlas.version>
 		<oshi-core.version>5.5.1</oshi-core.version>
 
 		<!--because xml deserialization with JAXB is not included in Java 11, and we prepare migrating to Java 11 -->
@@ -132,7 +132,7 @@
 
 		<!-- <scijava.app.directory>C:/Fiji.app</scijava.app.directory> -->
 		<!-- scijava.app.directory>C:/Users/nicol/Dropbox/BIOP/ABBA-Python/constructor/Fiji.app</scijava.app.directory -->
-
+		<!-- package version below are determined by the parent pom but need to be upgraded or temporarily fixed for bugs -->
 
 		<n5.version>3.1.1</n5.version>
 		<n5-hdf5.version>2.1.0</n5-hdf5.version>

@@ -11,7 +11,6 @@ import ij.ImagePlus;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import net.imglib2.realtransform.AffineTransform3D;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
-import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -22,8 +21,7 @@ import java.util.Map;
 public class AtlasFromSourcesHelper {
 
     public static AtlasMap fromSources(SourceAndConverter<?>[] sources, SourceAndConverter<?> label, double atlasPixelSizeMm) {
-        AtlasMap map = new AtlasMapFromSources(sources, label, atlasPixelSizeMm);
-        return map;
+        return new AtlasMapFromSources(sources, label, atlasPixelSizeMm);
     }
 
     public static Atlas makeAtlas(AtlasMap map, AtlasOntology ontology, String name) {
@@ -168,7 +166,7 @@ public class AtlasFromSourcesHelper {
 
     public static class AtlasMapFromSources implements AtlasMap {
 
-        final Map<String, SourceAndConverter> keyToImage = new HashMap<>();
+        final Map<String, SourceAndConverter<?>> keyToImage = new HashMap<>();
         final List<String> imageKeys = new ArrayList<>();
         final SourceAndConverter<?> labelImage;
 
@@ -211,7 +209,7 @@ public class AtlasFromSourcesHelper {
         }
 
         @Override
-        public Map<String, SourceAndConverter> getStructuralImages() {
+        public Map<String, SourceAndConverter<?>> getStructuralImages() {
             return keyToImage;
         }
 
@@ -221,7 +219,7 @@ public class AtlasFromSourcesHelper {
         }
 
         @Override
-        public SourceAndConverter getLabelImage() {
+        public SourceAndConverter<?> getLabelImage() {
             return labelImage;
         }
 

@@ -7,9 +7,8 @@ public class SimpleIJLaunch {
     public static void main(String[] args) {
         final ImageJ ij = new ImageJ();
         DebugTools.enableLogging ("INFO");
-        //DebugTools.enableLogging ("DEBUG");
         ij.ui().showUI();
-
+        //DebugTools.enableLogging ("DEBUG");
         //RemoteElastixTask.timeOutInMs = 100000;
         //AlphaBlendedResampledSource
     }
