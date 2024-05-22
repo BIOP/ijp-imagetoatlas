@@ -11,7 +11,7 @@
 
 	<groupId>ch.epfl.biop</groupId>
 	<artifactId>ImageToAtlasRegister</artifactId>
-	<version>0.8.1-SNAPSHOT</version>
+	<version>0.8.2-SNAPSHOT</version>
 
 	<name>Plugin To Register Images to Atlases</name>
 	<description>Collection of tools to register images to atlases in Fiji.</description>
