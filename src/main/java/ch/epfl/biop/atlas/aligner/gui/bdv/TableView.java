@@ -365,20 +365,22 @@ public class TableView implements MultiSlicePositioner.SliceChangeListener, List
     @Override
     public void sliceSelected(SliceSources slice) {
         int idx = slice.getIndex();
-        if (idx!=-1)
-        if (!table.getSelectionModel().isSelectedIndex(idx)){
-            table.getSelectionModel().addSelectionInterval(idx, idx);
-            table.repaint();
+        if (idx!=-1) {
+            if (!table.getSelectionModel().isSelectedIndex(idx)) {
+                table.getSelectionModel().addSelectionInterval(idx, idx);
+                table.repaint();
+            }
         }
     }
 
     @Override
     public void sliceDeselected(SliceSources slice) {
         int idx = slice.getIndex();
-        if (idx!=-1)
-        if (table.getSelectionModel().isSelectedIndex(idx)) {
-            table.getSelectionModel().removeSelectionInterval(idx, idx);
-            table.repaint();
+        if (idx!=-1) {
+            if (table.getSelectionModel().isSelectedIndex(idx)) {
+                table.getSelectionModel().removeSelectionInterval(idx, idx);
+                table.repaint();
+            }
         }
     }
 
@@ -395,15 +397,17 @@ public class TableView implements MultiSlicePositioner.SliceChangeListener, List
     @Override
     public void sliceKeyOn(SliceSources slice) {
         int idx = slice.getIndex();
-        if (idx!=-1)
-        ((AbstractTableModel)table.getModel()).fireTableCellUpdated(idx, 0);
+        if (idx!=-1) {
+            ((AbstractTableModel) table.getModel()).fireTableCellUpdated(idx, 0);
+        }
     }
 
     @Override
     public void sliceKeyOff(SliceSources slice) {
         int idx = slice.getIndex();
-        if (idx!=-1)
-        ((AbstractTableModel)table.getModel()).fireTableCellUpdated(idx, 0);
+        if (idx!=-1) {
+            ((AbstractTableModel) table.getModel()).fireTableCellUpdated(idx, 0);
+        }
     }
 
     @Override
@@ -457,6 +461,7 @@ public class TableView implements MultiSlicePositioner.SliceChangeListener, List
         public DisplaySettingsRenderer(boolean isBordered) {
             this.isBordered = isBordered;
             label.setOpaque(true); //MUST do this for background to show up.
+            label.setHorizontalAlignment(SwingConstants.CENTER);
         }
 
         public Component getTableCellRendererComponent(
@@ -509,7 +514,6 @@ public class TableView implements MultiSlicePositioner.SliceChangeListener, List
             Image newimg = image.getScaledInstance(15, 15,  java.awt.Image.SCALE_SMOOTH); // scale it the smooth way
             visibleIcon = new ImageIcon(newimg);  // transform it back
 
-
             iconURL = TableView.class.getResource("/graphics/InvisibleL.png");
             invisibleIcon = new ImageIcon(iconURL);
             image = invisibleIcon.getImage(); // transform it
@@ -524,6 +528,7 @@ public class TableView implements MultiSlicePositioner.SliceChangeListener, List
         public VisibilityRenderer(boolean isBordered) {
             this.isBordered = isBordered;
             setOpaque(true); //MUST do this for background to show up.
+            this.setHorizontalAlignment(SwingConstants.CENTER);
         }
 
         @Override
