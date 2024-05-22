@@ -1,6 +1,5 @@
 package ch.epfl.biop.atlas.aligner.gui.bdv;
 
-
 import bdv.util.BdvFunctions;
 import bdv.util.BdvHandle;
 import bdv.util.BdvHandleFrame;
@@ -65,7 +64,6 @@ import ch.epfl.biop.atlas.aligner.gui.bdv.card.SliceDefineROICommand;
 import ch.epfl.biop.atlas.aligner.plugin.ABBACommand;
 import ch.epfl.biop.atlas.aligner.plugin.IABBARegistrationPlugin;
 import ch.epfl.biop.atlas.aligner.plugin.RegistrationPluginHelper;
-import ch.epfl.biop.atlas.struct.Atlas;
 import ch.epfl.biop.atlas.struct.AtlasNode;
 import ch.epfl.biop.bdv.gui.graphicalhandle.GraphicalHandle;
 import ch.epfl.biop.bdv.gui.graphicalhandle.GraphicalHandleListener;
@@ -149,16 +147,12 @@ import static bdv.ui.BdvDefaultCards.DEFAULT_SOURCEGROUPS_CARD;
 import static bdv.ui.BdvDefaultCards.DEFAULT_SOURCES_CARD;
 import static bdv.ui.BdvDefaultCards.DEFAULT_VIEWERMODES_CARD;
 
-
 public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceChangeListener, GraphicalHandleListener, MouseMotionListener, MultiSlicePositioner.MultiSlicePositionerListener {
 
     public MultiSlicePositioner msp; // TODO : make accessor
     final BdvHandle bdvh;
-    //final SourceAndConverterBdvDisplayService displayService;
 
     TableView tableView;
-
-    final Consumer<String> debug = (str) -> {};//System.out::println;
 
     protected static final Logger logger = LoggerFactory.getLogger(MultiSlicePositioner.class);
 
@@ -205,35 +199,17 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
     private int iCurrentSlice = 0;
 
-    /**
-     * Non blocking error message for users
-     */
-    public BiConsumer<String, String> nonBlockingErrorMessageForUser = (title, message) ->
-            logger.error(title+":"+message);
+    private void blockingErrorMessageForUsers(String title, String message) {
+        JOptionPane.showMessageDialog(new JFrame(), message, title, JOptionPane.ERROR_MESSAGE);
+    }
 
-    /**
-     * Blocking error message for users
-     */
-    public BiConsumer<String, String> errorMessageForUser = (title, message) ->
-            JOptionPane.showMessageDialog(new JFrame(), message, title, JOptionPane.ERROR_MESSAGE);
+    private void warningMessageForUser(String title, String message) {
+        JOptionPane.showMessageDialog(new JFrame(), message, title, JOptionPane.WARNING_MESSAGE);
+    }
 
-    /**
-     * Blocking warning message for users
-     */
-    public BiConsumer<String, String> warningMessageForUser = (title, message) ->
-            JOptionPane.showMessageDialog(new JFrame(), message, title, JOptionPane.WARNING_MESSAGE);
-
-
-    /**
-     * Blocking warning message for users
-     */
-    public BiConsumer<String, String> infoMessageForUser = (title, message) ->
-            JOptionPane.showMessageDialog(new JFrame(), message, title, JOptionPane.INFORMATION_MESSAGE);
-
-    public Consumer<String> errlog = (message) -> {
-        logger.error("Multipositioner : "+message);
-        errorMessageForUser.accept("Error", message);
-    };
+    private void infoMessageForUser(String title, String message) {
+       JOptionPane.showMessageDialog(new JFrame(), message, title, JOptionPane.INFORMATION_MESSAGE);
+    }
 
     // Maximum right position of the selected slices
     final Integer[] rightPosition = new Integer[]{0, 0, 0};
@@ -321,7 +297,8 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                     BdvScijavaHelper.clearBdvHandleMenuBar(bdvh);
                 });
             } catch (Exception e) {
-                errlog.accept(e.getMessage());
+                blockingErrorMessageForUsers("Error when clearing Bdv Defaults", e.getMessage());
+                e.printStackTrace();
             }
         }
     }
@@ -432,6 +409,11 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RegisterSlicesDeepSliceLocalCommand.class, hierarchyLevelsSkipped, "mp", msp, "model", "rat");
 
         }
+
+        final BiConsumer<String,String> guiErrorLogger = this::blockingErrorMessageForUsers;
+
+        msp.subscribeToErrorMessages(guiErrorLogger);
+        addToCleanUpHook(() -> msp.unSubscribeFromErrorMessages(guiErrorLogger));
 
     }
 
@@ -968,7 +950,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                 boolean success = (Boolean) (cm.getOutput("success"));
 
                 if (!success) {
-                    errorMessageForUser.accept("State not saved!", "Something went wrong");
+                    blockingErrorMessageForUsers("State not saved!", "Something went wrong");
                     return;
                 }
 
@@ -981,12 +963,12 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                 }
 
                 if (stateFileIn.exists()) {
-                    msp.errlog.accept("Error, this file already exists!");
+                    blockingErrorMessageForUsers("Can't save the state","Error, the file "+stateFileIn+" already exists.");
                     return;
                 } else {
                     boolean success = msp.saveState(stateFileIn, true);
                     if (!success) {
-                        errorMessageForUser.accept("State not saved!", "Something went wrong");
+                        blockingErrorMessageForUsers("State not saved!", "Something went wrong");
                         return;
                     }
                 }
@@ -1017,13 +999,13 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             writer.close();
 
             if ((stateFileIn.exists())&& (Files.size(Paths.get(stateFileIn.getAbsolutePath()))>0)) {
-                infoMessageForUser.accept("State saved", "Path:" + stateFileIn.getAbsolutePath());
+                infoMessageForUser("State saved", "Path:" + stateFileIn.getAbsolutePath());
             } else {
-                errorMessageForUser.accept("State not saved!", "Something went wrong");
+                blockingErrorMessageForUsers("State not saved!", "Something went wrong");
             }
 
         } catch (Exception e) {
-            errorMessageForUser.accept("State not saved!", e.getMessage());
+            blockingErrorMessageForUsers("State not saved!", e.getMessage());
             e.printStackTrace();
         }
     }
@@ -1092,7 +1074,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     }
 
     public void iniSlice(SliceSources slice) {
-        debug.accept("Initializing "+slice.getName());
+        logger.debug("Initializing "+slice.getName());
         guiState.created(slice);
         if (guiState.nSlices()==1) {
             iCurrentSlice = 0;
@@ -1270,20 +1252,20 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
     @Override
     public void sliceCreated(SliceSources slice) {
-        debug.accept(slice.getName()+ " created");
+        logger.debug(slice.getName()+ " created");
         iniSlice(slice);
     }
 
     @Override
     public void sliceDeleted(SliceSources slice) {
-        debug.accept(slice.getName()+ " deleted");
+        logger.debug(slice.getName()+ " deleted");
         guiState.deleted(slice);
     }
 
     // Error : sometimes this does not return
     @Override
     public void sliceZPositionChanged(SliceSources slice) { // should not be sync : slices lock is already locked
-        debug.accept(slice.getName() + " z position changed");
+        logger.debug(slice.getName() + " z position changed");
         guiState.runSlice(slice, guiState -> {
             guiState.slicePositionChanged();
             updateSliceDisplayedPosition(guiState); // fail!! TODO FIX
@@ -1294,7 +1276,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     @Override
     public void sliceSelected(SliceSources slice) {
         if (bdvRepaintEnabled()) {
-            debug.accept(slice.getName() + " selected");
+            logger.debug(slice.getName() + " selected");
             bdvh.getViewerPanel().getDisplay().repaint();
         }
     }
@@ -1302,14 +1284,14 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     @Override
     public void sliceDeselected(SliceSources slice) {
         if (bdvRepaintEnabled()) {
-            debug.accept(slice.getName() + " deselected");
+            logger.debug(slice.getName() + " deselected");
             bdvh.getViewerPanel().getDisplay().repaint();
         }
     }
 
     @Override
     public void sliceSourcesChanged(SliceSources slice) {
-        debug.accept(slice.getName() + " slices changed");
+        logger.debug(slice.getName() + " slices changed");
         guiState.runSlice(slice, SliceGuiState::sourcesChanged);
     }
 
@@ -1478,10 +1460,10 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             }
         } else {
             if (bdvh == null) {
-                errlog.accept("No Graphical User Interface.");
+                blockingErrorMessageForUsers("Issue in GUI generation", "No Graphical User Interface.");
             }
             if (rm!=null) {
-                warningMessageForUser.accept("Warning", "Resource Monitor is already present");
+                warningMessageForUser("Warning", "Resource Monitor is already present");
             }
         }
     }

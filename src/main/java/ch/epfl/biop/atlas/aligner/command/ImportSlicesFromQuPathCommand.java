@@ -45,9 +45,9 @@ public class ImportSlicesFromQuPathCommand implements Command {
     public void run() {
         try {
             if (increment_between_slices_mm == 0) {
-               mp.warningMessageForUser.accept("Spacing between slices: 0", "Please specify a non-zero spacing between slices.");
-               increment_between_slices_mm = mp.getAtlas().getMap().getAtlasPrecisionInMillimeter()*10;
-               mp.warningMessageForUser.accept("Spacing between slices: 0", "Spacing overridden to "+increment_between_slices_mm+" mm");
+               mp.errorMessageForUser.accept("Spacing between slices: 0", "Please specify a non-zero increment between slices.");
+               mp.errlog.accept("Please specify a non-zero increment between slices.");
+               return;
             }
             AbstractSpimData<?> spimdata = (AbstractSpimData<?>) command_service
                     .run(CreateBdvDatasetQuPathCommand.class,true,

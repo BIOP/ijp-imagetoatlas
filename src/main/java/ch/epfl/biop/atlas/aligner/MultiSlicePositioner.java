@@ -134,11 +134,26 @@ public class MultiSlicePositioner implements Closeable {
     public BiConsumer<String, String> nonBlockingErrorMessageForUser = (title, message) ->
             logger.error(title+":"+message);
 
+    private final List<BiConsumer<String, String>> errorSubscribers = new ArrayList<>();
+
+    public synchronized void subscribeToErrorMessages(BiConsumer<String, String> errorLogger) {
+        errorSubscribers.add(errorLogger);
+    }
+
+    public synchronized void unSubscribeFromErrorMessages(BiConsumer<String, String> errorLogger) {
+        errorSubscribers.remove(errorLogger);
+    }
+
     /**
-     * Blocking error message for users TODO
+     * Blocking error message for users
      */
-    public BiConsumer<String, String> errorMessageForUser = (title, message) ->
-            logger.error(title+":"+message);
+    public BiConsumer<String, String> errorMessageForUser = (title, message) -> {
+        synchronized (this) {
+            errorSubscribers.forEach(logger -> logger.accept(title, message));
+        }
+        logger.error(title+":"+message);
+    };
+
             //JOptionPane.showMessageDialog(new JFrame(), message, title, JOptionPane.ERROR_MESSAGE); // Headless exception
 
     /**
@@ -358,13 +373,11 @@ public class MultiSlicePositioner implements Closeable {
         synchronized (slicesLock) {
             slices.add(slice);
             sortSlices();
-        //}
             listeners.forEach(listener -> {
                 logger.debug("Creating slice "+slice+" - calling "+listener);
                 listener.sliceCreated(slice);
             });
             logger.info("Slice "+slice+" created!");
-        //synchronized (slicesLock) {
             sortSlices(); // makes sense, no ?
         }
     }
@@ -509,9 +522,9 @@ public class MultiSlicePositioner implements Closeable {
     protected boolean runCreateSlice(CreateSliceAction createSliceAction) {
         synchronized (this) { // only one slice addition at a time
             boolean sacAlreadyPresent = false;
-            for (SourceAndConverter sac : createSliceAction.getSacs()) {
+            for (SourceAndConverter<?> sac : createSliceAction.getSacs()) {
                 for (SliceSources slice : getSlices()) {
-                    for (SourceAndConverter test : slice.getOriginalSources()) {
+                    for (SourceAndConverter<?> test : slice.getOriginalSources()) {
                         if (test.equals(sac)) {
                             sacAlreadyPresent = true;
                             break;
@@ -564,13 +577,13 @@ public class MultiSlicePositioner implements Closeable {
 
     //-----------------------------------------
 
-    public SliceSources createSlice(SourceAndConverter[] sacsArray, double slicingAxisPosition) {
+    public SliceSources createSlice(SourceAndConverter<?>[] sacsArray, double slicingAxisPosition) {
         CreateSliceAction cs = new CreateSliceAction(this, Arrays.asList(sacsArray), slicingAxisPosition,1,0);
         cs.runRequest();
         return cs.getSlice();
     }
 
-    public <T extends Entity> List<SliceSources> createSlice(SourceAndConverter[] sacsArray, double slicingAxisPosition, double axisIncrement, final Class<T> attributeClass, T defaultEntity) {
+    public <T extends Entity> List<SliceSources> createSlice(SourceAndConverter<?>[] sacsArray, double slicingAxisPosition, double axisIncrement, final Class<T> attributeClass, T defaultEntity) {
         List<SliceSources> out = new ArrayList<>();
         List<SourceAndConverter<?>> sacs = Arrays.asList(sacsArray);
         if ((sacs.size() > 1) && (attributeClass != null)) {
@@ -967,7 +980,7 @@ public class MultiSlicePositioner implements Closeable {
         }
 
         // -2. there's no file with the same name OR, it's ok to overwrite it.
-        if (abbaFile.exists() && overwrite == false) {
+        if (abbaFile.exists() && !overwrite) {
             errorMessageForUser.accept("Saving aborted", "The state file "+abbaFile.getAbsolutePath()+" already exists!");
             return false;
         }
@@ -1068,12 +1081,13 @@ public class MultiSlicePositioner implements Closeable {
      * destDirectory (will be created if does not exists)
      * @param zipFilePath zip file path
      * @param destDirectory dest directory
-     * @throws IOException
+     * @throws IOException if the zip file can't be unzipped
      */
     public void unpack(String zipFilePath, String destDirectory) throws IOException {
         File destDir = new File(destDirectory);
         if (!destDir.exists()) {
-            destDir.mkdir();
+            boolean result = destDir.mkdir();
+            if (!result) throw new IOException("Could not create folder "+destDir+" for zip unpacking.");
         }
         ZipInputStream zipIn = new ZipInputStream(new FileInputStream(zipFilePath));
         ZipEntry entry = zipIn.getNextEntry();
@@ -1086,7 +1100,8 @@ public class MultiSlicePositioner implements Closeable {
             } else {
                 // if the entry is a directory, make the directory
                 File dir = new File(filePath);
-                dir.mkdirs();
+                boolean result = dir.mkdirs();
+                if (!result) throw new IOException("Could not create folder "+dir+" for zip unpacking.");
             }
             zipIn.closeEntry();
             entry = zipIn.getNextEntry();
@@ -1095,8 +1110,8 @@ public class MultiSlicePositioner implements Closeable {
     }
     /**
      * Extracts a zip entry (file entry)
-     * @param zipIn
-     * @param filePath
+     * @param zipIn the zip input stream to decompress
+     * @param filePath where to decompress it
      * @throws IOException
      */
     private void extractFile(ZipInputStream zipIn, String filePath) throws IOException {
