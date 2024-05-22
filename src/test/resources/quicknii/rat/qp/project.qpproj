@@ -1,0 +1,1353 @@
+{
+  "version": "0.4.4",
+  "createTimestamp": 1705595744807,
+  "modifyTimestamp": 1705595744807,
+  "uri": "file:/C:/Users/nicol/Dropbox/BIOP/ImageToAtlasRegister/src/test/resources/quicknii/rat/qp/project.qpproj",
+  "lastID": 21,
+  "images": [
+    {
+      "serverBuilder": {
+        "builderType": "uri",
+        "providerClassName": "qupath.lib.images.servers.bioformats.BioFormatsServerBuilder",
+        "uri": "file:/C:/Users/nicol/Dropbox/BIOP/ImageToAtlasRegister/src/test/resources/quicknii/rat/ratslices0000.jpg",
+        "args": [
+          "--series",
+          "0"
+        ],
+        "metadata": {
+          "name": "ratslices0000.jpg",
+          "width": 606,
+          "height": 526,
+          "sizeZ": 1,
+          "sizeT": 1,
+          "channelType": "DEFAULT",
+          "isRGB": true,
+          "pixelType": "UINT8",
+          "levels": [
+            {
+              "downsample": 1.0,
+              "width": 606,
+              "height": 526
+            }
+          ],
+          "channels": [
+            {
+              "name": "Red",
+              "color": -65536
+            },
+            {
+              "name": "Green",
+              "color": -16711936
+            },
+            {
+              "name": "Blue",
+              "color": -16776961
+            }
+          ],
+          "pixelCalibration": {
+            "pixelWidth": {
+              "value": 29.977016,
+              "unit": "µm"
+            },
+            "pixelHeight": {
+              "value": 29.977016,
+              "unit": "µm"
+            },
+            "zSpacing": {
+              "value": 1.0,
+              "unit": "z-slice"
+            },
+            "timeUnit": "SECONDS",
+            "timepoints": []
+          },
+          "preferredTileWidth": 606,
+          "preferredTileHeight": 526
+        }
+      },
+      "entryID": 1,
+      "randomizedName": "d81c18ee-fcb4-42c9-b48d-ca4ceb50e124",
+      "imageName": "ratslices0000.jpg",
+      "metadata": {}
+    },
+    {
+      "serverBuilder": {
+        "builderType": "uri",
+        "providerClassName": "qupath.lib.images.servers.bioformats.BioFormatsServerBuilder",
+        "uri": "file:/C:/Users/nicol/Dropbox/BIOP/ImageToAtlasRegister/src/test/resources/quicknii/rat/ratslices0001.jpg",
+        "args": [
+          "--series",
+          "0"
+        ],
+        "metadata": {
+          "name": "ratslices0001.jpg",
+          "width": 606,
+          "height": 526,
+          "sizeZ": 1,
+          "sizeT": 1,
+          "channelType": "DEFAULT",
+          "isRGB": true,
+          "pixelType": "UINT8",
+          "levels": [
+            {
+              "downsample": 1.0,
+              "width": 606,
+              "height": 526
+            }
+          ],
+          "channels": [
+            {
+              "name": "Red",
+              "color": -65536
+            },
+            {
+              "name": "Green",
+              "color": -16711936
+            },
+            {
+              "name": "Blue",
+              "color": -16776961
+            }
+          ],
+          "pixelCalibration": {
+            "pixelWidth": {
+              "value": 29.977016,
+              "unit": "µm"
+            },
+            "pixelHeight": {
+              "value": 29.977016,
+              "unit": "µm"
+            },
+            "zSpacing": {
+              "value": 1.0,
+              "unit": "z-slice"
+            },
+            "timeUnit": "SECONDS",
+            "timepoints": []
+          },
+          "preferredTileWidth": 606,
+          "preferredTileHeight": 526
+        }
+      },
+      "entryID": 2,
+      "randomizedName": "0d10944c-b3a2-4b3d-8202-a6835f51228e",
+      "imageName": "ratslices0001.jpg",
+      "metadata": {}
+    },
+    {
+      "serverBuilder": {
+        "builderType": "uri",
+        "providerClassName": "qupath.lib.images.servers.bioformats.BioFormatsServerBuilder",
+        "uri": "file:/C:/Users/nicol/Dropbox/BIOP/ImageToAtlasRegister/src/test/resources/quicknii/rat/ratslices0002.jpg",
+        "args": [
+          "--series",
+          "0"
+        ],
+        "metadata": {
+          "name": "ratslices0002.jpg",
+          "width": 606,
+          "height": 526,
+          "sizeZ": 1,
+          "sizeT": 1,
+          "channelType": "DEFAULT",
+          "isRGB": true,
+          "pixelType": "UINT8",
+          "levels": [
+            {
+              "downsample": 1.0,
+              "width": 606,
+              "height": 526
+            }
+          ],
+          "channels": [
+            {
+              "name": "Red",
+              "color": -65536
+            },
+            {
+              "name": "Green",
+              "color": -16711936
+            },
+            {
+              "name": "Blue",
+              "color": -16776961
+            }
+          ],
+          "pixelCalibration": {
+            "pixelWidth": {
+              "value": 29.977016,
+              "unit": "µm"
+            },
+            "pixelHeight": {
+              "value": 29.977016,
+              "unit": "µm"
+            },
+            "zSpacing": {
+              "value": 1.0,
+              "unit": "z-slice"
+            },
+            "timeUnit": "SECONDS",
+            "timepoints": []
+          },
+          "preferredTileWidth": 606,
+          "preferredTileHeight": 526
+        }
+      },
+      "entryID": 3,
+      "randomizedName": "82b9ce86-3286-4c4c-9930-7db857a47e99",
+      "imageName": "ratslices0002.jpg",
+      "metadata": {}
+    },
+    {
+      "serverBuilder": {
+        "builderType": "uri",
+        "providerClassName": "qupath.lib.images.servers.bioformats.BioFormatsServerBuilder",
+        "uri": "file:/C:/Users/nicol/Dropbox/BIOP/ImageToAtlasRegister/src/test/resources/quicknii/rat/ratslices0003.jpg",
+        "args": [
+          "--series",
+          "0"
+        ],
+        "metadata": {
+          "name": "ratslices0003.jpg",
+          "width": 606,
+          "height": 526,
+          "sizeZ": 1,
+          "sizeT": 1,
+          "channelType": "DEFAULT",
+          "isRGB": true,
+          "pixelType": "UINT8",
+          "levels": [
+            {
+              "downsample": 1.0,
+              "width": 606,
+              "height": 526
+            }
+          ],
+          "channels": [
+            {
+              "name": "Red",
+              "color": -65536
+            },
+            {
+              "name": "Green",
+              "color": -16711936
+            },
+            {
+              "name": "Blue",
+              "color": -16776961
+            }
+          ],
+          "pixelCalibration": {
+            "pixelWidth": {
+              "value": 29.977016,
+              "unit": "µm"
+            },
+            "pixelHeight": {
+              "value": 29.977016,
+              "unit": "µm"
+            },
+            "zSpacing": {
+              "value": 1.0,
+              "unit": "z-slice"
+            },
+            "timeUnit": "SECONDS",
+            "timepoints": []
+          },
+          "preferredTileWidth": 606,
+          "preferredTileHeight": 526
+        }
+      },
+      "entryID": 4,
+      "randomizedName": "adaf46bf-0549-48d4-80dd-6a4e56167fc8",
+      "imageName": "ratslices0003.jpg",
+      "metadata": {}
+    },
+    {
+      "serverBuilder": {
+        "builderType": "uri",
+        "providerClassName": "qupath.lib.images.servers.bioformats.BioFormatsServerBuilder",
+        "uri": "file:/C:/Users/nicol/Dropbox/BIOP/ImageToAtlasRegister/src/test/resources/quicknii/rat/ratslices0004.jpg",
+        "args": [
+          "--series",
+          "0"
+        ],
+        "metadata": {
+          "name": "ratslices0004.jpg",
+          "width": 606,
+          "height": 526,
+          "sizeZ": 1,
+          "sizeT": 1,
+          "channelType": "DEFAULT",
+          "isRGB": true,
+          "pixelType": "UINT8",
+          "levels": [
+            {
+              "downsample": 1.0,
+              "width": 606,
+              "height": 526
+            }
+          ],
+          "channels": [
+            {
+              "name": "Red",
+              "color": -65536
+            },
+            {
+              "name": "Green",
+              "color": -16711936
+            },
+            {
+              "name": "Blue",
+              "color": -16776961
+            }
+          ],
+          "pixelCalibration": {
+            "pixelWidth": {
+              "value": 29.977016,
+              "unit": "µm"
+            },
+            "pixelHeight": {
+              "value": 29.977016,
+              "unit": "µm"
+            },
+            "zSpacing": {
+              "value": 1.0,
+              "unit": "z-slice"
+            },
+            "timeUnit": "SECONDS",
+            "timepoints": []
+          },
+          "preferredTileWidth": 606,
+          "preferredTileHeight": 526
+        }
+      },
+      "entryID": 5,
+      "randomizedName": "927e6f33-b0a5-41a8-82b0-e119552c6e28",
+      "imageName": "ratslices0004.jpg",
+      "metadata": {}
+    },
+    {
+      "serverBuilder": {
+        "builderType": "uri",
+        "providerClassName": "qupath.lib.images.servers.bioformats.BioFormatsServerBuilder",
+        "uri": "file:/C:/Users/nicol/Dropbox/BIOP/ImageToAtlasRegister/src/test/resources/quicknii/rat/ratslices0005.jpg",
+        "args": [
+          "--series",
+          "0"
+        ],
+        "metadata": {
+          "name": "ratslices0005.jpg",
+          "width": 606,
+          "height": 526,
+          "sizeZ": 1,
+          "sizeT": 1,
+          "channelType": "DEFAULT",
+          "isRGB": true,
+          "pixelType": "UINT8",
+          "levels": [
+            {
+              "downsample": 1.0,
+              "width": 606,
+              "height": 526
+            }
+          ],
+          "channels": [
+            {
+              "name": "Red",
+              "color": -65536
+            },
+            {
+              "name": "Green",
+              "color": -16711936
+            },
+            {
+              "name": "Blue",
+              "color": -16776961
+            }
+          ],
+          "pixelCalibration": {
+            "pixelWidth": {
+              "value": 29.977016,
+              "unit": "µm"
+            },
+            "pixelHeight": {
+              "value": 29.977016,
+              "unit": "µm"
+            },
+            "zSpacing": {
+              "value": 1.0,
+              "unit": "z-slice"
+            },
+            "timeUnit": "SECONDS",
+            "timepoints": []
+          },
+          "preferredTileWidth": 606,
+          "preferredTileHeight": 526
+        }
+      },
+      "entryID": 6,
+      "randomizedName": "dbcefa77-014c-4eff-a2c6-0db811b03d5b",
+      "imageName": "ratslices0005.jpg",
+      "metadata": {}
+    },
+    {
+      "serverBuilder": {
+        "builderType": "uri",
+        "providerClassName": "qupath.lib.images.servers.bioformats.BioFormatsServerBuilder",
+        "uri": "file:/C:/Users/nicol/Dropbox/BIOP/ImageToAtlasRegister/src/test/resources/quicknii/rat/ratslices0006.jpg",
+        "args": [
+          "--series",
+          "0"
+        ],
+        "metadata": {
+          "name": "ratslices0006.jpg",
+          "width": 606,
+          "height": 526,
+          "sizeZ": 1,
+          "sizeT": 1,
+          "channelType": "DEFAULT",
+          "isRGB": true,
+          "pixelType": "UINT8",
+          "levels": [
+            {
+              "downsample": 1.0,
+              "width": 606,
+              "height": 526
+            }
+          ],
+          "channels": [
+            {
+              "name": "Red",
+              "color": -65536
+            },
+            {
+              "name": "Green",
+              "color": -16711936
+            },
+            {
+              "name": "Blue",
+              "color": -16776961
+            }
+          ],
+          "pixelCalibration": {
+            "pixelWidth": {
+              "value": 29.977016,
+              "unit": "µm"
+            },
+            "pixelHeight": {
+              "value": 29.977016,
+              "unit": "µm"
+            },
+            "zSpacing": {
+              "value": 1.0,
+              "unit": "z-slice"
+            },
+            "timeUnit": "SECONDS",
+            "timepoints": []
+          },
+          "preferredTileWidth": 606,
+          "preferredTileHeight": 526
+        }
+      },
+      "entryID": 7,
+      "randomizedName": "5b13cbe1-1a5e-44b0-8fc2-34f1386f1b4e",
+      "imageName": "ratslices0006.jpg",
+      "metadata": {}
+    },
+    {
+      "serverBuilder": {
+        "builderType": "uri",
+        "providerClassName": "qupath.lib.images.servers.bioformats.BioFormatsServerBuilder",
+        "uri": "file:/C:/Users/nicol/Dropbox/BIOP/ImageToAtlasRegister/src/test/resources/quicknii/rat/ratslices0007.jpg",
+        "args": [
+          "--series",
+          "0"
+        ],
+        "metadata": {
+          "name": "ratslices0007.jpg",
+          "width": 606,
+          "height": 526,
+          "sizeZ": 1,
+          "sizeT": 1,
+          "channelType": "DEFAULT",
+          "isRGB": true,
+          "pixelType": "UINT8",
+          "levels": [
+            {
+              "downsample": 1.0,
+              "width": 606,
+              "height": 526
+            }
+          ],
+          "channels": [
+            {
+              "name": "Red",
+              "color": -65536
+            },
+            {
+              "name": "Green",
+              "color": -16711936
+            },
+            {
+              "name": "Blue",
+              "color": -16776961
+            }
+          ],
+          "pixelCalibration": {
+            "pixelWidth": {
+              "value": 29.977016,
+              "unit": "µm"
+            },
+            "pixelHeight": {
+              "value": 29.977016,
+              "unit": "µm"
+            },
+            "zSpacing": {
+              "value": 1.0,
+              "unit": "z-slice"
+            },
+            "timeUnit": "SECONDS",
+            "timepoints": []
+          },
+          "preferredTileWidth": 606,
+          "preferredTileHeight": 526
+        }
+      },
+      "entryID": 8,
+      "randomizedName": "1f064d11-fcbf-4847-a480-62b434b3fdf8",
+      "imageName": "ratslices0007.jpg",
+      "metadata": {}
+    },
+    {
+      "serverBuilder": {
+        "builderType": "uri",
+        "providerClassName": "qupath.lib.images.servers.bioformats.BioFormatsServerBuilder",
+        "uri": "file:/C:/Users/nicol/Dropbox/BIOP/ImageToAtlasRegister/src/test/resources/quicknii/rat/ratslices0008.jpg",
+        "args": [
+          "--series",
+          "0"
+        ],
+        "metadata": {
+          "name": "ratslices0008.jpg",
+          "width": 606,
+          "height": 526,
+          "sizeZ": 1,
+          "sizeT": 1,
+          "channelType": "DEFAULT",
+          "isRGB": true,
+          "pixelType": "UINT8",
+          "levels": [
+            {
+              "downsample": 1.0,
+              "width": 606,
+              "height": 526
+            }
+          ],
+          "channels": [
+            {
+              "name": "Red",
+              "color": -65536
+            },
+            {
+              "name": "Green",
+              "color": -16711936
+            },
+            {
+              "name": "Blue",
+              "color": -16776961
+            }
+          ],
+          "pixelCalibration": {
+            "pixelWidth": {
+              "value": 29.977016,
+              "unit": "µm"
+            },
+            "pixelHeight": {
+              "value": 29.977016,
+              "unit": "µm"
+            },
+            "zSpacing": {
+              "value": 1.0,
+              "unit": "z-slice"
+            },
+            "timeUnit": "SECONDS",
+            "timepoints": []
+          },
+          "preferredTileWidth": 606,
+          "preferredTileHeight": 526
+        }
+      },
+      "entryID": 9,
+      "randomizedName": "4135be24-7a9b-43a4-98e0-b0c0a70b9195",
+      "imageName": "ratslices0008.jpg",
+      "metadata": {}
+    },
+    {
+      "serverBuilder": {
+        "builderType": "uri",
+        "providerClassName": "qupath.lib.images.servers.bioformats.BioFormatsServerBuilder",
+        "uri": "file:/C:/Users/nicol/Dropbox/BIOP/ImageToAtlasRegister/src/test/resources/quicknii/rat/ratslices0009.jpg",
+        "args": [
+          "--series",
+          "0"
+        ],
+        "metadata": {
+          "name": "ratslices0009.jpg",
+          "width": 606,
+          "height": 526,
+          "sizeZ": 1,
+          "sizeT": 1,
+          "channelType": "DEFAULT",
+          "isRGB": true,
+          "pixelType": "UINT8",
+          "levels": [
+            {
+              "downsample": 1.0,
+              "width": 606,
+              "height": 526
+            }
+          ],
+          "channels": [
+            {
+              "name": "Red",
+              "color": -65536
+            },
+            {
+              "name": "Green",
+              "color": -16711936
+            },
+            {
+              "name": "Blue",
+              "color": -16776961
+            }
+          ],
+          "pixelCalibration": {
+            "pixelWidth": {
+              "value": 29.977016,
+              "unit": "µm"
+            },
+            "pixelHeight": {
+              "value": 29.977016,
+              "unit": "µm"
+            },
+            "zSpacing": {
+              "value": 1.0,
+              "unit": "z-slice"
+            },
+            "timeUnit": "SECONDS",
+            "timepoints": []
+          },
+          "preferredTileWidth": 606,
+          "preferredTileHeight": 526
+        }
+      },
+      "entryID": 10,
+      "randomizedName": "d3222b07-bbcf-47fd-a3b9-de3d87382d18",
+      "imageName": "ratslices0009.jpg",
+      "metadata": {}
+    },
+    {
+      "serverBuilder": {
+        "builderType": "uri",
+        "providerClassName": "qupath.lib.images.servers.bioformats.BioFormatsServerBuilder",
+        "uri": "file:/C:/Users/nicol/Dropbox/BIOP/ImageToAtlasRegister/src/test/resources/quicknii/rat/ratslices0010.jpg",
+        "args": [
+          "--series",
+          "0"
+        ],
+        "metadata": {
+          "name": "ratslices0010.jpg",
+          "width": 606,
+          "height": 526,
+          "sizeZ": 1,
+          "sizeT": 1,
+          "channelType": "DEFAULT",
+          "isRGB": true,
+          "pixelType": "UINT8",
+          "levels": [
+            {
+              "downsample": 1.0,
+              "width": 606,
+              "height": 526
+            }
+          ],
+          "channels": [
+            {
+              "name": "Red",
+              "color": -65536
+            },
+            {
+              "name": "Green",
+              "color": -16711936
+            },
+            {
+              "name": "Blue",
+              "color": -16776961
+            }
+          ],
+          "pixelCalibration": {
+            "pixelWidth": {
+              "value": 29.977016,
+              "unit": "µm"
+            },
+            "pixelHeight": {
+              "value": 29.977016,
+              "unit": "µm"
+            },
+            "zSpacing": {
+              "value": 1.0,
+              "unit": "z-slice"
+            },
+            "timeUnit": "SECONDS",
+            "timepoints": []
+          },
+          "preferredTileWidth": 606,
+          "preferredTileHeight": 526
+        }
+      },
+      "entryID": 11,
+      "randomizedName": "cd807be5-b352-4d38-9b20-661bbd43a2ce",
+      "imageName": "ratslices0010.jpg",
+      "metadata": {}
+    },
+    {
+      "serverBuilder": {
+        "builderType": "uri",
+        "providerClassName": "qupath.lib.images.servers.bioformats.BioFormatsServerBuilder",
+        "uri": "file:/C:/Users/nicol/Dropbox/BIOP/ImageToAtlasRegister/src/test/resources/quicknii/rat/ratslices0011.jpg",
+        "args": [
+          "--series",
+          "0"
+        ],
+        "metadata": {
+          "name": "ratslices0011.jpg",
+          "width": 606,
+          "height": 526,
+          "sizeZ": 1,
+          "sizeT": 1,
+          "channelType": "DEFAULT",
+          "isRGB": true,
+          "pixelType": "UINT8",
+          "levels": [
+            {
+              "downsample": 1.0,
+              "width": 606,
+              "height": 526
+            }
+          ],
+          "channels": [
+            {
+              "name": "Red",
+              "color": -65536
+            },
+            {
+              "name": "Green",
+              "color": -16711936
+            },
+            {
+              "name": "Blue",
+              "color": -16776961
+            }
+          ],
+          "pixelCalibration": {
+            "pixelWidth": {
+              "value": 29.977016,
+              "unit": "µm"
+            },
+            "pixelHeight": {
+              "value": 29.977016,
+              "unit": "µm"
+            },
+            "zSpacing": {
+              "value": 1.0,
+              "unit": "z-slice"
+            },
+            "timeUnit": "SECONDS",
+            "timepoints": []
+          },
+          "preferredTileWidth": 606,
+          "preferredTileHeight": 526
+        }
+      },
+      "entryID": 12,
+      "randomizedName": "3ec665e2-ff46-4fb3-8a8f-79d4abf68aad",
+      "imageName": "ratslices0011.jpg",
+      "metadata": {}
+    },
+    {
+      "serverBuilder": {
+        "builderType": "uri",
+        "providerClassName": "qupath.lib.images.servers.bioformats.BioFormatsServerBuilder",
+        "uri": "file:/C:/Users/nicol/Dropbox/BIOP/ImageToAtlasRegister/src/test/resources/quicknii/rat/ratslices0012.jpg",
+        "args": [
+          "--series",
+          "0"
+        ],
+        "metadata": {
+          "name": "ratslices0012.jpg",
+          "width": 606,
+          "height": 526,
+          "sizeZ": 1,
+          "sizeT": 1,
+          "channelType": "DEFAULT",
+          "isRGB": true,
+          "pixelType": "UINT8",
+          "levels": [
+            {
+              "downsample": 1.0,
+              "width": 606,
+              "height": 526
+            }
+          ],
+          "channels": [
+            {
+              "name": "Red",
+              "color": -65536
+            },
+            {
+              "name": "Green",
+              "color": -16711936
+            },
+            {
+              "name": "Blue",
+              "color": -16776961
+            }
+          ],
+          "pixelCalibration": {
+            "pixelWidth": {
+              "value": 29.977016,
+              "unit": "µm"
+            },
+            "pixelHeight": {
+              "value": 29.977016,
+              "unit": "µm"
+            },
+            "zSpacing": {
+              "value": 1.0,
+              "unit": "z-slice"
+            },
+            "timeUnit": "SECONDS",
+            "timepoints": []
+          },
+          "preferredTileWidth": 606,
+          "preferredTileHeight": 526
+        }
+      },
+      "entryID": 13,
+      "randomizedName": "3a154e2f-90e4-4606-b92d-67260c10a93b",
+      "imageName": "ratslices0012.jpg",
+      "metadata": {}
+    },
+    {
+      "serverBuilder": {
+        "builderType": "uri",
+        "providerClassName": "qupath.lib.images.servers.bioformats.BioFormatsServerBuilder",
+        "uri": "file:/C:/Users/nicol/Dropbox/BIOP/ImageToAtlasRegister/src/test/resources/quicknii/rat/ratslices0013.jpg",
+        "args": [
+          "--series",
+          "0"
+        ],
+        "metadata": {
+          "name": "ratslices0013.jpg",
+          "width": 606,
+          "height": 526,
+          "sizeZ": 1,
+          "sizeT": 1,
+          "channelType": "DEFAULT",
+          "isRGB": true,
+          "pixelType": "UINT8",
+          "levels": [
+            {
+              "downsample": 1.0,
+              "width": 606,
+              "height": 526
+            }
+          ],
+          "channels": [
+            {
+              "name": "Red",
+              "color": -65536
+            },
+            {
+              "name": "Green",
+              "color": -16711936
+            },
+            {
+              "name": "Blue",
+              "color": -16776961
+            }
+          ],
+          "pixelCalibration": {
+            "pixelWidth": {
+              "value": 29.977016,
+              "unit": "µm"
+            },
+            "pixelHeight": {
+              "value": 29.977016,
+              "unit": "µm"
+            },
+            "zSpacing": {
+              "value": 1.0,
+              "unit": "z-slice"
+            },
+            "timeUnit": "SECONDS",
+            "timepoints": []
+          },
+          "preferredTileWidth": 606,
+          "preferredTileHeight": 526
+        }
+      },
+      "entryID": 14,
+      "randomizedName": "04b97c09-a3c2-4ab0-85b7-7abbd33a161a",
+      "imageName": "ratslices0013.jpg",
+      "metadata": {}
+    },
+    {
+      "serverBuilder": {
+        "builderType": "uri",
+        "providerClassName": "qupath.lib.images.servers.bioformats.BioFormatsServerBuilder",
+        "uri": "file:/C:/Users/nicol/Dropbox/BIOP/ImageToAtlasRegister/src/test/resources/quicknii/rat/ratslices0014.jpg",
+        "args": [
+          "--series",
+          "0"
+        ],
+        "metadata": {
+          "name": "ratslices0014.jpg",
+          "width": 606,
+          "height": 526,
+          "sizeZ": 1,
+          "sizeT": 1,
+          "channelType": "DEFAULT",
+          "isRGB": true,
+          "pixelType": "UINT8",
+          "levels": [
+            {
+              "downsample": 1.0,
+              "width": 606,
+              "height": 526
+            }
+          ],
+          "channels": [
+            {
+              "name": "Red",
+              "color": -65536
+            },
+            {
+              "name": "Green",
+              "color": -16711936
+            },
+            {
+              "name": "Blue",
+              "color": -16776961
+            }
+          ],
+          "pixelCalibration": {
+            "pixelWidth": {
+              "value": 29.977016,
+              "unit": "µm"
+            },
+            "pixelHeight": {
+              "value": 29.977016,
+              "unit": "µm"
+            },
+            "zSpacing": {
+              "value": 1.0,
+              "unit": "z-slice"
+            },
+            "timeUnit": "SECONDS",
+            "timepoints": []
+          },
+          "preferredTileWidth": 606,
+          "preferredTileHeight": 526
+        }
+      },
+      "entryID": 15,
+      "randomizedName": "8253151d-7326-4fc6-8cfb-a9469036aeb9",
+      "imageName": "ratslices0014.jpg",
+      "metadata": {}
+    },
+    {
+      "serverBuilder": {
+        "builderType": "uri",
+        "providerClassName": "qupath.lib.images.servers.bioformats.BioFormatsServerBuilder",
+        "uri": "file:/C:/Users/nicol/Dropbox/BIOP/ImageToAtlasRegister/src/test/resources/quicknii/rat/ratslices0015.jpg",
+        "args": [
+          "--series",
+          "0"
+        ],
+        "metadata": {
+          "name": "ratslices0015.jpg",
+          "width": 606,
+          "height": 526,
+          "sizeZ": 1,
+          "sizeT": 1,
+          "channelType": "DEFAULT",
+          "isRGB": true,
+          "pixelType": "UINT8",
+          "levels": [
+            {
+              "downsample": 1.0,
+              "width": 606,
+              "height": 526
+            }
+          ],
+          "channels": [
+            {
+              "name": "Red",
+              "color": -65536
+            },
+            {
+              "name": "Green",
+              "color": -16711936
+            },
+            {
+              "name": "Blue",
+              "color": -16776961
+            }
+          ],
+          "pixelCalibration": {
+            "pixelWidth": {
+              "value": 29.977016,
+              "unit": "µm"
+            },
+            "pixelHeight": {
+              "value": 29.977016,
+              "unit": "µm"
+            },
+            "zSpacing": {
+              "value": 1.0,
+              "unit": "z-slice"
+            },
+            "timeUnit": "SECONDS",
+            "timepoints": []
+          },
+          "preferredTileWidth": 606,
+          "preferredTileHeight": 526
+        }
+      },
+      "entryID": 16,
+      "randomizedName": "6487878e-b46f-4b46-897f-0bd29806cceb",
+      "imageName": "ratslices0015.jpg",
+      "metadata": {}
+    },
+    {
+      "serverBuilder": {
+        "builderType": "uri",
+        "providerClassName": "qupath.lib.images.servers.bioformats.BioFormatsServerBuilder",
+        "uri": "file:/C:/Users/nicol/Dropbox/BIOP/ImageToAtlasRegister/src/test/resources/quicknii/rat/ratslices0016.jpg",
+        "args": [
+          "--series",
+          "0"
+        ],
+        "metadata": {
+          "name": "ratslices0016.jpg",
+          "width": 606,
+          "height": 526,
+          "sizeZ": 1,
+          "sizeT": 1,
+          "channelType": "DEFAULT",
+          "isRGB": true,
+          "pixelType": "UINT8",
+          "levels": [
+            {
+              "downsample": 1.0,
+              "width": 606,
+              "height": 526
+            }
+          ],
+          "channels": [
+            {
+              "name": "Red",
+              "color": -65536
+            },
+            {
+              "name": "Green",
+              "color": -16711936
+            },
+            {
+              "name": "Blue",
+              "color": -16776961
+            }
+          ],
+          "pixelCalibration": {
+            "pixelWidth": {
+              "value": 29.977016,
+              "unit": "µm"
+            },
+            "pixelHeight": {
+              "value": 29.977016,
+              "unit": "µm"
+            },
+            "zSpacing": {
+              "value": 1.0,
+              "unit": "z-slice"
+            },
+            "timeUnit": "SECONDS",
+            "timepoints": []
+          },
+          "preferredTileWidth": 606,
+          "preferredTileHeight": 526
+        }
+      },
+      "entryID": 17,
+      "randomizedName": "9a11713e-9cd9-4bfa-ac82-5605b2faab1b",
+      "imageName": "ratslices0016.jpg",
+      "metadata": {}
+    },
+    {
+      "serverBuilder": {
+        "builderType": "uri",
+        "providerClassName": "qupath.lib.images.servers.bioformats.BioFormatsServerBuilder",
+        "uri": "file:/C:/Users/nicol/Dropbox/BIOP/ImageToAtlasRegister/src/test/resources/quicknii/rat/ratslices0017.jpg",
+        "args": [
+          "--series",
+          "0"
+        ],
+        "metadata": {
+          "name": "ratslices0017.jpg",
+          "width": 606,
+          "height": 526,
+          "sizeZ": 1,
+          "sizeT": 1,
+          "channelType": "DEFAULT",
+          "isRGB": true,
+          "pixelType": "UINT8",
+          "levels": [
+            {
+              "downsample": 1.0,
+              "width": 606,
+              "height": 526
+            }
+          ],
+          "channels": [
+            {
+              "name": "Red",
+              "color": -65536
+            },
+            {
+              "name": "Green",
+              "color": -16711936
+            },
+            {
+              "name": "Blue",
+              "color": -16776961
+            }
+          ],
+          "pixelCalibration": {
+            "pixelWidth": {
+              "value": 29.977016,
+              "unit": "µm"
+            },
+            "pixelHeight": {
+              "value": 29.977016,
+              "unit": "µm"
+            },
+            "zSpacing": {
+              "value": 1.0,
+              "unit": "z-slice"
+            },
+            "timeUnit": "SECONDS",
+            "timepoints": []
+          },
+          "preferredTileWidth": 606,
+          "preferredTileHeight": 526
+        }
+      },
+      "entryID": 18,
+      "randomizedName": "3d516bca-e8fa-4960-81b1-165155ab2744",
+      "imageName": "ratslices0017.jpg",
+      "metadata": {}
+    },
+    {
+      "serverBuilder": {
+        "builderType": "uri",
+        "providerClassName": "qupath.lib.images.servers.bioformats.BioFormatsServerBuilder",
+        "uri": "file:/C:/Users/nicol/Dropbox/BIOP/ImageToAtlasRegister/src/test/resources/quicknii/rat/ratslices0018.jpg",
+        "args": [
+          "--series",
+          "0"
+        ],
+        "metadata": {
+          "name": "ratslices0018.jpg",
+          "width": 606,
+          "height": 526,
+          "sizeZ": 1,
+          "sizeT": 1,
+          "channelType": "DEFAULT",
+          "isRGB": true,
+          "pixelType": "UINT8",
+          "levels": [
+            {
+              "downsample": 1.0,
+              "width": 606,
+              "height": 526
+            }
+          ],
+          "channels": [
+            {
+              "name": "Red",
+              "color": -65536
+            },
+            {
+              "name": "Green",
+              "color": -16711936
+            },
+            {
+              "name": "Blue",
+              "color": -16776961
+            }
+          ],
+          "pixelCalibration": {
+            "pixelWidth": {
+              "value": 29.977016,
+              "unit": "µm"
+            },
+            "pixelHeight": {
+              "value": 29.977016,
+              "unit": "µm"
+            },
+            "zSpacing": {
+              "value": 1.0,
+              "unit": "z-slice"
+            },
+            "timeUnit": "SECONDS",
+            "timepoints": []
+          },
+          "preferredTileWidth": 606,
+          "preferredTileHeight": 526
+        }
+      },
+      "entryID": 19,
+      "randomizedName": "c487ff4d-617b-4417-b9c2-282baad8f3d4",
+      "imageName": "ratslices0018.jpg",
+      "metadata": {}
+    },
+    {
+      "serverBuilder": {
+        "builderType": "uri",
+        "providerClassName": "qupath.lib.images.servers.bioformats.BioFormatsServerBuilder",
+        "uri": "file:/C:/Users/nicol/Dropbox/BIOP/ImageToAtlasRegister/src/test/resources/quicknii/rat/ratslices0019.jpg",
+        "args": [
+          "--series",
+          "0"
+        ],
+        "metadata": {
+          "name": "ratslices0019.jpg",
+          "width": 606,
+          "height": 526,
+          "sizeZ": 1,
+          "sizeT": 1,
+          "channelType": "DEFAULT",
+          "isRGB": true,
+          "pixelType": "UINT8",
+          "levels": [
+            {
+              "downsample": 1.0,
+              "width": 606,
+              "height": 526
+            }
+          ],
+          "channels": [
+            {
+              "name": "Red",
+              "color": -65536
+            },
+            {
+              "name": "Green",
+              "color": -16711936
+            },
+            {
+              "name": "Blue",
+              "color": -16776961
+            }
+          ],
+          "pixelCalibration": {
+            "pixelWidth": {
+              "value": 29.977016,
+              "unit": "µm"
+            },
+            "pixelHeight": {
+              "value": 29.977016,
+              "unit": "µm"
+            },
+            "zSpacing": {
+              "value": 1.0,
+              "unit": "z-slice"
+            },
+            "timeUnit": "SECONDS",
+            "timepoints": []
+          },
+          "preferredTileWidth": 606,
+          "preferredTileHeight": 526
+        }
+      },
+      "entryID": 20,
+      "randomizedName": "e6ad8b30-cb91-4fc7-8031-f8f3ad566947",
+      "imageName": "ratslices0019.jpg",
+      "metadata": {}
+    },
+    {
+      "serverBuilder": {
+        "builderType": "uri",
+        "providerClassName": "qupath.lib.images.servers.bioformats.BioFormatsServerBuilder",
+        "uri": "file:/C:/Users/nicol/Dropbox/BIOP/ImageToAtlasRegister/src/test/resources/quicknii/rat/ratslices0020.jpg",
+        "args": [
+          "--series",
+          "0"
+        ],
+        "metadata": {
+          "name": "ratslices0020.jpg",
+          "width": 606,
+          "height": 526,
+          "sizeZ": 1,
+          "sizeT": 1,
+          "channelType": "DEFAULT",
+          "isRGB": true,
+          "pixelType": "UINT8",
+          "levels": [
+            {
+              "downsample": 1.0,
+              "width": 606,
+              "height": 526
+            }
+          ],
+          "channels": [
+            {
+              "name": "Red",
+              "color": -65536
+            },
+            {
+              "name": "Green",
+              "color": -16711936
+            },
+            {
+              "name": "Blue",
+              "color": -16776961
+            }
+          ],
+          "pixelCalibration": {
+            "pixelWidth": {
+              "value": 29.977016,
+              "unit": "µm"
+            },
+            "pixelHeight": {
+              "value": 29.977016,
+              "unit": "µm"
+            },
+            "zSpacing": {
+              "value": 1.0,
+              "unit": "z-slice"
+            },
+            "timeUnit": "SECONDS",
+            "timepoints": []
+          },
+          "preferredTileWidth": 606,
+          "preferredTileHeight": 526
+        }
+      },
+      "entryID": 21,
+      "randomizedName": "97ef704f-a4c6-4174-91c0-30fde6bb6be3",
+      "imageName": "ratslices0020.jpg",
+      "metadata": {}
+    }
+  ]
+}

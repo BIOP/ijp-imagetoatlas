@@ -10,3 +10,5 @@
 *.releaseBackup
 *.tmp.bak
 *.bfmemo
+/src/test/resources/quicknii/rat/qp/project.qpproj.backup
+/src/test/resources/quicknii/rat/qp/initial_state_bdv_view.json
