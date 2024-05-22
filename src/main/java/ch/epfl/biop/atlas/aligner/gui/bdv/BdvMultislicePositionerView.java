@@ -226,7 +226,12 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     // Current coordinate where Sources are dragged
     private int iSliceNoStep;
 
-    protected int overlapMode = 0;
+    protected int overlapMode = OVERLAP_BELOW_ATLAS;
+
+    final private static int OVERLAP_ON_ATLAS = 0;
+    final private static int OVERLAP_BELOW_ATLAS = 1;
+    final private static int OVERLAP_BELOW_ATLAS_STAIRS = 2;
+
 
     //------------------------------ Multipositioner Graphical handles
 
@@ -771,7 +776,9 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
         mode = REVIEW_MODE_INT;
         setDisplayMode(POSITIONING_MODE_INT);
-        toggleOverlap();
+
+        overlapMode = OVERLAP_BELOW_ATLAS_STAIRS;
+        updateOverlapMode();
 
         logger.debug("Overriding standard navigation commands");
         overrideStandardNavigation();
@@ -1096,11 +1103,11 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
     protected void updateSliceDisplayedPosition(SliceGuiState sliceGuiState) {
         // Sort slices along slicing axis
-        if ((overlapMode == 0)&&(sliceGuiState!=null)) {
+        if ((overlapMode == OVERLAP_ON_ATLAS)&&(sliceGuiState!=null)) {
             sliceGuiState.setYShift(0);
-        } else if ((overlapMode == 1)&&(sliceGuiState!=null)) {
+        } else if ((overlapMode == OVERLAP_BELOW_ATLAS)&&(sliceGuiState!=null)) {
             sliceGuiState.setYShift(1);
-        } else if (overlapMode == 2) {
+        } else if (overlapMode == OVERLAP_BELOW_ATLAS_STAIRS) {
             // N^2 algo! Take care TODO improve
             double lastPositionAlongX = -Double.MAX_VALUE;
             double stairIndex = 0;
@@ -1437,7 +1444,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     }
 
     private void updateOverlapMode() {
-        if (overlapMode==2) {
+        if (overlapMode==OVERLAP_BELOW_ATLAS_STAIRS) {
             updateSliceDisplayedPosition(null);
         } else {
             guiState.forEachSlice(this::updateSliceDisplayedPosition);
@@ -1575,7 +1582,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                 guiState.runSlice(sortedSlices.get(previousSliceIndex), SliceGuiState::isNotCurrent);
             }
             guiState.runSlice(sortedSlices.get(iCurrentSlice), SliceGuiState::isCurrent);
-            if (overlapMode==2) updateSliceDisplayedPosition(null);
+            if (overlapMode==OVERLAP_BELOW_ATLAS_STAIRS) updateSliceDisplayedPosition(null);
             centerBdvViewOn(sortedSlices.get(iCurrentSlice), true, previousSlice);
         }
         notifyCurrentSliceListeners();
@@ -1602,7 +1609,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                 guiState.runSlice(sortedSlices.get(previousSliceIndex), SliceGuiState::isNotCurrent);
             }
             guiState.runSlice(sortedSlices.get(iCurrentSlice), SliceGuiState::isCurrent);
-            if (overlapMode==2) updateSliceDisplayedPosition(null);
+            if (overlapMode==OVERLAP_BELOW_ATLAS_STAIRS) updateSliceDisplayedPosition(null);
             centerBdvViewOn(sortedSlices.get(iCurrentSlice), true, previousSlice);
         }
         notifyCurrentSliceListeners();
@@ -1626,7 +1633,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                 guiState.runSlice(sortedSlices.get(previousSliceIndex), SliceGuiState::isNotCurrent);
             }
             guiState.runSlice(sortedSlices.get(iCurrentSlice), SliceGuiState::isCurrent);
-            if (overlapMode==2) updateSliceDisplayedPosition(null);
+            if (overlapMode==OVERLAP_BELOW_ATLAS_STAIRS) updateSliceDisplayedPosition(null);
             centerBdvViewOn(sortedSlices.get(iCurrentSlice), true, previousSlice);
         }
         notifyCurrentSliceListeners();
@@ -1923,7 +1930,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         double newValue = 0.1 + 3.0 - ((value/100.0) * 3.0);
         if (newValue!=overlapFactorX) {
             overlapFactorX = newValue;
-            if (overlapMode == 2) {
+            if (overlapMode == OVERLAP_BELOW_ATLAS_STAIRS) {
                 updateOverlapMode();
             }
         }
@@ -1933,7 +1940,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         double newValue = 0.1 + 3.0 - ((value/100.0) * 3.0);
         if (newValue!=overlapFactorY) {
             overlapFactorY = newValue;
-            if (overlapMode == 2) {
+            if (overlapMode == OVERLAP_BELOW_ATLAS_STAIRS) {
                 updateOverlapMode();
             }
         }
