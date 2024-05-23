@@ -60,7 +60,7 @@ import java.util.stream.Collectors;
  * are set correctly, otherwise the images will be saturated upon export and will be registered badly.
  * Make sure you have multiresolution files if you don't want your downscaling to look bad! Also
  * this is currently the only registration method where the display settings matter for the registration.
- *
+ * <br>
  * There are two concrete class of this abstract class, one that can run DeepSlice locally (provided a conda env
  * exists with DeepSlice and is specified with the command
  * {@link ch.epfl.biop.wrappers.deepslice.ij2commands.DeepSlicePrefsSet}) and one that can be used in conjunction
@@ -121,7 +121,7 @@ abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command 
 
         if (slicesToRegister.size() == 0) {
             mp.log.accept("No slice selected");
-            mp.warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to register");
+            mp.errorMessageForUser.accept("No selected slice", "Please select the slice(s) you want to register");
             return;
         }
 

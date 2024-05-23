@@ -57,11 +57,6 @@ abstract public class RegistrationMultiChannelCommand implements Command {
             return;
         }
 
-        if (atlas_channels.size()!=slice_channels.size()) {
-            mp.errlog.accept("The number of slice channel(s) should be equal to the number of atlas channel(s).");
-            return;
-        }
-
         int maxIndexAtlas = Collections.max(atlas_channels);
         int minIndexAtlas = Collections.min(atlas_channels);
 
@@ -81,17 +76,17 @@ abstract public class RegistrationMultiChannelCommand implements Command {
         if (!validationError) {
             if (maxIndexAtlas >=mp.getNumberOfAtlasChannels()) {
                 mp.log.accept("The atlas has only "+mp.getNumberOfAtlasChannels()+" channels!");
-                mp.errlog.accept("The atlas has only "+mp.getNumberOfAtlasChannels()+" channels !\n Maximum index : "+(mp.getNumberOfAtlasChannels()-1));
+                mp.errorMessageForUser.accept("Issue with channels numbers","The atlas has only "+mp.getNumberOfAtlasChannels()+" channels !\n Maximum index : "+(mp.getNumberOfAtlasChannels()-1));
                 return;
             }
             if (mp.getSelectedSlices().size()==0) {
                 mp.log.accept("No slice selected");
-                mp.warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to register");
+                mp.errorMessageForUser.accept("No selected slice", "Please select the slice(s) you want to register");
                 return;
             }
             if (maxIndexSlices >=mp.getChannelBoundForSelectedSlices()) {
                 mp.log.accept("Missing channel in selected slice(s).");
-                mp.errlog.accept("Missing channel in selected slice(s)\n One selected slice only has "+mp.getChannelBoundForSelectedSlices()+" channel(s).\n Maximum index : "+(mp.getChannelBoundForSelectedSlices()-1) );
+                mp.errorMessageForUser.accept("Issue with channels numbers","Missing channel in selected slice(s)\n One selected slice only has "+mp.getChannelBoundForSelectedSlices()+" channel(s).\n Maximum index : "+(mp.getChannelBoundForSelectedSlices()-1) );
                 return;
             }
             runValidated();

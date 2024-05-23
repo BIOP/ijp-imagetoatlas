@@ -27,6 +27,11 @@ public class RegisterSlicesElastixAffineCommand extends RegistrationMultiChannel
 
     public void runValidated() {
 
+        if (atlas_channels.size()!=slice_channels.size()) {
+            mp.errlog.accept("The number of slice channel(s) should be equal to the number of atlas channel(s).");
+            return;
+        }
+
         ElastixHelper.checkOrSetLocal(this.mp.getContext());
 
         Map<String, Object> parameters = new HashMap<>();
