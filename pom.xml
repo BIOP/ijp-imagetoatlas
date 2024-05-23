@@ -189,11 +189,6 @@
 
 		<dependency>
 			<groupId>sc.fiji</groupId>
-			<artifactId>bigwarp_fiji</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>sc.fiji</groupId>
 			<artifactId>bigdataviewer-vistools</artifactId>
 		</dependency>
 
@@ -207,6 +202,12 @@
 			<groupId>sc.fiji</groupId>
 			<artifactId>bigdataviewer-playground</artifactId>
 			<version>${bigdataviewer-playground.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.ejml</groupId>
+					<artifactId>ejml-core</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<dependency>
@@ -223,6 +224,10 @@
 				<exclusion>
 					<groupId>xalan</groupId>
 					<artifactId>serializer</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.ejml</groupId>
+					<artifactId>ejml-core</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>

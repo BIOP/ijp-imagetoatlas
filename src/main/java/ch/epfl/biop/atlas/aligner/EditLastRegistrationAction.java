@@ -1,6 +1,8 @@
 package ch.epfl.biop.atlas.aligner;
 
 import ch.epfl.biop.atlas.aligner.plugin.RegistrationPluginHelper;
+import ch.epfl.biop.sourceandconverter.processor.SourcesIdentity;
+import ch.epfl.biop.sourceandconverter.processor.SourcesProcessComposer;
 import ch.epfl.biop.sourceandconverter.processor.SourcesProcessor;
 import ch.epfl.biop.sourceandconverter.processor.SourcesProcessorHelper;
 
@@ -61,12 +63,24 @@ public class EditLastRegistrationAction extends CancelableAction {
     @Override
     protected boolean run() {
         //mp.removeUserAction(this);
+        // We may have changed the z location, so we need to remove the z zero location and put it back at the new location
+        //SourcesProcessor aProcessor = SourcesProcessorHelper.removeChannelsSelect(rs.preprocessFixed)
+
         if (!reuseOriginalChannels) {
+            // The z location may have changed between the registration and the edition
+            // That's why I remove the previous z offset location and put back the new location
+            SourcesProcessor pA = SourcesProcessorHelper.compose(
+                    removeSourcesZOffset(rs.preprocessFixed),
+                    new SourcesZOffset(slice));
+            SourcesProcessor pS = SourcesProcessorHelper.compose(
+                    removeSourcesZOffset(rs.preprocessMoving),
+                    new SourcesZOffset(slice));
+
             slice.editLastRegistration(
                     SourcesProcessorHelper.compose(preprocessAtlas,
-                    SourcesProcessorHelper.removeChannelsSelect(rs.preprocessFixed)),
+                            SourcesProcessorHelper.removeChannelsSelect(pA)),
                     SourcesProcessorHelper.compose(preprocessSlice,
-                    SourcesProcessorHelper.removeChannelsSelect(rs.preprocessMoving)));
+                            SourcesProcessorHelper.removeChannelsSelect(pS)));
         } else {
             slice.editLastRegistration(rs.preprocessFixed, rs.preprocessMoving);
         }
@@ -79,6 +93,17 @@ public class EditLastRegistrationAction extends CancelableAction {
     protected boolean cancel() { // it cannot be canceled. maybe we could but I don't know
         // Unsupported yet : TODO!
         return true;
+    }
+
+    private static SourcesProcessor removeSourcesZOffset(SourcesProcessor processor) {
+        if (processor instanceof SourcesZOffset) {
+            return new SourcesIdentity();
+        } else if (processor instanceof SourcesProcessComposer) {
+            SourcesProcessComposer composer_in = (SourcesProcessComposer)processor;
+            return new SourcesProcessComposer(removeSourcesZOffset(composer_in.f2), removeSourcesZOffset(composer_in.f1));
+        } else {
+            return processor;
+        }
     }
 
 }
