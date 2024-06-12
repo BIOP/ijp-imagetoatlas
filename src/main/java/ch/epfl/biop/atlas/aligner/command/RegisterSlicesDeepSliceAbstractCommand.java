@@ -395,8 +395,6 @@ abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command 
             IRegistrationPlugin registration = (IRegistrationPlugin)
                     pluginService.getPlugin(AffineRegistration.class).createInstance();
             registration.setScijavaContext(ctx);
-
-            registration.setSliceInfo(new MultiSlicePositioner.SliceInfo(mp, slices.get(iSliceSource)));
             Map<String,Object> parameters = new HashMap<>();
 
             AffineTransform3D inPlaneTransform = new AffineTransform3D();
