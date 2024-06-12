@@ -1,4 +1,4 @@
-package ch.epfl.biop.atlas.aligner.plugin;
+package ch.epfl.biop.registration.plugin;
 
 import ch.epfl.biop.registration.Registration;
 import org.scijava.Context;
@@ -20,8 +20,8 @@ public class RegistrationPluginHelper {
                     .getAnnotation(RegistrationTypeProperties.class);
             return annotation.isManual();
         } else {
-            if (reg instanceof ExternalABBARegistrationPlugin) {
-                return ((ExternalABBARegistrationPlugin) reg).isManual();
+            if (reg instanceof ExternalRegistrationPlugin) {
+                return ((ExternalRegistrationPlugin) reg).isManual();
             } else {
                 return false; // Default value if no annotation is present
             }
@@ -38,8 +38,8 @@ public class RegistrationPluginHelper {
                     .getAnnotation(RegistrationTypeProperties.class);
             return annotation.isEditable();
         } else {
-            if (reg instanceof ExternalABBARegistrationPlugin) {
-                return ((ExternalABBARegistrationPlugin) reg).isEditable();
+            if (reg instanceof ExternalRegistrationPlugin) {
+                return ((ExternalRegistrationPlugin) reg).isEditable();
             } else {
                 return false; // Default value if no annotation is present
             }
@@ -55,8 +55,8 @@ public class RegistrationPluginHelper {
                     .getAnnotation(RegistrationTypeProperties.class);
             return annotation.userInterface();
         } else {
-            if (reg instanceof ExternalABBARegistrationPlugin) {
-                return ((ExternalABBARegistrationPlugin) reg).userInterface();
+            if (reg instanceof ExternalRegistrationPlugin) {
+                return ((ExternalRegistrationPlugin) reg).userInterface();
             } else {
                 return new Class[0]; // Default value if no annotation is present
             }
@@ -68,16 +68,16 @@ public class RegistrationPluginHelper {
      * @param queryUIClass the ui class from which the registration is supposed to be found
      * @return null is nothing is found
      */
-    public static Class<? extends IABBARegistrationPlugin> registrationFromUI (Context ctx, Class<? extends Command> queryUIClass) {
+    public static Class<? extends IRegistrationPlugin> registrationFromUI (Context ctx, Class<? extends Command> queryUIClass) {
         PluginService pluginService = ctx.getService(PluginService.class);
 
         // OK... intellij found this alone, let's hope it works
         return pluginService
-                .getPluginsOfType(IABBARegistrationPlugin.class)
+                .getPluginsOfType(IRegistrationPlugin.class)
                 .stream().map(pluginService::createInstance)
                 .filter(plugin -> Arrays.asList(RegistrationPluginHelper.userInterfaces(plugin)).contains(queryUIClass))
                 .findFirst()
-                .map(IABBARegistrationPlugin::getClass)
+                .map(IRegistrationPlugin::getClass)
                 .orElse(null);
 
     }

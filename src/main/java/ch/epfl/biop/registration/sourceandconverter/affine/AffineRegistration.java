@@ -1,8 +1,8 @@
 package ch.epfl.biop.registration.sourceandconverter.affine;
 
 import bdv.viewer.SourceAndConverter;
-import ch.epfl.biop.atlas.aligner.plugin.IABBARegistrationPlugin;
-import ch.epfl.biop.atlas.aligner.plugin.RegistrationTypeProperties;
+import ch.epfl.biop.registration.plugin.IRegistrationPlugin;
+import ch.epfl.biop.registration.plugin.RegistrationTypeProperties;
 import com.google.gson.Gson;
 import net.imglib2.realtransform.AffineTransform3D;
 import org.scijava.plugin.Plugin;
@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
  * To make an affine transform programmatically conveniently
  *
  */
-@Plugin(type = IABBARegistrationPlugin.class)
+@Plugin(type = IRegistrationPlugin.class)
 @RegistrationTypeProperties(
         isManual = false,
         isEditable = false,

@@ -1,6 +1,6 @@
 package ch.epfl.biop.atlas.aligner;
 
-import ch.epfl.biop.atlas.aligner.plugin.RegistrationPluginHelper;
+import ch.epfl.biop.registration.plugin.RegistrationPluginHelper;
 import ch.epfl.biop.sourceandconverter.processor.SourcesIdentity;
 import ch.epfl.biop.sourceandconverter.processor.SourcesProcessComposer;
 import ch.epfl.biop.sourceandconverter.processor.SourcesProcessor;

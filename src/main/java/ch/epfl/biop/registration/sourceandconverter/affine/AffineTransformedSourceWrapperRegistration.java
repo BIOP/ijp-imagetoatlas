@@ -5,7 +5,6 @@ import net.imglib2.realtransform.AffineTransform3D;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterAndTimeRange;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 

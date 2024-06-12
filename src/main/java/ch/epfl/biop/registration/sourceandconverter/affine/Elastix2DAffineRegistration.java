@@ -2,8 +2,8 @@ package ch.epfl.biop.registration.sourceandconverter.affine;
 
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.command.RegisterSlicesElastixAffineCommand;
-import ch.epfl.biop.atlas.aligner.plugin.IABBARegistrationPlugin;
-import ch.epfl.biop.atlas.aligner.plugin.RegistrationTypeProperties;
+import ch.epfl.biop.registration.plugin.IRegistrationPlugin;
+import ch.epfl.biop.registration.plugin.RegistrationTypeProperties;
 import ch.epfl.biop.scijava.command.source.register.Elastix2DAffineRegisterCommand;
 import net.imglib2.realtransform.AffineTransform3D;
 import org.scijava.command.Command;
@@ -22,13 +22,12 @@ import java.util.concurrent.Future;
  * Uses Elastix backend to perform an affine transform registration
  *
  */
-@Plugin(type = IABBARegistrationPlugin.class)
+@Plugin(type = IRegistrationPlugin.class)
 @RegistrationTypeProperties(
         isManual = false,
         isEditable = false,
         userInterface = {
                 RegisterSlicesElastixAffineCommand.class
-                //RegistrationElastixAffineRemoteCommand.class
         })
 
 public class Elastix2DAffineRegistration extends AffineTransformSourceAndConverterRegistration{

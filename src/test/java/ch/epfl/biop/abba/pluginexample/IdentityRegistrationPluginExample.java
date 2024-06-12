@@ -1,9 +1,8 @@
 package ch.epfl.biop.abba.pluginexample;
 
 import bdv.viewer.SourceAndConverter;
-import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
-import ch.epfl.biop.atlas.aligner.plugin.IABBARegistrationPlugin;
-import ch.epfl.biop.atlas.aligner.plugin.RegistrationTypeProperties;
+import ch.epfl.biop.registration.plugin.IRegistrationPlugin;
+import ch.epfl.biop.registration.plugin.RegistrationTypeProperties;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import net.imglib2.realtransform.RealTransform;
 import org.scijava.Context;
@@ -21,13 +20,13 @@ import java.util.function.Consumer;
  * is an array of SourceAndConverter, each element of the array being a single channel.
  *
  */
-@Plugin(type = IABBARegistrationPlugin.class)
+@Plugin(type = IRegistrationPlugin.class)
 @RegistrationTypeProperties(
         isEditable = false,
         isManual = false,
         userInterface = {IdentityRegistrationCommand.class}
 )
-public class IdentityRegistrationPluginExample implements IABBARegistrationPlugin{
+public class IdentityRegistrationPluginExample implements IRegistrationPlugin {
 
     public static final Consumer<String> defaultLog = (string) -> System.out.println(IdentityRegistrationPluginExample.class.getSimpleName()+":"+string);
 
@@ -59,7 +58,7 @@ public class IdentityRegistrationPluginExample implements IABBARegistrationPlugi
 
     /**
      * Any parameter of a registration method has to be set as a String to String dictionnary
-     * this same dictionnary needs to be returned in {@link IABBARegistrationPlugin#getRegistrationParameters()}
+     * this same dictionnary needs to be returned in {@link IRegistrationPlugin#getRegistrationParameters()}
      * for a correct serialization
      * @param parameters dictionary of parameters
      */
@@ -69,7 +68,7 @@ public class IdentityRegistrationPluginExample implements IABBARegistrationPlugi
     }
 
     /**
-     * see {@link IABBARegistrationPlugin#setRegistrationParameters(Map)}
+     * see {@link IRegistrationPlugin#setRegistrationParameters(Map)}
      * @return the dictionnary containing the parameters for this registration
      */
     @Override
@@ -196,11 +195,6 @@ public class IdentityRegistrationPluginExample implements IABBARegistrationPlugi
     @Override
     public RealTransform getTransformAsRealTransform() {
         return null; // unsupported, but in fact in this case
-    }
-
-    @Override
-    public void setSliceInfo(MultiSlicePositioner.SliceInfo sliceInfo) {
-        // Can be used to retrieve some info about the slice being registered
     }
 
     String errorMessage = "No error";

@@ -1,13 +1,13 @@
 package ch.epfl.biop.abba.pluginexample.py;
 
-import ch.epfl.biop.atlas.aligner.plugin.SimpleABBARegistrationPlugin;
+import ch.epfl.biop.registration.plugin.SimpleRegistrationPlugin;
 import ij.ImagePlus;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.realtransform.InvertibleRealTransform;
 
 import java.util.Map;
 
-public class ExternalSimpleRotationRegistrationPlugin implements SimpleABBARegistrationPlugin {
+public class ExternalSimpleRotationRegistrationPlugin implements SimpleRegistrationPlugin {
 
     @Override
     public double getVoxelSizeInMicron() {

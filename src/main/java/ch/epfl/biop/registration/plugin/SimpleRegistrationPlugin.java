@@ -1,4 +1,4 @@
-package ch.epfl.biop.atlas.aligner.plugin;
+package ch.epfl.biop.registration.plugin;
 
 import ij.ImagePlus;
 import net.imglib2.realtransform.InvertibleRealTransform;
@@ -6,7 +6,7 @@ import net.imglib2.realtransform.InvertibleRealTransform;
 import java.util.Map;
 
 @SuppressWarnings("SameReturnValue")
-public interface SimpleABBARegistrationPlugin {
+public interface SimpleRegistrationPlugin {
 
     /**
      * @return Sampling required for the registration, in micrometer

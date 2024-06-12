@@ -6,8 +6,8 @@ import bdv.viewer.DisplayMode;
 import bdv.viewer.Interpolation;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.command.RegisterSlicesElastixSplineCommand;
-import ch.epfl.biop.atlas.aligner.plugin.IABBARegistrationPlugin;
-import ch.epfl.biop.atlas.aligner.plugin.RegistrationTypeProperties;
+import ch.epfl.biop.registration.plugin.IRegistrationPlugin;
+import ch.epfl.biop.registration.plugin.RegistrationTypeProperties;
 import ch.epfl.biop.scijava.command.source.register.Elastix2DSplineRegisterCommand;
 import ij.gui.WaitForUserDialog;
 import jitk.spline.ThinPlateR2LogRSplineKernelTransform;
@@ -33,13 +33,12 @@ import java.util.stream.Collectors;
 
 import static bdv.util.RealTransformHelper.BigWarpFileFromRealTransform;
 
-@Plugin(type = IABBARegistrationPlugin.class)
+@Plugin(type = IRegistrationPlugin.class)
 @RegistrationTypeProperties(
         isManual = false,
         isEditable = true,
         userInterface = {
                 RegisterSlicesElastixSplineCommand.class
-                //RegistrationElastixSplineRemoteCommand.class
         }
 )
 

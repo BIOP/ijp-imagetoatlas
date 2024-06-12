@@ -15,7 +15,7 @@ import bdv.util.source.alpha.IAlphaSource;
 import bdv.viewer.Interpolation;
 import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
-import ch.epfl.biop.atlas.aligner.plugin.RegistrationPluginHelper;
+import ch.epfl.biop.registration.plugin.RegistrationPluginHelper;
 import ch.epfl.biop.atlas.mouse.allen.ccfv3.command.AllenBrainAdultMouseAtlasCCF2017Command;
 import ch.epfl.biop.atlas.struct.AtlasHelper;
 import ch.epfl.biop.atlas.struct.AtlasNode;
@@ -61,7 +61,6 @@ import net.imglib2.converter.Converters;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.position.FunctionRandomAccessible;
 import net.imglib2.realtransform.AffineTransform3D;
-import net.imglib2.realtransform.BoundingBoxEstimation;
 import net.imglib2.realtransform.InvertibleRealTransform;
 import net.imglib2.realtransform.InvertibleRealTransformSequence;
 import net.imglib2.realtransform.RealTransform;
@@ -112,10 +111,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Collectors;
-
-import static net.imglib2.realtransform.BoundingBoxEstimation.Method.CORNERS;
-import static net.imglib2.realtransform.BoundingBoxEstimation.Method.FACES;
-import static net.imglib2.realtransform.BoundingBoxEstimation.Method.VOLUME;
 
 
 /**

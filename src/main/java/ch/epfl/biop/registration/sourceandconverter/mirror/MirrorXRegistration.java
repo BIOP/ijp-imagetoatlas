@@ -1,14 +1,14 @@
 package ch.epfl.biop.registration.sourceandconverter.mirror;
 
 import ch.epfl.biop.atlas.aligner.command.MirrorDoCommand;
-import ch.epfl.biop.atlas.aligner.plugin.IABBARegistrationPlugin;
-import ch.epfl.biop.atlas.aligner.plugin.RegistrationTypeProperties;
+import ch.epfl.biop.registration.plugin.IRegistrationPlugin;
+import ch.epfl.biop.registration.plugin.RegistrationTypeProperties;
 import ch.epfl.biop.registration.sourceandconverter.spline.RealTransformSourceAndConverterRegistration;
 import org.scijava.plugin.Plugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Plugin(type = IABBARegistrationPlugin.class)
+@Plugin(type = IRegistrationPlugin.class)
 @RegistrationTypeProperties(
         isManual = false,
         isEditable = true,

@@ -1,8 +1,7 @@
-package ch.epfl.biop.atlas.aligner.plugin;
+package ch.epfl.biop.registration.plugin;
 
 import bdv.util.BoundedRealTransform;
 import bdv.viewer.SourceAndConverter;
-import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.bdv.img.imageplus.ImagePlusHelper;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import ij.ImagePlus;
@@ -21,22 +20,26 @@ import sc.fiji.bdvpg.sourceandconverter.transform.SourceRealTransformer;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceResampler;
 import sc.fiji.persist.ScijavaGsonHelper;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.Arrays;
 import java.util.stream.Collectors;
 
-public class SimpleRegistrationWrapper implements ExternalABBARegistrationPlugin {
+public class SimpleRegistrationWrapper implements ExternalRegistrationPlugin {
 
     public String getRegistrationTypeName() {
         return registrationTypeName;
     }
 
-    public SimpleRegistrationWrapper(String registrationTypeName, final SimpleABBARegistrationPlugin simpleRegistration) {
+    public SimpleRegistrationWrapper(String registrationTypeName, final SimpleRegistrationPlugin simpleRegistration) {
         this.registration = simpleRegistration;
         this.registrationTypeName = registrationTypeName;
     }
 
     final String registrationTypeName;
-    final SimpleABBARegistrationPlugin registration;
+    final SimpleRegistrationPlugin registration;
 
     Context context;
 
@@ -45,11 +48,6 @@ public class SimpleRegistrationWrapper implements ExternalABBARegistrationPlugin
     boolean isDone = false;
 
     protected RealTransform rt;
-
-    @Override
-    public void setSliceInfo(MultiSlicePositioner.SliceInfo sliceInfo) {
-
-    }
 
     @Override
     public boolean isManual() {
@@ -204,7 +202,7 @@ public class SimpleRegistrationWrapper implements ExternalABBARegistrationPlugin
             innerRT = ((BoundedRealTransform)rt).getTransform().copy();
         }
 
-        ArrayList<RealPoint> cvtList = new ArrayList<>();
+        List<RealPoint> cvtList = new ArrayList<>();
 
         for (RealPoint p : pts.ptList) {
             RealPoint pt3d = new RealPoint(3);

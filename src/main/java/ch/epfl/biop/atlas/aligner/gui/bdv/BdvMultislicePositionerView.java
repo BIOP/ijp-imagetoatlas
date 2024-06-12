@@ -62,8 +62,8 @@ import ch.epfl.biop.atlas.aligner.gui.bdv.card.EditPanel;
 import ch.epfl.biop.atlas.aligner.gui.bdv.card.NavigationPanel;
 import ch.epfl.biop.atlas.aligner.gui.bdv.card.SliceDefineROICommand;
 import ch.epfl.biop.atlas.aligner.plugin.ABBACommand;
-import ch.epfl.biop.atlas.aligner.plugin.IABBARegistrationPlugin;
-import ch.epfl.biop.atlas.aligner.plugin.RegistrationPluginHelper;
+import ch.epfl.biop.registration.plugin.IRegistrationPlugin;
+import ch.epfl.biop.registration.plugin.RegistrationPluginHelper;
 import ch.epfl.biop.atlas.struct.AtlasNode;
 import ch.epfl.biop.bdv.gui.graphicalhandle.GraphicalHandle;
 import ch.epfl.biop.bdv.gui.graphicalhandle.GraphicalHandleListener;
@@ -425,8 +425,8 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     private void installRegistrationPluginUI(int hierarchyLevelsSkipped) {
         PluginService pluginService = msp.getContext().getService(PluginService.class);
 
-        pluginService.getPluginsOfType(IABBARegistrationPlugin.class).forEach(registrationPluginClass -> {
-            IABBARegistrationPlugin plugin = pluginService.createInstance(registrationPluginClass);
+        pluginService.getPluginsOfType(IRegistrationPlugin.class).forEach(registrationPluginClass -> {
+            IRegistrationPlugin plugin = pluginService.createInstance(registrationPluginClass);
             for (Class<? extends Command> commandUI: RegistrationPluginHelper.userInterfaces(plugin)) {
                 logger.info("Registration plugin "+commandUI.getSimpleName()+" discovered");
                 BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), commandUI, hierarchyLevelsSkipped,"mp", msp);

@@ -1,4 +1,4 @@
-package ch.epfl.biop.atlas.aligner.plugin;
+package ch.epfl.biop.registration.plugin;
 import org.scijava.command.Command;
 
 /**
@@ -6,7 +6,7 @@ import org.scijava.command.Command;
  * mostly useful in order to add a plugin from PyImageJ
  */
 @SuppressWarnings("SameReturnValue")
-public interface ExternalABBARegistrationPlugin extends IABBARegistrationPlugin {
+public interface ExternalRegistrationPlugin extends IRegistrationPlugin {
 
     /**
      * Does the registration required an user input ?

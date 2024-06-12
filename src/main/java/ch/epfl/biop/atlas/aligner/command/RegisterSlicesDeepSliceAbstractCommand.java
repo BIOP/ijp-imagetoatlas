@@ -8,7 +8,7 @@ import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.RegisterSliceAction;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.atlas.aligner.action.MarkActionSequenceBatchAction;
-import ch.epfl.biop.atlas.aligner.plugin.IABBARegistrationPlugin;
+import ch.epfl.biop.registration.plugin.IRegistrationPlugin;
 import ch.epfl.biop.java.utilities.TempDirectory;
 import ch.epfl.biop.quicknii.QuickNIIExporter;
 import ch.epfl.biop.quicknii.QuickNIISeries;
@@ -392,7 +392,7 @@ abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command 
 
             //logger.debug("Slice QuickNii "+i+" correspond to initial slice "+iSliceSource);
 
-            IABBARegistrationPlugin registration = (IABBARegistrationPlugin)
+            IRegistrationPlugin registration = (IRegistrationPlugin)
                     pluginService.getPlugin(AffineRegistration.class).createInstance();
             registration.setScijavaContext(ctx);
 

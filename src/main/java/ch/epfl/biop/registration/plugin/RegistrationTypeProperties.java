@@ -1,4 +1,4 @@
-package ch.epfl.biop.atlas.aligner.plugin;
+package ch.epfl.biop.registration.plugin;
 
 import org.scijava.command.Command;
 
