@@ -23,8 +23,7 @@ import java.util.function.Consumer;
 @Plugin(type = IRegistrationPlugin.class)
 @RegistrationTypeProperties(
         isEditable = false,
-        isManual = false,
-        userInterface = {IdentityRegistrationCommand.class}
+        isManual = false
 )
 public class IdentityRegistrationPluginExample implements IRegistrationPlugin {
 

@@ -690,36 +690,6 @@ public class MultiSlicePositioner implements Closeable {
         return convertedParams;
     }
 
-    public void registerSelectedSlices(Command command,
-                                       SourcesProcessor preprocessFixed,
-                                       SourcesProcessor preprocessMoving) {
-        registerSelectedSlices(command,
-                preprocessFixed,
-                preprocessMoving,
-                new HashMap<>()
-        );
-    }
-
-    /**
-     * Main function which triggers registration of the selected slices
-     * @param command the ui command
-     * @param preprocessFixed how fixed sources need to be preprocessed before being registered
-     * @param preprocessMoving how moving sources need to be preprocessed before being registered
-     * @param parameters parameters used for the registration - all objects will be converted
-     *                   to String using the scijava {@link ConvertService}. They need to be strings
-     *                   to be serialized
-     */
-    public void registerSelectedSlices(Command command,
-                                       SourcesProcessor preprocessFixed,
-                                       SourcesProcessor preprocessMoving,
-                                       Map<String,Object> parameters) {
-        registerSelectedSlices(RegistrationPluginHelper.registrationFromUI(scijavaCtx,command.getClass()),
-                preprocessFixed,
-                preprocessMoving,
-                parameters
-        );
-    }
-
     /**
      * Main function which triggers registration of the selected slices
      * @param registrationClass the kind of registration which should be started

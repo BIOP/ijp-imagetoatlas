@@ -21,9 +21,5 @@ public @interface RegistrationTypeProperties {
      */
     boolean isEditable();
 
-    /**
-     * @return the command class the user has to call in order to start a registration
-     */
-    Class<? extends Command>[] userInterface();
 }
 

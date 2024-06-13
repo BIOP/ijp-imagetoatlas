@@ -6,6 +6,8 @@ import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
+import java.util.HashMap;
+
 @Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>[ABBA Dev] - Your Registration Here!")
 public class IdentityRegistrationCommand implements Command {
 
@@ -14,7 +16,7 @@ public class IdentityRegistrationCommand implements Command {
 
     @Override
     public void run() {
-        mp.registerSelectedSlices(this, SourcesProcessorHelper.Identity(),
-                SourcesProcessorHelper.Identity());
+        mp.registerSelectedSlices(IdentityRegistrationPluginExample.class, SourcesProcessorHelper.Identity(),
+                SourcesProcessorHelper.Identity(), new HashMap<>());
     }
 }

@@ -36,10 +36,7 @@ import static bdv.util.RealTransformHelper.BigWarpFileFromRealTransform;
 @Plugin(type = IRegistrationPlugin.class)
 @RegistrationTypeProperties(
         isManual = false,
-        isEditable = true,
-        userInterface = {
-                RegisterSlicesElastixSplineCommand.class
-        }
+        isEditable = true
 )
 
 public class Elastix2DSplineRegistration extends RealTransformSourceAndConverterRegistration {

@@ -24,12 +24,8 @@ import static bdv.util.RealTransformHelper.BigWarpFileFromRealTransform;
 @Plugin(type = IRegistrationPlugin.class)
 @RegistrationTypeProperties(
         isManual = true,
-        isEditable = true,
-        userInterface = {
-                RegisterSlicesBigWarpCommand.class
-        }
+        isEditable = true
 )
-
 public class SacBigWarp2DRegistration extends RealTransformSourceAndConverterRegistration {
 
     BigWarpLauncher bwl;

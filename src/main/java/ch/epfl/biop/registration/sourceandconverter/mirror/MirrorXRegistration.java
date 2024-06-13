@@ -11,10 +11,7 @@ import org.slf4j.LoggerFactory;
 @Plugin(type = IRegistrationPlugin.class)
 @RegistrationTypeProperties(
         isManual = false,
-        isEditable = true,
-        userInterface = {
-                MirrorDoCommand.class
-        }
+        isEditable = true
 )
 
 public class MirrorXRegistration extends RealTransformSourceAndConverterRegistration {

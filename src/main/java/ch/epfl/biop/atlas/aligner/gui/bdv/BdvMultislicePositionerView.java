@@ -62,8 +62,6 @@ import ch.epfl.biop.atlas.aligner.gui.bdv.card.EditPanel;
 import ch.epfl.biop.atlas.aligner.gui.bdv.card.NavigationPanel;
 import ch.epfl.biop.atlas.aligner.gui.bdv.card.SliceDefineROICommand;
 import ch.epfl.biop.atlas.aligner.plugin.ABBACommand;
-import ch.epfl.biop.registration.plugin.IRegistrationPlugin;
-import ch.epfl.biop.registration.plugin.RegistrationPluginHelper;
 import ch.epfl.biop.atlas.struct.AtlasNode;
 import ch.epfl.biop.bdv.gui.graphicalhandle.GraphicalHandle;
 import ch.epfl.biop.bdv.gui.graphicalhandle.GraphicalHandleListener;
@@ -83,7 +81,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.scijava.Context;
 import org.scijava.MenuPath;
 import org.scijava.cache.CacheService;
-import org.scijava.command.Command;
 import org.scijava.command.CommandModule;
 import org.scijava.command.CommandService;
 import org.scijava.module.Module;
@@ -423,15 +420,11 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     }
 
     private void installRegistrationPluginUI(int hierarchyLevelsSkipped) {
-        PluginService pluginService = msp.getContext().getService(PluginService.class);
 
-        pluginService.getPluginsOfType(IRegistrationPlugin.class).forEach(registrationPluginClass -> {
-            IRegistrationPlugin plugin = pluginService.createInstance(registrationPluginClass);
-            for (Class<? extends Command> commandUI: RegistrationPluginHelper.userInterfaces(plugin)) {
-                logger.info("Registration plugin "+commandUI.getSimpleName()+" discovered");
-                BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), commandUI, hierarchyLevelsSkipped,"mp", msp);
-            }
-        });
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RegisterSlicesElastixAffineCommand.class, hierarchyLevelsSkipped,"mp", msp);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RegisterSlicesBigWarpCommand.class, hierarchyLevelsSkipped,"mp", msp);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RegisterSlicesElastixSplineCommand.class, hierarchyLevelsSkipped,"mp", msp);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), MirrorDoCommand.class, hierarchyLevelsSkipped,"mp", msp);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), MirrorUndoCommand.class, hierarchyLevelsSkipped,"mp", msp);
 
         logger.debug("Installing external registration plugins ui");

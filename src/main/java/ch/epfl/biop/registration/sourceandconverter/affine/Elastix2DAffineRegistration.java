@@ -25,10 +25,7 @@ import java.util.concurrent.Future;
 @Plugin(type = IRegistrationPlugin.class)
 @RegistrationTypeProperties(
         isManual = false,
-        isEditable = false,
-        userInterface = {
-                RegisterSlicesElastixAffineCommand.class
-        })
+        isEditable = false)
 
 public class Elastix2DAffineRegistration extends AffineTransformSourceAndConverterRegistration{
 

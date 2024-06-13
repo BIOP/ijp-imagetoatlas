@@ -16,9 +16,7 @@ import org.slf4j.LoggerFactory;
 @Plugin(type = IRegistrationPlugin.class)
 @RegistrationTypeProperties(
         isManual = false,
-        isEditable = false,
-        userInterface = {
-        })
+        isEditable = false)
 
 public class AffineRegistration extends AffineTransformSourceAndConverterRegistration{
 
