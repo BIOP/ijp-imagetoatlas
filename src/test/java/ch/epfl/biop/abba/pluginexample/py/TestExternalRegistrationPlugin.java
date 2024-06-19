@@ -6,7 +6,7 @@ import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.atlas.aligner.command.ABBAStartCommand;
 import ch.epfl.biop.atlas.aligner.gui.bdv.BdvMultislicePositionerView;
-import ch.epfl.biop.atlas.aligner.plugin.SimpleRegistrationWrapper;
+import ch.epfl.biop.registration.plugin.SimpleRegistrationWrapper;
 import ch.epfl.biop.atlas.mouse.allen.ccfv3p1.command.AllenBrainAdultMouseAtlasCCF2017v3p1Command;
 import ch.epfl.biop.atlas.struct.Atlas;
 import ch.epfl.biop.scijava.command.spimdata.SourceFromImagePlusCommand;

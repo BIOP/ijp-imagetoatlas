@@ -1,5 +1,6 @@
 package ch.epfl.biop.atlas.aligner.command;
 
+import ch.epfl.biop.registration.sourceandconverter.spline.Elastix2DSplineRegistration;
 import ch.epfl.biop.scijava.command.source.register.ElastixHelper;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
@@ -51,7 +52,7 @@ public class RegisterSlicesElastixSplineCommand extends RegistrationMultiChannel
         parameters.put("background_offset_value_fixed", background_offset_value_fixed);
         parameters.put("pxSizeInCurrentUnit", pixel_size_micrometer/1000.0);
 
-        mp.registerSelectedSlices(this,
+        mp.registerSelectedSlices(Elastix2DSplineRegistration.class,
                 getFixedFilter(),
                 getMovingFilter(),
                 parameters);

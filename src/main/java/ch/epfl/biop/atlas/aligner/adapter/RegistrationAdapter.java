@@ -1,7 +1,7 @@
 package ch.epfl.biop.atlas.aligner.adapter;
 
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
-import ch.epfl.biop.atlas.aligner.plugin.ExternalABBARegistrationPlugin;
+import ch.epfl.biop.registration.plugin.ExternalRegistrationPlugin;
 import ch.epfl.biop.registration.Registration;
 import com.google.gson.*;
 import org.scijava.Context;
@@ -20,10 +20,8 @@ public class RegistrationAdapter implements JsonSerializer<Registration>,
 
     final Context scijavacontext;
 
-    final MultiSlicePositioner msp;
-    public RegistrationAdapter(Context context, MultiSlicePositioner mp) {
+    public RegistrationAdapter(Context context) {
         this.scijavacontext = context;
-        this.msp = mp;
     }
 
     @Override
@@ -32,7 +30,7 @@ public class RegistrationAdapter implements JsonSerializer<Registration>,
             Registration registration;
 
             logger.debug("Fetching registration plugin "+typeOfT.getTypeName());
-            if (typeOfT.getTypeName().equals(ExternalABBARegistrationPlugin.class.getName())) {
+            if (typeOfT.getTypeName().equals(ExternalRegistrationPlugin.class.getName())) {
                 String registrationTypeName = json
                         .getAsJsonObject()
                         .get("external_type")
@@ -50,7 +48,7 @@ public class RegistrationAdapter implements JsonSerializer<Registration>,
             registration.setRegistrationParameters(context.deserialize(json.getAsJsonObject().get("parameters"), Map.class));
             return registration;
         } catch (InstantiableException e) {
-            msp.errlog.accept("Unrecognized registration plugin "+typeOfT.getTypeName());
+            logger.error("Unrecognized registration plugin "+typeOfT.getTypeName());
             e.printStackTrace();
             return null;
         }
@@ -64,7 +62,7 @@ public class RegistrationAdapter implements JsonSerializer<Registration>,
         logger.debug("With transform "+registration.getTransform());
         logger.debug("And parameters "+registration.getRegistrationParameters());
         if (MultiSlicePositioner.isExternalRegistrationPlugin(registration.getRegistrationTypeName())) {
-            obj.addProperty("type", ExternalABBARegistrationPlugin.class.getSimpleName());
+            obj.addProperty("type", ExternalRegistrationPlugin.class.getSimpleName());
             obj.addProperty("external_type", registration.getRegistrationTypeName());
         } else {
             obj.addProperty("type", registration.getRegistrationTypeName());

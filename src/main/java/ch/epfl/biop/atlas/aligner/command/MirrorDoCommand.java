@@ -3,6 +3,7 @@ package ch.epfl.biop.atlas.aligner.command;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.atlas.aligner.action.MarkActionSequenceBatchAction;
+import ch.epfl.biop.registration.sourceandconverter.mirror.MirrorXRegistration;
 import ch.epfl.biop.sourceandconverter.processor.SourcesIdentity;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
@@ -38,7 +39,7 @@ public class MirrorDoCommand implements Command {
         parameters.put("mirror_side", mirror_side);
 
         new MarkActionSequenceBatchAction(mp).runRequest();
-        mp.registerSelectedSlices(this,
+        mp.registerSelectedSlices(MirrorXRegistration.class,
                 new SourcesIdentity(),
                 new SourcesIdentity(),
                 parameters);

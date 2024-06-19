@@ -1,8 +1,7 @@
 package ch.epfl.biop.abba.pluginexample.py;
 
 import bdv.viewer.SourceAndConverter;
-import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
-import ch.epfl.biop.atlas.aligner.plugin.ExternalABBARegistrationPlugin;
+import ch.epfl.biop.registration.plugin.ExternalRegistrationPlugin;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.realtransform.RealTransform;
@@ -12,17 +11,12 @@ import org.scijava.command.Command;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ExternalIdentityRegistrationPlugin implements ExternalABBARegistrationPlugin {
+public class ExternalIdentityRegistrationPlugin implements ExternalRegistrationPlugin {
 
     Map<String, String> params = new HashMap<>();
 
     public String getRegistrationTypeName() {
         return "PyIdentity";
-    }
-
-    @Override
-    public void setSliceInfo(MultiSlicePositioner.SliceInfo sliceInfo) {
-        // Do nothing
     }
 
     @Override

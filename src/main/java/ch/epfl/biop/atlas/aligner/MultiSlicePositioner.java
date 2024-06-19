@@ -3,9 +3,9 @@ package ch.epfl.biop.atlas.aligner;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.action.*;
 import ch.epfl.biop.atlas.aligner.adapter.*;
-import ch.epfl.biop.atlas.aligner.plugin.ExternalABBARegistrationPlugin;
-import ch.epfl.biop.atlas.aligner.plugin.IABBARegistrationPlugin;
-import ch.epfl.biop.atlas.aligner.plugin.RegistrationPluginHelper;
+import ch.epfl.biop.registration.plugin.ExternalRegistrationPlugin;
+import ch.epfl.biop.registration.plugin.IRegistrationPlugin;
+import ch.epfl.biop.registration.plugin.RegistrationPluginHelper;
 import ch.epfl.biop.atlas.struct.Atlas;
 import ch.epfl.biop.registration.Registration;
 import ch.epfl.biop.sourceandconverter.processor.*;
@@ -690,36 +690,6 @@ public class MultiSlicePositioner implements Closeable {
         return convertedParams;
     }
 
-    public void registerSelectedSlices(Command command,
-                                       SourcesProcessor preprocessFixed,
-                                       SourcesProcessor preprocessMoving) {
-        registerSelectedSlices(command,
-                preprocessFixed,
-                preprocessMoving,
-                new HashMap<>()
-        );
-    }
-
-    /**
-     * Main function which triggers registration of the selected slices
-     * @param command the ui command
-     * @param preprocessFixed how fixed sources need to be preprocessed before being registered
-     * @param preprocessMoving how moving sources need to be preprocessed before being registered
-     * @param parameters parameters used for the registration - all objects will be converted
-     *                   to String using the scijava {@link ConvertService}. They need to be strings
-     *                   to be serialized
-     */
-    public void registerSelectedSlices(Command command,
-                                       SourcesProcessor preprocessFixed,
-                                       SourcesProcessor preprocessMoving,
-                                       Map<String,Object> parameters) {
-        registerSelectedSlices(RegistrationPluginHelper.registrationFromUI(scijavaCtx,command.getClass()),
-                preprocessFixed,
-                preprocessMoving,
-                parameters
-        );
-    }
-
     /**
      * Main function which triggers registration of the selected slices
      * @param registrationClass the kind of registration which should be started
@@ -729,16 +699,16 @@ public class MultiSlicePositioner implements Closeable {
      *                   to String using the scijava {@link ConvertService}. They need to be strings
      *                   to be serialized
      */
-    public void registerSelectedSlices(Class<? extends IABBARegistrationPlugin> registrationClass,
+    public void registerSelectedSlices(Class<? extends IRegistrationPlugin> registrationClass,
                                        SourcesProcessor preprocessFixed,
                                        SourcesProcessor preprocessMoving,
                                        Map<String,Object> parameters) {
 
         PluginService ps = scijavaCtx.getService(PluginService.class);
-        Supplier<? extends IABBARegistrationPlugin> pluginSupplier =
+        Supplier<? extends IRegistrationPlugin> pluginSupplier =
                 () -> {
                     try {
-                        return (IABBARegistrationPlugin) ps.getPlugin(registrationClass).createInstance();
+                        return (IRegistrationPlugin) ps.getPlugin(registrationClass).createInstance();
                     } catch (InstantiableException e) {
                         e.printStackTrace();
                         return null;
@@ -780,7 +750,7 @@ public class MultiSlicePositioner implements Closeable {
      *                   to String using the scijava {@link ConvertService}. They need to be strings
      *                   to be serialized
      */
-    public void registerSelectedSlices(Supplier<? extends IABBARegistrationPlugin> registrationPluginSupplier,
+    public void registerSelectedSlices(Supplier<? extends IRegistrationPlugin> registrationPluginSupplier,
                                        SourcesProcessor preprocessFixed,
                                        SourcesProcessor preprocessMoving,
                                        Map<String,Object> parameters) {
@@ -797,13 +767,10 @@ public class MultiSlicePositioner implements Closeable {
 
             for (SliceSources slice : getSelectedSlices()) {
                 logger.debug("Starting slice registration for "+slice.getName());
-                IABBARegistrationPlugin registration = registrationPluginSupplier.get();
+                IRegistrationPlugin registration = registrationPluginSupplier.get();
                 if (registration!=null) {
                     logger.debug("\t slice registration for "+slice.getName()+"- set context");
                     registration.setScijavaContext(scijavaCtx);
-
-                    logger.debug("\t slice registration for "+slice.getName()+"- setSliceInfo");
-                    registration.setSliceInfo(new SliceInfo(this, slice));
 
                     // Sends parameters to the registration
                     logger.debug("\t slice registration for "+slice.getName()+"- setRegistrationParameters");
@@ -915,15 +882,15 @@ public class MultiSlicePositioner implements Closeable {
         PluginService pluginService = scijavaCtx.getService(PluginService.class);
 
         // Creates adapter for all registration plugins
-        RegistrationAdapter registrationAdapter = new RegistrationAdapter(scijavaCtx, this);
-        pluginService.getPluginsOfType(IABBARegistrationPlugin.class).forEach(registrationPluginClass -> {
-            IABBARegistrationPlugin plugin = pluginService.createInstance(registrationPluginClass);
+        RegistrationAdapter registrationAdapter = new RegistrationAdapter(scijavaCtx);
+        pluginService.getPluginsOfType(IRegistrationPlugin.class).forEach(registrationPluginClass -> {
+            IRegistrationPlugin plugin = pluginService.createInstance(registrationPluginClass);
             factoryRegistrations.registerSubtype(plugin.getClass());
             gsonbuilder.registerTypeHierarchyAdapter(plugin.getClass(), registrationAdapter);
         });
 
-        factoryRegistrations.registerSubtype(ExternalABBARegistrationPlugin.class);
-        gsonbuilder.registerTypeHierarchyAdapter(ExternalABBARegistrationPlugin.class, registrationAdapter);
+        factoryRegistrations.registerSubtype(ExternalRegistrationPlugin.class);
+        gsonbuilder.registerTypeHierarchyAdapter(ExternalRegistrationPlugin.class, registrationAdapter);
 
         // For sources processor
 
@@ -1456,7 +1423,7 @@ public class MultiSlicePositioner implements Closeable {
 
     //---------------------- For PyImageJ extensions
 
-    static final Map<String, Supplier<? extends IABBARegistrationPlugin>> externalRegistrationPlugins = new HashMap<>();
+    static final Map<String, Supplier<? extends IRegistrationPlugin>> externalRegistrationPlugins = new HashMap<>();
 
     /**
      * Register an external registration plugin, for instance performed by a python function
@@ -1464,7 +1431,7 @@ public class MultiSlicePositioner implements Closeable {
      * @param name of the registration plugin
      * @param pluginSupplier the thing that makes a new plugin of this kind
      */
-    public static void registerRegistrationPlugin(String name, Supplier<? extends IABBARegistrationPlugin> pluginSupplier) {
+    public static void registerRegistrationPlugin(String name, Supplier<? extends IRegistrationPlugin> pluginSupplier) {
         externalRegistrationPlugins.put(name, pluginSupplier);
     }
 
@@ -1472,7 +1439,7 @@ public class MultiSlicePositioner implements Closeable {
         return externalRegistrationPlugins.containsKey(name);
     }
 
-    public static Supplier<? extends IABBARegistrationPlugin> getExternalRegistrationPluginSupplier(String name) {
+    public static Supplier<? extends IRegistrationPlugin> getExternalRegistrationPluginSupplier(String name) {
         return externalRegistrationPlugins.get(name);
     }
 
