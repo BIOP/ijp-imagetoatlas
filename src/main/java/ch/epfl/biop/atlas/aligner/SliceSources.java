@@ -1822,7 +1822,7 @@ public class SliceSources {
         registered_sacs = sourcesNonRasterized.pop();
     }
 
-    public static class RegistrationAndSources {
+    private static class RegistrationAndSources {
 
         final Registration reg;
         final SourceAndConverter[] sacs;
