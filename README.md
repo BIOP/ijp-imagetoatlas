@@ -13,5 +13,3 @@ ImageJ/Fiji plugin that align images with the Allen Brain Atlas within Fiji.
 
 Documentation: [https://abba-documentation.readthedocs.io](https://abba-documentation.readthedocs.io/en/latest/)
 
-https://user-images.githubusercontent.com/20223054/149301605-07b27dd0-4010-4ca4-b415-f5a9acc8963d.mp4
-
