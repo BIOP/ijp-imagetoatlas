@@ -239,6 +239,7 @@ public class SliceGuiState {
 
     public void deleted() {
         hide();
+        ghs.forEach(GraphicalHandle::disable);
     }
 
     int stepBack = 0;
