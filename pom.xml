@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.scijava</groupId>
 		<artifactId>pom-scijava</artifactId>
-		<version>37.0.0</version>
+		<version>38.0.1</version>
 		<relativePath />
 	</parent>
 
@@ -107,10 +107,10 @@
 		<main-class>ch.epfl.biop.abba.ABBALaunchMouse</main-class>
 
 		<!-- bdv playground related dependencies -->
-		<bigdataviewer-playground.version>0.10.1</bigdataviewer-playground.version>
-		<bigdataviewer-image-loaders.version>0.7.2</bigdataviewer-image-loaders.version>
-		<bigdataviewer-biop-tools.version>0.10.0</bigdataviewer-biop-tools.version>
-		<bigdataviewer-selector.version>0.2.6</bigdataviewer-selector.version>
+		<bigdataviewer-playground.version>0.10.3</bigdataviewer-playground.version>
+		<bigdataviewer-image-loaders.version>0.8.1</bigdataviewer-image-loaders.version>
+		<bigdataviewer-biop-tools.version>0.10.1</bigdataviewer-biop-tools.version>
+		<bigdataviewer-selector.version>0.2.7</bigdataviewer-selector.version>
 
 		<!-- maths -->
 		<leastsquares.version>1.0.0</leastsquares.version>
@@ -134,46 +134,12 @@
 		<!-- scijava.app.directory>C:/Users/nicol/Dropbox/BIOP/ABBA-Python/constructor/Fiji.app</scijava.app.directory -->
 		<!-- package version below are determined by the parent pom but need to be upgraded or temporarily fixed for bugs -->
 
-		<n5.version>3.1.1</n5.version>
-		<n5-hdf5.version>2.1.0</n5-hdf5.version>
-		<n5-zarr.version>1.2.0</n5-zarr.version>
-		<n5-ij.version>4.0.1</n5-ij.version>
-		<n5-universe.version>1.3.1</n5-universe.version>
-		<n5-zstandard.version>1.0.2</n5-zstandard.version>
-		<org.janelia.n5-zstandard.version>${n5-zstandard.version}</org.janelia.n5-zstandard.version>
-
-		<bigwarp.version>9.1.2</bigwarp.version>
-		<bigwarp_fiji.version>9.1.2</bigwarp_fiji.version>
-		<bigdataviewer-core.version>10.4.13</bigdataviewer-core.version>
-		<bigdataviewer-vistools.version>1.0.0-beta-34</bigdataviewer-vistools.version>
-		<imglib2-realtransform.version>4.0.2</imglib2-realtransform.version>
-
-		<ejml-core.version>0.41</ejml-core.version>
-		<ejml-ddense.version>0.41</ejml-ddense.version>
-
-		<jitk-tps.version>3.0.4</jitk-tps.version>
-
 	</properties>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.scijava</groupId>
 			<artifactId>ui-behaviour</artifactId>
-		</dependency>
-
-		<!-- JAXB API v3.0.1 -->
-		<dependency>
-			<groupId>jakarta.xml.bind</groupId>
-			<artifactId>jakarta.xml.bind-api</artifactId>
-			<version>${jakarta.xml.bind-api.version}</version>
-		</dependency>
-
-		<!-- JAXB v3.0.2 reference implementation (curiously with com.sun coordinates) -->
-		<dependency>
-			<groupId>com.sun.xml.bind</groupId>
-			<artifactId>jaxb-impl</artifactId>
-			<version>${jaxb-impl.version}</version>
-			<scope>runtime</scope>
 		</dependency>
 
         <!-- ImageJ dependencies -->
@@ -202,12 +168,6 @@
 			<groupId>sc.fiji</groupId>
 			<artifactId>bigdataviewer-playground</artifactId>
 			<version>${bigdataviewer-playground.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.ejml</groupId>
-					<artifactId>ejml-core</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 
 		<dependency>
@@ -220,16 +180,6 @@
 			<groupId>ch.epfl.biop</groupId>
 			<artifactId>bigdataviewer-biop-tools</artifactId>
 			<version>${bigdataviewer-biop-tools.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>xalan</groupId>
-					<artifactId>serializer</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.ejml</groupId>
-					<artifactId>ejml-core</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 
 		<dependency>
