@@ -1335,11 +1335,20 @@ public class SliceSources {
 
         for (Registration reg : this.registrations) {
             RealTransform current = reg.getTransformAsRealTransform();
-            if (!(current instanceof MirrorXTransform)) { // We should not take the mirror transform into account
-                if (current == null) {
-                    mp.errlog.accept("Error : null registration found!");
-                    return;
+
+            if (current == null) {
+                mp.errlog.accept("Error : null registration found!");
+                return;
+            }
+
+            if (current instanceof BoundedRealTransform) {
+                if (((BoundedRealTransform) current).getTransform() instanceof MirrorXTransform) {
+                    continue;
                 }
+            }
+
+            if (!(current instanceof MirrorXTransform)) { // We should not take the mirror transform into account
+
                 RealTransform copied = current.copy();
                 fixOptimizer(copied, tolerance, maxIteration);
                 rts.add(copied);
