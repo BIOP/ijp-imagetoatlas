@@ -458,9 +458,9 @@ abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command 
 
     private void setPixelSizeFromModel() {
         if (model.equals("mouse")) {
-            px_size_micron = 30;
+            px_size_micron = 10;
         } else if (model.equals("rat")) {
-            px_size_micron = 60;
+            px_size_micron = 45;
         }
     }
 
