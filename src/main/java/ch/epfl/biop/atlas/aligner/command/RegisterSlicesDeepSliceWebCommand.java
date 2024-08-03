@@ -23,7 +23,7 @@ public class RegisterSlicesDeepSliceWebCommand extends RegisterSlicesDeepSliceAb
             deepSliceProcessor = (f_in) -> DeepSliceHelper.deepSliceWebRunner(f_in, ps);
 
         } else {
-            mp.errlog.accept("Can't use Web interface in headless mode, aborting DeepSlice registration");
+            mp.errorMessageForUser.accept("DeepSlice errot", "Can't use Web interface in headless mode, aborting DeepSlice registration");
             return false;
         }
         return true;

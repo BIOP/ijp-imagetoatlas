@@ -58,8 +58,8 @@ public class ExportAtlasToImageJCommand implements Command {
 
             int maxChannelInAtlas = mp.getReslicedAtlas().nonExtendedSlicedSources.length;
             if (maxIndex>=maxChannelInAtlas) {
-                mp.log.accept("Missing channels in atlas.");
-                mp.errlog.accept("The atlas only has "+maxChannelInAtlas+" channel(s).\n Maximum index : "+(maxChannelInAtlas-1) );
+                mp.errorMessageForUser.accept("Wrong atlas channel index",
+                        "The atlas only has "+maxChannelInAtlas+" channel(s).\n Maximum index : "+(maxChannelInAtlas-1) );
                 return;
             }
 
@@ -87,7 +87,7 @@ public class ExportAtlasToImageJCommand implements Command {
             if (success) {
                 images[i] = tasks.get(slice).getImagePlus();
                 tasks.get(slice).clean();
-                mp.log.accept("Atlas export to ImagePlus of slice "+slice+" done ("+(i+1)+"/"+images.length+")");
+                mp.infoMessageForUser.accept("", "Atlas export to ImagePlus of slice "+slice+" done ("+(i+1)+"/"+images.length+")");
                 images[i].setTitle("Slice_"+i+"_"+slice);
                 images[i].show();
             } else {

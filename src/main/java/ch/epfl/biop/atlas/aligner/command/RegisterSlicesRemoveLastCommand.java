@@ -25,8 +25,7 @@ public class RegisterSlicesRemoveLastCommand implements Command {
     public void run() {
         logger.info("Remove last registration command called.");
 
-        if (mp.getSelectedSlices().size()==0) {
-            mp.log.accept("No slice selected");
+        if (mp.getSelectedSlices().isEmpty()) {
             mp.warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to register");
             return;
         }

@@ -82,8 +82,7 @@ public class ExportResampledSlicesToBDVSourceCommand implements Command {
         // TODO : check if tasks are done
         List<SliceSources> slicesToExport = mp.getSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
 
-        if (slicesToExport.size()==0) {
-            mp.log.accept("No slice selected");
+        if (slicesToExport.isEmpty()) {
             mp.warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to export");
             return;
         }
@@ -98,8 +97,8 @@ public class ExportResampledSlicesToBDVSourceCommand implements Command {
             int maxIndex = indices.stream().mapToInt(e -> e).max().getAsInt();
 
             if (maxIndex>=mp.getChannelBoundForSelectedSlices()) {
-                mp.log.accept("Missing channel in selected slice(s).");
-                mp.errlog.accept("Missing channel in selected slice(s)\n One selected slice only has "+mp.getChannelBoundForSelectedSlices()+" channel(s).\n Maximum index : "+(mp.getChannelBoundForSelectedSlices()-1) );
+                mp.errorMessageForUser.accept("Missing channel in selected slice(s)",
+                        "One selected slice only has "+mp.getChannelBoundForSelectedSlices()+" channel(s).\n Maximum index : "+(mp.getChannelBoundForSelectedSlices()-1) );
                 return;
             }
 

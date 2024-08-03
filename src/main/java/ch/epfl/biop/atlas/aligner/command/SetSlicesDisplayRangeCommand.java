@@ -33,8 +33,7 @@ public class SetSlicesDisplayRangeCommand implements Command {
 
         List<SliceSources> slicesToModify = mp.getSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
 
-        if (slicesToModify.size()==0) {
-            mp.log.accept("No slice selected");
+        if (slicesToModify.isEmpty()) {
             mp.warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to adjust");
             return;
         }

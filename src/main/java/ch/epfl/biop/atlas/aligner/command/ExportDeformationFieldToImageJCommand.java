@@ -45,8 +45,7 @@ public class ExportDeformationFieldToImageJCommand implements Command {
         // TODO : check if tasks are done
         List<SliceSources> slicesToExport = mp.getSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
         double tolerance = mp.getAtlas().getMap().getAtlasPrecisionInMillimeter();
-        if (slicesToExport.size()==0) {
-            mp.log.accept("No slice selected");
+        if (slicesToExport.isEmpty()) {
             mp.warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to operate on.");
             return;
         }
@@ -70,7 +69,7 @@ public class ExportDeformationFieldToImageJCommand implements Command {
             if (success) {
                 images[i] = tasks.get(slice).getImagePlus();
                 tasks.get(slice).clean();
-                mp.log.accept("Export deformation field to ImagePlus of slice "+slice+" done ("+(i+1)+"/"+images.length+")");
+                mp.infoMessageForUser.accept("", "Export deformation field to ImagePlus of slice "+slice+" done ("+(i+1)+"/"+images.length+")");
                 images[i].show();
             } else {
                 mp.errorMessageForUser.accept("Export to ImageJ Stack error","Error in export of slice "+slice);

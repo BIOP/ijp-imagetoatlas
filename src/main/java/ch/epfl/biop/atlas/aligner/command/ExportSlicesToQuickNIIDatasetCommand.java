@@ -57,8 +57,8 @@ public class ExportSlicesToQuickNIIDatasetCommand implements Command {
             int maxIndex = indices.stream().mapToInt(e -> e).max().getAsInt();
 
             if (maxIndex>=mp.getChannelBoundForSelectedSlices()) {
-                mp.log.accept("Missing channel in selected slice(s).");
-                mp.errlog.accept("Missing channel in selected slice(s)\n One selected slice only has "+mp.getChannelBoundForSelectedSlices()+" channel(s).\n Maximum index : "+(mp.getChannelBoundForSelectedSlices()-1) );
+                mp.errorMessageForUser.accept("Missing channel in selected slice(s).",
+                        "Missing channel in selected slice(s)\n One selected slice only has "+mp.getChannelBoundForSelectedSlices()+" channel(s).\n Maximum index : "+(mp.getChannelBoundForSelectedSlices()-1) );
                 return;
             }
 

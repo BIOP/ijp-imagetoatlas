@@ -34,9 +34,9 @@ public class ExportSlicesToBDVCommand implements Command {
 
     @Override
     public void run() {
-        mp.log.accept("Waiting for the end of all current tasks...");
+        mp.infoMessageForUser.accept("", "Waiting for the end of all current tasks...");
         mp.waitForTasks();
-        mp.log.accept("All tasks ended");
+        mp.infoMessageForUser.accept("", "All tasks ended");
 
         List<SliceSources> slices = mp.getSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
 

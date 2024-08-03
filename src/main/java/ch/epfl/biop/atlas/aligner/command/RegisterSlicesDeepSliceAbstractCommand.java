@@ -119,8 +119,7 @@ abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command 
             slicesToRegister.add(iniList.get(i));
         }
 
-        if (slicesToRegister.size() == 0) {
-            mp.log.accept("No slice selected");
+        if (slicesToRegister.isEmpty()) {
             mp.errorMessageForUser.accept("No selected slice", "Please select the slice(s) you want to register");
             return;
         }
@@ -269,7 +268,7 @@ abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command 
 
         angleUpdatedMessage+="Angle Y : "+oldY+" has been updated to "+df.format(mp.getReslicedAtlas().getRotateY())+"\n";
 
-        mp.log.accept("Slicing angle adjusted to "+ angleUpdatedMessage);
+        mp.infoMessageForUser.accept("Slicing angle channged", "Slicing angle adjusted to "+ angleUpdatedMessage);
 
     }
 
@@ -428,8 +427,8 @@ abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command 
             int maxIndex = indices.stream().mapToInt(e -> e).max().getAsInt();
 
             if (maxIndex>=mp.getChannelBoundForSelectedSlices()) {
-                mp.log.accept("Missing channel in selected slice(s).");
-                mp.errlog.accept("Missing channel in selected slice(s)\n One selected slice only has "+mp.getChannelBoundForSelectedSlices()+" channel(s).\n Maximum index : "+(mp.getChannelBoundForSelectedSlices()-1) );
+                mp.errorMessageForUser.accept("Missing channel in selected slice(s).",
+                        "Missing channel in selected slice(s)\n One selected slice only has "+mp.getChannelBoundForSelectedSlices()+" channel(s).\n Maximum index : "+(mp.getChannelBoundForSelectedSlices()-1) );
                 return;
             }
 

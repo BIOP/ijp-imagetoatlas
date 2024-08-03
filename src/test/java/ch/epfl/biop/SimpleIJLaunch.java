@@ -5,8 +5,11 @@ import net.imagej.ImageJ;
 
 public class SimpleIJLaunch {
     public static void main(String[] args) {
+
+        DebugTools.setRootLevel("WARN");
+        DebugTools.enableLogging ("WARN");
         final ImageJ ij = new ImageJ();
-        DebugTools.enableLogging ("INFO");
+        //
         ij.ui().showUI();
         //DebugTools.enableLogging ("DEBUG");
         //RemoteElastixTask.timeOutInMs = 100000;

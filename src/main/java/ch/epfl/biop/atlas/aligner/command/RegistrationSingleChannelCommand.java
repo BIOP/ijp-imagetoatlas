@@ -27,19 +27,18 @@ abstract public class RegistrationSingleChannelCommand implements Command {
     @Override
     final public void run() {
         if (!validationError) {
-            if (channel_atlas >=mp.getNumberOfAtlasChannels()) {
-                mp.log.accept("The atlas has only "+mp.getNumberOfAtlasChannels()+" channels!");
-                mp.errlog.accept("The atlas has only "+mp.getNumberOfAtlasChannels()+" channels !\n Maximum index : "+(mp.getNumberOfAtlasChannels()-1));
+            if (channel_atlas >= mp.getNumberOfAtlasChannels()) {
+                mp.errorMessageForUser.accept("The atlas has only "+mp.getNumberOfAtlasChannels()+" channels!",
+                        "The atlas has only "+mp.getNumberOfAtlasChannels()+" channels !\n Maximum index : "+(mp.getNumberOfAtlasChannels()-1));
                 return;
             }
-            if (mp.getSelectedSlices().size()==0) {
-                mp.log.accept("No slice selected");
-                mp.warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to register");
+            if (mp.getSelectedSlices().isEmpty()) {
+                mp.errorMessageForUser.accept("No slice selected","Please select the slice(s) you want to register");
                 return;
             }
             if (channel_slice >=mp.getChannelBoundForSelectedSlices()) {
-                mp.log.accept("Missing channel in selected slice(s).");
-                mp.errlog.accept("Missing channel in selected slice(s)\n One selected slice only has "+mp.getChannelBoundForSelectedSlices()+" channel(s).\n Maximum index : "+(mp.getChannelBoundForSelectedSlices()-1) );
+                mp.errorMessageForUser.accept("Missing channel in selected slice(s).",
+                        "Missing channel in selected slice(s)\n One selected slice only has "+mp.getChannelBoundForSelectedSlices()+" channel(s).\n Maximum index : "+(mp.getChannelBoundForSelectedSlices()-1) );
                 return;
             }
             runValidated();

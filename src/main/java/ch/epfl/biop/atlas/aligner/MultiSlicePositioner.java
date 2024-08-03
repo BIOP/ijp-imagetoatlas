@@ -121,19 +121,6 @@ public class MultiSlicePositioner implements Closeable {
     // Rectangle user defined regions that crops the region of interest for registrations
     double roiPX, roiPY, roiSX, roiSY;
 
-    // Loggers
-
-    /**
-     * Non blocking log message for users
-     */
-    public Consumer<String> log = (message) -> logger.info("Multipositioner : "+message);
-
-    /**
-     * Non blocking error message for users
-     */
-    public BiConsumer<String, String> nonBlockingErrorMessageForUser = (title, message) ->
-            logger.error(title+":"+message);
-
     private final List<BiConsumer<String, String>> errorSubscribers = new ArrayList<>();
 
     public synchronized void subscribeToErrorMessages(BiConsumer<String, String> errorLogger) {
@@ -142,6 +129,26 @@ public class MultiSlicePositioner implements Closeable {
 
     public synchronized void unSubscribeFromErrorMessages(BiConsumer<String, String> errorLogger) {
         errorSubscribers.remove(errorLogger);
+    }
+
+    private final List<BiConsumer<String, String>> warnSubscribers = new ArrayList<>();
+
+    public synchronized void subscribeToWarningMessages(BiConsumer<String, String> warnLogger) {
+        warnSubscribers.add(warnLogger);
+    }
+
+    public synchronized void unSubscribeFromWarningMessages(BiConsumer<String, String> warnLogger) {
+        warnSubscribers.remove(warnLogger);
+    }
+
+    private final List<BiConsumer<String, String>> infoSubscribers = new ArrayList<>();
+
+    public synchronized void subscribeToInfoMessages(BiConsumer<String, String> infoLogger) {
+        infoSubscribers.add(infoLogger);
+    }
+
+    public synchronized void unSubscribeFromInfoMessages(BiConsumer<String, String> infoLogger) {
+        infoSubscribers.remove(infoLogger);
     }
 
     /**
@@ -154,18 +161,21 @@ public class MultiSlicePositioner implements Closeable {
         logger.error(title+":"+message);
     };
 
-            //JOptionPane.showMessageDialog(new JFrame(), message, title, JOptionPane.ERROR_MESSAGE); // Headless exception
-
     /**
      * Blocking warning message for users
      */
-    public BiConsumer<String, String> warningMessageForUser = (title, message) ->
-            logger.warn(title+":"+message);
-            //JOptionPane.showMessageDialog(new JFrame(), message, title, JOptionPane.WARNING_MESSAGE);
+    public BiConsumer<String, String> warningMessageForUser = (title, message) -> {
+        synchronized (this) {
+            warnSubscribers.forEach(logger -> logger.accept(title, message));
+        }
+        logger.warn(title+":"+message);
+    };
 
-    public Consumer<String> errlog = (message) -> {
-        logger.error("Multipositioner : "+message);
-        errorMessageForUser.accept("Error", message);
+    public BiConsumer<String, String> infoMessageForUser = (title, message) -> {
+        synchronized (this) {
+            infoSubscribers.forEach(logger -> logger.accept(title, message));
+        }
+        logger.info(title+":"+message);
     };
 
     final Object slicesLock = new Object();
@@ -321,7 +331,7 @@ public class MultiSlicePositioner implements Closeable {
     }
 
     public String getUndoMessage() {
-        if (userActions.size()==0) {
+        if (userActions.isEmpty()) {
             return "(None)";
         } else {
             CancelableAction lastAction = userActions.get(userActions.size()-1);
@@ -548,7 +558,7 @@ public class MultiSlicePositioner implements Closeable {
                 }
 
                 if (!exactMatch) {
-                    log.accept("A source is already used in the positioner : slice not created.");
+                    logger.error("A source is already used in the positioner : slice not created.");
                     return false;
                 } else {
                     // Move action:
@@ -564,14 +574,14 @@ public class MultiSlicePositioner implements Closeable {
 
             createSlice(createSliceAction.getSlice());
 
-            log.accept("Slice added");
+            logger.debug("Slice added");
         }
         return true;
     }
 
     protected boolean cancelCreateSlice(CreateSliceAction action) {
         removeSlice(action.getSlice());
-        log.accept("Slice "+action.getSlice()+" removed ");
+        logger.debug("Slice "+action.getSlice()+" removed ");
         return true;
     }
 
@@ -670,9 +680,8 @@ public class MultiSlicePositioner implements Closeable {
     }
 
     public void editLastRegistrationSelectedSlices(boolean reuseOriginalChannels, SourcesProcessor preprocessSlice, SourcesProcessor preprocessAtlas) {
-        if (getSelectedSlices().size()==0) {
+        if (getSelectedSlices().isEmpty()) {
             warningMessageForUser.accept("No selected slice", "Please select the slice you want to edit");
-            log.accept("Edit registration ignored : no slice selected");
         } else {
             for (SliceSources slice : getSelectedSlices()) {
                 new EditLastRegistrationAction(this, slice, reuseOriginalChannels, preprocessSlice, preprocessAtlas ).runRequest();
@@ -736,7 +745,7 @@ public class MultiSlicePositioner implements Closeable {
             registerSelectedSlices(externalRegistrationPlugins.get(registrationPluginName),
                     preprocessFixed, preprocessMoving, parameters);
         } else {
-            this.errlog.accept("Registration type:"+registrationPluginName+" not found!");
+            errorMessageForUser.accept("Registration plugin not found", "Registration type:"+registrationPluginName+" not found!");
         }
     }
 
@@ -754,9 +763,8 @@ public class MultiSlicePositioner implements Closeable {
                                        SourcesProcessor preprocessFixed,
                                        SourcesProcessor preprocessMoving,
                                        Map<String,Object> parameters) {
-        if (getSelectedSlices().size()==0) {
+        if (getSelectedSlices().isEmpty()) {
             warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to register");
-            log.accept("Registration ignored : no slice selected");
         } else {
             logger.debug("Putting user defined ROIs");
             // Putting user defined ROIs
@@ -799,7 +807,7 @@ public class MultiSlicePositioner implements Closeable {
      * Cancels last action
      */
     public void cancelLastAction() {
-        if (userActions.size() > 0) {
+        if (!userActions.isEmpty()) {
             CancelableAction action = userActions.get(userActions.size() - 1);
             if (action instanceof MarkActionSequenceBatchAction) {
                 action.cancelRequest();
@@ -813,7 +821,7 @@ public class MultiSlicePositioner implements Closeable {
                 userActions.get(userActions.size() - 1).cancelRequest();
             }
         } else {
-            log.accept("No action can be cancelled.");
+            infoMessageForUser.accept("Can't cancel!", "No action can be cancelled.");
         }
     }
 
@@ -835,7 +843,7 @@ public class MultiSlicePositioner implements Closeable {
                 redoableUserActions.get(redoableUserActions.size() - 1).runRequest();
             }
         } else {
-            log.accept("No action can be redone.");
+            infoMessageForUser.accept("Can't redo!", "No action can be redone.");
         }
     }
 
@@ -953,9 +961,9 @@ public class MultiSlicePositioner implements Closeable {
         }
 
         // -3. the tasks are finished
-        log.accept("Waiting for all tasks to be finished before saving ... ");
+        infoMessageForUser.accept("","Waiting for all tasks to be finished before saving ... ");
         getSlices().forEach(SliceSources::waitForEndOfTasks);
-        log.accept("All tasks have been performed!");
+        infoMessageForUser.accept("", "All tasks have been performed!");
         try {
             // We prepare the saving of the state, so that's a task:
             addTask();
@@ -1015,7 +1023,7 @@ public class MultiSlicePositioner implements Closeable {
                 try {
                     FileUtils.deleteDirectory(tmpdir);
                 } catch (IOException e) {
-                    errlog.accept("Could not delete temp folder " + tmpdir.getAbsolutePath() + ". Error: " + e.getMessage());
+                    errorMessageForUser.accept("File deletion issue.", "Could not delete the temporary folder " + tmpdir.getAbsolutePath() + ". Error: " + e.getMessage());
                 }
             }
         } finally {
@@ -1142,24 +1150,24 @@ public class MultiSlicePositioner implements Closeable {
                     AlignerState state = gson.fromJson(element, AlignerState.class); // actions are executed during deserialization
                     fileReader.close();
 
-                    String warningMessageForUser = "";
+                    String infoMessageForUser = "";
 
                     DecimalFormat df = new DecimalFormat("###.000");
 
                     Function<Double, String> a = (d) -> df.format(d*180/Math.PI);
 
                     if (state.rotationX!=reslicedAtlas.getRotateX()) {
-                        warningMessageForUser+="Current X Angle : "+a.apply(reslicedAtlas.getRotateX())+" has been updated to "+a.apply(state.rotationX)+"\n";
+                        infoMessageForUser+="Current X Angle : "+a.apply(reslicedAtlas.getRotateX())+" has been updated to "+a.apply(state.rotationX)+"\n";
                         reslicedAtlas.setRotateX(state.rotationX);
                     }
 
                     if (state.rotationY!=reslicedAtlas.getRotateY()) {
-                        warningMessageForUser+="Current Y Angle : "+a.apply(reslicedAtlas.getRotateY())+" has been updated to "+a.apply(state.rotationY)+"\n";
+                        infoMessageForUser+="Current Y Angle : "+a.apply(reslicedAtlas.getRotateY())+" has been updated to "+a.apply(state.rotationY)+"\n";
                         reslicedAtlas.setRotateY(state.rotationY);
                     }
 
-                    if (!warningMessageForUser.equals("")) {
-                        this.warningMessageForUser.accept("Warning", warningMessageForUser);
+                    if (!infoMessageForUser.isEmpty()) {
+                        this.infoMessageForUser.accept("Info", infoMessageForUser);
                     }
 
                     state.slices_state_list.forEach(sliceState -> {
@@ -1171,17 +1179,19 @@ public class MultiSlicePositioner implements Closeable {
                     if (emptyState) stateChangedSinceLastSave = false; // loaded state has not been changed, and it was the only one loaded
 
                 } catch (Exception e) {
-                    errlog.accept(e.getMessage());
+                    errorMessageForUser.accept("Error during state file loading", "Error: "+e.getMessage()+"\n Please also check the stack trace.");
                     e.printStackTrace();
                     return false;
                 }
             } else {
-                errlog.accept("Error : file "+stateFile.getAbsolutePath()+" not found!");
+                errorMessageForUser.accept("Error during state file loading",
+                        "Error : file "+stateFile.getAbsolutePath()+" not found!");
                 return false;
             }
             return true;
         } catch (IOException e) {
-            errlog.accept(e.getMessage());
+            errorMessageForUser.accept("IOException during state file loading", "Error: "+e.getMessage()+"\n Please also check the stack trace.");
+            e.printStackTrace();
             return false;
         } finally {
             removeTask();
@@ -1189,7 +1199,9 @@ public class MultiSlicePositioner implements Closeable {
             try {
                 FileUtils.deleteDirectory(tmpdir);
             } catch (IOException e) {
-                errlog.accept("Could not delete temp folder "+tmpdir.getAbsolutePath()+". Error: "+e.getMessage());
+                errorMessageForUser.accept("IOException during state file loading",
+                        "Could not delete temp folder "+tmpdir.getAbsolutePath()+"\n Error: "+e.getMessage()+"\n Please also check the stack trace.");
+                e.printStackTrace();
             }
         }
 
@@ -1207,7 +1219,7 @@ public class MultiSlicePositioner implements Closeable {
             File sacsFile = new File(fileNoExt+"_sources.json");
 
             if (!sacsFile.exists()) {
-                errlog.accept("File "+sacsFile.getAbsolutePath()+" not found!");
+                errorMessageForUser.accept("File not found.", "File "+sacsFile.getAbsolutePath()+" not found!");
                 return false;
             }
 
@@ -1215,7 +1227,9 @@ public class MultiSlicePositioner implements Closeable {
             try {
                 sacsl.run();
             } catch (Exception e) {
-                errlog.accept(e.getMessage());
+                errorMessageForUser.accept("Exception when deserialising image source.",
+                        "Error: "+e.getMessage()+"\n Please also check the stack trace.");
+                e.printStackTrace();
             }
 
 
@@ -1233,9 +1247,9 @@ public class MultiSlicePositioner implements Closeable {
                     // Didn't have the foresight to add a version number from the start...
                     String version = element.has("version") ? element.get("version").getAsString() : null;
                     if (version == null) {
-                        log.accept("Old state version, conversion required.");
+                        infoMessageForUser.accept("Old state file!", "A conversion is required.");
                         element = (JsonObject) AlignerState.convertOldJson(element);
-                        log.accept("Conversion done.");
+                        infoMessageForUser.accept("Old state file!", "Conversion done.");
                     }
 
                     AlignerState state = gson.fromJson(element, AlignerState.class); // actions are executed during deserialization
@@ -1269,12 +1283,12 @@ public class MultiSlicePositioner implements Closeable {
                     if (emptyState) stateChangedSinceLastSave = false; // loaded state has not been changed, and it was the only one loaded
 
                 } catch (Exception e) {
-                    errlog.accept(e.getMessage());
+                    errorMessageForUser.accept("Error during state loading", "Message: "+e.getMessage()+"\n Please also check the stack trace.");
                     e.printStackTrace();
                     return false;
                 }
             } else {
-                errlog.accept("Error : file "+stateFile.getAbsolutePath()+" not found!");
+                errorMessageForUser.accept("File not found", "Error : file "+stateFile.getAbsolutePath()+" not found!");
                 return false;
             }
             return true;

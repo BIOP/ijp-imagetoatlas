@@ -28,12 +28,12 @@ public class ABBAStateSaveCommand implements Command {
         // Appends extension
         String extension = FilenameUtils.getExtension(state_file.getAbsolutePath());
         if ((extension==null)||(extension.trim().equals(""))) {
-            mp.log.accept("Adding abba extension to state file");
+            mp.infoMessageForUser.accept("", "Adding abba extension to state file");
             state_file = new File(state_file.getAbsolutePath()+".abba");
         }
 
         if (state_file.exists()) {
-           mp.errlog.accept("Error, this file already exists!");
+           mp.errorMessageForUser.accept("This file already exists!", "Please choose a different name or location.");
         } else {
             success = mp.saveState(state_file, true);
         }

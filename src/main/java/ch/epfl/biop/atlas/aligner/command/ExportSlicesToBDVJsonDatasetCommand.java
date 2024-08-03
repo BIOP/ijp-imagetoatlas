@@ -39,10 +39,10 @@ public class ExportSlicesToBDVJsonDatasetCommand implements Command {
 
     @Override
     public void run() {
-        mp.log.accept("Waiting for the end of all current tasks...");
+        mp.infoMessageForUser.accept("","Waiting for the end of all current tasks...");
         mp.waitForTasks();
-        mp.log.accept("All tasks ended");
-        mp.log.accept("Starting saving...");
+        mp.infoMessageForUser.accept("","All tasks ended");
+        mp.infoMessageForUser.accept("","Starting saving...");
         List<SourceAndConverter<?>> sacs = new ArrayList<>();
         List<SliceSources> slices = mp.getSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
         if (slices.size()==0) {
@@ -59,8 +59,7 @@ public class ExportSlicesToBDVJsonDatasetCommand implements Command {
                 }
             });
             new SourceAndConverterServiceSaver(file, ctx, sacs).run();
-
-            mp.log.accept("Saved!");
+            mp.infoMessageForUser.accept("","Saved!");
         }
     }
 

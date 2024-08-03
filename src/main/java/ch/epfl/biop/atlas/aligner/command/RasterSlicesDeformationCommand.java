@@ -39,8 +39,7 @@ public class RasterSlicesDeformationCommand implements Command {
         // TODO : check if tasks are done
         List<SliceSources> slicesToProcess = mp.getSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
 
-        if (slicesToProcess.size()==0) {
-            mp.log.accept("No slice selected");
+        if (slicesToProcess.isEmpty()) {
             mp.warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to operate on");
             return;
         }

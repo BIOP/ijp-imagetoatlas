@@ -141,7 +141,7 @@ public class TableView implements MultiSlicePositioner.SliceChangeListener, List
                                 .run(DisplaySettingsCommand.class, true,
                                         "postrun", update);
                     } else {
-                        mp.log.accept("Please select a slice with a valid channel in the tab.");
+                        mp.infoMessageForUser.accept("Table issue", "Please select a slice with a valid channel in the tab.");
                     }
                 }
             }

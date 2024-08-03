@@ -61,14 +61,12 @@ public class ExportSlicesToImageJCommand extends DynamicCommand implements
     ImagePlus image;
 
 
-
     @Override
     public void run() {
         // TODO : check if tasks are done
         List<SliceSources> slicesToExport = mp.getSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
 
-        if (slicesToExport.size()==0) {
-            mp.log.accept("No slice selected");
+        if (slicesToExport.isEmpty()) {
             mp.warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to export");
             return;
         }
@@ -81,8 +79,8 @@ public class ExportSlicesToImageJCommand extends DynamicCommand implements
             int maxIndex = indices.stream().mapToInt(e -> e).max().getAsInt();
 
             if (maxIndex>=mp.getChannelBoundForSelectedSlices()) {
-                mp.log.accept("Missing channel in selected slice(s).");
-                mp.errlog.accept("Missing channel in selected slice(s)\n One selected slice only has "+mp.getChannelBoundForSelectedSlices()+" channel(s).\n Maximum index : "+(mp.getChannelBoundForSelectedSlices()-1) );
+                mp.errorMessageForUser.accept("Missing channel in selected slice(s).",
+                        "Missing channel in selected slice(s)\n One selected slice only has "+mp.getChannelBoundForSelectedSlices()+" channel(s).\n Maximum index : "+(mp.getChannelBoundForSelectedSlices()-1) );
                 return;
             }
 
@@ -110,10 +108,10 @@ public class ExportSlicesToImageJCommand extends DynamicCommand implements
             if (success) {
                 images[i] = tasks.get(slice).getImagePlus();
                 tasks.get(slice).clean();
-                mp.log.accept("Export to ImagePlus of slice "+slice+" done ("+(i+1)+"/"+images.length+")");
-                images[i].setTitle("Slice_"+i+"_"+slice);
+                mp.infoMessageForUser.accept("ImagePlus export", "Slice "+slice+" done ("+(i+1)+"/"+images.length+")");
+                images[i].setTitle(slice.getName());
                 images[i].show();
-                addRegionsOverlay(i, images[i], slice);
+                addRegionsOverlay(images[i], slice);
             } else {
                 mp.errorMessageForUser.accept("Export to ImageJ Stack error","Error in export of slice "+slice);
             }
@@ -147,26 +145,31 @@ public class ExportSlicesToImageJCommand extends DynamicCommand implements
             }
             image.setOverlay(concatOverlay);
             image.setDimensions(image.getNChannels(), image.getNFrames(), image.getNSlices());
+
+            String[] labels = image.getStack().getSliceLabels();
+            for (int iZ = 0; iZ<image.getNSlices(); iZ++) {
+                for (int iCh = 0; iCh<nChannels; iCh++) {
+                    labels[iZ * image.getNChannels()+iCh] = images[iZ].getTitle();
+                }
+            }
             image.draw();
         } else {
             image = images[0];
             image.draw(); // Let's hope this refreshes the overlay
         }
 
-        image.show();
+        //image.show();
         image.setTitle(image_name);
     }
 
-    private void addRegionsOverlay(int i, ImagePlus image, SliceSources slice) {
+    private void addRegionsOverlay(ImagePlus image, SliceSources slice) {
         if (!naming_choice.equals("Do not add regions")) {
             try {
                 mp.addTask();
                 double atlas_px_in_microns = 1000.0 * mp.getAtlas().getMap().getAtlasPrecisionInMillimeter();
                 double scale = atlas_px_in_microns / (this.px_size_micron);
 
-                if (image.getOverlay() == null) {
-                    image.setOverlay(new Overlay());
-                }
+                image.setOverlay(new Overlay());
 
                 IJShapeRoiArray ijRois = slice.getOriginalAtlasRegions(naming_choice);
                 for (CompositeFloatPoly aRoi : ijRois.rois) {
@@ -180,7 +183,11 @@ public class ExportSlicesToImageJCommand extends DynamicCommand implements
                     double dyInUm = -(-mp.sY / 2.0 - mp.getROI()[1]) * 1000.0;
                     atlas_roi.setLocation(atlas_roi.getXBase() - dxInUm / atlas_px_in_microns, atlas_roi.getYBase() - dyInUm / atlas_px_in_microns);
                     atlas_roi = RoiScaler.scale(atlas_roi, scale, scale, false);
-                    image.getOverlay().add(atlas_roi);
+                    if (atlas_roi!=null) {
+                        image.getOverlay().add(atlas_roi);
+                    } else {
+                        mp.errorMessageForUser.accept("Error in ROI export", "Region "+aRoi.name+" is null!");
+                    }
                 }
             } finally {
                 mp.removeTask();

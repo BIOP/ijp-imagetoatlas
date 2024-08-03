@@ -280,8 +280,6 @@ public class SliceSources {
         computeZThickness();
 
         try {
-
-
             SourceAndConverter rootSac = SourceAndConverterInspector.getRootSourceAndConverter(original_sacs[0]);
             if (SourceAndConverterServices.getSourceAndConverterService()
                     .getMetadata(rootSac, SourceAndConverterService.SPIM_DATA_INFO)==null) {
@@ -308,7 +306,9 @@ public class SliceSources {
 
             }
         } catch(Exception e) {
-            mp.errlog.accept("Couldn't name slice, empty name chosen");
+            name = "Slice name couldn't be found";
+            mp.warningMessageForUser.accept("Slice naming issue", "Couldn't name slice, empty name chosen");
+            e.printStackTrace();
         }
 
     }
@@ -357,11 +357,11 @@ public class SliceSources {
 
     public void setSliceThickness(double zBeginInMm, double zEndInMm) {
         if ((this.slicingAxisPosition<zBeginInMm)||(this.slicingAxisPosition>zEndInMm)) {
-            mp.errlog.accept("Wrong slice position. Cannot set slice bounds");
+            mp.errorMessageForUser.accept("Wrong slice bounds.", "Cannot set slice bounds");
             return;
         }
         if (zBeginInMm>zEndInMm) {
-            mp.errlog.accept("z(End) inferior to z(Begin). Cannot set slice bounds");
+            mp.errorMessageForUser.accept("Wrong slice bounds.", "z(End) inferior to z(Begin). Cannot set slice bounds");
             return;
         }
         setSliceThickness(zEndInMm-zBeginInMm);
@@ -394,7 +394,7 @@ public class SliceSources {
         double currentZSliceOccupancy = Math.abs(pt1.getDoublePosition(2)-pt2.getDoublePosition(2));
 
         if (currentZSliceOccupancy == 0) {
-            mp.errlog.accept("Error : slice thickness is 0! Cannot set slice thickness");
+            mp.errorMessageForUser.accept("Slice thickness error!", "Error : slice thickness is 0! Cannot set slice thickness");
             return;
         }
 
@@ -515,8 +515,8 @@ public class SliceSources {
                 CompletableFuture<Boolean> lastTask = tasks.get(tasks.size()-1);
                 lastTask.get();
             } catch (Exception e) {
+                mp.errorMessageForUser.accept("Tasks were cancelled for slice "+this, "Error:"+e.getMessage());
                 e.printStackTrace();
-                mp.errlog.accept("Tasks were cancelled for slice "+this+" Error:"+e.getMessage());
             }
         }
     }
@@ -672,7 +672,7 @@ public class SliceSources {
 
         boolean out = reg.register();
         if (!out) {
-            mp.errlog.accept(reg.getClass().getSimpleName()+": "+reg.getExceptionMessage());
+            mp.errorMessageForUser.accept("Error during registration", "Registration "+reg.getClass().getSimpleName()+" errored:\n "+reg.getExceptionMessage());
         } else {
             appendRegistration(reg);
         }
@@ -756,7 +756,7 @@ public class SliceSources {
                     actionInProgress = null;
                     postRun.run();
                 } else {
-                    mp.nonBlockingErrorMessageForUser.accept("Action failed", action.toString());
+                    mp.errorMessageForUser.accept("Action failed", action.toString());
                     if (mapActionTask.containsKey(action)) {
                         CompletableFuture future = mapActionTask.get(action);
                         tasks.remove(future);
@@ -856,7 +856,7 @@ public class SliceSources {
             mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.actionCancelFinished(action.getSliceSources(), action, result));
             mp.removeTask();
         } else {
-            mp.errlog.accept("Unregistered action");
+            mp.errorMessageForUser.accept("Can't cancel action", "Unregistered action "+action);
         }
     }
 
@@ -1105,10 +1105,10 @@ public class SliceSources {
             logger.debug("QuPath Project Folder = "+projectFolderPath);
 
             File f = new File(dataEntryFolder, "ABBA-RoiSet-"+mp.getAtlas().getName()+".zip");
-            mp.log.accept("Save slice ROI to quPath project " + f.getAbsolutePath());
+            mp.infoMessageForUser.accept("Export to QuPath", "Save "+this.name+" ROIs to quPath project " + f.getAbsolutePath());
 
             if (f.exists()&&(!erasePreviousFile)) {
-                mp.errlog.accept("Error : QuPath ROI file already exists");
+                mp.errorMessageForUser.accept("Export to QuPath error", "Error : QuPath ROI file already exists");
             }
 
             if ((!f.exists())||(erasePreviousFile)) {
@@ -1120,7 +1120,7 @@ public class SliceSources {
             }
 
         } catch (Exception e) {
-            mp.errlog.accept("Error in QuPath export: "+e.getMessage());
+            mp.errorMessageForUser.accept("Export to QuPath error", "Error in QuPath export: "+e.getMessage()+"\n Please also check the stack trace.");
             e.printStackTrace();
         }
 
@@ -1140,7 +1140,7 @@ public class SliceSources {
             // end of adding the pretransform sequence
             if (fullSequence!=null) {
                 File ftransform = new File(dataEntryFolder, "ABBA-Transform-"+mp.getAtlas().getName()+".json");
-                mp.log.accept("Save transformation to quPath project " + ftransform.getAbsolutePath());
+                mp.infoMessageForUser.accept("Export to Qupath", "Save transformation to quPath project " + ftransform.getAbsolutePath());
                 Gson gson = ScijavaGsonHelper.getGsonBuilder(mp.scijavaCtx, false).setPrettyPrinting().create();
                 String transform_string = gson.toJson(fullSequence, RealTransform.class);
 
@@ -1150,7 +1150,7 @@ public class SliceSources {
                         FileWriter writer = new FileWriter(ftransform.getAbsolutePath());
                         writer.write(transform_string);writer.flush();writer.close();
                     } else {
-                        mp.errlog.accept("Error : Transformation file already exists");
+                        mp.errorMessageForUser.accept("Export to QuPath error", "Error : Transformation file already exists");
                     }
                 } else {
                     FileWriter writer = new FileWriter(ftransform.getAbsolutePath());
@@ -1158,7 +1158,11 @@ public class SliceSources {
                 }
             }
         } catch (Exception e) {
-            mp.errlog.accept("Error while saving transform file!");
+            mp.errorMessageForUser.accept("Export to QuPath error",
+                    "Error while saving transform file!"+
+                    "Message: "+e.getMessage()+"\n"+
+                    "Please also check the stack trace");
+            e.printStackTrace();
         }
 
     }
@@ -1174,7 +1178,7 @@ public class SliceSources {
         for (SourceAndConverter<?> source: original_sacs) {
             // All linked to QuPath ?
             if (!QuPathBdvHelper.isSourceLinkedToQuPath(source)) {
-                mp.errlog.accept("Slice "+this+" not linked to a QuPath dataset");
+                mp.errorMessageForUser.accept("Export to QuPath error!", "Slice "+this+" not linked to a QuPath dataset");
                 return false;
             }
 
@@ -1191,8 +1195,8 @@ public class SliceSources {
                     }
                 }
             } catch (Exception e) {
+                mp.errorMessageForUser.accept("Export to QuPath error", e.getMessage());
                 e.printStackTrace();
-                mp.errlog.accept(e.getMessage());
                 return false;
             };
         }
@@ -1231,7 +1235,7 @@ public class SliceSources {
                     // Save in user specified folder
                     Files.copy(Paths.get(ijroisfile.f.getAbsolutePath()),Paths.get(f.getAbsolutePath()));
                 } else {
-                    mp.errlog.accept("ROI File already exists!");
+                    mp.warningMessageForUser.accept("ROI file not saved", "ROI File already exists!");
                 }
             } else {
                 // Save in user specified folder
@@ -1337,7 +1341,8 @@ public class SliceSources {
             RealTransform current = reg.getTransformAsRealTransform();
 
             if (current == null) {
-                mp.errlog.accept("Error : null registration found!");
+                mp.errorMessageForUser.accept("Error during trnasformation computation",
+                        "Error : null registration found!");
                 return;
             }
 
@@ -1366,7 +1371,7 @@ public class SliceSources {
     private void storeInQuPathProjectIfExists(ImageJRoisFile ijroisfile, boolean erasePreviousFile) {
 
         if (!QuPathBdvHelper.isSourceLinkedToQuPath(original_sacs[0])) {
-            mp.errlog.accept("Slice "+this+" not linked to a QuPath dataset");
+            mp.errorMessageForUser.accept("QuPath export error", "Slice "+this+" not linked to a QuPath dataset");
         }
         File dataEntryFolder = null;
 
@@ -1378,7 +1383,7 @@ public class SliceSources {
             logger.debug("QuPath Project Folder = "+projectFolderPath);
 
             File f = new File(dataEntryFolder, "ABBA-RoiSet-"+mp.getAtlas().getName()+".zip");
-            mp.log.accept("Save slice ROI to quPath project " + f.getAbsolutePath());
+            mp.infoMessageForUser.accept("Export to QuPath","Save slice ROI to quPath project " + f.getAbsolutePath());
 
             if (f.exists()) {
                 if (erasePreviousFile) {
@@ -1400,7 +1405,7 @@ public class SliceSources {
                     //----------------- LEGACY
 
                 } else {
-                    mp.errlog.accept("Error : QuPath ROI file already exists");
+                    mp.errorMessageForUser.accept("Export to QuPath error", "Error : QuPath ROI file already exists");
                 }
             } else {
                 Files.copy(Paths.get(ijroisfile.f.getAbsolutePath()),Paths.get(f.getAbsolutePath()));
@@ -1415,7 +1420,10 @@ public class SliceSources {
                 //----------------- LEGACY
             }
         } catch (Exception e) {
-            mp.errlog.accept("QuPath Entry data folder not found! ");
+            mp.errorMessageForUser.accept("QuPath export error",
+                    "Error mesage: "+e.getMessage()+"\n"+
+                    "Please also check the stack trace");
+            e.printStackTrace();
         }
 
         try {
@@ -1423,7 +1431,7 @@ public class SliceSources {
 
             if (transform!=null) {
                 File ftransform = new File(dataEntryFolder, "ABBA-Transform-"+mp.getAtlas().getName()+".json");
-                mp.log.accept("Save transformation to quPath project " + ftransform.getAbsolutePath());
+                mp.infoMessageForUser.accept("Export to QuPath", "Save transformation to quPath project " + ftransform.getAbsolutePath());
 
                 Gson gson = ScijavaGsonHelper.getGsonBuilder(mp.scijavaCtx, false).setPrettyPrinting().create();
 
@@ -1448,7 +1456,7 @@ public class SliceSources {
                         }
                         //----------------- LEGACY
                     } else {
-                        mp.errlog.accept("Error : Transformation file already exists");
+                        mp.errorMessageForUser.accept("QuPath export", "Error : Transformation file already exists");
                     }
                 } else {
                     FileWriter writer = new FileWriter(ftransform.getAbsolutePath());
@@ -1469,7 +1477,11 @@ public class SliceSources {
                 }
             }
         } catch (Exception e) {
-            mp.errlog.accept("Error while saving transform file!");
+            mp.errorMessageForUser.accept("QuPath export error",
+                    "Error while saving transform file!\n"+
+                    e.getMessage()+"\n"+
+                    "Please also check the stack trace");
+            e.printStackTrace();
         }
 
     }
@@ -1487,7 +1499,8 @@ public class SliceSources {
                 try {
                     URL ontologyURL = mp.getAtlas().getOntology().getDataSource();
                     if (ontologyURL.getFile()==null) {
-                        mp.errlog.accept("No ontology file found at location "+ontologyURL);
+                        mp.errorMessageForUser.accept("Error when writing Atlas ontology",
+                                "No ontology file found at location "+ontologyURL);
                         return;
                     }
                     Path originalOntologyFile = Paths.get(ontologyURL.toURI());
@@ -1579,7 +1592,7 @@ public class SliceSources {
                                      SourcesProcessor preprocessMoving) {
         Registration reg = this.registrations.get(registrations.size() - 1);
         if (RegistrationPluginHelper.isEditable(reg)) {
-            mp.log.accept("Edition will begin when the manual lock is acquired");
+            mp.infoMessageForUser.accept("Edit registration","Edition will begin when the manual lock is acquired");
             synchronized (MultiSlicePositioner.manualActionLock) {
                 this.removeRegistration(reg);
                 // preprocessFixed has an issue...
@@ -1600,7 +1613,7 @@ public class SliceSources {
                 this.appendRegistration(reg);
             }
         } else {
-            mp.log.accept("The last registration of class "+reg.getClass().getSimpleName()+" is not editable.");
+            mp.warningMessageForUser.accept("Registration edition error", "The last registration of class "+reg.getClass().getSimpleName()+" is not editable.");
         }
     }
 

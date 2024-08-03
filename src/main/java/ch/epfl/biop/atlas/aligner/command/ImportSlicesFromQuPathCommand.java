@@ -46,7 +46,6 @@ public class ImportSlicesFromQuPathCommand implements Command {
         try {
             if (increment_between_slices_mm == 0) {
                mp.errorMessageForUser.accept("Spacing between slices: 0", "Please specify a non-zero increment between slices.");
-               mp.errlog.accept("Please specify a non-zero increment between slices.");
                return;
             }
             AbstractSpimData<?> spimdata = (AbstractSpimData<?>) command_service
@@ -57,7 +56,7 @@ public class ImportSlicesFromQuPathCommand implements Command {
                     sac_service.getSourceAndConverterFromSpimdata(spimdata)
                             .toArray(new SourceAndConverter[0]);
 
-            if ((sacs!=null)&&(sacs.length>0)) { // Because the action could have been canceled
+            if (sacs.length>0) { // Because the action could have been canceled
                 mp.createSlice(sacs, slice_axis_initial_mm, increment_between_slices_mm, QuPathEntryIdEntity.class, new QuPathEntryIdEntity(-1));
             }
         } catch (InterruptedException e) {

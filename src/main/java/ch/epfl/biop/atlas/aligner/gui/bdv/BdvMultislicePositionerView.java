@@ -9,6 +9,7 @@ import bdv.util.BdvStackSource;
 import bdv.viewer.Interpolation;
 import bdv.viewer.SourceAndConverter;
 import bdv.viewer.ViewerPanel;
+import bdv.viewer.animate.MessageOverlayAnimator;
 import ch.epfl.biop.ResourcesMonitor;
 import ch.epfl.biop.atlas.aligner.CancelableAction;
 import ch.epfl.biop.atlas.aligner.CreateSliceAction;
@@ -208,8 +209,13 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         JOptionPane.showMessageDialog(new JFrame(), message, title, JOptionPane.WARNING_MESSAGE);
     }
 
+    final MessageOverlayAnimator moa;
+
     private void infoMessageForUser(String title, String message) {
-       JOptionPane.showMessageDialog(new JFrame(), message, title, JOptionPane.INFORMATION_MESSAGE);
+        // Multi-line not supported
+        message = message.replaceAll("\n", " | ");
+        moa.add(title+" | "+message);
+        bdvh.getViewerPanel().getDisplay().repaint();
     }
 
     // Maximum right position of the selected slices
@@ -420,6 +426,16 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
         msp.subscribeToErrorMessages(guiErrorLogger);
         addToCleanUpHook(() -> msp.unSubscribeFromErrorMessages(guiErrorLogger));
+
+        final BiConsumer<String,String> warnLogger = this::warningMessageForUser;
+
+        msp.subscribeToWarningMessages(warnLogger);
+        addToCleanUpHook(() -> msp.unSubscribeFromWarningMessages(warnLogger));
+
+        final BiConsumer<String,String> infoLogger = this::infoMessageForUser;
+
+        msp.subscribeToInfoMessages(infoLogger);
+        addToCleanUpHook(() -> msp.unSubscribeFromInfoMessages(infoLogger));
 
     }
 
@@ -750,7 +766,9 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         this.sX = msp.sX;
         this.sY = msp.sY;
         roiChanged(); // initialize roi
-        //this.displayService = msp.getContext().getService(SourceAndConverterBdvDisplayService.class);
+
+        moa = new MessageOverlayAnimator(8000, 0.0,0.1);
+        bdvh.getViewerPanel().addOverlayAnimator(moa);
 
         excludedKeys.add("X");
         excludedKeys.add("Y");
@@ -961,8 +979,8 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                 stateFileIn = (File) cm.getInput("state_file");
             } else {
                 String extension = FilenameUtils.getExtension(stateFileIn.getAbsolutePath());
-                if ((extension==null)||(extension.trim().equals(""))) {
-                    msp.log.accept("Adding abba extension to state file");
+                if (extension.trim().isEmpty()) {
+                    logger.debug("Adding abba extension to state file");
                     stateFileIn = new File(stateFileIn.getAbsolutePath()+".abba");
                 }
 

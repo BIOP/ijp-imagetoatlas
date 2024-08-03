@@ -29,8 +29,7 @@ public class MirrorDoCommand implements Command {
 
         List<SliceSources> slicesToMirror = mp.getSelectedSlices();
 
-        if (slicesToMirror.size() == 0) {
-            mp.log.accept("No slice selected");
+        if (slicesToMirror.isEmpty()) {
             mp.warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to mirror.");
             return;
         }

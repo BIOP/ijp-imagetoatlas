@@ -49,7 +49,6 @@ public class ExportSlicesOriginalDataToImageJCommand<T extends NativeType<T> & N
         List<SliceSources> slicesToExport = mp.getSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
 
         if (slicesToExport.size()==0) {
-            mp.log.accept("No slice selected");
             mp.warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to export");
             return;
         }
@@ -62,8 +61,7 @@ public class ExportSlicesOriginalDataToImageJCommand<T extends NativeType<T> & N
             int maxIndex = indices.stream().mapToInt(e -> e).max().getAsInt();
 
             if (maxIndex>=mp.getChannelBoundForSelectedSlices()) {
-                mp.log.accept("Missing channel in selected slice(s).");
-                mp.errlog.accept("Missing channel in selected slice(s)\n One selected slice only has "+mp.getChannelBoundForSelectedSlices()+" channel(s).\n Maximum index : "+(mp.getChannelBoundForSelectedSlices()-1) );
+                mp.errorMessageForUser.accept("Missing channel in selected slice(s).","Missing channel in selected slice(s)\n One selected slice only has "+mp.getChannelBoundForSelectedSlices()+" channel(s).\n Maximum index : "+(mp.getChannelBoundForSelectedSlices()-1) );
                 return;
             }
 
@@ -84,7 +82,8 @@ public class ExportSlicesOriginalDataToImageJCommand<T extends NativeType<T> & N
                 index++;
             }
         } catch (Exception e) {
-            mp.errlog.accept(e.getMessage());
+            mp.errorMessageForUser.accept("Error in slices export", "Reason:"+e.getMessage()+" \n Please also check the stack trace.");
+            e.printStackTrace();
         }
     }
 

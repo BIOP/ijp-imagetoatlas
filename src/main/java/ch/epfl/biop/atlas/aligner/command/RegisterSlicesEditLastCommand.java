@@ -46,8 +46,8 @@ public class RegisterSlicesEditLastCommand implements Command {
             List<Integer> indices = Arrays.stream(slices_channels_csv.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
             int maxIndex = indices.stream().mapToInt(e -> e).max().getAsInt();
             if (maxIndex>=mp.getChannelBoundForSelectedSlices()) {
-                mp.log.accept("Missing channel in selected slice(s).");
-                mp.errlog.accept("Missing channel in selected slice(s)\n One selected slice only has "+mp.getChannelBoundForSelectedSlices()+" channel(s).\n Maximum index : "+(mp.getChannelBoundForSelectedSlices()-1) );
+                mp.errorMessageForUser.accept("Missing channel in selected slice(s).",
+                        "Missing channel in selected slice(s)\n One selected slice only has "+mp.getChannelBoundForSelectedSlices()+" channel(s).\n Maximum index : "+(mp.getChannelBoundForSelectedSlices()-1) );
                 return;
             }
             preprocessSlice = new SourcesChannelsSelect(indices);
@@ -58,8 +58,8 @@ public class RegisterSlicesEditLastCommand implements Command {
             int maxIndex = indices.stream().mapToInt(e -> e).max().getAsInt();
             int maxChannelInAtlas = mp.getReslicedAtlas().nonExtendedSlicedSources.length;
             if (maxIndex>=maxChannelInAtlas) {
-                mp.log.accept("Missing channels in atlas.");
-                mp.errlog.accept("The atlas only has "+maxChannelInAtlas+" channel(s).\n Maximum index : "+(maxChannelInAtlas-1) );
+                mp.errorMessageForUser.accept("Missing channels in atlas.",
+                        "The atlas only has "+maxChannelInAtlas+" channel(s).\n Maximum index : "+(maxChannelInAtlas-1) );
                 return;
             }
 

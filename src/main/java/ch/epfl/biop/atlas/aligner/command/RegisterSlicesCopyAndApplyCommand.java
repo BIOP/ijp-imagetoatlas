@@ -45,13 +45,11 @@ public class RegisterSlicesCopyAndApplyCommand implements Command {
         List<SliceSources> selectedSlices = mp.getSelectedSlices();
 
         if (selectedSlices.size()==0) {
-            mp.log.accept("No slice selected");
             mp.warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to register");
             return;
         }
 
         if ((model_slice_index<0)||(model_slice_index>=mp.getSlices().size())) {
-            mp.log.accept("Invalid model slice index");
             mp.warningMessageForUser.accept("Invalid model slice index", "Please enter a valid slice index.");
             return;
         }
@@ -60,7 +58,6 @@ public class RegisterSlicesCopyAndApplyCommand implements Command {
 
         if (selectedSlices.contains(modelSlice)) {
             selectedSlices.remove(modelSlice);
-            mp.log.accept("The registration will not be applied to the model slice.");
             mp.warningMessageForUser.accept("Model slice selected!", "The registration sequence will not be applied to the model slice.");
         }
 

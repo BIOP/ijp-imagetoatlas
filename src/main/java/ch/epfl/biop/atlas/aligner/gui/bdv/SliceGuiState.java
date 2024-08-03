@@ -216,7 +216,7 @@ public class SliceGuiState {
         for (SourceAndConverter<?> source:sources) {
             SourceAndConverterServices
                     .getSourceAndConverterService()
-                    .register(source, "no tree");
+                    .register(source, "no tree"); // GUI lock!
         }
 
         if (sources.length>0) {

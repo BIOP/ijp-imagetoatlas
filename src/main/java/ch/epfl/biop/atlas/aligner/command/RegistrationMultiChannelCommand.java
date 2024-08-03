@@ -43,17 +43,17 @@ abstract public class RegistrationMultiChannelCommand implements Command {
                     .map(Integer::parseInt)
                     .collect(Collectors.toList());
         } catch (NumberFormatException e) {
-            mp.errlog.accept("Number parsing exception "+e.getMessage());
+            mp.errorMessageForUser.accept("Error in numeric input", "Number parsing exception "+e.getMessage());
             return;
         }
 
-        if (atlas_channels.size()==0) {
-            mp.errlog.accept("Error, you did not specify any atlas channel.");
+        if (atlas_channels.isEmpty()) {
+            mp.errorMessageForUser.accept("No Atlas channel", "Error, you did not specify any atlas channel.");
             return;
         }
 
-        if (slice_channels.size()==0) {
-            mp.errlog.accept("Error, you did not specify any slice channel.");
+        if (slice_channels.isEmpty()) {
+            mp.errorMessageForUser.accept("No Slice channel", "Error, you did not specify any slice channel.");
             return;
         }
 
@@ -64,28 +64,25 @@ abstract public class RegistrationMultiChannelCommand implements Command {
         int minIndexSlices = Collections.min(slice_channels);
 
         if (minIndexAtlas<0) {
-            mp.errlog.accept("The atlas channels index should be positive");
+            mp.errorMessageForUser.accept("Negative index!", "The atlas channels index should be positive");
             return;
         }
 
         if (minIndexSlices<0) {
-            mp.errlog.accept("The slices channels index should be positive");
+            mp.errorMessageForUser.accept("Negative index!", "The slices channels index should be positive");
             return;
         }
 
         if (!validationError) {
             if (maxIndexAtlas >=mp.getNumberOfAtlasChannels()) {
-                mp.log.accept("The atlas has only "+mp.getNumberOfAtlasChannels()+" channels!");
                 mp.errorMessageForUser.accept("Issue with channels numbers","The atlas has only "+mp.getNumberOfAtlasChannels()+" channels !\n Maximum index : "+(mp.getNumberOfAtlasChannels()-1));
                 return;
             }
-            if (mp.getSelectedSlices().size()==0) {
-                mp.log.accept("No slice selected");
+            if (mp.getSelectedSlices().isEmpty()) {
                 mp.errorMessageForUser.accept("No selected slice", "Please select the slice(s) you want to register");
                 return;
             }
             if (maxIndexSlices >=mp.getChannelBoundForSelectedSlices()) {
-                mp.log.accept("Missing channel in selected slice(s).");
                 mp.errorMessageForUser.accept("Issue with channels numbers","Missing channel in selected slice(s)\n One selected slice only has "+mp.getChannelBoundForSelectedSlices()+" channel(s).\n Maximum index : "+(mp.getChannelBoundForSelectedSlices()-1) );
                 return;
             }

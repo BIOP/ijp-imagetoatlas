@@ -29,7 +29,7 @@ public class RegisterSlicesElastixAffineCommand extends RegistrationMultiChannel
     public void runValidated() {
 
         if (atlas_channels.size()!=slice_channels.size()) {
-            mp.errlog.accept("The number of slice channel(s) should be equal to the number of atlas channel(s).");
+            mp.errorMessageForUser.accept("Number of channels issue", "The number of slice channel(s) should be equal to the number of atlas channel(s).");
             return;
         }
 
