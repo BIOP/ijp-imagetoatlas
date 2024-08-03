@@ -1,5 +1,6 @@
 package ch.epfl.biop.atlas.aligner.gui.bdv;
 
+import IceInternal.Ex;
 import bdv.util.BdvHandle;
 import bdv.util.source.alpha.IAlphaSource;
 import bdv.viewer.Interpolation;
@@ -27,7 +28,9 @@ import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
 import spimdata.util.Displaysettings;
 
+import java.awt.EventQueue;
 import java.awt.Graphics2D;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -203,29 +206,37 @@ public class SliceGuiState {
     }
 
     private void show() {
-        List<SourceAndConverter<?>> sourcesToDisplay = IntStream.range(0,nChannels)
-                .filter(this::currentlyVisible)
-                .mapToObj(idx -> {
-                    Displaysettings.applyDisplaysettings(sources_displayed[idx], displaysettings[idx]);
-                    return sources_displayed[idx];
-                })
-                .collect(Collectors.toList());
+        synchronized (SliceGuiState.class) {
+            try {
+                EventQueue.invokeLater(() -> {
+                    List<SourceAndConverter<?>> sourcesToDisplay = IntStream.range(0, nChannels)
+                            .filter(this::currentlyVisible)
+                            .mapToObj(idx -> {
+                                Displaysettings.applyDisplaysettings(sources_displayed[idx], displaysettings[idx]);
+                                return sources_displayed[idx];
+                            })
+                            .collect(Collectors.toList());
 
-        SourceAndConverter[] sources = sourcesToDisplay.toArray(new SourceAndConverter[sourcesToDisplay.size()]);
+                    SourceAndConverter[] sources = sourcesToDisplay.toArray(new SourceAndConverter[sourcesToDisplay.size()]);
 
-        for (SourceAndConverter<?> source:sources) {
-            SourceAndConverterServices
-                    .getSourceAndConverterService()
-                    .register(source, "no tree"); // GUI lock!
+                    for (SourceAndConverter<?> source : sources) {
+                        SourceAndConverterServices
+                                .getSourceAndConverterService()
+                                .register(source, "no tree"); // GUI lock!
+                    }
+
+                    if (sources.length > 0) {
+                        SourceAndConverterServices
+                                .getBdvDisplayService()
+                                .show(bdvh, sources);
+                    }
+
+                    bdvh.getViewerPanel().state().addSources(sourcesToDisplay);
+                });
+            }  catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
-
-        if (sources.length>0) {
-            SourceAndConverterServices
-                    .getBdvDisplayService()
-                    .show(bdvh, sources);
-        }
-
-        bdvh.getViewerPanel().state().addSources(sourcesToDisplay);
     }
 
     private void hide() {
