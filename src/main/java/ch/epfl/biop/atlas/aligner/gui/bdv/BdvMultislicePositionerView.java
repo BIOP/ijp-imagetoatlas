@@ -201,8 +201,16 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
     private int iCurrentSlice = 0;
 
+    private long lastErrorMessageTimestampMs = -1;
+    private long delayBetweenMessagesMs = 5000;
+
     private void blockingErrorMessageForUsers(String title, String message) {
-        JOptionPane.showMessageDialog(new JFrame(), message, title, JOptionPane.ERROR_MESSAGE);
+        if ((System.currentTimeMillis()-lastErrorMessageTimestampMs)>delayBetweenMessagesMs) {
+            JOptionPane.showMessageDialog(new JFrame(), message, title, JOptionPane.ERROR_MESSAGE);
+        } else {
+            infoMessageForUser(title, message); // Non blocking
+        }
+        lastErrorMessageTimestampMs = System.currentTimeMillis();
     }
 
     private void warningMessageForUser(String title, String message) {

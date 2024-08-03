@@ -48,7 +48,7 @@ public class ABBABdvStartCommand implements Command, Initializable {
                     .get()
                     .getOutput("mp");
 
-            BdvHandle bdvh = new DefaultBdvSupplier(new SerializableBdvOptions()).get();//. SourceAndConverterServices.getBdvDisplayService().getNewBdv();
+            BdvHandle bdvh = new DefaultBdvSupplier(new SerializableBdvOptions()).get();
             view = new BdvMultislicePositionerView(mp, bdvh);
 
         } catch (Exception e) {
