@@ -776,7 +776,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         roiChanged(); // initialize roi
 
         moa = new MessageOverlayAnimator(8000, 0.0,0.1);
-        bdvh.getViewerPanel().addOverlayAnimator(moa);
+        SwingUtilities.invokeLater(() -> bdvh.getViewerPanel().addOverlayAnimator(moa));
 
         excludedKeys.add("X");
         excludedKeys.add("Y");
