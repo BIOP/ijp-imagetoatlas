@@ -21,6 +21,7 @@ import ch.epfl.biop.atlas.aligner.RegisterSliceAction;
 import ch.epfl.biop.atlas.aligner.ReslicedAtlas;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.atlas.aligner.adapter.AlignerState;
+import ch.epfl.biop.atlas.aligner.command.ABBACheckForUpdateCommand;
 import ch.epfl.biop.atlas.aligner.command.ABBADocumentationCommand;
 import ch.epfl.biop.atlas.aligner.command.ABBAForumHelpCommand;
 import ch.epfl.biop.atlas.aligner.command.ABBAStateLoadCommand;
@@ -403,10 +404,6 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), SetSlicesThicknessCommand.class, hierarchyLevelsSkipped,"mp", msp);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), SetSlicesThicknessMatchNeighborsCommand.class, hierarchyLevelsSkipped,"mp", msp);
 
-        // Help commands
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ABBAForumHelpCommand.class, hierarchyLevelsSkipped);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ABBADocumentationCommand.class, hierarchyLevelsSkipped);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ABBAUserFeedbackCommand.class, hierarchyLevelsSkipped);
 
         if (DeepSliceHelper.isDeepSliceMouseCompatible(msp.getReslicedAtlas().ba.getName())) {
 
@@ -444,6 +441,16 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
         msp.subscribeToInfoMessages(infoLogger);
         addToCleanUpHook(() -> msp.unSubscribeFromInfoMessages(infoLogger));
+
+
+
+        // Help commands
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ABBAForumHelpCommand.class, hierarchyLevelsSkipped);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ABBADocumentationCommand.class, hierarchyLevelsSkipped);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ABBAUserFeedbackCommand.class, hierarchyLevelsSkipped);
+
+        // Update check
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ABBACheckForUpdateCommand.class, hierarchyLevelsSkipped);
 
     }
 
