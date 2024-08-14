@@ -641,7 +641,6 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         tableView = new TableView(this);
         msp.addSliceListener(tableView);
         BdvHandleHelper.addCard(bdvh, "Slices Display", tableView.getPanel(), true);
-        //bdvh.getCardPanel().adCard("Slices Display", tableView.getPanel(), true);
         addToCleanUpHook(() -> {
             tableView.cleanup();
             if (msp!=null) { // Because cleanup is called 2 times. TODO fix double call
