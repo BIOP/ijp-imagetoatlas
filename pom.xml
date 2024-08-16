@@ -107,7 +107,7 @@
 		<main-class>ch.epfl.biop.abba.ABBALaunchMouse</main-class>
 
 		<!-- bdv playground related dependencies -->
-		<bigdataviewer-playground.version>0.10.3</bigdataviewer-playground.version>
+		<bigdataviewer-playground.version>0.10.4</bigdataviewer-playground.version>
 		<bigdataviewer-image-loaders.version>0.8.1</bigdataviewer-image-loaders.version>
 		<bigdataviewer-biop-tools.version>0.10.4</bigdataviewer-biop-tools.version>
 		<bigdataviewer-selector.version>0.2.7</bigdataviewer-selector.version>

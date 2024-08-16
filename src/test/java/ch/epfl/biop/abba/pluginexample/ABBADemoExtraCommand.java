@@ -7,7 +7,7 @@ import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 @SuppressWarnings("unused")
 @Plugin(type = ABBACommand.class,
-        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Plugin>[List slices - Demo ABBA plugin]",
+        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Edit>(Experimental)>[List slices - Demo ABBA plugin]",
         description = "Plugin example for ABBA.")
 public class ABBADemoExtraCommand implements ABBACommand {
 

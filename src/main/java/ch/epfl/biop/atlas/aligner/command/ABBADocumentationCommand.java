@@ -19,7 +19,7 @@ public class ABBADocumentationCommand implements Command {
     @Override
     public void run() {
         try {
-            ps.open(new URL("https://biop.github.io/ijp-imagetoatlas/"));
+            ps.open(new URL("https://abba-documentation.readthedocs.io/"));
         } catch (IOException e) {
             e.printStackTrace();
         }

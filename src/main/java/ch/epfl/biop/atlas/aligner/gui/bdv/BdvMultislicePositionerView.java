@@ -72,6 +72,7 @@ import ch.epfl.biop.atlas.struct.AtlasNode;
 import ch.epfl.biop.bdv.gui.graphicalhandle.GraphicalHandle;
 import ch.epfl.biop.bdv.gui.graphicalhandle.GraphicalHandleListener;
 import ch.epfl.biop.wrappers.deepslice.ij2commands.DeepSlicePrefsSet;
+import ch.epfl.biop.wrappers.ij2command.BiopWrappersSet;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import ij.IJ;
@@ -151,6 +152,15 @@ import static bdv.ui.BdvDefaultCards.DEFAULT_SOURCES_CARD;
 import static bdv.ui.BdvDefaultCards.DEFAULT_VIEWERMODES_CARD;
 
 public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceChangeListener, GraphicalHandleListener, MouseMotionListener, MultiSlicePositioner.MultiSlicePositionerListener {
+
+    final public static String NAME_CARD_ATLAS_INFORMATION = "Atlas Information";
+    final public static String NAME_CARD_ATLAS_DISPLAY = "Atlas Display";
+    final public static String NAME_CARD_DISPLAY_NAVIGATION = "Display & Navigation"; //"Atlas Display";
+    final public static String NAME_CARD_EDIT_SLICES = "Edit Selected Slices";
+    final public static String NAME_CARD_ATLAS_SLICING = "Atlas Slicing";
+    final public static String NAME_CARD_DEFINE_ROI = "Define region of interest for registration";
+    final public static String NAME_CARD_CURRENT_SLICE_INFO = "Current slice info";
+    final public static String NAME_CARD_SLICES_DISPLAY = "Slices Display";
 
     public MultiSlicePositioner msp; // TODO : make accessor
     final BdvHandle bdvh;
@@ -326,106 +336,110 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
     private void installBdvMenu(int hierarchyLevelsSkipped) {
 
-        // Skips 4 levels of hierarchy in scijava command path (Plugins>BIOP>Atlas>Multi Image To Atlas>)
-        // And uses the rest to make the hierarchy of the top menu in the bdv window
-
         // Load and Save state
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"File>ABBA - Save State (+View)",0, () -> new Thread(this::saveState).start());
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"File>ABBA - Load State (+View)",0, () -> new Thread(this::loadState).start());
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"File>Save State (+View)",0, () -> new Thread(this::saveState).start());
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"File>Load State (+View)",0, () -> new Thread(this::loadState).start());
 
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>ABBA - Positioning Mode",0, () -> setDisplayMode(POSITIONING_MODE_INT));
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>ABBA - Review Mode",0, () -> setDisplayMode(REVIEW_MODE_INT));
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>ABBA - Change Overlap Mode [O]",0, this::toggleOverlap);
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>ABBA - Show mouse atlas Position",0, this::showAtlasPosition);
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>ABBA - Hide mouse atlas Position",0, this::hideAtlasPosition);
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>ABBA - Show slice info at mouse position",0, this::showSliceInfo);
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Display>ABBA - Hide slice info at mouse position",0, this::hideSliceInfo);
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Undo [Ctrl+Z]",0, msp::cancelLastAction);
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Redo [Ctrl+Shift+Z]",0, msp::redoAction);
+        BdvScijavaHelper.addSeparator(bdvh,"Edit");
+
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Configuration>Mouse Options>Show Atlas Position",0, this::showAtlasPosition);
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Configuration>Mouse Options>Hide Atlas Position",0, this::hideAtlasPosition);
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Configuration>Mouse Options>Show Slice Info",0, this::showSliceInfo);
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Configuration>Mouse Options>Hide Slice Info",0, this::hideSliceInfo);
+
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Edit>Configuration>Set Elastix & Transformix path", BiopWrappersSet.class);
+
+        // Slice importer
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Import>Import QuPath Project", ImportSlicesFromQuPathCommand.class, "mp", msp );
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Import>Import Current ImageJ Window", ImportSliceFromImagePlusCommand.class, "mp", msp );
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Import>Import With Bio-Formats", ImportSlicesFromFilesCommand.class, "mp", msp );
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Import>Import Sources", ImportSliceFromSourcesCommand.class, "mp", msp );
+
+
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"View>Display Mode>Positioning Mode",0, () -> setDisplayMode(POSITIONING_MODE_INT));
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"View>Display Mode>Review Mode",0, () -> setDisplayMode(REVIEW_MODE_INT));
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"View>Display Mode>Positioning - Change Overlap Mode [O]",0, this::toggleOverlap);
 
         // Cards commands
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Cards>Expand Card Panel",0, () -> bdvh.getSplitPanel().setCollapsed(false));
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Cards>Collapse Card Panel",0, () -> bdvh.getSplitPanel().setCollapsed(true));
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Cards>Add Resources Monitor",0, this::addResourcesMonitor);
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"View>Cards>Expand Card Panel",0, () -> bdvh.getSplitPanel().setCollapsed(false));
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"View>Cards>Collapse Card Panel",0, () -> bdvh.getSplitPanel().setCollapsed(true));
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"View>Cards>Add Resources Monitor",0, this::addResourcesMonitor);
 
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Navigate>ABBA - Next Slice [Right]",0, this::navigateNextSlice);
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Navigate>ABBA - Previous Slice [Left]",0, this::navigatePreviousSlice);
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Navigate>ABBA - Center On Current Slice [C]",0, this::navigateCurrentSlice);
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"View>Navigate>Next Slice [Right]",0, this::navigateNextSlice);
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"View>Navigate>Previous Slice [Left]",0, this::navigatePreviousSlice);
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"View>Navigate>Center On Current Slice [C]",0, this::navigateCurrentSlice);
 
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>ABBA - Undo [Ctrl+Z]",0, msp::cancelLastAction);
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>ABBA - Redo [Ctrl+Shift+Z]",0, msp::redoAction);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), SetSlicesDisplayRangeCommand.class, hierarchyLevelsSkipped,"view", this );
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>ABBA - Select all slices [Ctrl+A]",0,() -> msp.getSlices().forEach(SliceSources::select));
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>ABBA - Deselect all slices [Ctrl+Shift+A]",0,() -> msp.getSlices().forEach(SliceSources::deSelect));
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>ABBA - Remove selected slices",0,() ->
+
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Slices>Select All Slices [Ctrl+A]",0,() -> msp.getSlices().forEach(SliceSources::select));
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Slices>Deselect All Slices [Ctrl+Shift+A]",0,() -> msp.getSlices().forEach(SliceSources::deSelect));
+        BdvScijavaHelper.addSeparator(bdvh,"Slices");
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Slices>Remove Slices",0,() ->
                 msp.getSlices()
                         .stream()
                         .filter(SliceSources::isSelected)
                         .forEach(slice -> new DeleteSliceAction(msp, slice).runRequest())
         );
+        BdvScijavaHelper.addSeparator(bdvh,"Slices");
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Slices>Set Slices Display Range", SetSlicesDisplayRangeCommand.class, "mp", msp );
+        BdvScijavaHelper.addSeparator(bdvh,"Slices");
 
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>ABBA - Distribute spacing [D]",0,() -> {
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Slices>Distribute Slices [D]",0,() -> {
             if (this.mode == POSITIONING_MODE_INT) msp.equalSpacingSelectedSlices();
         });
-
-        // Slice importer
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ImportSlicesFromQuPathCommand.class, hierarchyLevelsSkipped,"mp", msp );
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ImportSliceFromImagePlusCommand.class, hierarchyLevelsSkipped,"mp", msp );
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ImportSlicesFromFilesCommand.class, hierarchyLevelsSkipped,"mp", msp );
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ImportSliceFromSourcesCommand.class, hierarchyLevelsSkipped,"mp", msp );
-
-        logger.debug("Installing java registration plugins ui");
-
-        // Adds registration plugin commands : discovered via scijava plugin autodiscovery mechanism
-        installRegistrationPluginUI(hierarchyLevelsSkipped);
-
-
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RegisterSlicesEditLastCommand.class, hierarchyLevelsSkipped,"mp", msp);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RegisterSlicesRemoveLastCommand.class, hierarchyLevelsSkipped,"mp", msp );
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RegisterSlicesCopyAndApplyCommand.class, hierarchyLevelsSkipped,"mp", msp );
-
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ExportRegionsToRoiManagerCommand.class, hierarchyLevelsSkipped,"mp", msp);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ExportRegionsToRoisetFileCommand.class, hierarchyLevelsSkipped,"mp", msp);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ExportRegistrationToQuPathCommand.class, hierarchyLevelsSkipped,"mp", msp);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ExportSlicesToBDVJsonDatasetCommand.class, hierarchyLevelsSkipped,"mp", msp);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ExportResampledSlicesToBDVSourceCommand.class, hierarchyLevelsSkipped,"mp", msp);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ExportSlicesToBDVCommand.class, hierarchyLevelsSkipped,"mp", msp);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ExportSlicesToImageJCommand.class, hierarchyLevelsSkipped,"mp", msp);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ExportSlicesOriginalDataToImageJCommand.class, hierarchyLevelsSkipped,"mp", msp);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ExportDeformationFieldToImageJCommand.class, hierarchyLevelsSkipped,"mp", msp);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ExportAtlasToImageJCommand.class, hierarchyLevelsSkipped,"mp", msp);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ExportSlicesToQuickNIIDatasetCommand.class, hierarchyLevelsSkipped,"mp", msp);
-
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RotateSlicesCommand.class, hierarchyLevelsSkipped,"mp", msp);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RasterSlicesDeformationCommand.class, hierarchyLevelsSkipped,"mp", msp);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RasterSlicesCommand.class, hierarchyLevelsSkipped,"mp", msp);
-
-
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), SliceAffineTransformCommand.class, hierarchyLevelsSkipped,"mp", msp);
-
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), SetSlicesThicknessCommand.class, hierarchyLevelsSkipped,"mp", msp);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), SetSlicesThicknessMatchNeighborsCommand.class, hierarchyLevelsSkipped,"mp", msp);
-
 
         if (DeepSliceHelper.isDeepSliceMouseCompatible(msp.getReslicedAtlas().ba.getName())) {
 
             logger.debug("Installing DeepSlice Command for Mouse");
-            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), DeepSlicePrefsSet.class, 2);
-            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), DeepSliceDocumentationCommand.class, 2);
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Edit>Configuration>Set DeepSlice Env path", DeepSlicePrefsSet.class);
 
-            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RegisterSlicesDeepSliceWebCommand.class, hierarchyLevelsSkipped, "mp", msp, "model", "mouse");
-            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RegisterSlicesDeepSliceLocalCommand.class, hierarchyLevelsSkipped, "mp", msp, "model", "mouse");
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Register>DeepSlice>DeepSlice Registration (Web)", RegisterSlicesDeepSliceWebCommand.class,  "mp", msp, "model", "mouse");
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Register>DeepSlice>DeepSlice Registration (Local)", RegisterSlicesDeepSliceLocalCommand.class,  "mp", msp, "model", "mouse");
 
         }
 
         if (DeepSliceHelper.isDeepSliceRatCompatible(msp.getReslicedAtlas().ba.getName())) {
 
             logger.debug("Installing DeepSlice Command for Rat");
-            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), DeepSlicePrefsSet.class, 2);
-            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), DeepSliceDocumentationCommand.class, 2);
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Edit>Configuration>DeepSlice setup...", DeepSlicePrefsSet.class, 0);
 
-            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RegisterSlicesDeepSliceWebCommand.class, hierarchyLevelsSkipped, "mp", msp, "model", "rat");
-            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RegisterSlicesDeepSliceLocalCommand.class, hierarchyLevelsSkipped, "mp", msp, "model", "rat");
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Register>DeepSlice>DeepSlice Registration (Web)", RegisterSlicesDeepSliceWebCommand.class, "mp", msp, "model", "rat");
+            BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Register>DeepSlice>DeepSlice Registration (Local)", RegisterSlicesDeepSliceLocalCommand.class, "mp", msp, "model", "rat");
 
         }
+
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Register>Affine>Rotate", RotateSlicesCommand.class, "mp", msp);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Register>Affine>Interactive Transform", SliceAffineTransformCommand.class, "mp", msp);
+
+        logger.debug("Installing java registration plugins ui");
+
+        // Adds registration plugin commands : discovered via scijava plugin autodiscovery mechanism
+        installRegistrationPluginUI(hierarchyLevelsSkipped);
+
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Edit>(Experimental)>Raster and cache deformation field", RasterSlicesDeformationCommand.class, "mp", msp);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Edit>(Experimental)>Raster slice", RasterSlicesCommand.class, "mp", msp);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Edit>(Experimental)>Copy and Apply Registration", RegisterSlicesCopyAndApplyCommand.class, "mp", msp );
+
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export>Set Slices Thickness", SetSlicesThicknessCommand.class, "mp", msp);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export>Set Slices Thickness (fill gaps)", SetSlicesThicknessMatchNeighborsCommand.class, "mp", msp);
+        BdvScijavaHelper.addSeparator(bdvh,"Export");
+
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export> ImageJ > Export Regions To Roi Manager", ExportRegionsToRoiManagerCommand.class, "mp", msp);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export> ImageJ > Export Regions To File", ExportRegionsToRoisetFileCommand.class, "mp", msp);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export> QuPath > Export Registrations To QuPath Project", ExportRegistrationToQuPathCommand.class, "mp", msp);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Edit>(Experimental)> Export > Bdv > Export Registered Slices to BDV Json Dataset", ExportSlicesToBDVJsonDatasetCommand.class, "mp", msp);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Edit>(Experimental)> Export > Bdv > Export Resampled Slices as BDV Source", ExportResampledSlicesToBDVSourceCommand.class, "mp", msp);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export> BigDataViewer > Export Registered Slices to BDV", ExportSlicesToBDVCommand.class, "mp", msp);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export> ImageJ > Export Registered Slices to ImageJ", ExportSlicesToImageJCommand.class, "mp", msp);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export> ImageJ > Export Original Slices to ImageJ", ExportSlicesOriginalDataToImageJCommand.class, "mp", msp);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export> ImageJ > Export Atlas Coordinates of Original Slices to ImageJ", ExportDeformationFieldToImageJCommand.class, "mp", msp);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export> ImageJ > Export Atlas to ImageJ", ExportAtlasToImageJCommand.class, "mp", msp);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Edit>(Experimental)>Export Registered Slices to Quick NII Dataset", ExportSlicesToQuickNIIDatasetCommand.class, "mp", msp);
+
+        BdvScijavaHelper.addSeparator(bdvh,"Register");
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Register>Edit Last Registration", RegisterSlicesEditLastCommand.class, "mp", msp);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Register>Remove Last Registration", RegisterSlicesRemoveLastCommand.class, "mp", msp );
 
         final BiConsumer<String,String> guiErrorLogger = this::blockingErrorMessageForUsers;
 
@@ -442,31 +456,35 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         msp.subscribeToInfoMessages(infoLogger);
         addToCleanUpHook(() -> msp.unSubscribeFromInfoMessages(infoLogger));
 
-
+        // Update check
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Help>Check for updates", ABBACheckForUpdateCommand.class);
 
         // Help commands
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ABBAForumHelpCommand.class, hierarchyLevelsSkipped);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ABBADocumentationCommand.class, hierarchyLevelsSkipped);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ABBAUserFeedbackCommand.class, hierarchyLevelsSkipped);
-
-        // Update check
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), ABBACheckForUpdateCommand.class, hierarchyLevelsSkipped);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Help>Ask for help in the forum (web)", ABBAForumHelpCommand.class);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Help>Go to documentation (web)", ABBADocumentationCommand.class);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Help>Give your feedback (web)", ABBAUserFeedbackCommand.class);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Help>About DeepSlice (web)", DeepSliceDocumentationCommand.class);
 
     }
 
     private void installRegistrationPluginUI(int hierarchyLevelsSkipped) {
 
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RegisterSlicesElastixAffineCommand.class, hierarchyLevelsSkipped,"mp", msp);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RegisterSlicesBigWarpCommand.class, hierarchyLevelsSkipped,"mp", msp);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), RegisterSlicesElastixSplineCommand.class, hierarchyLevelsSkipped,"mp", msp);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), MirrorDoCommand.class, hierarchyLevelsSkipped,"mp", msp);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), MirrorUndoCommand.class, hierarchyLevelsSkipped,"mp", msp);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Register>Affine>Elastix Registration (Affine)", RegisterSlicesElastixAffineCommand.class, "mp", msp);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Register>Spline>BigWarp Registration", RegisterSlicesBigWarpCommand.class, "mp", msp);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Register>Spline>Elastix Registration (Spline)", RegisterSlicesElastixSplineCommand.class, "mp", msp);
+        BdvScijavaHelper.addSeparator(bdvh,"Slices");
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Slices>Mirror Slices", MirrorDoCommand.class, "mp", msp);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Slices>Un-Mirror Slices", MirrorUndoCommand.class, "mp", msp);
+
+        if (!msp.getExternalRegistrationPluginsUI().isEmpty()) {
+            BdvScijavaHelper.addSeparator(bdvh,"Register");
+        }
 
         logger.debug("Installing external registration plugins ui");
         msp.getExternalRegistrationPluginsUI().keySet().forEach(externalRegistrationType ->
             msp.getExternalRegistrationPluginsUI().get(externalRegistrationType).forEach( ui -> {
                         logger.info("External registration plugin "+ui+" added in bdv user interface");
-                        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh, "Align>"+ui, 0, () ->
+                        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh, "Register>"+ui, 0, () ->
                             (msp.getContext().getService(CommandService.class)).run(ui, true, "mp", msp)
                         );
                     }
@@ -474,26 +492,25 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         );
 
 
-        logger.debug("Adding interactive transform");
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh, "Align>ABBA - Interactive Transform", 0, () ->
-            (msp.getContext().getService(CommandService.class)).run(SliceAffineTransformCommand.class, true, "mp", msp)
-        );
-        //BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), SliceAffineTransformCommand.class, hierarchyLevelsSkipped,"mp", msp);
+        //logger.debug("Adding interactive transform");
+        //BdvScijavaHelper.addActionToBdvHandleMenu(bdvh, "Align>ABBA - Interactive Transform", 0, () ->
+        //    (msp.getContext().getService(CommandService.class)).run(SliceAffineTransformCommand.class, true, "mp", msp)
+        //);
 
     }
 
     private void installBigDataViewerCards() {
-        BdvHandleHelper.addCard(bdvh, "Atlas Information", new AtlasInfoPanel(msp).getPanel(), true);
+        BdvHandleHelper.addCard(bdvh, NAME_CARD_ATLAS_INFORMATION, new AtlasInfoPanel(msp).getPanel(), true);
 
         //TODO, FIX NULL
-        BdvHandleHelper.addCard(bdvh, "Atlas Display", ScijavaSwingUI.getPanel(msp.getContext(), AtlasAdjustDisplayCommand.class, "view", this), true);
+        BdvHandleHelper.addCard(bdvh, NAME_CARD_ATLAS_DISPLAY, ScijavaSwingUI.getPanel(msp.getContext(), AtlasAdjustDisplayCommand.class, "view", this), true);
 
         logger.debug("Adding table view");
         addTableView();
 
-        BdvHandleHelper.addCard(bdvh, "Display & Navigation", new NavigationPanel(this).getPanel(), true);
+        BdvHandleHelper.addCard(bdvh, NAME_CARD_DISPLAY_NAVIGATION, new NavigationPanel(this).getPanel(), true);
 
-        BdvHandleHelper.addCard(bdvh, "Edit Selected Slices", new EditPanel(msp).getPanel(), true);
+        BdvHandleHelper.addCard(bdvh, NAME_CARD_EDIT_SLICES, new EditPanel(msp).getPanel(), true);
 
         try {
             Module module = ScijavaSwingUI.createModule(msp.getContext(), AtlasSlicingAdjusterCommand.class, "reslicedAtlas", msp.getReslicedAtlas());
@@ -501,7 +518,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             msp.getContext().inject(swingInputHarvester);
             InputPanel<JPanel, JPanel> inputPanel = new SwingInputPanel();
             swingInputHarvester.buildPanel(inputPanel, module);
-            BdvHandleHelper.addCard(bdvh, "Atlas Slicing", inputPanel.getComponent(), true);
+            BdvHandleHelper.addCard(bdvh, NAME_CARD_ATLAS_SLICING, inputPanel.getComponent(), true);
             msp.getReslicedAtlas().addListener(() -> {
                 inputPanel.getWidget("rotateX").refreshWidget();
                 inputPanel.getWidget("rotateY").refreshWidget();
@@ -510,7 +527,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             msp.errorMessageForUser.accept("GUI Initialisation error", e.getMessage());
         }
 
-        BdvHandleHelper.addCard(bdvh, "Define region of interest",
+        BdvHandleHelper.addCard(bdvh, NAME_CARD_DEFINE_ROI,
                 ScijavaSwingUI.getPanel(msp.getContext(), SliceDefineROICommand.class, "mp", msp, "view", this),
                 false);
 
@@ -518,13 +535,13 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             SwingUtilities.invokeLater(() -> {
             if (bdvh.getCardPanel()!=null) {
 
-                    bdvh.getCardPanel().removeCard("Atlas Information");
-                    bdvh.getCardPanel().removeCard("Atlas Display");
-                    bdvh.getCardPanel().removeCard("Display & Navigation");
-                    bdvh.getCardPanel().removeCard("Edit Selected Slices");
-                    bdvh.getCardPanel().removeCard("Atlas Slicing");
-                    bdvh.getCardPanel().removeCard("Define region of interest");
-                    bdvh.getCardPanel().removeCard("Current slice info");
+                    bdvh.getCardPanel().removeCard(NAME_CARD_ATLAS_INFORMATION);
+                    bdvh.getCardPanel().removeCard(NAME_CARD_ATLAS_DISPLAY);
+                    bdvh.getCardPanel().removeCard(NAME_CARD_DISPLAY_NAVIGATION);
+                    bdvh.getCardPanel().removeCard(NAME_CARD_EDIT_SLICES);
+                    bdvh.getCardPanel().removeCard(NAME_CARD_ATLAS_SLICING);
+                    bdvh.getCardPanel().removeCard(NAME_CARD_DEFINE_ROI);
+                    bdvh.getCardPanel().removeCard(NAME_CARD_CURRENT_SLICE_INFO);
 
             }
             })
@@ -640,12 +657,13 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     private void addTableView() {
         tableView = new TableView(this);
         msp.addSliceListener(tableView);
-        BdvHandleHelper.addCard(bdvh, "Slices Display", tableView.getPanel(), true);
+        BdvHandleHelper.addCard(bdvh, NAME_CARD_SLICES_DISPLAY, tableView.getPanel(), true);
         addToCleanUpHook(() -> {
             tableView.cleanup();
             if (msp!=null) { // Because cleanup is called 2 times. TODO fix double call
                 msp.removeSliceListener(tableView);
             }
+            // TODO: remove card
         });
     }
 
@@ -2280,17 +2298,19 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             DecimalFormat df2 = new DecimalFormat(".0");
             g.drawString("Z: "+df.format(slice.getSlicingAxisPosition()-msp.getReslicedAtlas().getZOffset())+" mm (Thickness: "+df2.format(slice.getThicknessInMm()*1000.0)+" um)", 15, yOffset+20);
             g.drawString(name, 15, yOffset);
-            List<CancelableAction> actions = new ArrayList<>(msp.getActionsFromSlice(slice)); // Copy useful ?
-            actions = AlignerState.filterSerializedActions(actions); // To get rid of useless actions for the user
-            g.setFont(new Font("TimesRoman", Font.PLAIN, 16));
-            int index = 0;
-            for (CancelableAction action : actions) {
-                if ((!(action instanceof MoveSliceAction)) && (!(action instanceof CreateSliceAction))) {
-                    g.drawString(action.toString(), 15, yOffset + 5 + (index + 2) * 15); // -30 because of Bdv message
-                    index++;
+            List<CancelableAction> actionsArray = msp.getActionsFromSlice(slice);
+            if (actionsArray!=null) {
+                List<CancelableAction> actions = new ArrayList<>(actionsArray); // Copy useful ?
+                actions = AlignerState.filterSerializedActions(actions); // To get rid of useless actions for the user
+                g.setFont(new Font("TimesRoman", Font.PLAIN, 16));
+                int index = 0;
+                for (CancelableAction action : actions) {
+                    if ((!(action instanceof MoveSliceAction)) && (!(action instanceof CreateSliceAction))) {
+                        g.drawString(action.toString(), 15, yOffset + 5 + (index + 2) * 15); // -30 because of Bdv message
+                        index++;
+                    }
                 }
             }
-
         }
     }
 

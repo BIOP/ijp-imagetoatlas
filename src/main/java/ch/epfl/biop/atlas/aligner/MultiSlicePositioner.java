@@ -676,6 +676,8 @@ public class MultiSlicePositioner implements Closeable {
                 indexNextKey++;
             }
             new MarkActionSequenceBatchAction(this).runRequest();
+        } else {
+            warningMessageForUser.accept("Can't distribute spacing", "You need to have at least three slices selected.");
         }
     }
 

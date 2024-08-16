@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Plugin(type = ABBACommand.class,
-        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>ABBA - Count the number of ROIS exported",
+        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Edit>(Experimental)>ABBA - Count the number of ROIS exported",
         description = "Export atlas regions nowhere.")
 public class PrintTheNumberOfRoisCommand extends DynamicCommand implements ABBACommand, Initializable {
 
@@ -28,7 +28,7 @@ public class PrintTheNumberOfRoisCommand extends DynamicCommand implements ABBAC
     @Override
     public void run() {
         List<SliceSources> slices = mp.getSelectedSlices();
-        if (slices.size()==0) {
+        if (slices.isEmpty()) {
             mp.errorMessageForUser.accept("No slice selected", "You did not select any slice.");
         } else {
             new MarkActionSequenceBatchAction(mp).runRequest();
