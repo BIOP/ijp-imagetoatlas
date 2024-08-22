@@ -1,4 +1,6 @@
 [![](https://github.com/BIOP/ijp-imagetoatlas/actions/workflows/build-main.yml/badge.svg)](https://github.com/BIOP/ijp-imagetoatlas/actions/workflows/build-main.yml)
+![Windows installer](https://img.shields.io/github/v/release/BIOP/ijp-imagetoatlas?label=Windows%20installer)
+
 
 # ABBA should be used with **QuPath 0.4.4** or **QuPath 0.5.x**
 
