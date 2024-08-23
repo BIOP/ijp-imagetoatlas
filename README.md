@@ -1,6 +1,7 @@
 [![](https://github.com/BIOP/ijp-imagetoatlas/actions/workflows/build-main.yml/badge.svg)](https://github.com/BIOP/ijp-imagetoatlas/actions/workflows/build-main.yml)
 ![Windows installer](https://img.shields.io/github/v/release/BIOP/ijp-imagetoatlas?label=Windows%20installer)
 [![](https://img.shields.io/pypi/v/abba_python.svg)](https://pypi.python.org/pypi/abba_python)
+![Maven Scijava](https://img.shields.io/github/v/tag/BIOP/ijp-imagetoatlas?label=Maven%20Scijava)
 
 
 # ABBA should be used with **QuPath 0.4.4** or **QuPath 0.5.x**
