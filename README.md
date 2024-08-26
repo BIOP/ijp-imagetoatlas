@@ -4,17 +4,16 @@
 [![PyPI Version](https://img.shields.io/pypi/v/abba_python.svg?label=Version-[PyPI])](https://pypi.python.org/pypi/abba_python)
 [![Maven Scijava Version](https://img.shields.io/github/v/tag/BIOP/ijp-imagetoatlas?label=Version-[Maven%20Scijava])](https://maven.scijava.org/#nexus-search;quick~imagetoatlasregister)
 
-
-# ABBA should be used with **QuPath 0.4.4** or **QuPath 0.5.x**
-
-> [!WARNING]  
-> ABBA should be used with **QuPath 0.4.4** (or above). If you are using QuPath 0.4.0, 0.4.1, 0.4.2 or 0.4.3 you NEED TO UPDATE IT!
-
-There was a bug that prevented to import some regions when splitting regions between left and 
-
 # Aligning Big Brains & Atlases
 
 ImageJ/Fiji plugin that align images with the Allen Brain Atlas within Fiji.
 
 Documentation: [https://abba-documentation.readthedocs.io](https://abba-documentation.readthedocs.io/en/latest/)
+
+This repository is the core Java package that runs ABBA on the ImageJ/Fiji side. There are associated repositories:
+- [Documentation](https://github.com/BIOP/abba-documentation)
+- [QuPath extension](https://github.com/BIOP/qupath-extension-abba)
+- [Python wrapper](https://github.com/BIOP/abba_python)
+- [Windows installer generator](https://github.com/BIOP/abba-installer)
+- [BraiAn - **Brai**n **An**alysis for post-registration analysis](https://silvalab.codeberg.page/BraiAn/)
 
