@@ -18,6 +18,9 @@ import ch.epfl.biop.sourceandconverter.processor.SourcesChannelsSelect;
 import ch.epfl.biop.sourceandconverter.processor.SourcesProcessor;
 import ch.epfl.biop.sourceandconverter.processor.SourcesProcessorHelper;
 import com.google.gson.Gson;
+import ij.IJ;
+import ij.ImagePlus;
+import ij.process.ColorProcessor;
 import net.imglib2.realtransform.AffineTransform3D;
 import org.scijava.Context;
 import org.scijava.InstantiableException;
@@ -122,6 +125,18 @@ abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command 
         if (slicesToRegister.isEmpty()) {
             mp.errorMessageForUser.accept("No selected slice", "Please select the slice(s) you want to register");
             return;
+        }
+
+        if (!channels.trim().equals("*")) {
+            List<Integer> indices = Arrays.stream(channels.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
+
+            int maxIndex = indices.stream().mapToInt(e -> e).max().getAsInt();
+
+            if (maxIndex>=mp.getChannelBoundForSelectedSlices()) {
+                mp.errorMessageForUser.accept("Missing channel in selected slice(s).",
+                        "Missing channel in selected slice(s)\n One selected slice only has "+mp.getChannelBoundForSelectedSlices()+" channel(s).\n Maximum index : "+(mp.getChannelBoundForSelectedSlices()-1) );
+                return;
+            }
         }
 
         setPixelSizeFromModel();
@@ -423,21 +438,12 @@ abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command 
 
         if (!channels.trim().equals("*")) {
             List<Integer> indices = Arrays.stream(channels.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
-
-            int maxIndex = indices.stream().mapToInt(e -> e).max().getAsInt();
-
-            if (maxIndex>=mp.getChannelBoundForSelectedSlices()) {
-                mp.errorMessageForUser.accept("Missing channel in selected slice(s).",
-                        "Missing channel in selected slice(s)\n One selected slice only has "+mp.getChannelBoundForSelectedSlices()+" channel(s).\n Maximum index : "+(mp.getChannelBoundForSelectedSlices()-1) );
-                return;
-            }
-
             preprocess = new SourcesChannelsSelect(indices);
         }
 
         try {
 
-            QuickNIIExporter.builder()
+            List<String> filePaths = QuickNIIExporter.builder()
                     .roi(mp.getROI())
                     .cvt8bits(convert_to_8_bits)
                     .jpeg(convert_to_jpg)
@@ -450,6 +456,27 @@ abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command 
                     .create()
                     .export();
 
+            double ratioSaturatedPixelValueThreshold = 0.02; // Should not have saturated pixel in more than 5% of the pixel
+            String message = "";
+            int iSaturatedCounter = 0;
+            for (int i = 0; i< filePaths.size(); i++) {
+                double saturationForImage = calculateSaturatedPixelRatio(IJ.openImage(filePaths.get(i)));
+                if (saturationForImage > ratioSaturatedPixelValueThreshold) {
+                    message += slices.get(i).getName()+" is saturated above "+((int)(ratioSaturatedPixelValueThreshold*100))+" % ("+((int)(saturationForImage*100))+"  %) \n";
+                    iSaturatedCounter++;
+                }
+                if (iSaturatedCounter>20) {
+                    message += "...";
+                    break;
+                }
+            }
+
+            if (!message.isEmpty()) {
+                mp.warningMessageForUser.accept("Slices saturated!", "DeepSlice will run but results won't be optimal. Please change display settings to avoid saturation: \n"+message);
+            } else {
+
+            }
+
         } catch (Exception e) {
             mp.errorMessageForUser.accept("Export to Quick NII dataset error. ", e.getMessage());
         }
@@ -461,6 +488,33 @@ abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command 
         } else if (model.equals("rat")) {
             px_size_micron = 60;
         }
+    }
+
+    // See https://github.com/BIOP/ijp-imagetoatlas/issues/164
+    public static double calculateSaturatedPixelRatio(ImagePlus image) {
+        if (!(image.getProcessor() instanceof ColorProcessor)) {
+            return 0;
+        }
+        ColorProcessor processor = (ColorProcessor) image.getProcessor();
+        int width = processor.getWidth();
+        int height = processor.getHeight();
+        int saturatedPixelCount = 0;
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int pixel = processor.getPixel(x, y);
+                int red = (pixel >> 16) & 0xFF;
+                int green = (pixel >> 8) & 0xFF;
+                int blue = pixel & 0xFF;
+
+                if (red == 255 || green == 255 || blue == 255) {
+                    saturatedPixelCount++;
+                }
+            }
+        }
+
+        double totalPixels = width * height;
+        return (double) saturatedPixelCount / totalPixels;
     }
 
 }
