@@ -22,6 +22,7 @@ import ch.epfl.biop.atlas.aligner.ReslicedAtlas;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.atlas.aligner.adapter.AlignerState;
 import ch.epfl.biop.atlas.aligner.command.ABBACheckForUpdateCommand;
+import ch.epfl.biop.atlas.aligner.command.ABBACiteInfoCommand;
 import ch.epfl.biop.atlas.aligner.command.ABBADocumentationCommand;
 import ch.epfl.biop.atlas.aligner.command.ABBAForumHelpCommand;
 import ch.epfl.biop.atlas.aligner.command.ABBAStateLoadCommand;
@@ -464,6 +465,8 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Help>Go to documentation (web)", ABBADocumentationCommand.class);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Help>Give your feedback (web)", ABBAUserFeedbackCommand.class);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Help>About DeepSlice (web)", DeepSliceDocumentationCommand.class);
+        BdvScijavaHelper.addSeparator(bdvh,"Help");
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Help>How to cite ABBA (web)", ABBACiteInfoCommand.class);
 
     }
 
