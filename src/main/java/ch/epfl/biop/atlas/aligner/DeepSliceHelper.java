@@ -8,36 +8,31 @@ import org.scijava.platform.PlatformService;
 
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class DeepSliceHelper {
+
+    final private static List<String> atlasNameMouseCompatible = new ArrayList<>();
+    final private static List<String> atlasNameRatCompatible = new ArrayList<>();
+
+    public synchronized static void addMouseCompatibleAtlas(String name) {
+        if(!atlasNameMouseCompatible.contains(name)) atlasNameMouseCompatible.add(name);
+    }
+
+    public synchronized static void addRatCompatibleAtlas(String name) {
+        if(!atlasNameRatCompatible.contains(name)) atlasNameRatCompatible.add(name);
+    }
 
     /**
      * @param atlasName either the BrainGlobe API name or the specific Java packaged Atlases
      * @return true if the DeepSlice mouse model will be compatible with this atlas
      */
     public static boolean isDeepSliceMouseCompatible(String atlasName) {
-        switch (atlasName) {
-            case "example_mouse_100um":
-            case "allen_mouse_100um":
-            case "allen_mouse_50um":
-            case "allen_mouse_25um":
-            case "allen_mouse_10um":
-            case "kim_mouse_100um":
-            case "kim_mouse_50um":
-            case "kim_mouse_25um":
-            case "kim_mouse_10um":
-            case "osten_mouse_100um":
-            case "osten_mouse_50um":
-            case "osten_mouse_25um":
-            case "osten_mouse_10um":
-            case "Adult Mouse Brain - Allen Brain Atlas V3":
-            case "Adult Mouse Brain - Allen Brain Atlas V3p1":
-                return true;
-        }
-        return false;
+        return atlasNameMouseCompatible.contains(atlasName);
     }
 
     /**
@@ -46,13 +41,7 @@ public class DeepSliceHelper {
      * @return true if the DeepSlice mouse model will be compatible with this atlas
      */
     public static boolean isDeepSliceRatCompatible(String atlasName) {
-        switch (atlasName) {
-            case "Rat - Waxholm Sprague Dawley V4":
-            case "Rat - Waxholm Sprague Dawley V4p2":
-            case "whs_sd_rat_39um":
-                return true;
-        }
-        return false;
+        return atlasNameRatCompatible.contains(atlasName);
     }
 
     public static File deepSliceLocalRunner(DeepSliceTaskSettings settings, File input_folder) {
