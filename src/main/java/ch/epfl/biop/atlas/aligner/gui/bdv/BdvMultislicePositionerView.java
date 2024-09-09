@@ -471,7 +471,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Help>Give your feedback (web)", ABBAUserFeedbackCommand.class);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Help>About DeepSlice (web)", DeepSliceDocumentationCommand.class);
         BdvScijavaHelper.addSeparator(bdvh,"Help");
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Help>How to cite ABBA (web)", ABBACiteInfoCommand.class);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Help>How to cite ABBA", ABBACiteInfoCommand.class);
 
     }
 
