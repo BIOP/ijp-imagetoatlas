@@ -30,10 +30,10 @@ public class SliceAffineTransformCommand extends InteractiveCommand implements M
     @Parameter(label = "Angle (degrees)", style = "slider,format:0.00,", min = "-180.0", max = "180.0", stepSize = "0.25", persist = false)
     double angle_degrees = Double.MIN_VALUE; // otherwise the slider is not properly initialized...
 
-    @Parameter(label = "Scale X", style = "slider,format:0.00", min = "0.5", max = "2.0", stepSize = "0.01", persist = false)
+    @Parameter(label = "Scale X", style = "slider,format:0.00", min = "0.2", max = "5.0", stepSize = "0.01", persist = false)
     double scale_X = 1.0f;
 
-    @Parameter(label = "Scale Y", style = "slider,format:0.00", min = "0.5", max = "2.0", stepSize = "0.01", persist = false)
+    @Parameter(label = "Scale Y", style = "slider,format:0.00", min = "0.2", max = "5.0", stepSize = "0.01", persist = false)
     double scale_Y = 1.0f;
 
     @Parameter(label = "Translation X (mm)", style = "slider,format:0.00", min = "-10.0", max = "10.0", stepSize = "0.025", persist = false)
