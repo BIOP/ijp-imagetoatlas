@@ -58,7 +58,9 @@ import ch.epfl.biop.atlas.aligner.command.RegisterSlicesElastixAffineCommand;
 import ch.epfl.biop.atlas.aligner.command.RegisterSlicesElastixSplineCommand;
 import ch.epfl.biop.atlas.aligner.command.RegisterSlicesRemoveLastCommand;
 import ch.epfl.biop.atlas.aligner.command.RotateSlicesCommand;
+import ch.epfl.biop.atlas.aligner.command.SetSlicesDeselectedCommand;
 import ch.epfl.biop.atlas.aligner.command.SetSlicesDisplayRangeCommand;
+import ch.epfl.biop.atlas.aligner.command.SetSlicesSelectedCommand;
 import ch.epfl.biop.atlas.aligner.command.SetSlicesThicknessCommand;
 import ch.epfl.biop.atlas.aligner.command.SetSlicesThicknessMatchNeighborsCommand;
 import ch.epfl.biop.atlas.aligner.command.SliceAffineTransformCommand;
@@ -375,6 +377,8 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Slices>Select All Slices [Ctrl+A]",0,() -> msp.getSlices().forEach(SliceSources::select));
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Slices>Deselect All Slices [Ctrl+Shift+A]",0,() -> msp.getSlices().forEach(SliceSources::deSelect));
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(),"Slices>Select Slices", SetSlicesSelectedCommand.class, "mp", msp);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(),"Slices>Deselect Slices", SetSlicesDeselectedCommand.class, "mp", msp);
         BdvScijavaHelper.addSeparator(bdvh,"Slices");
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Slices>Remove Slices",0,() ->
                 msp.getSlices()
