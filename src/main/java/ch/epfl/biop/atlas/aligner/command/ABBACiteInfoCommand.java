@@ -30,7 +30,6 @@ public class ABBACiteInfoCommand implements Command {
     public void run() {
 
         JFrame frame = new JFrame("How to cite");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(450, 350);
         frame.setLocationRelativeTo(null); // Center the window
         frame.setIconImage((new ImageIcon(MultiSlicePositioner.class.getResource("/graphics/ABBAFrame.jpg"))).getImage());
