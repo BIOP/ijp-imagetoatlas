@@ -236,7 +236,11 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     private void infoMessageForUser(String title, String message) {
         // Multi-line not supported
         message = message.replaceAll("\n", " | ");
-        moa.add(title+" | "+message);
+        if (title.isEmpty()) {
+            moa.add(message);
+        } else {
+            moa.add(title+" | "+message);
+        }
         bdvh.getViewerPanel().getDisplay().repaint();
     }
 
@@ -912,7 +916,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         try {
             msp.addTask();
             bdvh.getViewerPanel().requestRepaint();
-            if ((msp.getSlices()!=null)&&(msp.getSlices().size()>0)) {
+            if ((msp.getSlices()!=null)&&(!msp.getSlices().isEmpty())) {
                 msp.errorMessageForUser.accept("Slices are already present!", "You can't open a state file if slices are already present in ABBA.");
                  return;
             }
@@ -921,6 +925,9 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                 blockBdvRepaint();
                 cm = msp.getContext().getService(CommandService.class)
                         .run(ABBAStateLoadCommand.class, true, "mp", msp).get();
+                if ((cm == null) || (cm.getOutput("success") == null)) return;
+                boolean success = (boolean) cm.getOutput("success");
+                if (!success) return;
             } finally {
                 resumeBdvRepaint();
             }
@@ -959,7 +966,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                     }
                     tableView.updateTable();
                 } else {
-                    System.err.println("Cannot restore display slices because other slices are present"); // TODO : could be improved
+                    this.infoMessageForUser("Load state", "Cannot restore display slices!"); // TODO : could be improved
                 }
 
                 if (vs.iCurrentSlice!=null) {
