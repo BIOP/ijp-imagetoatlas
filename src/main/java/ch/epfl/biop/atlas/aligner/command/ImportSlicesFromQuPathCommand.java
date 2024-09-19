@@ -50,7 +50,7 @@ public class ImportSlicesFromQuPathCommand implements Command {
             }
             AbstractSpimData<?> spimdata = (AbstractSpimData<?>) command_service
                     .run(CreateBdvDatasetQuPathCommand.class,true,
-                            "quPathProject", qupath_project,
+                            "qupath_project", qupath_project,
                             "unit", "MILLIMETER").get().getOutput("spimData");
             SourceAndConverter<?>[] sacs =
                     sac_service.getSourceAndConverterFromSpimdata(spimdata)

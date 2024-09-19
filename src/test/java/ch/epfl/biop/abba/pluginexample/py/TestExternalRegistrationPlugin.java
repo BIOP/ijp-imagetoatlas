@@ -57,7 +57,7 @@ public class TestExternalRegistrationPlugin {
         ImagePlus demoSlice = IJ.openImage("src/test/resources/demoSlice.tif");
         demoSlice.show();
 
-        ij.command().run(SourceFromImagePlusCommand.class, true, "imagePlus", demoSlice).get();
+        ij.command().run(SourceFromImagePlusCommand.class, true, "image", demoSlice).get();
 
         SourceAndConverter[] sac = ij.convert().convert(demoSlice.getTitle(), SourceAndConverter[].class);
 

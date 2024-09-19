@@ -46,11 +46,11 @@ public class RegisterSlicesElastixSplineCommand extends RegistrationMultiChannel
 
         //mp.registerElastixSpline(getFixedFilter(), getMovingFilter(), nbControlPointsX, showIJ1Result);
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put("showImagePlusRegistrationResult", show_imageplus_registration_result);
-        parameters.put("nbControlPointsX", nb_control_points_x);
+        parameters.put("show_image_registration", show_imageplus_registration_result);
+        parameters.put("num_ctrl_points_x", nb_control_points_x);
         parameters.put("background_offset_value_moving", background_offset_value_moving);
         parameters.put("background_offset_value_fixed", background_offset_value_fixed);
-        parameters.put("pxSizeInCurrentUnit", pixel_size_micrometer/1000.0);
+        parameters.put("px_size_in_current_unit", pixel_size_micrometer/1000.0);
 
         mp.registerSelectedSlices(Elastix2DSplineRegistration.class,
                 getFixedFilter(),
