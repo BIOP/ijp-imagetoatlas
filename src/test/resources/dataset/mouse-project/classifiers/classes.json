@@ -1,0 +1,392 @@
+{
+  "pathClasses": [
+    {
+      "name": "abhd12",
+      "color": -15127243
+    },
+    {
+      "name": "acaa2",
+      "color": -5242340
+    },
+    {
+      "name": "acbd7",
+      "color": -6826245
+    },
+    {
+      "name": "adh8b",
+      "color": -1830023
+    },
+    {
+      "name": "agpat3",
+      "color": -9535942
+    },
+    {
+      "name": "aldh1l1",
+      "color": -16465136
+    },
+    {
+      "name": "apoa4b.1",
+      "color": -377660
+    },
+    {
+      "name": "apobb.1",
+      "color": -11856375
+    },
+    {
+      "name": "apoc2",
+      "color": -11061996
+    },
+    {
+      "name": "apoeb",
+      "color": -10787436
+    },
+    {
+      "name": "atp1a1b",
+      "color": -6889979
+    },
+    {
+      "name": "capn9",
+      "color": -8497931
+    },
+    {
+      "name": "ccl25b",
+      "color": -6944334
+    },
+    {
+      "name": "cdh5",
+      "color": -14584643
+    },
+    {
+      "name": "cers2asptlc2a",
+      "color": -1899352
+    },
+    {
+      "name": "cers3bNeurod6b",
+      "color": -16518799
+    },
+    {
+      "name": "cers4aSgms1a",
+      "color": -4839037
+    },
+    {
+      "name": "cers5",
+      "color": -13452204
+    },
+    {
+      "name": "cert1a",
+      "color": -8946354
+    },
+    {
+      "name": "cetp",
+      "color": -10862267
+    },
+    {
+      "name": "ch25hl1.1",
+      "color": -9108028
+    },
+    {
+      "name": "chaf1a",
+      "color": -539094
+    },
+    {
+      "name": "chata",
+      "color": -10351752
+    },
+    {
+      "name": "cish",
+      "color": -3455828
+    },
+    {
+      "name": "col11a1b",
+      "color": -11893217
+    },
+    {
+      "name": "col11a2",
+      "color": -1911249
+    },
+    {
+      "name": "coro1a",
+      "color": -359749
+    },
+    {
+      "name": "cyp3c1",
+      "color": -6379165
+    },
+    {
+      "name": "degs1",
+      "color": -15461507
+    },
+    {
+      "name": "dlb",
+      "color": -7027795
+    },
+    {
+      "name": "elavl3",
+      "color": -14691516
+    },
+    {
+      "name": "elovl1b",
+      "color": -3666024
+    },
+    {
+      "name": "elovl4b",
+      "color": -3389021
+    },
+    {
+      "name": "elovl7a",
+      "color": -3536580
+    },
+    {
+      "name": "fabp1b.1",
+      "color": -8332150
+    },
+    {
+      "name": "fabp2",
+      "color": -4330565
+    },
+    {
+      "name": "fabp3",
+      "color": -4318151
+    },
+    {
+      "name": "gad2",
+      "color": -8816154
+    },
+    {
+      "name": "gnb3a",
+      "color": -1076364
+    },
+    {
+      "name": "gpd1b",
+      "color": -1558441
+    },
+    {
+      "name": "gpx4a",
+      "color": -15817921
+    },
+    {
+      "name": "gpx4b",
+      "color": -15800214
+    },
+    {
+      "name": "hells",
+      "color": -10811744
+    },
+    {
+      "name": "hpgd",
+      "color": -1436221
+    },
+    {
+      "name": "hsd11b2",
+      "color": -15788972
+    },
+    {
+      "name": "hsd17b12a",
+      "color": -2992448
+    },
+    {
+      "name": "hsp90aa1.1",
+      "color": -7216129
+    },
+    {
+      "name": "kdsrHbbe1.1",
+      "color": -15763505
+    },
+    {
+      "name": "krt91",
+      "color": -176952
+    },
+    {
+      "name": "lama5",
+      "color": -8374005
+    },
+    {
+      "name": "lbr",
+      "color": -634584
+    },
+    {
+      "name": "lpl",
+      "color": -1641843
+    },
+    {
+      "name": "matn4",
+      "color": -2720072
+    },
+    {
+      "name": "mcm6",
+      "color": -8074739
+    },
+    {
+      "name": "myod1",
+      "color": -5302521
+    },
+    {
+      "name": "neurod1",
+      "color": -3753702
+    },
+    {
+      "name": "neurod4",
+      "color": -3771153
+    },
+    {
+      "name": "nfia",
+      "color": -7188968
+    },
+    {
+      "name": "notch3",
+      "color": -8303433
+    },
+    {
+      "name": "npc2",
+      "color": -14733042
+    },
+    {
+      "name": "otx5",
+      "color": -2926367
+    },
+    {
+      "name": "pax6a",
+      "color": -1827070
+    },
+    {
+      "name": "pcbp4",
+      "color": -2029116
+    },
+    {
+      "name": "phox2bb",
+      "color": -12067429
+    },
+    {
+      "name": "ppap2d",
+      "color": -1007419
+    },
+    {
+      "name": "psap",
+      "color": -7215503
+    },
+    {
+      "name": "ptgdsb.1",
+      "color": -4462952
+    },
+    {
+      "name": "ptgdsb.2",
+      "color": -4505743
+    },
+    {
+      "name": "ptgs2a",
+      "color": -245119
+    },
+    {
+      "name": "ptgs2b",
+      "color": -313401
+    },
+    {
+      "name": "pvalb5",
+      "color": -5870832
+    },
+    {
+      "name": "rrm1",
+      "color": -9749397
+    },
+    {
+      "name": "s100a10a",
+      "color": -5831355
+    },
+    {
+      "name": "scp2a",
+      "color": -14892831
+    },
+    {
+      "name": "sfrp2",
+      "color": -9489424
+    },
+    {
+      "name": "sgms2a",
+      "color": -12617788
+    },
+    {
+      "name": "smpd1",
+      "color": -7929135
+    },
+    {
+      "name": "smpd2a",
+      "color": -4602
+    },
+    {
+      "name": "smpd3",
+      "color": -7888683
+    },
+    {
+      "name": "smpd4",
+      "color": -7876269
+    },
+    {
+      "name": "sox10",
+      "color": -9273961
+    },
+    {
+      "name": "sox11a",
+      "color": -14679429
+    },
+    {
+      "name": "sox11b",
+      "color": -14666760
+    },
+    {
+      "name": "sptlc1",
+      "color": -973286
+    },
+    {
+      "name": "sptlc3Sptlc2b",
+      "color": -11558607
+    },
+    {
+      "name": "tagln",
+      "color": -12764183
+    },
+    {
+      "name": "tfap2c",
+      "color": -7275453
+    },
+    {
+      "name": "tp63",
+      "color": -4728748
+    },
+    {
+      "name": "tpm1",
+      "color": -800351
+    },
+    {
+      "name": "ugt1a1",
+      "color": -3818514
+    },
+    {
+      "name": "ugt8",
+      "color": -5893409
+    },
+    {
+      "name": "zgc",
+      "color": -9483222
+    },
+    {
+      "name": "zwi",
+      "color": -4188691
+    },
+    {
+      "name": "Ignore*",
+      "color": -4934476
+    },
+    {
+      "name": "HighDens",
+      "color": -65536
+    },
+    {
+      "name": "LowDens",
+      "color": -15450696
+    },
+    {
+      "name": "bg",
+      "color": -13421773
+    }
+  ]
+}

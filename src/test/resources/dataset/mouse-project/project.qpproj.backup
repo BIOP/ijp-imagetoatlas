@@ -1,0 +1,1209 @@
+{
+  "version": "0.5.1",
+  "createTimestamp": 1726824070309,
+  "modifyTimestamp": 1726824070309,
+  "uri": "file:/C:/Users/chiarutt/Dropbox/BIOP/ImageToAtlasRegister/src/test/resources/dataset/mouse-project/project.qpproj",
+  "lastID": 20,
+  "images": [
+    {
+      "serverBuilder": {
+        "builderType": "uri",
+        "providerClassName": "qupath.lib.images.servers.bioformats.BioFormatsServerBuilder",
+        "uri": "file:/C:/Users/chiarutt/Dropbox/BIOP/ImageToAtlasRegister/src/test/resources/dataset/mouse-project/Section-01.tif",
+        "args": [
+          "--series",
+          "0"
+        ],
+        "metadata": {
+          "name": "Section-01.tif",
+          "width": 655,
+          "height": 459,
+          "sizeZ": 1,
+          "sizeT": 1,
+          "channelType": "DEFAULT",
+          "isRGB": false,
+          "pixelType": "UINT16",
+          "levels": [
+            {
+              "downsample": 1.0,
+              "width": 655,
+              "height": 459
+            }
+          ],
+          "channels": [
+            {
+              "name": "Channel 1",
+              "color": -65536
+            },
+            {
+              "name": "Channel 2",
+              "color": -16711936
+            }
+          ],
+          "pixelCalibration": {
+            "pixelWidth": {
+              "value": 20.000000000000004,
+              "unit": "µm"
+            },
+            "pixelHeight": {
+              "value": 20.000000000000004,
+              "unit": "µm"
+            },
+            "zSpacing": {
+              "value": 1.0,
+              "unit": "z-slice"
+            },
+            "timeUnit": "SECONDS",
+            "timepoints": []
+          },
+          "preferredTileWidth": 655,
+          "preferredTileHeight": 459
+        }
+      },
+      "entryID": 1,
+      "randomizedName": "e56e5959-ae38-4d61-bd01-399fefc99b67",
+      "imageName": "Section-01.tif",
+      "metadata": {}
+    },
+    {
+      "serverBuilder": {
+        "builderType": "uri",
+        "providerClassName": "qupath.lib.images.servers.bioformats.BioFormatsServerBuilder",
+        "uri": "file:/C:/Users/chiarutt/Dropbox/BIOP/ImageToAtlasRegister/src/test/resources/dataset/mouse-project/Section-02.tif",
+        "args": [
+          "--series",
+          "0"
+        ],
+        "metadata": {
+          "name": "Section-02.tif",
+          "width": 655,
+          "height": 459,
+          "sizeZ": 1,
+          "sizeT": 1,
+          "channelType": "DEFAULT",
+          "isRGB": false,
+          "pixelType": "UINT16",
+          "levels": [
+            {
+              "downsample": 1.0,
+              "width": 655,
+              "height": 459
+            }
+          ],
+          "channels": [
+            {
+              "name": "Channel 1",
+              "color": -65536
+            },
+            {
+              "name": "Channel 2",
+              "color": -16711936
+            }
+          ],
+          "pixelCalibration": {
+            "pixelWidth": {
+              "value": 20.000000000000004,
+              "unit": "µm"
+            },
+            "pixelHeight": {
+              "value": 20.000000000000004,
+              "unit": "µm"
+            },
+            "zSpacing": {
+              "value": 1.0,
+              "unit": "z-slice"
+            },
+            "timeUnit": "SECONDS",
+            "timepoints": []
+          },
+          "preferredTileWidth": 655,
+          "preferredTileHeight": 459
+        }
+      },
+      "entryID": 2,
+      "randomizedName": "e6eb5f60-dfb0-4dcc-b3bc-d5fb4275bbb0",
+      "imageName": "Section-02.tif",
+      "metadata": {}
+    },
+    {
+      "serverBuilder": {
+        "builderType": "uri",
+        "providerClassName": "qupath.lib.images.servers.bioformats.BioFormatsServerBuilder",
+        "uri": "file:/C:/Users/chiarutt/Dropbox/BIOP/ImageToAtlasRegister/src/test/resources/dataset/mouse-project/Section-03.tif",
+        "args": [
+          "--series",
+          "0"
+        ],
+        "metadata": {
+          "name": "Section-03.tif",
+          "width": 655,
+          "height": 459,
+          "sizeZ": 1,
+          "sizeT": 1,
+          "channelType": "DEFAULT",
+          "isRGB": false,
+          "pixelType": "UINT16",
+          "levels": [
+            {
+              "downsample": 1.0,
+              "width": 655,
+              "height": 459
+            }
+          ],
+          "channels": [
+            {
+              "name": "Channel 1",
+              "color": -65536
+            },
+            {
+              "name": "Channel 2",
+              "color": -16711936
+            }
+          ],
+          "pixelCalibration": {
+            "pixelWidth": {
+              "value": 20.000000000000004,
+              "unit": "µm"
+            },
+            "pixelHeight": {
+              "value": 20.000000000000004,
+              "unit": "µm"
+            },
+            "zSpacing": {
+              "value": 1.0,
+              "unit": "z-slice"
+            },
+            "timeUnit": "SECONDS",
+            "timepoints": []
+          },
+          "preferredTileWidth": 655,
+          "preferredTileHeight": 459
+        }
+      },
+      "entryID": 3,
+      "randomizedName": "0e2b1b6d-1d78-40f2-bcd2-cb935dd89228",
+      "imageName": "Section-03.tif",
+      "metadata": {}
+    },
+    {
+      "serverBuilder": {
+        "builderType": "uri",
+        "providerClassName": "qupath.lib.images.servers.bioformats.BioFormatsServerBuilder",
+        "uri": "file:/C:/Users/chiarutt/Dropbox/BIOP/ImageToAtlasRegister/src/test/resources/dataset/mouse-project/Section-04.tif",
+        "args": [
+          "--series",
+          "0"
+        ],
+        "metadata": {
+          "name": "Section-04.tif",
+          "width": 655,
+          "height": 459,
+          "sizeZ": 1,
+          "sizeT": 1,
+          "channelType": "DEFAULT",
+          "isRGB": false,
+          "pixelType": "UINT16",
+          "levels": [
+            {
+              "downsample": 1.0,
+              "width": 655,
+              "height": 459
+            }
+          ],
+          "channels": [
+            {
+              "name": "Channel 1",
+              "color": -65536
+            },
+            {
+              "name": "Channel 2",
+              "color": -16711936
+            }
+          ],
+          "pixelCalibration": {
+            "pixelWidth": {
+              "value": 20.000000000000004,
+              "unit": "µm"
+            },
+            "pixelHeight": {
+              "value": 20.000000000000004,
+              "unit": "µm"
+            },
+            "zSpacing": {
+              "value": 1.0,
+              "unit": "z-slice"
+            },
+            "timeUnit": "SECONDS",
+            "timepoints": []
+          },
+          "preferredTileWidth": 655,
+          "preferredTileHeight": 459
+        }
+      },
+      "entryID": 4,
+      "randomizedName": "87c9ead8-8d8b-45cb-b6b7-b3cdc89d5b6e",
+      "imageName": "Section-04.tif",
+      "metadata": {}
+    },
+    {
+      "serverBuilder": {
+        "builderType": "uri",
+        "providerClassName": "qupath.lib.images.servers.bioformats.BioFormatsServerBuilder",
+        "uri": "file:/C:/Users/chiarutt/Dropbox/BIOP/ImageToAtlasRegister/src/test/resources/dataset/mouse-project/Section-05.tif",
+        "args": [
+          "--series",
+          "0"
+        ],
+        "metadata": {
+          "name": "Section-05.tif",
+          "width": 655,
+          "height": 459,
+          "sizeZ": 1,
+          "sizeT": 1,
+          "channelType": "DEFAULT",
+          "isRGB": false,
+          "pixelType": "UINT16",
+          "levels": [
+            {
+              "downsample": 1.0,
+              "width": 655,
+              "height": 459
+            }
+          ],
+          "channels": [
+            {
+              "name": "Channel 1",
+              "color": -65536
+            },
+            {
+              "name": "Channel 2",
+              "color": -16711936
+            }
+          ],
+          "pixelCalibration": {
+            "pixelWidth": {
+              "value": 20.000000000000004,
+              "unit": "µm"
+            },
+            "pixelHeight": {
+              "value": 20.000000000000004,
+              "unit": "µm"
+            },
+            "zSpacing": {
+              "value": 1.0,
+              "unit": "z-slice"
+            },
+            "timeUnit": "SECONDS",
+            "timepoints": []
+          },
+          "preferredTileWidth": 655,
+          "preferredTileHeight": 459
+        }
+      },
+      "entryID": 5,
+      "randomizedName": "232b0667-af34-4097-b460-07577ebeae44",
+      "imageName": "Section-05.tif",
+      "metadata": {}
+    },
+    {
+      "serverBuilder": {
+        "builderType": "uri",
+        "providerClassName": "qupath.lib.images.servers.bioformats.BioFormatsServerBuilder",
+        "uri": "file:/C:/Users/chiarutt/Dropbox/BIOP/ImageToAtlasRegister/src/test/resources/dataset/mouse-project/Section-06.tif",
+        "args": [
+          "--series",
+          "0"
+        ],
+        "metadata": {
+          "name": "Section-06.tif",
+          "width": 655,
+          "height": 459,
+          "sizeZ": 1,
+          "sizeT": 1,
+          "channelType": "DEFAULT",
+          "isRGB": false,
+          "pixelType": "UINT16",
+          "levels": [
+            {
+              "downsample": 1.0,
+              "width": 655,
+              "height": 459
+            }
+          ],
+          "channels": [
+            {
+              "name": "Channel 1",
+              "color": -65536
+            },
+            {
+              "name": "Channel 2",
+              "color": -16711936
+            }
+          ],
+          "pixelCalibration": {
+            "pixelWidth": {
+              "value": 20.000000000000004,
+              "unit": "µm"
+            },
+            "pixelHeight": {
+              "value": 20.000000000000004,
+              "unit": "µm"
+            },
+            "zSpacing": {
+              "value": 1.0,
+              "unit": "z-slice"
+            },
+            "timeUnit": "SECONDS",
+            "timepoints": []
+          },
+          "preferredTileWidth": 655,
+          "preferredTileHeight": 459
+        }
+      },
+      "entryID": 6,
+      "randomizedName": "193f03ed-9b7c-4571-8ed4-2009427d2231",
+      "imageName": "Section-06.tif",
+      "metadata": {}
+    },
+    {
+      "serverBuilder": {
+        "builderType": "uri",
+        "providerClassName": "qupath.lib.images.servers.bioformats.BioFormatsServerBuilder",
+        "uri": "file:/C:/Users/chiarutt/Dropbox/BIOP/ImageToAtlasRegister/src/test/resources/dataset/mouse-project/Section-07.tif",
+        "args": [
+          "--series",
+          "0"
+        ],
+        "metadata": {
+          "name": "Section-07.tif",
+          "width": 655,
+          "height": 459,
+          "sizeZ": 1,
+          "sizeT": 1,
+          "channelType": "DEFAULT",
+          "isRGB": false,
+          "pixelType": "UINT16",
+          "levels": [
+            {
+              "downsample": 1.0,
+              "width": 655,
+              "height": 459
+            }
+          ],
+          "channels": [
+            {
+              "name": "Channel 1",
+              "color": -65536
+            },
+            {
+              "name": "Channel 2",
+              "color": -16711936
+            }
+          ],
+          "pixelCalibration": {
+            "pixelWidth": {
+              "value": 20.000000000000004,
+              "unit": "µm"
+            },
+            "pixelHeight": {
+              "value": 20.000000000000004,
+              "unit": "µm"
+            },
+            "zSpacing": {
+              "value": 1.0,
+              "unit": "z-slice"
+            },
+            "timeUnit": "SECONDS",
+            "timepoints": []
+          },
+          "preferredTileWidth": 655,
+          "preferredTileHeight": 459
+        }
+      },
+      "entryID": 7,
+      "randomizedName": "e249939b-2de9-4f18-af9f-76dcc3d4e6a9",
+      "imageName": "Section-07.tif",
+      "metadata": {}
+    },
+    {
+      "serverBuilder": {
+        "builderType": "uri",
+        "providerClassName": "qupath.lib.images.servers.bioformats.BioFormatsServerBuilder",
+        "uri": "file:/C:/Users/chiarutt/Dropbox/BIOP/ImageToAtlasRegister/src/test/resources/dataset/mouse-project/Section-08.tif",
+        "args": [
+          "--series",
+          "0"
+        ],
+        "metadata": {
+          "name": "Section-08.tif",
+          "width": 655,
+          "height": 459,
+          "sizeZ": 1,
+          "sizeT": 1,
+          "channelType": "DEFAULT",
+          "isRGB": false,
+          "pixelType": "UINT16",
+          "levels": [
+            {
+              "downsample": 1.0,
+              "width": 655,
+              "height": 459
+            }
+          ],
+          "channels": [
+            {
+              "name": "Channel 1",
+              "color": -65536
+            },
+            {
+              "name": "Channel 2",
+              "color": -16711936
+            }
+          ],
+          "pixelCalibration": {
+            "pixelWidth": {
+              "value": 20.000000000000004,
+              "unit": "µm"
+            },
+            "pixelHeight": {
+              "value": 20.000000000000004,
+              "unit": "µm"
+            },
+            "zSpacing": {
+              "value": 1.0,
+              "unit": "z-slice"
+            },
+            "timeUnit": "SECONDS",
+            "timepoints": []
+          },
+          "preferredTileWidth": 655,
+          "preferredTileHeight": 459
+        }
+      },
+      "entryID": 8,
+      "randomizedName": "dfc734e3-7d85-457f-915f-d64b69c4ef08",
+      "imageName": "Section-08.tif",
+      "metadata": {}
+    },
+    {
+      "serverBuilder": {
+        "builderType": "uri",
+        "providerClassName": "qupath.lib.images.servers.bioformats.BioFormatsServerBuilder",
+        "uri": "file:/C:/Users/chiarutt/Dropbox/BIOP/ImageToAtlasRegister/src/test/resources/dataset/mouse-project/Section-09.tif",
+        "args": [
+          "--series",
+          "0"
+        ],
+        "metadata": {
+          "name": "Section-09.tif",
+          "width": 655,
+          "height": 459,
+          "sizeZ": 1,
+          "sizeT": 1,
+          "channelType": "DEFAULT",
+          "isRGB": false,
+          "pixelType": "UINT16",
+          "levels": [
+            {
+              "downsample": 1.0,
+              "width": 655,
+              "height": 459
+            }
+          ],
+          "channels": [
+            {
+              "name": "Channel 1",
+              "color": -65536
+            },
+            {
+              "name": "Channel 2",
+              "color": -16711936
+            }
+          ],
+          "pixelCalibration": {
+            "pixelWidth": {
+              "value": 20.000000000000004,
+              "unit": "µm"
+            },
+            "pixelHeight": {
+              "value": 20.000000000000004,
+              "unit": "µm"
+            },
+            "zSpacing": {
+              "value": 1.0,
+              "unit": "z-slice"
+            },
+            "timeUnit": "SECONDS",
+            "timepoints": []
+          },
+          "preferredTileWidth": 655,
+          "preferredTileHeight": 459
+        }
+      },
+      "entryID": 9,
+      "randomizedName": "6ea908ed-d2ef-415a-a599-7cd4f2d7b60f",
+      "imageName": "Section-09.tif",
+      "metadata": {}
+    },
+    {
+      "serverBuilder": {
+        "builderType": "uri",
+        "providerClassName": "qupath.lib.images.servers.bioformats.BioFormatsServerBuilder",
+        "uri": "file:/C:/Users/chiarutt/Dropbox/BIOP/ImageToAtlasRegister/src/test/resources/dataset/mouse-project/Section-10.tif",
+        "args": [
+          "--series",
+          "0"
+        ],
+        "metadata": {
+          "name": "Section-10.tif",
+          "width": 655,
+          "height": 459,
+          "sizeZ": 1,
+          "sizeT": 1,
+          "channelType": "DEFAULT",
+          "isRGB": false,
+          "pixelType": "UINT16",
+          "levels": [
+            {
+              "downsample": 1.0,
+              "width": 655,
+              "height": 459
+            }
+          ],
+          "channels": [
+            {
+              "name": "Channel 1",
+              "color": -65536
+            },
+            {
+              "name": "Channel 2",
+              "color": -16711936
+            }
+          ],
+          "pixelCalibration": {
+            "pixelWidth": {
+              "value": 20.000000000000004,
+              "unit": "µm"
+            },
+            "pixelHeight": {
+              "value": 20.000000000000004,
+              "unit": "µm"
+            },
+            "zSpacing": {
+              "value": 1.0,
+              "unit": "z-slice"
+            },
+            "timeUnit": "SECONDS",
+            "timepoints": []
+          },
+          "preferredTileWidth": 655,
+          "preferredTileHeight": 459
+        }
+      },
+      "entryID": 10,
+      "randomizedName": "867126c7-f2c9-4946-b31d-e765e2b824f1",
+      "imageName": "Section-10.tif",
+      "metadata": {}
+    },
+    {
+      "serverBuilder": {
+        "builderType": "uri",
+        "providerClassName": "qupath.lib.images.servers.bioformats.BioFormatsServerBuilder",
+        "uri": "file:/C:/Users/chiarutt/Dropbox/BIOP/ImageToAtlasRegister/src/test/resources/dataset/mouse-project/Section-11.tif",
+        "args": [
+          "--series",
+          "0"
+        ],
+        "metadata": {
+          "name": "Section-11.tif",
+          "width": 655,
+          "height": 459,
+          "sizeZ": 1,
+          "sizeT": 1,
+          "channelType": "DEFAULT",
+          "isRGB": false,
+          "pixelType": "UINT16",
+          "levels": [
+            {
+              "downsample": 1.0,
+              "width": 655,
+              "height": 459
+            }
+          ],
+          "channels": [
+            {
+              "name": "Channel 1",
+              "color": -65536
+            },
+            {
+              "name": "Channel 2",
+              "color": -16711936
+            }
+          ],
+          "pixelCalibration": {
+            "pixelWidth": {
+              "value": 20.000000000000004,
+              "unit": "µm"
+            },
+            "pixelHeight": {
+              "value": 20.000000000000004,
+              "unit": "µm"
+            },
+            "zSpacing": {
+              "value": 1.0,
+              "unit": "z-slice"
+            },
+            "timeUnit": "SECONDS",
+            "timepoints": []
+          },
+          "preferredTileWidth": 655,
+          "preferredTileHeight": 459
+        }
+      },
+      "entryID": 11,
+      "randomizedName": "94f99b97-6388-434e-8265-755635e292df",
+      "imageName": "Section-11.tif",
+      "metadata": {}
+    },
+    {
+      "serverBuilder": {
+        "builderType": "uri",
+        "providerClassName": "qupath.lib.images.servers.bioformats.BioFormatsServerBuilder",
+        "uri": "file:/C:/Users/chiarutt/Dropbox/BIOP/ImageToAtlasRegister/src/test/resources/dataset/mouse-project/Section-12.tif",
+        "args": [
+          "--series",
+          "0"
+        ],
+        "metadata": {
+          "name": "Section-12.tif",
+          "width": 655,
+          "height": 459,
+          "sizeZ": 1,
+          "sizeT": 1,
+          "channelType": "DEFAULT",
+          "isRGB": false,
+          "pixelType": "UINT16",
+          "levels": [
+            {
+              "downsample": 1.0,
+              "width": 655,
+              "height": 459
+            }
+          ],
+          "channels": [
+            {
+              "name": "Channel 1",
+              "color": -65536
+            },
+            {
+              "name": "Channel 2",
+              "color": -16711936
+            }
+          ],
+          "pixelCalibration": {
+            "pixelWidth": {
+              "value": 20.000000000000004,
+              "unit": "µm"
+            },
+            "pixelHeight": {
+              "value": 20.000000000000004,
+              "unit": "µm"
+            },
+            "zSpacing": {
+              "value": 1.0,
+              "unit": "z-slice"
+            },
+            "timeUnit": "SECONDS",
+            "timepoints": []
+          },
+          "preferredTileWidth": 655,
+          "preferredTileHeight": 459
+        }
+      },
+      "entryID": 12,
+      "randomizedName": "a7e2b378-de1e-4038-94aa-1a216ffd3bee",
+      "imageName": "Section-12.tif",
+      "metadata": {}
+    },
+    {
+      "serverBuilder": {
+        "builderType": "uri",
+        "providerClassName": "qupath.lib.images.servers.bioformats.BioFormatsServerBuilder",
+        "uri": "file:/C:/Users/chiarutt/Dropbox/BIOP/ImageToAtlasRegister/src/test/resources/dataset/mouse-project/Section-13.tif",
+        "args": [
+          "--series",
+          "0"
+        ],
+        "metadata": {
+          "name": "Section-13.tif",
+          "width": 655,
+          "height": 459,
+          "sizeZ": 1,
+          "sizeT": 1,
+          "channelType": "DEFAULT",
+          "isRGB": false,
+          "pixelType": "UINT16",
+          "levels": [
+            {
+              "downsample": 1.0,
+              "width": 655,
+              "height": 459
+            }
+          ],
+          "channels": [
+            {
+              "name": "Channel 1",
+              "color": -65536
+            },
+            {
+              "name": "Channel 2",
+              "color": -16711936
+            }
+          ],
+          "pixelCalibration": {
+            "pixelWidth": {
+              "value": 20.000000000000004,
+              "unit": "µm"
+            },
+            "pixelHeight": {
+              "value": 20.000000000000004,
+              "unit": "µm"
+            },
+            "zSpacing": {
+              "value": 1.0,
+              "unit": "z-slice"
+            },
+            "timeUnit": "SECONDS",
+            "timepoints": []
+          },
+          "preferredTileWidth": 655,
+          "preferredTileHeight": 459
+        }
+      },
+      "entryID": 13,
+      "randomizedName": "9b8b45e9-9a35-422a-99bf-7e8b666d7c54",
+      "imageName": "Section-13.tif",
+      "metadata": {}
+    },
+    {
+      "serverBuilder": {
+        "builderType": "uri",
+        "providerClassName": "qupath.lib.images.servers.bioformats.BioFormatsServerBuilder",
+        "uri": "file:/C:/Users/chiarutt/Dropbox/BIOP/ImageToAtlasRegister/src/test/resources/dataset/mouse-project/Section-14.tif",
+        "args": [
+          "--series",
+          "0"
+        ],
+        "metadata": {
+          "name": "Section-14.tif",
+          "width": 655,
+          "height": 459,
+          "sizeZ": 1,
+          "sizeT": 1,
+          "channelType": "DEFAULT",
+          "isRGB": false,
+          "pixelType": "UINT16",
+          "levels": [
+            {
+              "downsample": 1.0,
+              "width": 655,
+              "height": 459
+            }
+          ],
+          "channels": [
+            {
+              "name": "Channel 1",
+              "color": -65536
+            },
+            {
+              "name": "Channel 2",
+              "color": -16711936
+            }
+          ],
+          "pixelCalibration": {
+            "pixelWidth": {
+              "value": 20.000000000000004,
+              "unit": "µm"
+            },
+            "pixelHeight": {
+              "value": 20.000000000000004,
+              "unit": "µm"
+            },
+            "zSpacing": {
+              "value": 1.0,
+              "unit": "z-slice"
+            },
+            "timeUnit": "SECONDS",
+            "timepoints": []
+          },
+          "preferredTileWidth": 655,
+          "preferredTileHeight": 459
+        }
+      },
+      "entryID": 14,
+      "randomizedName": "be2616f0-2fcc-46aa-ab17-f39752431674",
+      "imageName": "Section-14.tif",
+      "metadata": {}
+    },
+    {
+      "serverBuilder": {
+        "builderType": "uri",
+        "providerClassName": "qupath.lib.images.servers.bioformats.BioFormatsServerBuilder",
+        "uri": "file:/C:/Users/chiarutt/Dropbox/BIOP/ImageToAtlasRegister/src/test/resources/dataset/mouse-project/Section-15.tif",
+        "args": [
+          "--series",
+          "0"
+        ],
+        "metadata": {
+          "name": "Section-15.tif",
+          "width": 655,
+          "height": 459,
+          "sizeZ": 1,
+          "sizeT": 1,
+          "channelType": "DEFAULT",
+          "isRGB": false,
+          "pixelType": "UINT16",
+          "levels": [
+            {
+              "downsample": 1.0,
+              "width": 655,
+              "height": 459
+            }
+          ],
+          "channels": [
+            {
+              "name": "Channel 1",
+              "color": -65536
+            },
+            {
+              "name": "Channel 2",
+              "color": -16711936
+            }
+          ],
+          "pixelCalibration": {
+            "pixelWidth": {
+              "value": 20.000000000000004,
+              "unit": "µm"
+            },
+            "pixelHeight": {
+              "value": 20.000000000000004,
+              "unit": "µm"
+            },
+            "zSpacing": {
+              "value": 1.0,
+              "unit": "z-slice"
+            },
+            "timeUnit": "SECONDS",
+            "timepoints": []
+          },
+          "preferredTileWidth": 655,
+          "preferredTileHeight": 459
+        }
+      },
+      "entryID": 15,
+      "randomizedName": "ffff11f3-fcf8-4826-b404-4fa95cf1ab49",
+      "imageName": "Section-15.tif",
+      "metadata": {}
+    },
+    {
+      "serverBuilder": {
+        "builderType": "uri",
+        "providerClassName": "qupath.lib.images.servers.bioformats.BioFormatsServerBuilder",
+        "uri": "file:/C:/Users/chiarutt/Dropbox/BIOP/ImageToAtlasRegister/src/test/resources/dataset/mouse-project/Section-16.tif",
+        "args": [
+          "--series",
+          "0"
+        ],
+        "metadata": {
+          "name": "Section-16.tif",
+          "width": 655,
+          "height": 459,
+          "sizeZ": 1,
+          "sizeT": 1,
+          "channelType": "DEFAULT",
+          "isRGB": false,
+          "pixelType": "UINT16",
+          "levels": [
+            {
+              "downsample": 1.0,
+              "width": 655,
+              "height": 459
+            }
+          ],
+          "channels": [
+            {
+              "name": "Channel 1",
+              "color": -65536
+            },
+            {
+              "name": "Channel 2",
+              "color": -16711936
+            }
+          ],
+          "pixelCalibration": {
+            "pixelWidth": {
+              "value": 20.000000000000004,
+              "unit": "µm"
+            },
+            "pixelHeight": {
+              "value": 20.000000000000004,
+              "unit": "µm"
+            },
+            "zSpacing": {
+              "value": 1.0,
+              "unit": "z-slice"
+            },
+            "timeUnit": "SECONDS",
+            "timepoints": []
+          },
+          "preferredTileWidth": 655,
+          "preferredTileHeight": 459
+        }
+      },
+      "entryID": 16,
+      "randomizedName": "ff454256-6c21-48b6-ab54-cb7e8bc4a414",
+      "imageName": "Section-16.tif",
+      "metadata": {}
+    },
+    {
+      "serverBuilder": {
+        "builderType": "uri",
+        "providerClassName": "qupath.lib.images.servers.bioformats.BioFormatsServerBuilder",
+        "uri": "file:/C:/Users/chiarutt/Dropbox/BIOP/ImageToAtlasRegister/src/test/resources/dataset/mouse-project/Section-17.tif",
+        "args": [
+          "--series",
+          "0"
+        ],
+        "metadata": {
+          "name": "Section-17.tif",
+          "width": 655,
+          "height": 459,
+          "sizeZ": 1,
+          "sizeT": 1,
+          "channelType": "DEFAULT",
+          "isRGB": false,
+          "pixelType": "UINT16",
+          "levels": [
+            {
+              "downsample": 1.0,
+              "width": 655,
+              "height": 459
+            }
+          ],
+          "channels": [
+            {
+              "name": "Channel 1",
+              "color": -65536
+            },
+            {
+              "name": "Channel 2",
+              "color": -16711936
+            }
+          ],
+          "pixelCalibration": {
+            "pixelWidth": {
+              "value": 20.000000000000004,
+              "unit": "µm"
+            },
+            "pixelHeight": {
+              "value": 20.000000000000004,
+              "unit": "µm"
+            },
+            "zSpacing": {
+              "value": 1.0,
+              "unit": "z-slice"
+            },
+            "timeUnit": "SECONDS",
+            "timepoints": []
+          },
+          "preferredTileWidth": 655,
+          "preferredTileHeight": 459
+        }
+      },
+      "entryID": 17,
+      "randomizedName": "f63d280f-329e-4a4e-a8f1-83cb975d92bc",
+      "imageName": "Section-17.tif",
+      "metadata": {}
+    },
+    {
+      "serverBuilder": {
+        "builderType": "uri",
+        "providerClassName": "qupath.lib.images.servers.bioformats.BioFormatsServerBuilder",
+        "uri": "file:/C:/Users/chiarutt/Dropbox/BIOP/ImageToAtlasRegister/src/test/resources/dataset/mouse-project/Section-18.tif",
+        "args": [
+          "--series",
+          "0"
+        ],
+        "metadata": {
+          "name": "Section-18.tif",
+          "width": 655,
+          "height": 459,
+          "sizeZ": 1,
+          "sizeT": 1,
+          "channelType": "DEFAULT",
+          "isRGB": false,
+          "pixelType": "UINT16",
+          "levels": [
+            {
+              "downsample": 1.0,
+              "width": 655,
+              "height": 459
+            }
+          ],
+          "channels": [
+            {
+              "name": "Channel 1",
+              "color": -65536
+            },
+            {
+              "name": "Channel 2",
+              "color": -16711936
+            }
+          ],
+          "pixelCalibration": {
+            "pixelWidth": {
+              "value": 20.000000000000004,
+              "unit": "µm"
+            },
+            "pixelHeight": {
+              "value": 20.000000000000004,
+              "unit": "µm"
+            },
+            "zSpacing": {
+              "value": 1.0,
+              "unit": "z-slice"
+            },
+            "timeUnit": "SECONDS",
+            "timepoints": []
+          },
+          "preferredTileWidth": 655,
+          "preferredTileHeight": 459
+        }
+      },
+      "entryID": 18,
+      "randomizedName": "ea52805d-f30d-4d0d-a81e-e8fd8eb0492c",
+      "imageName": "Section-18.tif",
+      "metadata": {}
+    },
+    {
+      "serverBuilder": {
+        "builderType": "uri",
+        "providerClassName": "qupath.lib.images.servers.bioformats.BioFormatsServerBuilder",
+        "uri": "file:/C:/Users/chiarutt/Dropbox/BIOP/ImageToAtlasRegister/src/test/resources/dataset/mouse-project/Section-19.tif",
+        "args": [
+          "--series",
+          "0"
+        ],
+        "metadata": {
+          "name": "Section-19.tif",
+          "width": 655,
+          "height": 459,
+          "sizeZ": 1,
+          "sizeT": 1,
+          "channelType": "DEFAULT",
+          "isRGB": false,
+          "pixelType": "UINT16",
+          "levels": [
+            {
+              "downsample": 1.0,
+              "width": 655,
+              "height": 459
+            }
+          ],
+          "channels": [
+            {
+              "name": "Channel 1",
+              "color": -65536
+            },
+            {
+              "name": "Channel 2",
+              "color": -16711936
+            }
+          ],
+          "pixelCalibration": {
+            "pixelWidth": {
+              "value": 20.000000000000004,
+              "unit": "µm"
+            },
+            "pixelHeight": {
+              "value": 20.000000000000004,
+              "unit": "µm"
+            },
+            "zSpacing": {
+              "value": 1.0,
+              "unit": "z-slice"
+            },
+            "timeUnit": "SECONDS",
+            "timepoints": []
+          },
+          "preferredTileWidth": 655,
+          "preferredTileHeight": 459
+        }
+      },
+      "entryID": 19,
+      "randomizedName": "3efe24d2-244e-4515-9edd-4554e804b237",
+      "imageName": "Section-19.tif",
+      "metadata": {}
+    },
+    {
+      "serverBuilder": {
+        "builderType": "uri",
+        "providerClassName": "qupath.lib.images.servers.bioformats.BioFormatsServerBuilder",
+        "uri": "file:/C:/Users/chiarutt/Dropbox/BIOP/ImageToAtlasRegister/src/test/resources/dataset/mouse-project/Section-20.tif",
+        "args": [
+          "--series",
+          "0"
+        ],
+        "metadata": {
+          "name": "Section-20.tif",
+          "width": 655,
+          "height": 459,
+          "sizeZ": 1,
+          "sizeT": 1,
+          "channelType": "DEFAULT",
+          "isRGB": false,
+          "pixelType": "UINT16",
+          "levels": [
+            {
+              "downsample": 1.0,
+              "width": 655,
+              "height": 459
+            }
+          ],
+          "channels": [
+            {
+              "name": "Channel 1",
+              "color": -65536
+            },
+            {
+              "name": "Channel 2",
+              "color": -16711936
+            }
+          ],
+          "pixelCalibration": {
+            "pixelWidth": {
+              "value": 20.000000000000004,
+              "unit": "µm"
+            },
+            "pixelHeight": {
+              "value": 20.000000000000004,
+              "unit": "µm"
+            },
+            "zSpacing": {
+              "value": 1.0,
+              "unit": "z-slice"
+            },
+            "timeUnit": "SECONDS",
+            "timepoints": []
+          },
+          "preferredTileWidth": 655,
+          "preferredTileHeight": 459
+        }
+      },
+      "entryID": 20,
+      "randomizedName": "f6d0ef02-1b7c-41b1-b3d7-80682319bbb6",
+      "imageName": "Section-20.tif",
+      "metadata": {}
+    }
+  ]
+}
