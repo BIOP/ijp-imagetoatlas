@@ -88,8 +88,8 @@ public class SliceDefineROICommand extends InteractiveCommand implements Initial
                     inProcess = true;
                     CommandModule cm = cs.run(GetUserRectangleCommand.class, true,
                                     "bdvh", view.getBdvh(),
-                                    "timeOutInMs", -1,
-                                    "messageForUser", "Select the rectangular region of interest.")
+                                    "time_out_in_ms", -1,
+                                    "message_for_user", "Select the rectangular region of interest.")
                             .get();
                     RealPoint p1 = (RealPoint) cm.getOutput("p1");
                     RealPoint p2 = (RealPoint) cm.getOutput("p2");
