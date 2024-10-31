@@ -25,8 +25,7 @@ public class ABBALaunchRat {
 
         MultiSlicePositioner mp = (MultiSlicePositioner) (ij.command()
                 .run(ABBAStartCommand.class, true,
-                        "ba", ratAtlas,
-                        "slicing_mode", "coronal").get().getOutput("mp"));
+                        "ba", ratAtlas).get().getOutput("mp"));
 
         BdvHandle bdvh = SourceAndConverterServices.getBdvDisplayService().getNewBdv();
 

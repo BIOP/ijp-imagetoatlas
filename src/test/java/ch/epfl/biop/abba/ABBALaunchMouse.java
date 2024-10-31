@@ -22,8 +22,7 @@ public class ABBALaunchMouse {
 
         MultiSlicePositioner mp = (MultiSlicePositioner) (ij.command()
                 .run(ABBAStartCommand.class, true,
-                        "ba", mouseAtlas,
-                        "slicing_mode", "coronal").get().getOutput("mp"));
+                        "ba", mouseAtlas).get().getOutput("mp"));
 
         BdvHandle bdvh = SourceAndConverterServices.getBdvDisplayService().getNewBdv();
 

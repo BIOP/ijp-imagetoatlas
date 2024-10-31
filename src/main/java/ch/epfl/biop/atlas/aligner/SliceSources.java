@@ -1594,6 +1594,7 @@ public class SliceSources {
         if (RegistrationPluginHelper.isEditable(reg)) {
             mp.infoMessageForUser.accept("Edit registration","Edition will begin when the manual lock is acquired");
             synchronized (MultiSlicePositioner.manualActionLock) {
+                // mp.infoMessageForUser.accept("Edit registration","Lock acquired!");
                 this.removeRegistration(reg);
                 // preprocessFixed has an issue...
                 reg.setFixedImage(

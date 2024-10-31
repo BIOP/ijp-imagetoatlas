@@ -1,5 +1,5 @@
 {
-  "version": "0.5.1",
+  "version": "0.5.0",
   "createTimestamp": 1726824070309,
   "modifyTimestamp": 1726824070309,
   "uri": "file:/C:/Users/chiarutt/Dropbox/BIOP/ImageToAtlasRegister/src/test/resources/dataset/mouse-project/project.qpproj",
@@ -61,7 +61,7 @@
         }
       },
       "entryID": 1,
-      "randomizedName": "8cf542fe-d7ad-4657-94a1-dce6f055be2d",
+      "randomizedName": "613b78ad-2290-47fa-a31c-259b795bd774",
       "imageName": "Section-01.tif",
       "metadata": {}
     },
@@ -121,7 +121,7 @@
         }
       },
       "entryID": 2,
-      "randomizedName": "b106891e-39b7-402a-954c-82354ab21e69",
+      "randomizedName": "8d3a2cf5-9be1-4403-a255-2b57bf8fff8d",
       "imageName": "Section-02.tif",
       "metadata": {}
     },
@@ -181,7 +181,7 @@
         }
       },
       "entryID": 3,
-      "randomizedName": "f93a7f1f-a614-4afb-b353-b4cd42e2a0fc",
+      "randomizedName": "6c26d825-26d6-4968-82d6-5065d08257d5",
       "imageName": "Section-03.tif",
       "metadata": {}
     },
@@ -241,7 +241,7 @@
         }
       },
       "entryID": 4,
-      "randomizedName": "bf56bf60-ad93-481a-ab42-629cde8a38dd",
+      "randomizedName": "3cfc0dd4-be81-4e10-b999-9e4ba4897f98",
       "imageName": "Section-04.tif",
       "metadata": {}
     },
@@ -301,7 +301,7 @@
         }
       },
       "entryID": 5,
-      "randomizedName": "a989f3c1-bb52-4c50-92a0-58d7eda826a3",
+      "randomizedName": "42e59a4b-9bb3-402e-8b11-b270425a9733",
       "imageName": "Section-05.tif",
       "metadata": {}
     },
@@ -361,7 +361,7 @@
         }
       },
       "entryID": 6,
-      "randomizedName": "ba4c97fd-8ee3-400b-94cd-77c305bf204f",
+      "randomizedName": "fce9af56-0e64-4dc7-aa97-37a53bca0fb2",
       "imageName": "Section-06.tif",
       "metadata": {}
     },
@@ -421,7 +421,7 @@
         }
       },
       "entryID": 7,
-      "randomizedName": "3b87a567-0ea1-452c-bc63-2a404c312341",
+      "randomizedName": "9b9dbe75-fd0e-4236-84bf-86f9f595fc56",
       "imageName": "Section-07.tif",
       "metadata": {}
     },
@@ -481,7 +481,7 @@
         }
       },
       "entryID": 8,
-      "randomizedName": "a3d75c9d-881b-4e01-9520-0a7a917a830c",
+      "randomizedName": "94b1b20f-8fde-467e-84f7-54941045cb39",
       "imageName": "Section-08.tif",
       "metadata": {}
     },
@@ -541,7 +541,7 @@
         }
       },
       "entryID": 9,
-      "randomizedName": "a6d7aed3-5b37-49e9-9e62-21d123032061",
+      "randomizedName": "5185e6a1-a4f6-44fd-9159-6835c9c3e8cf",
       "imageName": "Section-09.tif",
       "metadata": {}
     },
@@ -601,7 +601,7 @@
         }
       },
       "entryID": 10,
-      "randomizedName": "d3206e30-9e0c-4f5e-9db0-6822e2e601a8",
+      "randomizedName": "8d4ab61f-d521-433c-913d-1ed4e27f031d",
       "imageName": "Section-10.tif",
       "metadata": {}
     },
@@ -661,7 +661,7 @@
         }
       },
       "entryID": 11,
-      "randomizedName": "f3b62193-8ae3-49bd-93f7-9158d7112722",
+      "randomizedName": "e39b7e39-2cfc-49a0-b7e1-1b1bc31a398b",
       "imageName": "Section-11.tif",
       "metadata": {}
     },
@@ -721,7 +721,7 @@
         }
       },
       "entryID": 12,
-      "randomizedName": "94cc5fe7-6102-4c03-aab6-8a182504c73a",
+      "randomizedName": "f0addc64-b4ba-4847-9103-967e21b0a51c",
       "imageName": "Section-12.tif",
       "metadata": {}
     },
@@ -781,7 +781,7 @@
         }
       },
       "entryID": 13,
-      "randomizedName": "2bc7b972-4a9b-4b60-84fe-22d027189ca7",
+      "randomizedName": "8d9eb6a0-7070-4832-bbaa-7965d23ed693",
       "imageName": "Section-13.tif",
       "metadata": {}
     },
@@ -841,7 +841,7 @@
         }
       },
       "entryID": 14,
-      "randomizedName": "26bc04df-1835-4cdc-bb1b-4a6b71b985ea",
+      "randomizedName": "51176adb-7934-47db-9d84-8c12ef52a8bc",
       "imageName": "Section-14.tif",
       "metadata": {}
     },
@@ -901,7 +901,7 @@
         }
       },
       "entryID": 15,
-      "randomizedName": "8f28934e-e2b9-4b4a-a4f9-9127064b2bcb",
+      "randomizedName": "2a5a893b-6309-44f6-9883-6661998c6523",
       "imageName": "Section-15.tif",
       "metadata": {}
     },
@@ -961,7 +961,7 @@
         }
       },
       "entryID": 16,
-      "randomizedName": "c2d2f751-9761-49e5-8896-0c66a3853478",
+      "randomizedName": "879a92cb-8702-4e60-8dab-e7a00743d7e2",
       "imageName": "Section-16.tif",
       "metadata": {}
     },
@@ -1021,7 +1021,7 @@
         }
       },
       "entryID": 17,
-      "randomizedName": "d7871cfa-1e79-4440-bb39-70544b08d13a",
+      "randomizedName": "06694a1d-be61-41be-b05c-889680a1bc64",
       "imageName": "Section-17.tif",
       "metadata": {}
     },
@@ -1081,7 +1081,7 @@
         }
       },
       "entryID": 18,
-      "randomizedName": "fbd57434-6f18-4830-8dfb-9a6601f4eeb0",
+      "randomizedName": "7480665f-682d-4fbf-9e41-c513170f4c00",
       "imageName": "Section-18.tif",
       "metadata": {}
     },
@@ -1141,7 +1141,7 @@
         }
       },
       "entryID": 19,
-      "randomizedName": "c1fc1383-4692-43b4-8f20-6be05d7e9eeb",
+      "randomizedName": "200e524a-8f48-47fd-8214-8bf45dcac869",
       "imageName": "Section-19.tif",
       "metadata": {}
     },
@@ -1201,7 +1201,7 @@
         }
       },
       "entryID": 20,
-      "randomizedName": "10080bc2-1c05-45c1-bcbb-82a9d31a889a",
+      "randomizedName": "4f7723a3-41c9-4687-8ba5-38a2e7a2baaf",
       "imageName": "Section-20.tif",
       "metadata": {}
     }

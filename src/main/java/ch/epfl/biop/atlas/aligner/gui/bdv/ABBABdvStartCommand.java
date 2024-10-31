@@ -26,9 +26,6 @@ import javax.swing.JPanel;
         description = "Starts ABBA from an Atlas with a BDV View")
 public class ABBABdvStartCommand implements Command, Initializable {
 
-    @Parameter(choices = {"coronal", "sagittal", "horizontal"})
-    String slicing_mode;
-
     @Parameter
     public Atlas ba;
 
@@ -43,10 +40,14 @@ public class ABBABdvStartCommand implements Command, Initializable {
         try {
             MultiSlicePositioner mp = (MultiSlicePositioner) cs
                 .run(ABBAStartCommand.class, true,
-                    "slicing_mode", slicing_mode,
                     "ba", ba)
                     .get()
                     .getOutput("mp");
+
+            if (mp==null) {
+                System.err.println("Error - could not create multislicepositioner.");
+                return;
+            }
 
             BdvHandle bdvh = new DefaultBdvSupplier(new SerializableBdvOptions()).get();
             view = new BdvMultislicePositionerView(mp, bdvh);

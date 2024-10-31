@@ -531,4 +531,89 @@ public class ReslicedAtlas implements RealInterval {
     public void removeListener(Runnable atlasSlicingListener) {
         listeners.remove(atlasSlicingListener);
     }
+
+    // -----------------------------------
+
+    /**
+     * Specify the transformation to concatenate in order to go from coronal section
+     * to a user defined one.
+     *
+     * @param xAxis "AP", "PA", "RL", "LR", "IS" or "SI"
+     * @param yAxis "AP", "PA", "RL", "LR", "IS" or "SI"
+     * @param zAxis "AP", "PA", "RL", "LR", "IS" or "SI"
+     * @return the transformation to concatenate in order to go from coronal section to the one defined in the arguments
+     * @throws IllegalArgumentException if two axes are the same (singular matrix)
+     */
+    public static AffineTransform3D getTransformFromCoronal(String xAxis, String yAxis, String zAxis) throws IllegalArgumentException {
+        // First, make sure 3 axes are used
+        boolean apUsed = false;
+        boolean rlUsed = false;
+        boolean isUsed = false;
+
+        xAxis = xAxis.trim().toUpperCase();
+        yAxis = yAxis.trim().toUpperCase();
+        zAxis = zAxis.trim().toUpperCase();
+
+        switch (xAxis) {
+            case "AP": case "PA": apUsed = true; break;
+            case "RL": case "LR": rlUsed = true; break;
+            case "IS": case "SI": isUsed = true; break;
+            default: throw new IllegalArgumentException("xAxis is not recognized, it should be chosen within AP, PA, RL, LR, SI or IS");
+        }
+        switch (yAxis) {
+            case "AP": case "PA": apUsed = true; break;
+            case "RL": case "LR": rlUsed = true; break;
+            case "IS": case "SI": isUsed = true; break;
+            default: throw new IllegalArgumentException("xAxis is not recognized, it should be chosen within AP, PA, RL, LR, SI or IS");
+        }
+        switch (zAxis) {
+            case "AP": case "PA": apUsed = true; break;
+            case "RL": case "LR": rlUsed = true; break;
+            case "IS": case "SI": isUsed = true; break;
+            default: throw new IllegalArgumentException("xAxis is not recognized, it should be chosen within AP, PA, RL, LR, SI or IS");
+        }
+
+        if (!((apUsed)&&(rlUsed)&&(isUsed))) {
+            throw new IllegalArgumentException("Singular matrix, please use all axes");
+        }
+
+        double m00 = 0, m01=0, m02=0, m10=0, m11=0, m12=0, m20=0, m21=0, m22=0;
+
+        switch (xAxis) {
+            case "AP": m20 = 1; break;
+            case "PA": m20 = -1; break;
+            case "RL": m00 = 1; break;
+            case "LR": m00 = -1; break;
+            case "SI": m10 = 1; break;
+            case "IS": m10 = -1; break;
+        }
+
+        switch (yAxis) {
+            case "AP": m21 = 1; break;
+            case "PA": m21 = -1; break;
+            case "RL": m01 = 1; break;
+            case "LR": m01 = -1; break;
+            case "SI": m11 = 1; break;
+            case "IS": m11 = -1; break;
+        }
+
+        switch (zAxis) {
+            case "AP": m22 = 1; break;
+            case "PA": m22 = -1; break;
+            case "RL": m02 = 1; break;
+            case "LR": m02 = -1; break;
+            case "SI": m12 = 1; break;
+            case "IS": m12 = -1; break;
+        }
+
+        AffineTransform3D transform3D = new AffineTransform3D();
+        transform3D.set(
+            m00, m01, m02, 0,
+            m10, m11, m12, 0,
+            m20, m21, m22, 0
+        );
+
+        return transform3D;
+    }
+
 }
