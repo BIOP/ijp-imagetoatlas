@@ -1170,7 +1170,7 @@ public class SliceSources {
     private boolean simpleQuPathExportCase() {
         // It is a simple case of export if:
         // - All sources from this slice are DIRECTLY coming a from single QuPath entry
-        // - DIRECTLY means that the slices are not warped or wrapped into transfomed sources beforehand
+        // - DIRECTLY means that the slices are not warped or wrapped into transformed sources beforehand
 
         File dataEntryFolder = null;
 
