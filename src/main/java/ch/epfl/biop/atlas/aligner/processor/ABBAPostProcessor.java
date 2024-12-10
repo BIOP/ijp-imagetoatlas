@@ -7,6 +7,7 @@ import ch.epfl.biop.atlas.aligner.command.DisplaySettingsCommand;
 import ch.epfl.biop.atlas.aligner.gui.bdv.ABBABdvShortCommand;
 import ch.epfl.biop.atlas.aligner.gui.bdv.ABBABdvStartCommand;
 import ch.epfl.biop.atlas.mouse.allen.ccfv3p1.command.AllenBrainAdultMouseAtlasCCF2017v3p1Command;
+import ch.epfl.biop.atlas.mouse.allen.ccfv3p1asr.command.AllenBrainAdultMouseAtlasCCF2017v3p1ASRCommand;
 import ch.epfl.biop.atlas.scijava.AtlasChooserCommand;
 import ch.epfl.biop.bdv.img.omero.command.OmeroConnectCommand;
 import ch.epfl.biop.scijava.command.bdv.userdefinedregion.GetUserRectangleCommand;
@@ -58,6 +59,7 @@ public class ABBAPostProcessor extends AbstractPostprocessorPlugin {
                 checkedCommands.add(GetUserRectangleCommand.class.getName());
                 checkedCommands.add(DisplaySettingsCommand.class.getName());
                 checkedCommands.add(OmeroConnectCommand.class.getName());
+                checkedCommands.add(AllenBrainAdultMouseAtlasCCF2017v3p1ASRCommand.class.getName());
                 initialized = true;
             }
         }
