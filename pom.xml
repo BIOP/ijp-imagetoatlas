@@ -130,7 +130,7 @@
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>sign,deploy-to-scijava</releaseProfiles>
 
-		<!-- <scijava.app.directory>C:/Fiji.app</scijava.app.directory> -->
+		<scijava.app.directory>C:/fiji-win64/Fiji.app</scijava.app.directory>
 		<!-- scijava.app.directory>C:/Users/nicol/Dropbox/BIOP/ABBA-Python/constructor/Fiji.app</scijava.app.directory -->
 		<!-- package version below are determined by the parent pom but need to be upgraded or temporarily fixed for bugs -->
 
@@ -174,6 +174,12 @@
 			<groupId>net.imagej</groupId>
 			<artifactId>imagej-omero</artifactId>
 			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>ch.epfl.biop</groupId>
+			<artifactId>bigdataviewer-selector</artifactId>
+			<version>${bigdataviewer-selector.version}</version>
 		</dependency>
 
 		<dependency>
