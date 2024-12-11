@@ -1,0 +1,88 @@
+{
+  "builderType": "uri",
+  "providerClassName": "qupath.ext.omero.core.imageserver.OmeroImageServerBuilder",
+  "uri": "https://omero-tim.gerbi-gmb.de/webclient/?show\u003dimage-90654",
+  "args": [
+    "--pixelAPI",
+    "Ice",
+    "--serverAddress",
+    "",
+    "--serverPort",
+    "0"
+  ],
+  "metadata": {
+    "name": "Slide_01.vsi [10x_03]",
+    "width": 12468,
+    "height": 8287,
+    "sizeZ": 1,
+    "sizeT": 1,
+    "channelType": "DEFAULT",
+    "isRGB": false,
+    "pixelType": "UINT16",
+    "levels": [
+      {
+        "downsample": 1.0,
+        "width": 12468,
+        "height": 8287
+      },
+      {
+        "downsample": 2.0,
+        "width": 6234,
+        "height": 4143
+      },
+      {
+        "downsample": 4.0,
+        "width": 3117,
+        "height": 2071
+      },
+      {
+        "downsample": 7.997434252726106,
+        "width": 1559,
+        "height": 1036
+      },
+      {
+        "downsample": 15.984615384615383,
+        "width": 780,
+        "height": 518
+      },
+      {
+        "downsample": 31.969230769230766,
+        "width": 390,
+        "height": 259
+      }
+    ],
+    "channels": [
+      {
+        "name": "FL DAPI",
+        "color": -16776961
+      },
+      {
+        "name": "FL FITC",
+        "color": -16711936
+      },
+      {
+        "name": "FL CY3",
+        "color": -65536
+      }
+    ],
+    "pixelCalibration": {
+      "pixelWidth": {
+        "value": 0.6444174492866346,
+        "unit": "µm"
+      },
+      "pixelHeight": {
+        "value": 0.6444045441588437,
+        "unit": "µm"
+      },
+      "zSpacing": {
+        "value": 1.0,
+        "unit": "z-slice"
+      },
+      "timeUnit": "SECONDS",
+      "timepoints": []
+    },
+    "magnification": 10.0,
+    "preferredTileWidth": 512,
+    "preferredTileHeight": 512
+  }
+}
