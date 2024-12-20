@@ -5,13 +5,13 @@
 	<parent>
 		<groupId>org.scijava</groupId>
 		<artifactId>pom-scijava</artifactId>
-		<version>38.0.1</version>
+		<version>39.0.0</version>
 		<relativePath />
 	</parent>
 
 	<groupId>ch.epfl.biop</groupId>
 	<artifactId>ImageToAtlasRegister</artifactId>
-	<version>0.9.12-SNAPSHOT</version>
+	<version>0.10.0-SNAPSHOT</version>
 
 	<name>Plugin To Register Images to Atlases</name>
 	<description>Collection of tools to register images to atlases in Fiji.</description>
@@ -107,16 +107,16 @@
 		<main-class>ch.epfl.biop.abba.ABBALaunchMouse</main-class>
 
 		<!-- bdv playground related dependencies -->
-		<bigdataviewer-playground.version>0.10.10</bigdataviewer-playground.version>
-		<bigdataviewer-image-loaders.version>0.8.9</bigdataviewer-image-loaders.version>
-		<bigdataviewer-biop-tools.version>0.10.9</bigdataviewer-biop-tools.version>
+		<bigdataviewer-playground.version>0.11.0</bigdataviewer-playground.version>
+		<bigdataviewer-image-loaders.version>0.9.0</bigdataviewer-image-loaders.version>
+		<bigdataviewer-biop-tools.version>0.11.0</bigdataviewer-biop-tools.version>
 		<bigdataviewer-selector.version>0.2.7</bigdataviewer-selector.version>
 
 		<!-- maths -->
 		<leastsquares.version>1.0.0</leastsquares.version>
 
 		<!-- ABBA specific -->
-		<atlas.version>0.2.4</atlas.version>
+		<atlas.version>0.3.0</atlas.version>
 		<oshi-core.version>5.5.1</oshi-core.version>
 
 		<!--because xml deserialization with JAXB is not included in Java 11, and we prepare migrating to Java 11 -->
