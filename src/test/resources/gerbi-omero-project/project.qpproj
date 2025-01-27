@@ -1,5 +1,5 @@
 {
-  "version": "0.6.0-rc3",
+  "version": "0.5.1",
   "createTimestamp": 1733912632465,
   "modifyTimestamp": 1733912632465,
   "uri": "file:/C:/Users/chiarutt/Dropbox/BIOP/ImageToAtlasRegister/src/test/resources/gerbi-omero-project/project.qpproj",
@@ -90,7 +90,7 @@
         }
       },
       "entryID": 1,
-      "randomizedName": "3b14c21a-b77f-4c79-b5f3-cdb2ca8f287f",
+      "randomizedName": "9ca9d0c1-e56a-49d6-999f-2ad0319ba04c",
       "imageName": "Slide_00.vsi [10x_01]",
       "metadata": {}
     },
@@ -179,7 +179,7 @@
         }
       },
       "entryID": 2,
-      "randomizedName": "6357e3d6-42e4-4d0f-8865-65050ea1e83a",
+      "randomizedName": "1e8cd3a6-40d4-4a6b-8813-d78a188e737e",
       "imageName": "Slide_00.vsi [10x_05]",
       "metadata": {}
     },
@@ -273,7 +273,7 @@
         }
       },
       "entryID": 3,
-      "randomizedName": "83492124-0b3f-44ed-a751-daf94def0d90",
+      "randomizedName": "d71126bf-7e5b-458a-89f9-947360ec0e40",
       "imageName": "Slide_00.vsi [10x_09]",
       "metadata": {}
     },
@@ -367,7 +367,7 @@
         }
       },
       "entryID": 4,
-      "randomizedName": "8017efe4-b6ce-498a-bad8-5e3c36e1ec0c",
+      "randomizedName": "e155c52c-c81d-4208-bc86-d348dd6c5517",
       "imageName": "Slide_00.vsi [10x_13]",
       "metadata": {}
     },
@@ -461,7 +461,7 @@
         }
       },
       "entryID": 5,
-      "randomizedName": "658e8003-c04f-45ef-9199-749bd61398a0",
+      "randomizedName": "9af0d729-531e-481b-9935-501b0645f0a5",
       "imageName": "Slide_00.vsi [10x_17]",
       "metadata": {}
     },
@@ -555,7 +555,7 @@
         }
       },
       "entryID": 6,
-      "randomizedName": "dc5bedac-6cac-41d8-ad58-44e56a638635",
+      "randomizedName": "36c47ba5-56e7-4bf1-9a95-c1ec189b898f",
       "imageName": "Slide_00.vsi [10x_21]",
       "metadata": {}
     },
@@ -649,7 +649,7 @@
         }
       },
       "entryID": 7,
-      "randomizedName": "51d36554-fe79-4adb-9853-82b31e731cbc",
+      "randomizedName": "dabd14a9-6d99-46ae-ab20-7dbf1995661e",
       "imageName": "Slide_01.vsi [10x_03]",
       "metadata": {}
     },
@@ -743,7 +743,7 @@
         }
       },
       "entryID": 8,
-      "randomizedName": "38b2915c-063c-4eba-92a1-cb7822923782",
+      "randomizedName": "282c466f-08fd-4800-aa8a-4ff498c62c72",
       "imageName": "Slide_01.vsi [10x_07]",
       "metadata": {}
     },
@@ -837,7 +837,7 @@
         }
       },
       "entryID": 9,
-      "randomizedName": "c57c89fb-0f98-4a0c-a614-9e07df48337d",
+      "randomizedName": "71e5669f-e990-477a-97b2-f0578feaaf94",
       "imageName": "Slide_01.vsi [10x_11]",
       "metadata": {}
     },
@@ -931,7 +931,7 @@
         }
       },
       "entryID": 10,
-      "randomizedName": "29b79b7d-fc58-48cc-81e4-6bb1ce0bc693",
+      "randomizedName": "4da70ed9-b2da-4f60-82c8-290da35aae17",
       "imageName": "Slide_01.vsi [10x_15]",
       "metadata": {}
     },
@@ -1025,7 +1025,7 @@
         }
       },
       "entryID": 11,
-      "randomizedName": "ba75e6ae-fea2-4f14-a1bc-a998f452a259",
+      "randomizedName": "df94e217-9723-4a29-8a3b-4405a760acea",
       "imageName": "Slide_02.vsi [10x_02]",
       "metadata": {}
     },
@@ -1119,7 +1119,7 @@
         }
       },
       "entryID": 12,
-      "randomizedName": "27446179-54db-413d-b619-25f41d78f08d",
+      "randomizedName": "5595c902-50c4-401c-a853-a4badb47fbbc",
       "imageName": "Slide_02.vsi [10x_06]",
       "metadata": {}
     },
@@ -1213,7 +1213,7 @@
         }
       },
       "entryID": 13,
-      "randomizedName": "c2a9c4fd-810d-45f6-8aa8-53b1369f30e5",
+      "randomizedName": "09d6bba5-5031-437f-88f7-0b536eb19474",
       "imageName": "Slide_02.vsi [10x_10]",
       "metadata": {}
     },
@@ -1307,7 +1307,7 @@
         }
       },
       "entryID": 14,
-      "randomizedName": "0aaa3b3d-972e-4940-9f1c-05fef0818fcd",
+      "randomizedName": "cfd068d2-1726-4937-b77b-9de1e250032c",
       "imageName": "Slide_03.vsi [10x_01]",
       "metadata": {}
     },
@@ -1401,7 +1401,7 @@
         }
       },
       "entryID": 15,
-      "randomizedName": "99c59173-5975-4f31-b3a6-f93e2f90b158",
+      "randomizedName": "cb339489-7eac-48e6-8afd-de5f7469495e",
       "imageName": "Slide_03.vsi [10x_05]",
       "metadata": {}
     },
@@ -1495,7 +1495,7 @@
         }
       },
       "entryID": 16,
-      "randomizedName": "78cdfe3d-a858-4952-9163-e2b19d91573f",
+      "randomizedName": "5790cc71-7bb2-4f1b-bf23-c8d1ec8bda3d",
       "imageName": "Slide_03.vsi [10x_09]",
       "metadata": {}
     },
@@ -1589,7 +1589,7 @@
         }
       },
       "entryID": 17,
-      "randomizedName": "1e8d4793-9e30-451b-9a8d-972f11bd00c7",
+      "randomizedName": "39b0523b-3a2a-463d-8bda-53de164314fd",
       "imageName": "Slide_04.vsi [10x_01]",
       "metadata": {}
     },
@@ -1683,7 +1683,7 @@
         }
       },
       "entryID": 18,
-      "randomizedName": "7c061945-7ff6-4bbf-ae9e-34d8d7dd431a",
+      "randomizedName": "849a108e-bea7-4cd4-964d-4f10ef58718a",
       "imageName": "Slide_04.vsi [10x_05]",
       "metadata": {}
     },
@@ -1777,7 +1777,7 @@
         }
       },
       "entryID": 19,
-      "randomizedName": "59ded594-9ef6-4c5e-873b-6599bb159012",
+      "randomizedName": "4be87a17-f7a0-48fe-94c7-0c0b7bb2d7c3",
       "imageName": "Slide_04.vsi [10x_09]",
       "metadata": {}
     },
@@ -1871,7 +1871,7 @@
         }
       },
       "entryID": 20,
-      "randomizedName": "7a880d47-8c2d-47fd-bb7b-9473e1fed4b1",
+      "randomizedName": "cc4f4d87-edcf-4d6e-8af3-fb164637a898",
       "imageName": "Slide_05.vsi [10x_01]",
       "metadata": {}
     },
@@ -1965,7 +1965,7 @@
         }
       },
       "entryID": 21,
-      "randomizedName": "f6181ea8-5a2c-4a4b-b2de-ab05fa2bb80c",
+      "randomizedName": "2351e280-e7bc-465b-be47-d88103d2e9ff",
       "imageName": "Slide_05.vsi [10x_05]",
       "metadata": {}
     },
@@ -2059,7 +2059,7 @@
         }
       },
       "entryID": 22,
-      "randomizedName": "0ff342ce-d28e-49a0-a61c-67764f5358d2",
+      "randomizedName": "8cd091b5-380b-4340-b676-4a9702f07b0c",
       "imageName": "Slide_05.vsi [10x_09]",
       "metadata": {}
     },
@@ -2153,7 +2153,7 @@
         }
       },
       "entryID": 23,
-      "randomizedName": "83790212-0b30-4c0e-8488-1d920ac4a3ac",
+      "randomizedName": "58d92067-3977-40fc-acd5-e4fd76cb08f7",
       "imageName": "Slide_06.vsi [10x_01]",
       "metadata": {}
     },
@@ -2247,7 +2247,7 @@
         }
       },
       "entryID": 24,
-      "randomizedName": "90ef2693-a746-45a3-8428-c5cd5ee2661a",
+      "randomizedName": "52f4164b-d081-4026-91a6-d526b8661f3e",
       "imageName": "Slide_06.vsi [10x_05]",
       "metadata": {}
     },
@@ -2341,7 +2341,7 @@
         }
       },
       "entryID": 25,
-      "randomizedName": "b01ba560-6ffc-4b32-a94d-d2f0a2d812f1",
+      "randomizedName": "31590af7-be22-491d-a178-fab1f9e7f6bc",
       "imageName": "Slide_06.vsi [10x_09]",
       "metadata": {}
     }
