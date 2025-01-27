@@ -6,6 +6,7 @@ import ch.epfl.biop.atlas.aligner.ReslicedAtlas;
 import net.imglib2.realtransform.AffineTransform3D;
 import org.scijava.Context;
 import org.scijava.ItemIO;
+import org.scijava.ItemVisibility;
 import org.scijava.command.Command;
 import org.scijava.object.ObjectService;
 import org.scijava.plugin.Parameter;
@@ -18,13 +19,13 @@ import org.scijava.widget.Button;
         description = "Starts ABBA from an Atlas")
 public class ABBAStartCommand implements Command {
 
-    @Parameter(callback = "coronalCB")
+    @Parameter(callback = "coronalCB", visibility = ItemVisibility.MESSAGE)
     Button coronal;
 
-    @Parameter(callback = "sagittalCB")
+    @Parameter(callback = "sagittalCB", visibility = ItemVisibility.MESSAGE)
     Button sagittal;
 
-    @Parameter(callback = "horizontalCB")
+    @Parameter(callback = "horizontalCB", visibility = ItemVisibility.MESSAGE)
     Button horizontal;
 
     @Parameter(choices = {
