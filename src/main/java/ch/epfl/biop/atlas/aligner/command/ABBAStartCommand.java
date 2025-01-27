@@ -19,13 +19,17 @@ import org.scijava.widget.Button;
         description = "Starts ABBA from an Atlas")
 public class ABBAStartCommand implements Command {
 
-    @Parameter(callback = "coronalCB", visibility = ItemVisibility.MESSAGE)
+    // The presence of this parameter button will trigger MessageResolverProcessor
+    @Parameter(visibility = ItemVisibility.MESSAGE)
+    String message = "Select the atlas slicing orientation";
+
+    @Parameter(callback = "coronalCB")
     Button coronal;
 
-    @Parameter(callback = "sagittalCB", visibility = ItemVisibility.MESSAGE)
+    @Parameter(callback = "sagittalCB")
     Button sagittal;
 
-    @Parameter(callback = "horizontalCB", visibility = ItemVisibility.MESSAGE)
+    @Parameter(callback = "horizontalCB")
     Button horizontal;
 
     @Parameter(choices = {
@@ -72,9 +76,9 @@ public class ABBAStartCommand implements Command {
         AffineTransform3D orientation;
         try {
             orientation = ReslicedAtlas.getTransformFromCoronal(
-                        x_axis.substring(0,3),
-                        y_axis.substring(0,3),
-                        z_axis.substring(0,3)
+                        x_axis.substring(0,2),
+                        y_axis.substring(0,2),
+                        z_axis.substring(0,2)
                     );
         } catch (IllegalArgumentException exception) {
             System.err.println("Incorrect arguments, you need to use all three axes.");
