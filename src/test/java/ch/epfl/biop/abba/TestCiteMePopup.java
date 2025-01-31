@@ -26,7 +26,7 @@ public class TestCiteMePopup {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(450, 350);
         frame.setLocationRelativeTo(null); // Center the window
-        frame.setIconImage((new ImageIcon(MultiSlicePositioner.class.getResource("/graphics/ABBAFrame.jpg"))).getImage());
+        frame.setIconImage((new ImageIcon(MultiSlicePositioner.class.getResource("/graphics/ABBAStart.png"))).getImage());
 
         // Create a JPanel to hold the content and set a nice background color
         JPanel panel = new JPanel();

@@ -669,7 +669,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         // Set ABBA Icon in Window
         JFrame frame = ((BdvHandleFrame)bdvh).getBigDataViewer().getViewerFrame();
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-        frame.setIconImage((new ImageIcon(MultiSlicePositioner.class.getResource("/graphics/ABBAFrame.jpg"))).getImage());
+        frame.setIconImage((new ImageIcon(MultiSlicePositioner.class.getResource("/graphics/ABBAStart.png"))).getImage());
     }
 
     private void addTableView() {

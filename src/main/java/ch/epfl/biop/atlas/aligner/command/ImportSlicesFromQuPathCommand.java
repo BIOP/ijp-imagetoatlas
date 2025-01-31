@@ -17,7 +17,8 @@ import java.util.concurrent.ExecutionException;
 
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Import>ABBA - Import QuPath Project",
-        description = "Import images of a QuPath project as slices into ABBA")
+        description = "Import images of a QuPath project as slices into ABBA",
+        iconPath = "/graphics/ImportSlicesFromQuPath.png")
 public class ImportSlicesFromQuPathCommand implements Command {
 
     @Parameter(style = "message", visibility = ItemVisibility.MESSAGE)

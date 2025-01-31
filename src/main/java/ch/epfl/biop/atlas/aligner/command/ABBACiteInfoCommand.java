@@ -32,7 +32,7 @@ public class ABBACiteInfoCommand implements Command {
         JFrame frame = new JFrame("How to cite");
         frame.setSize(450, 350);
         frame.setLocationRelativeTo(null); // Center the window
-        frame.setIconImage((new ImageIcon(MultiSlicePositioner.class.getResource("/graphics/ABBAFrame.jpg"))).getImage());
+        frame.setIconImage((new ImageIcon(MultiSlicePositioner.class.getResource("/graphics/ABBAStart.png"))).getImage());
 
         // Create a JPanel to hold the content and set a nice background color
         JPanel panel = new JPanel();

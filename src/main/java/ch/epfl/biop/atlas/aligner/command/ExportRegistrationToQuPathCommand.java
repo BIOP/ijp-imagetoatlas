@@ -12,7 +12,8 @@ import java.util.List;
 
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>ABBA - Export Registrations To QuPath Project",
-        description = "Export atlas regions and transformations to QuPath project (for each selected slice)")
+        description = "Export atlas regions and transformations to QuPath project (for each selected slice)",
+        iconPath = "/graphics/ExportRegistrationToQuPath.png")
 public class ExportRegistrationToQuPathCommand implements Command {
 
     @Parameter

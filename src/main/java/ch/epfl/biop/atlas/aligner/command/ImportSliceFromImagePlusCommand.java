@@ -12,7 +12,8 @@ import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
 
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Import>ABBA - Import Current ImageJ Window",
-        description = "Import the current ImageJ image as a slice into ABBA")
+        description = "Import the current ImageJ image as a slice into ABBA",
+        iconPath = "/graphics/ImportSliceFromImagePlus.png")
 public class ImportSliceFromImagePlusCommand implements Command {
 
     @Parameter

@@ -19,7 +19,8 @@ import java.util.concurrent.ExecutionException;
 @SuppressWarnings("CanBeFinal")
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Import>ABBA - Import With Bio-Formats",
-        description = "Import a Bio-Formats compatible file as brain slices")
+        description = "Import a Bio-Formats compatible file as brain slices",
+        iconPath = "/graphics/ImportSlicesFromFiles.png")
 public class ImportSlicesFromFilesCommand implements Command {
 
     @Parameter
