@@ -97,10 +97,12 @@ abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command 
     @Parameter(label = "Allow change of atlas slicing angle")
     boolean allow_slicing_angle_change = true;
 
+    @Parameter(label = "Resampling pixel size (10 for mouse, 40 for rat)", description = "To go fast, you can use 30 microns for mouse, 60 for rat")
+    double px_size_micron = 10;
+
     boolean allow_change_slicing_position = true;
     boolean maintain_rank = true;
     boolean affine_transform = true;
-    double px_size_micron = Double.NaN; // Pixel size in micrometer for the resampling, 30 for mouse, 60 for rat
     boolean convert_to_8_bits = false;
     boolean convert_to_jpg = true;
     boolean interpolate = false;
@@ -138,8 +140,6 @@ abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command 
                 return;
             }
         }
-
-        setPixelSizeFromModel();
 
         TempDirectory td = new TempDirectory("deepslice");
         dataset_folder = td.getPath().toFile();
@@ -479,14 +479,6 @@ abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command 
 
         } catch (Exception e) {
             mp.errorMessageForUser.accept("Export to Quick NII dataset error. ", e.getMessage());
-        }
-    }
-
-    private void setPixelSizeFromModel() {
-        if (model.equals("mouse")) {
-            px_size_micron = 30;
-        } else if (model.equals("rat")) {
-            px_size_micron = 60;
         }
     }
 
