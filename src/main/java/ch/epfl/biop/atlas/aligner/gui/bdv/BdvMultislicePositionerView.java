@@ -79,6 +79,7 @@ import ch.epfl.biop.wrappers.ij2command.BiopWrappersSet;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import ij.IJ;
+import ij.plugin.frame.Recorder;
 import mpicbg.spim.data.sequence.Tile;
 import net.imglib2.*;
 import net.imglib2.position.FunctionRealRandomAccessible;
@@ -552,7 +553,6 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         addToCleanUpHook(() ->
             SwingUtilities.invokeLater(() -> {
             if (bdvh.getCardPanel()!=null) {
-
                     bdvh.getCardPanel().removeCard(NAME_CARD_ATLAS_INFORMATION);
                     bdvh.getCardPanel().removeCard(NAME_CARD_ATLAS_DISPLAY);
                     bdvh.getCardPanel().removeCard(NAME_CARD_DISPLAY_NAVIGATION);
@@ -809,106 +809,115 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
     public BdvMultislicePositionerView(MultiSlicePositioner msp, BdvHandle bdvh) {
 
-        // Final variable initialization
-        this.bdvh = bdvh;
-        this.vp = bdvh.getViewerPanel();
-        this.msp = msp;
-        this.sX = msp.sX;
-        this.sY = msp.sY;
-        roiChanged(); // initialize roi
+        boolean tmpRecord = Recorder.record;
+        // Avoid meesing up with the recorder during initialisation / a bit sketchy
+        try {
 
-        moa = new MessageOverlayAnimator(8000, 0.0,0.1);
-        SwingUtilities.invokeLater(() -> bdvh.getViewerPanel().addOverlayAnimator(moa));
+            Recorder.record = false;
 
-        excludedKeys.add("X");
-        excludedKeys.add("Y");
-        excludedKeys.add("Z");
-        excludedKeys.add("Left Right");
+            // Final variable initialization
+            this.bdvh = bdvh;
+            this.vp = bdvh.getViewerPanel();
+            this.msp = msp;
+            this.sX = msp.sX;
+            this.sY = msp.sY;
+            roiChanged(); // initialize roi
 
-        // Other variable initialization
-        previouszStep = (int) msp.getReslicedAtlas().getStep();
+            moa = new MessageOverlayAnimator(8000, 0.0, 0.1);
+            SwingUtilities.invokeLater(() -> bdvh.getViewerPanel().addOverlayAnimator(moa));
 
-        addFrameIcon();
+            excludedKeys.add("X");
+            excludedKeys.add("Y");
+            excludedKeys.add("Z");
+            excludedKeys.add("Left Right");
 
-        logger.debug("Installing behaviours : common");
-        installCommonBehaviours();
+            // Other variable initialization
+            previouszStep = (int) msp.getReslicedAtlas().getStep();
 
-        logger.debug("Installing behaviours : positioning");
-        installPositioningBehaviours();
+            addFrameIcon();
 
-        logger.debug("Installing behaviours : review");
-        installReviewBehaviours();
+            logger.debug("Installing behaviours : common");
+            installCommonBehaviours();
 
-        mode = REVIEW_MODE_INT;
-        setDisplayMode(POSITIONING_MODE_INT);
+            logger.debug("Installing behaviours : positioning");
+            installPositioningBehaviours();
 
-        overlapMode = OVERLAP_BELOW_ATLAS_STAIRS;
-        updateOverlapMode();
+            logger.debug("Installing behaviours : review");
+            installReviewBehaviours();
 
-        logger.debug("Overriding standard navigation commands");
-        overrideStandardNavigation();
+            mode = REVIEW_MODE_INT;
+            setDisplayMode(POSITIONING_MODE_INT);
 
-        logger.debug("Clearing default cards and bdv functionalities of BigDataViewer");
-        clearBdvDefaults();
+            overlapMode = OVERLAP_BELOW_ATLAS_STAIRS;
+            updateOverlapMode();
 
-        logger.debug("Installing menu");
-        int hierarchyLevelsSkipped = 4;
-        installBdvMenu(hierarchyLevelsSkipped);
+            logger.debug("Overriding standard navigation commands");
+            overrideStandardNavigation();
 
-        logger.debug("Installing multislice overlay");
-        BdvFunctions.showOverlay(new InnerOverlay(), "MultiSlice Overlay", BdvOptions.options().addTo(bdvh));
+            logger.debug("Clearing default cards and bdv functionalities of BigDataViewer");
+            clearBdvDefaults();
 
-        logger.debug("Defining atlas slicing listener");
-        atlasSlicingListener = this::atlasSlicingChanged;
-        msp.getReslicedAtlas().addListener(atlasSlicingListener);
+            logger.debug("Installing menu");
+            int hierarchyLevelsSkipped = 4;
+            installBdvMenu(hierarchyLevelsSkipped);
 
-        logger.debug("Adding bigdataviewer cards");
-        installBigDataViewerCards();
+            logger.debug("Installing multislice overlay");
+            BdvFunctions.showOverlay(new InnerOverlay(), "MultiSlice Overlay", BdvOptions.options().addTo(bdvh));
 
-        logger.debug("Displaying Altas");
-        displayAtlas();
+            logger.debug("Defining atlas slicing listener");
+            atlasSlicingListener = this::atlasSlicingChanged;
+            msp.getReslicedAtlas().addListener(atlasSlicingListener);
 
-        logger.debug("Adding ROI Overlay source");
-        addRoiOverlaySource();
+            logger.debug("Adding bigdataviewer cards");
+            installBigDataViewerCards();
 
-        logger.debug("Add right click actions");
-        addRightClickActions();
+            logger.debug("Displaying Altas");
+            displayAtlas();
 
-        logger.debug("Adding close window cleaning hook");
-        addCleanUpHook();
+            logger.debug("Adding ROI Overlay source");
+            addRoiOverlaySource();
 
-        logger.debug("SplitPanel Expanded");
-        bdvh.getSplitPanel().setCollapsed(false);
+            logger.debug("Add right click actions");
+            addRightClickActions();
 
-        logger.debug("Adding Drag and Drop Handler");
-        addDnDHandler();
+            logger.debug("Adding close window cleaning hook");
+            addCleanUpHook();
 
-        logger.debug("Adding mouse motion listener / handler");
-        bdvh.getViewerPanel().getDisplay().addHandler(this);
+            logger.debug("SplitPanel Expanded");
+            bdvh.getSplitPanel().setCollapsed(false);
 
-        logger.debug("Adding modification monitor");
-        addModificationMonitor();
+            logger.debug("Adding Drag and Drop Handler");
+            addDnDHandler();
 
-        logger.debug("Adding confirmation close hook");
-        addConfirmationCloseHook();
+            logger.debug("Adding mouse motion listener / handler");
+            bdvh.getViewerPanel().getDisplay().addHandler(this);
 
-        logger.debug("Add clean all hook");
-        addCleanAllHook();
+            logger.debug("Adding modification monitor");
+            addModificationMonitor();
 
-        logger.debug("Installing extra ABBA plugin");
-        addExtraABBACommands();
+            logger.debug("Adding confirmation close hook");
+            addConfirmationCloseHook();
 
-        logger.debug("Add closing listener");
-        msp.addMultiSlicePositionerListener(this);
+            logger.debug("Add clean all hook");
+            addCleanAllHook();
 
-        // Creates previously exiting slices for this view and the linked tableview
-        msp.addSliceListener(this);
-        msp.getSlices().forEach(this::sliceCreated);
-        msp.getSlices().forEach(tableView::sliceCreated);
+            logger.debug("Installing extra ABBA plugin");
+            addExtraABBACommands();
 
-        logger.debug("Register bdv view in the object service");
-        msp.getContext().getService(ObjectService.class).addObject(this);
-        addToCleanUpHook(() -> msp.getContext().getService(ObjectService.class).removeObject(this)); // Cleans object when view is closed
+            logger.debug("Add closing listener");
+            msp.addMultiSlicePositionerListener(this);
+
+            // Creates previously exiting slices for this view and the linked tableview
+            msp.addSliceListener(this);
+            msp.getSlices().forEach(this::sliceCreated);
+            msp.getSlices().forEach(tableView::sliceCreated);
+
+            logger.debug("Register bdv view in the object service");
+            msp.getContext().getService(ObjectService.class).addObject(this);
+            addToCleanUpHook(() -> msp.getContext().getService(ObjectService.class).removeObject(this)); // Cleans object when view is closed
+        } finally {
+            Recorder.record = tmpRecord; // Restore recorder state even if things are failing
+        }
     }
 
     /**

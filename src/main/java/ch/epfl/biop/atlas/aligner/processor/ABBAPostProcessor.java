@@ -4,7 +4,6 @@ import ch.epfl.biop.atlas.aligner.command.ABBAStartCommand;
 import ch.epfl.biop.atlas.aligner.command.ABBAStateLoadCommand;
 import ch.epfl.biop.atlas.aligner.command.ABBAStateSaveCommand;
 import ch.epfl.biop.atlas.aligner.command.DisplaySettingsCommand;
-import ch.epfl.biop.atlas.aligner.gui.bdv.ABBABdvShortCommand;
 import ch.epfl.biop.atlas.aligner.gui.bdv.ABBABdvStartCommand;
 import ch.epfl.biop.atlas.mouse.allen.ccfv3p1.command.AllenBrainAdultMouseAtlasCCF2017v3p1Command;
 import ch.epfl.biop.atlas.mouse.allen.ccfv3p1asr.command.AllenBrainAdultMouseAtlasCCF2017v3p1ASRCommand;
@@ -52,7 +51,6 @@ public class ABBAPostProcessor extends AbstractPostprocessorPlugin {
                 checkedCommands.add(AllenBrainAdultMouseAtlasCCF2017v3p1Command.class.getName());
                 checkedCommands.add(ABBAStartCommand.class.getName());
                 checkedCommands.add(ABBABdvStartCommand.class.getName());
-                checkedCommands.add(ABBABdvShortCommand.class.getName());
                 checkedCommands.add(AtlasChooserCommand.class.getName());
                 checkedCommands.add(ABBAStateLoadCommand.class.getName());
                 checkedCommands.add(ABBAStateSaveCommand.class.getName());
