@@ -68,43 +68,11 @@ public class ABBAForumHelpCommand implements Command {
             body += nl;
             body += "---"+nl;
             body += nl;
-            body += "OS and Dependencies Info"+nl;
-            body +="```"+nl;
-            body +="OS "+ System.getProperty("os.name")+nl;
-            if (!pythonInformation.isEmpty()) {
-                body += pythonInformation+nl;
-            } else {
-                body += "Not run from PyImageJ"+nl;
-            }
-            body +="ImageJ "+ VersionUtils.getVersion(ImageJ.class)+nl;
-            body +="IJ "+ VersionUtils.getVersion(IJ.class)+nl;
-            body +="ABBA "+ VersionUtils.getVersion(ABBAHelper.class)+nl;
-            body +="BigWarp "+VersionUtils.getVersion(BigWarp.class)+nl;
-            body +="Bdv "+VersionUtils.getVersion(BigDataViewer.class)+nl;
-            body +="Bdv Vistools "+VersionUtils.getVersion(BdvHandle.class)+nl;
-            body +="Bdv Biop Tools "+VersionUtils.getVersion(Elastix2DSplineRegister.class)+nl;
-            body +="Bdv Playground "+VersionUtils.getVersion(SourceAndConverterServices.class)+nl;
-            body +="Biop Image Loader "+VersionUtils.getVersion(BioFormatsHelper.class)+nl;
-            body +="Biop Wrappers "+VersionUtils.getVersion(ElastixTask.class)+nl;
-            if (Elastix.exePath!=null) {
-                body += "Elastix Path: " + Elastix.exePath + " exists ?"+new File(Elastix.exePath).exists()+nl;
-            } else {
-                body += "Elastix path not set"+nl;
-            }
-            if (Transformix.exePath!=null) {
-                body += "Transformix Path: " + Transformix.exePath + " exists ?"+new File(Transformix.exePath).exists()+nl;
-            } else {
-                body += "Transformix path not set"+nl;
-            }
-            if (DeepSlice.envDirPath!=null) {
-                body += "Deepslice env dir: " + DeepSlice.envDirPath + " exists ?"+new File(DeepSlice.envDirPath).exists()+nl;
-            } else {
-                body += "Deepslice env dir not set"+nl;
-            }
+            body += getConfigInfos(nl);
 
             //noinspection deprecation
             body +="Updates sites: "+sites_string+nl;
-            body +="```";
+
 
             String fullUrl = imageScForumUrl+"new-topic?"
                     +"title="+title+"&"
@@ -128,5 +96,44 @@ public class ABBAForumHelpCommand implements Command {
             e.printStackTrace();
             return "";
         }
+    }
+
+    public static String getConfigInfos(String nl) {
+        String config = "";
+        config += "OS and Dependencies Info"+nl;
+        config +="```"+nl;
+        config +="OS "+ System.getProperty("os.name")+nl;
+        if (!pythonInformation.isEmpty()) {
+            config += pythonInformation+nl;
+        } else {
+            config += "Not run from PyImageJ"+nl;
+        }
+        config +="ImageJ "+ VersionUtils.getVersion(ImageJ.class)+nl;
+        config +="IJ "+ VersionUtils.getVersion(IJ.class)+nl;
+        config +="ABBA "+ VersionUtils.getVersion(ABBAHelper.class)+nl;
+        config +="BigWarp "+VersionUtils.getVersion(BigWarp.class)+nl;
+        config +="Bdv "+VersionUtils.getVersion(BigDataViewer.class)+nl;
+        config +="Bdv Vistools "+VersionUtils.getVersion(BdvHandle.class)+nl;
+        config +="Bdv Biop Tools "+VersionUtils.getVersion(Elastix2DSplineRegister.class)+nl;
+        config +="Bdv Playground "+VersionUtils.getVersion(SourceAndConverterServices.class)+nl;
+        config +="Biop Image Loader "+VersionUtils.getVersion(BioFormatsHelper.class)+nl;
+        config +="Biop Wrappers "+VersionUtils.getVersion(ElastixTask.class)+nl;
+        if (Elastix.exePath!=null) {
+            config += "Elastix Path: " + Elastix.exePath + " exists ?"+new File(Elastix.exePath).exists()+nl;
+        } else {
+            config += "Elastix path not set"+nl;
+        }
+        if (Transformix.exePath!=null) {
+            config += "Transformix Path: " + Transformix.exePath + " exists ?"+new File(Transformix.exePath).exists()+nl;
+        } else {
+            config += "Transformix path not set"+nl;
+        }
+        if (DeepSlice.envDirPath!=null) {
+            config += "Deepslice env dir: " + DeepSlice.envDirPath + " exists ?"+new File(DeepSlice.envDirPath).exists()+nl;
+        } else {
+            config += "Deepslice env dir not set"+nl;
+        }
+        config +="```"+nl;
+        return config;
     }
 }

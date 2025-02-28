@@ -12,8 +12,18 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+import java.net.HttpURLConnection;
+import java.nio.file.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 public class ABBAHelper {
 
@@ -109,5 +119,83 @@ public class ABBAHelper {
             e.printStackTrace();
         }
     }
+
+    /**
+     *
+     * @param zipUrl the path to a zipped qupath project
+     * @return the qpproject file contained in the zip
+     * @throws IOException
+     */
+    static public File getTempQPProject(String zipUrl) throws Exception {
+        // Create a temporary directory that will be deleted on JVM exit
+        Path tempDir = Files.createTempDirectory("zipDownloadTemp");
+        //tempDir.toFile().deleteOnExit();
+
+        // Download the ZIP file
+        Path zipFilePath = downloadZip(zipUrl, tempDir);
+
+        // Extract the base name of the ZIP file from the URL
+        String zipFileName = extractFileNameFromUrl(zipUrl);
+        String targetFilePath = zipFileName.replace(".zip", "") + "/project.qpproj";
+
+        // Unzip the file
+        unzip(zipFilePath, tempDir);
+
+        // Get the desired file
+        File targetFile = tempDir.resolve(targetFilePath).toFile();
+
+        if (targetFile.exists()) {
+            return targetFile;
+        } else {
+            throw new IOException("File not found in the unzipped contents.");
+        }
+    }
+
+
+    private static Path downloadZip(String zipUrl, Path tempDir) throws IOException {
+        URL url = new URL(zipUrl);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("GET");
+
+        Path zipFilePath = tempDir.resolve("downloaded.zip");
+        try (InputStream in = connection.getInputStream();
+             OutputStream out = Files.newOutputStream(zipFilePath)) {
+
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+            while ((bytesRead = in.read(buffer)) != -1) {
+                out.write(buffer, 0, bytesRead);
+            }
+        }
+        return zipFilePath;
+    }
+
+    private static String extractFileNameFromUrl(String zipUrl) throws Exception {
+        URL url = new URL(zipUrl);
+        String path = url.getPath();
+        return path.substring(path.lastIndexOf('/') + 1);
+    }
+
+    private static void unzip(Path zipFilePath, Path tempDir) throws IOException {
+        try (ZipInputStream zipInputStream = new ZipInputStream(Files.newInputStream(zipFilePath))) {
+            ZipEntry entry;
+            while ((entry = zipInputStream.getNextEntry()) != null) {
+                Path entryPath = tempDir.resolve(entry.getName());
+                if (entry.isDirectory()) {
+                    Files.createDirectories(entryPath);
+                } else {
+                    Files.createDirectories(entryPath.getParent());
+                    Files.copy(zipInputStream, entryPath, StandardCopyOption.REPLACE_EXISTING);
+                }
+            }
+        }
+    }
+
+    public static void main(String[] args) throws Exception {
+        File f = getTempQPProject("https://zenodo.org/records/14918378/files/abba-omero-gerbi-subset.zip");
+        System.out.println(f.getAbsolutePath());
+
+    }
+
 
 }

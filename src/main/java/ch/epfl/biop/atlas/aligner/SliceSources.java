@@ -510,6 +510,7 @@ public class SliceSources {
     }
 
     public void waitForEndOfTasks() {
+
         if (tasks.size()>0) {
             try {
                 CompletableFuture<Boolean> lastTask = tasks.get(tasks.size()-1);

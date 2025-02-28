@@ -113,6 +113,13 @@ abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command 
 
     public void run() {
 
+        DeepSliceHelper.addMouseCompatibleAtlas("Adult Mouse Brain - Allen Brain Atlas V3");
+        DeepSliceHelper.addMouseCompatibleAtlas("Adult Mouse Brain - Allen Brain Atlas V3p1");
+        DeepSliceHelper.addMouseCompatibleAtlas("allen_mouse_10um_java");
+        DeepSliceHelper.addRatCompatibleAtlas("Rat - Waxholm Sprague Dawley V4");
+        DeepSliceHelper.addRatCompatibleAtlas("Rat - Waxholm Sprague Dawley V4p2");
+        DeepSliceHelper.addRatCompatibleAtlas("whs_sd_rat_39um_java");
+
         List<SliceSources> iniList = mp.getSlices().stream().filter(SliceSources::isSelected)
                 .collect(Collectors.toList());
 

@@ -399,13 +399,6 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             if (this.mode == POSITIONING_MODE_INT) msp.equalSpacingSelectedSlices();
         });
 
-        DeepSliceHelper.addMouseCompatibleAtlas("Adult Mouse Brain - Allen Brain Atlas V3");
-        DeepSliceHelper.addMouseCompatibleAtlas("Adult Mouse Brain - Allen Brain Atlas V3p1");
-        DeepSliceHelper.addMouseCompatibleAtlas("allen_mouse_10um_java");
-        DeepSliceHelper.addRatCompatibleAtlas("Rat - Waxholm Sprague Dawley V4");
-        DeepSliceHelper.addRatCompatibleAtlas("Rat - Waxholm Sprague Dawley V4p2");
-        DeepSliceHelper.addRatCompatibleAtlas("whs_sd_rat_39um_java");
-
         if (DeepSliceHelper.isDeepSliceMouseCompatible(msp.getReslicedAtlas().ba.getName())) {
 
             logger.debug("Installing DeepSlice Command for Mouse");

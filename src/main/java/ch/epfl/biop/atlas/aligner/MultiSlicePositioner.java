@@ -48,9 +48,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -98,7 +98,7 @@ public class MultiSlicePositioner implements Closeable {
     final public double sizePixX, sizePixY, sizePixZ;
 
     // List of slices contained in multislicepositioner - publicly accessible through getSlices() method
-    private List<SliceSources> slices = new ArrayList<>();//Collections.synchronizedList(new ArrayList<>());
+    private List<SliceSources> slices = new CopyOnWriteArrayList<>();//Collections.synchronizedList(new ArrayList<>());
 
     // Stack of actions that have been performed by the user - used for undo
     protected List<CancelableAction> userActions = new ArrayList<>();
@@ -327,7 +327,11 @@ public class MultiSlicePositioner implements Closeable {
     }
 
     public void waitForTasks() {
-        slices.forEach(SliceSources::waitForEndOfTasks);
+        List<SliceSources> safeList;
+        synchronized (slicesLock) {
+            safeList = new ArrayList<>(slices);
+        }
+        safeList.forEach(SliceSources::waitForEndOfTasks);
     }
 
     public String getUndoMessage() {
