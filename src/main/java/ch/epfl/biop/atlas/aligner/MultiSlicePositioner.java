@@ -199,6 +199,8 @@ public class MultiSlicePositioner implements Closeable {
      */
     public MultiSlicePositioner(Atlas biopAtlas, ReslicedAtlas reslicedAtlas, Context ctx) {
 
+        DeepSliceHelper.addJavaAtlases();
+
         logger.info("Creating MultiSlicePositioner instance");
         this.reslicedAtlas = reslicedAtlas;
         this.biopAtlas = biopAtlas;

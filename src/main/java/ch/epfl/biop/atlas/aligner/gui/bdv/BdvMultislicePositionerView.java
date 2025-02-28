@@ -399,6 +399,8 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             if (this.mode == POSITIONING_MODE_INT) msp.equalSpacingSelectedSlices();
         });
 
+        DeepSliceHelper.addJavaAtlases();
+
         if (DeepSliceHelper.isDeepSliceMouseCompatible(msp.getReslicedAtlas().ba.getName())) {
 
             logger.debug("Installing DeepSlice Command for Mouse");

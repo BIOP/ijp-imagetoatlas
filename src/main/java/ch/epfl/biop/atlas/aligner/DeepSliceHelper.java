@@ -16,6 +16,15 @@ import java.util.function.Supplier;
 
 public class DeepSliceHelper {
 
+    public static void addJavaAtlases() {
+        DeepSliceHelper.addMouseCompatibleAtlas("Adult Mouse Brain - Allen Brain Atlas V3");
+        DeepSliceHelper.addMouseCompatibleAtlas("Adult Mouse Brain - Allen Brain Atlas V3p1");
+        DeepSliceHelper.addMouseCompatibleAtlas("allen_mouse_10um_java");
+        DeepSliceHelper.addRatCompatibleAtlas("Rat - Waxholm Sprague Dawley V4");
+        DeepSliceHelper.addRatCompatibleAtlas("Rat - Waxholm Sprague Dawley V4p2");
+        DeepSliceHelper.addRatCompatibleAtlas("whs_sd_rat_39um_java");
+    }
+
     final private static List<String> atlasNameMouseCompatible = new ArrayList<>();
     final private static List<String> atlasNameRatCompatible = new ArrayList<>();
 
