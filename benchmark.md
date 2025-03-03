@@ -16,7 +16,7 @@ Biop Wrappers 0.11.2
 
 # ABBA Benchmark
 
-# 25 sections | 40 Threads | 200 Gb RAM
+## 25 sections | 40 Threads | 200 Gb RAM
 
 - Date and Time: 2025-02-28 14:09
 - Comments: first run
