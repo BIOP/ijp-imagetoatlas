@@ -97,6 +97,7 @@ public class ABBABenchMarkCommand implements Command {
             startTiming("Connect to OMERO Server");
             cs.run(OmeroConnectCommand.class, true,
                     "host", "omero-tim.gerbi-gmb.de",
+                    "port", 4064,
                     "username", "read-tim",
                     "password", "read-tim"
             ).get();
