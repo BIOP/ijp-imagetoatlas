@@ -1112,7 +1112,7 @@ public class MultiSlicePositioner implements Closeable {
             return legacyLoadState(stateFileAbba);
         }
 
-        boolean emptyState = this.slices.size()==0;
+        boolean emptyState = this.slices.isEmpty();
         // TODO : add a clock as an overlay
         getSlices().forEach(SliceSources::waitForEndOfTasks);
         // We prepare the loading of the state, so that's a task:

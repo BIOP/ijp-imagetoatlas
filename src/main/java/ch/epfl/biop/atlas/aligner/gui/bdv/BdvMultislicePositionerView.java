@@ -139,12 +139,7 @@ import java.io.FileWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
@@ -1058,9 +1053,11 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
             // Ok, let's save the view File
 
-            //serializeView(viewFile);
-            List<SliceGuiState.State> states = new ArrayList<>();
-            guiState.forEachSlice(sliceState -> states.add(new SliceGuiState.State(sliceState)));
+            List<SliceGuiState.State> states = new ArrayList<>(Collections.nCopies(msp.getSlices().size(), null));
+
+            guiState.forEachSlice(sliceState ->
+                    states.set(sliceState.slice.getIndex(), new SliceGuiState.State(sliceState))
+            );
             ViewState vs = new ViewState();
             vs.slicesStates = states;
             vs.showInfo = showSliceInfo;
@@ -2455,7 +2452,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
         //synchronized
         int nSlices() {
-            return sliceGuiState.values().size();
+            return sliceGuiState.size();
         }
 
         //synchronized
