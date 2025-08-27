@@ -2001,14 +2001,14 @@ public class SliceSources {
                         roiArray.add(roi);
 
                         if (ontology.getNodeFromId(v)!=null) {
-                            AtlasNode parent = (AtlasNode) ontology.getNodeFromId(v).parent();
+                            AtlasNode parent = ontology.getNodeFromId(v).parent();
                             if (parent!=null) {
 
                                 int parentId = parent.getId();
                                 fp.setColor(Float.intBitsToFloat(parentId));
                                 fp.fill(roi);
                                 if (childrenContained.get(parentId)!=null) {
-                                    if (childrenContained.get(v).size()==0) {
+                                    if (childrenContained.get(v).isEmpty()) {
                                         childrenContained.get(parentId).remove(v);
                                     }
                                     existingIdValues.add(parentId);
