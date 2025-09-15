@@ -60,12 +60,14 @@ import net.imglib2.converter.Converter;
 import net.imglib2.converter.Converters;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.position.FunctionRandomAccessible;
+
+import net.imglib2.realtransform.RealTransform;
+import net.imglib2.realtransform.RealTransformSequence;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.realtransform.InvertibleRealTransform;
 import net.imglib2.realtransform.InvertibleRealTransformSequence;
-import net.imglib2.realtransform.RealTransform;
-import net.imglib2.realtransform.RealTransformSequence;
 import net.imglib2.realtransform.Wrapped2DTransformAs3D;
+
 import net.imglib2.realtransform.inverse.WrappedIterativeInvertibleRealTransform;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.IntegerType;
@@ -1361,7 +1363,7 @@ public class SliceSources {
                 if ((copied instanceof InvertibleRealTransform) && (irts != null)) {
                     irts.add((InvertibleRealTransform) copied);
                 } else {
-                    irts = null;
+                    throw new RuntimeException("Error! The registration to store is not invertible! Class = "+copied.getClass().getName());
                 }
             }
         }

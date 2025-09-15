@@ -109,7 +109,7 @@
 		<!-- bdv playground related dependencies -->
 		<bigdataviewer-playground.version>0.11.2</bigdataviewer-playground.version>
 		<bigdataviewer-image-loaders.version>0.10.5</bigdataviewer-image-loaders.version>
-		<bigdataviewer-biop-tools.version>0.12.1</bigdataviewer-biop-tools.version>
+		<bigdataviewer-biop-tools.version>0.12.2</bigdataviewer-biop-tools.version>
 		<bigdataviewer-selector.version>0.2.8</bigdataviewer-selector.version>
 
 		<!-- maths -->
