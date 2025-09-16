@@ -2,7 +2,7 @@
 [![](https://readthedocs.org/projects/abba-documentation/badge/?version=latest)](https://abba-documentation.readthedocs.io/en/latest/)
 [![Windows installer Version](https://img.shields.io/github/v/release/BIOP/ijp-imagetoatlas?label=Version-[Windows%20installer])](https://github.com/BIOP/ijp-imagetoatlas/releases)
 [![PyPI Version](https://img.shields.io/pypi/v/abba_python.svg?label=Version-[PyPI])](https://pypi.python.org/pypi/abba_python)
-[![Maven Scijava Version](https://img.shields.io/github/v/tag/BIOP/ijp-imagetoatlas?label=Version-[Maven%20Scijava])](https://maven.scijava.org/#nexus-search;quick~imagetoatlasregister)
+[![Maven Scijava Version](https://img.shields.io/github/v/tag/BIOP/ijp-imagetoatlas?label=Version-[Maven%20Scijava])](https://maven.scijava.org/#browse/browse:releases:ch%2Fepfl%2Fbiop%2FImageToAtlasRegister)
 
 # Aligning Big Brains & Atlases
 
