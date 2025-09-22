@@ -1712,7 +1712,7 @@ public class SliceSources {
         si.updateBox();
     }
 
-    private Source<?> getModelWithGridSize(double gridSpacingInMicrometer) {
+    public Source<?> getModelWithGridSize(double gridSpacingInMicrometer) {
 
         double transform_field_subsampling = gridSpacingInMicrometer/(mp.getAtlas().getMap().getAtlasPrecisionInMillimeter()*1000.0);
 
