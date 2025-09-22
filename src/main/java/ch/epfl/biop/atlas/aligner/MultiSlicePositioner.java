@@ -530,7 +530,7 @@ public class MultiSlicePositioner implements Closeable {
                 userActions.remove(userActions.size() - 1);
                 redoableUserActions.add(action);
             } else {
-                logger.error("Error : cancel not called on the last action");
+                logger.warn("Warning : cancel not called on the last action"); // This happens in the export state command
             }
         }
     }

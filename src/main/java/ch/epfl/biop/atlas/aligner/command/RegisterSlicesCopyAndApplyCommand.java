@@ -39,17 +39,17 @@ public class RegisterSlicesCopyAndApplyCommand implements Command {
     @Parameter(label = "Tick if you want to skip the pre-transform (probably not)")
     boolean skip_pre_transform = false;
 
+    private Gson serializer;
 
     public void run() {
-
         List<SliceSources> selectedSlices = mp.getSelectedSlices();
 
-        if (selectedSlices.size()==0) {
+        if (selectedSlices.size() == 0) {
             mp.warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to register");
             return;
         }
 
-        if ((model_slice_index<0)||(model_slice_index>=mp.getSlices().size())) {
+        if ((model_slice_index < 0) || (model_slice_index >= mp.getSlices().size())) {
             mp.warningMessageForUser.accept("Invalid model slice index", "Please enter a valid slice index.");
             return;
         }
@@ -61,47 +61,70 @@ public class RegisterSlicesCopyAndApplyCommand implements Command {
             mp.warningMessageForUser.accept("Model slice selected!", "The registration sequence will not be applied to the model slice.");
         }
 
-
-        // Now let's get all the actions performed on the slice
-        AtomicInteger counter = new AtomicInteger(0);
-        AtomicBoolean result = new AtomicBoolean();
+        // Initialize serializer
         serializer = mp.getGsonStateSerializer(new ArrayList<>());
 
-        new LockAndRunOnceSliceAction(mp, modelSlice, counter,1, () -> {
-            // This block will be executed when the model slice has finished all jobs
-            // First: copy all the actions, it's the code from the state serialisation
-            AlignerState.SliceSourcesState slice_state = new AlignerState.SliceSourcesState();
-            slice_state.actions.addAll(filterSerializedActions(mp.getActionsFromSlice(modelSlice)));
-            slice_state.preTransform = modelSlice.getTransformSourceOrigin();
+        // Apply registration to all selected slices
+        AtomicInteger counter = new AtomicInteger(0);
+        AtomicBoolean result = new AtomicBoolean();
 
-            for (SliceSources slice: selectedSlices) {
-                // Apply all these actions on each slice, it's the deserialisation code
-                for (CancelableAction action: slice_state.actions) {
-                    // That's necessary because the bounding box needs to match the one of the original image
-                    // Maybe that's an issue
-                    /*if (action instanceof MoveSliceAction) {
-                        MoveSliceAction moveSliceAction = new MoveSliceAction(mp, slice, ((MoveSliceAction) action).getSlicingAxisPosition());
-                        moveSliceAction.runRequest();
-                    }*/
-                    if (action instanceof RegisterSliceAction) {
-                        RegisterSliceAction regActionModel = copyReg((RegisterSliceAction) action);
-                        RegisterSliceAction registerSlice = new RegisterSliceAction(mp, slice, regActionModel.getRegistration(), regActionModel.getFixedSourcesProcessor(), regActionModel.getMovingSourcesProcessor());
-                        registerSlice.setRegistration(registerSlice.getRegistration());
-                        registerSlice.runRequest();
-                    }
-                }
-                if (!skip_pre_transform) {
-                    slice.transformSourceOrigin(modelSlice.getTransformSourceOrigin().copy());
-                }
+        new LockAndRunOnceSliceAction(mp, modelSlice, counter, 1, () -> {
+            // This block will be executed when the model slice has finished all jobs
+            for (SliceSources slice : selectedSlices) {
+                copyRegistration(mp, modelSlice, mp, slice, skip_pre_transform);
             }
             return true;
         }, result).runRequest();
     }
-    Gson serializer;
+
     private RegisterSliceAction copyReg(RegisterSliceAction action) {
          // Clone through serialisation and deserialisation
         String regString = serializer.toJson(action, RegisterSliceAction.class);
         return serializer.fromJson(regString, RegisterSliceAction.class);
+    }
+
+    /**
+     * Static utility method for copying registration between slices in other contexts.
+     * This version initializes its own serializer and doesn't depend on the command's state.
+     *
+     * @param mpModel The MultiSlicePositioner instance of the model slice
+     * @param modelSlice The slice to copy the registration from
+     * @param mpModel The MultiSlicePositioner instance of the target slice
+     * @param targetSlice The slice to apply the registration to
+     * @param skipPreTransform Whether to skip applying the pre-transform
+     */
+    public static void copyRegistration(MultiSlicePositioner mpModel, SliceSources modelSlice,
+                                        MultiSlicePositioner mpTarget, SliceSources targetSlice, boolean skipPreTransform) {
+        Gson localSerializer = mpModel.getGsonStateSerializer(new ArrayList<>());
+
+        // Extract all actions from the model slice
+        AlignerState.SliceSourcesState slice_state = new AlignerState.SliceSourcesState();
+        slice_state.actions.addAll(filterSerializedActions(mpModel.getActionsFromSlice(modelSlice)));
+        slice_state.preTransform = modelSlice.getTransformSourceOrigin();
+
+        // Apply all actions to the target slice
+        for (CancelableAction action : slice_state.actions) {
+            if (action instanceof RegisterSliceAction) {
+                // Clone through serialisation and deserialisation
+                String regString = localSerializer.toJson(action, RegisterSliceAction.class);
+                RegisterSliceAction regActionModel = localSerializer.fromJson(regString, RegisterSliceAction.class);
+
+                RegisterSliceAction registerSlice = new RegisterSliceAction(
+                        mpTarget,
+                        targetSlice,
+                        regActionModel.getRegistration(),
+                        regActionModel.getFixedSourcesProcessor(),
+                        regActionModel.getMovingSourcesProcessor()
+                );
+                registerSlice.setRegistration(registerSlice.getRegistration());
+                registerSlice.runRequest();
+            }
+        }
+
+        // Apply pre-transform if not skipped
+        if (!skipPreTransform) {
+            targetSlice.transformSourceOrigin(modelSlice.getTransformSourceOrigin().copy());
+        }
     }
 
 }
