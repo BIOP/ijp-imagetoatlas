@@ -28,25 +28,25 @@ public class DeleteSliceAction extends CancelableAction {
     @Override
     public boolean run() {
         synchronized (DeleteSliceAction.class) { // avoid screw up with batch cancel ?
+            sliceSource.setBeingDeleted(true);
             getMP().addTask();
             logger.debug("Deleting slice "+getSliceSources()+" ...");
             savedActions = getMP().getActionsFromSlice(sliceSource);
-            savedActions.remove(this);savedActions.remove(this);savedActions.remove(this);
+            savedActions.remove(this);
             logger.debug("Saved actions slice in run : " + sliceSource);
 
-            //synchronized (savedActions) {
-                Collections.reverse(savedActions);
-                savedActions.forEach(action -> {
-                    if (action != this) {
-                        action.cancel();
-                    }
-                });
-                Collections.reverse(savedActions);
-            //}
+            Collections.reverse(savedActions);
+            savedActions.forEach(action -> {
+                if (action != this) {
+                    action.cancel();
+                }
+            });
+            Collections.reverse(savedActions);
 
             logger.debug("Slice "+getSliceSources()+" deleted !");
             getMP().stateHasBeenChanged();
             getMP().removeTask();
+            sliceSource.setBeingDeleted(false);
             return true;
         }
     }

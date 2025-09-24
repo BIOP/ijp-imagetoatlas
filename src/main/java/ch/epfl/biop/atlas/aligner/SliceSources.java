@@ -729,7 +729,7 @@ public class SliceSources {
 
     protected void enqueueRunAction(CancelableAction action, Runnable postRun, boolean runInExtraThread) {
         CompletableFuture<Boolean> startingPoint;
-        if (tasks.size() == 0) {
+        if (tasks.isEmpty()) {
             startingPoint = CompletableFuture.supplyAsync(() -> true);
         } else {
             startingPoint = tasks.get(tasks.size() - 1);
@@ -784,6 +784,16 @@ public class SliceSources {
             }
         }, e));
         mapActionTask.put(action, tasks.get(tasks.size() - 1));
+    }
+
+    boolean isBeingDeleted = false;
+
+    public void setBeingDeleted(boolean flag) {
+        isBeingDeleted = flag;
+    }
+
+    public boolean isBeingDeleted() {
+        return isBeingDeleted;
     }
 
     static final class ThreadPerTaskExecutor implements Executor {
