@@ -136,9 +136,8 @@ public class ScijavaCommandToPython {
             builder.append("\t"+plugin.description()+"\n\n");
             if (inputFields.size()>0) {
                 builder.append("\tParameters:\n");
-                for (int i=0; i<inputFields.size(); i++) {
-                    Field f = inputFields.get(i);
-                    builder.append("\t"+f.getName().toLowerCase()+" ");
+                for (Field f : inputFields) {
+                    builder.append("\t" + f.getName().toLowerCase() + " ");
                     addTypeHintIfPossible(builder, f, true);
                     builder.append(": ");
                     builder.append(f.getAnnotation(Parameter.class).label());
@@ -222,10 +221,7 @@ public class ScijavaCommandToPython {
                     if (Service.class.isAssignableFrom(f.getType())) {
                         return false;
                     }
-                    if (f.getType().equals(Context.class)) {
-                        return false;
-                    }
-                    return true;
+                    return !f.getType().equals(Context.class);
                 }).toArray(Field[]::new);
     }
 

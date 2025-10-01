@@ -5,7 +5,6 @@ import ch.epfl.biop.atlas.aligner.action.*;
 import ch.epfl.biop.atlas.aligner.adapter.*;
 import ch.epfl.biop.registration.plugin.ExternalRegistrationPlugin;
 import ch.epfl.biop.registration.plugin.IRegistrationPlugin;
-import ch.epfl.biop.registration.plugin.RegistrationPluginHelper;
 import ch.epfl.biop.atlas.struct.Atlas;
 import ch.epfl.biop.registration.Registration;
 import ch.epfl.biop.sourceandconverter.processor.*;
@@ -20,7 +19,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.scijava.Context;
 import org.scijava.InstantiableException;
-import org.scijava.command.Command;
 import org.scijava.convert.ConvertService;
 import org.scijava.object.ObjectService;
 import org.scijava.plugin.PluginService;
@@ -54,6 +52,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -1043,18 +1042,19 @@ public class MultiSlicePositioner implements Closeable {
         Path p = Files.createFile(Paths.get(zipFilePath));
         try (ZipOutputStream zs = new ZipOutputStream(Files.newOutputStream(p))) {
             Path pp = Paths.get(sourceDirPath);
-            Files.walk(pp)
-                    .filter(path -> !Files.isDirectory(path))
-                    .forEach(path -> {
-                        ZipEntry zipEntry = new ZipEntry(pp.relativize(path).toString());
-                        try {
-                            zs.putNextEntry(zipEntry);
-                            Files.copy(path, zs);
-                            zs.closeEntry();
-                        } catch (IOException e) {
-                            logger.error(e.getMessage());
-                        }
-                    });
+            try (Stream<Path> walkable = Files.walk(pp)) {
+                walkable.filter(path -> !Files.isDirectory(path))
+                        .forEach(path -> {
+                            ZipEntry zipEntry = new ZipEntry(pp.relativize(path).toString());
+                            try {
+                                zs.putNextEntry(zipEntry);
+                                Files.copy(path, zs);
+                                zs.closeEntry();
+                            } catch (IOException e) {
+                                logger.error(e.getMessage());
+                            }
+                        });
+            }
         }
     }
 
@@ -1095,7 +1095,7 @@ public class MultiSlicePositioner implements Closeable {
      * Extracts a zip entry (file entry)
      * @param zipIn the zip input stream to decompress
      * @param filePath where to decompress it
-     * @throws IOException
+     * @throws IOException if file unzipping did not work
      */
     private void extractFile(ZipInputStream zipIn, String filePath) throws IOException {
         BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath));

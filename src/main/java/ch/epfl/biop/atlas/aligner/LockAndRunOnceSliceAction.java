@@ -1,7 +1,6 @@
 package ch.epfl.biop.atlas.aligner;
 
 import java.awt.Graphics2D;
-import java.text.DecimalFormat;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
@@ -42,7 +41,7 @@ public class LockAndRunOnceSliceAction extends CancelableAction {
     }
 
     protected boolean run() {
-        if (done == false) {
+        if (!done) {
             //sliceSource.setSlicingAxisPosition(newSlicingAxisPosition);
             int counterValue = counter.incrementAndGet();
             if (counterValue == counterTarget) {
@@ -58,7 +57,7 @@ public class LockAndRunOnceSliceAction extends CancelableAction {
                         try {
                             counter.wait();
                         } catch (InterruptedException e) {
-
+                            e.printStackTrace();
                         }
                         counterValue = counter.get();
                     }

@@ -1,6 +1,5 @@
 package ch.epfl.biop.atlas.aligner.gui.bdv;
 
-import IceInternal.Ex;
 import bdv.util.BdvHandle;
 import bdv.util.source.alpha.IAlphaSource;
 import bdv.viewer.Interpolation;
@@ -30,7 +29,6 @@ import spimdata.util.Displaysettings;
 
 import java.awt.EventQueue;
 import java.awt.Graphics2D;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

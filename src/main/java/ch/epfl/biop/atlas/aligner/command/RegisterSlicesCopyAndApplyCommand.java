@@ -1,24 +1,18 @@
 package ch.epfl.biop.atlas.aligner.command;
 
-import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.CancelableAction;
 import ch.epfl.biop.atlas.aligner.LockAndRunOnceSliceAction;
-import ch.epfl.biop.atlas.aligner.MoveSliceAction;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.RegisterSliceAction;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.atlas.aligner.adapter.AlignerState;
-import ch.epfl.biop.registration.Registration;
-import ch.epfl.biop.scijava.command.source.register.ElastixHelper;
 import com.google.gson.Gson;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 

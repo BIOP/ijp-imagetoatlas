@@ -75,6 +75,7 @@ import net.imglib2.type.numeric.NumericType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.ExtendedRandomAccessibleInterval;
 import net.imglib2.view.Views;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
@@ -787,7 +788,7 @@ public class SliceSources {
     }
 
     static final class ThreadPerTaskExecutor implements Executor {
-        public void execute(Runnable r) { new Thread(r).start(); }
+        public void execute(@NotNull Runnable r) { new Thread(r).start(); }
     }
 
     protected void enqueueCancelAction(CancelableAction action, Runnable postRun) {

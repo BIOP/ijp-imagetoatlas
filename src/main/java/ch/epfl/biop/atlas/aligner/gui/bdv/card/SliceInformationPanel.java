@@ -4,14 +4,12 @@ import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.atlas.aligner.gui.bdv.BdvMultislicePositionerView;
 
 import javax.swing.BoxLayout;
-import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import java.awt.Component;
-import java.awt.GridLayout;
 
 public class SliceInformationPanel implements BdvMultislicePositionerView.CurrentSliceListener {
 

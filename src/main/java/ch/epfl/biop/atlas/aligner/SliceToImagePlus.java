@@ -153,7 +153,7 @@ public class SliceToImagePlus {
         allowedClasses.add(ARGBType.class);
 
         if (!allowedClasses.contains(firstSourceType)) {
-            throw new UnsupportedOperationException("Can't export pixel type "+firstSourceType.getClass().getSimpleName()+" to ImagePlus");
+            throw new UnsupportedOperationException("Can't export pixel type "+ firstSourceType.getSimpleName()+" to ImagePlus");
         }
 
         for (SourceAndConverter<?> source : sourceList) {

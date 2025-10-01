@@ -475,8 +475,6 @@ abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command 
 
             if (!message.isEmpty()) {
                 mp.warningMessageForUser.accept("Slices saturated!", "DeepSlice will run but results won't be optimal. Please change display settings to avoid saturation: \n"+message);
-            } else {
-
             }
 
         } catch (Exception e) {

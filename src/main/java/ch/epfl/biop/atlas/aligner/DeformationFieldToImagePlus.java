@@ -47,18 +47,19 @@ public class DeformationFieldToImagePlus {
         float[] posZ = new float[nPix];
 
         int index = 0;
-        for (int py = 0; py<sy; py++)
-        for (int px = 0; px<sx; px++){
-            pos[0] = (int)(px*downsample+downsample/2.0);
-            pos[1] = (int)(py*downsample+downsample/2.0);
-            pt.setPosition(pos);
-            rt.apply(pt,pt);
-            if (index<nPix) {
-                posX[index] = pt.getFloatPosition(0);
-                posY[index] = pt.getFloatPosition(1);
-                posZ[index] = pt.getFloatPosition(2);
+        for (int py = 0; py<sy; py++) {
+            for (int px = 0; px<sx; px++){
+                pos[0] = (int)(px*downsample+downsample/2.0);
+                pos[1] = (int)(py*downsample+downsample/2.0);
+                pt.setPosition(pos);
+                rt.apply(pt,pt);
+                if (index<nPix) {
+                    posX[index] = pt.getFloatPosition(0);
+                    posY[index] = pt.getFloatPosition(1);
+                    posZ[index] = pt.getFloatPosition(2);
+                }
+                index++;
             }
-            index++;
         }
 
         FloatProcessor xpr = new FloatProcessor(sx,sy,posX);

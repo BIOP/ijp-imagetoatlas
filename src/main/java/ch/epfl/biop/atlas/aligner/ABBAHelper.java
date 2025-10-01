@@ -124,7 +124,7 @@ public class ABBAHelper {
      *
      * @param zipUrl the path to a zipped qupath project
      * @return the qpproject file contained in the zip
-     * @throws IOException
+     * @throws IOException if qupath project can't be read
      */
     static public File getTempQPProject(String zipUrl) throws Exception {
         // Create a temporary directory that will be deleted on JVM exit
