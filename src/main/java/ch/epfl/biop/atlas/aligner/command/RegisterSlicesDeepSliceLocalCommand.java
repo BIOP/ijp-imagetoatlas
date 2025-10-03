@@ -82,10 +82,16 @@ public class RegisterSlicesDeepSliceLocalCommand extends RegisterSlicesDeepSlice
 
         if (new File(DeepSlice.envDirPath).exists()) {
             deepSliceProcessor =
-                    (input_folder) -> {
-                        settings.input_folder = input_folder.getAbsolutePath();
-                        return DeepSliceHelper.deepSliceLocalRunner(settings, input_folder);
-                    };
+                (input_folder, nSlices) -> {
+                    boolean pa = settings.propagate_angles; // store
+                    if (nSlices<=2) {
+                        settings.propagate_angles = false; // see https://github.com/BIOP/ijp-imagetoatlas/issues/214
+                    }
+                    settings.input_folder = input_folder.getAbsolutePath();
+                    File outDirectory =  DeepSliceHelper.deepSliceLocalRunner(settings, input_folder);
+                    settings.propagate_angles = pa; // restore
+                    return outDirectory;
+                };
         } else {
             return false;
         }

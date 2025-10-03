@@ -41,7 +41,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -108,8 +108,10 @@ abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command 
     boolean interpolate = false;
     String image_name_prefix = "Section";
     File dataset_folder;
-    Function<File,File> deepSliceProcessor = null;
+    BiFunction<File, Integer,File> deepSliceProcessor = null;
     QuickNIISeries series;
+
+    protected Integer nSlicesToRegister;
 
     public void run() {
 
@@ -125,6 +127,8 @@ abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command 
         for (int i = iniList.size()-1; i>=0; i--) {
             slicesToRegister.add(iniList.get(i));
         }
+
+        nSlicesToRegister = slicesToRegister.size();
 
         if (slicesToRegister.isEmpty()) {
             mp.errorMessageForUser.accept("No selected slice", "Please select the slice(s) you want to register");
@@ -161,7 +165,7 @@ abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command 
 
             exportDownsampledDataset(slicesToRegister);
 
-            File deepSliceResult = deepSliceProcessor.apply(dataset_folder);
+            File deepSliceResult = deepSliceProcessor.apply(dataset_folder, nSlicesToRegister);
 
             if (!deepSliceResult.exists()) {
                 mp.errorMessageForUser.accept("Deep Slice registration aborted",

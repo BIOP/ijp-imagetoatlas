@@ -20,7 +20,7 @@ public class RegisterSlicesDeepSliceWebCommand extends RegisterSlicesDeepSliceAb
 
         maintain_rank = maintain_slices_order;
         if (!ctx.getService(UIService.class).isHeadless()) {
-            deepSliceProcessor = (f_in) -> DeepSliceHelper.deepSliceWebRunner(f_in, ps);
+            deepSliceProcessor = (f_in, nSlices) -> DeepSliceHelper.deepSliceWebRunner(f_in, ps); // nSlices is ignored
 
         } else {
             mp.errorMessageForUser.accept("DeepSlice errot", "Can't use Web interface in headless mode, aborting DeepSlice registration");
