@@ -443,7 +443,7 @@ public class MultiSlicePositioner implements Closeable {
 
     public int getChannelBoundForSelectedSlices() {
         List<SliceSources> slices = getSelectedSlices();
-        if (slices.size()==0) {
+        if (slices.isEmpty()) {
             return 0;
         } else {
             return slices.stream()
@@ -529,7 +529,7 @@ public class MultiSlicePositioner implements Closeable {
                 userActions.remove(userActions.size() - 1);
                 redoableUserActions.add(action);
             } else {
-                logger.error("Error : cancel not called on the last action");
+                logger.warn("Warning : cancel not called on the last action"); // This happens in the export state command
             }
         }
     }
@@ -950,7 +950,7 @@ public class MultiSlicePositioner implements Closeable {
         // First, let's do a few checks (fastest to longest):
 
         // -0. there's at least a slice
-        if (slices.size() == 0) {
+        if (slices.isEmpty()) {
             errorMessageForUser.accept("No Slices To Save", "No slices are present. Nothing saved");
             return false;
         }
@@ -1219,7 +1219,7 @@ public class MultiSlicePositioner implements Closeable {
         try {
             addTask();
 
-            boolean emptyState = this.slices.size()==0;
+            boolean emptyState = this.slices.isEmpty();
             // TODO : add a clock as an overlay
             getSlices().forEach(SliceSources::waitForEndOfTasks);
 

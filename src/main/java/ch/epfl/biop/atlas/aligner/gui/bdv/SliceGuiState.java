@@ -204,35 +204,37 @@ public class SliceGuiState {
     }
 
     private void show() {
-        synchronized (SliceGuiState.class) {
-            try {
-                EventQueue.invokeLater(() -> {
-                    List<SourceAndConverter<?>> sourcesToDisplay = IntStream.range(0, nChannels)
-                            .filter(this::currentlyVisible)
-                            .mapToObj(idx -> {
-                                Displaysettings.applyDisplaysettings(sources_displayed[idx], displaysettings[idx]);
-                                return sources_displayed[idx];
-                            })
-                            .collect(Collectors.toList());
+        if (!slice.isBeingDeleted()) {
+            synchronized (SliceGuiState.class) {
+                try {
+                    EventQueue.invokeLater(() -> {
+                        List<SourceAndConverter<?>> sourcesToDisplay = IntStream.range(0, nChannels)
+                                .filter(this::currentlyVisible)
+                                .mapToObj(idx -> {
+                                    Displaysettings.applyDisplaysettings(sources_displayed[idx], displaysettings[idx]);
+                                    return sources_displayed[idx];
+                                })
+                                .collect(Collectors.toList());
 
-                    SourceAndConverter[] sources = sourcesToDisplay.toArray(new SourceAndConverter[sourcesToDisplay.size()]);
+                        SourceAndConverter[] sources = sourcesToDisplay.toArray(new SourceAndConverter[sourcesToDisplay.size()]);
 
-                    for (SourceAndConverter<?> source : sources) {
-                        SourceAndConverterServices
-                                .getSourceAndConverterService()
-                                .register(source, "no tree"); // GUI lock!
-                    }
+                        for (SourceAndConverter<?> source : sources) {
+                            SourceAndConverterServices
+                                    .getSourceAndConverterService()
+                                    .register(source, "no tree"); // GUI lock!
+                        }
 
-                    if (sources.length > 0) {
-                        SourceAndConverterServices
-                                .getBdvDisplayService()
-                                .show(bdvh, sources);
-                    }
+                        if (!sourcesToDisplay.isEmpty()) {
+                            SourceAndConverterServices
+                                    .getBdvDisplayService()
+                                    .show(bdvh, sourcesToDisplay.toArray(new SourceAndConverter[0]));
+                        }
 
-                    bdvh.getViewerPanel().state().addSources(sourcesToDisplay);
-                });
-            }  catch (Exception e) {
-                throw new RuntimeException(e);
+                        //bdvh.getViewerPanel().state().addSources(sourcesToDisplay);
+                    });
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
     }
