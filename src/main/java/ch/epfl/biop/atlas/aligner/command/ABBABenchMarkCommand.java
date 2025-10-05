@@ -32,7 +32,7 @@ import java.util.Map;
 
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>ABBA - Run Benchmark",
-        description = "Check for updates")
+        description = "Complete ABBA process in a benchmark")
 public class ABBABenchMarkCommand implements Command {
 
     @Parameter

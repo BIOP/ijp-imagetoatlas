@@ -6,7 +6,11 @@ import bdv.util.BdvHandleFrame;
 import bdv.util.BdvOptions;
 import bdv.util.BdvOverlay;
 import bdv.util.BdvStackSource;
+import bdv.util.RealRandomAccessibleIntervalSource;
+import bdv.util.source.alpha.AlphaConverter;
+import bdv.util.source.alpha.IAlphaSource;
 import bdv.viewer.Interpolation;
+import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
 import bdv.viewer.ViewerPanel;
 import bdv.viewer.animate.MessageOverlayAnimator;
@@ -25,6 +29,7 @@ import ch.epfl.biop.atlas.aligner.command.ABBACheckForUpdateCommand;
 import ch.epfl.biop.atlas.aligner.command.ABBACiteInfoCommand;
 import ch.epfl.biop.atlas.aligner.command.ABBADocumentationCommand;
 import ch.epfl.biop.atlas.aligner.command.ABBAForumHelpCommand;
+import ch.epfl.biop.atlas.aligner.command.ABBAImportDemoSlicesCommand;
 import ch.epfl.biop.atlas.aligner.command.ABBAStateLoadCommand;
 import ch.epfl.biop.atlas.aligner.command.ABBAStateSaveCommand;
 import ch.epfl.biop.atlas.aligner.command.ABBAUserFeedbackCommand;
@@ -81,12 +86,12 @@ import com.google.gson.GsonBuilder;
 import ij.IJ;
 import ij.plugin.frame.Recorder;
 import mpicbg.spim.data.sequence.Tile;
+import mpicbg.spim.data.sequence.VoxelDimensions;
 import net.imglib2.*;
 import net.imglib2.position.FunctionRealRandomAccessible;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.IntegerType;
-import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
 import org.apache.commons.io.FilenameUtils;
 import org.scijava.Context;
@@ -114,6 +119,7 @@ import sc.fiji.bdvpg.scijava.BdvScijavaHelper;
 import sc.fiji.bdvpg.scijava.ScijavaSwingUI;
 import sc.fiji.bdvpg.scijava.services.ui.swingdnd.BdvTransferHandler;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
+import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
 import spimdata.util.Displaysettings;
 
 import javax.swing.ImageIcon;
@@ -149,6 +155,7 @@ import java.util.stream.Collectors;
 import static bdv.ui.BdvDefaultCards.DEFAULT_SOURCEGROUPS_CARD;
 import static bdv.ui.BdvDefaultCards.DEFAULT_SOURCES_CARD;
 import static bdv.ui.BdvDefaultCards.DEFAULT_VIEWERMODES_CARD;
+import static bdv.util.source.alpha.AlphaSourceHelper.ALPHA_SOURCE_KEY;
 
 public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceChangeListener, GraphicalHandleListener, MouseMotionListener, MultiSlicePositioner.MultiSlicePositionerListener {
 
@@ -342,6 +349,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         // Load and Save state
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"File>Save State (+View)",0, () -> new Thread(this::saveState).start());
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"File>Load State (+View)",0, () -> new Thread(this::loadState).start());
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "File>Import Demo Sections", ABBAImportDemoSlicesCommand.class, "mp", msp );
 
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Undo [Ctrl+Z]",0, msp::cancelLastAction);
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Redo [Ctrl+Shift+Z]",0, msp::redoAction);
@@ -359,6 +367,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Import>Import Current ImageJ Window", ImportSliceFromImagePlusCommand.class, "mp", msp );
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Import>Import With Bio-Formats", ImportSlicesFromFilesCommand.class, "mp", msp );
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Import>Import Sources", ImportSliceFromSourcesCommand.class, "mp", msp );
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Import>Import Demo Sections", ABBAImportDemoSlicesCommand.class, "mp", msp );
 
 
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"View>Display Mode>Positioning Mode",0, () -> setDisplayMode(POSITIONING_MODE_INT));
@@ -564,6 +573,8 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         }
         SourceAndConverterServices.getBdvDisplayService()
                 .show(bdvh, sacsToAppend.toArray(new SourceAndConverter[0]));
+        bdvh.getViewerPanel().state().addSourcesToGroup(sacsToAppend, bdvh.getViewerPanel().state().getGroups().get(0));
+
     }
 
     public void addToCleanUpHook(Runnable runnable) {
@@ -574,36 +585,54 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
         logger.debug("Adding user ROI source");
 
-        BiConsumer<RealLocalizable, UnsignedShortType> fun = (loc, val) -> {
+        final float valTrue = 0.0f;
+        final float valFalse = 1.0f;
+
+        BiConsumer<RealLocalizable, FloatType> fun = (loc, val) -> {
             double px = loc.getFloatPosition(0);
             double py = loc.getFloatPosition(1);
 
-            if (py<-sY/1.9) {val.set(0); return;}
-            if (py>sY/1.9) {val.set(0); return;}
+            if (py<-sY/1.9) {val.set(valTrue); return;}
+            if (py>sY/1.9) {val.set(valTrue); return;}
 
             if (mode == POSITIONING_MODE_INT) {
                 final double v = Math.IEEEremainder(px + sX * 0.5, sX);
-                if (v < roiPX) {val.set(255); return;}
-                if (v > roiPX+roiSX) {val.set(255); return;}
-                if (py<roiPY) {val.set(255); return;}
-                if (py>roiPY+roiSY) {val.set(255); return;}
-                val.set(0);
+                if (v < roiPX) {val.set(valFalse); return;}
+                if (v > roiPX+roiSX) {val.set(valFalse); return;}
+                if (py<roiPY) {val.set(valFalse); return;}
+                if (py>roiPY+roiSY) {val.set(valFalse); return;}
+                val.set(valTrue);
             }
             if (mode == REVIEW_MODE_INT) {
-                if (loc.getFloatPosition(0) < roiPX) {val.set(255); return;}
-                if (loc.getFloatPosition(0) > roiPX+roiSX) {val.set(255); return;}
-                if (loc.getFloatPosition(1) < roiPY) {val.set(255); return;}
-                if (loc.getFloatPosition(1) > roiPY+roiSY) {val.set(255); return;}
-                val.set(0);
+                if (loc.getFloatPosition(0) < roiPX) {val.set(valFalse); return;}
+                if (loc.getFloatPosition(0) > roiPX+roiSX) {val.set(valFalse); return;}
+                if (loc.getFloatPosition(1) < roiPY) {val.set(valFalse); return;}
+                if (loc.getFloatPosition(1) > roiPY+roiSY) {val.set(valFalse); return;}
+                val.set(valTrue);
             }
         };
 
-        FunctionRealRandomAccessible<UnsignedShortType> roiOverlay = new FunctionRealRandomAccessible<>(3, fun, UnsignedShortType::new);
+        FunctionRealRandomAccessible<FloatType> roiOverlay = new FunctionRealRandomAccessible<>(3, fun, FloatType::new);
 
-        BdvStackSource<?> bss = BdvFunctions.show(roiOverlay,
-                new FinalInterval(new long[]{0, 0, 0}, new long[]{10, 10, 10}),"ROI", BdvOptions.options().addTo(bdvh));
+        long boxSizeUm = 1_000_000; // 1 meter
+        RealRandomAccessibleIntervalSource<FloatType> roiSource = new RealRandomAccessibleIntervalSource<>(roiOverlay,
+                new FinalInterval(new long[]{-boxSizeUm, -boxSizeUm, -boxSizeUm}, new long[]{boxSizeUm, boxSizeUm, boxSizeUm}),
+                new FloatType(), new AffineTransform3D(), "ROI");
 
-        bss.setDisplayRangeBounds(0,1600);
+        SourceAndConverter<FloatType> roiSAC = SourceAndConverterHelper.createSourceAndConverter(roiSource);
+        SourceAndConverterServices.getSourceAndConverterService().register(roiSAC);
+
+        IAlphaSource alpha = new WrappedIAlphaSource(roiSource);
+
+        SourceAndConverter<FloatType> alpha_sac = new SourceAndConverter<>(alpha, new AlphaConverter());
+
+        SourceAndConverterServices.getSourceAndConverterService().setMetadata(roiSAC, ALPHA_SOURCE_KEY, alpha_sac);
+
+        BdvStackSource<?> bss = BdvFunctions.show(roiSAC, BdvOptions.options().addTo(bdvh));
+
+        bdvh.getViewerPanel().state().addSourceToGroup(bss.getSources().get(0), bdvh.getViewerPanel().state().getGroups().get(2));
+
+        bss.setDisplayRangeBounds(0,4);
     }
 
     private void addCleanUpHook() {
@@ -2564,6 +2593,59 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     public void removeCurrentSliceListener(CurrentSliceListener listener) {
         synchronized (currentSliceListeners) {
             currentSliceListeners.remove(listener);
+        }
+    }
+
+    static class WrappedIAlphaSource implements IAlphaSource {
+
+        final Source<FloatType> alpha;
+        private WrappedIAlphaSource(Source<FloatType> alpha) {
+            this.alpha = alpha;
+        }
+
+        @Override
+        public boolean intersectBox(AffineTransform3D affineTransform, Interval cell, int timepoint) {
+            return true;
+        }
+
+        @Override
+        public boolean isPresent(int t) {
+            return alpha.isPresent(t);
+        }
+
+        @Override
+        public RandomAccessibleInterval<FloatType> getSource(int t, int level) {
+            return alpha.getSource(t, level);
+        }
+
+        @Override
+        public RealRandomAccessible<FloatType> getInterpolatedSource(int t, int level, Interpolation method) {
+            return alpha.getInterpolatedSource(t, level, method);
+        }
+
+        @Override
+        public void getSourceTransform(int t, int level, AffineTransform3D transform) {
+            alpha.getSourceTransform(t, level, transform);
+        }
+
+        @Override
+        public FloatType getType() {
+            return alpha.getType();
+        }
+
+        @Override
+        public String getName() {
+            return alpha.getName();
+        }
+
+        @Override
+        public VoxelDimensions getVoxelDimensions() {
+            return alpha.getVoxelDimensions();
+        }
+
+        @Override
+        public int getNumMipmapLevels() {
+            return alpha.getNumMipmapLevels();
         }
     }
 

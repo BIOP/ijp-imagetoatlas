@@ -228,9 +228,9 @@ public class SliceGuiState {
                             SourceAndConverterServices
                                     .getBdvDisplayService()
                                     .show(bdvh, sourcesToDisplay.toArray(new SourceAndConverter[0]));
-                        }
 
-                        //bdvh.getViewerPanel().state().addSources(sourcesToDisplay);
+                            bdvh.getViewerPanel().state().addSourcesToGroup(sourcesToDisplay, bdvh.getViewerPanel().state().getGroups().get(1));
+                        }
                     });
                 } catch (Exception e) {
                     throw new RuntimeException(e);
