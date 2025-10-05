@@ -117,6 +117,7 @@ import org.slf4j.LoggerFactory;
 import sc.fiji.bdvpg.bdv.BdvHandleHelper;
 import sc.fiji.bdvpg.scijava.BdvScijavaHelper;
 import sc.fiji.bdvpg.scijava.ScijavaSwingUI;
+import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
 import sc.fiji.bdvpg.scijava.services.ui.swingdnd.BdvTransferHandler;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;

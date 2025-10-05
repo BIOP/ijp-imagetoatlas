@@ -23,14 +23,14 @@ import java.net.URL;
 
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Help>ABBA - How to cite",
-        description = "How to cite ABBA")
+        description = "How to cite")
 public class ABBACiteInfoCommand implements Command {
 
     @Override
     public void run() {
 
         JFrame frame = new JFrame("How to cite");
-        frame.setSize(450, 350);
+        frame.setSize(900, 500);
         frame.setLocationRelativeTo(null); // Center the window
         frame.setIconImage((new ImageIcon(MultiSlicePositioner.class.getResource("/graphics/ABBAStart.png"))).getImage());
 
