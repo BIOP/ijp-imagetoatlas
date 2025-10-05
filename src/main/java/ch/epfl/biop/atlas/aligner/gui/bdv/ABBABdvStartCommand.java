@@ -135,7 +135,7 @@ public class ABBABdvStartCommand implements Command, Initializable {
             messageSkip = showWarningMessageWithCheckbox("Please read!","<html>If you are using ABBA in QuPath, please update to v0.4.4!<br> See https://go.epfl.ch/abba-update for more information.");
             ij.Prefs.set(keyMessagePref, messageSkip);
         }*/
-        ABBAHelper.displayABBALogo(1500); // BDV implies the presence of a GUI
+        ABBAHelper.displayABBALogo(2000); // BDV implies the presence of a GUI
     }
 
     void coronalCB() {

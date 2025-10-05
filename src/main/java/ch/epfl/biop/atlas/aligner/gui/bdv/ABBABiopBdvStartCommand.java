@@ -145,7 +145,7 @@ public class ABBABiopBdvStartCommand implements Command, Initializable {
     }
 
     public void initialize() {
-        ABBAHelper.displayABBALogo(1500); // BDV implies the presence of a GUI
+        ABBAHelper.displayABBALogo(2000); // BDV implies the presence of a GUI
     }
 
     void coronalCB() {

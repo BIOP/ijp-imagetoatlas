@@ -124,16 +124,19 @@ import spimdata.util.Displaysettings;
 
 import javax.swing.ImageIcon;
 import javax.swing.InputMap;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Stroke;
+import java.awt.datatransfer.DataFlavor;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowAdapter;
@@ -942,19 +945,24 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     /**
      * Saves the current view on top of the state file
      */
-    public void loadState() {
+    public void loadState(Object... kv) {
         try {
             msp.addTask();
             bdvh.getViewerPanel().requestRepaint();
             if ((msp.getSlices()!=null)&&(!msp.getSlices().isEmpty())) {
-                msp.errorMessageForUser.accept("Slices are already present!", "You can't open a state file if slices are already present in ABBA.");
+                msp.errorMessageForUser.accept("Slices are already present!", "You can't open a state file if slices are already present in ABBA instance.");
                  return;
             }
             CommandModule cm;
             try {
                 blockBdvRepaint();
-                cm = msp.getContext().getService(CommandService.class)
-                        .run(ABBAStateLoadCommand.class, true, "mp", msp).get();
+                if ((kv!=null)&&(kv.length==2)) {
+                    cm = msp.getContext().getService(CommandService.class)
+                            .run(ABBAStateLoadCommand.class, true, "mp", msp, kv[0], kv[1]).get();
+                } else {
+                    cm = msp.getContext().getService(CommandService.class)
+                            .run(ABBAStateLoadCommand.class, true, "mp", msp).get();
+                }
                 if ((cm == null) || (cm.getOutput("success") == null)) return;
                 boolean success = (boolean) cm.getOutput("success");
                 if (!success) return;
@@ -2418,6 +2426,73 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
      * Controls drag and drop actions in the multislice positioner
      */
     class TransferHandler extends BdvTransferHandler {
+
+        @Override
+        public boolean canImport(TransferSupport support) {
+            // First, check if the superclass can handle the import
+            boolean canSuperImport = super.canImport(support);
+            if (canSuperImport) return true;
+
+            // Check if the component is a JComponent
+            if (support.getComponent() instanceof JComponent) {
+                // Check if the data flavor is a file list flavor
+                if (support.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
+                    DropLocation dl = support.getDropLocation();
+                    updateDropLocation(support, dl);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public boolean importData(TransferSupport support) {
+            // Check if the component is a JComponent
+            if (support.getComponent() instanceof JComponent) {
+                // Check if the data flavor is a file list flavor
+                if (support.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
+                    try {
+                        // Get the list of files being dragged
+                        List<File> files = (List<File>) support.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+                        // Check if there is exactly one file and its extension is .abba or .qpproj
+                        if (files.size() == 1) {
+                            File file = files.get(0);
+                            String fileName = file.getName().toLowerCase();
+                            if (fileName.endsWith(".abba")) {
+                                new Thread(() -> BdvMultislicePositionerView.this.loadState("state_file", file)).start();
+                                return true; // Indicate success
+                            } else if (fileName.endsWith(".qpproj")) {
+                                new Thread(() -> {
+                                    MultiSlicePositioner msp = BdvMultislicePositionerView.this.msp;
+                                    CommandService cs = BdvMultislicePositionerView.this.msp.getContext().getService(CommandService.class);
+                                    cs.run(ImportSlicesFromQuPathCommand.class, true, "mp", msp, "qupath_project", file);
+                                }).start();
+                                // Handle the file import here
+                                return true; // Indicate success
+                            } else {
+                                // Show an error message
+                                JOptionPane.showMessageDialog((Component) support.getComponent(),
+                                        "Please drop a file with .abba or .qpproj extension.",
+                                        "Invalid Number of Files",
+                                        JOptionPane.ERROR_MESSAGE);
+                                return false; // Indicate failure
+                            }
+                        } else {
+                            JOptionPane.showMessageDialog((Component) support.getComponent(),
+                                    "Please drop a single file (with .abba or .qpproj extension).",
+                                    "Invalid File Type",
+                                    JOptionPane.ERROR_MESSAGE);
+                            return false; // Indicate failure
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        return false; // Indicate failure
+                    }
+                }
+            }
+            // Delegate to the superclass for other cases
+            return super.importData(support);
+        }
 
         @Override
         public void updateDropLocation(TransferSupport support, DropLocation dl) {
