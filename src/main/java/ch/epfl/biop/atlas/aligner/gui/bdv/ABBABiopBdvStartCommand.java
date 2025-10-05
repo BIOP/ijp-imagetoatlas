@@ -1,6 +1,7 @@
 package ch.epfl.biop.atlas.aligner.gui.bdv;
 
 import bdv.util.BdvHandle;
+import bdv.util.Prefs;
 import bdv.viewer.SourceGroup;
 import ch.epfl.biop.atlas.aligner.ABBAHelper;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
@@ -117,6 +118,7 @@ public class ABBABiopBdvStartCommand implements Command, Initializable {
             bdvh.getViewerPanel().state().setGroupName(groups.get(1), "Slices");
             bdvh.getViewerPanel().state().setGroupName(groups.get(2), "ROI Mask");
 
+            Prefs.showMultibox(false);
             view = new BdvMultislicePositionerView(mp, bdvh);
 
         } catch (Exception e) {

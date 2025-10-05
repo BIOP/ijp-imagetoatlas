@@ -2,6 +2,7 @@ package ch.epfl.biop.atlas.aligner;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.scijava.util.VersionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,15 +34,41 @@ public class ABBAHelper {
         JFrame frameStart = new JFrame();
         frameStart.setUndecorated(true);
         frameStart.setBackground(new Color(1.0f, 1.0f, 1.0f, 0.5f));
-        frameStart.setPreferredSize(new Dimension(960,540));
+        int imgW = 1000;
+        int imgH = 773;
+        frameStart.setPreferredSize(new Dimension(imgW, imgH));
         GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
         GraphicsDevice[] gd = ge.getScreenDevices();
-        frameStart.setLocation(gd[0].getDefaultConfiguration().getBounds().width/2-960/2, gd[0].getDefaultConfiguration().getBounds().height/2-540/2);
+        frameStart.setLocation(gd[0].getDefaultConfiguration().getBounds().width/2-imgW/2, gd[0].getDefaultConfiguration().getBounds().height/2-imgH/2);
         frameStart.pack();
         URL openImage = MultiSlicePositioner.class.getResource("/graphics/ABBA.png");
         try {
             BufferedImage myPicture = ImageIO.read(openImage);
-            frameStart.add(new JLabel(new ImageIcon(myPicture)));
+            JPanel panel = new JPanel() {
+                @Override
+                protected void paintComponent(Graphics g) {
+                    super.paintComponent(g);
+                    Graphics2D g2d = (Graphics2D) g;
+
+                    g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                    // Draw the image
+                    g2d.drawImage(myPicture, 0, 0, this);
+                    // Set the color for the version text
+                    g2d.setColor(new Color(1.0f, 0.0f, 0.0f, 1.0f));
+                    // Set the font for the version text
+                    g2d.setFont(new Font(Font.MONOSPACED, Font.BOLD, 40));
+                    // Get the font metrics to determine the width of the text
+                    FontMetrics fm = g2d.getFontMetrics();
+                    String infoline = "v"+VersionUtils.getVersion(MultiSlicePositioner.class);
+                    int textWidth = fm.stringWidth(infoline);
+                    // Position the text at the bottom right
+                    int x = imgW - textWidth - 10; // 10 pixels padding from the right
+                    int y = fm.getHeight()/2+5;//imgH-10;// - fm.getHeight(); // 10 pixels padding from the bottom
+                    g2d.drawString(infoline, x, y);
+                }
+            };
+            panel.setPreferredSize(new Dimension(imgW, imgH));
+            frameStart.add(panel);
             frameStart.setVisible(true);
             Thread.sleep(ms);
             frameStart.setVisible(false);

@@ -1,6 +1,7 @@
 package ch.epfl.biop.atlas.aligner.gui.bdv;
 
 import bdv.util.BdvHandle;
+import bdv.util.Prefs;
 import ch.epfl.biop.atlas.aligner.ABBAHelper;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.command.ABBAStartCommand;
@@ -101,6 +102,7 @@ public class ABBABdvStartCommand implements Command, Initializable {
             }
 
             BdvHandle bdvh = new DefaultBdvSupplier(new SerializableBdvOptions()).get();
+            Prefs.showMultibox(false);
             view = new BdvMultislicePositionerView(mp, bdvh);
 
         } catch (Exception e) {
