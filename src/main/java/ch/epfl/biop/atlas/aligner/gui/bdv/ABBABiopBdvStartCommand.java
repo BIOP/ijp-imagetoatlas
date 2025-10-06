@@ -45,6 +45,9 @@ public class ABBABiopBdvStartCommand implements Command, Initializable {
     @Parameter(callback = "horizontalCB")
     Button horizontal;
 
+    @Parameter
+    boolean white_background;
+
     @Parameter(choices = {
             "AP (Anterior-Posterior)",
             "PA (Posterior-Anterior)",
@@ -104,7 +107,7 @@ public class ABBABiopBdvStartCommand implements Command, Initializable {
             }
 
             AlphaSerializableBdvOptions options = new AlphaSerializableBdvOptions();
-            options.white_bg = true;
+            options.white_bg = white_background;
             options.showCenterCross = false;
             options.showSourcesNames = false;
             options.showRayCastSlider = false;
