@@ -20,7 +20,8 @@ import java.util.stream.Collectors;
 
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>ABBA - Export Registered Slices to BDV",
-        description = "Export registered slices to a BigDataViewer window.")
+        description = "Export registered slices to a BigDataViewer window.",
+        iconPath = "/graphics/ABBAExportBDV.png")
 public class ExportSlicesToBDVCommand implements Command {
 
     @Parameter(label = "Enter a tag to identify the registered sources (metadata key = \"ABBA\")" )

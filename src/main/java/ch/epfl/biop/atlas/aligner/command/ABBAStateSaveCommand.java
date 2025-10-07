@@ -11,7 +11,8 @@ import java.io.File;
 @SuppressWarnings("unused")
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>File>ABBA - Save State",
-        description = "Saves the current registration state")
+        description = "Saves the current registration state",
+        iconPath = "/graphics/SaveState.png")
 public class ABBAStateSaveCommand implements Command {
 
     @Parameter

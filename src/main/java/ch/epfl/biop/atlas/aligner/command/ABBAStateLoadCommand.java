@@ -10,7 +10,8 @@ import java.io.File;
 @SuppressWarnings("unused")
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>File>ABBA - Load State",
-        description = "Loads a previous registration state into ABBA")
+        description = "Loads a previous registration state into ABBA",
+        iconPath = "/graphics/LoadState.png")
 public class ABBAStateLoadCommand implements Command {
 
     @Parameter

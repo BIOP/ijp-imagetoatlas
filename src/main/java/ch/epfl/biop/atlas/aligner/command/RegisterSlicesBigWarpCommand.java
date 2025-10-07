@@ -8,7 +8,8 @@ import java.util.HashMap;
 
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>ABBA - BigWarp Registration",
-        description = "Uses BigWarp for in plane registration of selected slices")
+        description = "Uses BigWarp for in plane registration of selected slices",
+        iconPath = "/graphics/ABBABigWarp.png")
 public class RegisterSlicesBigWarpCommand extends RegistrationMultiChannelCommand {
 
     public void runValidated() {

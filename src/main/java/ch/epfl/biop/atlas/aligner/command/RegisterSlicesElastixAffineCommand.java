@@ -12,7 +12,8 @@ import java.util.Map;
 @SuppressWarnings("CanBeFinal")
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>ABBA - Elastix Registration (Affine)",
-        description = "Uses Elastix for affine in plane registration of selected slices")
+        description = "Uses Elastix for affine in plane registration of selected slices",
+        iconPath = "/graphics/ABBAAffine.png")
 public class RegisterSlicesElastixAffineCommand extends RegistrationMultiChannelCommand {
 
     @Parameter(label = "Registration re-sampling (micrometers)")

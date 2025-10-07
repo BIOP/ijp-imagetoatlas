@@ -12,7 +12,8 @@ import java.net.URL;
 
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>DeepSlice>DeepSlice Info",
-        description = "Open deep slice reference webpage.")
+        description = "Open deep slice reference webpage.",
+        iconPath = "/graphics/AboutDeepslice.png")
 public class DeepSliceDocumentationCommand implements Command {
 
     @Parameter

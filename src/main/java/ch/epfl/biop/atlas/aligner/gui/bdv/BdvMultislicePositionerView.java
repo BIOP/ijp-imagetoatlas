@@ -351,12 +351,12 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     private void installBdvMenu(int hierarchyLevelsSkipped) {
 
         // Load and Save state
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"File>Save State (+View)",0, () -> new Thread(this::saveState).start());
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"File>Load State (+View)",0, () -> new Thread(this::loadState).start());
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"File>Save State (+View)",0, () -> new Thread(this::saveState).start(), "/graphics/SaveState.png", "Save ABBA state file");
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"File>Load State (+View)",0, () -> new Thread(this::loadState).start(), "/graphics/LoadState.png", "Load ABBA state file");
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "File>Import Demo Sections", ABBAImportDemoSlicesCommand.class, "mp", msp );
 
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Undo [Ctrl+Z]",0, msp::cancelLastAction);
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Redo [Ctrl+Shift+Z]",0, msp::redoAction);
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Undo [Ctrl+Z]",0, msp::cancelLastAction, "/graphics/ABBAUndo.png", "Undo Last Action");
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Redo [Ctrl+Shift+Z]",0, msp::redoAction, "/graphics/ABBARedo.png", "Redo Last Action");
         BdvScijavaHelper.addSeparator(bdvh,"Edit");
 
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Configuration>Mouse Options>Show Atlas Position",0, this::showAtlasPosition);

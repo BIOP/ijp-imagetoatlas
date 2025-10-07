@@ -12,7 +12,8 @@ import java.util.Map;
 @SuppressWarnings("CanBeFinal")
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>ABBA - Elastix Registration (Spline)",
-        description = "Uses Elastix for spline in plane registration of selected slices")
+        description = "Uses Elastix for spline in plane registration of selected slices",
+        iconPath = "/graphics/ABBASpline.png")
 public class RegisterSlicesElastixSplineCommand extends RegistrationMultiChannelCommand {
 
     @Parameter(label = "Number of control points along X, minimum 2.")
