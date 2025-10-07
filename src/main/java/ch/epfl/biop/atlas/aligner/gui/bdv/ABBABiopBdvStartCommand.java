@@ -1,13 +1,21 @@
 package ch.epfl.biop.atlas.aligner.gui.bdv;
 
-import bdv.util.BdvHandle;
-import bdv.util.Prefs;
+import bdv.util.*;
+import bdv.util.source.alpha.AlphaConverter;
+import bdv.util.source.alpha.AlphaSourceRAI;
+import bdv.util.source.alpha.IAlphaSource;
+import bdv.viewer.SourceAndConverter;
 import bdv.viewer.SourceGroup;
 import ch.epfl.biop.atlas.aligner.ABBAHelper;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.command.ABBAStartCommand;
 import ch.epfl.biop.atlas.struct.Atlas;
 import ij.plugin.frame.Recorder;
+import net.imglib2.FinalInterval;
+import net.imglib2.position.FunctionRealRandomAccessible;
+import net.imglib2.realtransform.AffineTransform3D;
+import net.imglib2.type.numeric.integer.UnsignedByteType;
+import net.imglib2.type.numeric.real.FloatType;
 import org.scijava.Initializable;
 import org.scijava.ItemIO;
 import org.scijava.ItemVisibility;
@@ -19,12 +27,16 @@ import org.scijava.plugin.Plugin;
 import org.scijava.widget.Button;
 import sc.fiji.bdvpg.bdv.supplier.alpha.AlphaBdvSupplier;
 import sc.fiji.bdvpg.bdv.supplier.alpha.AlphaSerializableBdvOptions;
+import sc.fiji.bdvpg.services.SourceAndConverterServices;
+import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
 
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import java.util.List;
+
+import static bdv.util.source.alpha.AlphaSourceHelper.ALPHA_SOURCE_KEY;
 
 @SuppressWarnings("unused")
 @Plugin(type = Command.class,
@@ -121,7 +133,31 @@ public class ABBABiopBdvStartCommand implements Command, Initializable {
             bdvh.getViewerPanel().state().setGroupName(groups.get(1), "Slices");
             bdvh.getViewerPanel().state().setGroupName(groups.get(2), "ROI Mask");
 
+            if (white_background) {
+                // Bdv bg color is not configurable: https://github.com/bigdataviewer/bigdataviewer-core/issues/211
+                // So I add a fake white source, but that cost a little bit of computation.
+                FunctionRealRandomAccessible<UnsignedByteType> whiteBG =
+                        new FunctionRealRandomAccessible<>(3,
+                                (p,v) -> v.set(0), UnsignedByteType::new);
+
+                long boxSizeUm = 1_000_000; // 1 cm
+                RealRandomAccessibleIntervalSource<UnsignedByteType> whiteBGSource = new RealRandomAccessibleIntervalSource<>(whiteBG,
+                        new FinalInterval(new long[]{-boxSizeUm, -boxSizeUm, -boxSizeUm}, new long[]{boxSizeUm, boxSizeUm, boxSizeUm}),
+                        new UnsignedByteType(), new AffineTransform3D(), "Background");
+
+                SourceAndConverter<UnsignedByteType> whiteBGSAC = SourceAndConverterHelper.createSourceAndConverter(whiteBGSource);
+                SourceAndConverterServices.getSourceAndConverterService().register(whiteBGSAC);
+
+                IAlphaSource alpha = new AlphaSourceRAI(whiteBGSAC.getSpimSource());
+                SourceAndConverter<FloatType> alpha_sac = new SourceAndConverter<>(alpha, new AlphaConverter());
+                SourceAndConverterServices.getSourceAndConverterService().setMetadata(whiteBGSAC, ALPHA_SOURCE_KEY, alpha_sac);
+
+                SourceAndConverterServices.getBdvDisplayService().show(bdvh, whiteBGSAC);//.setMetadata(whiteBGSAC, ALPHA_SOURCE_KEY, alpha_sac);
+
+            }
+
             Prefs.showMultibox(false);
+            Prefs.showScaleBar(false);
             view = new BdvMultislicePositionerView(mp, bdvh);
 
         } catch (Exception e) {
