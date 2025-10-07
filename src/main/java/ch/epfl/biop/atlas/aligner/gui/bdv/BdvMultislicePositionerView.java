@@ -908,6 +908,8 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
             logger.debug("SplitPanel Expanded");
             bdvh.getSplitPanel().setCollapsed(false);
+            bdvh.getSplitPanel().setDividerSize(10);
+            bdvh.getSplitPanel().setDividerLocation(bdvh.getSplitPanel().getWidth()-600);
 
             logger.debug("Adding Drag and Drop Handler");
             addDnDHandler();
