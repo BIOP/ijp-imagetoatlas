@@ -97,13 +97,11 @@ public class SelectionLayer {
         }
     }
 
-    final Stroke normalStroke = new BasicStroke();
-    final Color backColor = new Color(0xF7BF18);
 
     public void draw(Graphics2D g) {
         if (isCurrentlySelecting) {
-            g.setStroke( normalStroke );
-            g.setPaint( backColor );
+            g.setStroke( ABBABdvViewPrefs.selection_stroke );
+            g.setPaint( ABBABdvViewPrefs.selection_back_color );
             g.draw(getCurrentSelectionRectangle());
         }
     }

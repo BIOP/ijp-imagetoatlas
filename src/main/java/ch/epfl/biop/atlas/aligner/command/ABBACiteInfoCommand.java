@@ -1,6 +1,7 @@
 package ch.epfl.biop.atlas.aligner.command;
 
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
+import ch.epfl.biop.atlas.aligner.gui.bdv.ABBABdvViewPrefs;
 import org.scijava.command.Command;
 import org.scijava.plugin.Plugin;
 
@@ -12,7 +13,6 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.EmptyBorder;
-import java.awt.Color;
 import java.awt.Desktop;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -36,7 +36,7 @@ public class ABBACiteInfoCommand implements Command {
 
         // Create a JPanel to hold the content and set a nice background color
         JPanel panel = new JPanel();
-        panel.setBackground(new Color(245, 245, 245)); // Light gray background
+        panel.setBackground(ABBABdvViewPrefs.color_cite_command_bg); // Light gray background
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBorder(new EmptyBorder(15, 15, 15, 15)); // Padding around the edges
 

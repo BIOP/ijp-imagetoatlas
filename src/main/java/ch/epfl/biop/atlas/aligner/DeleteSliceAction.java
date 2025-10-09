@@ -1,5 +1,7 @@
 package ch.epfl.biop.atlas.aligner;
 
+import ch.epfl.biop.atlas.aligner.gui.bdv.ABBABdvViewPrefs;
+import org.checkerframework.checker.units.qual.A;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,17 +70,17 @@ public class DeleteSliceAction extends CancelableAction {
     public void drawAction(Graphics2D g, double px, double py, double scale) {
         switch (sliceSource.getActionState(this)){
             case "(done)":
-                g.setColor(new Color(0, 255, 0, 200));
+                g.setColor(ABBABdvViewPrefs.done);
                 break;
             case "(locked)":
-                g.setColor(new Color(255, 0, 0, 200));
+                g.setColor(ABBABdvViewPrefs.locked);
                 break;
             case "(pending)":
-                g.setColor(new Color(255, 255, 0, 200));
+                g.setColor(ABBABdvViewPrefs.pending);
                 break;
         }
         g.fillOval((int) (px - 7), (int) (py - 7), 14, 14);
-        g.setColor(new Color(255, 255, 255, 200));
+        g.setColor(ABBABdvViewPrefs.delete_action_string_color);
         g.drawString("Delete", (int) px - 4, (int) py + 5);
     }
 

@@ -15,6 +15,7 @@ import bdv.util.source.alpha.IAlphaSource;
 import bdv.viewer.Interpolation;
 import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
+import ch.epfl.biop.atlas.aligner.gui.bdv.ABBABdvViewPrefs;
 import ch.epfl.biop.registration.plugin.RegistrationPluginHelper;
 import ch.epfl.biop.atlas.mouse.allen.ccfv3.command.AllenBrainAdultMouseAtlasCCF2017Command;
 import ch.epfl.biop.atlas.struct.AtlasHelper;
@@ -999,13 +1000,13 @@ public class SliceSources {
             if (value==mp.getAtlas().getMap().labelLeft()) {
                 logger.debug("Left region detected");
                 Roi left = cfp.getRoi();
-                left.setStrokeColor(new Color(0,255,0));
+                left.setStrokeColor(ABBABdvViewPrefs.stroke_color_left);
                 left.setName("Left");
                 roiList.rois.add(new CompositeFloatPoly(left));
             } else if (value==mp.getAtlas().getMap().labelRight()) {
                 logger.debug("Right region detected");
                 Roi right = cfp.getRoi();
-                right.setStrokeColor(new Color(255,0,255));
+                right.setStrokeColor(ABBABdvViewPrefs.stroke_color_right);
                 right.setName("Right");
                 roiList.rois.add(new CompositeFloatPoly(right));
             } else {

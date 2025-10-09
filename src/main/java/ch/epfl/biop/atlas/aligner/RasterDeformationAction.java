@@ -1,5 +1,6 @@
 package ch.epfl.biop.atlas.aligner;
 
+import ch.epfl.biop.atlas.aligner.gui.bdv.ABBABdvViewPrefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,23 +51,23 @@ public class RasterDeformationAction extends CancelableAction {
     public void drawAction(Graphics2D g, double px, double py, double scale) {
         double size = 7.0*scale;
         if (scale<0.9) {
-            g.setColor(new Color(128, 128, 128, 200));
+            g.setColor(ABBABdvViewPrefs.raster_small_scale);
         } else
         switch (slice.getActionState(this)) {
             case "(done)":
-                g.setColor(new Color(217, 0, 255, 200));
+                g.setColor(ABBABdvViewPrefs.done);
                 break;
             case "(locked)":
-                g.setColor(new Color(205, 1, 106, 200));
+                g.setColor(ABBABdvViewPrefs.locked);
                 break;
             case "(pending)":
-                g.setColor(new Color(255, 255, 0, 200));
+                g.setColor(ABBABdvViewPrefs.pending);
                 break;
         }
         {
             g.fillOval((int) (px - size), (int) (py - size), (int) (2.0*size), (int) (2.0*size));
         }
-        g.setColor(new Color(255, 255, 255, 200));
+        g.setColor(ABBABdvViewPrefs.valid_action_string_color);
         g.drawString("R", (int) px - 4, (int) py + 5);
     }
 

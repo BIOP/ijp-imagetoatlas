@@ -3,6 +3,7 @@ package ch.epfl.biop.abba.actionexample;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.atlas.aligner.CancelableAction;
+import ch.epfl.biop.atlas.aligner.gui.bdv.ABBABdvViewPrefs;
 import ij.IJ;
 import ij.gui.Roi;
 import net.imglib2.realtransform.RealTransform;
@@ -55,13 +56,13 @@ public class PrintTheNumberOfRoisAction extends CancelableAction {
         // For instance:
         switch (slice.getActionState(this)){ // Will change depending on the state of this action
             case "(done)":
-                g.setColor(new Color(0, 255, 0, 200));
+                g.setColor(ABBABdvViewPrefs.done);
                 break;
             case "(locked)":
-                g.setColor(new Color(255, 0, 0, 200));
+                g.setColor(ABBABdvViewPrefs.locked);
                 break;
             case "(pending)":
-                g.setColor(new Color(255, 255, 0, 200));
+                g.setColor(ABBABdvViewPrefs.pending);
                 break;
         }
         g.fillOval((int) (px - 7), (int) (py - 7), 14, 14);

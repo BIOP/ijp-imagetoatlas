@@ -117,7 +117,6 @@ import org.slf4j.LoggerFactory;
 import sc.fiji.bdvpg.bdv.BdvHandleHelper;
 import sc.fiji.bdvpg.scijava.BdvScijavaHelper;
 import sc.fiji.bdvpg.scijava.ScijavaSwingUI;
-import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
 import sc.fiji.bdvpg.scijava.services.ui.swingdnd.BdvTransferHandler;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
@@ -130,13 +129,8 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Font;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.Point;
-import java.awt.Stroke;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
@@ -150,6 +144,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
@@ -1935,8 +1930,8 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         if (optSlice.isPresent()) {
             SliceSources slice = optSlice.get();
             String info = slice.getInfo();
-            g.setFont(new Font("TimesRoman", Font.BOLD, 16));
-            g.setColor(new Color(32, 125, 49, 220));
+            g.setFont(ABBABdvViewPrefs.slice_info_font);
+            g.setColor(ABBABdvViewPrefs.slice_info_color);
             Point mouseLocation = bdvh.getViewerPanel().getMousePosition();
             if ((info!=null)&&(mouseLocation!=null)) {
                 drawString(g,info,mouseLocation.x,mouseLocation.y+40);
@@ -2057,8 +2052,6 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
     class InnerOverlay extends BdvOverlay {
         int drawCounter = 0;
-        final Color color = new Color(128,112,50,200);
-        final Stroke stroke = new BasicStroke(4);
         @Override
         protected void draw(Graphics2D g) {
             drawCounter++;
@@ -2129,15 +2122,29 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             int w = bdvh.getViewerPanel().getWidth();
             int h = bdvh.getViewerPanel().getHeight();
 
-            g.setColor(color);
-            g.setStroke(stroke);
+            g.setColor(ABBABdvViewPrefs.task_counter_color);
+            g.setStroke(ABBABdvViewPrefs.task_counter_stroke);
 
-            if (msp.getNumberOfTasks()>0) {
-                g.drawString(""+msp.getNumberOfTasks(), w-30-4, h-18-4);
-                if (drawCounter<=10) {
+            if (msp.getNumberOfTasks() > 0) {
+                String text = "" + msp.getNumberOfTasks();
+                FontMetrics fm = g.getFontMetrics();
+                int textWidth = fm.stringWidth(text);
+                int textHeight = fm.getAscent(); // Use ascent for baseline alignment
+
+                // Center of the arc
+                int centerX = w - 54 + 25;
+                int centerY = h - 54 + 25;
+
+                // Calculate x and y for centered text
+                int x = centerX - textWidth / 2;
+                int y = centerY + textHeight / 2;
+
+                g.drawString(text, x, y);
+
+                if (drawCounter <= 10) {
                     g.drawArc(w - 54, h - 54, 50, 50, 0, drawCounter * 36);
                 } else {
-                    g.drawArc(w - 54, h - 54, 50, 50, (drawCounter-10) * 36, 360-((drawCounter-10) * 36));
+                    g.drawArc(w - 54, h - 54, 50, 50, (drawCounter - 10) * 36, 360 - ((drawCounter - 10) * 36));
                 }
             }
 
@@ -2223,8 +2230,8 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             }
         }
 
-        g.setFont(new Font("TimesRoman", Font.BOLD, 16));
-        g.setColor(new Color(255, 255, 100, 250));
+        g.setFont(ABBABdvViewPrefs.mouse_atlas_coordinates_font);
+        g.setColor(ABBABdvViewPrefs.mouse_atlas_coordinates_color);
         try {
             Point mouseLocation = bdvh.getViewerPanel().getMousePosition();
             if ((ontologyLocation!=null)&&(mouseLocation!=null)) {
@@ -2247,8 +2254,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
             for (int i = 0; i < sortedSelected.size(); i++) {
                 SliceSources slice = sortedSelected.get(i);
-                //SliceGuiState sliceState = sliceGuiState.get(slice);
-                Integer[] coords = guiState.getSliceHandleCoords(slice);//sliceState.getSliceHandleCoords();
+                Integer[] coords = guiState.getSliceHandleCoords(slice);
                 RealPoint sliceCenter = new RealPoint(coords[0], coords[1], 0);
 
                 if (precedentPoint != null) {
@@ -2285,10 +2291,10 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
             if (sortedSelected.size() > 1) {
                 ghs.forEach(GraphicalHandle::enable);
-                g.setColor(new Color(255, 0, 255, 200));
+                g.setColor(ABBABdvViewPrefs.line_between_selected_slices_color);
                 g.drawLine(leftPosition[0], leftPosition[1], rightPosition[0], rightPosition[1]);
             } else if (sortedSelected.size() == 1) {
-                g.setColor(new Color(255, 0, 255, 200));
+                g.setColor(ABBABdvViewPrefs.line_between_selected_slices_color);
                 g.drawLine(leftPosition[0], leftPosition[1], rightPosition[0], rightPosition[1]);
             } else {
                 ghs.forEach(GraphicalHandle::disable);
@@ -2296,13 +2302,8 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             ghs.forEach(gh -> gh.draw(g));
         }
 
-        Color colorNotSelected = new Color(255, 255, 0, 64);
-        Color colorSelected = new Color(0, 255, 0, 180);
-
         // Set the stroke of the copy, not the original
-        Stroke dashed = new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL,
-                0, new float[]{9}, 0);
-        g.setStroke(dashed);
+        g.setStroke(ABBABdvViewPrefs.dashed_stroke_slice_handle_to_atlas);
 
         // Needs manual clipping because otherwise the time it takes to draw lines is abysmal
         int w = bdvh.getViewerPanel().getWidth();
@@ -2317,9 +2318,9 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             handlePoint.setPosition(sY/2.0, 1);
             bdvAt3D.apply(handlePoint, handlePoint);
             if (slice.isSelected()) {
-                g.setColor(colorSelected);
+                g.setColor(ABBABdvViewPrefs.color_slice_handle_selected);
             } else {
-                g.setColor(colorNotSelected);
+                g.setColor(ABBABdvViewPrefs.color_slice_handle_not_selected);
             }
 
             if ((coordSliceCenter[0]>0) && (coordSliceCenter[0]<w)) {
@@ -2338,8 +2339,8 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         if (iCurrentSlice != -1 && slicesCopy.size() > iCurrentSlice) {
             SliceSources slice = msp.getSlices().get(iCurrentSlice);
             //listeners.forEach(listener -> listener.isCurrentSlice(slice));
-            g.setColor(new Color(255, 255, 255, 128));
-            g.setStroke(new BasicStroke(5));
+            g.setColor(ABBABdvViewPrefs.current_slice_circle_color);
+            g.setStroke(ABBABdvViewPrefs.current_slice_circle_stroke);
             Integer[] coords = guiState.getSliceHandleCoords(slice);//sliceGuiState.get(slice).getSliceHandleCoords();
             RealPoint sliceCenter = new RealPoint(coords[0], coords[1], 0);
             if (slice.isKeySlice()) {
@@ -2347,9 +2348,8 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             } else {
                 g.drawOval((int) sliceCenter.getDoublePosition(0) - 15, (int) sliceCenter.getDoublePosition(1) - 15, 29, 29);
             }
-            Integer[] c = {255,255,255,128};
-            g.setColor(new Color(c[0], c[1], c[2], c[3]));
-            g.setFont(new Font("TimesRoman", Font.BOLD, 18));
+            g.setColor(ABBABdvViewPrefs.current_slice_handle_color);
+            g.setFont(ABBABdvViewPrefs.arrow_on_current_slice_font);
             g.drawString("\u25C4 \u25BA", (int) (sliceCenter.getDoublePosition(0) - 15), (int) (sliceCenter.getDoublePosition(1) - 20));
 
             String name = slice.getName();
@@ -2364,7 +2364,8 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             if (actionsArray!=null) {
                 List<CancelableAction> actions = new ArrayList<>(actionsArray); // Copy useful ?
                 actions = AlignerState.filterSerializedActions(actions); // To get rid of useless actions for the user
-                g.setFont(new Font("TimesRoman", Font.PLAIN, 16));
+                g.setColor(ABBABdvViewPrefs.action_summary_current_slice_color);
+                g.setFont(ABBABdvViewPrefs.action_summary_current_slice_font);
                 int index = 0;
                 for (CancelableAction action : actions) {
                     if ((!(action instanceof MoveSliceAction)) && (!(action instanceof CreateSliceAction))) {
@@ -2394,11 +2395,8 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
 
     private void drawDragAndDropRectangle(Graphics2D g, AffineTransform3D bdvAt3D) {
-        int colorCode = ARGBType.rgba(120,250,50,128);//this.info.getColor().get();
 
-        Color color = new Color(ARGBType.red(colorCode), ARGBType.green(colorCode), ARGBType.blue(colorCode), ARGBType.alpha(colorCode));
-
-        g.setColor(color);
+        g.setColor(ABBABdvViewPrefs.rectangle_dnd_color);
 
         RealPoint[][] ptRectWorld = new RealPoint[2][2];
 
@@ -2421,7 +2419,6 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         g.drawLine(ptRectScreen[1][1].x, ptRectScreen[1][1].y, ptRectScreen[0][1].x, ptRectScreen[0][1].y);
         g.drawLine(ptRectScreen[0][1].x, ptRectScreen[0][1].y, ptRectScreen[0][0].x, ptRectScreen[0][0].y);
 
-        g.setColor(color);
     }
 
     /**
