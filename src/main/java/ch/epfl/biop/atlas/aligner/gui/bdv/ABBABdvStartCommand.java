@@ -103,6 +103,7 @@ public class ABBABdvStartCommand implements Command, Initializable {
 
             BdvHandle bdvh = new DefaultBdvSupplier(new SerializableBdvOptions()).get();
             Prefs.showMultibox(false);
+            ABBATheme.setTheme(ABBATheme.createDarkTheme());
             view = new BdvMultislicePositionerView(mp, bdvh);
 
         } catch (Exception e) {

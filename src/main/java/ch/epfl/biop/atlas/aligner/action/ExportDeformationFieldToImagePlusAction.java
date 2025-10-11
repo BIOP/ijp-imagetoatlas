@@ -71,7 +71,7 @@ public class ExportDeformationFieldToImagePlusAction extends CancelableAction {
                 break;
         }
         g.fillRect((int) (px - 7), (int) (py - 7), 14, 14);
-        g.setColor(ABBABdvViewPrefs.export_deformation_field_action_text_color);
+        g.setColor(ABBABdvViewPrefs.text_action_export_deformation_field_action);
         g.drawString("E", (int) px - 4, (int) py + 5);
     }
 

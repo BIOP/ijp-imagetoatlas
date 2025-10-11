@@ -2054,6 +2054,10 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         int drawCounter = 0;
         @Override
         protected void draw(Graphics2D g) {
+
+            // Enable antialiasing for this overlay
+            enableAntialiasing(g);
+
             drawCounter++;
             drawCounter = drawCounter%21;
             // Gets a copy of the slices to avoid concurrent exception
@@ -2155,6 +2159,17 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             }
 
         }
+    }
+
+    private void enableAntialiasing(Graphics2D g2d) {
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+                RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB); // Better for LCD screens
+        g2d.setRenderingHint(RenderingHints.KEY_RENDERING,
+                RenderingHints.VALUE_RENDER_QUALITY);
+        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+                RenderingHints.VALUE_INTERPOLATION_BICUBIC);
     }
 
     Object getSourceValueAt(SourceAndConverter<?> sac, RealPoint pt) {

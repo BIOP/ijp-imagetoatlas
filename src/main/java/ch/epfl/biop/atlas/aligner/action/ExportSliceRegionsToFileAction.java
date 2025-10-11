@@ -51,7 +51,7 @@ public class ExportSliceRegionsToFileAction extends CancelableAction {
                 break;
         }
         g.fillOval((int) (px - 7), (int) (py - 7), 14, 14);
-        g.setColor(ABBABdvViewPrefs.export_slice_region_to_file_string_action);
+        g.setColor(ABBABdvViewPrefs.text_action_export_slice_region_to_file);
         g.drawString("E", (int) px - 4, (int) py + 5);
     }
 

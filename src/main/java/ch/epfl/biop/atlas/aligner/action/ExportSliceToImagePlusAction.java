@@ -76,7 +76,7 @@ public class ExportSliceToImagePlusAction extends CancelableAction {
                 break;
         }
         g.fillRect((int) (px - 7), (int) (py - 7), 14, 14);
-        g.setColor(ABBABdvViewPrefs.color_export_slice_to_image_plus_action);
+        g.setColor(ABBABdvViewPrefs.text_action_export_slice_to_image_plus);
         g.drawString("E", (int) px - 4, (int) py + 5);
     }
 

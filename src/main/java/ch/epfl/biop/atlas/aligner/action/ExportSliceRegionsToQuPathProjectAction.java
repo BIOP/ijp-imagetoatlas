@@ -46,7 +46,7 @@ public class ExportSliceRegionsToQuPathProjectAction extends CancelableAction {
                 break;
         }
         g.fillOval((int) (px - 7), (int) (py - 7), 14, 14);
-        g.setColor(ABBABdvViewPrefs.export_slice_regions_to_qupath_string_color);
+        g.setColor(ABBABdvViewPrefs.text_action_export_slice_regions_to_qupath);
         g.drawString("E", (int) px - 4, (int) py + 5);
     }
 

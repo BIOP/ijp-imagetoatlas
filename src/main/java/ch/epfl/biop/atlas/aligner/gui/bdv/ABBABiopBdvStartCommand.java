@@ -154,6 +154,9 @@ public class ABBABiopBdvStartCommand implements Command, Initializable {
 
                 SourceAndConverterServices.getBdvDisplayService().show(bdvh, whiteBGSAC);//.setMetadata(whiteBGSAC, ALPHA_SOURCE_KEY, alpha_sac);
 
+                ABBATheme.setTheme(ABBATheme.createLightTheme());
+            } else {
+                ABBATheme.setTheme(ABBATheme.createDarkTheme());
             }
 
             Prefs.showMultibox(false);

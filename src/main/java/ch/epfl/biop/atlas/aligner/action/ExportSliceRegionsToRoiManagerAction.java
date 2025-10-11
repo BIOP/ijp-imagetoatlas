@@ -46,7 +46,7 @@ public class ExportSliceRegionsToRoiManagerAction extends CancelableAction {
                 break;
         }
         g.fillOval((int) (px - 7), (int) (py - 7), 14, 14);
-        g.setColor(ABBABdvViewPrefs.color_export_to_roimanager_action);
+        g.setColor(ABBABdvViewPrefs.text_action_export_to_roimanager);
         g.drawString("E", (int) px - 4, (int) py + 5);
     }
 

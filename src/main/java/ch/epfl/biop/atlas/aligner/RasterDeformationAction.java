@@ -4,7 +4,6 @@ import ch.epfl.biop.atlas.aligner.gui.bdv.ABBABdvViewPrefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.Color;
 import java.awt.Graphics2D;
 
 /**
@@ -67,7 +66,7 @@ public class RasterDeformationAction extends CancelableAction {
         {
             g.fillOval((int) (px - size), (int) (py - size), (int) (2.0*size), (int) (2.0*size));
         }
-        g.setColor(ABBABdvViewPrefs.valid_action_string_color);
+        g.setColor(ABBABdvViewPrefs.text_action_register);
         g.drawString("R", (int) px - 4, (int) py + 5);
     }
 

@@ -120,7 +120,7 @@ public class RegisterSliceAction extends CancelableAction {
             } else {
                 g.fillOval((int) (px - size), (int) (py - size), (int) (2.0*size), (int) (2.0*size));
             }
-            g.setColor(ABBABdvViewPrefs.valid_action_string_color);
+            g.setColor(ABBABdvViewPrefs.text_action_register);
             g.drawString("R", (int) px - 4, (int) py + 5);
         } else {
             g.setColor(ABBABdvViewPrefs.invalid_action_string_color);
