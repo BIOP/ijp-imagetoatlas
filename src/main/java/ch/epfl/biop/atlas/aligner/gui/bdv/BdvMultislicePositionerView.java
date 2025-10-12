@@ -33,6 +33,7 @@ import ch.epfl.biop.atlas.aligner.command.ABBAImportDemoSlicesCommand;
 import ch.epfl.biop.atlas.aligner.command.ABBAStateLoadCommand;
 import ch.epfl.biop.atlas.aligner.command.ABBAStateSaveCommand;
 import ch.epfl.biop.atlas.aligner.command.ABBAUserFeedbackCommand;
+import ch.epfl.biop.atlas.aligner.command.ABBAGetPromptForMethodsWriting;
 import ch.epfl.biop.atlas.aligner.command.AtlasSlicingAdjusterCommand;
 import ch.epfl.biop.atlas.aligner.command.DeepSliceDocumentationCommand;
 import ch.epfl.biop.atlas.aligner.command.ExportAtlasToImageJCommand;
@@ -90,7 +91,6 @@ import mpicbg.spim.data.sequence.VoxelDimensions;
 import net.imglib2.*;
 import net.imglib2.position.FunctionRealRandomAccessible;
 import net.imglib2.realtransform.AffineTransform3D;
-import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.real.FloatType;
 import org.apache.commons.io.FilenameUtils;
@@ -481,7 +481,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Help>About DeepSlice (web)", DeepSliceDocumentationCommand.class);
         BdvScijavaHelper.addSeparator(bdvh,"Help");
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Help>How to cite ABBA", ABBACiteInfoCommand.class);
-
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Help>Get LLM prompt for methods summary", ABBAGetPromptForMethodsWriting.class, "mp", msp);
     }
 
     private void installRegistrationPluginUI(int hierarchyLevelsSkipped) {

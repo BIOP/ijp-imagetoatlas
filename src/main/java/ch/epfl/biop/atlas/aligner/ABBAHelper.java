@@ -114,6 +114,10 @@ public class ABBAHelper {
         }
     }
 
+    public static String getVersion() {
+        return VersionUtils.getVersion(ABBAHelper.class);
+    }
+
     public static class ABBASettings {
         public String pathToABBAAtlas;
         public String pathToABBAOntology;
@@ -221,8 +225,15 @@ public class ABBAHelper {
     public static void main(String[] args) throws Exception {
         File f = getTempQPProject("https://zenodo.org/records/14918378/files/abba-omero-gerbi-subset.zip");
         System.out.println(f.getAbsolutePath());
-
     }
 
+    final public static String URL_DeepSlice = "https://doi.org/10.1038/s41467-023-41645-4";
+    final public static String URL_Fiji = "https://doi.org/10.1038/nmeth.2019";
+    final public static String URL_QuPath = "https://doi.org/10.1038/s41598-017-17204-5";
+    final public static String URL_BDV = "https://doi.org/10.1038/nmeth.3392";
+    final public static String URL_Elastix = "https://doi.org/10.1109/TMI.2009.2035616";
+    final public static String URL_ABBA = "https://doi.org/10.1016/j.celrep.2025.115876";
+    final public static String URL_Brainglobe = "https://doi.org/10.21105/joss.02668";
+    final public static String URL_BigWarp = "https://doi.org/10.1109/ISBI.2016.7493463";
 
 }
