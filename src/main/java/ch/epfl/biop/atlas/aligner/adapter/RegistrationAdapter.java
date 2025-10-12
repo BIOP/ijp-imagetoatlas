@@ -46,6 +46,9 @@ public class RegistrationAdapter implements JsonSerializer<Registration>,
             registration.setScijavaContext(scijavacontext);
             registration.setTransform(json.getAsJsonObject().get("transform").getAsString());
             registration.setRegistrationParameters(context.deserialize(json.getAsJsonObject().get("parameters"), Map.class));
+            if (json.getAsJsonObject().has("name") && !json.getAsJsonObject().get("name").isJsonNull()) {
+                registration.setRegistrationName(json.getAsJsonObject().get("name").getAsString());
+            }
             return registration;
         } catch (InstantiableException e) {
             logger.error("Unrecognized registration plugin "+typeOfT.getTypeName());
@@ -69,6 +72,7 @@ public class RegistrationAdapter implements JsonSerializer<Registration>,
         }
         obj.addProperty("transform", registration.getTransform());
         obj.add("parameters", context.serialize(registration.getRegistrationParameters()));
+        obj.add("name", context.serialize(registration.getRegistrationName()));
 
         return obj;
     }

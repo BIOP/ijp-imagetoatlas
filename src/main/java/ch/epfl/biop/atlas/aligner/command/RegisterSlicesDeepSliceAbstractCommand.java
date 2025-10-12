@@ -226,7 +226,7 @@ abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command 
                 DeepSliceHelper.Holder<Registration<SourceAndConverter<?>[]>> regSupplier = newSliceRegistration.get(slice);
                 new RegisterSliceAction(mp, slice, regSupplier,
                         SourcesProcessorHelper.Identity(),
-                        SourcesProcessorHelper.Identity()).runRequest(true);
+                        SourcesProcessorHelper.Identity(), "DeepSlice Affine").runRequest(true);
             }
         }
         new MarkActionSequenceBatchAction(mp).runRequest();

@@ -62,6 +62,21 @@ public class RegisterSliceAction extends CancelableAction {
         this.preprocessMoving = preprocessMoving;
     }
 
+    String registrationName = null;
+
+    public RegisterSliceAction(MultiSlicePositioner mp,
+                               SliceSources slice,
+                               Supplier<Registration<SourceAndConverter<?>[]>> registrationSupplier,
+                               SourcesProcessor preprocessFixed,
+                               SourcesProcessor preprocessMoving, String registrationName) {
+        super(mp);
+        this.slice = slice;
+        this.registrationSupplier = registrationSupplier;
+        this.preprocessFixed = preprocessFixed;
+        this.preprocessMoving = preprocessMoving;
+        this.registrationName = registrationName;
+    }
+
     public SourcesProcessor getFixedSourcesProcessor() {
         return preprocessFixed;
     }
@@ -76,6 +91,9 @@ public class RegisterSliceAction extends CancelableAction {
     protected boolean run() { //
         if (registration == null) {
             registration = registrationSupplier.get();
+            if (registrationName!=null) {
+                registration.setRegistrationName(registrationName);
+            }
         }
         if (registration.isRegistrationDone()&&isValid()) {
             slice.appendRegistration(registration);
