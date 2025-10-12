@@ -75,7 +75,7 @@ public class ExportAtlasSliceToImagePlusAction extends CancelableAction {
     public void drawAction(Graphics2D g, double px, double py, double scale) {
         switch (slice.getActionState(this)) {
             case "(done)":
-                g.setColor(ABBABdvViewPrefs.done);
+                g.setColor(ABBABdvViewPrefs.done_export);
                 break;
             case "(locked)":
                 g.setColor(ABBABdvViewPrefs.locked);
@@ -86,7 +86,8 @@ public class ExportAtlasSliceToImagePlusAction extends CancelableAction {
         }
         g.fillRect((int) (px - 7), (int) (py - 7), 14, 14);
         g.setColor(ABBABdvViewPrefs.text_action_export_atlas_to_image_plus);
-        g.drawString("E", (int) px - 4, (int) py + 5);
+        g.setFont(ABBABdvViewPrefs.action_font);
+        g.drawString("E", (int) px - 4, (int) py + 3);
     }
 
 }

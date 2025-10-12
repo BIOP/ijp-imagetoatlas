@@ -3,11 +3,13 @@ package ch.epfl.biop.atlas.aligner.gui.bdv;
 import java.awt.*;
 
 public class ABBABdvViewPrefs {
-   public static Font slice_info_font = new Font("TimesRoman", Font.BOLD, 16);
-   public static Color slice_info_color = new Color(32, 125, 49, 220); // When slice info is shown
-   public static Color done = new Color(0, 255, 0, 200);
-   public static Color locked = new Color(255, 0, 0, 200);
-   public static Color pending = new Color(255, 255, 0, 200);
+   public static Font slice_info_font;// = new Font("TimesRoman", Font.BOLD, 16);
+   public static Font action_font;
+   public static Color slice_info_color;// = new Color(32, 125, 49, 220); // When slice info is shown
+   public static Color done; // = new Color(0, 255, 0, 200);
+   public static Color done_export;
+   public static Color locked; // = new Color(255, 0, 0, 200);
+   public static Color pending; // = new Color(255, 255, 0, 200);
    public static Color unmirror_small_scale = new Color(128, 128, 128, 200);
    public static Color raster_small_scale = new Color(128, 128, 128, 200);
    public static Color invalid_action_string_color = new Color(205, 1, 106, 199);
@@ -16,7 +18,9 @@ public class ABBABdvViewPrefs {
    public static Color register_small_scale = new Color(128, 128, 128, 200);
    public static Color stroke_color_left = new Color(0,255,0);
    public static Color stroke_color_right = new Color(255,0,255);
+   public static Color text_action_raster_deformation;
    public static Color text_action_register = new Color(255, 255, 255, 200);
+   public static Color text_action_unmirror;
    public static Color text_action_export_to_roimanager = new Color(255, 255, 255, 200);
    public static Color text_action_export_deformation_field_action = new Color(255, 255, 255, 200); // text_action_export_deformation_field_action
    public static Color text_action_export_atlas_to_image_plus = new Color(255, 255, 255, 200);

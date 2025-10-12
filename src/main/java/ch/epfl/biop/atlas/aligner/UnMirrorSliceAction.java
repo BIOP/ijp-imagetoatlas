@@ -60,8 +60,9 @@ public class UnMirrorSliceAction extends CancelableAction {
                 }
 
             g.fillRect((int) (px - size), (int) (py - size), (int) (2.0*size), (int) (2.0*size));
-            g.setColor(ABBABdvViewPrefs.text_action_register);
-            g.drawString("R", (int) px - 4, (int) py + 5);
+            g.setColor(ABBABdvViewPrefs.text_action_unmirror);
+            g.setFont(ABBABdvViewPrefs.action_font);
+            g.drawString("U", (int) px - 4, (int) py + 5);
         } else {
             g.setColor(ABBABdvViewPrefs.invalid_action_string_color);
             g.drawString("X", (int) px - 4, (int) py + 5);

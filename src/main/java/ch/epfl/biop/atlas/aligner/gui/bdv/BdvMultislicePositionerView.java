@@ -2365,11 +2365,11 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             }
             g.setColor(ABBABdvViewPrefs.current_slice_handle_color);
             g.setFont(ABBABdvViewPrefs.arrow_on_current_slice_font);
-            g.drawString("\u25C4 \u25BA", (int) (sliceCenter.getDoublePosition(0) - 15), (int) (sliceCenter.getDoublePosition(1) - 20));
+            g.drawString("\u25C4 \u25BA", (int) (sliceCenter.getDoublePosition(0) - 20), (int) (sliceCenter.getDoublePosition(1) - 20));
 
             String name = slice.getName();
             int yOffset = 20;
-            if (mode==REVIEW_MODE_INT) yOffset = 130;
+            if (mode==REVIEW_MODE_INT) yOffset = 160;
             if (slice.isKeySlice()) name += " [Key]";
             DecimalFormat df = new DecimalFormat("00.000");
             DecimalFormat df2 = new DecimalFormat(".0");

@@ -70,6 +70,7 @@ public class RasterSliceAction extends CancelableAction {
             g.fillOval((int) (px - size), (int) (py - size), (int) (2.0*size), (int) (2.0*size));
         }
         g.setColor(ABBABdvViewPrefs.raster_action_string_color);
+        g.setFont(ABBABdvViewPrefs.action_font);
         g.drawString("R", (int) px - 4, (int) py + 5);
     }
 
