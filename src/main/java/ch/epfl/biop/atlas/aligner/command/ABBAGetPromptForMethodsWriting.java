@@ -50,36 +50,37 @@ public class ABBAGetPromptForMethodsWriting implements Command {
 
         llm_prompt_for_methods =
                 "# Goal\n"+
-                "\n"+
-                "Please write a SHORT methods section of what I've done to register my 2D histological sections to a 3D atlas."+
-                "I used the software ABBA for this task (version"+ABBAHelper.getVersion()+"). ABBA uses a variety of third party tools (atlas, registration tools, software platform such as Fiji and QuPath)"+
-                " that should also be included in the methods if they are used.\n"+
-                "Ask please make sure to ask the user to review your output! We don't want incorrect methods to end up in publications.\n"+
-                "\n";
+                        "\n"+
+                        "Generate a concise methods section describing the registration of 2D histological sections to a 3D atlas. "+
+                        "The user has performed this registration using ABBA software (version "+ABBAHelper.getVersion()+"). "+
+                        "ABBA integrates various third-party tools (atlases, registration algorithms, and software platforms including Fiji and QuPath) "+
+                        "that should be cited when relevant.\n"+
+                        "IMPORTANT: Include a disclaimer reminding the user to review the output carefully to ensure accuracy before publication.\n"+
+                        "\n";
 
         llm_prompt_for_methods +=
-                "# Atlas\n"+
-                "\n"+
-                "For starters, I'm using the atlas named '"+ mp.getAtlas().getName()+"'.\n"+
-                "You can find some extra information about it at the following URL:\n"+
-                "* "+ mp.getAtlas().getURL()+"\n";
+                "# Atlas Information\n"+
+                        "\n"+
+                        "The user employed the '"+ mp.getAtlas().getName()+"' atlas.\n"+
+                        "Additional information available at:\n"+
+                        "* "+ mp.getAtlas().getURL()+"\n";
 
         if (!mp.getAtlas().getDOIs().isEmpty()) {
-            llm_prompt_for_methods += "You can also check the DOIs associated to the atlas (if they exist):\n";
+            llm_prompt_for_methods += "Related DOIs:\n";
         }
 
         for (String doi: mp.getAtlas().getDOIs() ) {
             llm_prompt_for_methods +="* "+doi+"\n";
         }
 
-        llm_prompt_for_methods +="Since it's not easy to know from the parameters in which orientation the atlas was cut (coronal, sagittal, horizontal), "+
-                "insert an obvious placeholder sentence that I will need to fill later.\n"+
-                "Now the atlas slicing may have been adjusted for slight rotation along the x and y axis. Here's are the adjustement values:\n"+
-                "* Angle X (degrees) = "+df.format(mp.getReslicedAtlas().getRotateX()/Math.PI*180)+"\n"+
-                "* Angle Y (degrees) = "+df.format(mp.getReslicedAtlas().getRotateY()/Math.PI*180)+"\n\n"+
-                "If the values are both zero, then no adjustement was done. Note that if DeepSlice was used, these values were probably set by DeepSlice and not by the user.\n\n";
+        llm_prompt_for_methods +="\nThe atlas sectioning orientation (coronal, sagittal, or horizontal) cannot be determined from the parameters. "+
+                "Insert a clear placeholder for the user to specify this information.\n"+
+                "Atlas slicing adjustments for rotation:\n"+
+                "* X-axis rotation: "+df.format(mp.getReslicedAtlas().getRotateX()/Math.PI*180)+" degrees\n"+
+                "* Y-axis rotation: "+df.format(mp.getReslicedAtlas().getRotateY()/Math.PI*180)+" degrees\n\n"+
+                "If both values are zero, no adjustment was performed. Note: DeepSlice may have set these values automatically.\n\n";
 
-        llm_prompt_for_methods +="Here's the list of channels present in the atlas:\n\n";
+        llm_prompt_for_methods +="Atlas channels available:\n\n";
 
         int idx = 0;
         Set<String> uselessKeys = new HashSet<>();
@@ -87,7 +88,7 @@ public class ABBAGetPromptForMethodsWriting implements Command {
                 uselessKeys.add("Y");
                 uselessKeys.add("Z");
                 uselessKeys.add("Label");
-                uselessKeys.add("Left_Right");
+                uselessKeys.add("Left Right");
         for (String key : mp.getAtlas().getMap().getImagesKeys()) {
             if (!uselessKeys.contains(key)) {
                 llm_prompt_for_methods += "* channel " + idx + ": " + key + "\n";
@@ -97,32 +98,31 @@ public class ABBAGetPromptForMethodsWriting implements Command {
 
         llm_prompt_for_methods +="\n";
 
-        llm_prompt_for_methods +="# Origin and king of slice data\n\n"+
-                "I can't provide you good information about the data. Please add a placeholder sentence that specify what I need "+
-                "to fill in these information (how were the image acquired, how many channels and what are they).\n\n";
+        llm_prompt_for_methods +="# Experimental Data\n\n"+
+                "Insufficient information provided about the experimental data. Insert placeholders for:\n"+
+                "- Image acquisition method and equipment\n"+
+                "- Number and type of channels/stains\n"+
+                "- Any preprocessing steps\n\n";
 
-        llm_prompt_for_methods +="# Registration steps for all slices - Preamble\n\n"+
-                "I'll give you a list of all slices of the dataset, and for each one of them, which process has been applied for the registration.\n"+
-                "But first let me explain a bit the syntax. For instance, see this example slice (which is not part of my current dataset:+" +
+        llm_prompt_for_methods +="# Registration Protocol - Overview\n\n"+
+                "Below is the complete list of slices with their registration parameters.\n"+
+                "Syntax explanation using this example (not from the current dataset):\n"+
                 "```\n"+
                 "1 - Slide_04.vsi - 10x_10\n" +
                 "2 - Z: 08.162 mm (Thickness: 83.7 um)\n" +
-                "3 - Affine Id Atlas // Id Section] (done)\n" +
+                "3 - DeepSlice Affine Id Atlas // Id Section] (done)\n" +
                 "4 - Elastix 2D Affine [Z0] [Ch0;1] Atlas // [Z0][Ch1;0] Section] (done)\n" +
                 "5 - Elastix 2D Spline [Z0] [Ch0;1] Atlas // [Z0][Ch0;1] Section] (done)\n" +
-                "```"+
-                "Line 1: name of the slice (`[Key]` may be indicated if the slice is a key reference slice)\n"+
-                "Line 2: its position along the atlas axis\n"+
-                "Line 3: It's a DeepSlice registration! Mention it! DeepSlice allows for automated positioning along the atlas axis + a first affine registration - (the word `Deepslice` will appear explicitely in newer versions of ABBA)\n"+
-                "Line 4: an elastix affine registration was performed, that registration used multiple channels: the channels 0 and 1 of the atlas were "+
-                " used against respectively to the channel 1 and 0 of the experimental section. You can ignore `[Z0]`\n"+
-                "Line 5: an elastix spline registration was performed, that registration used multiple channels: the channels 0 and 1 of the atlas were "+
-                " used against respectively to the channel 0 and 1 of the experimental section. You can ignore `[Z0]`\n"+
-                "BigWarp may be used as well, it's a manual spline transform. Also make sure to add a placeholder that should ask me how many control points I've selected for my job."+
+                "```\n"+
+                "Line 1: Slice identifier (`[Key]` indicates reference slice)\n"+
+                "Line 2: Position along atlas axis and section thickness\n"+
+                "Line 3: DeepSlice registration (automated positioning + initial affine transform) - Note: 'DeepSlice' will appear explicitly in newer ABBA versions\n"+
+                "Line 4: Elastix affine registration with channel mapping (atlas Ch0,1 → section Ch1,0). Ignore `[Z0]`\n"+
+                "Line 5: Elastix spline registration with channel mapping (atlas Ch0,1 → section Ch0,1). Ignore `[Z0]`\n"+
+                "BigWarp indicates manual spline transformation - include placeholder for number of control points used.\n"+
                 "\n";
 
-        llm_prompt_for_methods +="Here's the list of all slices and their registration protocol. I also added the spacing between two consecutive slices (if there are several), because if they are spaced\n"+
-                " with equal distance the methods writing will be easier.\n\n";
+        llm_prompt_for_methods +="Inter-slice spacing is included to identify regular vs. irregular sampling.\n\n";
 
         double lastSlicePosition = mp.getSelectedSlices().get(0).getSlicingAxisPosition();
 
@@ -153,10 +153,11 @@ public class ABBAGetPromptForMethodsWriting implements Command {
             }
         }
 
+
         llm_prompt_for_methods +="\n";
         llm_prompt_for_methods +="# References\n\n";
-        llm_prompt_for_methods +="Please keep only the DOI in your reference section, do you write the authors. Cite with, for example [1] and then add 1 + a copy of the DOI in your reference section.\n";
-        llm_prompt_for_methods +="Also note that QuPath is not used directly but rather for the post processing.\n";
+        llm_prompt_for_methods +="Format citations as numbered references [1] with DOIs only (exclude author lists).\n";
+        llm_prompt_for_methods +="Note: QuPath is used for post-processing, not direct registration.\n";
         llm_prompt_for_methods +="- ABBA paper: "+ABBAHelper.URL_ABBA+"\n";
         llm_prompt_for_methods +="- DeepSlice paper: "+ABBAHelper.URL_DeepSlice+"\n";
         llm_prompt_for_methods +="- Fiji paper: "+ABBAHelper.URL_Fiji+"\n";
@@ -178,12 +179,11 @@ public class ABBAGetPromptForMethodsWriting implements Command {
         }
 
         llm_prompt_for_methods+="\n\n";
-        llm_prompt_for_methods+="Good luck for your task! Be concise!\n";
+        llm_prompt_for_methods+="Generate a concise, professional methods section based on the above information.\n";
 
-        llm_prompt_for_methods+="# Example output\n\n";
-
-        llm_prompt_for_methods+="Here is an example output that you can take as a template (adjusted to the current conditions of course):\n\n";
-        llm_prompt_for_methods+="THIS IS JUST AN EXAMPLE, modify the sections according to the data above.";
+        llm_prompt_for_methods+="# Example Output Template\n\n";
+        llm_prompt_for_methods+="Use this structure as a guide (adapt to the specific data provided):\n\n";
+        llm_prompt_for_methods+="IMPORTANT: This is a template only - modify all sections according to the actual data above.\n\n";
 
         llm_prompt_for_methods+="## Methods: Registration of Histological Sections to 3D Atlas\n" +
                 "\n" +
@@ -193,16 +193,15 @@ public class ABBAGetPromptForMethodsWriting implements Command {
                 "\n" +
                 "## Atlas Selection and Configuration\n" +
                 "\n" +
-                "Registration of histological sections to a reference atlas was performed using the Aligning Big Brains and Atlas (ABBA) plugin (version "+ABBAHelper.getVersion()+") [1] running within the Fiji image processing platform [2]. ABBA utilizes BigDataViewer [5] for visualization and BigWarp [6] for visualization of spline transformations. The Allen Mouse Common Coordinate Framework (CCF) atlas at 10 μm resolution (allen_mouse_10um_java) [3] was used as the reference template. **[PLACEHOLDER: Specify the anatomical orientation of atlas sectioning - coronal, sagittal, or horizontal]**. \n" +
+                "Registration of histological sections to a reference atlas was performed using the Aligning Big Brains and Atlas (ABBA) plugin (version "+ABBAHelper.getVersion()+") [1] running within the Fiji image processing platform [2]. ABBA utilizes BigDataViewer [5] for visualization and BigWarp [6] for visualization of spline transformations. The (...) atlas at (...) μm resolution [3] was used as the reference template. **[PLACEHOLDER: Specify the anatomical orientation of atlas sectioning - coronal, sagittal, or horizontal]**. \n" +
                 "\n" +
                 "The atlas orientation was adjusted to better match the sectioning plane of the experimental tissue, with a rotation of ... along the X-axis and ... along the Y-axis. These values were set by DeepSlice. For registration purposes, two atlas channels were utilized: channel 0 (...) and channel 1 (...).\n" +
                 "\n" +
                 "## Section Registration Workflow\n" +
                 "\n" +
-                "A total of ... serial sections from Slide_04.vsi (sections 10x_06 through 10x_12) were registered to the atlas, spanning positions from ... mm to ... mm along the atlas axis. All sections were spaced at approximately 80 μm intervals.\n" +
+                "A total of (...) serial sections from Slide_04.vsi (sections (...) through (...)) were registered to the atlas, spanning positions from ... mm to ... mm along the atlas axis. All sections were spaced at approximately 80 μm intervals.\n" +
                 "\n" +
                 "(insert part about registration procedure, common or not depending on whether the slices have been treated identically or not)" +
-                "**[PLACEHOLDER: If manual refinement using BigWarp was performed, specify the approximate number of control points used per section]**\n" +
                 "\n" +
                 "## Post-Processing\n" +
                 "\n" +
