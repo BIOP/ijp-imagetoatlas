@@ -1162,9 +1162,9 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     public String getViewName() {
         String name = "Aligning Big Brains and Atlases - "+msp.getAtlas().getName();
         if (msp.isModifiedSinceLastSave()) {
-            return name+"* (modified)";
+            return ABBABdvViewPrefs.title_prefix+name+"* (modified)"+ABBABdvViewPrefs.title_suffix;
         } else {
-            return name;
+            return ABBABdvViewPrefs.title_prefix+name+ABBABdvViewPrefs.title_suffix;
         }
     }
 
@@ -2267,6 +2267,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             List<SliceSources> sortedSelected = msp.getSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
             RealPoint precedentPoint = null;
 
+            g.setStroke(ABBABdvViewPrefs.line_between_selected_slices_stroke);
             for (int i = 0; i < sortedSelected.size(); i++) {
                 SliceSources slice = sortedSelected.get(i);
                 Integer[] coords = guiState.getSliceHandleCoords(slice);

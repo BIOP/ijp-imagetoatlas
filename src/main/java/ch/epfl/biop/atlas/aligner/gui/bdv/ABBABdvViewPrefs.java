@@ -46,4 +46,7 @@ public class ABBABdvViewPrefs {
 
    public static Color selection_back_color = new Color(0xF7BF18);
    public static Stroke selection_stroke = new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{9}, 0); //new BasicStroke(2);
+   public static Stroke line_between_selected_slices_stroke;
+
+   public static String title_suffix = "", title_prefix = "";
 }
