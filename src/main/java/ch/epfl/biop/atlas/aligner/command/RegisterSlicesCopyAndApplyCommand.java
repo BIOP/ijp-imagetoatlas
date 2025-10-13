@@ -33,8 +33,6 @@ public class RegisterSlicesCopyAndApplyCommand implements Command {
     @Parameter(label = "Tick if you want to skip the pre-transform (probably not)")
     boolean skip_pre_transform = false;
 
-    private Gson serializer;
-
     public void run() {
         List<SliceSources> selectedSlices = mp.getSelectedSlices();
 
@@ -55,9 +53,6 @@ public class RegisterSlicesCopyAndApplyCommand implements Command {
             mp.warningMessageForUser.accept("Model slice selected!", "The registration sequence will not be applied to the model slice.");
         }
 
-        // Initialize serializer
-        serializer = mp.getGsonStateSerializer(new ArrayList<>());
-
         // Apply registration to all selected slices
         AtomicInteger counter = new AtomicInteger(0);
         AtomicBoolean result = new AtomicBoolean();
@@ -69,12 +64,6 @@ public class RegisterSlicesCopyAndApplyCommand implements Command {
             }
             return true;
         }, result).runRequest();
-    }
-
-    private RegisterSliceAction copyReg(RegisterSliceAction action) {
-         // Clone through serialisation and deserialisation
-        String regString = serializer.toJson(action, RegisterSliceAction.class);
-        return serializer.fromJson(regString, RegisterSliceAction.class);
     }
 
     /**

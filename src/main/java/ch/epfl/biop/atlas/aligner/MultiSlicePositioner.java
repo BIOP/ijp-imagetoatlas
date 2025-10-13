@@ -536,41 +536,6 @@ public class MultiSlicePositioner implements Closeable {
 
     protected boolean runCreateSlice(CreateSliceAction createSliceAction) {
         synchronized (this) { // only one slice addition at a time
-            boolean sacAlreadyPresent = false;
-            for (SourceAndConverter<?> sac : createSliceAction.getSacs()) {
-                for (SliceSources slice : getSlices()) {
-                    for (SourceAndConverter<?> test : slice.getOriginalSources()) {
-                        if (test.equals(sac)) {
-                            sacAlreadyPresent = true;
-                            break;
-                        }
-                    }
-                }
-            }
-
-            if (sacAlreadyPresent) {
-                SliceSources zeSlice = null;
-
-                // A source is already included :
-                // If all sources match exactly what's in a single SliceSources -> that's a move operation
-
-                boolean exactMatch = false;
-                for (SliceSources ss : slices) {
-                    if (ss.exactMatch(createSliceAction.getSacs())) {
-                        exactMatch = true;
-                        zeSlice = ss;
-                    }
-                }
-
-                if (!exactMatch) {
-                    logger.error("A source is already used in the positioner : slice not created.");
-                    return false;
-                } else {
-                    // Move action:
-                    new MoveSliceAction(this, zeSlice, createSliceAction.slicingAxisPosition).runRequest();
-                    return false;
-                }
-            }
 
             if (createSliceAction.getSlice() == null) {// for proper redo function
                 createSliceAction.setSlice(new SliceSources(createSliceAction.getSacs().toArray(new SourceAndConverter[0]),
