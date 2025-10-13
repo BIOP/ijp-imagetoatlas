@@ -45,6 +45,9 @@ public class ABBAGetPromptForMethodsWriting implements Command {
             return;
         }
 
+        mp.infoMessageForUser.accept("Wait for end of all tasks", "Wait for all tasks to finish before generating prompt...");
+        mp.waitForTasks();
+
         DecimalFormat df = new DecimalFormat("00.000");
         DecimalFormat df2 = new DecimalFormat(".0");
 
@@ -74,7 +77,7 @@ public class ABBAGetPromptForMethodsWriting implements Command {
         }
 
         llm_prompt_for_methods +="\nThe atlas sectioning orientation (coronal, sagittal, or horizontal) cannot be determined from the parameters. "+
-                "Insert a clear placeholder for the user to specify this information.\n"+
+                "Insert a clear placeholder for the user to specify this information.\n\n"+
                 "Atlas slicing adjustments for rotation:\n"+
                 "* X-axis rotation: "+df.format(mp.getReslicedAtlas().getRotateX()/Math.PI*180)+" degrees\n"+
                 "* Y-axis rotation: "+df.format(mp.getReslicedAtlas().getRotateY()/Math.PI*180)+" degrees\n\n"+
@@ -114,12 +117,12 @@ public class ABBAGetPromptForMethodsWriting implements Command {
                 "4 - Elastix 2D Affine [Z0] [Ch0;1] Atlas // [Z0][Ch1;0] Section] (done)\n" +
                 "5 - Elastix 2D Spline [Z0] [Ch0;1] Atlas // [Z0][Ch0;1] Section] (done)\n" +
                 "```\n"+
-                "Line 1: Slice identifier (`[Key]` indicates reference slice)\n"+
+                "Line 1: Slice identifier (optional `[Key]` suffix indicates where the user positioned its reference/key slice)\n"+
                 "Line 2: Position along atlas axis and section thickness\n"+
-                "Line 3: DeepSlice registration (automated positioning + initial affine transform) - Note: 'DeepSlice' will appear explicitly in newer ABBA versions\n"+
+                "Line 3: DeepSlice registration (automated positioning + initial affine transform + atlas slicing angle correction)\n"+
                 "Line 4: Elastix affine registration with channel mapping (atlas Ch0,1 → section Ch1,0). Ignore `[Z0]`\n"+
-                "Line 5: Elastix spline registration with channel mapping (atlas Ch0,1 → section Ch0,1). Ignore `[Z0]`\n"+
-                "BigWarp indicates manual spline transformation - include placeholder for number of control points used.\n"+
+                "Line 5: Elastix spline registration with channel mapping (atlas Ch0,1 → section Ch0,1). Ignore `[Z0]` and put placeholder to specify how many control points were used.\n"+
+                "BigWarp indicates a fully manual spline transformation - include placeholder for number of control points used.\n"+
                 "\n";
 
         llm_prompt_for_methods +="Inter-slice spacing is included to identify regular vs. irregular sampling.\n\n";
@@ -128,29 +131,55 @@ public class ABBAGetPromptForMethodsWriting implements Command {
 
         llm_prompt_for_methods +="# Slices\n\n";
 
+        llm_prompt_for_methods += "There are "+mp.getSelectedSlices().size()+" slices in total. Here is how they have been processed, sorted by Z values:\n\n";
+
+        List<String> slicesProcessingSteps = new ArrayList<>();
+
         for (SliceSources slice: mp.getSelectedSlices()) {
-            String name = slice.getName();
-            if (slice.isKeySlice()) name += " [Key]";
-            llm_prompt_for_methods +=name+"\n";
-            llm_prompt_for_methods +="Z: "+df.format(slice.getSlicingAxisPosition()- mp.getReslicedAtlas().getZOffset())+" mm (Thickness: "+df2.format(slice.getThicknessInMm()*1000.0)+" um)\n";
-            if (slice.getIndex()!=0) {
-                llm_prompt_for_methods +="Dist from previous slice (micrometer): "+df.format((slice.getSlicingAxisPosition()-lastSlicePosition)*1000)+"\n";
-                lastSlicePosition = slice.getSlicingAxisPosition();
-            }
             List<CancelableAction> actionsArray = mp.getActionsFromSlice(slice);
+            String processingStepsForSlice = "";
             if (actionsArray!=null) {
                 List<CancelableAction> actions = new ArrayList<>(actionsArray); // Copy useful ?
                 actions = AlignerState.filterSerializedActions(actions);
                 for (CancelableAction action : actions) {
                     if ((!(action instanceof MoveSliceAction)) && (!(action instanceof CreateSliceAction))) {
                         String actionString = action.toString();
-                        if (actionString.equals("Affine Id Atlas // Id Section] (done)")) {
-                            actionString="DeepSlice Affine Id Atlas // Id Section] (done)";
+                        if (actionString.equals("Affine Id Atlas // Id Section] (done)")|| (actionString.equals("Affine Id.Atlas // Id.Section)] (done)"))) {
+                            actionString="DeepSlice Affine Id.Atlas // Id.Section] (done)";
                         }
-                        llm_prompt_for_methods += actionString+"\n";
+                        processingStepsForSlice += actionString+"\n";
                     }
                 }
             }
+            slicesProcessingSteps.add(processingStepsForSlice);
+        }
+
+        boolean equalProcessing = slicesProcessingSteps.isEmpty() ||
+                slicesProcessingSteps.stream().distinct().count() == 1;
+
+        if (!equalProcessing) {
+            llm_prompt_for_methods+="\n Not all slices have been processed identically! \n\n";
+        }
+
+        int idxSlice = 0;
+        for (SliceSources slice: mp.getSelectedSlices()) {
+            String name = slice.getName();
+            if (slice.isKeySlice()) name += " [Key]";
+            llm_prompt_for_methods +=name+"\n";
+            llm_prompt_for_methods +="Z: "+df.format(slice.getSlicingAxisPosition()- mp.getReslicedAtlas().getZOffset())+" mm (Thickness: "+df2.format(slice.getThicknessInMm()*1000.0)+" um)\n";
+            if (idxSlice!=0) {
+                llm_prompt_for_methods +="Dist from previous slice (micrometer): "+df.format((slice.getSlicingAxisPosition()-lastSlicePosition)*1000)+"\n";
+                lastSlicePosition = slice.getSlicingAxisPosition();
+            }
+            if (!equalProcessing) {
+                llm_prompt_for_methods+=slicesProcessingSteps.get(idxSlice);
+            }
+            idxSlice++;
+        }
+
+        if (equalProcessing) {
+            llm_prompt_for_methods+="\nAll slices have been processed identically with the following registration step(s):\n";
+            llm_prompt_for_methods+=slicesProcessingSteps.get(0);
         }
 
 
@@ -184,7 +213,7 @@ public class ABBAGetPromptForMethodsWriting implements Command {
         llm_prompt_for_methods+="# Example Output Template\n\n";
         llm_prompt_for_methods+="Use this structure as a guide (adapt to the specific data provided):\n\n";
         llm_prompt_for_methods+="IMPORTANT: This is a template only - modify all sections according to the actual data above.\n\n";
-
+        llm_prompt_for_methods+="<START OF TEMPLATE>\n";
         llm_prompt_for_methods+="## Methods: Registration of Histological Sections to 3D Atlas\n" +
                 "\n" +
                 "## Image Acquisition and Preprocessing\n" +
@@ -214,8 +243,8 @@ public class ABBAGetPromptForMethodsWriting implements Command {
                 "\n" +
                 "---\n" +
                 "\n" +
-                "**IMPORTANT: Please carefully review this methods section and fill in all placeholders (marked with [PLACEHOLDER]) with accurate information specific to your experimental procedures. Verify that all technical details accurately reflect your workflow before including this in any publication.**";
-
+                "**IMPORTANT: Please carefully review this methods section and fill in all placeholders (marked with [PLACEHOLDER]) with accurate information specific to your experimental procedures. Verify that all technical details accurately reflect your workflow before including this in any publication.**\n";
+        llm_prompt_for_methods+="<END OF TEMPLATE>\n";
 
     }
 
