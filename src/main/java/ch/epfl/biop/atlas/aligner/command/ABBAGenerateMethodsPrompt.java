@@ -23,9 +23,9 @@ import java.util.List;
 import java.util.Set;
 
 @Plugin(type = Command.class,
-        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Help>ABBA - Get a prompt to use for methods writing",
+        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Cite>ABBA - Get Prompt r methods writing",
         description = "Outputs a summary of methods used for the registration. Can be copy pasted in the llm of your choice.")
-public class ABBAGetPromptForMethodsWriting implements Command {
+public class ABBAGenerateMethodsPrompt implements Command {
 
     @Parameter
     MultiSlicePositioner mp;
@@ -113,15 +113,16 @@ public class ABBAGetPromptForMethodsWriting implements Command {
                 "```\n"+
                 "1 - Slide_04.vsi - 10x_10\n" +
                 "2 - Z: 08.162 mm (Thickness: 83.7 um)\n" +
-                "3 - DeepSlice Affine Id Atlas // Id Section] (done)\n" +
-                "4 - Elastix 2D Affine [Z0] [Ch0;1] Atlas // [Z0][Ch1;0] Section] (done)\n" +
-                "5 - Elastix 2D Spline [Z0] [Ch0;1] Atlas // [Z0][Ch0;1] Section] (done)\n" +
+                "3 - Step 1|DeepSlice Affine Id Atlas // Id Section] (done)\n" +
+                "4 - Step 2|Elastix 2D Affine [Z0] [Ch0;1] Atlas // [Z0][Ch1;0] Section] (done)\n" +
+                "5 - Step 3|Elastix 2D Spline [Z0] [Ch0;1] Atlas // [Z0][Ch0;1] Section] (done)\n" +
                 "```\n"+
                 "Line 1: Slice identifier (optional `[Key]` suffix indicates where the user positioned its reference/key slice)\n"+
                 "Line 2: Position along atlas axis and section thickness\n"+
                 "Line 3: DeepSlice registration (automated positioning + initial affine transform + atlas slicing angle correction)\n"+
                 "Line 4: Elastix affine registration with channel mapping (atlas Ch0,1 → section Ch1,0). Ignore `[Z0]`\n"+
                 "Line 5: Elastix spline registration with channel mapping (atlas Ch0,1 → section Ch0,1). Ignore `[Z0]` and put placeholder to specify how many control points were used.\n"+
+                "If DeepSlice is used several times, mention it since running DeepSlice multiple times gives better results.\n"+
                 "BigWarp indicates a fully manual spline transformation - include placeholder for number of control points used.\n"+
                 "\n";
 
@@ -141,13 +142,15 @@ public class ABBAGetPromptForMethodsWriting implements Command {
             if (actionsArray!=null) {
                 List<CancelableAction> actions = new ArrayList<>(actionsArray); // Copy useful ?
                 actions = AlignerState.filterSerializedActions(actions);
+                int idxStep = 1;
                 for (CancelableAction action : actions) {
                     if ((!(action instanceof MoveSliceAction)) && (!(action instanceof CreateSliceAction))) {
                         String actionString = action.toString();
                         if (actionString.equals("Affine Id Atlas // Id Section] (done)")|| (actionString.equals("Affine Id.Atlas // Id.Section)] (done)"))) {
                             actionString="DeepSlice Affine Id.Atlas // Id.Section] (done)";
                         }
-                        processingStepsForSlice += actionString+"\n";
+                        processingStepsForSlice += "Step "+idxStep+"|"+actionString+"\n";
+                        idxStep++;
                     }
                 }
             }

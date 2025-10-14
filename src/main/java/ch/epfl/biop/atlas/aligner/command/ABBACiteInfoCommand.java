@@ -22,7 +22,7 @@ import java.net.URL;
 // Merci chaton gpt
 
 @Plugin(type = Command.class,
-        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Help>ABBA - How to cite",
+        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Cite>ABBA - How to cite",
         description = "How to cite")
 public class ABBACiteInfoCommand implements Command {
 

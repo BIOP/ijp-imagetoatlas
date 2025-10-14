@@ -33,7 +33,7 @@ import ch.epfl.biop.atlas.aligner.command.ABBAImportDemoSlicesCommand;
 import ch.epfl.biop.atlas.aligner.command.ABBAStateLoadCommand;
 import ch.epfl.biop.atlas.aligner.command.ABBAStateSaveCommand;
 import ch.epfl.biop.atlas.aligner.command.ABBAUserFeedbackCommand;
-import ch.epfl.biop.atlas.aligner.command.ABBAGetPromptForMethodsWriting;
+import ch.epfl.biop.atlas.aligner.command.ABBAGenerateMethodsPrompt;
 import ch.epfl.biop.atlas.aligner.command.AtlasSlicingAdjusterCommand;
 import ch.epfl.biop.atlas.aligner.command.DeepSliceDocumentationCommand;
 import ch.epfl.biop.atlas.aligner.command.ExportAtlasToImageJCommand;
@@ -102,6 +102,7 @@ import org.scijava.command.CommandModule;
 import org.scijava.command.CommandService;
 import org.scijava.module.Module;
 import org.scijava.object.ObjectService;
+import org.scijava.platform.PlatformService;
 import org.scijava.plugin.PluginService;
 import org.scijava.ui.behaviour.Behaviour;
 import org.scijava.ui.behaviour.BehaviourMap;
@@ -141,6 +142,8 @@ import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
@@ -481,9 +484,21 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Help>Go to documentation (web)", ABBADocumentationCommand.class);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Help>Give your feedback (web)", ABBAUserFeedbackCommand.class);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Help>About DeepSlice (web)", DeepSliceDocumentationCommand.class);
-        BdvScijavaHelper.addSeparator(bdvh,"Help");
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Help>How to cite ABBA", ABBACiteInfoCommand.class);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Help>Get LLM prompt for methods summary", ABBAGetPromptForMethodsWriting.class, "mp", msp);
+
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Cite>How to cite ABBA (web)", ABBACiteInfoCommand.class);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Cite>Generate methods prompt", ABBAGenerateMethodsPrompt.class, "mp", msp);
+        BdvScijavaHelper.addSeparator(bdvh,"Cite");
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Cite>About DeepSlice (web)", DeepSliceDocumentationCommand.class);
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh, "Cite>About current atlas (web)", 0, () ->
+        {
+            try {
+                (msp.getContext().getService(PlatformService.class)).open(new URL(msp.getAtlas().getURL()));
+            } catch (IOException e) {
+                msp.errorMessageForUser.accept("Could not open atlas URL", "msp.getAtlas().getURL() | Error: "+e.getMessage());
+            }
+        }
+        );
+
     }
 
     private void installRegistrationPluginUI(int hierarchyLevelsSkipped) {
