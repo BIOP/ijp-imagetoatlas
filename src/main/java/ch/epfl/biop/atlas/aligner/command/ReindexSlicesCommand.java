@@ -3,6 +3,7 @@ package ch.epfl.biop.atlas.aligner.command;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.CreateSliceAction;
 import ch.epfl.biop.atlas.aligner.DeleteSliceAction;
+import ch.epfl.biop.atlas.aligner.LockAndRunOnceSliceAction;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.atlas.aligner.action.MarkActionSequenceBatchAction;
@@ -13,11 +14,13 @@ import org.scijava.plugin.Plugin;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("CanBeFinal")
 @Plugin(type = Command.class,
-        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>ABBA - Reindex channels of slices",
+        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>ABBA - Re-index channels of slices",
         description = "Creates a new slice with reindexed channels.")
 public class ReindexSlicesCommand implements Command {
 
@@ -62,14 +65,18 @@ public class ReindexSlicesCommand implements Command {
         new MarkActionSequenceBatchAction(mp).runRequest();
         try {
         for (SliceSources sliceSources: selectedSlices) {
-            List<SourceAndConverter<?>> newSources = new ArrayList<>();
-            for (int i = 0; i<indices.size(); i++) {
-                newSources.add(sliceSources.getOriginalSources()[indices.get(i)]);
-            }
-            CreateSliceAction cs = new CreateSliceAction(mp, newSources,sliceSources.getSlicingAxisPosition(), sliceSources.getZThicknessCorrection(), sliceSources.getZShiftCorrection());
-            cs.runRequest();
-            RegisterSlicesCopyAndApplyCommand.copyRegistration(mp, sliceSources, mp, cs.getSlice(), false);
-            new DeleteSliceAction(mp, sliceSources).runRequest();
+            AtomicBoolean result = new AtomicBoolean();
+            new LockAndRunOnceSliceAction(mp, sliceSources, new AtomicInteger(0), 1, () -> {
+                List<SourceAndConverter<?>> newSources = new ArrayList<>();
+                for (int i = 0; i<indices.size(); i++) {
+                    newSources.add(sliceSources.getOriginalSources()[indices.get(i)]);
+                }
+                CreateSliceAction cs = new CreateSliceAction(mp, newSources,sliceSources.getSlicingAxisPosition(), sliceSources.getZThicknessCorrection(), sliceSources.getZShiftCorrection());
+                cs.runRequest();
+                RegisterSlicesCopyAndApplyCommand.copyRegistration(mp, sliceSources, mp, cs.getSlice(), false);
+                new DeleteSliceAction(mp, sliceSources).runRequest();
+                return true;
+            }, result).runRequest();
         }} finally {
             new MarkActionSequenceBatchAction(mp).runRequest();
             mp.removeTask();
