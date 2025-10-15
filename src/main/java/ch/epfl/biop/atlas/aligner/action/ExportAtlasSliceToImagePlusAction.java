@@ -48,7 +48,7 @@ public class ExportAtlasSliceToImagePlusAction extends CancelableAction {
         try {
             resultImage = SliceToImagePlus.exportAtlas(getMP(), slice, preprocess, px, py, sx, sy, pixel_size_mm, timepoint, interpolate);
         } catch (UnsupportedOperationException exception) {
-            System.err.println(exception.getMessage());
+            getMP().errorMessageForUser.accept("Could not export to ImageJ", exception.getMessage());
             return false;
         }
         return resultImage!=null;

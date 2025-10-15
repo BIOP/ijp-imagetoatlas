@@ -73,6 +73,7 @@ public class AlignerState {
         skipableActions.add(LockAndRunOnceSliceAction.class);
         skipableActions.add(RasterSliceAction.class);
         skipableActions.add(ExportSliceToImagePlusAction.class);
+        skipableActions.add(ExportDeformationFieldToImagePlusAction.class);
 
         List<CancelableAction> compiledActions = new ArrayList<>();
         if ((ini_actions == null)||(ini_actions.size()==0)) {
