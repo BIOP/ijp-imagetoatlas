@@ -738,6 +738,7 @@ public class MultiSlicePositioner implements Closeable {
         if (getSelectedSlices().isEmpty()) {
             warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to register");
         } else {
+            if (getSelectedSlices().size()>1) {new MarkActionSequenceBatchAction(this).runRequest();}
             logger.debug("Putting user defined ROIs");
             // Putting user defined ROIs
             parameters.put("px", roiPX);
@@ -769,6 +770,7 @@ public class MultiSlicePositioner implements Closeable {
                     logger.error("NULL registration plugin obtained, ignoring registration.");
                 }
             }
+            if (getSelectedSlices().size()>1) {new MarkActionSequenceBatchAction(this).runRequest();}
         }
     }
 
