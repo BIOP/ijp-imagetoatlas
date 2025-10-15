@@ -30,6 +30,7 @@ import ch.epfl.biop.atlas.aligner.command.ABBACiteInfoCommand;
 import ch.epfl.biop.atlas.aligner.command.ABBADocumentationCommand;
 import ch.epfl.biop.atlas.aligner.command.ABBAForumHelpCommand;
 import ch.epfl.biop.atlas.aligner.command.ABBAImportDemoSlicesCommand;
+import ch.epfl.biop.atlas.aligner.command.ABBAStartLogCommand;
 import ch.epfl.biop.atlas.aligner.command.ABBAStateLoadCommand;
 import ch.epfl.biop.atlas.aligner.command.ABBAStateSaveCommand;
 import ch.epfl.biop.atlas.aligner.command.ABBAUserFeedbackCommand;
@@ -385,6 +386,8 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"View>Navigate>Next Slice [Right]",0, this::navigateNextSlice);
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"View>Navigate>Previous Slice [Left]",0, this::navigatePreviousSlice);
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"View>Navigate>Center On Current Slice [C]",0, this::navigateCurrentSlice);
+        BdvScijavaHelper.addSeparator(bdvh, "View");
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "View>Log", ABBAStartLogCommand.class, "mp", msp );
 
 
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Slices>Select All Slices [Ctrl+A]",0,() -> msp.getSlices().forEach(SliceSources::select));
