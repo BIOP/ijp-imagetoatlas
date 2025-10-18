@@ -132,7 +132,7 @@ public class ABBAGenerateMethodsPrompt implements Command {
 
         llm_prompt_for_methods +="# Slices\n\n";
 
-        llm_prompt_for_methods += "There are "+mp.getSelectedSlices().size()+" slices in total. Here is how they have been processed, sorted by Z values:\n\n";
+        llm_prompt_for_methods += "There are "+mp.getSelectedSlices().size()+" slices in total. Here is how they have been positioned along Z, sorted by Z values:\n\n";
 
         List<String> slicesProcessingSteps = new ArrayList<>();
 
@@ -181,7 +181,7 @@ public class ABBAGenerateMethodsPrompt implements Command {
         }
 
         if (equalProcessing) {
-            llm_prompt_for_methods+="\nAll slices have been processed identically with the following registration step(s):\n";
+            llm_prompt_for_methods+="\nAll slices have been processed identically for the in-plane registration with the following registration step(s):\n";
             llm_prompt_for_methods+=slicesProcessingSteps.get(0);
         }
 

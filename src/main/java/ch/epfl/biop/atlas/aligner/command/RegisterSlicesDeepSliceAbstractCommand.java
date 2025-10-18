@@ -6,6 +6,7 @@ import ch.epfl.biop.atlas.aligner.LockAndRunOnceSliceAction;
 import ch.epfl.biop.atlas.aligner.MoveSliceAction;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.RegisterSliceAction;
+import ch.epfl.biop.atlas.aligner.ReslicedAtlas;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.atlas.aligner.action.MarkActionSequenceBatchAction;
 import ch.epfl.biop.registration.plugin.IRegistrationPlugin;
@@ -106,7 +107,7 @@ abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command 
     boolean convert_to_8_bits = false;
     boolean convert_to_jpg = true;
     boolean interpolate = false;
-    String image_name_prefix = "Section";
+    final String image_name_prefix = "Section";
     File dataset_folder;
     BiFunction<File, Integer,File> deepSliceProcessor = null;
     QuickNIISeries series;
@@ -189,21 +190,18 @@ abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command 
                 return false;
             }
 
-            double nPixX = 1000.0 * mp.getROI()[2] / px_size_micron;
-            double nPixY = 1000.0 * mp.getROI()[3] / px_size_micron;
-
             if (allow_slicing_angle_change) {
                 //logger.debug("Slices pixel number = " + nPixX + " : " + nPixY);
-                adjustSlicingAngle(10, slicesToRegister, nPixX, nPixY); //
+                adjustSlicingAngle(mp, series,10, slicesToRegister); //
             }
 
             if (allow_change_slicing_position) {
-                adjustSlicesZPosition(slicesToRegister, nPixX, nPixY, newAxisPosition);
+                adjustSlicesZPosition(mp, series, maintain_rank, slicesToRegister, newAxisPosition);
             }
 
             if (affine_transform) {
                 try {
-                    affineTransformInPlane(slicesToRegister, nPixX, nPixY, newSliceRegistration);//, newSliceAffineTransformer);
+                    affineTransformInPlane(ctx, mp, series, px_size_micron, slicesToRegister, newSliceRegistration);//, newSliceAffineTransformer);
                 } catch (InstantiableException e) {
                     e.printStackTrace();
                 }
@@ -230,73 +228,135 @@ abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command 
             }
         }
         new MarkActionSequenceBatchAction(mp).runRequest();
-
     }
 
     abstract boolean setSettings();
 
-    protected void adjustSlicingAngle(int nIterations, List<SliceSources> slices, double nPixX, double nPixY) {
+    static protected void adjustSlicingAngle(MultiSlicePositioner mp, QuickNIISeries series, int nIterations, List<SliceSources> slices) {
 
-        double oldX = mp.getReslicedAtlas().getRotateX();
-        double oldY = mp.getReslicedAtlas().getRotateY();
+        ReslicedAtlas reslicedAtlas = mp.getReslicedAtlas();
 
-        for (int nAdjust = 0;nAdjust<nIterations;nAdjust++) { // Iterative rotation adjustement, because that's convenient
+        double iniX = reslicedAtlas.getRotateX();
+        double iniY = reslicedAtlas.getRotateY();
 
-            AffineTransform3D toABBA = mp.getReslicedAtlas().getSlicingTransformToAtlas().inverse();
+        List<Double> rotCorr;
 
-            // Transform sources according to anchoring
-            double[] rxs = new double[slices.size()];
-            double[] rys = new double[slices.size()];
+        DecimalFormat df = new DecimalFormat("#0.0");
 
-            for (int i = 0; i < slices.size(); i++) {
-                QuickNIISeries.SliceInfo slice = series.slices.get(i);
+        // Knowing which direction to get the atlas slicing right is kind of annoying. So I compute the derivative and go in the right direction
+        // I want to apply cx and cy
+        // reslicedAtlas.setRotateX((mp.getReslicedAtlas().getRotateX() + cx);
+        // reslicedAtlas.setRotateY((mp.getReslicedAtlas().getRotateY() + cy);
+        // such as
+        // getRotDXDY (rx, ry) tends to (0,0)
+        // let's compute drx/dcorx, drx/dcory, dry/dcorx, dry/dcory
+        double dangle = 0.05; // radians, used to compute the derivative
+        double drxdcx, drxdcy, drydcx, drydcy;
 
-                AffineTransform3D toCCFv3 = QuickNIISeries.getTransform(mp.getReslicedAtlas().ba.getName(), slice,nPixX,nPixY);
+        reslicedAtlas.setRotateX(iniX);
+        reslicedAtlas.setRotateY(iniY);
+        rotCorr = getRotDXRotDY(mp,series,slices);
+        double iniCx = rotCorr.get(0);
+        double iniCy = rotCorr.get(1);
+        reslicedAtlas.setRotateX(iniX + dangle);
+        reslicedAtlas.setRotateY(iniY);
+        rotCorr = getRotDXRotDY(mp,series,slices);
+        drxdcx = (rotCorr.get(0)-iniCx)/dangle;
+        drydcx = (rotCorr.get(1)-iniCy)/dangle;
+        reslicedAtlas.setRotateX(iniX);
+        reslicedAtlas.setRotateY(iniY+dangle);
+        rotCorr = getRotDXRotDY(mp,series,slices);
+        drxdcy = (rotCorr.get(0)-iniCx)/dangle;
+        drydcy = (rotCorr.get(1)-iniCy)/dangle;
+        reslicedAtlas.setRotateX(iniX);
+        reslicedAtlas.setRotateY(iniY);
 
-                AffineTransform3D nonFlat = toCCFv3.preConcatenate(toABBA);
+        // Because right now we have:
+        // drx = drx/dcx * dcx + drx/dcy * dcy
+        // dry = dry/dcx * dcx + dry/dcy * dcy
+        // We have to inverse the matrix because we want to find dcx and dcy such as drx = -rx and dry = -ry
+        double det = drxdcx*drydcy - drxdcy*drydcx;
+        double m00 = drydcy/det;
+        double m10 = -drydcx/det;
+        double m11 = drxdcx / det;
+        double m01 = -drxdcy/det;
 
-                // Get the z vector to measure the angle of rotation compared to the actual one
+        for (int nAdjust = 0;nAdjust<nIterations;nAdjust++) { // Iterative rotation adjustment
 
-                double zx = nonFlat.get(2, 0);
-                double zy = nonFlat.get(2, 1);
-                double zz = nonFlat.get(2, 2);
+            rotCorr = getRotDXRotDY(mp,series,slices);
+            double cx = rotCorr.get(0);
+            double cy = rotCorr.get(1);
+            // We want to nullify cx and cy
+            double dx = - m00*cx - m10*cy;
+            double dy = - m01*cx - m11*cy;
+            System.out.println("DX = "+dx);
+            System.out.println("DY = "+dy);
 
-                double zNorm = Math.sqrt(zx * zx + zy * zy + zz * zz);
+            reslicedAtlas.setRotateX((reslicedAtlas.getRotateX() + dx));
+            reslicedAtlas.setRotateY((reslicedAtlas.getRotateY() + dy));
 
-                zx /= zNorm;
-                zy /= zNorm;
-                zz /= zNorm;
-
-                double ry = Math.asin(zx);
-                double rx = Math.asin(zy);
-
-                rxs[i] = rx;
-                rys[i] = ry;
-
-            }
-
-            /*logger.debug("Round "+nAdjust);
-            logger.debug("rotation x =" + DeepSliceHelper.getMedian(rxs));
-            logger.debug("rotation y =" + DeepSliceHelper.getMedian(rys));*/
-            mp.getReslicedAtlas().setRotateY(mp.getReslicedAtlas().getRotateY() - DeepSliceHelper.getMedian(rys) / 2.0);
-            mp.getReslicedAtlas().setRotateX(mp.getReslicedAtlas().getRotateX() + DeepSliceHelper.getMedian(rxs) / 2.0);
         }
 
         String angleUpdatedMessage = "";
 
-        DecimalFormat df = new DecimalFormat("#0.000");
-        angleUpdatedMessage+="Angle X : "+oldX+" has been updated to "+df.format(mp.getReslicedAtlas().getRotateX())+"\n";
+        angleUpdatedMessage+="Angle X : "+df.format(reslicedAtlas.getRotateX()/Math.PI*180)+" deg\n ";
+        angleUpdatedMessage+="Angle Y : "+df.format(reslicedAtlas.getRotateY()/Math.PI*180)+" deg\n";
 
-        angleUpdatedMessage+="Angle Y : "+oldY+" has been updated to "+df.format(mp.getReslicedAtlas().getRotateY())+"\n";
-
-        mp.infoMessageForUser.accept("Slicing angle channged", "Slicing angle adjusted to "+ angleUpdatedMessage);
+        mp.infoMessageForUser.accept("Slicing angle changed", "Slicing angle adjusted. "+ angleUpdatedMessage);
+        mp.infoMessageForUser.accept("Angle spread (ignored)", "Range X: ["+df.format(rotCorr.get(2))+":"+df.format(rotCorr.get(3))+"]");
+        mp.infoMessageForUser.accept("Angle spread (ignored)", "Range Y: ["+df.format(rotCorr.get(3))+":"+df.format(rotCorr.get(4))+"]");
 
     }
 
-    protected void adjustSlicesZPosition(final List<SliceSources> slices, double nPixX, double nPixY, Map<SliceSources, DeepSliceHelper.Holder<Double>> newAxisPosition) {
+    private static List<Double> getRotDXRotDY(MultiSlicePositioner mp, QuickNIISeries series, List<SliceSources> slices) {
+
+        AffineTransform3D toABBA = mp.getReslicedAtlas().getSlicingTransformToAtlas().inverse();
+
+        // Transform sources according to anchoring
+        double[] rxs = new double[slices.size()];
+        double[] rys = new double[slices.size()];
+
+        for (int i = 0; i < slices.size(); i++) {
+            QuickNIISeries.SliceInfo slice = series.slices.get(i);
+
+            AffineTransform3D toCCFv3 = QuickNIISeries.getTransform(mp.getReslicedAtlas().ba.getName(), slice, slice.width, slice.height);
+
+            AffineTransform3D nonFlat = toCCFv3.preConcatenate(toABBA);
+
+            // Get the z vector to measure the angle of rotation compared to the actual one
+
+            double zx = nonFlat.get(2, 0);
+            double zy = nonFlat.get(2, 1);
+            double zz = nonFlat.get(2, 2);
+
+            double zNorm = Math.sqrt(zx * zx + zy * zy + zz * zz);
+
+            zx /= zNorm;
+            zy /= zNorm;
+            zz /= zNorm;
+
+            double ry = Math.asin(zx);
+            double rx = Math.asin(zy);
+
+            rxs[i] = rx;
+            rys[i] = ry;
+
+        }
+
+        List<Double> ans = new ArrayList<>();
+        ans.add(DeepSliceHelper.getMedian(rxs));
+        ans.add(DeepSliceHelper.getMedian(rys));
+        ans.add(Arrays.stream(rxs).min().getAsDouble()/Math.PI*180);
+        ans.add(Arrays.stream(rxs).max().getAsDouble()/Math.PI*180);
+        ans.add(Arrays.stream(rys).min().getAsDouble()/Math.PI*180);
+        ans.add(Arrays.stream(rys).max().getAsDouble()/Math.PI*180);
+        return ans;
+    }
+
+    static protected void adjustSlicesZPosition(MultiSlicePositioner mp, QuickNIISeries series, boolean maintain_rank, final List<SliceSources> slices, Map<SliceSources, DeepSliceHelper.Holder<Double>> newAxisPosition) {
         // The "slices" list is sorted according to the z axis, before deepslice action
 
-        final String regex = "(.*)"+image_name_prefix +"_s([0-9]+).*";
+        final String regex = "(.*)"+"_s([0-9]+).*";
         final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
 
         Map<SliceSources, Double> slicesNewPosition = new HashMap<>();
@@ -313,7 +373,7 @@ abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command 
 
             //logger.debug("Slice QuickNii "+i+" correspond to initial slice "+iSliceSource);
 
-            AffineTransform3D toCCFv3 = QuickNIISeries.getTransform(mp.getReslicedAtlas().ba.getName(), slice, nPixX, nPixY);
+            AffineTransform3D toCCFv3 = QuickNIISeries.getTransform(mp.getReslicedAtlas().ba.getName(), slice, slice.width, slice.height);
 
             AffineTransform3D nonFlat = toCCFv3.preConcatenate(toABBA);
 
@@ -368,20 +428,22 @@ abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command 
         }
     }
 
-    protected void  affineTransformInPlane(final List<SliceSources> slices, double nPixX, double nPixY,
-                                         Map<SliceSources, DeepSliceHelper.Holder<Registration<SourceAndConverter<?>[]>>> newSliceTransform
-    //                                     Map<SliceSources, Holder<SourcesAffineTransformer>> newSAT
-    ) throws InstantiableException {
+    static protected void  affineTransformInPlane(Context ctx,
+                                                  MultiSlicePositioner mp,
+                                                  QuickNIISeries series,
+                                                  double px_size_micron,
+                                                  final List<SliceSources> slices,
+                                                  Map<SliceSources, DeepSliceHelper.Holder<Registration<SourceAndConverter<?>[]>>> newSliceTransform) throws InstantiableException {
         AffineTransform3D toABBA = mp.getReslicedAtlas().getSlicingTransformToAtlas().inverse();
 
         // Transform sources according to anchoring
-        final String regex = "(.*)"+image_name_prefix +"_s([0-9]+).*";
+        final String regex = "(.*)"+"_s([0-9]+).*";
         final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
 
         for (int i = 0; i < slices.size(); i++) {
             QuickNIISeries.SliceInfo slice = series.slices.get(i);
 
-            AffineTransform3D toCCFv3 = QuickNIISeries.getTransform(mp.getReslicedAtlas().ba.getName(), slice,nPixX,nPixY);
+            AffineTransform3D toCCFv3 = QuickNIISeries.getTransform(mp.getReslicedAtlas().ba.getName(), slice, slice.width, slice.height);
 
             AffineTransform3D flat = toCCFv3.preConcatenate(toABBA);
 
@@ -413,7 +475,7 @@ abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command 
             //logger.debug("Slice QuickNii "+i+" correspond to initial slice "+iSliceSource);
 
             IRegistrationPlugin registration = (IRegistrationPlugin)
-                    pluginService.getPlugin(AffineRegistration.class).createInstance();
+                    ctx.getService(PluginService.class).getPlugin(AffineRegistration.class).createInstance();
             registration.setScijavaContext(ctx);
             Map<String,Object> parameters = new HashMap<>();
 

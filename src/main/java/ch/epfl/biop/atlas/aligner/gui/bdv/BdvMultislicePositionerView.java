@@ -52,6 +52,7 @@ import ch.epfl.biop.atlas.aligner.command.ImportSliceFromImagePlusCommand;
 import ch.epfl.biop.atlas.aligner.command.ImportSliceFromSourcesCommand;
 import ch.epfl.biop.atlas.aligner.command.ImportSlicesFromFilesCommand;
 import ch.epfl.biop.atlas.aligner.command.ImportSlicesFromQuPathCommand;
+import ch.epfl.biop.atlas.aligner.command.ImportSlicesFromQuickNIICommand;
 import ch.epfl.biop.atlas.aligner.command.MirrorDoCommand;
 import ch.epfl.biop.atlas.aligner.command.MirrorUndoCommand;
 import ch.epfl.biop.atlas.aligner.command.RasterSlicesCommand;
@@ -371,6 +372,8 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Import>Import Current ImageJ Window", ImportSliceFromImagePlusCommand.class, "mp", msp );
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Import>Import With Bio-Formats", ImportSlicesFromFilesCommand.class, "mp", msp );
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Import>Import Sources", ImportSliceFromSourcesCommand.class, "mp", msp );
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Import>Import QuickNII Project", ImportSlicesFromQuickNIICommand.class, "mp", msp );
+        BdvScijavaHelper.addSeparator(bdvh, "Import");
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Import>Import Demo Sections", ABBAImportDemoSlicesCommand.class, "mp", msp );
 
 
