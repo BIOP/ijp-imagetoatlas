@@ -28,7 +28,9 @@ import static ch.epfl.biop.atlas.aligner.gui.bdv.BdvMultislicePositionerView.get
 
 
 @SuppressWarnings("CanBeFinal")
-@Plugin(type = Command.class, menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>ABBA - Export registered slices as QuickNII dataset")
+@Plugin(type = Command.class,
+        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>ABBA - Export registered slices as QuickNII dataset",
+        iconPath = "/graphics/ABBAToQNII.png")
 public class ExportSlicesToQuickNIIDatasetCommand implements Command {
 
     @Parameter(style = "message", visibility = ItemVisibility.MESSAGE)

@@ -365,8 +365,12 @@ public class MultiSlicePositioner implements Closeable {
 
     public void rotateSlices(int axis, double angle_rad) {
         List<SliceSources> sortedSelected = getSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
-        for (SliceSources slice : sortedSelected) {
-            slice.rotateSourceOrigin(axis, angle_rad);
+        if (sortedSelected.isEmpty()) {
+            this.warningMessageForUser.accept("No Slice(s) Selected", "Can't apply transformation to empty selection.");
+        } else {
+            for (SliceSources slice : sortedSelected) {
+                slice.rotateSourceOrigin(axis, angle_rad);
+            }
         }
     }
 

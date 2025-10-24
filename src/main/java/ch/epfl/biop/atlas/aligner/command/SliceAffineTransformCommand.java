@@ -18,7 +18,8 @@ import java.util.Set;
 
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Edit>ABBA - Interactive Transform",
-        description = "To use at the beginning of the registration process only! Rotates, scales, translate the original unregistered selected slices")
+        description = "To use at the beginning of the registration process only! Rotates, scales, translate the original unregistered selected slices",
+        iconPath = "/graphics/InteractiveTransform.png")
 public class SliceAffineTransformCommand extends InteractiveCommand implements MultiSlicePositioner.MultiSlicePositionerListener {
 
     @Parameter

@@ -41,7 +41,8 @@ import static ch.epfl.biop.atlas.aligner.command.RegisterSlicesDeepSliceAbstract
 
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Import>ABBA - Import QuickNII Project",
-        description = "Import images of a QuickNII Project as slices into ABBA")
+        description = "Import images of a QuickNII Project as slices into ABBA",
+        iconPath = "/graphics/QNIIToABBA.png")
 public class ImportSlicesFromQuickNIICommand implements Command {
 
     @Parameter(style = "message", visibility = ItemVisibility.MESSAGE)
