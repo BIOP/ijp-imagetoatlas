@@ -445,27 +445,28 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Edit>(Experimental)>Raster and cache deformation field", RasterSlicesDeformationCommand.class, "mp", msp);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Edit>(Experimental)>Raster slice", RasterSlicesCommand.class, "mp", msp);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Edit>(Experimental)>Copy and Apply Registration", RegisterSlicesCopyAndApplyCommand.class, "mp", msp );
 
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export>Set Slices Thickness", SetSlicesThicknessCommand.class, "mp", msp);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export>Set Slices Thickness (fill gaps)", SetSlicesThicknessMatchNeighborsCommand.class, "mp", msp);
         BdvScijavaHelper.addSeparator(bdvh,"Export");
 
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export> QuPath > Export Registrations To QuPath Project", ExportRegistrationToQuPathCommand.class, "mp", msp);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export> ImageJ > Export Regions To Roi Manager", ExportRegionsToRoiManagerCommand.class, "mp", msp);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export> ImageJ > Export Regions To File", ExportRegionsToRoisetFileCommand.class, "mp", msp);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export> QuPath > Export Registrations To QuPath Project", ExportRegistrationToQuPathCommand.class, "mp", msp);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Edit>(Experimental)> Export > Bdv > Export Registered Slices to BDV Json Dataset", ExportSlicesToBDVJsonDatasetCommand.class, "mp", msp);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Edit>(Experimental)> Export > Bdv > Export Resampled Slices as BDV Source", ExportResampledSlicesToBDVSourceCommand.class, "mp", msp);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export > BDV > Export Registered Slices to BDV Json Dataset", ExportSlicesToBDVJsonDatasetCommand.class, "mp", msp);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export > BDV > Export Resampled Slices as BDV Source", ExportResampledSlicesToBDVSourceCommand.class, "mp", msp);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export> BigDataViewer > Export Registered Slices to BDV", ExportSlicesToBDVCommand.class, "mp", msp);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export> ImageJ > Export Registered Slices to ImageJ", ExportSlicesToImageJCommand.class, "mp", msp);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export> ImageJ > Export Original Slices to ImageJ", ExportSlicesOriginalDataToImageJCommand.class, "mp", msp);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export> ImageJ > Export Atlas Coordinates of Original Slices to ImageJ", ExportDeformationFieldToImageJCommand.class, "mp", msp);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export> ImageJ > Export Atlas to ImageJ", ExportAtlasToImageJCommand.class, "mp", msp);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Edit>(Experimental)>Export Registered Slices to Quick NII Dataset", ExportSlicesToQuickNIIDatasetCommand.class, "mp", msp);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export> QuickNII > Export Registered Slices as Quick NII Dataset", ExportSlicesToQuickNIIDatasetCommand.class, "mp", msp);
 
         BdvScijavaHelper.addSeparator(bdvh,"Register");
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Register>Edit Last Registration", RegisterSlicesEditLastCommand.class, "mp", msp);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Register>Remove Last Registration", RegisterSlicesRemoveLastCommand.class, "mp", msp );
+        BdvScijavaHelper.addSeparator(bdvh,"Register");
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Register>Copy Registrations from model and Apply to selected slices", RegisterSlicesCopyAndApplyCommand.class, "mp", msp );
 
         final BiConsumer<String,String> guiErrorLogger = this::blockingErrorMessageForUsers;
 
@@ -2195,12 +2196,12 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                 RenderingHints.VALUE_INTERPOLATION_BICUBIC);
     }
 
-    Object getSourceValueAt(SourceAndConverter<?> sac, RealPoint pt) {
-        RealRandomAccessible<?> rra_ible = sac.getSpimSource().getInterpolatedSource(0, 0, Interpolation.NEARESTNEIGHBOR);
+    public static <T> T getSourceValueAt(SourceAndConverter<T> sac, RealPoint pt) {
+        RealRandomAccessible<T> rra_ible = sac.getSpimSource().getInterpolatedSource(0, 0, Interpolation.NEARESTNEIGHBOR);
         if (rra_ible != null) {
             AffineTransform3D sourceTransform = new AffineTransform3D();
             sac.getSpimSource().getSourceTransform(0, 0, sourceTransform);
-            RealRandomAccess<?> rra = rra_ible.realRandomAccess();
+            RealRandomAccess<T> rra = rra_ible.realRandomAccess();
             RealPoint iPt = new RealPoint(3);
             sourceTransform.inverse().apply(pt, iPt);
             rra.setPosition(iPt);
@@ -2228,9 +2229,9 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             SourceAndConverter<FloatType> ySource = reslicedAtlas.extendedSlicedSources[reslicedAtlas.getCoordinateSourceIndex(1)]; // By convention the left right indicator image is the next to last one
             SourceAndConverter<FloatType> zSource = reslicedAtlas.extendedSlicedSources[reslicedAtlas.getCoordinateSourceIndex(2)]; // By convention the left right indicator image is the next to last one
 
-            coords[0] = ((FloatType) getSourceValueAt(xSource, globalMouseCoordinates)).get();
-            coords[1] = ((FloatType) getSourceValueAt(ySource, globalMouseCoordinates)).get();
-            coords[2] = ((FloatType) getSourceValueAt(zSource, globalMouseCoordinates)).get();
+            coords[0] = getSourceValueAt(xSource, globalMouseCoordinates).get();
+            coords[1] = getSourceValueAt(ySource, globalMouseCoordinates).get();
+            coords[2] = getSourceValueAt(zSource, globalMouseCoordinates).get();
         } else {
             assert mode == REVIEW_MODE_INT;
             SourceAndConverter<?> label = reslicedAtlas.nonExtendedSlicedSources[reslicedAtlas.getLabelSourceIndex()]; // By convention the label image is the last one

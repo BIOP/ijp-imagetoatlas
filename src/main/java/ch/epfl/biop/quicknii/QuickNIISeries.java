@@ -67,6 +67,12 @@ public class QuickNIISeries {
                 u[2],v[2], w[2],anchor.oz
         );
 
+        AffineTransform3D toCCF = getToCCF(atlasName);
+
+        return transform.preConcatenate(toCCF);
+    }
+
+    public static AffineTransform3D getToCCF(String atlasName) {
         AffineTransform3D toCCF = new AffineTransform3D();
 
         if (DeepSliceHelper.isDeepSliceMouseCompatible(atlasName)) {
@@ -96,8 +102,7 @@ public class QuickNIISeries {
         } else {
             System.err.println("Unknown or unsupported atlas named "+atlasName);
         }
-
-        return transform.preConcatenate(toCCF);
+        return toCCF;
     }
 
     public static class Anchor {

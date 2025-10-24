@@ -289,8 +289,6 @@ abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command 
             // We want to nullify cx and cy
             double dx = - m00*cx - m10*cy;
             double dy = - m01*cx - m11*cy;
-            System.out.println("DX = "+dx);
-            System.out.println("DY = "+dy);
 
             reslicedAtlas.setRotateX((reslicedAtlas.getRotateX() + dx));
             reslicedAtlas.setRotateY((reslicedAtlas.getRotateY() + dy));
@@ -443,9 +441,9 @@ abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command 
         for (int i = 0; i < slices.size(); i++) {
             QuickNIISeries.SliceInfo slice = series.slices.get(i);
 
-            AffineTransform3D toCCFv3 = QuickNIISeries.getTransform(mp.getReslicedAtlas().ba.getName(), slice, slice.width, slice.height);
+            AffineTransform3D toCCF = QuickNIISeries.getTransform(mp.getReslicedAtlas().ba.getName(), slice, slice.width, slice.height);
 
-            AffineTransform3D flat = toCCFv3.preConcatenate(toABBA);
+            AffineTransform3D flat = toCCF.preConcatenate(toABBA);
 
             // Removes any z transformation -> in plane transformation
             flat.set(0,2,0);
@@ -511,7 +509,7 @@ abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command 
 
         try {
 
-            List<String> filePaths = QuickNIIExporter.builder()
+            List<File> filePaths = QuickNIIExporter.builder()
                     .roi(mp.getROI())
                     .cvt8bits(convert_to_8_bits)
                     .jpeg(convert_to_jpg)
@@ -528,7 +526,7 @@ abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command 
             String message = "";
             int iSaturatedCounter = 0;
             for (int i = 0; i< filePaths.size(); i++) {
-                double saturationForImage = calculateSaturatedPixelRatio(IJ.openImage(filePaths.get(i)));
+                double saturationForImage = calculateSaturatedPixelRatio(IJ.openImage(filePaths.get(i).getAbsolutePath()));
                 if (saturationForImage > ratioSaturatedPixelValueThreshold) {
                     message += slices.get(i).getName()+" is saturated above "+((int)(ratioSaturatedPixelValueThreshold*100))+" % ("+((int)(saturationForImage*100))+"  %) \n";
                     iSaturatedCounter++;

@@ -54,9 +54,12 @@ public class QuickNIIExporter {
         return new Builder();
     }
 
-    public List<String> export() throws Exception {
+    public List<File> export() throws Exception {
 
-        List<String> filePaths = new ArrayList<>();
+        List<File> filePaths = new ArrayList<>();
+        for (int i = 0;i< slices.size();i++) {
+            filePaths.add(null);
+        }
 
         // Creates
         if (!datasetFolder.exists()) {
@@ -84,18 +87,15 @@ public class QuickNIIExporter {
             }
 
             if (convertToJpeg) {
-                /*double ratioSaturated = calculateSaturatedPixelRatio(imp);
-                IJ.log(imp.getTitle()+" - Saturation Ratio = "+(int) (ratioSaturated*100)+" %");
-                if (ratioSaturated > 0.15) {
-                    IJ.log("Image "+imp.getTitle()+" is oversaturated! (>15%), please adjust B&C of the channel before export!! ");
-                }*/
 
                 String filePath = datasetFolder.getAbsolutePath() + File.separator + // Folder
                         imageName + "_s" + df.format(i) + ".jpg";
                 IJ.saveAs(imp,"jpeg", filePath
                          // image name, three digits, and underscore s
                 );
-                filePaths.add(filePath);
+                synchronized (filePaths) {
+                    filePaths.set(i, new File(filePath));
+                }
 
             } else {
                 String filePath = datasetFolder.getAbsolutePath() + File.separator + // Folder
@@ -103,7 +103,9 @@ public class QuickNIIExporter {
                 IJ.save(imp, filePath
                          // image name, three digits, and underscore s
                 );
-                filePaths.add(filePath);
+                synchronized (filePaths) {
+                    filePaths.set(i, new File(filePath));
+                }
 
             }
 
