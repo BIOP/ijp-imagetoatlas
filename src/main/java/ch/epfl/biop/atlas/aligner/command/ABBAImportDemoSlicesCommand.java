@@ -37,7 +37,7 @@ public class ABBAImportDemoSlicesCommand implements Command {
     @Override
     public void run() {
         try {
-
+            mp.addTask();
             File qupathProjectFile;
 
             System.gc();
@@ -96,6 +96,8 @@ public class ABBAImportDemoSlicesCommand implements Command {
 
         } catch (Exception e) {
             throw new RuntimeException(e);
+        } finally {
+            mp.removeTask();
         }
 
     }

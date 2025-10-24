@@ -94,6 +94,7 @@ public class RegisterSlicesDeepSliceLocalCommand extends RegisterSlicesDeepSlice
                     return outDirectory;
                 };
         } else {
+            mp.errorMessageForUser.accept("DeepSlice error", "Invalid DeepSlice environment directory. Please use Edit>Configuration to set it.");
             return false;
         }
         return true;

@@ -115,119 +115,123 @@ abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command 
     protected Integer nSlicesToRegister;
 
     public void run() {
+        try {
+            mp.addTask();
+            DeepSliceHelper.addJavaAtlases();
 
-        DeepSliceHelper.addJavaAtlases();
+            List<SliceSources> iniList = mp.getSlices().stream().filter(SliceSources::isSelected)
+                    .collect(Collectors.toList());
 
-        List<SliceSources> iniList = mp.getSlices().stream().filter(SliceSources::isSelected)
-                .collect(Collectors.toList());
+            // We need to reverse the order because DeepSlice expects the slices to be sorted from caudal to rostral
 
-        // We need to reverse the order because DeepSlice expects the slices to be sorted from caudal to rostral
+            List<SliceSources> slicesToRegister = new ArrayList<>();
 
-        List<SliceSources> slicesToRegister = new ArrayList<>();
+            for (int i = iniList.size() - 1; i >= 0; i--) {
+                slicesToRegister.add(iniList.get(i));
+            }
 
-        for (int i = iniList.size()-1; i>=0; i--) {
-            slicesToRegister.add(iniList.get(i));
-        }
+            nSlicesToRegister = slicesToRegister.size();
 
-        nSlicesToRegister = slicesToRegister.size();
-
-        if (slicesToRegister.isEmpty()) {
-            mp.errorMessageForUser.accept("No selected slice", "Please select the slice(s) you want to register");
-            return;
-        }
-
-        if (!channels.trim().equals("*")) {
-            List<Integer> indices = Arrays.stream(channels.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
-
-            int maxIndex = indices.stream().mapToInt(e -> e).max().getAsInt();
-
-            if (maxIndex>=mp.getChannelBoundForSelectedSlices()) {
-                mp.errorMessageForUser.accept("Missing channel in selected slice(s).",
-                        "Missing channel in selected slice(s)\n One selected slice only has "+mp.getChannelBoundForSelectedSlices()+" channel(s).\n Maximum index : "+(mp.getChannelBoundForSelectedSlices()-1) );
+            if (slicesToRegister.isEmpty()) {
+                mp.errorMessageForUser.accept("No selected slice", "Please select the slice(s) you want to register");
                 return;
             }
-        }
 
-        TempDirectory td = new TempDirectory("deepslice");
-        dataset_folder = td.getPath().toFile();
-        td.deleteOnExit();
+            if (!channels.trim().equals("*")) {
+                List<Integer> indices = Arrays.stream(channels.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
 
-        if (!setSettings()) return;
+                int maxIndex = indices.stream().mapToInt(e -> e).max().getAsInt();
 
-        Map<SliceSources, DeepSliceHelper.Holder<Double>> newAxisPosition = new HashMap<>();
-        Map<SliceSources, DeepSliceHelper.Holder<Registration<SourceAndConverter<?>[]>>> newSliceRegistration = new HashMap<>();
-
-        for (SliceSources slice: slicesToRegister) {
-            newAxisPosition.put(slice, new DeepSliceHelper.Holder<>());
-            newSliceRegistration.put(slice, new DeepSliceHelper.Holder<>());
-        }
-
-        Supplier<Boolean> deepSliceRunner =  () -> {
-
-            exportDownsampledDataset(slicesToRegister);
-
-            File deepSliceResult = deepSliceProcessor.apply(dataset_folder, nSlicesToRegister);
-
-            if (!deepSliceResult.exists()) {
-                mp.errorMessageForUser.accept("Deep Slice registration aborted",
-                        "Could not find DeepSlice result file " + deepSliceResult.getAbsolutePath()
-                );
-                return false;
-            }
-
-            // Ok, now comes the big deal. First, read json file
-
-            try {
-                series = new Gson().fromJson(new FileReader(deepSliceResult.getAbsolutePath()), QuickNIISeries.class);
-            } catch (Exception e) {
-                mp.errorMessageForUser.accept("Deep Slice Command error", "Could not parse json file " + deepSliceResult.getAbsolutePath());
-                e.printStackTrace();
-                return false;
-            }
-
-            if (series.slices.size() != slicesToRegister.size()) {
-                mp.errorMessageForUser.accept("Deep Slice Command error", "Please retry the command, DeepSlice returned less images than present in the input (" + (slicesToRegister.size() - series.slices.size()) + " missing) ! ");
-                return false;
-            }
-
-            if (allow_slicing_angle_change) {
-                //logger.debug("Slices pixel number = " + nPixX + " : " + nPixY);
-                adjustSlicingAngle(mp, series,10, slicesToRegister); //
-            }
-
-            if (allow_change_slicing_position) {
-                adjustSlicesZPosition(mp, series, maintain_rank, slicesToRegister, newAxisPosition);
-            }
-
-            if (affine_transform) {
-                try {
-                    affineTransformInPlane(ctx, mp, series, px_size_micron, slicesToRegister, newSliceRegistration);//, newSliceAffineTransformer);
-                } catch (InstantiableException e) {
-                    e.printStackTrace();
+                if (maxIndex >= mp.getChannelBoundForSelectedSlices()) {
+                    mp.errorMessageForUser.accept("Missing channel in selected slice(s).",
+                            "Missing channel in selected slice(s)\n One selected slice only has " + mp.getChannelBoundForSelectedSlices() + " channel(s).\n Maximum index : " + (mp.getChannelBoundForSelectedSlices() - 1));
+                    return;
                 }
             }
-            return true;
-        };
 
-        AtomicInteger counter = new AtomicInteger();
-        counter.set(0);
+            TempDirectory td = new TempDirectory("deepslice");
+            dataset_folder = td.getPath().toFile();
+            td.deleteOnExit();
 
-        AtomicBoolean result = new AtomicBoolean();
+            if (!setSettings()) return;
 
-        new MarkActionSequenceBatchAction(mp).runRequest();
-        for (SliceSources slice: slicesToRegister) {
-            new LockAndRunOnceSliceAction(mp, slice, counter, slicesToRegister.size(), deepSliceRunner, result).runRequest(true);
-            if (allow_change_slicing_position) {
-                new MoveSliceAction(mp, slice, newAxisPosition.get(slice)).runRequest(true);
+            Map<SliceSources, DeepSliceHelper.Holder<Double>> newAxisPosition = new HashMap<>();
+            Map<SliceSources, DeepSliceHelper.Holder<Registration<SourceAndConverter<?>[]>>> newSliceRegistration = new HashMap<>();
+
+            for (SliceSources slice : slicesToRegister) {
+                newAxisPosition.put(slice, new DeepSliceHelper.Holder<>());
+                newSliceRegistration.put(slice, new DeepSliceHelper.Holder<>());
             }
-            if (affine_transform) {
-                DeepSliceHelper.Holder<Registration<SourceAndConverter<?>[]>> regSupplier = newSliceRegistration.get(slice);
-                new RegisterSliceAction(mp, slice, regSupplier,
-                        SourcesProcessorHelper.Identity(),
-                        SourcesProcessorHelper.Identity(), "DeepSlice Affine").runRequest(true);
+
+            Supplier<Boolean> deepSliceRunner = () -> {
+
+                exportDownsampledDataset(slicesToRegister);
+
+                File deepSliceResult = deepSliceProcessor.apply(dataset_folder, nSlicesToRegister);
+
+                if (!deepSliceResult.exists()) {
+                    mp.errorMessageForUser.accept("Deep Slice registration aborted",
+                            "Could not find DeepSlice result file " + deepSliceResult.getAbsolutePath()
+                    );
+                    return false;
+                }
+
+                // Ok, now comes the big deal. First, read json file
+
+                try {
+                    series = new Gson().fromJson(new FileReader(deepSliceResult.getAbsolutePath()), QuickNIISeries.class);
+                } catch (Exception e) {
+                    mp.errorMessageForUser.accept("Deep Slice Command error", "Could not parse json file " + deepSliceResult.getAbsolutePath());
+                    e.printStackTrace();
+                    return false;
+                }
+
+                if (series.slices.size() != slicesToRegister.size()) {
+                    mp.errorMessageForUser.accept("Deep Slice Command error", "Please retry the command, DeepSlice returned less images than present in the input (" + (slicesToRegister.size() - series.slices.size()) + " missing) ! ");
+                    return false;
+                }
+
+                if (allow_slicing_angle_change) {
+                    //logger.debug("Slices pixel number = " + nPixX + " : " + nPixY);
+                    adjustSlicingAngle(mp, series, 10, slicesToRegister); //
+                }
+
+                if (allow_change_slicing_position) {
+                    adjustSlicesZPosition(mp, series, maintain_rank, slicesToRegister, newAxisPosition);
+                }
+
+                if (affine_transform) {
+                    try {
+                        affineTransformInPlane(ctx, mp, series, px_size_micron, slicesToRegister, newSliceRegistration);//, newSliceAffineTransformer);
+                    } catch (InstantiableException e) {
+                        e.printStackTrace();
+                    }
+                }
+                return true;
+            };
+
+            AtomicInteger counter = new AtomicInteger();
+            counter.set(0);
+
+            AtomicBoolean result = new AtomicBoolean();
+
+            new MarkActionSequenceBatchAction(mp).runRequest();
+            for (SliceSources slice : slicesToRegister) {
+                new LockAndRunOnceSliceAction(mp, slice, counter, slicesToRegister.size(), deepSliceRunner, result).runRequest(true);
+                if (allow_change_slicing_position) {
+                    new MoveSliceAction(mp, slice, newAxisPosition.get(slice)).runRequest(true);
+                }
+                if (affine_transform) {
+                    DeepSliceHelper.Holder<Registration<SourceAndConverter<?>[]>> regSupplier = newSliceRegistration.get(slice);
+                    new RegisterSliceAction(mp, slice, regSupplier,
+                            SourcesProcessorHelper.Identity(),
+                            SourcesProcessorHelper.Identity(), "DeepSlice Affine").runRequest(true);
+                }
             }
+            new MarkActionSequenceBatchAction(mp).runRequest();
+        } finally {
+            mp.removeTask();
         }
-        new MarkActionSequenceBatchAction(mp).runRequest();
     }
 
     abstract boolean setSettings();
