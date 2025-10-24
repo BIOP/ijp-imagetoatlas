@@ -18,7 +18,8 @@ import javax.swing.JPanel;
 
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Help>ABBA - Check for updates",
-        description = "Check for updates")
+        description = "Check for updates",
+        iconPath = "/graphics/ABBAUpdate.png")
 public class ABBACheckForUpdateCommand implements Command {
 
     private static final String REPO_API_URL = "https://api.github.com/repos/BIOP/ijp-imagetoatlas/releases/latest";
@@ -85,6 +86,9 @@ public class ABBACheckForUpdateCommand implements Command {
     private static boolean isLatestVersion(String currentVersion, String latestVersion) {
         String[] currentParts = currentVersion.split("\\.");
         String[] latestParts = latestVersion.split("\\.");
+        if (currentParts[2].endsWith("-SNAPSHOT")) {
+            currentParts[2] = currentParts[2].substring(0, currentParts[2].length()-9);
+        }
 
         for (int i = 0; i < Math.min(currentParts.length, latestParts.length); i++) {
             int currentPart = Integer.parseInt(currentParts[i]);

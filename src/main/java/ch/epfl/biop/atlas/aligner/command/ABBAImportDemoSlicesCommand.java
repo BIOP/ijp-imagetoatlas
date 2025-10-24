@@ -18,8 +18,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Plugin(type = Command.class,
-        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>ABBA - Open Demo Slices (web)",
-        description = "Open a set of demo brain sections")
+        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>ABBA - Open Demo Slices (Web)",
+        description = "Open a set of demo brain sections",
+        iconPath = "/graphics/ImportDemoSlices.png")
 public class ABBAImportDemoSlicesCommand implements Command {
 
     @Parameter

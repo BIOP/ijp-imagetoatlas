@@ -8,7 +8,8 @@ import org.scijava.plugin.Plugin;
 
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Import>ABBA - Import Sources",
-        description = "Import a list of sources as a slice into ABBA")
+        description = "Import a list of sources as a slice into ABBA",
+        iconPath = "/graphics/BDVToABBA.png")
 public class ImportSliceFromSourcesCommand implements Command {
 
     @Parameter

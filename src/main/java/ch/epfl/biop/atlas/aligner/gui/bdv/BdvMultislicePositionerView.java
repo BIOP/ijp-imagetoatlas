@@ -373,7 +373,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Import>Import QuickNII Project", ImportSlicesFromQuickNIICommand.class, "mp", msp );
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Import>Import Sources From BDV-Playground", ImportSliceFromSourcesCommand.class, "mp", msp );
         BdvScijavaHelper.addSeparator(bdvh, "Import");
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Import>Import Demo Sections", ABBAImportDemoSlicesCommand.class, "mp", msp );
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Import>Import Demo Sections (Web)", ABBAImportDemoSlicesCommand.class, "mp", msp );
 
 
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"View>Display Mode>Positioning Mode",0, () -> setDisplayMode(POSITIONING_MODE_INT));
@@ -486,16 +486,16 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Help>Check For Updates", ABBACheckForUpdateCommand.class);
 
         // Help commands
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Help>Ask For Help In The Forum (web)", ABBAForumHelpCommand.class);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Help>Go To Documentation (web)", ABBADocumentationCommand.class);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Help>Give Your Feedback (web)", ABBAUserFeedbackCommand.class);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Help>About DeepSlice (web)", DeepSliceDocumentationCommand.class);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Help>Ask For Help In The Forum (Web)", ABBAForumHelpCommand.class);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Help>Go To Documentation (Web)", ABBADocumentationCommand.class);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Help>Give Your Feedback (Web)", ABBAUserFeedbackCommand.class);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Help>About DeepSlice (Web)", DeepSliceDocumentationCommand.class);
 
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Cite>How To Cite ABBA (web)", ABBACiteInfoCommand.class);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Cite>How To Cite ABBA (Web)", ABBACiteInfoCommand.class);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Cite>Generate Methods Prompt", ABBAGenerateMethodsPrompt.class, "mp", msp);
         BdvScijavaHelper.addSeparator(bdvh,"Cite");
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Cite>About DeepSlice (web)", DeepSliceDocumentationCommand.class);
-        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh, "Cite>About Current Atlas (web)", 0, () ->
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Cite>About DeepSlice (Web)", DeepSliceDocumentationCommand.class);
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh, "Cite>About Current Atlas (Web)", 0, () ->
         {
             try {
                 (msp.getContext().getService(PlatformService.class)).open(new URL(msp.getAtlas().getURL()));
