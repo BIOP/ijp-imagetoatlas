@@ -5,6 +5,7 @@ import java.awt.*;
 public class ABBABdvViewPrefs {
    public static Font slice_info_font;// = new Font("TimesRoman", Font.BOLD, 16);
    public static Font action_font;
+   public static String default_font; // Not used, just to prevent warning
    public static Color slice_info_color;// = new Color(32, 125, 49, 220); // When slice info is shown
    public static Color done; // = new Color(0, 255, 0, 200);
    public static Color done_export;

@@ -119,7 +119,6 @@ public class ExportSlicesToQuickNIIDatasetCommand implements Command {
                 pt.setPosition(mp.getROI()[0]+margin,0);
                 pt.setPosition(mp.getROI()[1]+margin,1);
                 pt.setPosition(slicesToExport.get(idx).getSlicingAxisPosition(), 2);
-                System.out.println("pto "+pt);
 
                 double oxi = getSourceValueAt(xSource, pt).get();
                 double oyi = getSourceValueAt(ySource, pt).get();
@@ -128,14 +127,12 @@ public class ExportSlicesToQuickNIIDatasetCommand implements Command {
                 pt.setPosition(mp.getROI()[0]+mp.getROI()[2]-margin,0);
                 pt.setPosition(mp.getROI()[1]+margin,1);
 
-                System.out.println("ptu "+pt);
                 double uxi = getSourceValueAt(xSource, pt).get();
                 double uyi = getSourceValueAt(ySource, pt).get();
                 double uzi = getSourceValueAt(zSource, pt).get();
 
                 pt.setPosition(mp.getROI()[0]+margin,0);
                 pt.setPosition(mp.getROI()[1]+mp.getROI()[3]-margin,1);
-                System.out.println("ptv"+pt);
                 double vxi = getSourceValueAt(xSource, pt).get();
                 double vyi = getSourceValueAt(ySource, pt).get();
                 double vzi = getSourceValueAt(zSource, pt).get();
