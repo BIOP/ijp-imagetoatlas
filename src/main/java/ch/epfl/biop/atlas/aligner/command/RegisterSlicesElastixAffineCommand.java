@@ -9,6 +9,8 @@ import org.scijava.plugin.Plugin;
 import java.util.HashMap;
 import java.util.Map;
 
+import static ch.epfl.biop.atlas.aligner.ABBAHelper.getResource;
+
 @SuppressWarnings("CanBeFinal")
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>ABBA - Elastix Registration (Affine)",
@@ -46,6 +48,14 @@ public class RegisterSlicesElastixAffineCommand extends RegistrationMultiChannel
                 getFixedFilter(),
                 getMovingFilter(),
                 parameters);
+    }
+
+
+    @Override
+    protected String getMessage() {
+        return "<html>" +
+                "    <p><img src='"+getResource("graphics/ABBAAffine.png")+"' width='80' height='80'></img></p>" +
+                "</html>\n";
     }
 
 }

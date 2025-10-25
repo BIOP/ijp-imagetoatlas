@@ -3,6 +3,7 @@ package ch.epfl.biop.atlas.aligner.command;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.sourceandconverter.processor.SourcesChannelsSelect;
 import ch.epfl.biop.sourceandconverter.processor.SourcesProcessor;
+import org.scijava.ItemVisibility;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 
@@ -17,6 +18,9 @@ import java.util.stream.Collectors;
  * Validation of the user inputs is performed before the registration is started
  */
 abstract public class RegistrationMultiChannelCommand implements Command {
+
+    @Parameter(style = "message", visibility = ItemVisibility.MESSAGE)
+    String message = getMessage();
 
     @Parameter
     MultiSlicePositioner mp;
@@ -100,4 +104,5 @@ abstract public class RegistrationMultiChannelCommand implements Command {
         return new SourcesChannelsSelect(slice_channels);
     }
 
+    abstract protected String getMessage();
 }

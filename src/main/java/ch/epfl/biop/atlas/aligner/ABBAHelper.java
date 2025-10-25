@@ -159,21 +159,33 @@ public class ABBAHelper {
      */
     static public File getTempQPProject(String zipUrl) throws Exception {
         // Create a temporary directory that will be deleted on JVM exit
+
         Path tempDir = Files.createTempDirectory("zipDownloadTemp");
-        //tempDir.toFile().deleteOnExit();
+        tempDir.toFile().deleteOnExit();
+
+        return getQPProject(tempDir, zipUrl);
+    }
+
+    /**
+     *
+     * @param zipUrl the path to a zipped qupath project
+     * @return the qpproject file contained in the zip
+     * @throws IOException if qupath project can't be read
+     */
+    static public File getQPProject(Path directory, String zipUrl) throws Exception {
 
         // Download the ZIP file
-        Path zipFilePath = downloadZip(zipUrl, tempDir);
+        Path zipFilePath = downloadZip(zipUrl, directory);
 
         // Extract the base name of the ZIP file from the URL
         String zipFileName = extractFileNameFromUrl(zipUrl);
         String targetFilePath = zipFileName.replace(".zip", "") + "/project.qpproj";
 
         // Unzip the file
-        unzip(zipFilePath, tempDir);
+        unzip(zipFilePath, directory);
 
         // Get the desired file
-        File targetFile = tempDir.resolve(targetFilePath).toFile();
+        File targetFile = directory.resolve(targetFilePath).toFile();
 
         if (targetFile.exists()) {
             return targetFile;
@@ -236,4 +248,7 @@ public class ABBAHelper {
     final public static String URL_Brainglobe = "https://doi.org/10.21105/joss.02668";
     final public static String URL_BigWarp = "https://doi.org/10.1109/ISBI.2016.7493463";
 
+    public static URL getResource(final String name) {
+        return ABBAHelper.class.getClassLoader().getResource(name);
+    }
 }

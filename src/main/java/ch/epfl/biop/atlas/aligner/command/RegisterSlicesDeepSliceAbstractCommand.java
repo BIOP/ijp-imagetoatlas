@@ -48,6 +48,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static ch.epfl.biop.atlas.aligner.ABBAHelper.getResource;
+
 /**
  * Command which is using the amazing DeepSlice workflow by Harry Carey, and William Redmond, in Simon McMullan group
  * (<a href="https://doi.org/10.1038/s41467-023-41645-4">DeepSlice publication</a>)
@@ -75,7 +77,12 @@ import java.util.stream.Collectors;
 abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command {
 
     @Parameter(visibility = ItemVisibility.MESSAGE)
-    public String message = "<html><b>Don't forget to adjust min/max display settings!</b> <br>  Almost 50% of images sent by ABBA users to DeepSlice are over-saturated. <br> (and thus, badly registered) </html>";
+    public String message =
+            "<html>" +
+                    "<p><img src='"+getResource("graphics/DeepSlice.png")+"' width='80' height='80'></img></p>" +
+                    "<b>Don't forget to adjust min/max display settings!</b> " +
+                    "<br>  Almost 50% of images sent by ABBA users to DeepSlice are over-saturated. <br> " +
+                    "(and thus, badly registered) </html>";
 
     @Parameter
     MultiSlicePositioner mp;
