@@ -2,6 +2,7 @@ package ch.epfl.biop.atlas.aligner.command;
 
 
 import bdv.viewer.SourceAndConverter;
+import ch.epfl.biop.atlas.aligner.ABBAHelper;
 import ch.epfl.biop.atlas.aligner.DeformationFieldToImagePlus;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.ReslicedAtlas;
@@ -29,9 +30,7 @@ import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.task.Task;
 import org.scijava.task.TaskService;
-import org.scijava.util.VersionUtils;
 import org.scijava.widget.Button;
-import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
 import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceResampler;
 
@@ -51,9 +50,9 @@ import java.util.zip.ZipOutputStream;
 
 @SuppressWarnings("unused")
 @Plugin(type = Command.class,
-        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>File>ABBA - Export State For Sharing",
+        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>ABBA - Export Standardized ABBA Project (Zip)",
         description = "Takes a full project and store a downscaled version of the dataset for sharing")
-public class  ABBAStateExportCommand implements Command {
+public class ExportStdZipStateCommand implements Command {
 
     @Parameter(visibility = ItemVisibility.MESSAGE)
     String message = "Select the atlas slicing orientation";
@@ -127,6 +126,7 @@ public class  ABBAStateExportCommand implements Command {
     @Parameter
     double target_resolution_micrometer;
 
+    @Parameter
     int downscale_deformation_field = 4;
 
     @Override
@@ -194,8 +194,6 @@ public class  ABBAStateExportCommand implements Command {
                 preprocess = SourcesProcessorHelper.Identity();
             }
 
-
-
             File[] downscaledTiffs = new File[mp.getSlices().size()];
 
             createResampledData.setProgressMaximum(mp.getSlices().size());
@@ -206,7 +204,7 @@ public class  ABBAStateExportCommand implements Command {
 
                 SourceAndConverter<?> model = SourceHelper.getModelFusedMultiSources(sources,
                         0, 1,
-                        0.01, 0.01, 0.01,
+                        target_resolution_micrometer/1000.0, target_resolution_micrometer/1000.0, target_resolution_micrometer/1000.0,
                         1,
                         2, 2, 2, "Model");
 
@@ -317,7 +315,7 @@ public class  ABBAStateExportCommand implements Command {
             exportTask.setStatusMessage("Zipping results...");
             // Zip all for convenience of sharing
 
-            ABBAExportMeta meta = new ABBAExportMeta();
+            ABBAHelper.ABBAExportMeta meta = new ABBAHelper.ABBAExportMeta();
             meta.timestamp = Instant.now().toString();
             meta.resolution_um = target_resolution_micrometer;
             meta.atlas_name = ba.getName();
@@ -385,21 +383,8 @@ public class  ABBAStateExportCommand implements Command {
         this.z_axis = "LR (Left-Right)";
     }
 
-    static class ABBAExportMeta {
-        String version = VersionUtils.getVersion(ABBAStateExportCommand.class);
-        String experiment_information;
-        String atlas_name;
-        String timestamp;
-        double resolution_um;
-        int n_slices;
-        int downscale_deformation_field;
-        String x_axis;
-        String y_axis;
-        String z_axis;
-    }
-
     public void zipAndDeleteFiles(File stateFile, List<File> data, List<File> deformationField,
-                                  ABBAExportMeta meta, String zipFileName, Task task) throws IOException {
+                                  ABBAHelper.ABBAExportMeta meta, String zipFileName, Task task) throws IOException {
 
         // Create Gson instance
         Gson gson = new GsonBuilder()
@@ -449,7 +434,7 @@ public class  ABBAStateExportCommand implements Command {
         }
     }
 
-    private void addMetaToZip(ZipOutputStream zos, ABBAExportMeta meta, Gson gson) throws IOException {
+    private void addMetaToZip(ZipOutputStream zos, ABBAHelper.ABBAExportMeta meta, Gson gson) throws IOException {
         // Serialize meta object to JSON string
         String jsonString = gson.toJson(meta);
 

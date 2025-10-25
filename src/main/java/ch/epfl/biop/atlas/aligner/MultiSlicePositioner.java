@@ -1009,7 +1009,7 @@ public class MultiSlicePositioner implements Closeable {
         }
     }
 
-    private static void pack(String sourceDirPath, String zipFilePath) throws IOException {
+    public static void pack(String sourceDirPath, String zipFilePath) throws IOException {
         Path p = Files.createFile(Paths.get(zipFilePath));
         try (ZipOutputStream zs = new ZipOutputStream(Files.newOutputStream(p))) {
             Path pp = Paths.get(sourceDirPath);

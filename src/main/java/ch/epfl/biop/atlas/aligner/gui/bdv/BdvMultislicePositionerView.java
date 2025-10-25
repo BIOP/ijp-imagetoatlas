@@ -29,6 +29,7 @@ import ch.epfl.biop.atlas.aligner.command.ABBACheckForUpdateCommand;
 import ch.epfl.biop.atlas.aligner.command.ABBACiteInfoCommand;
 import ch.epfl.biop.atlas.aligner.command.ABBADocumentationCommand;
 import ch.epfl.biop.atlas.aligner.command.ABBAForumHelpCommand;
+import ch.epfl.biop.atlas.aligner.command.ExportStdZipStateCommand;
 import ch.epfl.biop.atlas.aligner.command.ImportDemoSlicesCommand;
 import ch.epfl.biop.atlas.aligner.command.ABBAStartLogCommand;
 import ch.epfl.biop.atlas.aligner.command.ABBAStateLoadCommand;
@@ -460,6 +461,8 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export> ImageJ > Export Atlas Coordinates Of Original Slices To ImageJ", ExportDeformationFieldToImageJCommand.class, "mp", msp);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export> ImageJ > Export Atlas To ImageJ", ExportAtlasToImageJCommand.class, "mp", msp);
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export> QuickNII > Export Registered Slices As Quick NII Dataset", ExportSlicesToQuickNIIDatasetCommand.class, "mp", msp);
+        BdvScijavaHelper.addSeparator(bdvh,"Export");
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export> Export Standardized ABBA Project (Zip)", ExportStdZipStateCommand.class);
 
         BdvScijavaHelper.addSeparator(bdvh,"Register");
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Register>Edit Last Registration", RegisterSlicesEditLastCommand.class, "mp", msp);

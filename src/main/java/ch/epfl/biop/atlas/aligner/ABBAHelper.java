@@ -1,5 +1,6 @@
 package ch.epfl.biop.atlas.aligner;
 
+import ch.epfl.biop.atlas.aligner.command.ExportStdZipStateCommand;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.scijava.util.VersionUtils;
@@ -250,5 +251,18 @@ public class ABBAHelper {
 
     public static URL getResource(final String name) {
         return ABBAHelper.class.getClassLoader().getResource(name);
+    }
+
+    public static class ABBAExportMeta {
+        public String version = VersionUtils.getVersion(ExportStdZipStateCommand.class);
+        public String experiment_information;
+        public String atlas_name;
+        public String timestamp;
+        public double resolution_um;
+        public int n_slices;
+        public int downscale_deformation_field;
+        public String x_axis;
+        public String y_axis;
+        public String z_axis;
     }
 }
