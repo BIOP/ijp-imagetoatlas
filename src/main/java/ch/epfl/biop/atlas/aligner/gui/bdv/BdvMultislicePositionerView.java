@@ -452,19 +452,19 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export>Set Slices Thickness (fill gaps)", SetSlicesThicknessMatchNeighborsCommand.class, "mp", msp);
         BdvScijavaHelper.addSeparator(bdvh,"Export");
 
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export> QuPath > Export Registrations To QuPath Project", ExportRegistrationToQuPathCommand.class, "mp", msp);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export> ImageJ > Export Regions To Roi Manager", ExportRegionsToRoiManagerCommand.class, "mp", msp);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export> ImageJ > Export Regions To File", ExportRegionsToRoisetFileCommand.class, "mp", msp);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export > BDV > Export Registered Slices To BDV Json Dataset", ExportSlicesToBDVJsonDatasetCommand.class, "mp", msp);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export > BDV > Export Resampled Slices As BDV Sources", ExportResampledSlicesToBDVSourceCommand.class, "mp", msp);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export> BigDataViewer > Export Registered Slices To BDV", ExportSlicesToBDVCommand.class, "mp", msp);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export> ImageJ > Export Registered Slices To ImageJ", ExportSlicesToImageJCommand.class, "mp", msp);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export> ImageJ > Export Original Slices To ImageJ", ExportSlicesOriginalDataToImageJCommand.class, "mp", msp);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export> ImageJ > Export Atlas Coordinates Of Original Slices To ImageJ", ExportDeformationFieldToImageJCommand.class, "mp", msp);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export> ImageJ > Export Atlas To ImageJ", ExportAtlasToImageJCommand.class, "mp", msp);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export> QuickNII > Export Registered Slices As Quick NII Dataset", ExportSlicesToQuickNIIDatasetCommand.class, "mp", msp);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export>QuPath>Export Registrations To QuPath Project", ExportRegistrationToQuPathCommand.class, "mp", msp);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export>ImageJ>Export Regions To Roi Manager", ExportRegionsToRoiManagerCommand.class, "mp", msp);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export>ImageJ>Export Regions To File", ExportRegionsToRoisetFileCommand.class, "mp", msp);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export>BigDataViewer>Export Registered Slices To BDV Json Dataset", ExportSlicesToBDVJsonDatasetCommand.class, "mp", msp);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export>BigDataViewer>Export Resampled Slices As BDV Sources", ExportResampledSlicesToBDVSourceCommand.class, "mp", msp);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export>BigDataViewer>Export Registered Slices To BDV", ExportSlicesToBDVCommand.class, "mp", msp);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export>ImageJ>Export Registered Slices To ImageJ", ExportSlicesToImageJCommand.class, "mp", msp);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export>ImageJ>Export Original Slices To ImageJ", ExportSlicesOriginalDataToImageJCommand.class, "mp", msp);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export>ImageJ>Export Atlas Coordinates Of Original Slices To ImageJ", ExportDeformationFieldToImageJCommand.class, "mp", msp);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export>ImageJ>Export Atlas To ImageJ", ExportAtlasToImageJCommand.class, "mp", msp);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export>QuickNII>Export Registered Slices As Quick NII Dataset", ExportSlicesToQuickNIIDatasetCommand.class, "mp", msp);
         BdvScijavaHelper.addSeparator(bdvh,"Export");
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export> Export Standardized ABBA Project (Zip)", ExportStdZipStateCommand.class);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export>Export Standardized ABBA Project (Zip)", ExportStdZipStateCommand.class);
 
         BdvScijavaHelper.addSeparator(bdvh,"Register");
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Register>Edit Last Registration", RegisterSlicesEditLastCommand.class, "mp", msp);
