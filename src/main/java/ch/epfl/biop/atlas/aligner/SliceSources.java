@@ -71,8 +71,11 @@ import net.imglib2.realtransform.Wrapped2DTransformAs3D;
 
 import net.imglib2.realtransform.inverse.WrappedIterativeInvertibleRealTransform;
 import net.imglib2.type.NativeType;
+import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.NumericType;
+import net.imglib2.type.numeric.integer.UnsignedByteType;
+import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.ExtendedRandomAccessibleInterval;
 import net.imglib2.view.Views;
@@ -85,6 +88,7 @@ import sc.fiji.bdvpg.services.SourceAndConverterServices;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterAndTimeRange;
 import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
 import sc.fiji.bdvpg.sourceandconverter.importer.EmptySourceAndConverterCreator;
+import sc.fiji.bdvpg.sourceandconverter.transform.SourceOutOfBoundsColorChanger;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceRealTransformer;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceResampler;
 import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
@@ -658,7 +662,6 @@ public class SliceSources {
     }
 
     public void sourcesChanged() {
-        // TODO : notify
         mp.notifySourcesChanged(this);
     }
 
@@ -1693,6 +1696,8 @@ public class SliceSources {
 
     final LinkedList<SourceAndConverter<?>[]> sourcesNonRasterized = new LinkedList<>();
 
+    final LinkedList<SourceAndConverter<?>[]> sourcesBgChanged = new LinkedList<>();
+
     protected void pushRasterDeformation(double gridSpacingInMicrometer) {
         sourcesDeformationFieldNonRasterized.push(registered_sacs);
 
@@ -1807,6 +1812,29 @@ public class SliceSources {
         registered_sacs = sourcesDeformationFieldNonRasterized.pop();
     }
 
+    public void pushSliceBg(int whiteBgColor) {
+        SourceAndConverter<?>[] oriSources = registered_sacs;
+        sourcesBgChanged.push(registered_sacs);
+        registered_sacs = new SourceAndConverter[nChannels]; // Compulsory or the push is useless!
+        for (int iChannel = 0; iChannel < this.nChannels; iChannel++) {
+            NumericType bg;
+            if (oriSources[iChannel].getSpimSource().getType() instanceof UnsignedByteType) {
+                bg = new UnsignedByteType(whiteBgColor);
+            } else if (oriSources[iChannel].getSpimSource().getType() instanceof UnsignedShortType) {
+                bg = new UnsignedShortType(whiteBgColor);
+            } else if (oriSources[iChannel].getSpimSource().getType() instanceof ARGBType) {
+                bg = new ARGBType(ARGBType.rgba(whiteBgColor, whiteBgColor, whiteBgColor, 0));
+            } else {
+                throw new RuntimeException("Sorry, can't apply white background to pixel type "+oriSources[iChannel].getSpimSource().getType().getClass().getSimpleName()+". Please report to the forum if you want this functionality");
+            }
+            registered_sacs[iChannel] = new SourceOutOfBoundsColorChanger(oriSources[iChannel], bg).get();
+        }
+    }
+
+    public void popSliceBg() {
+        registered_sacs = sourcesBgChanged.pop();
+    }
+
     public void pushRasterSlice(double voxelSpacingInMicrometer, boolean interpolate) {
         SourceAndConverter<?>[] oriSources = registered_sacs;
         sourcesNonRasterized.push(registered_sacs);
@@ -1817,11 +1845,9 @@ public class SliceSources {
         this.addAllRegistrations(rts, irts, getTolerance(), getMaxIteration());
 
         // Let's do the stuff
-        // registered_sacs = this.registered_sacs_sequence.get(2).sacs; // Just to test
         Source<?> model = getModelWithGridSize(voxelSpacingInMicrometer);
 
         SourceAndConverter<?> modelSac = SourceAndConverterHelper.createSourceAndConverter(model);
-
 
         registered_sacs = new SourceAndConverter[nChannels]; // Compulsory or the push is useless!
 
@@ -1830,17 +1856,6 @@ public class SliceSources {
                     oriSources[iChannel].getSpimSource().getName()+"_raster_"+voxelSpacingInMicrometer+"_um", true, true, interpolate, 0);
             registered_sacs[iChannel] = resampler.apply(oriSources[iChannel]);
         }
-
-        /*
-        for (SourceAndConverter sac: registered_sacs) {
-            mp.bindSource(sac);
-            /*SourceAndConverterServices
-                    .getSourceAndConverterService()
-                    .register(sac);*/
-        /*    if (alphaSource!=null) {
-                AlphaSourceHelper.setAlphaSource(sac, alphaSource);
-            }
-        }*/
 
         si.updateBox();
     }
