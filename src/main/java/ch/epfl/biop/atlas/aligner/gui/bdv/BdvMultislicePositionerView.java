@@ -406,7 +406,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                         .forEach(slice -> new DeleteSliceAction(msp, slice).runRequest())
         );
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(),"Slices>Re-Index Slices channels", ReindexSlicesCommand.class, "mp", msp);
-        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(),"Slices>Add White Background", SetSlicesBackgroundCommand.class, "mp", msp);
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(),"Slices>Set White Background", SetSlicesBackgroundCommand.class, "mp", msp);
         BdvScijavaHelper.addSeparator(bdvh,"Slices");
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Slices>Set Slices Display Range", SetSlicesDisplayRangeCommand.class, "mp", msp );
         BdvScijavaHelper.addSeparator(bdvh,"Slices");

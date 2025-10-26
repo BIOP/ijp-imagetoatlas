@@ -7,6 +7,7 @@ import ch.epfl.biop.atlas.aligner.MoveSliceAction;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.RegisterSliceAction;
 import ch.epfl.biop.atlas.aligner.ReslicedAtlas;
+import ch.epfl.biop.atlas.aligner.SetSliceBackgroundAction;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.atlas.aligner.action.MarkActionSequenceBatchAction;
 import ch.epfl.biop.registration.plugin.IRegistrationPlugin;
@@ -533,23 +534,27 @@ abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command 
                     .create()
                     .export();
 
-            double ratioSaturatedPixelValueThreshold = 0.02; // Should not have saturated pixel in more than 5% of the pixel
+            double ratioSaturatedPixelValueThreshold = 0.05; // Should not have saturated pixel in more than 5% of the pixel
             String message = "";
             int iSaturatedCounter = 0;
             for (int i = 0; i< filePaths.size(); i++) {
-                double saturationForImage = calculateSaturatedPixelRatio(IJ.openImage(filePaths.get(i).getAbsolutePath()));
-                if (saturationForImage > ratioSaturatedPixelValueThreshold) {
-                    message += slices.get(i).getName()+" is saturated above "+((int)(ratioSaturatedPixelValueThreshold*100))+" % ("+((int)(saturationForImage*100))+"  %) \n";
-                    iSaturatedCounter++;
-                }
-                if (iSaturatedCounter>20) {
-                    message += "...";
-                    break;
+                SliceSources slice = slices.get(i);
+                boolean whiteBG = mp.getActionsFromSlice(slice).stream().anyMatch(a -> a instanceof SetSliceBackgroundAction);
+                if (!whiteBG) {
+                    double saturationForImage = calculateSaturatedPixelRatio(IJ.openImage(filePaths.get(i).getAbsolutePath()));
+                    if (saturationForImage > ratioSaturatedPixelValueThreshold) {
+                        message += slices.get(i).getName() + " is saturated above " + ((int) (ratioSaturatedPixelValueThreshold * 100)) + " % (" + ((int) (saturationForImage * 100)) + "  %) \n";
+                        iSaturatedCounter++;
+                    }
+                    if (iSaturatedCounter > 20) {
+                        message += "...";
+                        break;
+                    }
                 }
             }
 
             if (!message.isEmpty()) {
-                mp.warningMessageForUser.accept("Slices saturated!", "DeepSlice will run but results won't be optimal. Please change display settings to avoid saturation: \n"+message);
+                mp.warningMessageForUser.accept("Slices saturated!", "DeepSlice will run but results won't be optimal. Please change display settings to avoid saturation: \n"+"For slices with white background, please run Slices>Set White Background\n"+message);
             }
 
         } catch (Exception e) {

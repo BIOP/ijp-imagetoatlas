@@ -39,7 +39,7 @@ public class SetSliceBackgroundAction extends CancelableAction {
     }
 
     public String toString() {
-        return "Set Slice Background As White " + slice.getActionState(this);
+        return "Set White Background " + slice.getActionState(this);
     }
 
     public void drawAction(Graphics2D g, double px, double py, double scale) {
