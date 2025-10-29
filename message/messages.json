@@ -3,24 +3,9 @@
     {
       "timestamp": "2025-10-29T10:00:00Z",
       "title": "ABBA v0.11.0 Released",
-      "content": "<html>\n<body style='font-family: Arial, sans-serif; padding: 20px; line-height: 1.6;'>\n    <h2 style='color: #2c3e50; margin-bottom: 5px;'>🎉 Welcome to ABBA 0.11.0</h2>\n    <p style='color: #7f8c8d; font-size: 0.9em; margin-bottom: 20px;'>New features and improvements</p>\n    \n    <p style='margin: 12px 0;'>\n        <b style='color: #2980b9;'>Standard Export:</b> Share your projects as standardized .zip files with resampled data and metadata.\n    </p>\n    \n    <p style='margin: 12px 0;'>\n        <b style='color: #2980b9;'>QuickNII Integration:</b> Import and export QuickNII projects.\n    </p>\n    \n    <p style='margin: 12px 0;'>\n        <b style='color: #2980b9;'>Methods Generator:</b> Use an automatically generated prompt to get publication-ready methods with DOIs and registration details.\n</p>\n    \n    <p style='margin: 12px 0;'>\n        <b style='color: #2980b9;'>Brightfield images:</b> Added support for white background handling, eliminating black edge artifacts during registration.\n    </p>\n    \n    <p style='margin: 12px 0;'>\n        Plus: New light/dark themes, improved UI with icons, drag-and-drop support, and much more!\n    </p>\n</body>\n</html>"
+      "content": "<html>\n<body style='font-family: Arial, sans-serif; padding: 20px; line-height: 1.6;'>\n    <h2 style='color: #2c3e50; margin-bottom: 5px;'>🎉 Welcome to ABBA 0.11.0</h2>\n    <p style='color: #7f8c8d; font-size: 0.9em; margin-bottom: 20px;'>New features and improvements</p>\n    \n    <p style='margin: 12px 0;'>\n        <b style='color: #2980b9;'>Standard Export:</b> Share your projects as standardized .zip files with resampled data and metadata.\n    </p>\n    \n    <p style='margin: 12px 0;'>\n        <b style='color: #2980b9;'>QuickNII Integration:</b> Import and export QuickNII projects.\n    </p>\n    \n    <p style='margin: 12px 0;'>\n        <b style='color: #2980b9;'>Methods Generator:</b> Use an automatically generated prompt to get publication-ready methods with DOIs and registration details.\n</p>\n    \n    <p style='margin: 12px 0;'>\n        <b style='color: #2980b9;'>Brightfield images:</b> Added support for white background, eliminating black edge artifacts during registration.\n    </p>\n    \n    <p style='margin: 12px 0;'>\n        Plus: New light/dark themes, improved UI with icons, drag-and-drop support, and much more!\n    </p>\n</body>\n</html>"
     }
   ],
   "tips": [
-    {
-      "id": 1,
-      "title": "Keyboard Shortcuts",
-      "content": "<html><body style='width: 400px; font-family: sans-serif;'><h3>💡 Quick Tip</h3><p>Use <kbd>Ctrl+Z</kbd> to undo your last action and <kbd>Ctrl+Y</kbd> to redo!</p></body></html>"
-    },
-    {
-      "id": 2,
-      "title": "Batch Processing",
-      "content": "<html><body style='width: 400px; font-family: sans-serif;'><h3>💡 Quick Tip</h3><p>You can process multiple images at once using the <b>Batch Mode</b> in the File menu.</p></body></html>"
-    },
-    {
-      "id": 3,
-      "title": "Save Your Work",
-      "content": "<html><body style='width: 400px; font-family: sans-serif;'><h3>💡 Quick Tip</h3><p>Remember to save your alignment parameters regularly. Use <b>File → Save Parameters</b> to avoid losing your work.</p></body></html>"
-    }
   ]
 }
