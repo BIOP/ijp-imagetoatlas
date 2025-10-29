@@ -54,6 +54,7 @@ import ch.epfl.biop.atlas.aligner.command.ImportSliceFromSourcesCommand;
 import ch.epfl.biop.atlas.aligner.command.ImportSlicesFromFilesCommand;
 import ch.epfl.biop.atlas.aligner.command.ImportSlicesFromQuPathCommand;
 import ch.epfl.biop.atlas.aligner.command.ImportSlicesFromQuickNIICommand;
+import ch.epfl.biop.atlas.aligner.command.ImportStdZipStateCommand;
 import ch.epfl.biop.atlas.aligner.command.MirrorDoCommand;
 import ch.epfl.biop.atlas.aligner.command.MirrorUndoCommand;
 import ch.epfl.biop.atlas.aligner.command.RasterSlicesCommand;
@@ -376,6 +377,8 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Import>Import Sources From BDV-Playground", ImportSliceFromSourcesCommand.class, "mp", msp );
         BdvScijavaHelper.addSeparator(bdvh, "Import");
         BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Import>Import Demo Sections (Web)", ImportDemoSlicesCommand.class, "mp", msp );
+        BdvScijavaHelper.addSeparator(bdvh, "Import");
+        BdvScijavaHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Import>Import Standardized ABBA Project (Zip) in new ABBA instance", ImportStdZipStateCommand.class);
 
 
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"View>Display Mode>Positioning Mode",0, () -> setDisplayMode(POSITIONING_MODE_INT));

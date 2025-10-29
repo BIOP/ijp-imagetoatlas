@@ -3,10 +3,13 @@ package ch.epfl.biop.atlas.aligner.command;
 
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.ABBAHelper;
+import ch.epfl.biop.atlas.aligner.CancelableAction;
 import ch.epfl.biop.atlas.aligner.DeformationFieldToImagePlus;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.ReslicedAtlas;
+import ch.epfl.biop.atlas.aligner.SetSliceBackgroundAction;
 import ch.epfl.biop.atlas.aligner.SliceSources;
+import ch.epfl.biop.atlas.aligner.UnMirrorSliceAction;
 import ch.epfl.biop.atlas.struct.Atlas;
 import ch.epfl.biop.kheops.ometiff.OMETiffExporter;
 import ch.epfl.biop.sourceandconverter.SourceHelper;
@@ -276,11 +279,25 @@ public class ExportStdZipStateCommand implements Command {
             // Copy to avoid issues with reindexing when slices are moved - the order is correct, we don't want to mess it up
             List<SliceSources> slicesCopied = new ArrayList<>(mpDS.getSlices());
             for (int iSlice = 0; iSlice < mp.getSlices().size(); iSlice++) {
-                mpDS.moveSlice(slicesCopied.get(iSlice), mp.getSlices().get(iSlice).getSlicingAxisPosition());
+                SliceSources slice = slicesCopied.get(iSlice);
+                // Pick and apply a potential set white Pixel Background
+                List<CancelableAction> setBgActions = mp.getActionsFromSlice(mp.getSlices().get(iSlice)).stream().filter(action -> action instanceof SetSliceBackgroundAction).collect(Collectors.toList());
+                if (!setBgActions.isEmpty()) {
+                    SetSliceBackgroundAction setSliceBGAction = new SetSliceBackgroundAction(mpDS, slice, ((SetSliceBackgroundAction)setBgActions.get(setBgActions.size()-1)).getBgValue());
+                    setSliceBGAction.runRequest();
+                }
+
+                mpDS.moveSlice(slice, mp.getSlices().get(iSlice).getSlicingAxisPosition());
                 RegisterSlicesCopyAndApplyCommand.copyRegistration(mp,
                         mp.getSlices().get(iSlice),
                         mpDS, slicesCopied.get(iSlice),
-                        true);
+                        false);
+
+                List<CancelableAction> unmirrorActions = mp.getActionsFromSlice(mp.getSlices().get(iSlice)).stream().filter(action -> action instanceof SetSliceBackgroundAction).collect(Collectors.toList());
+                if (!unmirrorActions.isEmpty()) {
+                    UnMirrorSliceAction unMirrorAction = new UnMirrorSliceAction(mpDS, slice);
+                    unMirrorAction.runRequest();
+                }
             }
 
             mpDS.waitForTasks();
@@ -292,7 +309,7 @@ public class ExportStdZipStateCommand implements Command {
 
             // Now let's store the abba result
             File pathStateSave = new File(save_path + File.separator + "state.abba");
-            mpDS.saveState(pathStateSave, true);
+            mpDS.saveState(pathStateSave, false);
             stateFile = pathStateSave;
 
             // Now let's save the registration transformation field, downscaled 10 times (so every 100 micrometers
