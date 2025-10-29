@@ -635,7 +635,7 @@ public class SliceSources {
     }
 
     protected void appendRegistration(Registration<SourceAndConverter<?>[]> reg) {
-
+        //TODO: ALWAYS KEEP MIRROR ON TOP!
         if (reg instanceof RealTransformSourceAndConverterRegistration) {
             RealTransformSourceAndConverterRegistration sreg = (RealTransformSourceAndConverterRegistration) reg;
             if (!(sreg.getRealTransform() instanceof BoundedRealTransform)) {

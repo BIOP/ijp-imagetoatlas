@@ -31,7 +31,11 @@ public class ABBAHelper {
 
     protected static final Logger logger = LoggerFactory.getLogger(ABBAHelper.class);
 
+    static boolean abbaLogoAlreadyDisplayed = false;
+
     public static void displayABBALogo(int ms) {
+        if (abbaLogoAlreadyDisplayed) return;
+        abbaLogoAlreadyDisplayed = true;
         JFrame frameStart = new JFrame();
         frameStart.setUndecorated(true);
         frameStart.setBackground(new Color(1.0f, 1.0f, 1.0f, 0.5f));
@@ -59,13 +63,13 @@ public class ABBAHelper {
                     // Set the font for the version text
                     g2d.setFont(new Font(Font.MONOSPACED, Font.BOLD, 40));
                     // Get the font metrics to determine the width of the text
-                    FontMetrics fm = g2d.getFontMetrics();
-                    String infoline = "v"+VersionUtils.getVersion(MultiSlicePositioner.class);
-                    int textWidth = fm.stringWidth(infoline);
+                    // FontMetrics fm = g2d.getFontMetrics();
+                    // String infoline = "v"+VersionUtils.getVersion(MultiSlicePositioner.class);
+                    // int textWidth = fm.stringWidth(infoline);
                     // Position the text at the bottom right
-                    int x = imgW - textWidth - 10; // 10 pixels padding from the right
-                    int y = fm.getHeight()/2+5;//imgH-10;// - fm.getHeight(); // 10 pixels padding from the bottom
-                    g2d.drawString(infoline, x, y);
+                    // int x = imgW - textWidth - 10; // 10 pixels padding from the right
+                    // int y = fm.getHeight()/2+5;//imgH-10;// - fm.getHeight(); // 10 pixels padding from the bottom
+                    // g2d.drawString(infoline, x, y);
                 }
             };
             panel.setPreferredSize(new Dimension(imgW, imgH));
