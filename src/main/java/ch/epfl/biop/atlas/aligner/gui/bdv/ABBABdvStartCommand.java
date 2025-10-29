@@ -5,6 +5,7 @@ import bdv.util.Prefs;
 import ch.epfl.biop.atlas.aligner.ABBAHelper;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.command.ABBAStartCommand;
+import ch.epfl.biop.atlas.aligner.gui.message.StartupMessageHandler;
 import ch.epfl.biop.atlas.struct.Atlas;
 import ij.plugin.frame.Recorder;
 import org.scijava.Initializable;
@@ -106,6 +107,10 @@ public class ABBABdvStartCommand implements Command, Initializable {
             ABBATheme.setTheme(ABBATheme.createDarkTheme());
             view = new BdvMultislicePositionerView(mp, bdvh);
 
+            // Create handler and check for messages
+            StartupMessageHandler handler = new StartupMessageHandler();
+            handler.checkAndShowMessage();
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -130,12 +135,6 @@ public class ABBABdvStartCommand implements Command, Initializable {
     }
 
     public void initialize() {
-        /*String keyMessagePref = "ch.epfl.biop.atlas.aligner.startupmessage.skip";
-        boolean messageSkip = ij.Prefs.get(keyMessagePref, false);
-        if (!messageSkip) {
-            messageSkip = showWarningMessageWithCheckbox("Please read!","<html>If you are using ABBA in QuPath, please update to v0.4.4!<br> See https://go.epfl.ch/abba-update for more information.");
-            ij.Prefs.set(keyMessagePref, messageSkip);
-        }*/
         ABBAHelper.displayABBALogo(2000); // BDV implies the presence of a GUI
     }
 

@@ -9,6 +9,7 @@ import bdv.viewer.SourceGroup;
 import ch.epfl.biop.atlas.aligner.ABBAHelper;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.command.ABBAStartCommand;
+import ch.epfl.biop.atlas.aligner.gui.message.StartupMessageHandler;
 import ch.epfl.biop.atlas.struct.Atlas;
 import ij.plugin.frame.Recorder;
 import net.imglib2.FinalInterval;
@@ -162,6 +163,10 @@ public class ABBABiopBdvStartCommand implements Command, Initializable {
             Prefs.showMultibox(false);
             Prefs.showScaleBar(false);
             view = new BdvMultislicePositionerView(mp, bdvh);
+
+            // Create handler and check for messages
+            StartupMessageHandler handler = new StartupMessageHandler();
+            handler.checkAndShowMessage();
 
         } catch (Exception e) {
             e.printStackTrace();

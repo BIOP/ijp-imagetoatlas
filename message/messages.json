@@ -1,0 +1,31 @@
+{
+  "announcements": [
+    {
+      "timestamp": "2024-10-29T10:00:00Z",
+      "title": "New Feature: 3D Visualization",
+      "content": "<html><body style='width: 400px; font-family: sans-serif;'><h2>Atlas Aligner v2.5 Released!</h2><p>We're excited to announce <b>3D visualization support</b> for your atlas alignments.</p><ul><li>Interactive 3D viewer</li><li>Enhanced performance</li><li>Better accuracy</li></ul><p>Check the documentation for more details.</p></body></html>"
+    },
+    {
+      "timestamp": "2024-10-15T14:30:00Z",
+      "title": "Important Update",
+      "content": "<html><body style='width: 400px; font-family: sans-serif;'><h2>Bug Fix Release</h2><p>Fixed critical issues with image registration. Please update to the latest version.</p></body></html>"
+    }
+  ],
+  "tips": [
+    {
+      "id": 1,
+      "title": "Keyboard Shortcuts",
+      "content": "<html><body style='width: 400px; font-family: sans-serif;'><h3>💡 Quick Tip</h3><p>Use <kbd>Ctrl+Z</kbd> to undo your last action and <kbd>Ctrl+Y</kbd> to redo!</p></body></html>"
+    },
+    {
+      "id": 2,
+      "title": "Batch Processing",
+      "content": "<html><body style='width: 400px; font-family: sans-serif;'><h3>💡 Quick Tip</h3><p>You can process multiple images at once using the <b>Batch Mode</b> in the File menu.</p></body></html>"
+    },
+    {
+      "id": 3,
+      "title": "Save Your Work",
+      "content": "<html><body style='width: 400px; font-family: sans-serif;'><h3>💡 Quick Tip</h3><p>Remember to save your alignment parameters regularly. Use <b>File → Save Parameters</b> to avoid losing your work.</p></body></html>"
+    }
+  ]
+}
