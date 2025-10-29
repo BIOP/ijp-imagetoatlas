@@ -53,7 +53,9 @@ public class StartupMessageDialog {
         editorPane.setContentType("text/html");
         editorPane.setText(htmlContent);
         editorPane.setEditable(false);
-        editorPane.setBackground(Color.WHITE);
+        // Use a neutral light gray background that works well in both light and dark themes
+        editorPane.setBackground(new Color(240, 240, 240));
+        editorPane.setForeground(Color.BLACK);
         editorPane.setMargin(new Insets(10, 10, 10, 10));
 
         // Enable hyperlink clicking

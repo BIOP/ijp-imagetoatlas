@@ -21,7 +21,7 @@ public class StartupMessageHandler {
     // GitHub raw URL for the messages JSON file
     // Note: Change 'main' to 'master' if your default branch is 'master'
     private static final String MESSAGES_URL =
-            "https://raw.githubusercontent.com/BIOP/ijp-imagetoatlas/main/message/messages.json";
+            "https://raw.githubusercontent.com/BIOP/ijp-imagetoatlas/refs/heads/master/message/messages.json";
 
     // Preference keys
     private static final String PREF_LAST_ANNOUNCEMENT_TIMESTAMP =
@@ -46,7 +46,7 @@ public class StartupMessageHandler {
             StartupMessageData data = loadMessagesFromGitHub();
 
             if (data == null) {
-                IJ.log("Could not load startup messages");
+                //IJ.log("Could not load startup messages");
                 return;
             }
 
@@ -81,7 +81,7 @@ public class StartupMessageHandler {
 
             int responseCode = connection.getResponseCode();
             if (responseCode != 200) {
-                IJ.log("Failed to fetch messages. HTTP response code: " + responseCode);
+                //IJ.log("Failed to fetch messages. HTTP response code: " + responseCode);
                 return null;
             }
 

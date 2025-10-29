@@ -1,14 +1,9 @@
 {
   "announcements": [
     {
-      "timestamp": "2024-10-29T10:00:00Z",
-      "title": "New Feature: 3D Visualization",
-      "content": "<html><body style='width: 400px; font-family: sans-serif;'><h2>Atlas Aligner v2.5 Released!</h2><p>We're excited to announce <b>3D visualization support</b> for your atlas alignments.</p><ul><li>Interactive 3D viewer</li><li>Enhanced performance</li><li>Better accuracy</li></ul><p>Check the documentation for more details.</p></body></html>"
-    },
-    {
-      "timestamp": "2024-10-15T14:30:00Z",
-      "title": "Important Update",
-      "content": "<html><body style='width: 400px; font-family: sans-serif;'><h2>Bug Fix Release</h2><p>Fixed critical issues with image registration. Please update to the latest version.</p></body></html>"
+      "timestamp": "2025-10-29T10:00:00Z",
+      "title": "ABBA v0.11.0 Released",
+      "content": "<html>\n<body style='font-family: Arial, sans-serif; padding: 20px; line-height: 1.6;'>\n    <h2 style='color: #2c3e50; margin-bottom: 5px;'>🎉 Welcome to ABBA 0.11.0</h2>\n    <p style='color: #7f8c8d; font-size: 0.9em; margin-bottom: 20px;'>New features and improvements</p>\n    \n    <p style='margin: 12px 0;'>\n        <b style='color: #2980b9;'>Standard Export:</b> Share your projects as standardized .zip files with resampled data and metadata—perfect for publications!\n    </p>\n    \n    <p style='margin: 12px 0;'>\n        <b style='color: #2980b9;'>QuickNII Integration:</b> Import and export QuickNII projects with automatic angle adjustments.\n    </p>\n    \n    <p style='margin: 12px 0;'>\n        <b style='color: #2980b9;'>Methods Generator:</b> Automatically generate publication-ready methods text with DOIs and registration details.\n    </p>\n    \n    <p style='background-color: #fff9e6; padding: 10px; margin: 15px 0;'>\n        <b>Important:</b> Brightfield images now support white background handling, eliminating black edge artifacts during registration.\n    </p>\n    \n    <p style='margin: 12px 0;'>\n        Plus: New light/dark themes, improved UI with icons, drag-and-drop support, and much more!\n    </p>\n</body>\n</html>"
     }
   ],
   "tips": [

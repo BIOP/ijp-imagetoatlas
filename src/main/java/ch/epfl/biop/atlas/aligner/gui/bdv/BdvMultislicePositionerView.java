@@ -82,6 +82,7 @@ import ch.epfl.biop.atlas.aligner.gui.bdv.card.AtlasInfoPanel;
 import ch.epfl.biop.atlas.aligner.gui.bdv.card.EditPanel;
 import ch.epfl.biop.atlas.aligner.gui.bdv.card.NavigationPanel;
 import ch.epfl.biop.atlas.aligner.gui.bdv.card.SliceDefineROICommand;
+import ch.epfl.biop.atlas.aligner.gui.message.StartupMessageHandler;
 import ch.epfl.biop.atlas.aligner.plugin.ABBACommand;
 import ch.epfl.biop.atlas.struct.AtlasNode;
 import ch.epfl.biop.bdv.gui.graphicalhandle.GraphicalHandle;
@@ -164,6 +165,7 @@ import static bdv.ui.BdvDefaultCards.DEFAULT_SOURCEGROUPS_CARD;
 import static bdv.ui.BdvDefaultCards.DEFAULT_SOURCES_CARD;
 import static bdv.ui.BdvDefaultCards.DEFAULT_VIEWERMODES_CARD;
 import static bdv.util.source.alpha.AlphaSourceHelper.ALPHA_SOURCE_KEY;
+import static ch.epfl.biop.atlas.aligner.gui.message.StartupMessageHandler.resetPreferences;
 
 public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceChangeListener, GraphicalHandleListener, MouseMotionListener, MultiSlicePositioner.MultiSlicePositionerListener {
 
@@ -362,6 +364,8 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Redo [Ctrl+Shift+Z]",0, msp::redoAction, "/graphics/ABBARedo.png", "Redo Last Action");
         BdvScijavaHelper.addSeparator(bdvh,"Edit");
 
+        BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Configuration>Startup Message>Reset Preferences",0, StartupMessageHandler::resetPreferences);
+        BdvScijavaHelper.addSeparator(bdvh, "Edit>Configuration");
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Configuration>Mouse Options>Show Atlas Position",0, this::showAtlasPosition);
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Configuration>Mouse Options>Hide Atlas Position",0, this::hideAtlasPosition);
         BdvScijavaHelper.addActionToBdvHandleMenu(bdvh,"Edit>Configuration>Mouse Options>Show Slice Info",0, this::showSliceInfo);
