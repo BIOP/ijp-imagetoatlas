@@ -70,7 +70,7 @@ public class StartupMessageDialog {
         });
 
         JScrollPane scrollPane = new JScrollPane(editorPane);
-        scrollPane.setPreferredSize(new Dimension(500, 300));
+        scrollPane.setPreferredSize(new Dimension(500, 600));
         scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         dialog.add(scrollPane, BorderLayout.CENTER);
