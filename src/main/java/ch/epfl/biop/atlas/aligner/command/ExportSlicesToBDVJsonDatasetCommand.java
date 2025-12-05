@@ -45,7 +45,7 @@ public class ExportSlicesToBDVJsonDatasetCommand implements Command {
         mp.infoMessageForUser.accept("","Starting saving...");
         List<SourceAndConverter<?>> sacs = new ArrayList<>();
         List<SliceSources> slices = mp.getSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
-        if (slices.size()==0) {
+        if (slices.isEmpty()) {
             mp.errorMessageForUser.accept("No slice selected", "You did not select any slice to save");
         } else {
             AffineTransform3D at3D = mp.getAffineTransformFromAlignerToAtlas();

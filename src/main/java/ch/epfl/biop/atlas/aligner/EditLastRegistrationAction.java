@@ -38,7 +38,7 @@ public class EditLastRegistrationAction extends CancelableAction {
             }
         }
 
-        if (registrationActionsCompiled.size() == 0) {
+        if (registrationActionsCompiled.isEmpty()) {
             rs = null;
         } else {
             rs = (RegisterSliceAction) registrationActionsCompiled.get(registrationActionsCompiled.size()-1);

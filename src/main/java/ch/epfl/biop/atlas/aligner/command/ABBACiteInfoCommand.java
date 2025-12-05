@@ -19,8 +19,6 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URL;
 
-// Merci chaton gpt
-
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Cite>ABBA - How to cite",
         description = "How to cite")

@@ -21,9 +21,6 @@ public class AtlasAdjustDisplayCommand extends InteractiveCommand implements
     @Parameter
     BdvMultislicePositionerView view;
 
-
-    // -- Initializable methods --
-
     boolean listenerRegistered=false;
 
     @Override
@@ -89,9 +86,9 @@ public class AtlasAdjustDisplayCommand extends InteractiveCommand implements
     }
 
     @Override
-    public void modeChanged(BdvMultislicePositionerView mp, int oldmode, int newmode) {
+    public void modeChanged(BdvMultislicePositionerView mp, int oldMode, int newMode) {
 
-        if (newmode == BdvMultislicePositionerView.REVIEW_MODE_INT) {
+        if (newMode == BdvMultislicePositionerView.REVIEW_MODE_INT) {
             SourceAndConverterHelper.transferColorConverters(view.msp.getReslicedAtlas().extendedSlicedSources, view.msp.getReslicedAtlas().nonExtendedSlicedSources);
         } else {
             SourceAndConverterHelper.transferColorConverters(view.msp.getReslicedAtlas().nonExtendedSlicedSources, view.msp.getReslicedAtlas().extendedSlicedSources);
@@ -108,7 +105,7 @@ public class AtlasAdjustDisplayCommand extends InteractiveCommand implements
         for (int iChannel = 0; iChannel<keys.size(); iChannel++) {
             String key = keys.get(iChannel);
             if (view.includedKey(key)) {
-                switch (newmode) {
+                switch (newMode) {
                     case BdvMultislicePositionerView.POSITIONING_MODE_INT:
                         view.getBdvh().getViewerPanel()
                                 .state()

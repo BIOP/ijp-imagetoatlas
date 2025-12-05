@@ -156,7 +156,7 @@ public class TableView implements MultiSlicePositioner.SliceChangeListener, List
                 int row = table.rowAtPoint(point);
                 int col = table.columnAtPoint(point);
                 if ((e.getClickCount()==2) && (col == 0)) {
-                    // Is there a slice which is being double clicked ?
+                    // Is there a slice which is being double-clicked ?
                     if (row<getSlices().size()) {
                         SliceSources slice =  getSlices().get(row);
                         view.navigateSlice(slice);
@@ -322,7 +322,7 @@ public class TableView implements MultiSlicePositioner.SliceChangeListener, List
 
                 // Maybe it's the last one with this number of channels...
                 int newMaxChannels;
-                if (slices.size() == 0) { // special case : hangs forever if the last slice is removed
+                if (slices.isEmpty()) { // special case : hangs forever if the last slice is removed
                     newMaxChannels = 0;
                 } else {
                     newMaxChannels = slices.stream()

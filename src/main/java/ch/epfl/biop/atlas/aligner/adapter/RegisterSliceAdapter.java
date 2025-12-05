@@ -15,7 +15,6 @@ import java.util.function.Supplier;
 
 /**
  * This adapter only saves the transform, not the preprocessing of the source and the atlas
- * Function.identity is returned instead of the original preprocessing.
  */
 
 public class RegisterSliceAdapter implements JsonSerializer<RegisterSliceAction>,

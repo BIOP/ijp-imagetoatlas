@@ -151,20 +151,10 @@ public class ExportSlicesToQuickNIIDatasetCommand implements Command {
                 RealPoint v = new RealPoint(0, 0, 0);
                 toCCF.inverse().apply(vi,v);
 
-                /*System.out.println("Slice "+idx+" oi tr:"+oi);
-                System.out.println("Slice "+idx+" o tr:"+o);
-                System.out.println("Slice "+idx+" ui tr:"+ui);
-                System.out.println("Slice "+idx+" u tr:"+u);
-                System.out.println("Slice "+idx+" vi tr:"+vi);
-                System.out.println("Slice "+idx+" v tr:"+v);*/
-
                 sliceInfo.anchoring = new double[]{
                         o.getDoublePosition(0), o.getDoublePosition(1), o.getDoublePosition(2),
-                        // wth ?
                         u.getDoublePosition(0)-o.getDoublePosition(0), u.getDoublePosition(1) -o.getDoublePosition(1), u.getDoublePosition(2)-o.getDoublePosition(2),
                         v.getDoublePosition(0)-o.getDoublePosition(0), v.getDoublePosition(1) -o.getDoublePosition(1), v.getDoublePosition(2)-o.getDoublePosition(2)};
-                        //u.getDoublePosition(0), u.getDoublePosition(1), u.getDoublePosition(2),
-                        //v.getDoublePosition(0), v.getDoublePosition(1), v.getDoublePosition(2)};
                 series.slices.add(sliceInfo);
             }
 

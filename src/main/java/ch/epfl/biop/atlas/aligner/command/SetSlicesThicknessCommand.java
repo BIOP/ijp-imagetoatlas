@@ -23,7 +23,7 @@ public class SetSlicesThicknessCommand implements Command {
     @Override
     public void run() {
         List<SliceSources> slices = mp.getSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
-        if (slices.size()==0) {
+        if (slices.isEmpty()) {
             mp.errorMessageForUser.accept("No slice selected", "You did not select any slice to edit");
         } else {
             for (SliceSources slice : slices) {

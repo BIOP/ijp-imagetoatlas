@@ -13,7 +13,7 @@ import spimdata.util.Displaysettings;
 import java.util.function.Consumer;
 
 /**
- * Command triggered by the user when he is clicking on the the table header of the slice
+ * Command triggered by the user when he is clicking on the table header of the slice
  * display card.
  */
 @Plugin(type = Command.class)

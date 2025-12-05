@@ -125,7 +125,7 @@ public class ABBAGenerateMethodsPrompt implements Command {
                 "If DeepSlice is used several times, mention it since running DeepSlice multiple times gives better results.\n"+
                 "BigWarp indicates a fully manual spline transformation - include placeholder for number of control points used.\n"+
                 "There are other kinds of action that you may encounter:\n"+
-                "- Mirror X: means that a slice has been virtually mirrored in order to reconstruct a full section out of an hemisection. This can be useful before deepslice, because deepslice does not work with hemi-sections.\n"+
+                "- Mirror X: means that a slice has been virtually mirrored in order to reconstruct a full section out of an hemi-section. This can be useful before DeepSlice, because DeepSlice does not work with hemi-sections.\n"+
                 "- UnMirror: revert the mirroring\n"+
                 "- Set White Background: Typically used before any registration in order to avoid black edges in the image if the image is a brightfield image and not a fluorescence image.\n"+
                 "\n";

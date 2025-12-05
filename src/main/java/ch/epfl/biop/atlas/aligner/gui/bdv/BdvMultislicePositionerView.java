@@ -221,13 +221,14 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
     private ViewerPanel vp;
 
-    private int previouszStep;
+    private int previousZStep;
 
     final List<Runnable> extraCleanUp = new ArrayList<>();
 
     private int iCurrentSlice = 0;
 
     private long lastErrorMessageTimestampMs = -1;
+
     private long delayBetweenMessagesMs = 5000;
 
     private void blockingErrorMessageForUsers(String title, String message) {
@@ -878,7 +879,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             excludedKeys.add("Left Right");
 
             // Other variable initialization
-            previouszStep = (int) msp.getReslicedAtlas().getStep();
+            previousZStep = (int) msp.getReslicedAtlas().getStep();
 
             addFrameIcon();
 
@@ -1324,7 +1325,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         at3D.inverse().apply(centerScreenCurrentBdv, centerScreenGlobalCoord);
 
         // New target
-        centerScreenGlobalCoord.setPosition((centerScreenGlobalCoord.getDoublePosition(0) - msp.sX / 2.0) * (double) previouszStep / (double) msp.getReslicedAtlas().getStep() + msp.sX / 2.0, 0);
+        centerScreenGlobalCoord.setPosition((centerScreenGlobalCoord.getDoublePosition(0) - msp.sX / 2.0) * (double) previousZStep / (double) msp.getReslicedAtlas().getStep() + msp.sX / 2.0, 0);
 
         // How should we translate at3D, such as the screen center is the new one
 
@@ -1362,7 +1363,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         nextAffineTransform.set(shiftMatrix.getDoublePosition(2), 2, 3);
 
         bdvh.getViewerPanel().state().setViewerTransform(nextAffineTransform);
-        previouszStep = (int) msp.getReslicedAtlas().getStep();
+        previousZStep = (int) msp.getReslicedAtlas().getStep();
         bdvh.getViewerPanel().requestRepaint();
     }
 
@@ -1685,7 +1686,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         if (iCurrentSlice >= sortedSlices.size()) {
             iCurrentSlice = 0;
         }
-        if (sortedSlices.size() > 0) {
+        if (!sortedSlices.isEmpty()) {
             SliceSources slice = sortedSlices.get(iCurrentSlice);
             if (slice!=null) {
                 guiState.runSlice(slice, SliceGuiState::isCurrent);
@@ -1705,7 +1706,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         if (iCurrentSlice >= sortedSlices.size()) {
             iCurrentSlice = 0;
         }
-        if (sortedSlices.size() > 0) {
+        if (!sortedSlices.isEmpty()) {
             SliceSources previousSlice = null;
             if ((previousSliceIndex>=0)&&(previousSliceIndex<sortedSlices.size())) {
                 previousSlice = sortedSlices.get(previousSliceIndex);
@@ -1732,7 +1733,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             iCurrentSlice = sortedSlices.size() - 1;
         }
 
-        if (sortedSlices.size() > 0) {
+        if (!sortedSlices.isEmpty()) {
             SliceSources previousSlice = null;
             if ((previousSliceIndex>=0)&&(previousSliceIndex<sortedSlices.size())) {
                 previousSlice = sortedSlices.get(previousSliceIndex);
@@ -1756,7 +1757,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             return;
         }
 
-        if (sortedSlices.size() > 0) {
+        if (!sortedSlices.isEmpty()) {
             SliceSources previousSlice = null;
             if ((previousSliceIndex>=0)&&(previousSliceIndex<sortedSlices.size())) {
                 previousSlice = sortedSlices.get(previousSliceIndex);
@@ -1882,7 +1883,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     @Override
     public void hover_out(GraphicalHandle gh) {
         gh_below_mouse.remove(gh);
-        if (gh_below_mouse.size() == 0) {
+        if (gh_below_mouse.isEmpty()) {
             unblock();
         }
     }
@@ -1896,7 +1897,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     public void removed(GraphicalHandle gh) {
         if (gh_below_mouse.contains(gh)) {
             gh_below_mouse.remove(gh);
-            if (gh_below_mouse.size() == 0) unblock();
+            if (gh_below_mouse.isEmpty()) unblock();
         }
         ghs.remove(gh);
     }
@@ -1904,7 +1905,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     public Object getCurrentSlice() {
         List<SliceSources> sortedSlices = msp.getSlices();
 
-        if (sortedSlices.size()>0) {
+        if (!sortedSlices.isEmpty()) {
             if (iCurrentSlice >= sortedSlices.size()) {
                 iCurrentSlice = 0;
                 notifyCurrentSliceListeners();

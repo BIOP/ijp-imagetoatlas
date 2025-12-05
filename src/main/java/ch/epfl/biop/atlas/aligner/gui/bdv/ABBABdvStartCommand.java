@@ -98,7 +98,7 @@ public class ABBABdvStartCommand implements Command, Initializable {
             Recorder.record = tmpRecord;
 
             if (mp==null) {
-                System.err.println("Error - could not create multislicepositioner.");
+                System.err.println("Error - could not create MultiSlicePositioner object.");
                 return;
             }
 

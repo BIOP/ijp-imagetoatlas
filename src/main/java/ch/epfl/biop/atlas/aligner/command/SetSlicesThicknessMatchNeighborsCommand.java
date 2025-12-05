@@ -22,7 +22,7 @@ public class SetSlicesThicknessMatchNeighborsCommand implements Command {
     @Override
     public void run() {
         List<SliceSources> slices = mp.getSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
-        if (slices.size()==0) {
+        if (slices.isEmpty()) {
             mp.errorMessageForUser.accept("No slice selected", "You did not select any slice to edit");
         } else {
             List<SliceSources> allSlices = mp.getSlices();
@@ -78,8 +78,6 @@ public class SetSlicesThicknessMatchNeighborsCommand implements Command {
             double mid = (zEnd+zBegin)/2.0;
             zBegin = mid-minThickness/2.0;
             zEnd = mid+minThickness/2.0;
-            //System.out.println("Slice = "+currentSlice.getName());
-            //System.out.println("Thick = "+(zEnd-zBegin)+" zBegin = "+zBegin+" zEnd = "+zEnd);
             currentSlice.setSliceThickness(zBegin, zEnd);
         } else {
             currentSlice.setSliceThickness(zBegin, zEnd);

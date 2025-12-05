@@ -40,7 +40,7 @@ public class ExportRegionsToRoisetFileCommand extends DynamicCommand implements
         //mp.exportSelectedSlicesRegionsToFile(naming_choice, dir_output, erase_previous_file);
 
         List<SliceSources> slices = mp.getSelectedSlices();
-        if (slices.size()==0) {
+        if (slices.isEmpty()) {
             mp.errorMessageForUser.accept("No slice selected", "You did not select any slice.");
         } else {
             new MarkActionSequenceBatchAction(mp).runRequest();

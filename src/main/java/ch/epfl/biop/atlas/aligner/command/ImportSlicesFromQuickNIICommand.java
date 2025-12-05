@@ -73,7 +73,7 @@ public class ImportSlicesFromQuickNIICommand implements Command {
         try {
             // First, let's open the image files and package them into a bdv dataset
             QuickNIISeries series = new Gson().fromJson(new FileReader(quicknii_project.getAbsolutePath()), QuickNIISeries.class);
-            File parentFolder = new File(quicknii_project.getParent()); // We assume the files are at the same folder hierarchy level than the images.
+            File parentFolder = new File(quicknii_project.getParent()); // We assume the files are at the same folder hierarchy level as the images.
             File[] imageFiles = series.slices.stream().map(si -> new File(parentFolder, si.filename)).toArray(File[]::new);
 
             AbstractSpimData<?> spimdata = (AbstractSpimData<?>)

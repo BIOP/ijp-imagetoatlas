@@ -125,7 +125,7 @@ import java.util.stream.Collectors;
 /**
  * Class which contains the current registered SourceAndConverter array
  * Each element of the array is a channel
- * This class should be UI independent (no show / bdvhandle, etc)
+ * This class should be UI independent (no show / bdvhandle, etc.)
  */
 
 public class SliceSources {
@@ -323,7 +323,6 @@ public class SliceSources {
     }
 
     private void positionChanged() {
-        // TODO
     }
 
     protected double zThicknessCorrection;
@@ -520,7 +519,7 @@ public class SliceSources {
 
     public void waitForEndOfTasks() {
 
-        if (tasks.size()>0) {
+        if (!tasks.isEmpty()) {
             try {
                 CompletableFuture<Boolean> lastTask = tasks.get(tasks.size()-1);
                 lastTask.get();
@@ -672,8 +671,8 @@ public class SliceSources {
         reg.setFixedImage(preprocessFixed.apply(mp.reslicedAtlas.nonExtendedSlicedSources));
         reg.setMovingImage(preprocessMoving.apply(registered_sacs));
 
-        // For the mask : we set it as the label image, pre processed identically
-        // 0 - remove channel select from pre processor
+        // For the mask : we set it as the label image, pre-processed identically
+        // 0 - remove channel select from pre-processor
         SourcesProcessor fixedProcessor = SourcesProcessorHelper.removeChannelsSelect(preprocessFixed);
         // 1 - adds a channel select for the atlas
         fixedProcessor = new SourcesProcessComposer(fixedProcessor, new SourcesChannelsSelect(mp.reslicedAtlas.getLabelSourceIndex()));
@@ -834,7 +833,7 @@ public class SliceSources {
                    }
                 } else {
                     CompletableFuture<Boolean> startingPoint;
-                    if (tasks.size() == 0) {
+                    if (tasks.isEmpty()) {
                         startingPoint = CompletableFuture.supplyAsync(() -> true);
                     } else {
                         startingPoint = tasks.get(tasks.size() - 1);
@@ -1062,11 +1061,7 @@ public class SliceSources {
     }
 
     private InvertibleRealTransform getTransformedSequenceToRoot(SourceAndConverter<?> source) {
-        // Remove the transform coming from
-        //AffineTransform3D lastTransform = new AffineTransform3D();
-        //source.getSpimSource().getSourceTransform(0,0, lastTransform);
         InvertibleRealTransformSequence irts = new InvertibleRealTransformSequence();
-        //irts.add(lastTransform.inverse());
         appendPreviousTransform(source.getSpimSource(), irts);
         return irts;
     }
@@ -1217,7 +1212,7 @@ public class SliceSources {
                 mp.errorMessageForUser.accept("Export to QuPath error", e.getMessage());
                 e.printStackTrace();
                 return false;
-            };
+            }
         }
 
         // No wrapping ?
@@ -1344,10 +1339,6 @@ public class SliceSources {
 
         addAllRegistrations(rts, irts, tolerance, maxIteration);
 
-        //this.original_sacs[0].getSpimSource().getSourceTransform(0,resolutionLevel,at3D);
-        //rts.add(at3D.inverse().copy());
-        //if (irts!=null) irts.add(at3D.inverse().copy());
-
         return (irts==null)?rts:irts;
     }
 
@@ -1396,10 +1387,10 @@ public class SliceSources {
 
         try {
             dataEntryFolder = QuPathBdvHelper.getDataEntryFolder(original_sacs[0]);
-            logger.debug("DataEntryFolder = "+dataEntryFolder);
+            logger.debug("Store in QuPath - DataEntryFolder = "+dataEntryFolder);
 
             String projectFolderPath = QuPathBdvHelper.getProjectFile(original_sacs[0]).getParent();
-            logger.debug("QuPath Project Folder = "+projectFolderPath);
+            logger.debug("Store in QuOath - QuPath Project Folder = "+projectFolderPath);
 
             File f = new File(dataEntryFolder, "ABBA-RoiSet-"+mp.getAtlas().getName()+".zip");
             mp.infoMessageForUser.accept("Export to QuPath","Save slice ROI to quPath project " + f.getAbsolutePath());
@@ -1414,7 +1405,7 @@ public class SliceSources {
                     // For compatibility with previous versions
                     //noinspection deprecation
                     if (mp.getAtlas() instanceof AllenBrainAdultMouseAtlasCCF2017Command) {
-                        // Save it the old fashioned way
+                        // Save it the old-fashioned way
                         f = new File(dataEntryFolder, "ABBA-RoiSet.zip");
                         if (f.exists()) {
                             Files.delete(Paths.get(f.getAbsolutePath()));
@@ -1432,7 +1423,7 @@ public class SliceSources {
                 //----------------- LEGACY
                 //noinspection deprecation
                 if (mp.getAtlas() instanceof AllenBrainAdultMouseAtlasCCF2017Command) {
-                    // Save it the old fashioned way
+                    // Save it the old-fashioned way
                     f = new File(dataEntryFolder, "ABBA-RoiSet.zip");
                     Files.copy(Paths.get(ijroisfile.f.getAbsolutePath()),Paths.get(f.getAbsolutePath()));
                 }
@@ -1466,7 +1457,7 @@ public class SliceSources {
                         //----------------- LEGACY
                         //noinspection deprecation
                         if (mp.getAtlas() instanceof AllenBrainAdultMouseAtlasCCF2017Command) {
-                            // Save it the old fashioned way
+                            // Save it the old-fashioned way
                             ftransform = new File(dataEntryFolder, "ABBA-Transform.json");
                             writer = new FileWriter(ftransform.getAbsolutePath());
                             writer.write(transform_string);
@@ -1485,7 +1476,7 @@ public class SliceSources {
                     //----------------- LEGACY
                     //noinspection deprecation
                     if (mp.getAtlas() instanceof AllenBrainAdultMouseAtlasCCF2017Command) {
-                        // Save it the old fashioned way
+                        // Save it the old-fashioned way
                         ftransform = new File(dataEntryFolder, "ABBA-Transform.json");
                         writer = new FileWriter(ftransform.getAbsolutePath());
                         writer.write(transform_string);
@@ -1623,7 +1614,7 @@ public class SliceSources {
                         preprocessMoving.apply(registered_sacs)
                 ); // NO filtering -> all channels
 
-                // 0 - remove channel select from pre processor
+                // 0 - remove channel select from pre-processor
                 SourcesProcessor fixedProcessor = SourcesProcessorHelper.removeChannelsSelect(preprocessFixed);
                 // 1 - adds a channel select for the atlas
                 fixedProcessor = new SourcesProcessComposer(fixedProcessor, new SourcesChannelsSelect(mp.reslicedAtlas.getLabelSourceIndex()));
@@ -1722,10 +1713,6 @@ public class SliceSources {
 
         for (int iChannel = 0; iChannel < this.nChannels; iChannel++) {
             registered_sacs[iChannel] = srt.apply(original_sacs[iChannel]);
-            // Attempt to fix issue with transformation caching, but it's not working
-            //((WarpedSource<?>)registered_sacs[iChannel].getSpimSource()).setBoundingBoxEstimator(new BoundingBoxEstimation(CORNERS));
-            //((WarpedSource<?>)registered_sacs[iChannel].getSpimSource()).setBoundingBoxEstimator(new BoundingBoxEstimation(FACES));
-            //((WarpedSource<?>)registered_sacs[iChannel].getSpimSource()).setBoundingBoxEstimator(new BoundingBoxEstimation(VOLUME));
         }
 
         si.updateBox();
@@ -1994,7 +1981,7 @@ public class SliceSources {
         });
 
         // We should keep, for each possible values, a way to know
-        // if their are some labels which belong to children labels in the image.
+        // if there are some labels which belong to children labels in the image.
         Map<Integer, Set<Integer>> childrenContained = new HashMap<>();
         possibleIdValues.forEach(idValue -> {
             AtlasNode node = ontology.getNodeFromId(idValue);
@@ -2010,7 +1997,7 @@ public class SliceSources {
 
         HashSet<Integer> isLeaf = new HashSet<>();
         childrenContained.forEach((k,v) -> {
-            if (v.size()==0) {
+            if (v.isEmpty()) {
                 isLeaf.add(k);
             }
         });
@@ -2052,7 +2039,7 @@ public class SliceSources {
             leavesValues.forEach(childrenContained::remove);
             isLeaf.clear();
             childrenContained.forEach((k,v) -> {
-                        if (v.size()==0) {
+                        if (v.isEmpty()) {
                             isLeaf.add(k);
                         }
                     }

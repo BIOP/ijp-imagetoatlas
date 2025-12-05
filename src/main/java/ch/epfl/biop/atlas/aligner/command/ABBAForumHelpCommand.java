@@ -71,9 +71,7 @@ public class ABBAForumHelpCommand implements Command {
             body += nl;
             body += getConfigInfos(nl);
 
-            //noinspection deprecation
             body +="Updates sites: "+sites_string+nl;
-
 
             String fullUrl = imageScForumUrl+"new-topic?"
                     +"title="+title+"&"
@@ -81,7 +79,7 @@ public class ABBAForumHelpCommand implements Command {
                     +"category=usage-issues&"
                     +"tags=fiji,abba";
 
-            IJ.log(fullUrl); // Mac OS : if the URL is too long, the next line returns an error
+            IJ.log(fullUrl); // macOS : if the URL is too long, the next line returns an error
 
             ps.open(new URL(fullUrl));
         } catch (Exception e) {
@@ -130,9 +128,9 @@ public class ABBAForumHelpCommand implements Command {
             config += "Transformix path not set"+nl;
         }
         if (DeepSlice.envDirPath!=null) {
-            config += "Deepslice env dir: " + DeepSlice.envDirPath + " exists ?"+new File(DeepSlice.envDirPath).exists()+nl;
+            config += "DeepSlice env dir: " + DeepSlice.envDirPath + " exists ?"+new File(DeepSlice.envDirPath).exists()+nl;
         } else {
-            config += "Deepslice env dir not set"+nl;
+            config += "DeepSlice env dir not set"+nl;
         }
         config +="```"+nl;
         return config;

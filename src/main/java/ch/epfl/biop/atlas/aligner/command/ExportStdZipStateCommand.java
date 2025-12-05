@@ -178,7 +178,7 @@ public class ExportStdZipStateCommand implements Command {
             // We need a robust approach. Will it be simple ? Not sure.
             // We'll need to resample the original data at a certain resolution, and we need to avoid making an image too big. Let's start by ignoring the possibility of images too big
 
-            // So, let's raster the registered images at a certain resolution
+            // So, lets raster the registered images at a certain resolution
 
             // Plan:
             // - raster the slices to the target resolution
@@ -452,7 +452,7 @@ public class ExportStdZipStateCommand implements Command {
     }
 
     private void addMetaToZip(ZipOutputStream zos, ABBAHelper.ABBAExportMeta meta, Gson gson) throws IOException {
-        // Serialize meta object to JSON string
+        // Serialize metaobject to JSON string
         String jsonString = gson.toJson(meta);
 
         // Convert to bytes

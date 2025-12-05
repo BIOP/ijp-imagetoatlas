@@ -48,7 +48,7 @@ public class ExportSlicesOriginalDataToImageJCommand<T extends NativeType<T> & N
         // TODO : check if tasks are done
         List<SliceSources> slicesToExport = mp.getSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
 
-        if (slicesToExport.size()==0) {
+        if (slicesToExport.isEmpty()) {
             mp.warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to export");
             return;
         }

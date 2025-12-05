@@ -65,7 +65,7 @@ import static ch.epfl.biop.atlas.aligner.ABBAHelper.getResource;
  * By default, ABBA downsamples to 30 microns (mouse) or 60 microns (rat)
  * per pixel for DeepSlice and saves as an 8 bit rgb jpeg image. Also, make sure that the min max display settings
  * are set correctly, otherwise the images will be saturated upon export and will be registered badly.
- * Make sure you have multiresolution files if you don't want your downscaling to look bad! Also
+ * Make sure you have multiresolution files if you don't want your downscaling to look bad! Also,
  * this is currently the only registration method where the display settings matter for the registration.
  * <br>
  * There are two concrete class of this abstract class, one that can run DeepSlice locally (provided a conda env

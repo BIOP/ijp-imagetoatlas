@@ -62,14 +62,6 @@ public class ABBAHelper {
                     g2d.setColor(new Color(1.0f, 0.0f, 0.0f, 1.0f));
                     // Set the font for the version text
                     g2d.setFont(new Font(Font.MONOSPACED, Font.BOLD, 40));
-                    // Get the font metrics to determine the width of the text
-                    // FontMetrics fm = g2d.getFontMetrics();
-                    // String infoline = "v"+VersionUtils.getVersion(MultiSlicePositioner.class);
-                    // int textWidth = fm.stringWidth(infoline);
-                    // Position the text at the bottom right
-                    // int x = imgW - textWidth - 10; // 10 pixels padding from the right
-                    // int y = fm.getHeight()/2+5;//imgH-10;// - fm.getHeight(); // 10 pixels padding from the bottom
-                    // g2d.drawString(infoline, x, y);
                 }
             };
             panel.setPreferredSize(new Dimension(imgW, imgH));
@@ -86,7 +78,7 @@ public class ABBAHelper {
     public static String getMapUrl() {
         ABBASettings settings = getFromLocalFiji();
         if (settings==null) {
-            return null; //Prefs.get(keyPrefix+"mapUrl","");
+            return null;
         } else {
             return settings.pathToABBAAtlas;
         }

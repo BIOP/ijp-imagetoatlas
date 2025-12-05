@@ -113,7 +113,7 @@ public class RegisterSliceAction extends CancelableAction {
         if (registration == null) {
             return "Future<Registration>";
         }
-        return registration.toString() + " "+preprocessFixed.toString()+".Atlas // "+preprocessMoving.toString()+".Section)] " + slice.getActionState(this);
+        return registration+" "+preprocessFixed.toString()+".Atlas // "+preprocessMoving.toString()+".Section)] " + slice.getActionState(this);
     }
 
     public void drawAction(Graphics2D g, double px, double py, double scale) {

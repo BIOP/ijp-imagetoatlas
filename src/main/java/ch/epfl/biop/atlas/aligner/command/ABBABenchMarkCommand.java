@@ -42,7 +42,7 @@ public class ABBABenchMarkCommand implements Command {
     String demo_dataset;
 
     @Parameter(description = "Slower when check - wait for all sections to have finished their registration steps before starting the next one.")
-    boolean wait_betweem_each_step;
+    boolean wait_between_each_step;
 
     @Parameter
     CommandService cs;
@@ -180,14 +180,14 @@ public class ABBABenchMarkCommand implements Command {
             }
             endTiming("Import Sources into ABBA");
 
-            if (!wait_betweem_each_step) {
+            if (!wait_between_each_step) {
                 task.setStatusMessage("Registration Steps and Export...");
                 startTiming("Registration Steps and Export");
             }
 
             int n_deepslice_runs = 2;
             for (int idxDeepSliceRun = 0; idxDeepSliceRun < n_deepslice_runs; idxDeepSliceRun++) {
-                if (wait_betweem_each_step) {
+                if (wait_between_each_step) {
                     task.setStatusMessage("DeepSlice Registration (Local) Run " + (idxDeepSliceRun + 1));
                     startTiming("DeepSlice Registration (Local) Run " + (idxDeepSliceRun + 1));
                 }
@@ -201,13 +201,13 @@ public class ABBABenchMarkCommand implements Command {
                         "slices_spacing_micrometer", -1.0,
                         "px_size_micron", 30
                 ).get();
-                if (wait_betweem_each_step) {
+                if (wait_between_each_step) {
                     mp.waitForTasks();
                     endTiming("DeepSlice Registration (Local) Run " + (idxDeepSliceRun + 1));
                 }
             }
 
-            if (wait_betweem_each_step) {
+            if (wait_between_each_step) {
                 task.setStatusMessage("Elastix Registration (Affine)...");
                 startTiming("Elastix Registration (Affine)");
             }
@@ -220,12 +220,12 @@ public class ABBABenchMarkCommand implements Command {
                     "background_offset_value_moving", 0.0
             ).get();
 
-            if (wait_betweem_each_step) {
+            if (wait_between_each_step) {
                 mp.waitForTasks();
                 endTiming("Elastix Registration (Affine)");
             }
 
-            if (wait_betweem_each_step) {
+            if (wait_between_each_step) {
                 task.setStatusMessage("Elastix Registration (Spline)...");
                 startTiming("Elastix Registration (Spline)");
             }
@@ -240,12 +240,12 @@ public class ABBABenchMarkCommand implements Command {
                     "show_imageplus_registration_result", false
             ).get();
 
-            if (wait_betweem_each_step) {
+            if (wait_between_each_step) {
                 mp.waitForTasks();
                 endTiming("Elastix Registration (Spline)");
             }
 
-            if (wait_betweem_each_step) {
+            if (wait_between_each_step) {
                 task.setStatusMessage("Export Registrations to QuPath Project...");
                 startTiming("Export Registrations to QuPath Project");
             }
@@ -255,7 +255,7 @@ public class ABBABenchMarkCommand implements Command {
                     "erase_previous_file", true
             ).get();
 
-            if (wait_betweem_each_step) {
+            if (wait_between_each_step) {
                 mp.waitForTasks();
                 endTiming("Export Registrations to QuPath Project");
             } else {

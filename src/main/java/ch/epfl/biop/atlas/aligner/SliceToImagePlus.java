@@ -48,7 +48,7 @@ public class SliceToImagePlus {
             Map<SourceAndConverter<T>, Integer> mapMipmap = new HashMap<>();
             sourceList.forEach(src -> {
                 int mipmapLevel = SourceAndConverterHelper.bestLevel(src, timepoint, pixelSizeMillimeter);
-                logger.debug("Mipmap level chosen for source ["+src.getSpimSource().getName()+"] : "+mipmapLevel);
+                logger.debug("export 1: Mipmap level chosen for source ["+src.getSpimSource().getName()+"] : "+mipmapLevel);
                 mapMipmap.put(resampledSourceList.get(sourceList.indexOf(src)), mipmapLevel);
             });
 
@@ -102,7 +102,7 @@ public class SliceToImagePlus {
             Map<SourceAndConverter<T>, Integer> mapMipmap = new HashMap<>();
             sourceList.forEach(src -> {
                 int mipmapLevel = SourceAndConverterHelper.bestLevel(src, timepoint, pixelSizeMillimeter);
-                logger.debug("Mipmap level chosen for source ["+src.getSpimSource().getName()+"] : "+mipmapLevel);
+                logger.debug("export 2: Mipmap level chosen for source ["+src.getSpimSource().getName()+"] : "+mipmapLevel);
                 mapMipmap.put(resampledSourceList.get(sourceList.indexOf(src)), mipmapLevel);
             });
 
@@ -177,7 +177,7 @@ public class SliceToImagePlus {
             sourceList.forEach(src -> {
                 int mipmapLevel = SourceAndConverterHelper.bestLevel(src, timepoint, pixelSizeMillimeter);
                 if (!interpolate) mipmapLevel = 0; // For labels
-                logger.debug("Mipmap level chosen for source ["+src.getSpimSource().getName()+"] : "+mipmapLevel);
+                logger.debug("export 3: Mipmap level chosen for source ["+src.getSpimSource().getName()+"] : "+mipmapLevel);
                 mapMipmap.put(resampledSourceList.get(sourceList.indexOf(src)), mipmapLevel);
             });
 

@@ -117,7 +117,7 @@ public class SliceSourcesPopupMenu {
     {
         popup = new JPopupMenu();
 
-        if (slices.get().size()>0) {
+        if (!slices.get().isEmpty()) {
 
             addPopupAction("Set as Key Slice(s)", (slices) -> {
                 if (slices.length>1) new MarkActionSequenceBatchAction(mp).runRequest();

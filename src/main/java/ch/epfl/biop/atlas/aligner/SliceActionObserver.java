@@ -104,7 +104,7 @@ public class SliceActionObserver implements MultiSlicePositioner.SliceChangeList
                 sliceSortedActions.put(action.getSliceSources(), new ArrayList<>());
             }
             sliceSortedActions.get(action.getSliceSources()).add(action);
-            logger.debug("Action registered in observer: "+action);
+            logger.debug("Action enqueued in observer: "+action);
         } else {
             assert action instanceof CreateSliceAction;
         }
@@ -129,7 +129,7 @@ public class SliceActionObserver implements MultiSlicePositioner.SliceChangeList
             } else {
                 logger.debug("Ah, create slice was already contained, it's a redo!");
             }
-            logger.debug("Action registered in observer: "+action);
+            logger.debug("Action done - registered in observer: "+action);
         }
         if (!action.isValid()) {
             sliceSortedActions.get(action.getSliceSources()).remove(action); // Invalid = to remove ? TODO : check

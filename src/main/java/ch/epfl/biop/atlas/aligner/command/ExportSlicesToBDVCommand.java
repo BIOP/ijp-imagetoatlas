@@ -41,7 +41,7 @@ public class ExportSlicesToBDVCommand implements Command {
 
         List<SliceSources> slices = mp.getSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
 
-        if (slices.size()==0) {
+        if (slices.isEmpty()) {
             mp.errorMessageForUser.accept("No slice selected", "You did not select any slice to export");
         } else {
             //slices.forEach(SliceSources::setAlphaSources); // Should make things faster

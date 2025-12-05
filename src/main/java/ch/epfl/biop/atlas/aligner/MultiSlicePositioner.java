@@ -108,7 +108,7 @@ public class MultiSlicePositioner implements Closeable {
     // scijava context
     Context scijavaCtx;
 
-    // Multislice observer observes and display events happening to slices
+    // Multislice observer observes and display slices events
     protected SliceActionObserver mso;
 
     // Resliced atlas
@@ -268,10 +268,10 @@ public class MultiSlicePositioner implements Closeable {
 
     /**
      * Defines, in physical units, the region that will be used to perform the automated registration
-     * @param px center of the region, x axis
-     * @param py center of the region, y axis
-     * @param sx size of the region, x axis
-     * @param sy size of the region, y axis
+     * @param px center of the region, x-axis
+     * @param py center of the region, y-axis
+     * @param sx size of the region, x-axis
+     * @param sy size of the region, y-axis
      */
     public void setROI(double px, double py, double sx, double sy) {
         if (px<-sX / 2.0) {
@@ -350,7 +350,7 @@ public class MultiSlicePositioner implements Closeable {
     }
 
     public String getRedoMessage() {
-        if (redoableUserActions.size()==0) {
+        if (redoableUserActions.isEmpty()) {
             return "(None)";
         } else {
             CancelableAction lastAction = redoableUserActions.get(redoableUserActions.size()-1);
@@ -499,7 +499,7 @@ public class MultiSlicePositioner implements Closeable {
             logger.debug("Action "+action+" on slice "+action.getSliceSources()+" is valid.");
             userActions.add(action);
             logger.debug("Action "+action+" on slice "+action.getSliceSources()+" added to userActions.");
-            if (redoableUserActions.size() > 0) {
+            if (!redoableUserActions.isEmpty()) {
                 if (redoableUserActions.get(redoableUserActions.size() - 1).equals(action)) {
                     redoableUserActions.remove(redoableUserActions.size() - 1);
                 } else {
@@ -508,8 +508,6 @@ public class MultiSlicePositioner implements Closeable {
                     redoableUserActions.clear();
                 }
             }
-            //logger.debug("Action "+action+" on slice "+action.getSliceSources()+" info sending to MultiSliceObserver.");
-            //logger.debug("Action "+action+" on slice "+action.getSliceSources()+" info sent to MultiSliceObserver!");
         } else {
             logger.error("Invalid action "+action+" on slice "+action.getSliceSources());
         }
@@ -572,7 +570,7 @@ public class MultiSlicePositioner implements Closeable {
         List<SourceAndConverter<?>> sacs = Arrays.asList(sacsArray);
         if ((sacs.size() > 1) && (attributeClass != null)) {
 
-            // Check whether the source can be splitted
+            // Check whether the source can be split
             // Split based on attribute argument (usually Tile.class)
 
             Map<T, List<SourceAndConverter<?>>> sacsGroups =
@@ -807,7 +805,7 @@ public class MultiSlicePositioner implements Closeable {
      * Redo last action
      */
     public void redoAction() {
-        if (redoableUserActions.size() > 0) {
+        if (!redoableUserActions.isEmpty()) {
             CancelableAction action = redoableUserActions.get(redoableUserActions.size() - 1);
             if (action instanceof MarkActionSequenceBatchAction) {
                 action.runRequest();
@@ -1034,7 +1032,7 @@ public class MultiSlicePositioner implements Closeable {
     private static final int BUFFER_SIZE = 4096;
     /**
      * Extracts a zip file specified by the zipFilePath to a directory specified by
-     * destDirectory (will be created if does not exists)
+     * destDirectory (will be created if it does not exist)
      * @param zipFilePath zip file path
      * @param destDirectory dest directory
      * @throws IOException if the zip file can't be unzipped
@@ -1379,7 +1377,7 @@ public class MultiSlicePositioner implements Closeable {
     }
 
     /**
-     * Informations sent to the registration server (provided the user agrees)
+     * Information sent to the registration server (provided the user agrees)
      */
     @SuppressWarnings("CanBeFinal")
     public static class SliceInfo {

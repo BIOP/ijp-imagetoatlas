@@ -47,7 +47,7 @@ public class AlignerState {
     }
 
     /*
-    Some actions will not be serialized like the export actions and we
+    Some actions will not be serialized (like the export actions), and we
     need to somehow 'compile' actions to get rid of some actions which are there
     for user convenience but that we do not want to keep.
     For instance a series of attempted registration then deleted will not be saved.
@@ -64,20 +64,20 @@ public class AlignerState {
         serializableActions.add(SetSliceBackgroundAction.class);
         //serializableActions.add(RasterDeformationAction.class);
 
-        Set<Class<? extends CancelableAction>> skipableActions = new HashSet<>();
-        skipableActions.add(ExportSliceRegionsToFileAction.class);
-        skipableActions.add(ExportSliceRegionsToQuPathProjectAction.class);
-        skipableActions.add(ExportSliceRegionsToRoiManagerAction.class);
-        skipableActions.add(EditLastRegistrationAction.class); //TODO : make it serializable ? serializable or not ?
-        skipableActions.add(ExportAtlasSliceToImagePlusAction.class);
-        skipableActions.add(RasterDeformationAction.class);
-        skipableActions.add(LockAndRunOnceSliceAction.class);
-        skipableActions.add(RasterSliceAction.class);
-        skipableActions.add(ExportSliceToImagePlusAction.class);
-        skipableActions.add(ExportDeformationFieldToImagePlusAction.class);
+        Set<Class<? extends CancelableAction>> actionsToSkip = new HashSet<>();
+        actionsToSkip.add(ExportSliceRegionsToFileAction.class);
+        actionsToSkip.add(ExportSliceRegionsToQuPathProjectAction.class);
+        actionsToSkip.add(ExportSliceRegionsToRoiManagerAction.class);
+        actionsToSkip.add(EditLastRegistrationAction.class); //TODO : make it serializable ? serializable or not ?
+        actionsToSkip.add(ExportAtlasSliceToImagePlusAction.class);
+        actionsToSkip.add(RasterDeformationAction.class);
+        actionsToSkip.add(LockAndRunOnceSliceAction.class);
+        actionsToSkip.add(RasterSliceAction.class);
+        actionsToSkip.add(ExportSliceToImagePlusAction.class);
+        actionsToSkip.add(ExportDeformationFieldToImagePlusAction.class);
 
         List<CancelableAction> compiledActions = new ArrayList<>();
-        if ((ini_actions == null)||(ini_actions.size()==0)) {
+        if ((ini_actions == null)||(ini_actions.isEmpty())) {
             logger.error("Wrong number of actions to be serialized");
             return compiledActions;
         }
@@ -94,7 +94,7 @@ public class AlignerState {
                 idxIniActions++;
                 compiledActions.add(nextAction);
             } else {
-                if (skipableActions.contains(nextAction.getClass())) {
+                if (actionsToSkip.contains(nextAction.getClass())) {
                     idxIniActions++;
                 } else {
                     if (nextAction instanceof DeleteLastRegistrationAction) {
@@ -109,11 +109,11 @@ public class AlignerState {
                                 idxCompiledActions--;
                                 idxIniActions++;
                             } else {
-                                logger.error("Error : issue with DeleteLastRegistrationAction action!!!!");
+                                logger.error("Error : issue with DeleteLastRegistrationAction action - the last registration is not of the correct type.");
                                 idxIniActions++;
                             }
                         } else {
-                            logger.error("Error : issue with DeleteLastRegistrationAction action!!!!");
+                            logger.error("Error : issue with DeleteLastRegistrationAction action - no registration found.");
                             idxIniActions++;
                         }
                     } else {

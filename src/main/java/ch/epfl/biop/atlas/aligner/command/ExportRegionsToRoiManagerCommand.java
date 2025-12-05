@@ -31,7 +31,7 @@ public class ExportRegionsToRoiManagerCommand extends DynamicCommand implements
     public void run() {
 
         List<SliceSources> slices = mp.getSelectedSlices();
-        if (slices.size()==0) {
+        if (slices.isEmpty()) {
             mp.errorMessageForUser.accept("No slice selected", "You did not select any slice.");
         } else {
             new MarkActionSequenceBatchAction(mp).runRequest();

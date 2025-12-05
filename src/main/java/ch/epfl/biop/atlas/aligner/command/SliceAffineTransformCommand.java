@@ -83,7 +83,7 @@ public class SliceAffineTransformCommand extends InteractiveCommand implements M
                 }
             }
 
-            if (selectedSlices.size()==0) {
+            if (selectedSlices.isEmpty()) {
                 mp.errorMessageForUser.accept("No selected slice", "Please select a slice and rerun the function");
             } else {
                 if (!CollectionUtils.isEqualCollection(selectedSlices, mp.getSelectedSlices())) {
