@@ -165,7 +165,6 @@ import static bdv.ui.BdvDefaultCards.DEFAULT_SOURCEGROUPS_CARD;
 import static bdv.ui.BdvDefaultCards.DEFAULT_SOURCES_CARD;
 import static bdv.ui.BdvDefaultCards.DEFAULT_VIEWERMODES_CARD;
 import static bdv.util.source.alpha.AlphaSourceHelper.ALPHA_SOURCE_KEY;
-import static ch.epfl.biop.atlas.aligner.gui.message.StartupMessageHandler.resetPreferences;
 
 public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceChangeListener, GraphicalHandleListener, MouseMotionListener, MultiSlicePositioner.MultiSlicePositionerListener {
 

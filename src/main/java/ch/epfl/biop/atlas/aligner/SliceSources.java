@@ -62,6 +62,7 @@ import net.imglib2.converter.Converters;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.position.FunctionRandomAccessible;
 
+import net.imglib2.realtransform.BoundingBoxEstimation;
 import net.imglib2.realtransform.RealTransform;
 import net.imglib2.realtransform.RealTransformSequence;
 import net.imglib2.realtransform.AffineTransform3D;
@@ -1715,6 +1716,7 @@ public class SliceSources {
         } else {
             srt = new SourceRealTransformer<>(RealTransformHelper.resampleTransform(rts, model));
         }
+        srt.setBoundingBoxEstimator(new ABBABoundingBoxEstimator());
 
         registered_sacs = new SourceAndConverter[nChannels]; // Compulsory or the push is useless!
 
@@ -2094,4 +2096,24 @@ public class SliceSources {
         }
     }
 
+    public static class ABBABoundingBoxEstimator extends BoundingBoxEstimation {
+
+        public ABBABoundingBoxEstimator() {
+        }
+
+        @Override
+        public RealInterval estimateInterval(RealTransform xfm, RealInterval interval) {
+            return new FinalInterval(new long[]{0,0,0}, new long[]{1,1,1});
+        }
+
+        @Override
+        public Interval estimatePixelInterval(RealTransform xfm, Interval interval) {
+            return new FinalInterval(new long[]{0,0,0}, new long[]{1,1,1});
+        }
+
+        public BoundingBoxEstimation copy() {
+            return this;
+        }
+
+    }
 }
