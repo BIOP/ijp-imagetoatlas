@@ -108,10 +108,10 @@
 
 		<!-- bdv playground related dependencies -->
 		<bigdataviewer-playground.version>0.12.0</bigdataviewer-playground.version>
-		<bigdataviewer-image-loaders.version>0.11.2</bigdataviewer-image-loaders.version>
-		<bigdataviewer-biop-tools.version>0.13.4</bigdataviewer-biop-tools.version>
+		<bigdataviewer-image-loaders.version>0.11.5</bigdataviewer-image-loaders.version>
+		<bigdataviewer-biop-tools.version>0.13.6</bigdataviewer-biop-tools.version>
 		<bigdataviewer-selector.version>0.2.8</bigdataviewer-selector.version>
-		<ijl-utilities-wrappers.version>0.11.5</ijl-utilities-wrappers.version>
+		<ijl-utilities-wrappers.version>0.11.7</ijl-utilities-wrappers.version>
 
 		<!-- maths -->
 		<leastsquares.version>1.0.0</leastsquares.version>
