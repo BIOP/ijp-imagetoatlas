@@ -28,7 +28,7 @@ public class ABBAStateSaveCommand implements Command {
     public void run() {
         // Appends extension
         String extension = FilenameUtils.getExtension(state_file.getAbsolutePath());
-        if ((extension==null)||(extension.trim().equals(""))) {
+        if (extension.trim().isEmpty()) {
             mp.infoMessageForUser.accept("", "Adding abba extension to state file");
             state_file = new File(state_file.getAbsolutePath()+".abba");
         }

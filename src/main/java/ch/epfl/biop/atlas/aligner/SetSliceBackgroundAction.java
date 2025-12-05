@@ -46,21 +46,20 @@ public class SetSliceBackgroundAction extends CancelableAction {
         double size = 7.0*scale;
         if (scale<0.9) {
             g.setColor(ABBABdvViewPrefs.raster_small_scale);
-        } else
-        switch (slice.getActionState(this)) {
-            case "(done)":
-                g.setColor(ABBABdvViewPrefs.done);
-                break;
-            case "(locked)":
-                g.setColor(ABBABdvViewPrefs.locked);
-                break;
-            case "(pending)":
-                g.setColor(ABBABdvViewPrefs.pending);
-                break;
+        } else {
+            switch (slice.getActionState(this)) {
+                case "(done)":
+                    g.setColor(ABBABdvViewPrefs.done);
+                    break;
+                case "(locked)":
+                    g.setColor(ABBABdvViewPrefs.locked);
+                    break;
+                case "(pending)":
+                    g.setColor(ABBABdvViewPrefs.pending);
+                    break;
+            }
         }
-        {
-            g.fillOval((int) (px - size), (int) (py - size), (int) (2.0*size), (int) (2.0*size));
-        }
+        g.fillOval((int) (px - size), (int) (py - size), (int) (2.0*size), (int) (2.0*size));
         g.setColor(ABBABdvViewPrefs.text_action_register);
         g.setFont(ABBABdvViewPrefs.action_font);
         g.drawString("W", (int) px - 4, (int) py + 5);

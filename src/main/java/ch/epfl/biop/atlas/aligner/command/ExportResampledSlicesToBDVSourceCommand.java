@@ -75,7 +75,7 @@ public class ExportResampledSlicesToBDVSourceCommand implements Command {
     int resolution_levels = 6;
 
     @Parameter(type = ItemIO.OUTPUT)
-    SourceAndConverter[] fusedImages;
+    SourceAndConverter<?>[] fusedImages;
 
     @Override
     public void run() {

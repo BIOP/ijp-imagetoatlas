@@ -246,8 +246,7 @@ public class SliceSources {
             public RealRandomAccessible<FloatType> getInterpolatedSource(int t, int level, Interpolation interpolation) {
                 ExtendedRandomAccessibleInterval<FloatType, RandomAccessibleInterval< FloatType >>
                         eView = Views.extendZero(getSource( t, level ));
-                RealRandomAccessible< FloatType > realRandomAccessible = Views.interpolate( eView, interpolators.get(Interpolation.NEARESTNEIGHBOR) );
-                return realRandomAccessible;
+                return Views.interpolate( eView, interpolators.get(Interpolation.NEARESTNEIGHBOR) );
             }
 
             @Override
@@ -942,12 +941,7 @@ public class SliceSources {
     }
 
     private RandomAccessibleInterval<FloatType> convertedRai(RandomAccessibleInterval<IntegerType<?>> raiLabel) {
-        Converter<IntegerType<?>, FloatType> cvt = new Converter<IntegerType<?>, FloatType>() {
-            @Override
-            public void convert(IntegerType<?> integerType, FloatType floatType) {
-                floatType.set(Float.intBitsToFloat(integerType.getInteger()));
-            }
-        };
+        Converter<IntegerType<?>, FloatType> cvt = (integerType, floatType) -> floatType.set(Float.intBitsToFloat(integerType.getInteger()));
         return Converters.convert(raiLabel, cvt, new FloatType());
     }
 
@@ -1764,8 +1758,7 @@ public class SliceSources {
             public RealRandomAccessible<FloatType> getInterpolatedSource(int t, int level, Interpolation interpolation) {
                 ExtendedRandomAccessibleInterval<FloatType, RandomAccessibleInterval< FloatType >>
                         eView = Views.extendZero(getSource( t, level ));
-                RealRandomAccessible< FloatType > realRandomAccessible = Views.interpolate( eView, interpolators.get(Interpolation.NEARESTNEIGHBOR) );
-                return realRandomAccessible;
+                return Views.interpolate( eView, interpolators.get(Interpolation.NEARESTNEIGHBOR) );
             }
 
             @Override

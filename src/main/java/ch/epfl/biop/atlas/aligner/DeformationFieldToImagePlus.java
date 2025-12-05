@@ -27,7 +27,7 @@ public class DeformationFieldToImagePlus {
                 .getSlicePixToCCFRealTransform(resolutionLevel, tolerance, maxIterations))
                 .inverse();
 
-        RandomAccessibleInterval raiModel = slice.getOriginalSources()[0].getSpimSource().getSource(timepoint, resolutionLevel);
+        RandomAccessibleInterval<?> raiModel = slice.getOriginalSources()[0].getSpimSource().getSource(timepoint, resolutionLevel);
         final int sxt = (int) (raiModel.dimension(0));
         final int syt = (int) (raiModel.dimension(1));
 

@@ -72,7 +72,6 @@ public class RegisterSlicesCopyAndApplyCommand implements Command {
      *
      * @param mpModel The MultiSlicePositioner instance of the model slice
      * @param modelSlice The slice to copy the registration from
-     * @param mpModel The MultiSlicePositioner instance of the target slice
      * @param targetSlice The slice to apply the registration to
      * @param skipPreTransform Whether to skip applying the pre-transform
      */

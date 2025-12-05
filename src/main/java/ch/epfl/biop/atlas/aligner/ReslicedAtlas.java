@@ -316,11 +316,12 @@ public class ReslicedAtlas implements RealInterval {
     }
 
     public void setStep(int zStep) {
-        if (!lock)
-        if ((zStep > 0)&&(zStep!=this.zStep)) {
-            this.zStep = zStep;
-            slicingUpdate();
-            listeners.forEach(Runnable::run);
+        if (!lock) {
+            if ((zStep > 0)&&(zStep!=this.zStep)) {
+                this.zStep = zStep;
+                slicingUpdate();
+                listeners.forEach(Runnable::run);
+            }
         }
     }
 
@@ -330,11 +331,12 @@ public class ReslicedAtlas implements RealInterval {
      * @param rx angle in radian
      */
     public void setRotateX(double rx) {
-        if (!lock)
-        if (rx!=this.rotx) {
-            this.rotx = rx;
-            slicingUpdate();
-            listeners.forEach(Runnable::run);
+        if (!lock) {
+            if (rx != this.rotx) {
+                this.rotx = rx;
+                slicingUpdate();
+                listeners.forEach(Runnable::run);
+            }
         }
     }
 
@@ -352,11 +354,12 @@ public class ReslicedAtlas implements RealInterval {
      * @param ry angle in radian
      */
     public void setRotateY(double ry) {
-        if (!lock)
-        if (ry!=this.roty) {
-            this.roty = ry;
-            slicingUpdate();
-            listeners.forEach(Runnable::run);
+        if (!lock) {
+            if (ry != this.roty) {
+                this.roty = ry;
+                slicingUpdate();
+                listeners.forEach(Runnable::run);
+            }
         }
     }
 

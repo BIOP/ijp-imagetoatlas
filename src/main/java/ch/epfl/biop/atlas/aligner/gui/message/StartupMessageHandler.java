@@ -113,7 +113,7 @@ public class StartupMessageHandler {
         }
 
         return data.getAnnouncements().stream()
-                .max(Comparator.comparing(a -> a.getTimestampAsInstant()))
+                .max(Comparator.comparing(StartupMessageData.Announcement::getTimestampAsInstant))
                 .orElse(null);
     }
 

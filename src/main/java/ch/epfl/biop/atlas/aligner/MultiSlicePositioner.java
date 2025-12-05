@@ -570,8 +570,7 @@ public class MultiSlicePositioner implements Closeable {
         List<SourceAndConverter<?>> sacs = Arrays.asList(sacsArray);
         if ((sacs.size() > 1) && (attributeClass != null)) {
 
-            // Check whether the source can be split
-            // Split based on attribute argument (usually Tile.class)
+            // Check whether the source can be split based on attribute argument (usually Tile.class)
 
             Map<T, List<SourceAndConverter<?>>> sacsGroups =
                     sacs.stream().collect(Collectors.groupingBy(sac -> {
@@ -786,12 +785,10 @@ public class MultiSlicePositioner implements Closeable {
         if (!userActions.isEmpty()) {
             CancelableAction action = userActions.get(userActions.size() - 1);
             if (action instanceof MarkActionSequenceBatchAction) {
-                action.cancelRequest();
-                action = userActions.get(userActions.size() - 1);
-                while (!(action instanceof MarkActionSequenceBatchAction)) {
+                do {
                     action.cancelRequest();
                     action = userActions.get(userActions.size() - 1);
-                }
+                } while (!(action instanceof MarkActionSequenceBatchAction));
                 action.cancelRequest();
             } else {
                 userActions.get(userActions.size() - 1).cancelRequest();
@@ -808,12 +805,10 @@ public class MultiSlicePositioner implements Closeable {
         if (!redoableUserActions.isEmpty()) {
             CancelableAction action = redoableUserActions.get(redoableUserActions.size() - 1);
             if (action instanceof MarkActionSequenceBatchAction) {
-                action.runRequest();
-                action = redoableUserActions.get(redoableUserActions.size() - 1);
-                while (!(action instanceof MarkActionSequenceBatchAction)) {
+                do {
                     action.runRequest();
                     action = redoableUserActions.get(redoableUserActions.size() - 1);
-                }
+                } while (!(action instanceof MarkActionSequenceBatchAction));
                 action.runRequest();
             } else {
                 redoableUserActions.get(redoableUserActions.size() - 1).runRequest();
@@ -1071,7 +1066,7 @@ public class MultiSlicePositioner implements Closeable {
     private void extractFile(ZipInputStream zipIn, String filePath) throws IOException {
         BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath));
         byte[] bytesIn = new byte[BUFFER_SIZE];
-        int read = 0;
+        int read;
         while ((read = zipIn.read(bytesIn)) != -1) {
             bos.write(bytesIn, 0, read);
         }

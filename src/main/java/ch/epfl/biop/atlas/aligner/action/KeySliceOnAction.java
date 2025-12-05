@@ -25,11 +25,12 @@ public class KeySliceOnAction extends CancelableAction {
     }
 
     protected boolean run() {
+        // already a key slice, but we don't care
         if (!sliceSource.isKeySlice()) {
             sliceSource.keySliceOn();
             getMP().stateHasBeenChanged();
-            return true;
-        } else return true; // already a key slice, but we don't care
+        }
+        return true;
     }
 
     public String toString() {

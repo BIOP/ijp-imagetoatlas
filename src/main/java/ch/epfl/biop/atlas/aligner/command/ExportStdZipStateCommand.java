@@ -105,7 +105,7 @@ public class ExportStdZipStateCommand implements Command {
     @Parameter
     String identifier;
 
-    @Parameter(style = "open", persist = true)
+    @Parameter(style = "open")
     File state_file;
 
     @Parameter(style = "directory", required = false)
@@ -266,9 +266,7 @@ public class ExportStdZipStateCommand implements Command {
                         "slice_axis_initial_mm", 0,
                         "increment_between_slices_mm", 0.1
                 ).get();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            } catch (ExecutionException e) {
+            } catch (InterruptedException | ExecutionException e) {
                 throw new RuntimeException(e);
             }
 

@@ -1530,7 +1530,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
     public void setDisplayMode(int mode) {
         if (this.mode!=mode) {
-            int oldMode = mode;
+            int oldMode = this.mode;
             this.mode = mode;
             modeChanged(mode, oldMode);
         }
@@ -2395,7 +2395,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             }
             g.setColor(ABBABdvViewPrefs.current_slice_handle_color);
             g.setFont(ABBABdvViewPrefs.arrow_on_current_slice_font);
-            g.drawString("\u25C4 \u25BA", (int) (sliceCenter.getDoublePosition(0) - 20), (int) (sliceCenter.getDoublePosition(1) - 20));
+            g.drawString("◄ ►", (int) (sliceCenter.getDoublePosition(0) - 20), (int) (sliceCenter.getDoublePosition(1) - 20));
 
             String name = slice.getName();
             int yOffset = 20;

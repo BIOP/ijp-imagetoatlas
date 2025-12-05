@@ -1,7 +1,6 @@
 package ch.epfl.biop.atlas.aligner;
 
 import ch.epfl.biop.atlas.aligner.gui.bdv.ABBABdvViewPrefs;
-import org.checkerframework.checker.units.qual.A;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

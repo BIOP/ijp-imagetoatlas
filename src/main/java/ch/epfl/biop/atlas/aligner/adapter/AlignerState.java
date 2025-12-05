@@ -91,12 +91,9 @@ public class AlignerState {
             CancelableAction nextAction = ini_actions.get(idxIniActions);
             if (serializableActions.contains(nextAction.getClass())) {
                 idxCompiledActions++;
-                idxIniActions++;
                 compiledActions.add(nextAction);
             } else {
-                if (actionsToSkip.contains(nextAction.getClass())) {
-                    idxIniActions++;
-                } else {
+                if (!actionsToSkip.contains(nextAction.getClass())) {
                     if (nextAction instanceof DeleteLastRegistrationAction) {
                         // For now...
                         int idxLastRegistration = idxCompiledActions-1;
@@ -107,23 +104,19 @@ public class AlignerState {
                             if (compiledActions.get(idxLastRegistration) instanceof RegisterSliceAction) {
                                 compiledActions.remove(idxLastRegistration);
                                 idxCompiledActions--;
-                                idxIniActions++;
                             } else {
                                 logger.error("Error : issue with DeleteLastRegistrationAction action - the last registration is not of the correct type.");
-                                idxIniActions++;
                             }
                         } else {
                             logger.error("Error : issue with DeleteLastRegistrationAction action - no registration found.");
-                            idxIniActions++;
                         }
                     } else {
                         logger.warn("Error : issue with filtering serializable actions. Action class = "+nextAction.getClass());
-                        idxIniActions++;
                     }
                 }
             }
+            idxIniActions++;
         }
-
         return compiledActions;
     }
 

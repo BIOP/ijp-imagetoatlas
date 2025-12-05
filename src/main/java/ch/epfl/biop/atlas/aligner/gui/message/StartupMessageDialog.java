@@ -3,7 +3,6 @@ package ch.epfl.biop.atlas.aligner.gui.message;
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
 import java.awt.*;
-import java.awt.Desktop;
 import java.net.URI;
 
 /**
@@ -38,9 +37,7 @@ public class StartupMessageDialog {
      * Show the dialog
      */
     public void showDialog() {
-        SwingUtilities.invokeLater(() -> {
-            createAndShowDialog();
-        });
+        SwingUtilities.invokeLater(this::createAndShowDialog);
     }
 
     private void createAndShowDialog() {

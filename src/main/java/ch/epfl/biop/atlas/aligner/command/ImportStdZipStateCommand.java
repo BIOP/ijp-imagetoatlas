@@ -52,7 +52,7 @@ import static ch.epfl.biop.atlas.aligner.MultiSlicePositioner.pack;
         description = "Opens a previously created zipped ABBA project.")
 public class ImportStdZipStateCommand implements Command {
 
-    @Parameter(style = "open", persist = true)
+    @Parameter(style = "open")
     File zip_file;
 
     @Parameter
@@ -121,11 +121,7 @@ public class ImportStdZipStateCommand implements Command {
             view.loadState("state_file", new File(directory, "state_updated.abba"));
             importTask.setStatusMessage("Done!");
 
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (ExecutionException e) {
-            throw new RuntimeException(e);
-        } catch (InterruptedException e) {
+        } catch (ExecutionException | InterruptedException e) {
             throw new RuntimeException(e);
         } catch (Exception e) {
             throw new RuntimeException(e);

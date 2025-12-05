@@ -121,17 +121,18 @@ public class RegisterSliceAction extends CancelableAction {
         if (isValid) {
             if (scale<0.9) {
                 g.setColor(ABBABdvViewPrefs.register_small_scale);
-            } else
-            switch (slice.getActionState(this)) {
-                case "(done)":
-                    g.setColor(ABBABdvViewPrefs.done);
-                    break;
-                case "(locked)":
-                    g.setColor(ABBABdvViewPrefs.locked);
-                    break;
-                case "(pending)":
-                    g.setColor(ABBABdvViewPrefs.pending);
-                    break;
+            } else {
+                switch (slice.getActionState(this)) {
+                    case "(done)":
+                        g.setColor(ABBABdvViewPrefs.done);
+                        break;
+                    case "(locked)":
+                        g.setColor(ABBABdvViewPrefs.locked);
+                        break;
+                    case "(pending)":
+                        g.setColor(ABBABdvViewPrefs.pending);
+                        break;
+                }
             }
             if ((registration != null) && (RegistrationPluginHelper.isManual(registration))) {
                 g.fillRect((int) (px - size), (int) (py - size), (int) (2.0*size), (int) (2.0*size));

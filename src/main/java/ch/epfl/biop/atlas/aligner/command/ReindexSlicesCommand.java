@@ -40,7 +40,7 @@ public class ReindexSlicesCommand implements Command {
         List<Integer> indices;
 
         try {
-            indices = Arrays.asList(new_indices.split(",")).stream().map(str -> new Integer(Integer.parseInt(str))).collect(Collectors.toList());
+            indices = Arrays.stream(new_indices.split(",")).map(Integer::parseInt).collect(Collectors.toList());
         } catch (NumberFormatException e) {
             mp.errorMessageForUser.accept("Invalid channels indices", "Could not parse indices");
             return;
@@ -68,8 +68,8 @@ public class ReindexSlicesCommand implements Command {
             AtomicBoolean result = new AtomicBoolean();
             new LockAndRunOnceSliceAction(mp, sliceSources, new AtomicInteger(0), 1, () -> {
                 List<SourceAndConverter<?>> newSources = new ArrayList<>();
-                for (int i = 0; i<indices.size(); i++) {
-                    newSources.add(sliceSources.getOriginalSources()[indices.get(i)]);
+                for (Integer index : indices) {
+                    newSources.add(sliceSources.getOriginalSources()[index]);
                 }
                 CreateSliceAction cs = new CreateSliceAction(mp, newSources,sliceSources.getSlicingAxisPosition(), sliceSources.getZThicknessCorrection(), sliceSources.getZShiftCorrection());
                 cs.runRequest();
