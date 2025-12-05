@@ -1245,7 +1245,7 @@ public class MultiSlicePositioner implements Closeable {
                         reslicedAtlas.setRotateY(state.rotationY);
                     }
 
-                    if (!warningMessageForUser.equals("")) {
+                    if (!warningMessageForUser.isEmpty()) {
                         this.warningMessageForUser.accept("Warning", warningMessageForUser);
                     }
 

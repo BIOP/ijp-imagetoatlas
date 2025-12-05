@@ -216,7 +216,7 @@ public class SliceGuiState {
                                 })
                                 .collect(Collectors.toList());
 
-                        SourceAndConverter[] sources = sourcesToDisplay.toArray(new SourceAndConverter[sourcesToDisplay.size()]);
+                        SourceAndConverter[] sources = sourcesToDisplay.toArray(new SourceAndConverter[0]);
 
                         for (SourceAndConverter<?> source : sources) {
                             SourceAndConverterServices

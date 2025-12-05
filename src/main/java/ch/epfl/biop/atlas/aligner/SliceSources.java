@@ -505,17 +505,6 @@ public class SliceSources {
         }
     }
 
-    protected boolean exactMatch(List<SourceAndConverter<?>> testSacs) {
-        Set<SourceAndConverter<?>> originalSacsSet = new HashSet<>(Arrays.asList(original_sacs));
-        return (originalSacsSet.containsAll(testSacs) && testSacs.containsAll(originalSacsSet));
-    }
-
-    protected boolean isContainingAny(Collection<SourceAndConverter<?>> sacs) {
-        Set<SourceAndConverter> originalSacsSet = new HashSet<>();
-        originalSacsSet.addAll(Arrays.asList(original_sacs));
-        return (sacs.stream().distinct().anyMatch(originalSacsSet::contains));
-    }
-
     public void waitForEndOfTasks() {
 
         if (!tasks.isEmpty()) {
@@ -1518,7 +1507,7 @@ public class SliceSources {
     }
 
     public String toString() {
-        if (!name.equals("") ) {
+        if (!name.isEmpty()) {
             return name;
         } else {
             int index = mp.getSlices().indexOf(this);
