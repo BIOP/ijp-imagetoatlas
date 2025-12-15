@@ -8,10 +8,12 @@ import ch.epfl.biop.atlas.aligner.gui.bdv.ABBABdvStartCommand;
 import ch.epfl.biop.atlas.aligner.gui.bdv.BdvMultislicePositionerView;
 import ch.epfl.biop.atlas.mouse.allen.ccfv3p1asr.command.AllenBrainAdultMouseAtlasCCF2017v3p1ASRCommand;
 import ch.epfl.biop.atlas.struct.Atlas;
+import ch.epfl.biop.bdv.img.omero.OmeroChecker;
 import ch.epfl.biop.bdv.img.omero.command.OmeroConnectCommand;
 import ch.epfl.biop.bdv.img.qupath.command.CreateBdvDatasetQuPathCommand;
 import ij.IJ;
 import ij.Prefs;
+import org.scijava.Context;
 import org.scijava.ItemIO;
 import org.scijava.command.Command;
 import org.scijava.command.CommandService;
@@ -45,6 +47,9 @@ public class ABBABenchMarkCommand implements Command {
     boolean wait_between_each_step;
 
     @Parameter
+    Context ctx;
+
+    @Parameter
     CommandService cs;
 
     @Parameter
@@ -61,6 +66,9 @@ public class ABBABenchMarkCommand implements Command {
 
     @Override
     public void run() {
+
+        OmeroChecker.PromptUserIfOmeroDependenciesMissing(ctx);
+
         // Check whether the benchmark can work TODO:
         // - Elastix and transformix set
         // - Access to internet (to DL the OMERO public dataset)
