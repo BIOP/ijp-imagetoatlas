@@ -108,7 +108,7 @@
 
 		<!-- bdv playground related dependencies -->
 		<bigdataviewer-playground.version>0.13.0</bigdataviewer-playground.version>
-		<bigdataviewer-image-loaders.version>0.12.0</bigdataviewer-image-loaders.version>
+		<bigdataviewer-image-loaders.version>0.12.1</bigdataviewer-image-loaders.version>
 		<bigdataviewer-biop-tools.version>0.14.0</bigdataviewer-biop-tools.version>
 		<bigdataviewer-selector.version>0.2.8</bigdataviewer-selector.version>
 		<ijl-utilities-wrappers.version>0.12.0</ijl-utilities-wrappers.version>
