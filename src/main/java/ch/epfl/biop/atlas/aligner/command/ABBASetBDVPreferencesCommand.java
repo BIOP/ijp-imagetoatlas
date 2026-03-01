@@ -4,8 +4,8 @@ import org.scijava.Context;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import sc.fiji.bdvpg.bdv.config.BdvSettingsGUISetter;
-import sc.fiji.bdvpg.scijava.command.BdvPlaygroundActionCommand;
+import sc.fiji.bdvpg.command.BdvPlaygroundActionCommand;
+import sc.fiji.bdvpg.viewers.bdv.config.BdvSettingsGUISetter;
 
 import java.io.File;
 @SuppressWarnings("unused")

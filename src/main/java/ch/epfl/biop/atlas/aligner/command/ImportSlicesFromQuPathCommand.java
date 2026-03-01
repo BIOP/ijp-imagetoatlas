@@ -10,7 +10,7 @@ import org.scijava.command.Command;
 import org.scijava.command.CommandService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
+import sc.fiji.bdvpg.scijava.services.SourceService;
 
 import java.io.File;
 import java.util.concurrent.ExecutionException;
@@ -40,7 +40,7 @@ public class ImportSlicesFromQuPathCommand implements Command {
     CommandService command_service;
 
     @Parameter
-    SourceAndConverterService sac_service;
+    SourceService sac_service;
 
     @Override
     public void run() {
@@ -54,7 +54,7 @@ public class ImportSlicesFromQuPathCommand implements Command {
                             "qupath_project", qupath_project,
                             "unit", "MILLIMETER").get().getOutput("spimData");
             SourceAndConverter<?>[] sacs =
-                    sac_service.getSourceAndConverterFromSpimdata(spimdata)
+                    sac_service.getSourcesFromDataset(spimdata)
                             .toArray(new SourceAndConverter[0]);
 
             if (sacs.length>0) { // Because the action could have been canceled

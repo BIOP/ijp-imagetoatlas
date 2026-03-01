@@ -10,9 +10,9 @@ import net.imglib2.realtransform.AffineTransform3D;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
-import sc.fiji.bdvpg.services.SourceAndConverterServices;
-import sc.fiji.bdvpg.sourceandconverter.transform.SourceAffineTransformer;
+import sc.fiji.bdvpg.scijava.services.SourceService;
+import sc.fiji.bdvpg.services.SourceServices;
+import sc.fiji.bdvpg.source.transform.SourceAffineTransformer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +31,7 @@ public class ExportSlicesToBDVCommand implements Command {
     MultiSlicePositioner mp;
 
     @Parameter
-    SourceAndConverterService sac_service;
+    SourceService sac_service;
 
     @Override
     public void run() {
@@ -58,10 +58,10 @@ public class ExportSlicesToBDVCommand implements Command {
                 }
             });
 
-            BdvHandle bdvh = SourceAndConverterServices
+            BdvHandle bdvh = SourceServices
                     .getBdvDisplayService().getNewBdv();
 
-            SourceAndConverterServices
+            SourceServices
                     .getBdvDisplayService()
                     .show(bdvh, sacsToAppend.toArray(new SourceAndConverter[0]));
         }

@@ -30,16 +30,16 @@ import ch.epfl.biop.java.utilities.roi.types.IJShapeRoiArray;
 import ch.epfl.biop.java.utilities.roi.types.ImageJRoisFile;
 import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import ch.epfl.biop.registration.Registration;
-import ch.epfl.biop.registration.sourceandconverter.affine.AffineTransformedSourceWrapperRegistration;
-import ch.epfl.biop.registration.sourceandconverter.affine.CenterZeroRegistration;
-import ch.epfl.biop.registration.sourceandconverter.mirror.MirrorXRegistration;
-import ch.epfl.biop.registration.sourceandconverter.mirror.MirrorXTransform;
-import ch.epfl.biop.registration.sourceandconverter.spline.RealTransformSourceAndConverterRegistration;
-import ch.epfl.biop.sourceandconverter.processor.SourcesChannelsSelect;
-import ch.epfl.biop.sourceandconverter.processor.SourcesIdentity;
-import ch.epfl.biop.sourceandconverter.processor.SourcesProcessComposer;
-import ch.epfl.biop.sourceandconverter.processor.SourcesProcessor;
-import ch.epfl.biop.sourceandconverter.processor.SourcesProcessorHelper;
+import ch.epfl.biop.registration.source.affine.AffineTransformedSourceWrapperRegistration;
+import ch.epfl.biop.registration.source.affine.CenterZeroRegistration;
+import ch.epfl.biop.registration.source.mirror.MirrorXRegistration;
+import ch.epfl.biop.registration.source.mirror.MirrorXTransform;
+import ch.epfl.biop.registration.source.spline.RealTransformSourceRegistration;
+import ch.epfl.biop.source.processor.SourcesChannelsSelect;
+import ch.epfl.biop.source.processor.SourcesIdentity;
+import ch.epfl.biop.source.processor.SourcesProcessComposer;
+import ch.epfl.biop.source.processor.SourcesProcessor;
+import ch.epfl.biop.source.processor.SourcesProcessorHelper;
 import com.google.gson.Gson;
 import ij.ImagePlus;
 import ij.gui.Roi;
@@ -83,16 +83,16 @@ import net.imglib2.view.Views;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
-import sc.fiji.bdvpg.scijava.services.ui.SourceAndConverterInspector;
-import sc.fiji.bdvpg.services.SourceAndConverterServices;
-import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterAndTimeRange;
-import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
-import sc.fiji.bdvpg.sourceandconverter.importer.EmptySourceAndConverterCreator;
-import sc.fiji.bdvpg.sourceandconverter.transform.SourceOutOfBoundsColorChanger;
-import sc.fiji.bdvpg.sourceandconverter.transform.SourceRealTransformer;
-import sc.fiji.bdvpg.sourceandconverter.transform.SourceResampler;
-import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
+import sc.fiji.bdvpg.scijava.services.SourceService;
+import sc.fiji.bdvpg.scijava.services.tree.inspect.SourceInspector;
+import sc.fiji.bdvpg.services.SourceServices;
+import sc.fiji.bdvpg.source.SourceAndTimeRange;
+import sc.fiji.bdvpg.source.SourceHelper;
+import sc.fiji.bdvpg.source.importer.EmptySourceCreator;
+import sc.fiji.bdvpg.source.transform.SourceOutOfBoundsColorChanger;
+import sc.fiji.bdvpg.source.transform.SourceRealTransformer;
+import sc.fiji.bdvpg.source.transform.SourceResampler;
+import sc.fiji.bdvpg.source.transform.SourceTransformHelper;
 import sc.fiji.persist.ScijavaGsonHelper;
 import spimdata.util.Displaysettings;
 
@@ -288,18 +288,18 @@ public class SliceSources {
         computeZThickness();
 
         try {
-            SourceAndConverter rootSac = SourceAndConverterInspector.getRootSourceAndConverter(original_sacs[0]);
-            if (SourceAndConverterServices.getSourceAndConverterService()
-                    .getMetadata(rootSac, SourceAndConverterService.SPIM_DATA_INFO)==null) {
+            SourceAndConverter rootSac = SourceInspector.getRootSourceAndConverter(original_sacs[0]);
+            if (SourceServices.getSourceService()
+                    .getMetadata(rootSac, SourceService.SPIM_DATA_INFO)==null) {
                 // Not linked to a spimdata
                 name = rootSac.getSpimSource().getName();
             } else {
                 AbstractSpimData asd =
-                        ((SourceAndConverterService.SpimDataInfo)SourceAndConverterServices.getSourceAndConverterService()
-                                .getMetadata(rootSac, SourceAndConverterService.SPIM_DATA_INFO)).asd;
+                        ((SourceService.SpimDataInfo)SourceServices.getSourceService()
+                                .getMetadata(rootSac, SourceService.SPIM_DATA_INFO)).asd;
 
-                int viewSetupId = ((SourceAndConverterService.SpimDataInfo)SourceAndConverterServices.getSourceAndConverterService()
-                        .getMetadata(rootSac, SourceAndConverterService.SPIM_DATA_INFO)).setupId;
+                int viewSetupId = ((SourceService.SpimDataInfo)SourceServices.getSourceService()
+                        .getMetadata(rootSac, SourceService.SPIM_DATA_INFO)).setupId;
 
                 BasicViewSetup bvs = (BasicViewSetup) asd.getSequenceDescription().getViewSetups().get(viewSetupId);
 
@@ -624,8 +624,8 @@ public class SliceSources {
 
     protected void appendRegistration(Registration<SourceAndConverter<?>[]> reg) {
         //TODO: ALWAYS KEEP MIRROR ON TOP!
-        if (reg instanceof RealTransformSourceAndConverterRegistration) {
-            RealTransformSourceAndConverterRegistration sreg = (RealTransformSourceAndConverterRegistration) reg;
+        if (reg instanceof RealTransformSourceRegistration) {
+            RealTransformSourceRegistration sreg = (RealTransformSourceRegistration) reg;
             if (!(sreg.getRealTransform() instanceof BoundedRealTransform)) {
                 if (sreg.getRealTransform() instanceof InvertibleRealTransform) {
                     BoundedRealTransform brt = new BoundedRealTransform((InvertibleRealTransform) sreg.getRealTransform(), si);
@@ -870,7 +870,7 @@ public class SliceSources {
         labelImageBeingComputed = true;
 
         // 0 - slicing model : empty source but properly defined in space and resolution
-        SourceAndConverter singleSliceModel = new EmptySourceAndConverterCreator("SlicingModel", at3D,
+        SourceAndConverter singleSliceModel = new EmptySourceCreator("SlicingModel", at3D,
                 mp.nPixX,
                 mp.nPixY,
                 1
@@ -887,7 +887,7 @@ public class SliceSources {
                 mp.reslicedAtlas.nonExtendedSlicedSources[mp.reslicedAtlas.getLabelSourceIndex()]; // By convention the label image is the last one
 
         sac = resampler.apply(sac);
-        sac = SourceTransformHelper.createNewTransformedSourceAndConverter(translateZ, new SourceAndConverterAndTimeRange(sac, 0));
+        sac = SourceTransformHelper.createNewTransformedSourceAndConverter(translateZ, new SourceAndTimeRange(sac, 0));
 
         Map<SourceAndConverter<T>, Integer> mapSacToMml = new HashMap<>();
         mapSacToMml.put(sac, 0);
@@ -915,7 +915,7 @@ public class SliceSources {
         sac = mp.reslicedAtlas.nonExtendedSlicedSources[mp.reslicedAtlas.getLeftRightSourceIndex()]; // Don't know why this is working
 
         sac = resampler.apply(sac);
-        sac = SourceTransformHelper.createNewTransformedSourceAndConverter(translateZ, new SourceAndConverterAndTimeRange(sac, 0));
+        sac = SourceTransformHelper.createNewTransformedSourceAndConverter(translateZ, new SourceAndTimeRange(sac, 0));
 
         mapSacToMml = new HashMap<>();
         mapSacToMml.put(sac, 0);
@@ -1200,7 +1200,7 @@ public class SliceSources {
 
         // No wrapping ?
         for (SourceAndConverter<?> source: original_sacs) {
-            if (SourceAndConverterServices.getSourceAndConverterService().getMetadata(source, "SPIMDATA") == null) {
+            if (SourceServices.getSourceService().getMetadata(source, "SPIMDATA") == null) {
                 logger.info("Slice "+this+" is not directly a QuPath project entry. It could have been transformed before being imported in ABBA");
                 return false;
             }
@@ -1614,10 +1614,10 @@ public class SliceSources {
     public String getInfo() {
         String sliceInfo = "";
 
-        SourceAndConverter rootSac = SourceAndConverterInspector.getRootSourceAndConverter(original_sacs[0]);
+        SourceAndConverter rootSac = SourceInspector.getRootSourceAndConverter(original_sacs[0]);
 
-        if (SourceAndConverterServices.getSourceAndConverterService()
-                .getMetadata(rootSac, SourceAndConverterService.SPIM_DATA_INFO)==null) {
+        if (SourceServices.getSourceService()
+                .getMetadata(rootSac, SourceService.SPIM_DATA_INFO)==null) {
             sliceInfo+="No information available";
         } else {
             if (QuPathBdvHelper.isSourceLinkedToQuPath(original_sacs[0])) {
@@ -1818,7 +1818,7 @@ public class SliceSources {
         // Let's do the stuff
         Source<?> model = getModelWithGridSize(voxelSpacingInMicrometer);
 
-        SourceAndConverter<?> modelSac = SourceAndConverterHelper.createSourceAndConverter(model);
+        SourceAndConverter<?> modelSac = SourceHelper.createSourceAndConverter(model);
 
         registered_sacs = new SourceAndConverter[nChannels]; // Compulsory or the push is useless!
 
@@ -1833,8 +1833,8 @@ public class SliceSources {
 
     public void setAlphaSources() {
         for (SourceAndConverter sac: registered_sacs) {
-            SourceAndConverterServices
-                    .getSourceAndConverterService()
+            SourceServices
+                    .getSourceService()
                     .register(sac);
             if (alphaSource!=null) {
                 AlphaSourceHelper.setAlphaSource(sac, alphaSource);

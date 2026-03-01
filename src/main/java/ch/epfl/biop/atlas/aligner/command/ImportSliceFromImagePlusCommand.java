@@ -8,7 +8,7 @@ import mpicbg.spim.data.generic.AbstractSpimData;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
+import sc.fiji.bdvpg.scijava.services.SourceService;
 
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Import>ABBA - Import Current ImageJ Window",
@@ -26,16 +26,16 @@ public class ImportSliceFromImagePlusCommand implements Command {
     ImagePlus image;
 
     @Parameter
-    SourceAndConverterService sac_service;
+    SourceService sac_service;
 
     @Override
     public void run() {
 
         AbstractSpimData<?> asd = ImagePlusToSpimData.getSpimData(image);
         sac_service.register(asd);
-        sac_service.setSpimDataName(asd, image.getTitle());
+        sac_service.setDatasetName(asd, image.getTitle());
 
-        SourceAndConverter[] sacs = sac_service.getSourceAndConverterFromSpimdata(asd).toArray(new SourceAndConverter[0]);
+        SourceAndConverter[] sacs = sac_service.getSourcesFromDataset(asd).toArray(new SourceAndConverter[0]);
 
         mp.createSlice(sacs, slice_axis_mm);
     }

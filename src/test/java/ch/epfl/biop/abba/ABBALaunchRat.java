@@ -10,7 +10,7 @@ import ch.epfl.biop.atlas.struct.Atlas;
 import loci.common.DebugTools;
 import net.imagej.ImageJ;
 import net.imagej.patcher.LegacyInjector;
-import sc.fiji.bdvpg.services.SourceAndConverterServices;
+import sc.fiji.bdvpg.services.SourceServices;
 
 public class ABBALaunchRat {
     static {
@@ -27,7 +27,7 @@ public class ABBALaunchRat {
                 .run(ABBAStartCommand.class, true,
                         "ba", ratAtlas).get().getOutput("mp"));
 
-        BdvHandle bdvh = SourceAndConverterServices.getBdvDisplayService().getNewBdv();
+        BdvHandle bdvh = SourceServices.getBdvDisplayService().getNewBdv();
 
         BdvMultislicePositionerView view = new BdvMultislicePositionerView(mp, bdvh);
 

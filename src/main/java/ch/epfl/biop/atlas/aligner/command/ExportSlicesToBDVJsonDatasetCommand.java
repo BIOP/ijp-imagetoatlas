@@ -8,9 +8,9 @@ import org.scijava.Context;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
-import sc.fiji.bdvpg.services.SourceAndConverterServiceSaver;
-import sc.fiji.bdvpg.sourceandconverter.transform.SourceAffineTransformer;
+import sc.fiji.bdvpg.scijava.services.SourceService;
+import sc.fiji.bdvpg.services.SourceServiceSaver;
+import sc.fiji.bdvpg.source.transform.SourceAffineTransformer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +35,7 @@ public class ExportSlicesToBDVJsonDatasetCommand implements Command {
     Context ctx;
 
     @Parameter
-    SourceAndConverterService sac_service;
+    SourceService sac_service;
 
     @Override
     public void run() {
@@ -58,7 +58,7 @@ public class ExportSlicesToBDVJsonDatasetCommand implements Command {
                     sacs.add(source);
                 }
             });
-            new SourceAndConverterServiceSaver(file, ctx, sacs).run();
+            new SourceServiceSaver(file, ctx, sacs).run();
             mp.infoMessageForUser.accept("","Saved!");
         }
     }

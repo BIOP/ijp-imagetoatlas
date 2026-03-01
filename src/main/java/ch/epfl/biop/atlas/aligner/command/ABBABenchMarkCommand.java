@@ -21,8 +21,9 @@ import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.task.Task;
 import org.scijava.task.TaskService;
-import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
-import sc.fiji.bdvpg.scijava.services.ui.SourceAndConverterServiceUI;
+import sc.fiji.bdvpg.scijava.services.SourceService;
+import sc.fiji.bdvpg.scijava.services.tree.SourceTree;
+import sc.fiji.bdvpg.scijava.services.tree.SourceTreeModel;//.SourceServiceUI;
 
 import java.io.File;
 import java.time.LocalDateTime;
@@ -53,7 +54,7 @@ public class ABBABenchMarkCommand implements Command {
     CommandService cs;
 
     @Parameter
-    SourceAndConverterService source_service;
+    SourceService source_service;
 
     @Parameter(label = "Use graphical user interface")
     boolean use_gui;
@@ -121,7 +122,7 @@ public class ABBABenchMarkCommand implements Command {
                     "split_rgb_channels", false,
                     "plane_origin_convention", "[TOP LEFT]").get();
 
-            SourceAndConverterServiceUI treeUI = source_service.getUI();
+            SourceTree treeUI = source_service.tree();
             List<SourceAndConverter<?>[]> groupedSources = new ArrayList<>();
             treeUI.getRoot().child("gerbi-omero-project").child("ImageName").children().forEach(imageNameNode -> {
                 SourceAndConverter<?>[] sources = imageNameNode.sources();

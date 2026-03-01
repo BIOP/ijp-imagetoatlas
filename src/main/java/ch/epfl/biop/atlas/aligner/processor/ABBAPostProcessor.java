@@ -9,7 +9,7 @@ import ch.epfl.biop.atlas.mouse.allen.ccfv3p1.command.AllenBrainAdultMouseAtlasC
 import ch.epfl.biop.atlas.mouse.allen.ccfv3p1asr.command.AllenBrainAdultMouseAtlasCCF2017v3p1ASRCommand;
 import ch.epfl.biop.atlas.scijava.AtlasChooserCommand;
 import ch.epfl.biop.bdv.img.omero.command.OmeroConnectCommand;
-import ch.epfl.biop.scijava.command.bdv.userdefinedregion.GetUserRectangleCommand;
+import ch.epfl.biop.command.view.region.GetUserRectangleCommand;
 import org.scijava.Priority;
 import org.scijava.command.CommandInfo;
 import org.scijava.command.DynamicCommandInfo;

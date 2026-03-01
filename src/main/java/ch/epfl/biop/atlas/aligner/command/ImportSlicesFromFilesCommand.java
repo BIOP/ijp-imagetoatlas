@@ -10,7 +10,7 @@ import org.scijava.command.Command;
 import org.scijava.command.CommandService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
+import sc.fiji.bdvpg.scijava.services.SourceService;
 
 import java.io.File;
 import java.util.List;
@@ -45,7 +45,7 @@ public class ImportSlicesFromFilesCommand implements Command {
     CommandService command_service;
 
     @Parameter
-    SourceAndConverterService sac_service;
+    SourceService sac_service;
 
     @Override
     public void run() {
@@ -65,7 +65,7 @@ public class ImportSlicesFromFilesCommand implements Command {
                             .getOutput("spimdata");
 
             SourceAndConverter[] sacs =
-                    sac_service.getSourceAndConverterFromSpimdata(spimdata)
+                    sac_service.getSourcesFromDataset(spimdata)
                             .toArray(new SourceAndConverter[0]);
 
             List<SliceSources> slices = mp.createSlice(sacs, slice_axis_initial_mm, increment_between_slices_mm, Tile.class, new Tile(-1));

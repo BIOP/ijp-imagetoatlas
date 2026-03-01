@@ -1,9 +1,9 @@
 package ch.epfl.biop.atlas.aligner.command;
 
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
-import ch.epfl.biop.sourceandconverter.processor.SourcesChannelsSelect;
-import ch.epfl.biop.sourceandconverter.processor.SourcesProcessor;
-import ch.epfl.biop.sourceandconverter.processor.SourcesProcessorHelper;
+import ch.epfl.biop.source.processor.SourcesChannelsSelect;
+import ch.epfl.biop.source.processor.SourcesProcessor;
+import ch.epfl.biop.source.processor.SourcesProcessorHelper;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;

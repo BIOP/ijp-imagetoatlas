@@ -12,10 +12,10 @@ import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.atlas.aligner.UnMirrorSliceAction;
 import ch.epfl.biop.atlas.struct.Atlas;
 import ch.epfl.biop.kheops.ometiff.OMETiffExporter;
-import ch.epfl.biop.sourceandconverter.SourceHelper;
-import ch.epfl.biop.sourceandconverter.processor.SourcesChannelsSelect;
-import ch.epfl.biop.sourceandconverter.processor.SourcesProcessor;
-import ch.epfl.biop.sourceandconverter.processor.SourcesProcessorHelper;
+import ch.epfl.biop.source.SourceHelper;
+import ch.epfl.biop.source.processor.SourcesChannelsSelect;
+import ch.epfl.biop.source.processor.SourcesProcessor;
+import ch.epfl.biop.source.processor.SourcesProcessorHelper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import ij.IJ;
@@ -34,8 +34,8 @@ import org.scijava.plugin.Plugin;
 import org.scijava.task.Task;
 import org.scijava.task.TaskService;
 import org.scijava.widget.Button;
-import sc.fiji.bdvpg.services.SourceAndConverterServices;
-import sc.fiji.bdvpg.sourceandconverter.transform.SourceResampler;
+import sc.fiji.bdvpg.services.SourceServices;
+import sc.fiji.bdvpg.source.transform.SourceResampler;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -348,11 +348,11 @@ public class ExportStdZipStateCommand implements Command {
             ctx.getService(ObjectService.class).removeObject(mpDS);
 
             // Remove all sources - TODO : make this more specific!
-            SourceAndConverterServices
-                    .getSourceAndConverterService()
+            SourceServices
+                    .getSourceService()
                     .remove(
-                            SourceAndConverterServices
-                                    .getSourceAndConverterService().getSourceAndConverters().toArray(new SourceAndConverter[0])
+                            SourceServices
+                                    .getSourceService().getSources().toArray(new SourceAndConverter[0])
                     );
 
             zipAll.start();

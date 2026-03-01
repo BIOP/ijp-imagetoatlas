@@ -5,7 +5,7 @@ import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.atlas.aligner.SliceToImagePlus;
 import ch.epfl.biop.atlas.aligner.gui.bdv.ABBABdvViewPrefs;
-import ch.epfl.biop.sourceandconverter.processor.SourcesProcessor;
+import ch.epfl.biop.source.processor.SourcesProcessor;
 import ij.ImagePlus;
 
 import java.awt.*;

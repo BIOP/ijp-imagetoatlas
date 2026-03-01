@@ -1,10 +1,10 @@
 package ch.epfl.biop.atlas.aligner;
 
 import ch.epfl.biop.registration.plugin.RegistrationPluginHelper;
-import ch.epfl.biop.sourceandconverter.processor.SourcesIdentity;
-import ch.epfl.biop.sourceandconverter.processor.SourcesProcessComposer;
-import ch.epfl.biop.sourceandconverter.processor.SourcesProcessor;
-import ch.epfl.biop.sourceandconverter.processor.SourcesProcessorHelper;
+import ch.epfl.biop.source.processor.SourcesIdentity;
+import ch.epfl.biop.source.processor.SourcesProcessComposer;
+import ch.epfl.biop.source.processor.SourcesProcessor;
+import ch.epfl.biop.source.processor.SourcesProcessorHelper;
 
 import java.awt.*;
 import java.util.ArrayList;

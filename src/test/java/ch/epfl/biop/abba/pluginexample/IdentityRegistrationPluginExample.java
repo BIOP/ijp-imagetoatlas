@@ -7,7 +7,7 @@ import ch.epfl.biop.java.utilities.roi.types.RealPointList;
 import net.imglib2.realtransform.RealTransform;
 import org.scijava.Context;
 import org.scijava.plugin.Plugin;
-import sc.fiji.bdvpg.sourceandconverter.importer.SourceAndConverterDuplicator;
+import sc.fiji.bdvpg.source.importer.SourceDuplicator;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -155,7 +155,7 @@ public class IdentityRegistrationPluginExample implements IRegistrationPlugin {
     @Override
     public SourceAndConverter<?>[] getTransformedImageMovingToFixed(SourceAndConverter<?>[] img) {
 
-        SourceAndConverterDuplicator duplicator = new SourceAndConverterDuplicator(null);
+        SourceDuplicator duplicator = new SourceDuplicator(null);
 
         SourceAndConverter[] out = new SourceAndConverter[img.length];
 

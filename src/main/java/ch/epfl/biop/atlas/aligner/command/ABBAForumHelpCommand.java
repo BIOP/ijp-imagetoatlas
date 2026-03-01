@@ -5,7 +5,7 @@ import bdv.util.BdvHandle;
 import bigwarp.BigWarp;
 import ch.epfl.biop.atlas.aligner.ABBAHelper;
 import ch.epfl.biop.bdv.img.bioformats.BioFormatsHelper;
-import ch.epfl.biop.sourceandconverter.register.Elastix2DSplineRegister;
+import ch.epfl.biop.source.register.Elastix2DSplineRegister;
 import ch.epfl.biop.wrappers.deepslice.DeepSlice;
 import ch.epfl.biop.wrappers.elastix.Elastix;
 import ch.epfl.biop.wrappers.elastix.ElastixTask;
@@ -20,7 +20,7 @@ import org.scijava.platform.PlatformService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.util.VersionUtils;
-import sc.fiji.bdvpg.services.SourceAndConverterServices;
+import sc.fiji.bdvpg.services.SourceServices;
 
 import java.io.File;
 import java.net.URL;
@@ -114,7 +114,7 @@ public class ABBAForumHelpCommand implements Command {
         config +="Bdv "+VersionUtils.getVersion(BigDataViewer.class)+nl;
         config +="Bdv Vistools "+VersionUtils.getVersion(BdvHandle.class)+nl;
         config +="Bdv Biop Tools "+VersionUtils.getVersion(Elastix2DSplineRegister.class)+nl;
-        config +="Bdv Playground "+VersionUtils.getVersion(SourceAndConverterServices.class)+nl;
+        config +="Bdv Playground "+VersionUtils.getVersion(SourceServices.class)+nl;
         config +="Biop Image Loader "+VersionUtils.getVersion(BioFormatsHelper.class)+nl;
         config +="Biop Wrappers "+VersionUtils.getVersion(ElastixTask.class)+nl;
         if (Elastix.exePath!=null) {

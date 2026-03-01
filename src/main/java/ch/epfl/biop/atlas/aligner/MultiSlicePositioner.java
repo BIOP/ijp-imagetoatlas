@@ -7,8 +7,8 @@ import ch.epfl.biop.registration.plugin.ExternalRegistrationPlugin;
 import ch.epfl.biop.registration.plugin.IRegistrationPlugin;
 import ch.epfl.biop.atlas.struct.Atlas;
 import ch.epfl.biop.registration.Registration;
-import ch.epfl.biop.sourceandconverter.processor.*;
-import ch.epfl.biop.sourceandconverter.processor.adapter.*;
+import ch.epfl.biop.source.processor.*;
+import ch.epfl.biop.source.processor.adapter.*;
 import com.google.gson.*;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import mpicbg.spim.data.generic.base.Entity;
@@ -25,10 +25,10 @@ import org.scijava.plugin.PluginService;
 import org.scijava.util.VersionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
-import sc.fiji.bdvpg.services.SourceAndConverterServiceLoader;
-import sc.fiji.bdvpg.services.SourceAndConverterServiceSaver;
-import sc.fiji.bdvpg.services.SourceAndConverterServices;
+import sc.fiji.bdvpg.scijava.services.SourceService;
+import sc.fiji.bdvpg.services.SourceServiceLoader;
+import sc.fiji.bdvpg.services.SourceServiceSaver;
+import sc.fiji.bdvpg.services.SourceServices;
 import sc.fiji.persist.RuntimeTypeAdapterFactory;
 import sc.fiji.persist.ScijavaGsonHelper;
 
@@ -57,7 +57,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import static sc.fiji.bdvpg.scijava.services.SourceAndConverterService.SPIM_DATA_INFO;
+import static sc.fiji.bdvpg.scijava.services.SourceService.SPIM_DATA_INFO;
 
 /**
  * All specific methods and fields dedicated to the multislice positioner
@@ -574,8 +574,8 @@ public class MultiSlicePositioner implements Closeable {
 
             Map<T, List<SourceAndConverter<?>>> sacsGroups =
                     sacs.stream().collect(Collectors.groupingBy(sac -> {
-                        if (SourceAndConverterServices.getSourceAndConverterService().getMetadata(sac, SPIM_DATA_INFO) != null) {
-                            SourceAndConverterService.SpimDataInfo sdi = (SourceAndConverterService.SpimDataInfo) SourceAndConverterServices.getSourceAndConverterService().getMetadata(sac, SPIM_DATA_INFO);
+                        if (SourceServices.getSourceService().getMetadata(sac, SPIM_DATA_INFO) != null) {
+                            SourceService.SpimDataInfo sdi = (SourceService.SpimDataInfo) SourceServices.getSourceService().getMetadata(sac, SPIM_DATA_INFO);
                             AbstractSpimData<AbstractSequenceDescription<BasicViewSetup, ?, ?>> asd = (AbstractSpimData<AbstractSequenceDescription<BasicViewSetup, ?, ?>>) sdi.asd;
                             BasicViewSetup bvs = asd.getSequenceDescription().getViewSetups().get(sdi.setupId);
                             if (bvs.getAttribute(attributeClass) == null) {
@@ -965,7 +965,7 @@ public class MultiSlicePositioner implements Closeable {
 
                 // Make sure the spimdata are all re-serialized in the target folder, using the useRelativePaths flag to true
 
-                SourceAndConverterServiceSaver sacss = new SourceAndConverterServiceSaver(sourcesFile,
+                SourceServiceSaver sacss = new SourceServiceSaver(sourcesFile,
                         this.scijavaCtx,
                         allSacs, true);
 
@@ -1101,8 +1101,8 @@ public class MultiSlicePositioner implements Closeable {
             unpack(stateFileAbba.getAbsolutePath(), tmpdir.getAbsolutePath());
             File sacsFile = new File(tmpdir, "sources.json");
 
-            SourceAndConverterServiceLoader sacsl =
-                    new SourceAndConverterServiceLoader(sacsFile.getAbsolutePath(),
+            SourceServiceLoader sacsl =
+                    new SourceServiceLoader(sacsFile.getAbsolutePath(),
                             sacsFile.getParent(), this.scijavaCtx, false, true);
             sacsl.run();
             List<SourceAndConverter> serialized_sources = new ArrayList<>();
@@ -1197,7 +1197,7 @@ public class MultiSlicePositioner implements Closeable {
                 return false;
             }
 
-            SourceAndConverterServiceLoader sacsl = new SourceAndConverterServiceLoader(sacsFile.getAbsolutePath(), sacsFile.getParent(), this.scijavaCtx, false);
+            SourceServiceLoader sacsl = new SourceServiceLoader(sacsFile.getAbsolutePath(), sacsFile.getParent(), this.scijavaCtx, false);
             try {
                 sacsl.run();
             } catch (Exception e) {

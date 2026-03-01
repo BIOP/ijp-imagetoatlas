@@ -14,7 +14,7 @@ import ch.epfl.biop.atlas.struct.Atlas;
 import ij.IJ;
 import ij.ImagePlus;
 import net.imagej.ImageJ;
-import sc.fiji.bdvpg.services.SourceAndConverterServices;
+import sc.fiji.bdvpg.services.SourceServices;
 
 import java.awt.*;
 
@@ -33,7 +33,7 @@ public class DemoRegistrationIJ1 {
                 .run(ABBAStartCommand.class, true,
                 "ba", mouseAtlas).get().getOutput("mp"));
 
-        BdvHandle bdvh = SourceAndConverterServices.getBdvDisplayService().getNewBdv();
+        BdvHandle bdvh = SourceServices.getBdvDisplayService().getNewBdv();
 
         BdvMultislicePositionerView view = new BdvMultislicePositionerView(mp, bdvh);
 

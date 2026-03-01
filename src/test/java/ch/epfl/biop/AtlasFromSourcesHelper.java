@@ -10,7 +10,7 @@ import ch.epfl.biop.bdv.img.imageplus.ImagePlusToSpimData;
 import ij.ImagePlus;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import net.imglib2.realtransform.AffineTransform3D;
-import sc.fiji.bdvpg.services.SourceAndConverterServices;
+import sc.fiji.bdvpg.services.SourceServices;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -140,21 +140,21 @@ public class AtlasFromSourcesHelper {
 
         AbstractSpimData<?> sd = ImagePlusToSpimData.getSpimData(image);
 
-        SourceAndConverterServices.getSourceAndConverterService()
+        SourceServices.getSourceService()
                 .register(sd);
 
-        List<SourceAndConverter<?>> structuralImages = SourceAndConverterServices
-                .getSourceAndConverterService()
-                .getSourceAndConverterFromSpimdata(sd);
+        List<SourceAndConverter<?>> structuralImages = SourceServices
+                .getSourceService()
+                .getSourcesFromDataset(sd);
 
         AbstractSpimData<?> sdLabel = ImagePlusToSpimData.getSpimData(image);
 
-        SourceAndConverterServices.getSourceAndConverterService()
+        SourceServices.getSourceService()
                 .register(sdLabel);
 
-        List<SourceAndConverter<?>> labelSource = SourceAndConverterServices
-                .getSourceAndConverterService()
-                .getSourceAndConverterFromSpimdata(sdLabel);
+        List<SourceAndConverter<?>> labelSource = SourceServices
+                .getSourceService()
+                .getSourcesFromDataset(sdLabel);
 
 
         AtlasMap map = fromSources(structuralImages.toArray(new SourceAndConverter[0]),

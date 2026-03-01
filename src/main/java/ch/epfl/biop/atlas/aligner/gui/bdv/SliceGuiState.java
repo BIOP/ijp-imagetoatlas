@@ -8,11 +8,11 @@ import bdv.viewer.SourceAndConverter;
 import bdv.viewer.render.DefaultMipmapOrdering;
 import bdv.viewer.render.MipmapOrdering;
 import ch.epfl.biop.atlas.aligner.SliceSources;
-import ch.epfl.biop.bdv.gui.graphicalhandle.CircleGraphicalHandle;
-import ch.epfl.biop.bdv.gui.graphicalhandle.GraphicalHandle;
-import ch.epfl.biop.bdv.gui.graphicalhandle.GraphicalHandleToolTip;
-import ch.epfl.biop.bdv.gui.graphicalhandle.SquareGraphicalHandle;
-import ch.epfl.biop.registration.sourceandconverter.affine.AffineTransformedSourceWrapperRegistration;
+import ch.epfl.biop.viewers.bdv.graphicalhandle.CircleGraphicalHandle;
+import ch.epfl.biop.viewers.bdv.graphicalhandle.GraphicalHandle;
+import ch.epfl.biop.viewers.bdv.graphicalhandle.GraphicalHandleToolTip;
+import ch.epfl.biop.viewers.bdv.graphicalhandle.SquareGraphicalHandle;
+import ch.epfl.biop.registration.source.affine.AffineTransformedSourceWrapperRegistration;
 import mpicbg.spim.data.sequence.VoxelDimensions;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealPoint;
@@ -23,8 +23,8 @@ import net.imglib2.type.numeric.NumericType;
 import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
-import sc.fiji.bdvpg.services.SourceAndConverterServices;
-import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
+import sc.fiji.bdvpg.services.SourceServices;
+import sc.fiji.bdvpg.source.SourceHelper;
 import spimdata.util.Displaysettings;
 
 import java.awt.EventQueue;
@@ -87,7 +87,7 @@ public class SliceGuiState {
 
         slicePositioner = new AffineTransformedSourceWrapperRegistration();
         sources_displayed = slicePositioner.getTransformedImageMovingToFixed(iniSources);
-        SourceAndConverterHelper.transferColorConverters(iniSources, sources_displayed);
+        SourceHelper.transferColorConverters(iniSources, sources_displayed);
 
         for (int i=0; i<nChannels; i++) {
             Displaysettings ds = new Displaysettings(-1);
@@ -219,13 +219,13 @@ public class SliceGuiState {
                         SourceAndConverter[] sources = sourcesToDisplay.toArray(new SourceAndConverter[0]);
 
                         for (SourceAndConverter<?> source : sources) {
-                            SourceAndConverterServices
-                                    .getSourceAndConverterService()
+                            SourceServices
+                                    .getSourceService()
                                     .register(source, "no tree"); // GUI lock!
                         }
 
                         if (!sourcesToDisplay.isEmpty()) {
-                            SourceAndConverterServices
+                            SourceServices
                                     .getBdvDisplayService()
                                     .show(bdvh, sourcesToDisplay.toArray(new SourceAndConverter[0]));
 

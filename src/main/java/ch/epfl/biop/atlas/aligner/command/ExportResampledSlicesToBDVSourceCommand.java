@@ -4,17 +4,17 @@ import bdv.util.source.fused.AlphaFusedResampledSource;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
-import ch.epfl.biop.sourceandconverter.EmptyMultiResolutionSourceAndConverterCreator;
-import ch.epfl.biop.sourceandconverter.SourceFuserAndResampler;
-import ch.epfl.biop.sourceandconverter.processor.SourcesChannelsSelect;
-import ch.epfl.biop.sourceandconverter.processor.SourcesProcessor;
-import ch.epfl.biop.sourceandconverter.processor.SourcesProcessorHelper;
+import ch.epfl.biop.source.EmptyMultiResolutionSourceCreator;
+import ch.epfl.biop.source.SourceFuserAndResampler;
+import ch.epfl.biop.source.processor.SourcesChannelsSelect;
+import ch.epfl.biop.source.processor.SourcesProcessor;
+import ch.epfl.biop.source.processor.SourcesProcessorHelper;
 import net.imglib2.realtransform.AffineTransform3D;
 import org.scijava.ItemIO;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import sc.fiji.bdvpg.sourceandconverter.transform.SourceAffineTransformer;
+import sc.fiji.bdvpg.source.transform.SourceAffineTransformer;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -179,12 +179,12 @@ public class ExportResampledSlicesToBDVSourceCommand implements Command {
 
         coord.set(m);
 
-        model = new EmptyMultiResolutionSourceAndConverterCreator("Model",
+        model = new EmptyMultiResolutionSourceCreator("Model",
                 coord, (long)(sizeX/(px_size_micron_x/1000.0)),
                 (long)(sizeY/(px_size_micron_y/1000.0)),
                 (long)(sizeZ/(px_size_micron_z/1000.0)), 1, downsample_x, downsample_y, downsample_z, resolution_levels).get();
 
-        //SourceAndConverterServices.getSourceAndConverterService().register(model);
+        //SourceServices.getSourceService().register(model);
 
         for (int iCh = 0; iCh<nChannels; iCh++) {
             final int iChannel = iCh;
@@ -195,7 +195,7 @@ public class ExportResampledSlicesToBDVSourceCommand implements Command {
                     .map(sources -> sources[iChannel])
                     .map(source -> new SourceAffineTransformer(at3D).apply(source))//sat)
                     /*.map(src -> {
-                        SourceAndConverterServices.getSourceAndConverterService()
+                        SourceServices.getSourceService()
                                 .register(AlphaSourceHelper.getOrBuildAlphaSource(src));
                         return src;
                     })*/

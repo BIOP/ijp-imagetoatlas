@@ -9,7 +9,7 @@ import ch.epfl.biop.atlas.mouse.allen.ccfv3p1.command.AllenBrainAdultMouseAtlasC
 import ch.epfl.biop.atlas.struct.Atlas;
 import loci.common.DebugTools;
 import net.imagej.ImageJ;
-import sc.fiji.bdvpg.services.SourceAndConverterServices;
+import sc.fiji.bdvpg.services.SourceServices;
 
 public class ABBALaunchMouse {
 
@@ -24,7 +24,7 @@ public class ABBALaunchMouse {
                 .run(ABBAStartCommand.class, true,
                         "ba", mouseAtlas).get().getOutput("mp"));
 
-        BdvHandle bdvh = SourceAndConverterServices.getBdvDisplayService().getNewBdv();
+        BdvHandle bdvh = SourceServices.getBdvDisplayService().getNewBdv();
 
         BdvMultislicePositionerView view = new BdvMultislicePositionerView(mp, bdvh);
 

@@ -85,8 +85,8 @@ import ch.epfl.biop.atlas.aligner.gui.bdv.card.SliceDefineROICommand;
 import ch.epfl.biop.atlas.aligner.gui.message.StartupMessageHandler;
 import ch.epfl.biop.atlas.aligner.plugin.ABBACommand;
 import ch.epfl.biop.atlas.struct.AtlasNode;
-import ch.epfl.biop.bdv.gui.graphicalhandle.GraphicalHandle;
-import ch.epfl.biop.bdv.gui.graphicalhandle.GraphicalHandleListener;
+import ch.epfl.biop.viewers.bdv.graphicalhandle.GraphicalHandle;
+import ch.epfl.biop.viewers.bdv.graphicalhandle.GraphicalHandleListener;
 import ch.epfl.biop.wrappers.deepslice.ij2commands.DeepSlicePrefsSet;
 import ch.epfl.biop.wrappers.ij2command.BiopWrappersSet;
 import com.google.gson.Gson;
@@ -122,12 +122,12 @@ import org.scijava.ui.swing.widget.SwingInputPanel;
 import org.scijava.widget.InputPanel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sc.fiji.bdvpg.bdv.BdvHandleHelper;
+import sc.fiji.bdvpg.viewers.bdv.BdvHandleHelper;
 import sc.fiji.bdvpg.scijava.BdvScijavaHelper;
 import sc.fiji.bdvpg.scijava.ScijavaSwingUI;
-import sc.fiji.bdvpg.scijava.services.ui.swingdnd.BdvTransferHandler;
-import sc.fiji.bdvpg.services.SourceAndConverterServices;
-import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
+import sc.fiji.bdvpg.scijava.services.tree.swingdnd.BdvTransferHandler;
+import sc.fiji.bdvpg.services.SourceServices;
+import sc.fiji.bdvpg.source.SourceHelper;
 import spimdata.util.Displaysettings;
 
 import javax.swing.ImageIcon;
@@ -599,7 +599,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             sacsToAppend.add(msp.getReslicedAtlas().extendedSlicedSources[i]);
             sacsToAppend.add(msp.getReslicedAtlas().nonExtendedSlicedSources[i]);
         }
-        SourceAndConverterServices.getBdvDisplayService()
+        SourceServices.getBdvDisplayService()
                 .show(bdvh, sacsToAppend.toArray(new SourceAndConverter[0]));
         bdvh.getViewerPanel().state().addSourcesToGroup(sacsToAppend, bdvh.getViewerPanel().state().getGroups().get(0));
 
@@ -647,14 +647,14 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                 new FinalInterval(new long[]{-boxSizeUm, -boxSizeUm, -boxSizeUm}, new long[]{boxSizeUm, boxSizeUm, boxSizeUm}),
                 new FloatType(), new AffineTransform3D(), "ROI");
 
-        SourceAndConverter<FloatType> roiSAC = SourceAndConverterHelper.createSourceAndConverter(roiSource);
-        SourceAndConverterServices.getSourceAndConverterService().register(roiSAC);
+        SourceAndConverter<FloatType> roiSAC = SourceHelper.createSourceAndConverter(roiSource);
+        SourceServices.getSourceService().register(roiSAC);
 
         IAlphaSource alpha = new WrappedIAlphaSource(roiSource);
 
         SourceAndConverter<FloatType> alpha_sac = new SourceAndConverter<>(alpha, new AlphaConverter());
 
-        SourceAndConverterServices.getSourceAndConverterService().setMetadata(roiSAC, ALPHA_SOURCE_KEY, alpha_sac);
+        SourceServices.getSourceService().setMetadata(roiSAC, ALPHA_SOURCE_KEY, alpha_sac);
 
         BdvStackSource<?> bss = BdvFunctions.show(roiSAC, BdvOptions.options().addTo(bdvh));
 
@@ -666,7 +666,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     private void addCleanUpHook() {
         // Close hook to try to release as many resources as possible -> proven avoiding mem leaks
         BdvHandleHelper.setBdvHandleCloseOperation(bdvh, msp.getContext().getService(CacheService.class),
-                SourceAndConverterServices.getBdvDisplayService(), false,
+                SourceServices.getBdvDisplayService(), false,
                 () -> {
                     logger.info("Closing multipositioner bdv window, releasing some resources.");
 
@@ -778,11 +778,11 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                     * */
 
                     // Remove all sources - TODO : make this more specific!
-                    SourceAndConverterServices
-                            .getSourceAndConverterService()
+                    SourceServices
+                            .getSourceService()
                             .remove(
-                                    SourceAndConverterServices
-                                            .getSourceAndConverterService().getSourceAndConverters().toArray(new SourceAndConverter[0])
+                                    SourceServices
+                                            .getSourceService().getSources().toArray(new SourceAndConverter[0])
                             );
 
                     //System.gc();
@@ -2562,7 +2562,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
          * @param sacs list of source and converter to import
          */
         @Override
-        public void importSourcesAndConverters(TransferSupport support, List<SourceAndConverter<?>> sacs) {
+        public void importSources(TransferSupport support, List<SourceAndConverter<?>> sacs) {
             double slicingAxisPosition = iSliceNoStep * msp.sizePixX * (int) msp.getReslicedAtlas().getStep();
             msp.createSlice(sacs.toArray(new SourceAndConverter[0]), slicingAxisPosition, msp.getAtlas().getMap().getAtlasPrecisionInMillimeter(), Tile.class, new Tile(-1));
         }

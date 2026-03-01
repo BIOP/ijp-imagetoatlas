@@ -11,9 +11,9 @@ import loci.common.DebugTools;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import net.imagej.ImageJ;
 import net.imglib2.realtransform.AffineTransform3D;
-import sc.fiji.bdvpg.services.SourceAndConverterServices;
-import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterAndTimeRange;
-import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
+import sc.fiji.bdvpg.services.SourceServices;
+import sc.fiji.bdvpg.source.SourceAndTimeRange;
+import sc.fiji.bdvpg.source.transform.SourceTransformHelper;
 
 import java.io.File;
 import java.io.FileReader;
@@ -47,9 +47,9 @@ public class QuickNiiRatDemo {
         ).get().getOutput("spimdata");
 
         // Retrieve sources from the spimdata
-        List<SourceAndConverter<?>> sources = SourceAndConverterServices
-                .getSourceAndConverterService()
-                .getSourceAndConverterFromSpimdata(asd);
+        List<SourceAndConverter<?>> sources = SourceServices
+                .getSourceService()
+                .getSourcesFromDataset(asd);
 
         for (int i = 0; i < sources.size(); i++) {
             QuickNIISeries.SliceInfo slice = series.slices.get(i);
@@ -60,14 +60,14 @@ public class QuickNiiRatDemo {
                     (double) source.getSpimSource().getSource(0, 0).dimension(1)/1000.);
 
             SourceTransformHelper.append(toCCFv3,
-                                new SourceAndConverterAndTimeRange(source, 0));
+                                new SourceAndTimeRange(source, 0));
 
         }
 
-        BdvHandle bdvh = SourceAndConverterServices.getBdvDisplayService().getNewBdv();
+        BdvHandle bdvh = SourceServices.getBdvDisplayService().getNewBdv();
 
-        SourceAndConverterServices.getBdvDisplayService().show(bdvh, ratAtlas.getMap().getStructuralImages().values().toArray(new SourceAndConverter[0]));
-        SourceAndConverterServices.getBdvDisplayService().show(bdvh, sources.toArray(new SourceAndConverter[0]));
+        SourceServices.getBdvDisplayService().show(bdvh, ratAtlas.getMap().getStructuralImages().values().toArray(new SourceAndConverter[0]));
+        SourceServices.getBdvDisplayService().show(bdvh, sources.toArray(new SourceAndConverter[0]));
 
     }
 

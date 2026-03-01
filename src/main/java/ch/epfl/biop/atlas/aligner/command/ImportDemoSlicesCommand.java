@@ -11,8 +11,8 @@ import org.scijava.command.Command;
 import org.scijava.command.CommandService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
-import sc.fiji.bdvpg.scijava.services.ui.SourceAndConverterServiceUI;
+import sc.fiji.bdvpg.scijava.services.SourceService;
+import sc.fiji.bdvpg.scijava.services.tree.SourceTree;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -49,7 +49,7 @@ public class ImportDemoSlicesCommand implements Command {
     CommandService cs;
 
     @Parameter
-    SourceAndConverterService source_service;
+    SourceService source_service;
 
     @Override
     public void run() {
@@ -91,9 +91,9 @@ public class ImportDemoSlicesCommand implements Command {
                     "split_rgb_channels", false,
                     "plane_origin_convention", "[TOP LEFT]").get();
 
-            SourceAndConverterServiceUI treeUI = source_service.getUI();
+            SourceTree tree = source_service.tree();
             List<SourceAndConverter<?>[]> groupedSources = new ArrayList<>();
-            treeUI.getRoot().child("gerbi-omero-project").child("ImageName").children().forEach(imageNameNode -> {
+            tree.getRoot().child("gerbi-omero-project").child("ImageName").children().forEach(imageNameNode -> {
                 SourceAndConverter<?>[] sources = imageNameNode.sources();
                 groupedSources.add(sources);
             });

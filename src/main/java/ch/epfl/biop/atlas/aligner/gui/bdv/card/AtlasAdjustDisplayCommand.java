@@ -9,8 +9,8 @@ import org.scijava.command.InteractiveCommand;
 import org.scijava.module.MutableModuleItem;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
-import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
+import sc.fiji.bdvpg.scijava.services.SourceService;
+import sc.fiji.bdvpg.source.SourceHelper;
 
 import java.util.List;
 @SuppressWarnings("unused")
@@ -63,7 +63,7 @@ public class AtlasAdjustDisplayCommand extends InteractiveCommand implements
     // -- Runnable methods --
 
     @Parameter
-    SourceAndConverterService sac_service;
+    SourceService sac_service;
 
     @Override
     public void run() {
@@ -89,9 +89,9 @@ public class AtlasAdjustDisplayCommand extends InteractiveCommand implements
     public void modeChanged(BdvMultislicePositionerView mp, int oldMode, int newMode) {
 
         if (newMode == BdvMultislicePositionerView.REVIEW_MODE_INT) {
-            SourceAndConverterHelper.transferColorConverters(view.msp.getReslicedAtlas().extendedSlicedSources, view.msp.getReslicedAtlas().nonExtendedSlicedSources);
+            SourceHelper.transferColorConverters(view.msp.getReslicedAtlas().extendedSlicedSources, view.msp.getReslicedAtlas().nonExtendedSlicedSources);
         } else {
-            SourceAndConverterHelper.transferColorConverters(view.msp.getReslicedAtlas().nonExtendedSlicedSources, view.msp.getReslicedAtlas().extendedSlicedSources);
+            SourceHelper.transferColorConverters(view.msp.getReslicedAtlas().nonExtendedSlicedSources, view.msp.getReslicedAtlas().extendedSlicedSources);
         }
 
         for (SourceAndConverter<?> sac : view.msp.getReslicedAtlas().extendedSlicedSources) {

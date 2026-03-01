@@ -4,9 +4,9 @@ import bdv.tools.transformation.TransformedSource;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.struct.AtlasMap;
 import ch.epfl.biop.atlas.struct.Atlas;
-import ch.epfl.biop.sourceandconverter.EmptyMultiResolutionSourceAndConverterCreator;
-import ch.epfl.biop.registration.sourceandconverter.affine.AffineTransformedSourceWrapperRegistration;
-import ch.epfl.biop.sourceandconverter.transform.SourceMosaicZSlicer;
+import ch.epfl.biop.source.EmptyMultiResolutionSourceCreator;
+import ch.epfl.biop.registration.source.affine.AffineTransformedSourceWrapperRegistration;
+import ch.epfl.biop.source.transform.SourceMosaicZSlicer;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealInterval;
 import net.imglib2.RealPoint;
@@ -14,9 +14,9 @@ import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.util.LinAlgHelpers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sc.fiji.bdvpg.services.SourceAndConverterServices;
-import sc.fiji.bdvpg.sourceandconverter.transform.SourceAffineTransformer;
-import sc.fiji.bdvpg.sourceandconverter.transform.SourceResampler;
+import sc.fiji.bdvpg.services.SourceServices;
+import sc.fiji.bdvpg.source.transform.SourceAffineTransformer;
+import sc.fiji.bdvpg.source.transform.SourceResampler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -206,7 +206,7 @@ public class ReslicedAtlas implements RealInterval {
         // 0 - slicing model : empty source but properly defined in space and resolution
         AffineTransform3D m = new AffineTransform3D();
 
-        SourceAndConverter nonWrappedSlicingModel = new EmptyMultiResolutionSourceAndConverterCreator("SlicingModel", m,
+        SourceAndConverter nonWrappedSlicingModel = new EmptyMultiResolutionSourceCreator("SlicingModel", m,
                 nPixX,
                 nPixY,
                 nPixZ,
@@ -215,13 +215,13 @@ public class ReslicedAtlas implements RealInterval {
         ).get();
 
         if (slicingModel!=null) {
-            SourceAndConverterServices.getSourceAndConverterService().remove(slicingModel);
+            SourceServices.getSourceService().remove(slicingModel);
         }
 
         // Wrapped as TransformedSource to adjust slicing
         slicingModel = new SourceAffineTransformer(nonWrappedSlicingModel, slicingTransfom).get();
 
-        SourceAndConverterServices.getSourceAndConverterService().register(slicingModel);
+        SourceServices.getSourceService().register(slicingModel);
 
         AtlasMap map = ba.getMap();
 

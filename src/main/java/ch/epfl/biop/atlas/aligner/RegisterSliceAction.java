@@ -4,7 +4,7 @@ import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.gui.bdv.ABBABdvViewPrefs;
 import ch.epfl.biop.registration.plugin.RegistrationPluginHelper;
 import ch.epfl.biop.registration.Registration;
-import ch.epfl.biop.sourceandconverter.processor.SourcesProcessor;
+import ch.epfl.biop.source.processor.SourcesProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

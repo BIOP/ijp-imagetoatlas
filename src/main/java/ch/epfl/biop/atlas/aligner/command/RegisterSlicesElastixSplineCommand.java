@@ -1,7 +1,7 @@
 package ch.epfl.biop.atlas.aligner.command;
 
-import ch.epfl.biop.registration.sourceandconverter.spline.Elastix2DSplineRegistration;
-import ch.epfl.biop.scijava.command.source.register.ElastixHelper;
+import ch.epfl.biop.registration.source.spline.Elastix2DSplineRegistration;
+import ch.epfl.biop.command.register.ElastixHelper;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;

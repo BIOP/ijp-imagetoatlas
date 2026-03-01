@@ -5,7 +5,7 @@ import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.RegisterSliceAction;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.registration.Registration;
-import ch.epfl.biop.sourceandconverter.processor.SourcesProcessor;
+import ch.epfl.biop.source.processor.SourcesProcessor;
 import com.google.gson.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

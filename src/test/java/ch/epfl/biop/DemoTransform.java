@@ -11,8 +11,8 @@ import ch.epfl.biop.atlas.struct.Atlas;
 import net.imagej.ImageJ;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.realtransform.InvertibleRealTransformSequence;
-import sc.fiji.bdvpg.services.SourceAndConverterServices;
-import sc.fiji.bdvpg.sourceandconverter.transform.SourceAffineTransformer;
+import sc.fiji.bdvpg.services.SourceServices;
+import sc.fiji.bdvpg.source.transform.SourceAffineTransformer;
 
 import java.io.File;
 
@@ -28,7 +28,7 @@ public class DemoTransform {
                 .run(ABBAStartCommand.class, true,
                         "ba", mouseAtlas).get().getOutput("mp"));
 
-        BdvHandle bdvh = SourceAndConverterServices.getBdvDisplayService().getNewBdv();
+        BdvHandle bdvh = SourceServices.getBdvDisplayService().getNewBdv();
 
         BdvMultislicePositionerView view = new BdvMultislicePositionerView(mp, bdvh);
 
@@ -38,9 +38,9 @@ public class DemoTransform {
         SliceSources slice0 = mp.getSlices().get(0);
         SliceSources slice10 = mp.getSlices().get(10);
 
-        BdvHandle bdvh2 = SourceAndConverterServices.getBdvDisplayService().getNewBdv();
+        BdvHandle bdvh2 = SourceServices.getBdvDisplayService().getNewBdv();
 
-        SourceAndConverterServices
+        SourceServices
                 .getBdvDisplayService()
                 .show(bdvh2, slice0.getOriginalSources());
 
@@ -54,7 +54,7 @@ public class DemoTransform {
 
         for (SourceAndConverter sac : slice10.getRegisteredSources()) {
             SourceAndConverter source = sat.apply(sac);
-            SourceAndConverterServices
+            SourceServices
                     .getBdvDisplayService()
                     .show(bdvh2, source);
         }

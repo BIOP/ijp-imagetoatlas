@@ -2,7 +2,7 @@ package ch.epfl.biop;
 
 import ch.epfl.biop.atlas.scijava.AtlasChooserCommand;
 import ch.epfl.biop.atlas.struct.Atlas;
-import ch.epfl.biop.sourceandconverter.SourceVoxelProcessor;
+import ch.epfl.biop.source.SourceVoxelProcessor;
 import ij.ImagePlus;
 import org.scijava.command.Command;
 import org.scijava.object.ObjectService;

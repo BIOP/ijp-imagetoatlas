@@ -6,17 +6,17 @@ import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.atlas.aligner.command.ABBAStartCommand;
 import ch.epfl.biop.atlas.aligner.gui.bdv.BdvMultislicePositionerView;
+import ch.epfl.biop.bdv.img.imageplus.command.ImagePlusToBdvDatasetCommand;
 import ch.epfl.biop.registration.plugin.SimpleRegistrationWrapper;
 import ch.epfl.biop.atlas.mouse.allen.ccfv3p1.command.AllenBrainAdultMouseAtlasCCF2017v3p1Command;
 import ch.epfl.biop.atlas.struct.Atlas;
-import ch.epfl.biop.scijava.command.spimdata.SourceFromImagePlusCommand;
-import ch.epfl.biop.sourceandconverter.processor.SourcesChannelsSelect;
+import ch.epfl.biop.source.processor.SourcesChannelsSelect;
 import ij.IJ;
 import ij.ImagePlus;
 import net.imagej.ImageJ;
 import org.scijava.Context;
 import org.scijava.command.PyCommandBuilder;
-import sc.fiji.bdvpg.services.SourceAndConverterServices;
+import sc.fiji.bdvpg.services.SourceServices;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -50,16 +50,16 @@ public class TestExternalRegistrationPlugin {
         // --------------- Starting ABBA
         MultiSlicePositioner mp = (MultiSlicePositioner) ij.command().run(ABBAStartCommand.class, true).get().getOutput("mp");
 
-        BdvHandle bdvh = SourceAndConverterServices.getBdvDisplayService().getNewBdv();
+        BdvHandle bdvh = SourceServices.getBdvDisplayService().getNewBdv();
 
         BdvMultislicePositionerView view = new BdvMultislicePositionerView(mp, bdvh);
 
         ImagePlus demoSlice = IJ.openImage("src/test/resources/demoSlice.tif");
         demoSlice.show();
 
-        ij.command().run(SourceFromImagePlusCommand.class, true, "image", demoSlice).get();
+        ij.command().run(ImagePlusToBdvDatasetCommand.class, true, "image", demoSlice).get();
 
-        SourceAndConverter[] sac = ij.convert().convert(demoSlice.getTitle(), SourceAndConverter[].class);
+        SourceAndConverter<?>[] sac = ij.convert().convert(demoSlice.getTitle(), SourceAndConverter[].class);
 
         mp.createSlice(sac,4.5);
 

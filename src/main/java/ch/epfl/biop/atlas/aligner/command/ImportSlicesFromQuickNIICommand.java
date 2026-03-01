@@ -11,8 +11,8 @@ import ch.epfl.biop.bdv.img.bioformats.command.CreateBdvDatasetBioFormatsCommand
 import ch.epfl.biop.quicknii.QuickNIISeries;
 import ch.epfl.biop.registration.Registration;
 import ch.epfl.biop.registration.plugin.IRegistrationPlugin;
-import ch.epfl.biop.registration.sourceandconverter.affine.AffineRegistration;
-import ch.epfl.biop.sourceandconverter.processor.SourcesProcessorHelper;
+import ch.epfl.biop.registration.source.affine.AffineRegistration;
+import ch.epfl.biop.source.processor.SourcesProcessorHelper;
 import com.google.gson.Gson;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import mpicbg.spim.data.sequence.Tile;
@@ -25,9 +25,9 @@ import org.scijava.command.CommandService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.plugin.PluginService;
-import sc.fiji.bdvpg.scijava.services.SourceAndConverterService;
-import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterAndTimeRange;
-import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
+import sc.fiji.bdvpg.scijava.services.SourceService;
+import sc.fiji.bdvpg.source.SourceAndTimeRange;
+import sc.fiji.bdvpg.source.transform.SourceTransformHelper;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -62,7 +62,7 @@ public class ImportSlicesFromQuickNIICommand implements Command {
     CommandService command_service;
 
     @Parameter
-    SourceAndConverterService sac_service;
+    SourceService sac_service;
 
     @Parameter
     Context ctx;
@@ -91,16 +91,16 @@ public class ImportSlicesFromQuickNIICommand implements Command {
                             .getOutput("spimdata");
 
             SourceAndConverter[] sacs =
-                    sac_service.getSourceAndConverterFromSpimdata(spimdata)
+                    sac_service.getSourcesFromDataset(spimdata)
                             .toArray(new SourceAndConverter[0]);
 
             // Remove potential original calibration - pixel size will be 1mm
-            sac_service.getSourceAndConverterFromSpimdata(spimdata)
+            sac_service.getSourcesFromDataset(spimdata)
                             .forEach(source -> {
                                 AffineTransform3D reverseCalibration = new AffineTransform3D();
                                 source.getSpimSource().getSourceTransform(0,0,reverseCalibration);
                                 SourceTransformHelper.append(reverseCalibration.inverse(),
-                                        new SourceAndConverterAndTimeRange(source,0));
+                                        new SourceAndTimeRange(source,0));
                             });
 
             List<SliceSources> slices = mp.createSlice(sacs, 0, 1, Tile.class, new Tile(-1));

@@ -2,7 +2,7 @@ package ch.epfl.biop.atlas.aligner;
 
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.bdv.img.imageplus.ImagePlusHelper;
-import ch.epfl.biop.sourceandconverter.processor.SourcesProcessor;
+import ch.epfl.biop.source.processor.SourcesProcessor;
 import ij.ImagePlus;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.NativeType;
@@ -13,9 +13,9 @@ import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
-import sc.fiji.bdvpg.sourceandconverter.importer.EmptySourceAndConverterCreator;
-import sc.fiji.bdvpg.sourceandconverter.transform.SourceResampler;
+import sc.fiji.bdvpg.source.SourceHelper;
+import sc.fiji.bdvpg.source.importer.EmptySourceCreator;
+import sc.fiji.bdvpg.source.transform.SourceResampler;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -47,7 +47,7 @@ public class SliceToImagePlus {
 
             Map<SourceAndConverter<T>, Integer> mapMipmap = new HashMap<>();
             sourceList.forEach(src -> {
-                int mipmapLevel = SourceAndConverterHelper.bestLevel(src, timepoint, pixelSizeMillimeter);
+                int mipmapLevel = SourceHelper.bestLevel(src, timepoint, pixelSizeMillimeter);
                 logger.debug("export 1: Mipmap level chosen for source ["+src.getSpimSource().getName()+"] : "+mipmapLevel);
                 mapMipmap.put(resampledSourceList.get(sourceList.indexOf(src)), mipmapLevel);
             });
@@ -66,7 +66,7 @@ public class SliceToImagePlus {
 
         } else {
             SourceAndConverter source = resampledSourceList.get(0);
-            int mipmapLevel = SourceAndConverterHelper.bestLevel(sourceList.get(0), timepoint, pixelSizeMillimeter);
+            int mipmapLevel = SourceHelper.bestLevel(sourceList.get(0), timepoint, pixelSizeMillimeter);
             ImagePlus singleChannel = ImagePlusHelper.wrap(
                     source,
                     mipmapLevel,
@@ -101,7 +101,7 @@ public class SliceToImagePlus {
 
             Map<SourceAndConverter<T>, Integer> mapMipmap = new HashMap<>();
             sourceList.forEach(src -> {
-                int mipmapLevel = SourceAndConverterHelper.bestLevel(src, timepoint, pixelSizeMillimeter);
+                int mipmapLevel = SourceHelper.bestLevel(src, timepoint, pixelSizeMillimeter);
                 logger.debug("export 2: Mipmap level chosen for source ["+src.getSpimSource().getName()+"] : "+mipmapLevel);
                 mapMipmap.put(resampledSourceList.get(sourceList.indexOf(src)), mipmapLevel);
             });
@@ -120,7 +120,7 @@ public class SliceToImagePlus {
 
         } else {
             SourceAndConverter source = resampledSourceList.get(0);
-            int mipmapLevel = SourceAndConverterHelper.bestLevel(sourceList.get(0), timepoint, pixelSizeMillimeter);
+            int mipmapLevel = SourceHelper.bestLevel(sourceList.get(0), timepoint, pixelSizeMillimeter);
             ImagePlus singleChannel = ImagePlusHelper.wrap(
                     source,
                     mipmapLevel,
@@ -175,7 +175,7 @@ public class SliceToImagePlus {
 
             Map<SourceAndConverter<T>, Integer> mapMipmap = new HashMap<>();
             sourceList.forEach(src -> {
-                int mipmapLevel = SourceAndConverterHelper.bestLevel(src, timepoint, pixelSizeMillimeter);
+                int mipmapLevel = SourceHelper.bestLevel(src, timepoint, pixelSizeMillimeter);
                 if (!interpolate) mipmapLevel = 0; // For labels
                 logger.debug("export 3: Mipmap level chosen for source ["+src.getSpimSource().getName()+"] : "+mipmapLevel);
                 mapMipmap.put(resampledSourceList.get(sourceList.indexOf(src)), mipmapLevel);
@@ -195,7 +195,7 @@ public class SliceToImagePlus {
 
         } else {
             SourceAndConverter source = resampledSourceList.get(0);
-            int mipmapLevel = SourceAndConverterHelper.bestLevel(sourceList.get(0), timepoint, pixelSizeMillimeter);
+            int mipmapLevel = SourceHelper.bestLevel(sourceList.get(0), timepoint, pixelSizeMillimeter);
             ImagePlus singleChannel = ImagePlusHelper.wrap(
                     source,
                     mipmapLevel,
@@ -247,7 +247,7 @@ public class SliceToImagePlus {
 
         transform.set(at3D);
 
-        return new EmptySourceAndConverterCreator("model", at3D.inverse(), nPx, nPy, nPz).get();
+        return new EmptySourceCreator("model", at3D.inverse(), nPx, nPy, nPz).get();
     }
 
 }

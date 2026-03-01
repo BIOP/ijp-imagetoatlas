@@ -1,7 +1,7 @@
 package ch.epfl.biop.atlas.aligner.command;
 
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
-import ch.epfl.biop.sourceandconverter.exporter.IntRangeParser;
+import ch.epfl.biop.source.exporter.IntRangeParser;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;

@@ -28,8 +28,8 @@ import org.scijava.plugin.Plugin;
 import org.scijava.widget.Button;
 import sc.fiji.bdvpg.bdv.supplier.alpha.AlphaBdvSupplier;
 import sc.fiji.bdvpg.bdv.supplier.alpha.AlphaSerializableBdvOptions;
-import sc.fiji.bdvpg.services.SourceAndConverterServices;
-import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterHelper;
+import sc.fiji.bdvpg.services.SourceServices;
+import sc.fiji.bdvpg.source.SourceHelper;
 
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
@@ -146,14 +146,14 @@ public class ABBABiopBdvStartCommand implements Command, Initializable {
                         new FinalInterval(new long[]{-boxSizeUm, -boxSizeUm, -boxSizeUm}, new long[]{boxSizeUm, boxSizeUm, boxSizeUm}),
                         new UnsignedByteType(), new AffineTransform3D(), "Background");
 
-                SourceAndConverter<UnsignedByteType> whiteBGSAC = SourceAndConverterHelper.createSourceAndConverter(whiteBGSource);
-                SourceAndConverterServices.getSourceAndConverterService().register(whiteBGSAC);
+                SourceAndConverter<UnsignedByteType> whiteBGSAC = SourceHelper.createSourceAndConverter(whiteBGSource);
+                SourceServices.getSourceService().register(whiteBGSAC);
 
                 IAlphaSource alpha = new AlphaSourceRAI(whiteBGSAC.getSpimSource());
                 SourceAndConverter<FloatType> alpha_sac = new SourceAndConverter<>(alpha, new AlphaConverter());
-                SourceAndConverterServices.getSourceAndConverterService().setMetadata(whiteBGSAC, ALPHA_SOURCE_KEY, alpha_sac);
+                SourceServices.getSourceService().setMetadata(whiteBGSAC, ALPHA_SOURCE_KEY, alpha_sac);
 
-                SourceAndConverterServices.getBdvDisplayService().show(bdvh, whiteBGSAC);//.setMetadata(whiteBGSAC, ALPHA_SOURCE_KEY, alpha_sac);
+                SourceServices.getBdvDisplayService().show(bdvh, whiteBGSAC);//.setMetadata(whiteBGSAC, ALPHA_SOURCE_KEY, alpha_sac);
 
                 ABBATheme.setTheme(ABBATheme.createLightTheme());
             } else {

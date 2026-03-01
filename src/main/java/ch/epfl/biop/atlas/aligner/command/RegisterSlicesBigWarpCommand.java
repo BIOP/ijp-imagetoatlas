@@ -1,6 +1,6 @@
 package ch.epfl.biop.atlas.aligner.command;
 
-import ch.epfl.biop.registration.sourceandconverter.bigwarp.SacBigWarp2DRegistration;
+import ch.epfl.biop.registration.source.bigwarp.BigWarpSource2DRegistration;
 import org.scijava.command.Command;
 import org.scijava.plugin.Plugin;
 
@@ -15,7 +15,7 @@ import static ch.epfl.biop.atlas.aligner.ABBAHelper.getResource;
 public class RegisterSlicesBigWarpCommand extends RegistrationMultiChannelCommand {
 
     public void runValidated() {
-        mp.registerSelectedSlices(SacBigWarp2DRegistration.class, getFixedFilter(), getMovingFilter(), new HashMap<>());
+        mp.registerSelectedSlices(BigWarpSource2DRegistration.class, getFixedFilter(), getMovingFilter(), new HashMap<>());
     }
 
     @Override

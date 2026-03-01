@@ -7,9 +7,9 @@ import com.google.gson.Gson;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import net.imagej.ImageJ;
 import org.apache.commons.io.FileUtils;
-import sc.fiji.bdvpg.services.SourceAndConverterServices;
-import sc.fiji.bdvpg.sourceandconverter.SourceAndConverterAndTimeRange;
-import sc.fiji.bdvpg.sourceandconverter.transform.SourceTransformHelper;
+import sc.fiji.bdvpg.services.SourceServices;
+import sc.fiji.bdvpg.source.SourceAndTimeRange;
+import sc.fiji.bdvpg.source.transform.SourceTransformHelper;
 
 import java.io.File;
 import java.util.List;
@@ -45,9 +45,9 @@ public class QuickNiiDemoJSON {
                 ).get().getOutput("spimdata");
 
         // Retrieve sources from the spimdata
-        List<SourceAndConverter<?>> sources = SourceAndConverterServices
-                .getSourceAndConverterService()
-                .getSourceAndConverterFromSpimdata(asd);
+        List<SourceAndConverter<?>> sources = SourceServices
+                .getSourceService()
+                .getSourcesFromDataset(asd);
 
         // Transform sources according to anchoring
         for (int i=0; i<sources.size(); i++) {
@@ -55,7 +55,7 @@ public class QuickNiiDemoJSON {
             SourceAndConverter source = sources.get(i);
             SourceTransformHelper.append(QuickNIISeries.getTransform("Adult Mouse Brain - Allen Brain Atlas V3p1", slice,
                     (double) source.getSpimSource().getSource(0,0).dimension(0),
-                    (double) source.getSpimSource().getSource(0,0).dimension(1)), new SourceAndConverterAndTimeRange(source, 0));
+                    (double) source.getSpimSource().getSource(0,0).dimension(1)), new SourceAndTimeRange(source, 0));
         }
 
     }
