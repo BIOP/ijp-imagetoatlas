@@ -14,7 +14,7 @@ import ch.epfl.biop.atlas.struct.Atlas;
 import ij.IJ;
 import ij.ImagePlus;
 import net.imagej.ImageJ;
-import sc.fiji.bdvpg.services.SourceServices;
+import sc.fiji.bdvpg.service.SourceServices;
 
 import java.awt.*;
 

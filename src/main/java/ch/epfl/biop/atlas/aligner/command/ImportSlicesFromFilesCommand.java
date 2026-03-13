@@ -3,14 +3,14 @@ package ch.epfl.biop.atlas.aligner.command;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
-import ch.epfl.biop.bdv.img.bioformats.command.CreateBdvDatasetBioFormatsCommand;
+import ch.epfl.biop.bdv.img.bioformats.command.DatasetFromBioFormatsCreateCommand;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import mpicbg.spim.data.sequence.Tile;
 import org.scijava.command.Command;
 import org.scijava.command.CommandService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import sc.fiji.bdvpg.scijava.services.SourceService;
+import sc.fiji.bdvpg.scijava.service.SourceService;
 
 import java.io.File;
 import java.util.List;
@@ -52,7 +52,7 @@ public class ImportSlicesFromFilesCommand implements Command {
         try {
             AbstractSpimData<?> spimdata = (AbstractSpimData<?>)
                     command_service.run(
-                                CreateBdvDatasetBioFormatsCommand.class,
+                                DatasetFromBioFormatsCreateCommand.class,
                                 true, "files", files,
                                 "datasetname", datasetname,
                                 "unit", "MILLIMETER",

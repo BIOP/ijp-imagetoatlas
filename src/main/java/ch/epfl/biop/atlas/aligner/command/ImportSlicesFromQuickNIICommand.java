@@ -7,7 +7,7 @@ import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.RegisterSliceAction;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.atlas.aligner.action.MarkActionSequenceBatchAction;
-import ch.epfl.biop.bdv.img.bioformats.command.CreateBdvDatasetBioFormatsCommand;
+import ch.epfl.biop.bdv.img.bioformats.command.DatasetFromBioFormatsCreateCommand;
 import ch.epfl.biop.quicknii.QuickNIISeries;
 import ch.epfl.biop.registration.Registration;
 import ch.epfl.biop.registration.plugin.IRegistrationPlugin;
@@ -25,7 +25,7 @@ import org.scijava.command.CommandService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.plugin.PluginService;
-import sc.fiji.bdvpg.scijava.services.SourceService;
+import sc.fiji.bdvpg.scijava.service.SourceService;
 import sc.fiji.bdvpg.source.SourceAndTimeRange;
 import sc.fiji.bdvpg.source.transform.SourceTransformHelper;
 
@@ -78,7 +78,7 @@ public class ImportSlicesFromQuickNIICommand implements Command {
 
             AbstractSpimData<?> spimdata = (AbstractSpimData<?>)
                     command_service.run(
-                                    CreateBdvDatasetBioFormatsCommand.class,
+                                    DatasetFromBioFormatsCreateCommand.class,
                                     true, "files", imageFiles,
                                     "datasetname", quicknii_project.getName(),
                                     "unit", "MILLIMETER",

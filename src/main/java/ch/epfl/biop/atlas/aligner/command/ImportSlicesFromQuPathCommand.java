@@ -2,7 +2,7 @@ package ch.epfl.biop.atlas.aligner.command;
 
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
-import ch.epfl.biop.bdv.img.qupath.command.CreateBdvDatasetQuPathCommand;
+import ch.epfl.biop.bdv.img.qupath.command.DatasetFromQuPathCreateCommand;
 import ch.epfl.biop.bdv.img.qupath.entity.QuPathEntryIdEntity;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import org.scijava.ItemVisibility;
@@ -10,7 +10,7 @@ import org.scijava.command.Command;
 import org.scijava.command.CommandService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import sc.fiji.bdvpg.scijava.services.SourceService;
+import sc.fiji.bdvpg.scijava.service.SourceService;
 
 import java.io.File;
 import java.util.concurrent.ExecutionException;
@@ -50,7 +50,7 @@ public class ImportSlicesFromQuPathCommand implements Command {
                return;
             }
             AbstractSpimData<?> spimdata = (AbstractSpimData<?>) command_service
-                    .run(CreateBdvDatasetQuPathCommand.class,true,
+                    .run(DatasetFromQuPathCreateCommand.class,true,
                             "qupath_project", qupath_project,
                             "unit", "MILLIMETER").get().getOutput("spimData");
             SourceAndConverter<?>[] sacs =

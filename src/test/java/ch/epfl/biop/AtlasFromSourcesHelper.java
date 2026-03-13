@@ -10,7 +10,7 @@ import ch.epfl.biop.bdv.img.imageplus.ImagePlusToSpimData;
 import ij.ImagePlus;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import net.imglib2.realtransform.AffineTransform3D;
-import sc.fiji.bdvpg.services.SourceServices;
+import sc.fiji.bdvpg.service.SourceServices;
 
 import java.net.URL;
 import java.util.ArrayList;

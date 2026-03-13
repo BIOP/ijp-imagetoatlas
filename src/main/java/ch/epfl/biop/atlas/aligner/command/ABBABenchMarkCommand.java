@@ -10,7 +10,7 @@ import ch.epfl.biop.atlas.mouse.allen.ccfv3p1asr.command.AllenBrainAdultMouseAtl
 import ch.epfl.biop.atlas.struct.Atlas;
 import ch.epfl.biop.bdv.img.omero.OmeroChecker;
 import ch.epfl.biop.bdv.img.omero.command.OmeroConnectCommand;
-import ch.epfl.biop.bdv.img.qupath.command.CreateBdvDatasetQuPathCommand;
+import ch.epfl.biop.bdv.img.qupath.command.DatasetFromQuPathCreateCommand;
 import ij.IJ;
 import ij.Prefs;
 import org.scijava.Context;
@@ -21,9 +21,9 @@ import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.task.Task;
 import org.scijava.task.TaskService;
-import sc.fiji.bdvpg.scijava.services.SourceService;
-import sc.fiji.bdvpg.scijava.services.tree.SourceTree;
-import sc.fiji.bdvpg.scijava.services.tree.SourceTreeModel;//.SourceServiceUI;
+import sc.fiji.bdvpg.scijava.service.SourceService;
+import sc.fiji.bdvpg.scijava.service.tree.SourceTree;
+import sc.fiji.bdvpg.scijava.service.tree.SourceTreeModel;//.SourceServiceUI;
 
 import java.io.File;
 import java.time.LocalDateTime;
@@ -115,7 +115,7 @@ public class ABBABenchMarkCommand implements Command {
 
             task.setStatusMessage("Create BDV Dataset...");
             startTiming("Create BDV Dataset");
-            cs.run(CreateBdvDatasetQuPathCommand.class, true,
+            cs.run(DatasetFromQuPathCreateCommand.class, true,
                     "qupath_project", qupathProjectFile,
                     "datasetname", "gerbi-omero-project",
                     "unit", "MILLIMETER",
@@ -124,7 +124,7 @@ public class ABBABenchMarkCommand implements Command {
 
             SourceTree treeUI = source_service.tree();
             List<SourceAndConverter<?>[]> groupedSources = new ArrayList<>();
-            treeUI.getRoot().child("gerbi-omero-project").child("ImageName").children().forEach(imageNameNode -> {
+            treeUI.root().child("gerbi-omero-project").child("ImageName").children().forEach(imageNameNode -> {
                 SourceAndConverter<?>[] sources = imageNameNode.sources();
                 groupedSources.add(sources);
             });

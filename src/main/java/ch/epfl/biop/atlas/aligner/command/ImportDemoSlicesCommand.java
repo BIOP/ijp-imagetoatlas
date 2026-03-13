@@ -5,14 +5,14 @@ import ch.epfl.biop.atlas.aligner.ABBAHelper;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.bdv.img.omero.command.OmeroConnectCommand;
-import ch.epfl.biop.bdv.img.qupath.command.CreateBdvDatasetQuPathCommand;
+import ch.epfl.biop.bdv.img.qupath.command.DatasetFromQuPathCreateCommand;
 import org.scijava.ItemVisibility;
 import org.scijava.command.Command;
 import org.scijava.command.CommandService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import sc.fiji.bdvpg.scijava.services.SourceService;
-import sc.fiji.bdvpg.scijava.services.tree.SourceTree;
+import sc.fiji.bdvpg.scijava.service.SourceService;
+import sc.fiji.bdvpg.scijava.service.tree.SourceTree;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -84,7 +84,7 @@ public class ImportDemoSlicesCommand implements Command {
                     "password", "read-tim"
             ).get();
 
-            cs.run(CreateBdvDatasetQuPathCommand.class, true,
+            cs.run(DatasetFromQuPathCreateCommand.class, true,
                     "qupath_project", qupathProjectFile,
                     "datasetname", "gerbi-omero-project",
                     "unit", "MILLIMETER",
@@ -93,7 +93,7 @@ public class ImportDemoSlicesCommand implements Command {
 
             SourceTree tree = source_service.tree();
             List<SourceAndConverter<?>[]> groupedSources = new ArrayList<>();
-            tree.getRoot().child("gerbi-omero-project").child("ImageName").children().forEach(imageNameNode -> {
+            tree.root().child("gerbi-omero-project").child("ImageName").children().forEach(imageNameNode -> {
                 SourceAndConverter<?>[] sources = imageNameNode.sources();
                 groupedSources.add(sources);
             });

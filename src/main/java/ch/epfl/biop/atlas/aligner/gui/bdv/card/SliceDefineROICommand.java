@@ -2,7 +2,7 @@ package ch.epfl.biop.atlas.aligner.gui.bdv.card;
 
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.gui.bdv.BdvMultislicePositionerView;
-import ch.epfl.biop.command.view.region.GetUserRectangleCommand;
+import ch.epfl.biop.command.display.bdv.region.UserRectangleGetCommand;
 import net.imglib2.RealPoint;
 import org.scijava.Initializable;
 import org.scijava.command.Command;
@@ -86,7 +86,7 @@ public class SliceDefineROICommand extends InteractiveCommand implements Initial
             Thread t = new Thread(() -> {
                 try {
                     inProcess = true;
-                    CommandModule cm = cs.run(GetUserRectangleCommand.class, true,
+                    CommandModule cm = cs.run(UserRectangleGetCommand.class, true,
                                     "bdvh", view.getBdvh(),
                                     "time_out_in_ms", -1,
                                     "message_for_user", "Select the rectangular region of interest.")

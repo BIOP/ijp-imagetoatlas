@@ -10,7 +10,7 @@ import ch.epfl.biop.atlas.struct.Atlas;
 import loci.common.DebugTools;
 import net.imagej.ImageJ;
 import net.imagej.patcher.LegacyInjector;
-import sc.fiji.bdvpg.services.SourceServices;
+import sc.fiji.bdvpg.service.SourceServices;
 
 public class ABBALaunchRat {
     static {

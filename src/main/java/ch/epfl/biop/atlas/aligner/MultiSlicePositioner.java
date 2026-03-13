@@ -25,10 +25,10 @@ import org.scijava.plugin.PluginService;
 import org.scijava.util.VersionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sc.fiji.bdvpg.scijava.services.SourceService;
-import sc.fiji.bdvpg.services.SourceServiceLoader;
-import sc.fiji.bdvpg.services.SourceServiceSaver;
-import sc.fiji.bdvpg.services.SourceServices;
+import sc.fiji.bdvpg.scijava.service.SourceService;
+import sc.fiji.bdvpg.service.SourceServiceLoader;
+import sc.fiji.bdvpg.service.SourceServiceSaver;
+import sc.fiji.bdvpg.service.SourceServices;
 import sc.fiji.persist.RuntimeTypeAdapterFactory;
 import sc.fiji.persist.ScijavaGsonHelper;
 
@@ -57,7 +57,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import static sc.fiji.bdvpg.scijava.services.SourceService.SPIM_DATA_INFO;
+import static sc.fiji.bdvpg.scijava.service.SourceService.SPIM_DATA_INFO;
 
 /**
  * All specific methods and fields dedicated to the multislice positioner

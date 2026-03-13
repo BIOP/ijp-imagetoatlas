@@ -11,7 +11,7 @@ import ch.epfl.biop.atlas.struct.Atlas;
 import net.imagej.ImageJ;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.realtransform.InvertibleRealTransformSequence;
-import sc.fiji.bdvpg.services.SourceServices;
+import sc.fiji.bdvpg.service.SourceServices;
 import sc.fiji.bdvpg.source.transform.SourceAffineTransformer;
 
 import java.io.File;

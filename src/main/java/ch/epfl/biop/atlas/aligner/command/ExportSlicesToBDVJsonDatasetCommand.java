@@ -8,8 +8,8 @@ import org.scijava.Context;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import sc.fiji.bdvpg.scijava.services.SourceService;
-import sc.fiji.bdvpg.services.SourceServiceSaver;
+import sc.fiji.bdvpg.scijava.service.SourceService;
+import sc.fiji.bdvpg.service.SourceServiceSaver;
 import sc.fiji.bdvpg.source.transform.SourceAffineTransformer;
 
 import java.util.ArrayList;

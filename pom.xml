@@ -5,13 +5,13 @@
 	<parent>
 		<groupId>org.scijava</groupId>
 		<artifactId>pom-scijava</artifactId>
-		<version>43.0.0</version>
+		<version>40.0.0</version>
 		<relativePath />
 	</parent>
 
 	<groupId>ch.epfl.biop</groupId>
 	<artifactId>ImageToAtlasRegister</artifactId>
-	<version>0.11.2-SNAPSHOT</version>
+	<version>0.20.0-SNAPSHOT</version>
 
 	<name>Plugin To Register Images to Atlases</name>
 	<description>Collection of tools to register images to atlases in Fiji.</description>
@@ -107,9 +107,9 @@
 		<main-class>ch.epfl.biop.abba.ABBALaunchMouse</main-class>
 
 		<!-- bdv playground related dependencies -->
-		<bigdataviewer-playground.version>0.18.0-SNAPSHOT</bigdataviewer-playground.version>
-		<bigdataviewer-image-loaders.version>0.12.3-SNAPSHOT</bigdataviewer-image-loaders.version>
-		<bigdataviewer-biop-tools.version>0.16.1-SNAPSHOT</bigdataviewer-biop-tools.version>
+		<bigdataviewer-playground.version>0.20.2</bigdataviewer-playground.version>
+		<bigdataviewer-image-loaders.version>0.20.1</bigdataviewer-image-loaders.version>
+		<bigdataviewer-biop-tools.version>0.20.4</bigdataviewer-biop-tools.version>
 		<bigdataviewer-selector.version>0.2.8</bigdataviewer-selector.version>
 		<ijl-utilities-wrappers.version>0.12.0</ijl-utilities-wrappers.version>
 
@@ -117,7 +117,7 @@
 		<leastsquares.version>1.0.0</leastsquares.version>
 
 		<!-- ABBA specific -->
-		<atlas.version>0.3.3-SNAPSHOT</atlas.version>
+		<atlas.version>0.3.4-SNAPSHOT</atlas.version>
 		<oshi-core.version>5.5.1</oshi-core.version>
 
 		<!--because xml deserialization with JAXB is not included in Java 11, and we prepare migrating to Java 11 -->

@@ -17,8 +17,8 @@ import org.scijava.object.ObjectService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.widget.Button;
-import sc.fiji.bdvpg.viewers.bdv.supplier.DefaultBdvSupplier;
-import sc.fiji.bdvpg.viewers.bdv.supplier.SerializableBdvOptions;
+import sc.fiji.bdvpg.viewer.bdv.supplier.DefaultBdvSupplier;
+import sc.fiji.bdvpg.viewer.bdv.supplier.SerializableBdvOptions;
 
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;

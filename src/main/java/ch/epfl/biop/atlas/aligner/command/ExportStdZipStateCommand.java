@@ -34,7 +34,7 @@ import org.scijava.plugin.Plugin;
 import org.scijava.task.Task;
 import org.scijava.task.TaskService;
 import org.scijava.widget.Button;
-import sc.fiji.bdvpg.services.SourceServices;
+import sc.fiji.bdvpg.service.SourceServices;
 import sc.fiji.bdvpg.source.transform.SourceResampler;
 
 import java.io.File;

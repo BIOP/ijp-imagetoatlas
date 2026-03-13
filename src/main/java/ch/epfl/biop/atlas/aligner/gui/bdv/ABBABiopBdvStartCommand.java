@@ -28,7 +28,7 @@ import org.scijava.plugin.Plugin;
 import org.scijava.widget.Button;
 import sc.fiji.bdvpg.bdv.supplier.alpha.AlphaBdvSupplier;
 import sc.fiji.bdvpg.bdv.supplier.alpha.AlphaSerializableBdvOptions;
-import sc.fiji.bdvpg.services.SourceServices;
+import sc.fiji.bdvpg.service.SourceServices;
 import sc.fiji.bdvpg.source.SourceHelper;
 
 import javax.swing.JCheckBox;

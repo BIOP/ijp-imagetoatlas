@@ -14,7 +14,7 @@ import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.util.LinAlgHelpers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sc.fiji.bdvpg.services.SourceServices;
+import sc.fiji.bdvpg.service.SourceServices;
 import sc.fiji.bdvpg.source.transform.SourceAffineTransformer;
 import sc.fiji.bdvpg.source.transform.SourceResampler;
 

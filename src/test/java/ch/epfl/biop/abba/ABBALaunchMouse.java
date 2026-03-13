@@ -9,7 +9,7 @@ import ch.epfl.biop.atlas.mouse.allen.ccfv3p1.command.AllenBrainAdultMouseAtlasC
 import ch.epfl.biop.atlas.struct.Atlas;
 import loci.common.DebugTools;
 import net.imagej.ImageJ;
-import sc.fiji.bdvpg.services.SourceServices;
+import sc.fiji.bdvpg.service.SourceServices;
 
 public class ABBALaunchMouse {
 
