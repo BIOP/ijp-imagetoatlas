@@ -128,6 +128,9 @@
 		<reflections.version>0.10.2</reflections.version>
 		<pyimagej-scijava-command.version>0.2.1</pyimagej-scijava-command.version>
 
+        <!-- appose runner for DeepSlice -->
+        <appose.version>0.11.0</appose.version>
+
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>sign,deploy-to-scijava</releaseProfiles>
 
@@ -212,6 +215,12 @@
 			<artifactId>atlas</artifactId>
 			<version>${atlas.version}</version>
 		</dependency>
+
+        <dependency>
+            <groupId>org.apposed</groupId>
+            <artifactId>appose</artifactId>
+            <version>${appose.version}</version>
+        </dependency>
 
 		<!-- test dependencies -->
 
