@@ -179,9 +179,9 @@ public class AtlasFromSourcesHelper {
                 imageKeys.add(source.getSpimSource().getName());
                 keyToImage.put(source.getSpimSource().getName(), source);
             }
-            keyToImage.put("X", AtlasHelper.getCoordinateSac(0, "X"));
-            keyToImage.put("Y", AtlasHelper.getCoordinateSac(1, "Y"));
-            keyToImage.put("Z", AtlasHelper.getCoordinateSac(2, "Z"));
+            keyToImage.put("X", AtlasHelper.getCoordinateSource(0, "X"));
+            keyToImage.put("Y", AtlasHelper.getCoordinateSource(1, "Y"));
+            keyToImage.put("Z", AtlasHelper.getCoordinateSource(2, "Z"));
             keyToImage.put("Left Right", label);
 
             imageKeys.add("X");
