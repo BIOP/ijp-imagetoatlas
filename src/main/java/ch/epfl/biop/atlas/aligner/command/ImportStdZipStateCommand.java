@@ -87,9 +87,25 @@ public class ImportStdZipStateCommand implements Command {
                 System.err.println("Error during deserialisation of meta.json file");
                 return;
             }
-            System.out.println("Opening atlas: "+meta.atlas_name);
 
-            Atlas atlas = (Atlas) ctx.getService(ModuleService.class).run(ctx.getService(CommandService.class).getCommand(AtlasChooserCommand.class), true,"choice", meta.atlas_name).get().getOutput("atlas");
+            System.out.println("Opening atlas: " + meta.atlas_name);
+
+            String principalName;
+            String additionalNames = "";
+            if (meta.atlas_name.contains("+")) {
+                String[] parts = meta.atlas_name.split("\\+", 2);
+                principalName = parts[0];
+                additionalNames = parts[1].replace("+", ",");
+            } else {
+                principalName = meta.atlas_name;
+            }
+
+            Atlas atlas = (Atlas) ctx.getService(ModuleService.class)
+                    .run(ctx.getService(CommandService.class).getCommand(AtlasChooserCommand.class),
+                            true,
+                            "choice", principalName,
+                            "additionalAtlases", additionalNames)
+                    .get().getOutput("atlas");
 
             System.out.println("Creating BDV mp instance");
 

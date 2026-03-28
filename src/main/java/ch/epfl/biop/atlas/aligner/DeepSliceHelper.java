@@ -17,23 +17,57 @@ import java.util.function.Supplier;
 public class DeepSliceHelper {
 
     public static void addJavaAtlases() {
-        DeepSliceHelper.addMouseCompatibleAtlas("Adult Mouse Brain - Allen Brain Atlas V3");
-        DeepSliceHelper.addMouseCompatibleAtlas("Adult Mouse Brain - Allen Brain Atlas V3p1");
-        DeepSliceHelper.addMouseCompatibleAtlas("allen_mouse_10um_java");
-        DeepSliceHelper.addRatCompatibleAtlas("Rat - Waxholm Sprague Dawley V4");
-        DeepSliceHelper.addRatCompatibleAtlas("Rat - Waxholm Sprague Dawley V4p2");
-        DeepSliceHelper.addRatCompatibleAtlas("whs_sd_rat_39um_java");
+        DeepSliceHelper.addMouseCompatibleAtlas(
+                "Adult Mouse Brain - Allen Brain Atlas V3",
+                "Adult Mouse Brain - Allen Brain Atlas V3p1",
+                "allen_mouse_10um_java",
+                "example_mouse_100um",
+                "allen_mouse_10um",
+                "allen_mouse_25um",
+                "allen_mouse_50um",
+                "allen_mouse_100um",
+                "kim_mouse_10um",
+                "kim_mouse_25um",
+                "kim_mouse_50um",
+                "kim_mouse_100um",
+                "osten_mouse_10um",
+                "osten_mouse_25um",
+                "osten_mouse_50um",
+                "osten_mouse_100um",
+                "perens_lsfm_mouse_20um",
+                "kim_dev_mouse_stp_10um",
+                "kim_dev_mouse_idisco_10um",
+                "kim_dev_mouse_mri_a0_10um",
+                "kim_dev_mouse_mri_adc_10um",
+                "kim_dev_mouse_mri_dwi_10um",
+                "kim_dev_mouse_mri_fa_10um",
+                "kim_dev_mouse_mri_mtr_10um",
+                "kim_dev_mouse_mri_t2_10um",
+                "allen_mouse_bluebrain_barrels_10um",
+                "allen_mouse_bluebrain_barrels_25um",
+                "princeton_mouse_20um");
+
+        DeepSliceHelper.addRatCompatibleAtlas(
+                "Rat - Waxholm Sprague Dawley V4",
+                "Rat - Waxholm Sprague Dawley V4p2",
+                "whs_sd_rat_39um_java",
+                "whs_sd_rat_39um");
+
     }
 
     final private static List<String> atlasNameMouseCompatible = new ArrayList<>();
     final private static List<String> atlasNameRatCompatible = new ArrayList<>();
 
-    public synchronized static void addMouseCompatibleAtlas(String name) {
-        if(!atlasNameMouseCompatible.contains(name)) atlasNameMouseCompatible.add(name);
+    public synchronized static void addMouseCompatibleAtlas(String... names) {
+        for (String name: names) {
+            if(!atlasNameMouseCompatible.contains(name)) atlasNameMouseCompatible.add(name);
+        }
     }
 
-    public synchronized static void addRatCompatibleAtlas(String name) {
-        if(!atlasNameRatCompatible.contains(name)) atlasNameRatCompatible.add(name);
+    public synchronized static void addRatCompatibleAtlas(String... names) {
+        for (String name: names) {
+            if (!atlasNameRatCompatible.contains(name)) atlasNameRatCompatible.add(name);
+        }
     }
 
     /**
@@ -41,7 +75,8 @@ public class DeepSliceHelper {
      * @return true if the DeepSlice mouse model will be compatible with this atlas
      */
     public static boolean isDeepSliceMouseCompatible(String atlasName) {
-        return atlasNameMouseCompatible.contains(atlasName);
+        // To support composite atlases:
+        return atlasNameMouseCompatible.stream().anyMatch(atlasName::contains);
     }
 
     /**
@@ -50,7 +85,7 @@ public class DeepSliceHelper {
      * @return true if the DeepSlice mouse model will be compatible with this atlas
      */
     public static boolean isDeepSliceRatCompatible(String atlasName) {
-        return atlasNameRatCompatible.contains(atlasName);
+        return atlasNameRatCompatible.stream().anyMatch(atlasName::contains);// atlasNameRatCompatible.contains(atlasName);
     }
 
     public static File deepSliceLocalRunner(DeepSliceTaskSettings settings, File input_folder) {

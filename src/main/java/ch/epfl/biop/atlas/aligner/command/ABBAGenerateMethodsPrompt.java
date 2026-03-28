@@ -11,6 +11,7 @@ import ch.epfl.biop.atlas.mouse.allen.ccfv3p1.command.AllenBrainAdultMouseAtlasC
 import ch.epfl.biop.atlas.mouse.allen.ccfv3p1asr.command.AllenBrainAdultMouseAtlasCCF2017v3p1ASRCommand;
 import ch.epfl.biop.atlas.rat.waxholm.spraguedawley.v4p2.WaxholmSpragueDawleyRatV4p2Atlas;
 import ch.epfl.biop.atlas.rat.waxholm.spraguedawley.v4p2asr.command.WaxholmSpragueDawleyRatV4p2ASRCommand;
+import ch.epfl.biop.atlas.struct.AtlasHelper;
 import org.scijava.ItemIO;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
@@ -87,11 +88,11 @@ public class ABBAGenerateMethodsPrompt implements Command {
 
         int idx = 0;
         Set<String> uselessKeys = new HashSet<>();
-                uselessKeys.add("X");
-                uselessKeys.add("Y");
-                uselessKeys.add("Z");
-                uselessKeys.add("Label");
-                uselessKeys.add("Left Right");
+                uselessKeys.add(AtlasHelper.KEY_X);
+                uselessKeys.add(AtlasHelper.KEY_Y);
+                uselessKeys.add(AtlasHelper.KEY_Z);
+                uselessKeys.add(AtlasHelper.KEY_LABEL);
+                uselessKeys.add(AtlasHelper.KEY_LEFT_RIGHT);
         for (String key : mp.getAtlas().getMap().getImagesKeys()) {
             if (!uselessKeys.contains(key)) {
                 llm_prompt_for_methods += "* channel " + idx + ": " + key + "\n";
