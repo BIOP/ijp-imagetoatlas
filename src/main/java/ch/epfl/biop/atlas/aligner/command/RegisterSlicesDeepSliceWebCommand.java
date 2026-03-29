@@ -8,7 +8,7 @@ import org.scijava.ui.UIService;
 
 @SuppressWarnings("CanBeFinal")
 @Plugin(type = Command.class,
-        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>ABBA - DeepSlice Registration (Web)",
+        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>(Obsolete)>ABBA - DeepSlice Registration (Web)",
         description = "Uses Deepslice for affine in plane and axial registration of selected slices",
         iconPath = "/graphics/DeepSlice.png")
 public class RegisterSlicesDeepSliceWebCommand extends RegisterSlicesDeepSliceAbstractCommand {

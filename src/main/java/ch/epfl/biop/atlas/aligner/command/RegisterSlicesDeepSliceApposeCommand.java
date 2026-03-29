@@ -16,7 +16,7 @@ import java.io.File;
 
 @SuppressWarnings("CanBeFinal")
 @Plugin(type = Command.class,
-        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>ABBA - DeepSlice Registration (Local, Appose)",
+        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>ABBA - DeepSlice Registration",
         description = "Uses Deepslice for affine in plane and axial registration of selected slices",
         iconPath = "/graphics/DeepSlice.png")
 public class RegisterSlicesDeepSliceApposeCommand extends RegisterSlicesDeepSliceAbstractCommand {
