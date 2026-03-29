@@ -25,57 +25,7 @@ import ch.epfl.biop.atlas.aligner.RegisterSliceAction;
 import ch.epfl.biop.atlas.aligner.ReslicedAtlas;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.atlas.aligner.adapter.AlignerState;
-import ch.epfl.biop.atlas.aligner.command.ABBACheckForUpdateCommand;
-import ch.epfl.biop.atlas.aligner.command.ABBACiteInfoCommand;
-import ch.epfl.biop.atlas.aligner.command.ABBADocumentationCommand;
-import ch.epfl.biop.atlas.aligner.command.ABBAForumHelpCommand;
-import ch.epfl.biop.atlas.aligner.command.ExportStdZipStateCommand;
-import ch.epfl.biop.atlas.aligner.command.ImportDemoSlicesCommand;
-import ch.epfl.biop.atlas.aligner.command.ABBAStartLogCommand;
-import ch.epfl.biop.atlas.aligner.command.ABBAStateLoadCommand;
-import ch.epfl.biop.atlas.aligner.command.ABBAStateSaveCommand;
-import ch.epfl.biop.atlas.aligner.command.ABBAUserFeedbackCommand;
-import ch.epfl.biop.atlas.aligner.command.ABBAGenerateMethodsPrompt;
-import ch.epfl.biop.atlas.aligner.command.AtlasSlicingAdjusterCommand;
-import ch.epfl.biop.atlas.aligner.command.DeepSliceDocumentationCommand;
-import ch.epfl.biop.atlas.aligner.command.ExportAtlasToImageJCommand;
-import ch.epfl.biop.atlas.aligner.command.ExportDeformationFieldToImageJCommand;
-import ch.epfl.biop.atlas.aligner.command.ExportRegionsToRoiManagerCommand;
-import ch.epfl.biop.atlas.aligner.command.ExportRegionsToRoisetFileCommand;
-import ch.epfl.biop.atlas.aligner.command.ExportRegistrationToQuPathCommand;
-import ch.epfl.biop.atlas.aligner.command.ExportResampledSlicesToBDVSourceCommand;
-import ch.epfl.biop.atlas.aligner.command.ExportSlicesOriginalDataToImageJCommand;
-import ch.epfl.biop.atlas.aligner.command.ExportSlicesToBDVCommand;
-import ch.epfl.biop.atlas.aligner.command.ExportSlicesToBDVJsonDatasetCommand;
-import ch.epfl.biop.atlas.aligner.command.ExportSlicesToImageJCommand;
-import ch.epfl.biop.atlas.aligner.command.ExportSlicesToQuickNIIDatasetCommand;
-import ch.epfl.biop.atlas.aligner.command.ImportSliceFromImagePlusCommand;
-import ch.epfl.biop.atlas.aligner.command.ImportSliceFromSourcesCommand;
-import ch.epfl.biop.atlas.aligner.command.ImportSlicesFromFilesCommand;
-import ch.epfl.biop.atlas.aligner.command.ImportSlicesFromQuPathCommand;
-import ch.epfl.biop.atlas.aligner.command.ImportSlicesFromQuickNIICommand;
-import ch.epfl.biop.atlas.aligner.command.ImportStdZipStateCommand;
-import ch.epfl.biop.atlas.aligner.command.MirrorDoCommand;
-import ch.epfl.biop.atlas.aligner.command.MirrorUndoCommand;
-import ch.epfl.biop.atlas.aligner.command.RasterSlicesCommand;
-import ch.epfl.biop.atlas.aligner.command.RasterSlicesDeformationCommand;
-import ch.epfl.biop.atlas.aligner.command.RegisterSlicesBigWarpCommand;
-import ch.epfl.biop.atlas.aligner.command.RegisterSlicesCopyAndApplyCommand;
-import ch.epfl.biop.atlas.aligner.command.RegisterSlicesDeepSliceWebCommand;
-import ch.epfl.biop.atlas.aligner.command.RegisterSlicesDeepSliceLocalCommand;
-import ch.epfl.biop.atlas.aligner.command.RegisterSlicesEditLastCommand;
-import ch.epfl.biop.atlas.aligner.command.RegisterSlicesElastixAffineCommand;
-import ch.epfl.biop.atlas.aligner.command.RegisterSlicesElastixSplineCommand;
-import ch.epfl.biop.atlas.aligner.command.RegisterSlicesRemoveLastCommand;
-import ch.epfl.biop.atlas.aligner.command.ReindexSlicesCommand;
-import ch.epfl.biop.atlas.aligner.command.RotateSlicesCommand;
-import ch.epfl.biop.atlas.aligner.command.SetSlicesBackgroundCommand;
-import ch.epfl.biop.atlas.aligner.command.SetSlicesDeselectedCommand;
-import ch.epfl.biop.atlas.aligner.command.SetSlicesDisplayRangeCommand;
-import ch.epfl.biop.atlas.aligner.command.SetSlicesSelectedCommand;
-import ch.epfl.biop.atlas.aligner.command.SetSlicesThicknessCommand;
-import ch.epfl.biop.atlas.aligner.command.SetSlicesThicknessMatchNeighborsCommand;
-import ch.epfl.biop.atlas.aligner.command.SliceAffineTransformCommand;
+import ch.epfl.biop.atlas.aligner.command.*;
 import ch.epfl.biop.atlas.aligner.gui.MultiSliceContextMenuClickBehaviour;
 import ch.epfl.biop.atlas.aligner.gui.bdv.card.AtlasAdjustDisplayCommand;
 import ch.epfl.biop.atlas.aligner.gui.bdv.card.AtlasInfoPanel;
@@ -428,20 +378,18 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
             logger.debug("Installing DeepSlice Command for Mouse");
             BdvMenuHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Edit>Configuration>Set DeepSlice Env Path", DeepSlicePrefsSet.class);
-
+            BdvMenuHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Register>DeepSlice>DeepSlice Registration (Appose)", RegisterSlicesDeepSliceApposeCommand.class,  "mp", msp, "model", "mouse");
             BdvMenuHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Register>DeepSlice>DeepSlice Registration (Web)", RegisterSlicesDeepSliceWebCommand.class,  "mp", msp, "model", "mouse");
             BdvMenuHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Register>DeepSlice>DeepSlice Registration (Local)", RegisterSlicesDeepSliceLocalCommand.class,  "mp", msp, "model", "mouse");
-
         }
 
         if (DeepSliceHelper.isDeepSliceRatCompatible(msp.getReslicedAtlas().ba.getName())) {
 
             logger.debug("Installing DeepSlice Command for Rat");
-            BdvMenuHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Edit>Configuration>DeepSlice Setup...", DeepSlicePrefsSet.class, 0);
-
+            BdvMenuHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Edit>Configuration>DeepSlice Setup...", DeepSlicePrefsSet.class);
+            BdvMenuHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Register>DeepSlice>DeepSlice Registration (Appose)", RegisterSlicesDeepSliceApposeCommand.class,  "mp", msp, "model", "rat");
             BdvMenuHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Register>DeepSlice>DeepSlice Registration (Web)", RegisterSlicesDeepSliceWebCommand.class, "mp", msp, "model", "rat");
             BdvMenuHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Register>DeepSlice>DeepSlice Registration (Local)", RegisterSlicesDeepSliceLocalCommand.class, "mp", msp, "model", "rat");
-
         }
 
         BdvMenuHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Register>Affine>Rotate", RotateSlicesCommand.class, "mp", msp);
