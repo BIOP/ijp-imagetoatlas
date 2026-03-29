@@ -1,5 +1,6 @@
 package ch.epfl.biop.atlas.aligner;
 
+import ch.epfl.biop.atlas.scijava.AtlasChooserCommand;
 import ch.epfl.biop.wrappers.deepslice.DeepSliceTask;
 import ch.epfl.biop.wrappers.deepslice.DeepSliceTaskSettings;
 import ch.epfl.biop.wrappers.deepslice.DefaultDeepSliceTask;
@@ -10,9 +11,11 @@ import org.apposed.appose.Environment;
 import org.apposed.appose.Service;
 import org.scijava.platform.PlatformService;
 
+import javax.swing.*;
 import java.io.File;
 import java.net.URL;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -103,9 +106,12 @@ public class DeepSliceHelper {
         return new File(input_folder, "results.json");
     }
 
-    public static File deepSliceLocalApposeRunner(DeepSliceTaskSettings settings, File input_folder) {
+    public static File deepSliceLocalApposeRunner(DeepSliceTaskSettings settings, File input_folder, Consumer<String> listenEnv, Consumer<String> listenProgress, boolean headless) {
         ApposeDeepSliceTask task = new ApposeDeepSliceTask();
         task.setSettings(settings);
+        task.listenEnv(listenEnv);
+        task.listenProgress(listenProgress);
+        task.isHeadless(headless);
         try {
             task.run();
         } catch (Exception e) {
@@ -169,19 +175,84 @@ public class DeepSliceHelper {
         return new File(input_folder, "results.json");
     }
 
+    public static String DS_VERSION = "1.2.6";
 
     public static class ApposeDeepSliceTask extends DeepSliceTask {
 
-        public void run() throws Exception {
-            final Environment env = Appose
+        private Environment getEnv() throws Exception {
+            return Appose
                     .pixi()
                     .channels("conda-forge")
                     .conda( "appose", "python==3.12", "numpy")
-                    .pypi("DeepSlice==1.2.6")
-                    .name("deepslice-v0")
-                    //.base()
+                    .pypi("DeepSlice=="+DS_VERSION)
+                    .name("deepslice-v"+DS_VERSION)
                     .logDebug() // log problems
+                    .subscribeError(listenEnv)
+                    .subscribeOutput(listenEnv)
                     .build();
+        }
+
+        public void run() throws Exception {
+
+            AtomicReference<Environment> env_ref = new AtomicReference<>();
+
+            if (firstRun && !headless) {
+                // Display a spinning wheel like below, that ends when the env is built:
+
+                JDialog waitDialog;
+                waitDialog = new JDialog((java.awt.Frame) null, "Loading DeepSlice...", true);
+                JPanel panel = new JPanel();
+                panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+                panel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
+
+                JLabel infoLabel = new JLabel("<html>"
+                        + "<h2>Loading DeepSlice (v"+DeepSliceHelper.DS_VERSION+")</h2>"
+                        + "<p><img src='" + DeepSliceHelper.class.getClassLoader().getResource("graphics/DeepSlice.png") + "' width='80' height='80'></p>"
+                        + "<p>For more information, visit <a href='https://www.deepslice.org/'>https://www.deepslice.org/</a></p>"
+                        + "</html>", SwingConstants.CENTER);
+                infoLabel.setAlignmentX(java.awt.Component.CENTER_ALIGNMENT);
+                panel.add(infoLabel);
+
+                panel.add(Box.createVerticalStrut(15));
+
+                ImageIcon loadingIcon = new ImageIcon(AtlasChooserCommand.class.getClassLoader().getResource("graphics/loading.gif"));
+                loadingIcon.setImage(loadingIcon.getImage().getScaledInstance(64, 64, java.awt.Image.SCALE_DEFAULT));
+                JLabel waitLabel = new JLabel("Loading DeepSlice environment, please wait...", loadingIcon, SwingConstants.CENTER);
+                waitLabel.setAlignmentX(java.awt.Component.CENTER_ALIGNMENT);
+                panel.add(waitLabel);
+
+                waitDialog.getContentPane().add(panel);
+                waitDialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+                waitDialog.pack();
+                waitDialog.setLocationRelativeTo(null);
+
+                // SwingWorker runs registration in background;
+                // disposing the modal dialog unblocks setVisible(true) below
+                final JDialog dlg = waitDialog;
+                new SwingWorker<Void, Void>() {
+                    @Override
+                    protected Void doInBackground() throws Exception {
+                        env_ref.set(getEnv());
+                        return null;
+                    }
+                    @Override
+                    protected void done() {
+                        dlg.dispose();
+                    }
+                }.execute();
+
+                waitDialog.setVisible(true);
+            } else {
+                env_ref.set(getEnv());
+            }
+
+            firstRun = false;
+            final Environment env = env_ref.get();
+
+            if (env == null) {
+                listenEnv.accept("Could not build environment!");
+                throw new RuntimeException("Could not build DeepSlice environment");
+            }
 
             try (Service python = env.python().init(callImports())) {
                 final Map<String, Object> inputs = new HashMap<>();
@@ -196,7 +267,11 @@ public class DeepSliceHelper {
                         settings.use_enforce_index_spacing ? settings.enforce_index_spacing : null);
 
                 final Service.Task task = python.task(getScript(), inputs);
-                task.listen(evt -> System.out.println(evt.message));
+                task.listen((evt) -> {
+                    if (evt.message!=null) {
+                        listenProgress.accept(evt.message);
+                    }
+                });
                 task.start();
                 task.waitFor();
 
@@ -253,6 +328,25 @@ public class DeepSliceHelper {
                     + "\n"
                     + "task.outputs['output_path'] = filename\n"
                     + "task.update('done.')\n";
+        }
+
+        Consumer<String> listenEnv = (message) -> {};
+        Consumer<String> listenProgress = (message) -> {};
+
+        public void listenEnv(Consumer<String> listenEnv) {
+            this.listenEnv = listenEnv;
+        }
+
+        public void listenProgress(Consumer<String> listenProgress) {
+            this.listenProgress = listenProgress;
+        }
+
+        static boolean firstRun = true;
+
+        boolean headless;
+
+        public void isHeadless(boolean headless) {
+            this.headless = headless;
         }
     }
 }

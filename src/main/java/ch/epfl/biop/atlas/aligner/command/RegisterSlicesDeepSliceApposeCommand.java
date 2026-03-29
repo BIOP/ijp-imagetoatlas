@@ -5,6 +5,7 @@ import ch.epfl.biop.wrappers.deepslice.DeepSliceTaskSettings;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
+import org.scijava.ui.UIService;
 
 import java.io.File;
 
@@ -86,7 +87,17 @@ public class RegisterSlicesDeepSliceApposeCommand extends RegisterSlicesDeepSlic
                         settings.propagate_angles = false; // see https://github.com/BIOP/ijp-imagetoatlas/issues/214
                     }
                     settings.input_folder = input_folder.getAbsolutePath();
-                    File outDirectory =  DeepSliceHelper.deepSliceLocalApposeRunner(settings, input_folder);
+
+                    UIService uiService = ctx.getService(UIService.class);
+                    boolean headless = (uiService == null) || uiService.isHeadless();
+
+
+                    File outDirectory =
+                            DeepSliceHelper.deepSliceLocalApposeRunner(settings,
+                                    input_folder,
+                                    (message) -> mp.infoMessageForUser.accept("Appose DeepSlice Environment Installation...", message),
+                                    (message) -> mp.infoMessageForUser.accept("Appose DeepSlice Run", message),
+                                    headless);
                     settings.propagate_angles = pa; // restore
                     return outDirectory;
                 };
