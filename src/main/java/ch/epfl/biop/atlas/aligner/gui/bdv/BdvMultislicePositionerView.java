@@ -378,19 +378,19 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         if (DeepSliceHelper.isDeepSliceMouseCompatible(msp.getReslicedAtlas().ba.getName())) {
 
             logger.debug("Installing DeepSlice Command for Mouse");
-            BdvMenuHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Edit>Configuration>Set DeepSlice Env Path", DeepSlicePrefsSet.class);
-            BdvMenuHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Register>DeepSlice>DeepSlice Registration (Appose)", RegisterSlicesDeepSliceApposeCommand.class,  "mp", msp, "model", "mouse");
-            BdvMenuHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Register>DeepSlice>DeepSlice Registration (Web)", RegisterSlicesDeepSliceWebCommand.class,  "mp", msp, "model", "mouse");
-            BdvMenuHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Register>DeepSlice>DeepSlice Registration (Local)", RegisterSlicesDeepSliceLocalCommand.class,  "mp", msp, "model", "mouse");
+            BdvMenuHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Edit>Obsolete>Configuration>Set DeepSlice Env Path", DeepSlicePrefsSet.class);
+            BdvMenuHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Register>DeepSlice>DeepSlice Registration", RegisterSlicesDeepSliceApposeCommand.class,  "mp", msp, "model", "mouse");
+            BdvMenuHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Edit>Obsolete>DeepSlice>DeepSlice Registration (Web)", RegisterSlicesDeepSliceWebCommand.class,  "mp", msp, "model", "mouse");
+            BdvMenuHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Edit>Obsolete>DeepSlice>DeepSlice Registration (Local)", RegisterSlicesDeepSliceLocalCommand.class,  "mp", msp, "model", "mouse");
         }
 
         if (DeepSliceHelper.isDeepSliceRatCompatible(msp.getReslicedAtlas().ba.getName())) {
 
             logger.debug("Installing DeepSlice Command for Rat");
-            BdvMenuHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Edit>Configuration>DeepSlice Setup...", DeepSlicePrefsSet.class);
-            BdvMenuHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Register>DeepSlice>DeepSlice Registration (Appose)", RegisterSlicesDeepSliceApposeCommand.class,  "mp", msp, "model", "rat");
-            BdvMenuHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Register>DeepSlice>DeepSlice Registration (Web)", RegisterSlicesDeepSliceWebCommand.class, "mp", msp, "model", "rat");
-            BdvMenuHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Register>DeepSlice>DeepSlice Registration (Local)", RegisterSlicesDeepSliceLocalCommand.class, "mp", msp, "model", "rat");
+            BdvMenuHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Edit>Obsolete>Configuration>DeepSlice Setup...", DeepSlicePrefsSet.class);
+            BdvMenuHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Register>DeepSlice>DeepSlice Registration", RegisterSlicesDeepSliceApposeCommand.class,  "mp", msp, "model", "rat");
+            BdvMenuHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Edit>Obsolete>DeepSlice>DeepSlice Registration (Web)", RegisterSlicesDeepSliceWebCommand.class, "mp", msp, "model", "rat");
+            BdvMenuHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Edit>Obsolete>DeepSlice>DeepSlice Registration (Local)", RegisterSlicesDeepSliceLocalCommand.class, "mp", msp, "model", "rat");
         }
 
         BdvMenuHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Register>Affine>Rotate", RotateSlicesCommand.class, "mp", msp);

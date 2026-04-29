@@ -2,6 +2,7 @@ package ch.epfl.biop.atlas.aligner.command;
 
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.aligner.ABBAHelper;
+import ch.epfl.biop.atlas.aligner.DeleteSliceAction;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.atlas.aligner.gui.bdv.ABBABdvStartCommand;
@@ -23,7 +24,6 @@ import org.scijava.task.Task;
 import org.scijava.task.TaskService;
 import sc.fiji.bdvpg.scijava.service.SourceService;
 import sc.fiji.bdvpg.scijava.service.tree.SourceTree;
-import sc.fiji.bdvpg.scijava.service.tree.SourceTreeModel;//.SourceServiceUI;
 
 import java.io.File;
 import java.time.LocalDateTime;
@@ -41,7 +41,16 @@ public class ABBABenchMarkCommand implements Command {
     @Parameter
     String comment;
 
-    @Parameter(choices = {"25 sections", "97 sections"})
+    final static String SMALL_REMOTE = "25 sections (remote)";
+    final static String BIG_REMOTE = "97 sections (remote)";
+    final static String SMALL_LOCAL = "1 slide local (cached, local)";
+    final static String BIG_LOCAL = "97 sections (cached, local)";
+
+    @Parameter(choices = {
+            SMALL_REMOTE,
+            BIG_REMOTE,
+            SMALL_LOCAL,
+            BIG_LOCAL})
     String demo_dataset;
 
     @Parameter(description = "Slower when check - wait for all sections to have finished their registration steps before starting the next one.")
@@ -82,54 +91,9 @@ public class ABBABenchMarkCommand implements Command {
         // - Execution date
 
         Task task = taskService.createTask("ABBA Benchmark - "+demo_dataset+ " | ");
-        task.start();
+
         try {
-
-            File qupathProjectFile;
-
-            System.gc();
-            task.setStatusMessage("Download QuPath Project...");
-            startTiming("Download QuPath Project");
-            switch (demo_dataset) {
-                case "25 sections":
-                    qupathProjectFile = ABBAHelper.getTempQPProject("https://zenodo.org/records/14918378/files/abba-omero-gerbi-subset.zip");
-                    break;
-                case "97 sections":
-                    qupathProjectFile = ABBAHelper.getTempQPProject("https://zenodo.org/records/14918378/files/abba-omero-gerbi-full.zip");
-                    break;
-                default:
-                    throw new IllegalArgumentException("Demo dataset not recognized: " + demo_dataset);
-            }
-            endTiming("Download QuPath Project");
-
-            task.setStatusMessage("Connect to OMERO Server...");
-            startTiming("Connect to OMERO Server");
-            cs.run(OmeroConnectCommand.class, true,
-                    "host", "omero-tim.gerbi-gmb.de",
-                    "port", 4064,
-                    "username", "read-tim",
-                    "password", "read-tim"
-            ).get();
-            endTiming("Connect to OMERO Server");
-
-
-            task.setStatusMessage("Create BDV Dataset...");
-            startTiming("Create BDV Dataset");
-            cs.run(DatasetFromQuPathCreateCommand.class, true,
-                    "qupath_project", qupathProjectFile,
-                    "datasetname", "gerbi-omero-project",
-                    "unit", "MILLIMETER",
-                    "split_rgb_channels", false,
-                    "plane_origin_convention", "[TOP LEFT]").get();
-
-            SourceTree treeUI = source_service.tree();
-            List<SourceAndConverter<?>[]> groupedSources = new ArrayList<>();
-            treeUI.root().child("gerbi-omero-project").child("ImageName").children().forEach(imageNameNode -> {
-                SourceAndConverter<?>[] sources = imageNameNode.sources();
-                groupedSources.add(sources);
-            });
-            endTiming("Create BDV Dataset");
-
+            task.start();
 
             task.setStatusMessage("Load Atlas and Initialize Positioner...");
             startTiming("Load Atlas and Initialize Positioner");
@@ -155,16 +119,86 @@ public class ABBABenchMarkCommand implements Command {
             }
             endTiming("Load Atlas and Initialize Positioner");
 
+            System.gc();
+            task.setStatusMessage("Getting Data...");
+            startTiming("Getting Data");
 
-            task.setStatusMessage("Import Sources into ABBA...");
-            startTiming("Import Sources into ABBA");
-            for (int index = 0; index < groupedSources.size(); index++) {
-                cs.run(ImportSliceFromSourcesCommand.class, true,
-                        "mp", mp,
-                        "slice_axis_mm", 4.0 + index * 1.0, // False initial guess
-                        "sources", groupedSources.get(index)
+            if ((demo_dataset.equals(SMALL_REMOTE))||(demo_dataset.equals(BIG_REMOTE))) {
+                File qupathProjectFile;
+                switch (demo_dataset) {
+                    case SMALL_REMOTE:
+                        qupathProjectFile = ABBAHelper.getTempQPProject("https://zenodo.org/records/14918378/files/abba-omero-gerbi-subset.zip");
+                        break;
+                    case BIG_REMOTE:
+                        qupathProjectFile = ABBAHelper.getTempQPProject("https://zenodo.org/records/14918378/files/abba-omero-gerbi-full.zip");
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Demo dataset not recognized: " + demo_dataset);
+                }
+
+                task.setStatusMessage("Connect to OMERO Server...");
+                startTiming("Connect to OMERO Server");
+                cs.run(OmeroConnectCommand.class, true,
+                        "host", "omero-tim.gerbi-gmb.de",
+                        "port", 4064,
+                        "username", "read-tim",
+                        "password", "read-tim"
                 ).get();
+                endTiming("Connect to OMERO Server");
+
+
+                task.setStatusMessage("Create BDV Dataset...");
+                startTiming("Create BDV Dataset");
+                cs.run(DatasetFromQuPathCreateCommand.class, true,
+                        "qupath_project", qupathProjectFile,
+                        "datasetname", "gerbi-omero-project",
+                        "unit", "MILLIMETER",
+                        "split_rgb_channels", false,
+                        "plane_origin_convention", "[TOP LEFT]").get();
+
+                SourceTree treeUI = source_service.tree();
+                List<SourceAndConverter<?>[]> groupedSources = new ArrayList<>();
+                treeUI.root().child("gerbi-omero-project").child("ImageName").children().forEach(imageNameNode -> {
+                    SourceAndConverter<?>[] sources = imageNameNode.sources();
+                    groupedSources.add(sources);
+                });
+                endTiming("Create BDV Dataset");
+
+                task.setStatusMessage("Import Sources into ABBA...");
+                startTiming("Import Sources into ABBA");
+                for (int index = 0; index < groupedSources.size(); index++) {
+                    cs.run(ImportSliceFromSourcesCommand.class, true,
+                            "mp", mp,
+                            "slice_axis_mm", 4.0 + index * 1.0, // False initial guess
+                            "sources", groupedSources.get(index)
+                    ).get();
+                }
+            } else {
+                switch (demo_dataset) {
+                    case SMALL_LOCAL:
+                        cs.run(ImportDemoSlicesZENODOCommand.class, true,
+                                "mp", mp,
+                                "number_of_slides", 2
+                                ).get();
+                        break;
+                    case BIG_LOCAL:
+                        cs.run(ImportDemoSlicesZENODOCommand.class, true,
+                                "mp", mp,
+                                "number_of_slides", 7
+                        ).get();
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Demo dataset not recognized: " + demo_dataset);
+                }
+                // Removes label, overview and macro
+                mp.getSlices().forEach( slice -> {
+                    if (!slice.getName().contains("10x")) new DeleteSliceAction(mp, slice).runRequest();
+                });
             }
+            NOT WORKING!!
+
+            endTiming("Getting Data...");
+
 
             mp.getSlices().forEach(SliceSources::select);
             cs.run(SetSlicesDisplayRangeCommand.class, true,
