@@ -42,7 +42,9 @@ public class SetSlicesDisplayRangeCommand implements Command {
             List<Integer> indices = Arrays.stream(channels_csv.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
             slicesToModify.stream().forEach(slice -> {
                 for (int iChannel:indices) {
-                    slice.setDisplayRange(iChannel, display_min, display_max);
+                    if (iChannel<slice.nChannels) {
+                        slice.setDisplayRange(iChannel, display_min, display_max);
+                    }
                 }
             });
         } else {

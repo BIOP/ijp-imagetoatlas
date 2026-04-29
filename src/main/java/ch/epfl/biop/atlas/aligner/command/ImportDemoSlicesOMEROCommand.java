@@ -21,16 +21,16 @@ import java.util.List;
 import static ch.epfl.biop.atlas.aligner.ABBAHelper.getResource;
 
 @Plugin(type = Command.class,
-        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>ABBA - Open Demo Slices (Web)",
+        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>ABBA - Open Demo Slices From OMERO",
         description = "Open a set of demo brain sections",
-        iconPath = "/graphics/ImportDemoSlices.png")
-public class ImportDemoSlicesCommand implements Command {
+        iconPath = "/graphics/ImportDemoSlicesOMERO.png")
+public class ImportDemoSlicesOMEROCommand implements Command {
 
     //https://forum.image.sc/t/trends-in-microscopy-2023-omero-server/101652
     @Parameter(style = "message", visibility = ItemVisibility.MESSAGE)
     String message =  "<html>" +
             "<h1>Import Demo Slices</h1>\n" +
-            "    <p><img src='"+getResource("graphics/ImportDemoSlices.png")+"' width='80' height='80'></img></p>" +
+            "    <p><img src='"+getResource("graphics/ImportDemoSlicesOMERO.png")+"' width='80' height='80'></img></p>" +
             "    <p>These Demo slices are kindly hosted within the public German-BioImaging OMERO instance.</p>\n" +
             "    <p>For more information, please visit <a href=https://forum.image.sc/t/trends-in-microscopy-2023-omero-server/101652>https://forum.image.sc/t/trends-in-microscopy-2023-omero-server/101652</a> </p>\n" +
             "    <p>The QuPath project containing these slices can also be directly downloaded from <a href=https://zenodo.org/records/14918378>Zenodo.</a></p>"+
