@@ -198,6 +198,8 @@ public class MultiSlicePositioner implements Closeable {
      */
     public MultiSlicePositioner(Atlas biopAtlas, ReslicedAtlas reslicedAtlas, Context ctx) {
 
+        this.idx = MultiSlicePositioner.uniqueIdx.getAndIncrement();
+
         DeepSliceHelper.addJavaAtlases();
 
         logger.info("Creating MultiSlicePositioner instance");
@@ -1442,6 +1444,15 @@ public class MultiSlicePositioner implements Closeable {
             externalRegistrationPluginsUI.put(registrationTypeName, new ArrayList<>());
         }
         externalRegistrationPluginsUI.get(registrationTypeName).add(registrationUICommandName);
+    }
+
+    static AtomicInteger uniqueIdx = new AtomicInteger();
+
+    final int idx;
+
+    @Override
+    public String toString() {
+        return "ABBA Instance #"+idx;
     }
 
 }
