@@ -231,6 +231,12 @@
 			<scope>test</scope>
 		</dependency>
 
+		<!-- dependency> See https://github.com/imglib/imglib2-realtransform/issues/52
+			<groupId>net.imglib2</groupId>
+			<artifactId>imglib2-realtransform</artifactId>
+			<version>4.0.6-SNAPSHOT</version>
+		</dependency -->
+
 		<dependency>
 			<groupId>ch.epfl.biop</groupId>
 			<artifactId>pyimagej-scijava-command</artifactId>
