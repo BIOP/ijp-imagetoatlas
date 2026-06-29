@@ -1,7 +1,6 @@
 package ch.epfl.biop.atlas.aligner.command;
 
 import ch.epfl.biop.registration.source.spline.Elastix2DSplineRegistration;
-import ch.epfl.biop.command.register.ElastixHelper;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
@@ -44,8 +43,6 @@ public class RegisterSlicesElastixSplineCommand extends RegistrationMultiChannel
             validationError = true;
             return;
         }
-
-        ElastixHelper.checkOrSetLocal(this.mp.getContext());
 
         //mp.registerElastixSpline(getFixedFilter(), getMovingFilter(), nbControlPointsX, showIJ1Result);
         Map<String, Object> parameters = new HashMap<>();

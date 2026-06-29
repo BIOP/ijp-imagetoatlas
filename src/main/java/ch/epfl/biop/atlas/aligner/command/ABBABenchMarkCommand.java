@@ -195,9 +195,11 @@ public class ABBABenchMarkCommand implements Command {
                     if (!slice.getName().contains("10x")) new DeleteSliceAction(mp, slice).runRequest();
                 });
             }
-            NOT WORKING!!
 
-            endTiming("Getting Data...");
+            throw new RuntimeException("ABBA Benchmark currently not working");
+            //NOT WORKING!!
+
+            /*endTiming("Getting Data...");
 
 
             mp.getSlices().forEach(SliceSources::select);
@@ -307,7 +309,7 @@ public class ABBABenchMarkCommand implements Command {
             }
 
             report = getReport();
-            IJ.log(report);
+            IJ.log(report);*/
 
         } catch (Exception e) {
             throw new RuntimeException(e);

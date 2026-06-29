@@ -1,7 +1,6 @@
 package ch.epfl.biop.atlas.aligner.command;
 
 import ch.epfl.biop.registration.source.affine.Elastix2DAffineRegistration;
-import ch.epfl.biop.command.register.ElastixHelper;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
@@ -35,8 +34,6 @@ public class RegisterSlicesElastixAffineCommand extends RegistrationMultiChannel
             mp.errorMessageForUser.accept("Number of channels issue", "The number of slice channel(s) should be equal to the number of atlas channel(s).");
             return;
         }
-
-        ElastixHelper.checkOrSetLocal(this.mp.getContext());
 
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("show_image_registration", show_imageplus_registration_result);
