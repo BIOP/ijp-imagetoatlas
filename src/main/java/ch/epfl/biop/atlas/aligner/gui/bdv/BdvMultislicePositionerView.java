@@ -35,6 +35,7 @@ import ch.epfl.biop.atlas.aligner.gui.bdv.card.SliceDefineROICommand;
 import ch.epfl.biop.atlas.aligner.gui.message.StartupMessageHandler;
 import ch.epfl.biop.atlas.aligner.plugin.ABBACommand;
 import ch.epfl.biop.atlas.struct.AtlasNode;
+import ch.epfl.biop.viewer.bdv.BusyOverlay;
 import ch.epfl.biop.viewer.bdv.graphicalhandle.GraphicalHandle;
 import ch.epfl.biop.viewer.bdv.graphicalhandle.GraphicalHandleListener;
 import ch.epfl.biop.wrappers.deepslice.ij2commands.DeepSlicePrefsSet;
@@ -1113,6 +1114,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                         previousStateModification = current_msp.isModifiedSinceLastSave();
                         BdvHandleHelper.setWindowTitle(bdvh, getViewName());
                     }
+                    updateBusyOverlay(current_msp.getNumberOfTasks());
                     if (current_msp.getNumberOfTasks() > 0) {
                         if (bdvh != null) {
                             bdvh.getViewerPanel().getDisplay().repaint(); // OK
@@ -1135,6 +1137,19 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             }
         }
         logger.debug("Bdv view modification monitoring stopped");
+    }
+
+    /**
+     * Reflects the number of running tasks in the busy banner. Called from the monitoring
+     * thread: the overlay only stores volatile fields, so this never blocks, and never blocks
+     * the EDT which reads them back when painting.
+     *
+     * @param nTasks the number of tasks currently being performed
+     */
+    private void updateBusyOverlay(int nTasks) {
+        busyOverlay.setSpinnerColor(ABBABdvViewPrefs.task_counter_color); // follows the theme
+        busyOverlay.setBusy(nTasks > 0,
+                nTasks > 1 ? nTasks + " tasks running" : "1 task running");
     }
 
     public String getViewName() {
@@ -2028,16 +2043,19 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         }
     }
 
+    /**
+     * Banner telling the user that background tasks are running. The animation is derived from
+     * the clock by the overlay itself, no frame counter is needed here.
+     */
+    final BusyOverlay busyOverlay = new BusyOverlay();
+
     class InnerOverlay extends BdvOverlay {
-        int drawCounter = 0;
         @Override
         protected void draw(Graphics2D g) {
 
             // Enable antialiasing for this overlay
             enableAntialiasing(g);
 
-            drawCounter++;
-            drawCounter = drawCounter%21;
             // Gets a copy of the slices to avoid concurrent exception
             List<SliceSources> slicesCopy = msp.getSlices();
 
@@ -2104,31 +2122,12 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             int w = bdvh.getViewerPanel().getWidth();
             int h = bdvh.getViewerPanel().getHeight();
 
+            // Busy banner, top centered. Drawn last so that it stays on top of everything else.
+            // Its state is refreshed by modificationMonitor(), which also drives the repaints.
+            busyOverlay.setCanvasSize(w, h);
+            busyOverlay.drawOverlays(g);
+
             g.setColor(ABBABdvViewPrefs.task_counter_color);
-            g.setStroke(ABBABdvViewPrefs.task_counter_stroke);
-
-            if (msp.getNumberOfTasks() > 0) {
-                String text = "" + msp.getNumberOfTasks();
-                FontMetrics fm = g.getFontMetrics();
-                int textWidth = fm.stringWidth(text);
-                int textHeight = fm.getAscent(); // Use ascent for baseline alignment
-
-                // Center of the arc
-                int centerX = w - 54 + 25;
-                int centerY = h - 54 + 25;
-
-                // Calculate x and y for centered text
-                int x = centerX - textWidth / 2;
-                int y = centerY + textHeight / 2;
-
-                g.drawString(text, x, y);
-
-                if (drawCounter <= 10) {
-                    g.drawArc(w - 54, h - 54, 50, 50, 0, drawCounter * 36);
-                } else {
-                    g.drawArc(w - 54, h - 54, 50, 50, (drawCounter - 10) * 36, 360 - ((drawCounter - 10) * 36));
-                }
-            }
 
             if (msp.isModifiedSinceLastSave()) {
                 g.drawString("Modified since last save!", 5, h-15);
