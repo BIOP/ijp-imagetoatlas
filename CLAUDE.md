@@ -46,7 +46,7 @@ The `src/test/java` directory contains demo launchers and plugin examples rather
 ### CI Build
 The project uses SciJava's CI scripts:
 - `.github/build.sh` downloads and executes `ci-build.sh` from scijava-scripts
-- CI builds on Java 8 (Zulu distribution)
+- CI builds on Java 21 (Zulu distribution)
 - Deploys to SciJava Maven repository on tagged releases
 
 ## Architecture Overview
@@ -221,7 +221,7 @@ Each `SliceSources` contains:
 - `ch.epfl.biop.bigdataviewer-selector` - Source selection
 
 **Key Versions (see pom.xml):**
-- Java 8 target
+- Java 21 target (`scijava.jvm.version`)
 - bigdataviewer-playground: 0.13.0
 - atlas: 0.3.2
 

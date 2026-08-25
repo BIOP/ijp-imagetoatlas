@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.scijava</groupId>
 		<artifactId>pom-scijava</artifactId>
-		<version>40.0.0</version>
+		<version>45.1.0</version>
 		<relativePath />
 	</parent>
 
@@ -107,17 +107,17 @@
 		<main-class>ch.epfl.biop.abba.ABBALaunchMouse</main-class>
 
 		<!-- bdv playground related dependencies -->
-		<bigdataviewer-playground.version>0.21.0</bigdataviewer-playground.version>
-		<bigdataviewer-image-loaders.version>0.21.1</bigdataviewer-image-loaders.version>
-		<bigdataviewer-biop-tools.version>0.21.0</bigdataviewer-biop-tools.version>
-		<bigdataviewer-selector.version>0.2.8</bigdataviewer-selector.version>
+		<bigdataviewer-playground.version>0.23.1</bigdataviewer-playground.version>
+		<bigdataviewer-image-loaders.version>0.23.1</bigdataviewer-image-loaders.version>
+		<bigdataviewer-biop-tools.version>0.23.0</bigdataviewer-biop-tools.version>
+		<bigdataviewer-selector.version>0.23.0</bigdataviewer-selector.version>
 		<ijl-utilities-wrappers.version>0.12.1</ijl-utilities-wrappers.version>
 
 		<!-- maths -->
 		<leastsquares.version>1.0.0</leastsquares.version>
 
 		<!-- ABBA specific -->
-		<atlas.version>0.4.0</atlas.version>
+		<atlas.version>0.23.0-SNAPSHOT</atlas.version>
 		<oshi-core.version>5.5.1</oshi-core.version>
 
 		<!--because xml deserialization with JAXB is not included in Java 11, and we prepare migrating to Java 11 -->
@@ -137,6 +137,16 @@
 		<!-- scijava.app.directory>C:/Fiji</scijava.app.directory -->
 		<!-- scijava.app.directory>C:/Users/nicol/Dropbox/BIOP/ABBA-Python/constructor/Fiji.app</scijava.app.directory -->
 		<!-- package version below are determined by the parent pom but need to be upgraded or temporarily fixed for bugs -->
+
+		<!-- Several dependencies (bigdataviewer-biop-tools, atlas, Operetta_Importer,
+		     and their transitive sc.fiji:Stitching_) are compiled for Java 21, so this
+		     build must target 21 as well (the enforcer bytecode rule checks this). -->
+		<scijava.jvm.version>21</scijava.jvm.version>
+
+		<!-- Some dependencies (ome:turbojpeg) have classes in the default package,
+		     which breaks the module path derivation of the maven-javadoc-plugin.
+		     Run javadoc in non-modular (pre-Java 9) mode instead. -->
+		<legacyMode>true</legacyMode>
 
 	</properties>
 
@@ -161,11 +171,6 @@
 			<groupId>ch.epfl.biop</groupId>
 			<artifactId>ijl-utilities-wrappers</artifactId>
 			<version>${ijl-utilities-wrappers.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>sc.fiji</groupId>
-			<artifactId>bigdataviewer-vistools</artifactId>
 		</dependency>
 
 		<dependency>

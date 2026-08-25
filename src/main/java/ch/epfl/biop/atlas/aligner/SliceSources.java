@@ -21,7 +21,7 @@ import ch.epfl.biop.atlas.mouse.allen.ccfv3.command.AllenBrainAdultMouseAtlasCCF
 import ch.epfl.biop.atlas.struct.AtlasHelper;
 import ch.epfl.biop.atlas.struct.AtlasNode;
 import ch.epfl.biop.atlas.struct.AtlasOntology;
-import ch.epfl.biop.bdv.img.entity.ImageName;
+import spimdata.util.ImageName;
 import ch.epfl.biop.bdv.img.imageplus.ImagePlusHelper;
 import ch.epfl.biop.java.utilities.roi.ConvertibleRois;
 import ch.epfl.biop.java.utilities.roi.SelectToROIKeepLines;
