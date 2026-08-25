@@ -12,6 +12,7 @@ import org.scijava.task.Task;
 import org.scijava.task.TaskService;
 
 import java.io.File;
+import java.util.Arrays;
 
 import static ch.epfl.biop.atlas.aligner.ABBAHelper.getResource;
 
@@ -49,25 +50,27 @@ public class ImportDemoSlicesZENODOCommand implements Command {
         try {
             mp.addTask();
 
-            //3 4 2 5 1 6 0
-            int iSlice = 4-number_of_slides/2-1;
-            int nSlices = 0;
-            taskDL.setProgressMaximum(number_of_slides);
+            // Slides are picked around the central one, in this order: 3 4 2 5 1 6 0
+            final int[] slidesByPriority = {3, 4, 2, 5, 1, 6, 0};
+            int nSlides = Math.max(1, Math.min(slidesByPriority.length, number_of_slides));
+            int[] slides = Arrays.copyOf(slidesByPriority, nSlides);
+            Arrays.sort(slides); // keeps the slides in their anatomical order
+
+            taskDL.setProgressMaximum(nSlides);
             taskDL.start();
-            File[] files = new File[number_of_slides];
-            while (nSlices<number_of_slides) {
+            File[] files = new File[nSlides];
+            for (int i = 0; i < nSlides; i++) {
+                int iSlice = slides[i];
                 taskDL.setStatusMessage("Download slices from slide "+iSlice);
-                files[iSlice] = new File(DatasetHelper.dowloadBrainVSIDataset(iSlice), "Slide_0"+iSlice+".vsi");
-                nSlices++;
-                iSlice++;
-                taskDL.setProgressValue(nSlices);
+                files[i] = new File(DatasetHelper.dowloadBrainVSIDataset(iSlice), "Slide_0"+iSlice+".vsi");
+                taskDL.setProgressValue(i+1);
             }
 
             taskDL.setStatusMessage("Opening local files...");
 
             cs.run(ImportSlicesFromFilesCommand.class, true,
                         "mp", mp,
-                        "datasetname", "Zenodo Demo Sections ("+number_of_slides+" Slides)",
+                        "datasetname", "Zenodo Demo Sections ("+nSlides+" Slides)",
                         "files", files,
                         "split_rgb_channels", false,
                         "slice_axis_initial_mm", 0,

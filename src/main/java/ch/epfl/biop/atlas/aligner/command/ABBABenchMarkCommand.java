@@ -77,7 +77,9 @@ public class ABBABenchMarkCommand implements Command {
     @Override
     public void run() {
 
-        OmeroChecker.PromptUserIfOmeroDependenciesMissing(ctx);
+        if (demo_dataset.equals(SMALL_REMOTE) || demo_dataset.equals(BIG_REMOTE)) {
+            OmeroChecker.PromptUserIfOmeroDependenciesMissing(ctx);
+        }
 
         // Check whether the benchmark can work TODO:
         // - Elastix and transformix set
@@ -174,6 +176,7 @@ public class ABBABenchMarkCommand implements Command {
                     ).get();
                 }
             } else {
+                startTiming("Import Sources into ABBA");
                 switch (demo_dataset) {
                     case SMALL_LOCAL:
                         cs.run(ImportDemoSlicesZENODOCommand.class, true,
@@ -196,10 +199,8 @@ public class ABBABenchMarkCommand implements Command {
                 });
             }
 
-            throw new RuntimeException("ABBA Benchmark currently not working");
-            //NOT WORKING!!
+            endTiming("Getting Data");
 
-            /*endTiming("Getting Data...");
 
 
             mp.getSlices().forEach(SliceSources::select);
@@ -236,13 +237,13 @@ public class ABBABenchMarkCommand implements Command {
                     task.setStatusMessage("DeepSlice Registration (Local) Run " + (idxDeepSliceRun + 1));
                     startTiming("DeepSlice Registration (Local) Run " + (idxDeepSliceRun + 1));
                 }
-                cs.run(RegisterSlicesDeepSliceLocalCommand.class, true,
+                cs.run(RegisterSlicesDeepSliceApposeCommand.class, true,
                         "mp", mp,
                         "channels", "0,1",
                         "model", "mouse",
                         "allow_slicing_angle_change", true,
                         "ensemble", false,
-                        "post_processing", "Keep order + ensure regular spacing",
+                        "post_processing", RegisterSlicesDeepSliceApposeCommand.KEEP_ORDER_REGULAR_SPACING,
                         "slices_spacing_micrometer", -1.0,
                         "px_size_micron", 30
                 ).get();
@@ -290,26 +291,33 @@ public class ABBABenchMarkCommand implements Command {
                 endTiming("Elastix Registration (Spline)");
             }
 
-            if (wait_between_each_step) {
-                task.setStatusMessage("Export Registrations to QuPath Project...");
-                startTiming("Export Registrations to QuPath Project");
+            // Only the remote datasets are backed by a QuPath project: for the local demo
+            // slices the export finds no QuPath-linked source and would silently do nothing.
+            if (demo_dataset.equals(SMALL_REMOTE) || demo_dataset.equals(BIG_REMOTE)) {
+
+                if (wait_between_each_step) {
+                    task.setStatusMessage("Export Registrations to QuPath Project...");
+                    startTiming("Export Registrations to QuPath Project");
+                }
+
+                cs.run(ExportRegistrationToQuPathCommand.class, true,
+                        "mp", mp,
+                        "erase_previous_file", true
+                ).get();
+
+                if (wait_between_each_step) {
+                    mp.waitForTasks();
+                    endTiming("Export Registrations to QuPath Project");
+                }
             }
 
-            cs.run(ExportRegistrationToQuPathCommand.class, true,
-                    "mp", mp,
-                    "erase_previous_file", true
-            ).get();
-
-            if (wait_between_each_step) {
-                mp.waitForTasks();
-                endTiming("Export Registrations to QuPath Project");
-            } else {
+            if (!wait_between_each_step) {
                 mp.waitForTasks();
                 endTiming("Registration Steps and Export");
             }
 
             report = getReport();
-            IJ.log(report);*/
+            IJ.log(report);
 
         } catch (Exception e) {
             throw new RuntimeException(e);
