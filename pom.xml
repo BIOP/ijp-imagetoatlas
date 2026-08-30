@@ -91,10 +91,32 @@
 		<url>https://github.com/BIOP/ijp-imagetoatlas/actions</url>
 	</ciManagement>
 
+	<!-- NB: Two workarounds below for damage left by the maven.scijava.org outage
+	     (see the SciJava Zulip outage thread). Both can be reverted once the
+	     SciJava Nexus is healthy again.
+
+	     1. checksumPolicy=fail on scijava.public: the group serves some artifacts
+	        as HTTP 200 with a zero-length body (jar, pom and .sha1 alike), e.g.
+	        xml-apis:xml-apis-ext:1.3.04, which Maven otherwise accepts as a valid
+	        download and caches, breaking the enforcer ("zip file is empty") and
+	        poisoning every local repository it touches. Failing on the checksum
+	        mismatch makes Maven fall through to the next repository.
+
+	     2. The ome repository: ome:formats-gpl, ome:turbojpeg and
+	        org.openmicroscopy:omero-* are no longer served by the scijava.public
+	        group at all (jars 404, only previously cached poms come back), because
+	        its ome-releases / ome-external proxies are broken. It also acts as the
+	        healthy fallback for point 1. -->
 	<repositories>
 		<repository>
 			<id>scijava.public</id>
 			<url>https://maven.scijava.org/content/groups/public</url>
+			<releases><checksumPolicy>fail</checksumPolicy></releases>
+			<snapshots><checksumPolicy>fail</checksumPolicy></snapshots>
+		</repository>
+		<repository>
+			<id>ome</id>
+			<url>https://artifacts.openmicroscopy.org/artifactory/maven</url>
 		</repository>
 	</repositories>
 	
@@ -108,7 +130,7 @@
 
 		<!-- bdv playground related dependencies -->
 		<bigdataviewer-playground.version>0.23.1</bigdataviewer-playground.version>
-		<bigdataviewer-image-loaders.version>0.23.1</bigdataviewer-image-loaders.version>
+		<bigdataviewer-image-loaders.version>0.23.2</bigdataviewer-image-loaders.version>
 		<bigdataviewer-biop-tools.version>0.23.0</bigdataviewer-biop-tools.version>
 		<bigdataviewer-selector.version>0.23.0</bigdataviewer-selector.version>
 		<ijl-utilities-wrappers.version>0.12.1</ijl-utilities-wrappers.version>
@@ -117,12 +139,15 @@
 		<leastsquares.version>1.0.0</leastsquares.version>
 
 		<!-- ABBA specific -->
-		<atlas.version>0.23.0-SNAPSHOT</atlas.version>
+		<atlas.version>0.23.1</atlas.version>
 		<oshi-core.version>5.5.1</oshi-core.version>
 
 		<!--because xml deserialization with JAXB is not included in Java 11, and we prepare migrating to Java 11 -->
 		<jakarta.xml.bind-api.version>3.0.1</jakarta.xml.bind-api.version>
 		<jaxb-impl.version>3.0.2</jaxb-impl.version>
+
+		<!-- JPEG-2000 codec, see the ome-jai test dependency below -->
+		<ome-jai.version>0.1.5</ome-jai.version>
 
 		<!-- to generate python API, method put in tests -->
 		<reflections.version>0.10.2</reflections.version>
@@ -246,6 +271,19 @@
 			<groupId>ch.epfl.biop</groupId>
 			<artifactId>pyimagej-scijava-command</artifactId>
 			<version>${pyimagej-scijava-command.version}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- JPEG-2000 codec, needed to decode the demo .vsi slides (and any other
+			 JPEG-2000 compressed file). pom-scijava excludes org.openmicroscopy:ome-jai
+			 from ome-codecs because Fiji ships it separately (bio-formats update site),
+			 so it has to be put back explicitly to run ABBA outside of a Fiji install
+			 (SimpleIJLaunch, ABBALaunch*, ABBABenchMarkCommand). Without it Bio-Formats
+			 fails with "The JAI Image I/O Tools are required to read JPEG-2000 files". -->
+		<dependency>
+			<groupId>org.openmicroscopy</groupId>
+			<artifactId>ome-jai</artifactId>
+			<version>${ome-jai.version}</version>
 			<scope>test</scope>
 		</dependency>
 
