@@ -175,7 +175,19 @@ public class DeepSliceHelper {
         return new File(input_folder, "results.json");
     }
 
-    public static String DS_VERSION = "1.2.6";
+    public static String DS_VERSION = "1.2.8";
+
+    /**
+     * DeepSlice is written against the Keras 2 API. With TensorFlow 2.16+ the default
+     * `tensorflow.keras` is Keras 3, and the rat model - which, unlike the mouse one, wraps
+     * Xception into a functional model called with `training=True` - then returns garbage
+     * predictions (scale off by ~4x, inconsistent slicing angles, random depths). The mouse model
+     * is unaffected. We therefore pin TensorFlow and install `tf-keras` (the Keras 2 backport),
+     * which is activated by the TF_USE_LEGACY_KERAS environment variable set in
+     * {@link ApposeDeepSliceTask#callImports()}.
+     * See https://github.com/BIOP/ijp-imagetoatlas/issues (DeepSlice rat registration)
+     */
+    public static String TF_VERSION = "2.21.0";
 
     public static class ApposeDeepSliceTask extends DeepSliceTask {
 
@@ -184,8 +196,8 @@ public class DeepSliceHelper {
                     .pixi()
                     .channels("conda-forge")
                     .conda( "appose", "python==3.12", "numpy")
-                    .pypi("DeepSlice=="+DS_VERSION)
-                    .name("deepslice-v"+DS_VERSION)
+                    .pypi("DeepSlice=="+DS_VERSION, "tensorflow=="+TF_VERSION, "tf-keras=="+TF_VERSION)
+                    .name("deepslice-v"+DS_VERSION+"-tf"+TF_VERSION)
                     .logDebug() // log problems
                     .subscribeError(listenEnv)
                     .subscribeOutput(listenEnv)
@@ -286,12 +298,15 @@ public class DeepSliceHelper {
         }
 
         /**
-         * These imports have to be executed from the main thread because of a numpy limitation
+         * These imports have to be executed from the main thread because of a numpy limitation.
+         * TF_USE_LEGACY_KERAS has to be set before TensorFlow is imported - see {@link DeepSliceHelper#TF_VERSION}.
          * @return imports to import in the main thread
          */
         private String callImports()
         {
             return ""
+                    + "import os\n"
+                    + "os.environ['TF_USE_LEGACY_KERAS'] = '1'\n" // DeepSlice needs the Keras 2 API, see TF_VERSION
                     + "from DeepSlice import DSModel\n"
                     + "from DeepSlice.read_and_write import QuickNII_functions\n"
                     + "import numpy\n";
