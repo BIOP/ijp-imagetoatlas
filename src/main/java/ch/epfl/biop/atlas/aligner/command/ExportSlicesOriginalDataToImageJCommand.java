@@ -16,6 +16,7 @@ import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -68,13 +69,25 @@ public class ExportSlicesOriginalDataToImageJCommand<T extends NativeType<T> & N
             preprocess = new SourcesChannelsSelect(indices);
         }
 
+        List<List<SourceAndConverter<?>>> sourcesPerSlice = new ArrayList<>();
+
+        for (SliceSources slice : slicesToExport) {
+            List<SourceAndConverter<?>> sliceSources = Arrays.asList(preprocess.apply(slice.getOriginalSources()));
+            // nothing is exported if a single slice misses the requested resolution level
+            String issue = getResolutionLevelIssue(slice, sliceSources);
+            if (issue != null) {
+                mp.errorMessageForUser.accept("Missing resolution level in selected slice(s).", issue);
+                return;
+            }
+            sourcesPerSlice.add(sliceSources);
+        }
+
         images = new ImagePlus[slicesToExport.size()];
 
         try {
             int index = 0;
-            for (SliceSources slice : slicesToExport) {
+            for (List<SourceAndConverter<?>> sliceSources : sourcesPerSlice) {
 
-                List<SourceAndConverter<?>> sliceSources = Arrays.asList(preprocess.apply(slice.getOriginalSources()));
                 CZTRange range = ImagePlusGetter.fromSources(sliceSources, 0, resolution_level);
                 List<SourceAndConverter<T>> castSources = sliceSources.stream().map(source -> (SourceAndConverter<T>) source).collect(Collectors.toList());
                 images[index] = ImagePlusGetter.getImagePlus(sliceSources.get(0).getSpimSource().getName(), castSources, resolution_level, range, verbose, false, false, null);
@@ -85,6 +98,28 @@ public class ExportSlicesOriginalDataToImageJCommand<T extends NativeType<T> & N
             mp.errorMessageForUser.accept("Error in slices export", "Reason:"+e.getMessage()+" \n Please also check the stack trace.");
             e.printStackTrace();
         }
+    }
+
+    /**
+     * @param slice a slice which should be exported
+     * @param sliceSources the (preprocessed) sources of this slice
+     * @return a message explaining why {@link #resolution_level} can't be used for this slice,
+     * or null if this resolution level is available in all its sources
+     */
+    private String getResolutionLevelIssue(SliceSources slice, List<SourceAndConverter<?>> sliceSources) {
+        if (resolution_level < 0) {
+            return "The resolution level should be a positive number (0 = max resolution).\n Requested resolution level: "+resolution_level;
+        }
+        for (SourceAndConverter<?> source : sliceSources) {
+            int nLevels = source.getSpimSource().getNumMipmapLevels();
+            if (resolution_level >= nLevels) {
+                return "The slice '"+slice.getName()+"', channel '"+source.getSpimSource().getName()+"',\n"
+                        +" has only "+nLevels+" resolution level(s): the downscaled image requested is not present.\n"
+                        +" Requested resolution level: "+resolution_level+"\n"
+                        +" Maximal resolution level: "+(nLevels-1);
+            }
+        }
+        return null;
     }
 
 }
