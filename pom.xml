@@ -125,7 +125,7 @@
 		<jakarta.xml.bind-api.version>3.0.1</jakarta.xml.bind-api.version>
 		<jaxb-impl.version>3.0.2</jaxb-impl.version>
 
-		<!-- JPEG-2000 codec, see the ome-jai test dependency below -->
+		<!-- JPEG-2000 codec, see the ome-jai dependency below -->
 		<ome-jai.version>0.1.5</ome-jai.version>
 
 		<!-- to generate python API, method put in tests -->
@@ -253,17 +253,22 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- JPEG-2000 codec, needed to decode the demo .vsi slides (and any other
-			 JPEG-2000 compressed file). pom-scijava excludes org.openmicroscopy:ome-jai
-			 from ome-codecs because Fiji ships it separately (bio-formats update site),
-			 so it has to be put back explicitly to run ABBA outside of a Fiji install
-			 (SimpleIJLaunch, ABBALaunch*, ABBABenchMarkCommand). Without it Bio-Formats
-			 fails with "The JAI Image I/O Tools are required to read JPEG-2000 files". -->
+		<!-- JPEG-2000 codec, needed to decode .vsi slides (and any other JPEG-2000
+			 compressed file). pom-scijava excludes org.openmicroscopy:ome-jai from
+			 ome-codecs on the assumption that Fiji ships it separately (bio-formats
+			 update site), but it is currently missing from the latest Fiji: without it
+			 Bio-Formats fails with "The JAI Image I/O Tools are required to read
+			 JPEG-2000 files", both outside Fiji (SimpleIJLaunch, ABBALaunch*,
+			 ABBABenchMarkCommand) and inside a plain Fiji install.
+			 Deliberately at compile scope rather than test scope, so that
+			 scijava-maven-plugin:populate-app copies it into ${scijava.app.directory}
+			 and so that it is shipped on the ABBA update site.
+			 TEMPORARY WORKAROUND: move it back to test scope once Fiji ships ome-jai
+			 again, to avoid two update sites providing the same jar. -->
 		<dependency>
 			<groupId>org.openmicroscopy</groupId>
 			<artifactId>ome-jai</artifactId>
 			<version>${ome-jai.version}</version>
-			<scope>test</scope>
 		</dependency>
 
 	</dependencies>
