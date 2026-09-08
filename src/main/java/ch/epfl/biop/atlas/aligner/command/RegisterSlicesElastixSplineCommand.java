@@ -31,6 +31,12 @@ public class RegisterSlicesElastixSplineCommand extends RegistrationMultiChannel
     @Parameter(label = "Show registration results as ImagePlus")
     boolean show_imageplus_registration_result;
 
+    @Override
+    protected boolean requiresConsistentPixelTypes() {
+        // Elastix registers a single multichannel ImagePlus built out of the selected channels
+        return true;
+    }
+
     public void runValidated() {
 
         if (atlas_channels.size()!=slice_channels.size()) {

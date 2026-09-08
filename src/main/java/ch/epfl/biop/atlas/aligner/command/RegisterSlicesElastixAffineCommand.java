@@ -28,6 +28,12 @@ public class RegisterSlicesElastixAffineCommand extends RegistrationMultiChannel
 
     double background_offset_value_fixed = 0;
 
+    @Override
+    protected boolean requiresConsistentPixelTypes() {
+        // Elastix registers a single multichannel ImagePlus built out of the selected channels
+        return true;
+    }
+
     public void runValidated() {
 
         if (atlas_channels.size()!=slice_channels.size()) {
