@@ -1,0 +1,81 @@
+# Resolves and smoke-tests the DeepSlice Appose (pixi) environment on every OS we ship to.
+#
+# Why this exists: the environment mixes conda packages with platform-specific PyPI wheels
+# (tensorflow), whose availability differs between operating systems and releases, and a
+# tensorflow upgrade silently turns tensorflow.keras into Keras 3, under which DeepSlice's rat
+# model returns garbage. Nothing in a Linux build can catch either, hence the OS matrix.
+#
+# Standard GitHub-hosted runners are free and unlimited on public repositories, so the macOS
+# job here costs nothing. Each job downloads ~1 GB (tensorflow and the DeepSlice model weights)
+# and takes several minutes; the environment is deliberately NOT cached, since resolving it from
+# scratch is exactly what is under test. CPU only: there is no GPU environment to test.
+#
+# The environment itself is NOT defined here: it lives in
+# src/main/resources/ch/epfl/biop/atlas/aligner/deepslice/pixi.toml, which
+# DeepSliceHelper.ApposeDeepSliceTask loads at runtime. This workflow resolves that very file.
+name: deepslice env
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'src/main/java/ch/epfl/biop/atlas/aligner/DeepSliceHelper.java'
+      - 'src/main/resources/ch/epfl/biop/atlas/aligner/deepslice/**'
+      - 'src/test/java/ch/epfl/biop/atlas/aligner/DeepSliceApposeEnvTest.java'
+      - '.github/workflows/deepslice-env.yml'
+
+jobs:
+  deepslice-env:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            label: linux-64
+          - os: windows-latest
+            label: win-64
+          # Apple silicon. tensorflow's macosx_12_0_arm64 wheels install on any supported macOS,
+          # so a single macOS job covers them all.
+          - os: macos-latest
+            label: osx-arm64
+          # No Intel macOS job: tensorflow has published no osx-64 wheel since 2.16.2,
+          # and ApposeDeepSliceTask fails fast with an explanatory message there.
+
+    name: ${{ matrix.label }}
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: 'zulu'
+          cache: 'maven'
+
+      - name: Report macOS version
+        if: startsWith(matrix.os, 'macos')
+        run: sw_vers
+
+      # Keeps every Appose artifact (pixi binary and environments) out of the runner image, and
+      # short: tensorflow's Python modules sit ~130 characters deep inside the environment, too close
+      # to the 260-character MAX_PATH limit on Windows for a long base directory. Set here from
+      # $RUNNER_TEMP rather than from a matrix value, because github.workspace and runner.temp are
+      # both empty in the matrix context.
+      - name: Pick a directory for the Appose environment
+        shell: bash
+        run: echo "APPOSE_ENVS_DIR=$RUNNER_TEMP/ae" >> "$GITHUB_ENV"
+
+      - name: Build and run the DeepSlice environment smoke test
+        shell: bash
+        run: |
+          mvn -B --no-transfer-progress test \
+            -Dtest=DeepSliceApposeEnvTest \
+            -DfailIfNoSpecifiedTests=true \
+            -Ddeepslice.env.test=true
+
+      - name: Show the generated pixi manifest
+        if: always()
+        shell: bash
+        run: cat "$APPOSE_ENVS_DIR"/*/pixi.toml || true

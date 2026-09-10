@@ -1,0 +1,38 @@
+# Environment for ch.epfl.biop.atlas.aligner.DeepSliceHelper.ApposeDeepSliceTask.
+#
+# This file is the single source of truth for the DeepSlice environment: it is loaded from the
+# classpath at build time and handed to pixi as-is. The matrix in
+# .github/workflows/deepslice-env.yml resolves this exact file on Linux, Windows and macOS.
+#
+# The platform below is substituted at build time with the conda subdir of the running machine
+# (linux-64, win-64 or osx-arm64). Only the current platform is listed on purpose: pixi locks
+# every platform named here, so listing them all would let a wheel that disappears on one OS
+# break users of the others.
+#
+# CPU only. The plain tensorflow wheel pulls no CUDA library; never switch to tensorflow[and-cuda]:
+# DeepSlice runs fast enough on a CPU, and a GPU build would multiply the download size and the
+# ways the environment can fail to resolve.
+#
+# No [system-requirements]: tensorflow tags its Apple-silicon wheels macosx_12_0_arm64, which the
+# macOS 13.0 that pixi assumes on osx-arm64 already satisfies. Intel Macs (osx-64) have had no
+# tensorflow wheel since 2.16.2, and ApposeDeepSliceTask fails fast there.
+
+[workspace]
+name = "deepslice"
+channels = ["conda-forge"]
+platforms = ["@PLATFORM@"]
+
+[dependencies]
+python = "==3.12"
+numpy = ">=2,<3"
+
+[pypi-dependencies]
+# Must match appose.version in pom.xml.
+appose = "==0.12.0"
+DeepSlice = "==1.2.8"
+# DeepSlice is written against the Keras 2 API. From TensorFlow 2.16 on, tensorflow.keras is
+# Keras 3, under which the rat model returns garbage predictions (the mouse model is unaffected).
+# tf-keras is the Keras 2 backport, activated by TF_USE_LEGACY_KERAS in
+# ApposeDeepSliceTask#callImports(); its version must follow tensorflow's.
+tensorflow = "==2.21.0"
+tf-keras = "==2.21.0"

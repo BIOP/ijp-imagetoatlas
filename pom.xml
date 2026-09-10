@@ -253,6 +253,12 @@
 			<scope>test</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+
 		<!-- JPEG-2000 codec, needed to decode .vsi slides (and any other JPEG-2000
 			 compressed file). pom-scijava excludes org.openmicroscopy:ome-jai from
 			 ome-codecs on the assumption that Fiji ships it separately (bio-formats
