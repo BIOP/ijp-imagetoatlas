@@ -820,6 +820,15 @@ public class MultiSlicePositioner implements Closeable {
         }
     }
 
+    /**
+     * Called once a state is loaded: undo can't go back past the load, so the actions replayed
+     * from the file can't be undone. Per-slice action lists are kept: saving still writes them.
+     */
+    private void clearUndoHistory() {
+        userActions.clear();
+        redoableUserActions.clear();
+    }
+
     // ------------------------------------------------ Serialization / Deserialization
 
     public Gson getGsonStateSerializer(List<SourceAndConverter> serialized_sources) {
@@ -1152,6 +1161,8 @@ public class MultiSlicePositioner implements Closeable {
                         sliceState.slice.sourcesChanged();
                     });
 
+                    clearUndoHistory();
+
                     if (emptyState) stateChangedSinceLastSave = false; // loaded state has not been changed, and it was the only one loaded
 
                 } catch (Exception e) {
@@ -1255,6 +1266,8 @@ public class MultiSlicePositioner implements Closeable {
                         sliceState.slice.waitForEndOfTasks();
                         sliceState.slice.transformSourceOrigin((AffineTransform3D) (sliceState.preTransform));
                     });
+
+                    clearUndoHistory();
 
                     if (emptyState) stateChangedSinceLastSave = false; // loaded state has not been changed, and it was the only one loaded
 
