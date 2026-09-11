@@ -75,6 +75,7 @@ public class AlignerState {
         actionsToSkip.add(RasterSliceAction.class);
         actionsToSkip.add(ExportSliceToImagePlusAction.class);
         actionsToSkip.add(ExportDeformationFieldToImagePlusAction.class);
+        actionsToSkip.add(MirrorSliceZAction.class); // its result is saved in the pre-transform
 
         List<CancelableAction> compiledActions = new ArrayList<>();
         if ((ini_actions == null)||(ini_actions.isEmpty())) {

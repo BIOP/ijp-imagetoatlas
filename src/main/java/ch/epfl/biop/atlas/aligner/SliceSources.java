@@ -544,6 +544,17 @@ public class SliceSources {
         return preTransform.getAffineTransform();
     }
 
+    /**
+     * Mirrors the slice along z in its own frame: the pre-transform is followed by diag(1, 1, -1) applied first.
+     * The image is centered before, so the section keeps its z extent. Registrations only act in x and y,
+     * so this also holds after registrations.
+     */
+    public void mirrorZ() {
+        AffineTransform3D mirror = new AffineTransform3D();
+        mirror.set(-1, 2, 2);
+        transformSourceOrigin(preTransform.getAffineTransform().concatenate(mirror));
+    }
+
     public int getNumberOfRegistrations() {
         return registrations.size()-3;
     }

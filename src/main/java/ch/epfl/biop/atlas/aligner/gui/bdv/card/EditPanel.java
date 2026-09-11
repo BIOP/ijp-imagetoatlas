@@ -2,7 +2,6 @@ package ch.epfl.biop.atlas.aligner.gui.bdv.card;
 
 import ch.epfl.biop.atlas.aligner.InPlaneTransform;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
-import net.imglib2.realtransform.AffineTransform3D;
 
 import javax.swing.*;
 import java.awt.*;
@@ -42,7 +41,7 @@ public class EditPanel {
 
         JButton rotX = new JButton(iconRotX);
         rotX.setToolTipText("Rotate around X axis (~ flip vertically)");
-        rotX.addActionListener(e -> rotateSelectedSlicesOrigin(mp, 0));
+        rotX.addActionListener(e -> mp.flipSlices(mp.getSelectedSlices(), 0));
         paneEdit.add(rotX);
 
         // Rotate X (/flipX)
@@ -52,7 +51,7 @@ public class EditPanel {
 
         JButton rotY = new JButton(iconRotY);
         rotY.setToolTipText("Rotate around Y axis (~ flip horizontally)");
-        rotY.addActionListener(e -> rotateSelectedSlicesOrigin(mp, 1));
+        rotY.addActionListener(e -> mp.flipSlices(mp.getSelectedSlices(), 1));
         paneEdit.add(rotY);
 
         JButton distribute = new JButton("Distribute Spacing");
@@ -68,15 +67,6 @@ public class EditPanel {
     static void rotateSelectedSlices(MultiSlicePositioner mp, double angle) {
         double[] center = mp.getROICenter();
         mp.transformSlicesInPlane(mp.getSelectedSlices(), InPlaneTransform.rotation(angle, center[0], center[1]).toAffine(), "Rotate");
-    }
-
-    // 180 degrees rotation of the pre-transform, not undoable
-    static void rotateSelectedSlicesOrigin(MultiSlicePositioner mp, int axis) {
-        mp.getSelectedSlices().forEach(slice -> {
-            AffineTransform3D at3d = slice.getTransformSourceOrigin();
-            at3d.rotate(axis, Math.PI);
-            slice.transformSourceOrigin(at3d);
-        });
     }
 
 }

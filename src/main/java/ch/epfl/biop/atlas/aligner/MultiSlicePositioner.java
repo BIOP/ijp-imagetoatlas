@@ -816,16 +816,44 @@ public class MultiSlicePositioner implements Closeable {
             warningMessageForUser.accept("No Slice(s) Selected", "Can't apply transformation to empty selection.");
             return;
         }
+        if (slices.size()>1) {new MarkActionSequenceBatchAction(this).runRequest();}
+        registerSlicesInPlane(slices, m, name);
+        if (slices.size()>1) {new MarkActionSequenceBatchAction(this).runRequest();}
+    }
+
+    /**
+     * Rotates slices by 180 degrees around the X or Y axis going through the ROI center, in a single undo step.
+     * The in-plane part is a "Flip" registration, the z part mirrors each slice along z in its own frame
+     * (see {@link SliceSources#mirrorZ()}), so that thick sections are really turned over.
+     * @param slices the slices to flip
+     * @param axis 0 for X (y is flipped), 1 for Y (x is flipped)
+     */
+    public void flipSlices(List<SliceSources> slices, int axis) {
+        if (slices.isEmpty()) {
+            warningMessageForUser.accept("No Slice(s) Selected", "Can't apply transformation to empty selection.");
+            return;
+        }
+        int flipped = (axis==0) ? 1 : 0;
+        AffineTransform3D flip = new AffineTransform3D();
+        flip.set(-1, flipped, flipped);
+        flip.set(2.0 * getROICenter()[flipped], flipped, 3);
+        new MarkActionSequenceBatchAction(this).runRequest();
+        registerSlicesInPlane(slices, flip, "Flip");
+        for (SliceSources slice : slices) {
+            new MirrorSliceZAction(this, slice).runRequest();
+        }
+        new MarkActionSequenceBatchAction(this).runRequest();
+    }
+
+    private void registerSlicesInPlane(List<SliceSources> slices, AffineTransform3D m, String name) {
         Supplier<? extends IRegistrationPlugin> affineSupplier = pluginSupplier(AffineRegistration.class);
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(AffineRegistration.TRANSFORM_KEY, AffineRegistration.affineTransform3DToString(m));
-        if (slices.size()>1) {new MarkActionSequenceBatchAction(this).runRequest();}
         registerSlices(slices, () -> {
             IRegistrationPlugin registration = affineSupplier.get();
             if (registration!=null) registration.setRegistrationName(name);
             return registration;
         }, SourcesProcessorHelper.Identity(), SourcesProcessorHelper.Identity(), parameters);
-        if (slices.size()>1) {new MarkActionSequenceBatchAction(this).runRequest();}
     }
 
 
