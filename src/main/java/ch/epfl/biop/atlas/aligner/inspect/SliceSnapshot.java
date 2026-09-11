@@ -104,32 +104,6 @@ public class SliceSnapshot {
     }
 
     /**
-     * Measures how well the slice outline matches the atlas outline: Dice coefficient between the tissue mask
-     * (Otsu threshold of the slice intensity, as rendered) and the atlas mask (non-zero atlas labels), over the
-     * snapshot grid. Uses the region, pixel size, slice channels, registration step back and atlas position options.
-     * Meant to rank slices and to accept or reject an in-plane correction (compare with registrationStepBack = 1).
-     * It does not find the slice position along the slicing axis: the atlas outline size dominates the score.
-     * @return 1 for a perfect match, 0 without any overlap
-     */
-    public static double tissueAtlasDice(MultiSlicePositioner mp, SliceSources slice, Options options) {
-        Grid grid = new Grid(options.regionMm != null ? options.regionMm : mp.getROI(), options.pixelSizeMm);
-        int[] red = new int[grid.size()], green = new int[grid.size()], blue = new int[grid.size()];
-        accumulateSlice(slice, options, grid, red, green, blue);
-        int[] intensity = new int[grid.size()];
-        for (int i = 0; i < intensity.length; i++) intensity[i] = Math.min(255, Math.max(red[i], Math.max(green[i], blue[i])));
-        int threshold = otsuThreshold(intensity);
-        int[] labels = sampleLabels(mp, options, grid, atlasPosition(slice, options));
-        long tissue = 0, atlas = 0, both = 0;
-        for (int i = 0; i < intensity.length; i++) {
-            boolean isTissue = intensity[i] > threshold, isAtlas = labels[i] != 0;
-            if (isTissue) tissue++;
-            if (isAtlas) atlas++;
-            if (isTissue && isAtlas) both++;
-        }
-        return (tissue + atlas) == 0 ? 0 : 2.0 * both / (tissue + atlas);
-    }
-
-    /**
      * Renders several slices and tiles them in a grid
      * @param columns number of columns, 0 or less for an automatic choice
      */
@@ -275,30 +249,6 @@ public class SliceSnapshot {
             green[index] += (int) (weight * ARGBType.green(argb.get()));
             blue[index] += (int) (weight * ARGBType.blue(argb.get()));
         });
-    }
-
-    /** @return the threshold of an 8-bit image maximizing the between-class variance */
-    private static int otsuThreshold(int[] values) {
-        long[] histogram = new long[256];
-        for (int v : values) histogram[v]++;
-        double sumAll = 0;
-        for (int i = 0; i < 256; i++) sumAll += i * histogram[i];
-        double sumBelow = 0, bestVariance = -1;
-        long countBelow = 0;
-        int threshold = 0;
-        for (int t = 0; t < 256; t++) {
-            countBelow += histogram[t];
-            sumBelow += t * histogram[t];
-            long countAbove = values.length - countBelow;
-            if ((countBelow == 0) || (countAbove == 0)) continue;
-            double meanDifference = sumBelow / countBelow - (sumAll - sumBelow) / countAbove;
-            double variance = (double) countBelow * countAbove * meanDifference * meanDifference;
-            if (variance > bestVariance) {
-                bestVariance = variance;
-                threshold = t;
-            }
-        }
-        return threshold;
     }
 
     // ------------------------------------ Atlas regions
