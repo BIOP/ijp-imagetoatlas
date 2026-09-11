@@ -7,6 +7,7 @@ import ch.epfl.biop.registration.plugin.ExternalRegistrationPlugin;
 import ch.epfl.biop.registration.plugin.IRegistrationPlugin;
 import ch.epfl.biop.atlas.struct.Atlas;
 import ch.epfl.biop.registration.Registration;
+import ch.epfl.biop.registration.source.affine.AffineRegistration;
 import ch.epfl.biop.source.processor.*;
 import ch.epfl.biop.source.processor.adapter.*;
 import com.google.gson.*;
@@ -806,6 +807,29 @@ public class MultiSlicePositioner implements Closeable {
                 logger.error("NULL registration plugin obtained, ignoring registration.");
             }
         }
+    }
+
+    /**
+     * Appends an in-plane affine transform to each slice, as an {@link AffineRegistration}, in a single undo step
+     * @param slices the slices to transform
+     * @param m maps each point p of a registered slice to m·p, in aligner coordinates (mm), see {@link InPlaneTransform}
+     * @param name name of the registration, shown in the timeline and saved in the state
+     */
+    public void transformSlicesInPlane(List<SliceSources> slices, AffineTransform3D m, String name) {
+        if (slices.isEmpty()) {
+            warningMessageForUser.accept("No Slice(s) Selected", "Can't apply transformation to empty selection.");
+            return;
+        }
+        Supplier<? extends IRegistrationPlugin> affineSupplier = pluginSupplier(AffineRegistration.class);
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put(AffineRegistration.TRANSFORM_KEY, AffineRegistration.affineTransform3DToString(m));
+        if (slices.size()>1) {new MarkActionSequenceBatchAction(this).runRequest();}
+        registerSlices(slices, () -> {
+            IRegistrationPlugin registration = affineSupplier.get();
+            if (registration!=null) registration.setRegistrationName(name);
+            return registration;
+        }, SourcesProcessorHelper.Identity(), SourcesProcessorHelper.Identity(), parameters);
+        if (slices.size()>1) {new MarkActionSequenceBatchAction(this).runRequest();}
     }
 
 
