@@ -687,19 +687,19 @@ public class MultiSlicePositioner implements Closeable {
                                        SourcesProcessor preprocessFixed,
                                        SourcesProcessor preprocessMoving,
                                        Map<String,Object> parameters) {
+        registerSelectedSlices(pluginSupplier(registrationClass), preprocessFixed, preprocessMoving, parameters);
+    }
 
+    private Supplier<? extends IRegistrationPlugin> pluginSupplier(Class<? extends IRegistrationPlugin> registrationClass) {
         PluginService ps = scijavaCtx.getService(PluginService.class);
-        Supplier<? extends IRegistrationPlugin> pluginSupplier =
-                () -> {
-                    try {
-                        return (IRegistrationPlugin) ps.getPlugin(registrationClass).createInstance();
-                    } catch (InstantiableException e) {
-                        e.printStackTrace();
-                        return null;
-                    }
-                };
-
-        registerSelectedSlices(pluginSupplier, preprocessFixed, preprocessMoving, parameters);
+        return () -> {
+            try {
+                return (IRegistrationPlugin) ps.getPlugin(registrationClass).createInstance();
+            } catch (InstantiableException e) {
+                e.printStackTrace();
+                return null;
+            }
+        };
     }
 
     /**
@@ -738,42 +738,73 @@ public class MultiSlicePositioner implements Closeable {
                                        SourcesProcessor preprocessFixed,
                                        SourcesProcessor preprocessMoving,
                                        Map<String,Object> parameters) {
-        if (getSelectedSlices().isEmpty()) {
+        List<SliceSources> slices = getSelectedSlices();
+        if (slices.isEmpty()) {
             warningMessageForUser.accept("No selected slice", "Please select the slice(s) you want to register");
         } else {
-            if (getSelectedSlices().size()>1) {new MarkActionSequenceBatchAction(this).runRequest();}
-            logger.debug("Putting user defined ROIs");
-            // Putting user defined ROIs
-            parameters.put("px", roiPX);
-            parameters.put("py", roiPY);
-            parameters.put("sx", roiSX);
-            parameters.put("sy", roiSY);
+            if (slices.size()>1) {new MarkActionSequenceBatchAction(this).runRequest();}
+            registerSlices(slices, registrationPluginSupplier, preprocessFixed, preprocessMoving, parameters);
+            if (slices.size()>1) {new MarkActionSequenceBatchAction(this).runRequest();}
+        }
+    }
 
-            for (SliceSources slice : getSelectedSlices()) {
-                logger.debug("Starting slice registration for "+slice.getName());
-                IRegistrationPlugin registration = registrationPluginSupplier.get();
-                if (registration!=null) {
-                    logger.debug("\t slice registration for "+slice.getName()+"- set context");
-                    registration.setScijavaContext(scijavaCtx);
+    /**
+     * Registers the given slices, see {@link #registerSlices(List, Supplier, SourcesProcessor, SourcesProcessor, Map)}
+     */
+    public void registerSlices(List<SliceSources> slices,
+                               Class<? extends IRegistrationPlugin> registrationClass,
+                               SourcesProcessor preprocessFixed,
+                               SourcesProcessor preprocessMoving,
+                               Map<String,Object> parameters) {
+        registerSlices(slices, pluginSupplier(registrationClass), preprocessFixed, preprocessMoving, parameters);
+    }
 
-                    // Sends parameters to the registration
-                    logger.debug("\t slice registration for "+slice.getName()+"- setRegistrationParameters");
-                    registration.setRegistrationParameters(convertToString(scijavaCtx, parameters));
+    /**
+     * Registers the given slices, one registration action per slice. No batch marks are added:
+     * callers group the actions in a single undo step with {@link MarkActionSequenceBatchAction} if needed.
+     * @param slices the slices to register
+     * @param registrationPluginSupplier a supplier of registration plugins
+     * @param preprocessFixed how fixed sources need to be preprocessed before being registered
+     * @param preprocessMoving how moving sources need to be preprocessed before being registered
+     * @param parameters parameters used for the registration - all objects will be converted
+     *                   to String using the scijava {@link ConvertService}. They need to be strings
+     *                   to be serialized
+     */
+    public void registerSlices(List<SliceSources> slices,
+                               Supplier<? extends IRegistrationPlugin> registrationPluginSupplier,
+                               SourcesProcessor preprocessFixed,
+                               SourcesProcessor preprocessMoving,
+                               Map<String,Object> parameters) {
+        logger.debug("Putting user defined ROIs");
+        // Putting user defined ROIs
+        parameters.put("px", roiPX);
+        parameters.put("py", roiPY);
+        parameters.put("sx", roiSX);
+        parameters.put("sy", roiSY);
 
-                    // Always set slice at zero position for registration
-                    logger.debug("\t slice registration for "+slice.getName()+"- set slice zero position to zero");
-                    parameters.put("pz", 0);
+        for (SliceSources slice : slices) {
+            logger.debug("Starting slice registration for "+slice.getName());
+            IRegistrationPlugin registration = registrationPluginSupplier.get();
+            if (registration!=null) {
+                logger.debug("\t slice registration for "+slice.getName()+"- set context");
+                registration.setScijavaContext(scijavaCtx);
 
-                    logger.debug("\t slice registration for "+slice.getName()+"- RegisterSliceAction request");
-                    new RegisterSliceAction(this, slice, registration,
-                            SourcesProcessorHelper.compose(new SourcesZOffset(slice), preprocessFixed),
-                            SourcesProcessorHelper.compose(new SourcesZOffset(slice), preprocessMoving)).runRequest();
+                // Sends parameters to the registration
+                logger.debug("\t slice registration for "+slice.getName()+"- setRegistrationParameters");
+                registration.setRegistrationParameters(convertToString(scijavaCtx, parameters));
 
-                } else {
-                    logger.error("NULL registration plugin obtained, ignoring registration.");
-                }
+                // Always set slice at zero position for registration
+                logger.debug("\t slice registration for "+slice.getName()+"- set slice zero position to zero");
+                parameters.put("pz", 0);
+
+                logger.debug("\t slice registration for "+slice.getName()+"- RegisterSliceAction request");
+                new RegisterSliceAction(this, slice, registration,
+                        SourcesProcessorHelper.compose(new SourcesZOffset(slice), preprocessFixed),
+                        SourcesProcessorHelper.compose(new SourcesZOffset(slice), preprocessMoving)).runRequest();
+
+            } else {
+                logger.error("NULL registration plugin obtained, ignoring registration.");
             }
-            if (getSelectedSlices().size()>1) {new MarkActionSequenceBatchAction(this).runRequest();}
         }
     }
 

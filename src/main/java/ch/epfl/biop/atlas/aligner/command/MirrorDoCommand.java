@@ -38,7 +38,7 @@ public class MirrorDoCommand implements Command {
         parameters.put("mirror_side", mirror_side);
 
         new MarkActionSequenceBatchAction(mp).runRequest();
-        mp.registerSelectedSlices(MirrorXRegistration.class,
+        mp.registerSlices(slicesToMirror, MirrorXRegistration.class,
                 new SourcesIdentity(),
                 new SourcesIdentity(),
                 parameters);
