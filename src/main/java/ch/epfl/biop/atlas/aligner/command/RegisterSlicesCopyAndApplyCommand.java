@@ -30,7 +30,7 @@ public class RegisterSlicesCopyAndApplyCommand implements Command {
     @Parameter(label = "Index of the slice registrations you'd like to copy")
     int model_slice_index;
 
-    @Parameter(label = "Tick if you want to skip the pre-transform (probably not)")
+    @Parameter(label = "Skip the pre-transform (z part of X or Y flips, rotations from older ABBA versions). In-plane edits are always copied")
     boolean skip_pre_transform = false;
 
     public void run() {

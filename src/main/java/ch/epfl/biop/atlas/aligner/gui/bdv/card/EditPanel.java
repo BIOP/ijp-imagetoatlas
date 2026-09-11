@@ -1,6 +1,8 @@
 package ch.epfl.biop.atlas.aligner.gui.bdv.card;
 
+import ch.epfl.biop.atlas.aligner.InPlaneTransform;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
+import net.imglib2.realtransform.AffineTransform3D;
 
 import javax.swing.*;
 import java.awt.*;
@@ -20,7 +22,7 @@ public class EditPanel {
 
         JButton turnCW = new JButton(iconCW);
         turnCW.setToolTipText("Rotate selected slices 90 degrees clockwise");
-        turnCW.addActionListener(e -> mp.rotateSlices(2,Math.PI/2.0));
+        turnCW.addActionListener(e -> rotateSelectedSlices(mp, Math.PI/2.0));
         paneEdit.add(turnCW);
 
         // CCW
@@ -30,7 +32,7 @@ public class EditPanel {
 
         JButton turnCCW = new JButton(iconCCW);
         turnCCW.setToolTipText("Rotate selected slices 90 degrees counter clockwise");
-        turnCCW.addActionListener(e -> mp.rotateSlices(2,-Math.PI/2.0));
+        turnCCW.addActionListener(e -> rotateSelectedSlices(mp, -Math.PI/2.0));
         paneEdit.add(turnCCW);
 
         // Rotate X (/flipX)
@@ -40,7 +42,7 @@ public class EditPanel {
 
         JButton rotX = new JButton(iconRotX);
         rotX.setToolTipText("Rotate around X axis (~ flip vertically)");
-        rotX.addActionListener(e -> mp.rotateSlices(0,Math.PI));
+        rotX.addActionListener(e -> rotateSelectedSlicesOrigin(mp, 0));
         paneEdit.add(rotX);
 
         // Rotate X (/flipX)
@@ -50,7 +52,7 @@ public class EditPanel {
 
         JButton rotY = new JButton(iconRotY);
         rotY.setToolTipText("Rotate around Y axis (~ flip horizontally)");
-        rotY.addActionListener(e -> mp.rotateSlices(1,Math.PI));
+        rotY.addActionListener(e -> rotateSelectedSlicesOrigin(mp, 1));
         paneEdit.add(rotY);
 
         JButton distribute = new JButton("Distribute Spacing");
@@ -61,6 +63,20 @@ public class EditPanel {
 
     public JPanel getPanel() {
         return paneEdit;
+    }
+
+    static void rotateSelectedSlices(MultiSlicePositioner mp, double angle) {
+        double[] center = mp.getROICenter();
+        mp.transformSlicesInPlane(mp.getSelectedSlices(), InPlaneTransform.rotation(angle, center[0], center[1]).toAffine(), "Rotate");
+    }
+
+    // 180 degrees rotation of the pre-transform, not undoable
+    static void rotateSelectedSlicesOrigin(MultiSlicePositioner mp, int axis) {
+        mp.getSelectedSlices().forEach(slice -> {
+            AffineTransform3D at3d = slice.getTransformSourceOrigin();
+            at3d.rotate(axis, Math.PI);
+            slice.transformSourceOrigin(at3d);
+        });
     }
 
 }

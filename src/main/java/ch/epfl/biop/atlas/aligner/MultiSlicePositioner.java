@@ -310,6 +310,13 @@ public class MultiSlicePositioner implements Closeable {
         return new double[]{roiPX, roiPY, roiSX, roiSY};
     }
 
+    /**
+     * @return the center {x, y} of the registration region, in mm: the pivot of in-plane edits
+     */
+    public double[] getROICenter() {
+        return new double[]{roiPX + roiSX / 2.0, roiPY + roiSY / 2.0};
+    }
+
     public void selectSlice(SliceSources... slices) {
         for (SliceSources slice : slices) {
             slice.select();
@@ -362,17 +369,6 @@ public class MultiSlicePositioner implements Closeable {
                 return "("+lastlastAction.actionClassString()+" [batch])";
             } else {
                 return "("+lastAction.actionClassString()+")";
-            }
-        }
-    }
-
-    public void rotateSlices(int axis, double angle_rad) {
-        List<SliceSources> sortedSelected = getSlices().stream().filter(SliceSources::isSelected).collect(Collectors.toList());
-        if (sortedSelected.isEmpty()) {
-            this.warningMessageForUser.accept("No Slice(s) Selected", "Can't apply transformation to empty selection.");
-        } else {
-            for (SliceSources slice : sortedSelected) {
-                slice.rotateSourceOrigin(axis, angle_rad);
             }
         }
     }

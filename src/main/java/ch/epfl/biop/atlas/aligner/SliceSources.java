@@ -544,12 +544,6 @@ public class SliceSources {
         return preTransform.getAffineTransform();
     }
 
-    public void rotateSourceOrigin(int axis, double angle) {
-        AffineTransform3D at3d = preTransform.getAffineTransform();
-        at3d.rotate(axis, angle);
-        transformSourceOrigin(at3d);
-    }
-
     public int getNumberOfRegistrations() {
         return registrations.size()-3;
     }
