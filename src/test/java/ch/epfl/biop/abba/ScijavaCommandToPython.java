@@ -26,6 +26,8 @@ import java.util.stream.Collectors;
 
 public class ScijavaCommandToPython {
 
+    final public static String tabStr = "    ";
+
     public static String pythonize(String commandClassName) {
         if (commandClassName.startsWith("ABBA")) {
             commandClassName = commandClassName.substring(4);
@@ -104,7 +106,7 @@ public class ScijavaCommandToPython {
                 builder.append(",\n");
                 for (int i=0; i<inputFields.size(); i++) {
                     Field f = inputFields.get(i);
-                    builder.append("\t\t"+f.getName().toLowerCase());
+                    builder.append(tabStr+tabStr+f.getName().toLowerCase());
                     addTypeHintIfPossible(builder, f, false);
 
                     if (i<inputFields.size()-1) {
@@ -132,12 +134,12 @@ public class ScijavaCommandToPython {
                 Returns:
                 return_type: Description of the return value.
                 """*/
-            builder.append("\t\"\"\"\n");
-            builder.append("\t"+plugin.description()+"\n\n");
+            builder.append(tabStr+"\"\"\"\n");
+            builder.append(tabStr+plugin.description()+"\n\n");
             if (inputFields.size()>0) {
-                builder.append("\tParameters:\n");
+                builder.append(tabStr+"Parameters:\n");
                 for (Field f : inputFields) {
-                    builder.append("\t" + f.getName().toLowerCase() + " ");
+                    builder.append(tabStr + f.getName().toLowerCase() + " ");
                     addTypeHintIfPossible(builder, f, true);
                     builder.append(": ");
                     builder.append(f.getAnnotation(Parameter.class).label());
@@ -150,11 +152,11 @@ public class ScijavaCommandToPython {
             }
             //builder.append("\t@return:\n");
             //builder.append("\t\tNone\n");
-            builder.append("\t\"\"\"\n");
+            builder.append(tabStr+"\"\"\"\n");
 
-            builder.append("\t"+c.getSimpleName()+" = jimport('"+c.getName()+"')\n");
+            builder.append(tabStr+c.getSimpleName()+" = jimport('"+c.getName()+"')\n");
 
-            builder.append("\treturn self.ij.command().run("+c.getSimpleName()+", True");
+            builder.append(tabStr+"return self.ij.command().run("+c.getSimpleName()+", True");
 
             if ((inputFields.size()==0)&&(pythonReferences.size()==0)) {
                 builder.append(")\n");
@@ -164,7 +166,7 @@ public class ScijavaCommandToPython {
                 keys.sort(String::compareTo);
                 for (int i = 0; i< keys.size(); i++) {
                     String key = keys.get(i);
-                    builder.append("\t\t\t\t\t\t\t\t'"+key+"'"+", self."+key);
+                    builder.append(tabStr+tabStr+tabStr+tabStr+tabStr+tabStr+tabStr+tabStr+"'"+key+"'"+", self."+key);
                     if (i < keys.size()-1) {
                         builder.append(",\n");
                     }
@@ -174,7 +176,7 @@ public class ScijavaCommandToPython {
                 }
                 for (int i=0; i<inputFields.size(); i++) {
                     Field f = inputFields.get(i);
-                    builder.append("\t\t\t\t\t\t\t\t'"+f.getName()+"'"+", "+f.getName().toLowerCase());
+                    builder.append(tabStr+tabStr+tabStr+tabStr+tabStr+tabStr+tabStr+tabStr+"'"+f.getName()+"'"+", "+f.getName().toLowerCase());
                     if (i<inputFields.size()-1) {
                         builder.append(",\n");
                     }
