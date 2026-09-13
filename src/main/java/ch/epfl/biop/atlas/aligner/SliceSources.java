@@ -723,6 +723,19 @@ public class SliceSources {
         }
     }
 
+    /**
+     * Replaces the transform of the last registration, without running or editing it: used to undo and redo an edition
+     * @param reg the last registration of this slice
+     * @param transform the transform to set, as serialized by {@link Registration#getTransform()}
+     * @return false if the registration is not the last one
+     */
+    protected boolean setLastRegistrationTransform(Registration<SourceAndConverter<?>[]> reg, String transform) {
+        if (!removeRegistration(reg)) return false;
+        reg.setTransform(transform);
+        appendRegistration(reg);
+        return true;
+    }
+
     Executor executor = ForkJoinPool.commonPool();
 
     protected void enqueueRunAction(CancelableAction action, Runnable postRun, boolean runInExtraThread) {

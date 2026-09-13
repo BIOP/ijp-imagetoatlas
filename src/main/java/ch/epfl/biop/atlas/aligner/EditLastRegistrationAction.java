@@ -60,8 +60,13 @@ public class EditLastRegistrationAction extends CancelableAction {
         return slice;
     }
 
+    // Transforms of the registration before and after the edition: undo and redo set them back without the editor
+    private String transformBefore, transformAfter;
+
     @Override
     protected boolean run() {
+        if (transformAfter != null) return setTransform(transformAfter); // redo
+        transformBefore = rs.registration.getTransform();
         //mp.removeUserAction(this);
         // We may have changed the z location, so we need to remove the z zero location and put it back at the new location
         //SourcesProcessor aProcessor = SourcesProcessorHelper.removeChannelsSelect(rs.preprocessFixed)
@@ -84,15 +89,22 @@ public class EditLastRegistrationAction extends CancelableAction {
         } else {
             slice.editLastRegistration(rs.preprocessFixed, rs.preprocessMoving);
         }
+        transformAfter = rs.registration.getTransform();
         slice.sourcesChanged();
         getMP().stateHasBeenChanged();
         return true;
     }
 
     @Override
-    protected boolean cancel() { // it cannot be canceled. maybe we could but I don't know
-        // Unsupported yet : TODO!
-        return true;
+    protected boolean cancel() {
+        return (transformBefore == null) || setTransform(transformBefore);
+    }
+
+    private boolean setTransform(String transform) {
+        boolean result = slice.setLastRegistrationTransform(rs.registration, transform);
+        slice.sourcesChanged();
+        getMP().stateHasBeenChanged();
+        return result;
     }
 
     private static SourcesProcessor removeSourcesZOffset(SourcesProcessor processor) {
