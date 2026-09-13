@@ -395,7 +395,6 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         }
 
         BdvMenuHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Register>Affine>Rotate", RotateSlicesCommand.class, "mp", msp);
-        BdvMenuHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Register>Affine>Interactive Transform", SliceAffineTransformCommand.class, "mp", msp);
 
         logger.debug("Installing java registration plugins ui");
 
