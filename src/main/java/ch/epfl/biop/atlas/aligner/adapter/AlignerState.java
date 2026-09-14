@@ -20,11 +20,18 @@ public class AlignerState {
     protected static final Logger logger = LoggerFactory.getLogger(AlignerState.class);
 
     public AlignerState(MultiSlicePositioner mp) {
+        this(mp, mp.getSlices());
+    }
+
+    /**
+     * State restricted to some slices
+     */
+    public AlignerState(MultiSlicePositioner mp, List<SliceSources> slices) {
 
         rotationX = mp.getReslicedAtlas().getRotateX();
         rotationY = mp.getReslicedAtlas().getRotateY();
 
-        mp.getSlices().forEach(sliceSource -> {
+        slices.forEach(sliceSource -> {
             SliceSourcesState slice_state = new SliceSourcesState();
             slice_state.actions.addAll(filterSerializedActions(mp.getActionsFromSlice(sliceSource)));
             slice_state.preTransform = sliceSource.getTransformSourceOrigin();

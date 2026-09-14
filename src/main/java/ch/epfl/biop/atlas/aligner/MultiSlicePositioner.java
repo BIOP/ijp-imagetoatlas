@@ -946,6 +946,10 @@ public class MultiSlicePositioner implements Closeable {
     // ------------------------------------------------ Serialization / Deserialization
 
     public Gson getGsonStateSerializer(List<SourceAndConverter> serialized_sources) {
+        return getGsonStateSerializer(serialized_sources, this::currentSliceGetter);
+    }
+
+    private Gson getGsonStateSerializer(List<SourceAndConverter> serialized_sources, Supplier<SliceSources> sliceGetter) {
         GsonBuilder gsonbuilder = new GsonBuilder()
                 .setPrettyPrinting()
                 .registerTypeAdapter(SourceAndConverter.class, new IndexedSourceAndConverterAdapter(serialized_sources))
@@ -973,13 +977,13 @@ public class MultiSlicePositioner implements Closeable {
 
         gsonbuilder.registerTypeAdapterFactory(factoryActions);
         gsonbuilder.registerTypeHierarchyAdapter(CreateSliceAction.class, new CreateSliceAdapter(this));
-        gsonbuilder.registerTypeHierarchyAdapter(MoveSliceAction.class, new MoveSliceAdapter(this, this::currentSliceGetter));
-        gsonbuilder.registerTypeHierarchyAdapter(RasterDeformationAction.class, new RasterDeformationActionAdapter(this, this::currentSliceGetter));
-        gsonbuilder.registerTypeHierarchyAdapter(RegisterSliceAction.class, new RegisterSliceAdapter(this, this::currentSliceGetter));
-        gsonbuilder.registerTypeHierarchyAdapter(KeySliceOnAction.class, new KeySliceOnAdapter(this, this::currentSliceGetter));
-        gsonbuilder.registerTypeHierarchyAdapter(KeySliceOffAction.class, new KeySliceOffAdapter(this, this::currentSliceGetter));
-        gsonbuilder.registerTypeHierarchyAdapter(UnMirrorSliceAction.class, new UnMirrorAdapter(this, this::currentSliceGetter));
-        gsonbuilder.registerTypeHierarchyAdapter(SetSliceBackgroundAction.class, new SetSliceBackgroundActionAdapter(this, this::currentSliceGetter));
+        gsonbuilder.registerTypeHierarchyAdapter(MoveSliceAction.class, new MoveSliceAdapter(this, sliceGetter));
+        gsonbuilder.registerTypeHierarchyAdapter(RasterDeformationAction.class, new RasterDeformationActionAdapter(this, sliceGetter));
+        gsonbuilder.registerTypeHierarchyAdapter(RegisterSliceAction.class, new RegisterSliceAdapter(this, sliceGetter));
+        gsonbuilder.registerTypeHierarchyAdapter(KeySliceOnAction.class, new KeySliceOnAdapter(this, sliceGetter));
+        gsonbuilder.registerTypeHierarchyAdapter(KeySliceOffAction.class, new KeySliceOffAdapter(this, sliceGetter));
+        gsonbuilder.registerTypeHierarchyAdapter(UnMirrorSliceAction.class, new UnMirrorAdapter(this, sliceGetter));
+        gsonbuilder.registerTypeHierarchyAdapter(SetSliceBackgroundAction.class, new SetSliceBackgroundActionAdapter(this, sliceGetter));
 
         // For registration registration
         RuntimeTypeAdapterFactory<Registration> factoryRegistrations = RuntimeTypeAdapterFactory.of(Registration.class);
@@ -1018,6 +1022,81 @@ public class MultiSlicePositioner implements Closeable {
         gsonbuilder.registerTypeHierarchyAdapter(SourcesZOffset.class, new SourcesZOffsetAdapter());
 
         return gsonbuilder.create();
+    }
+
+    /**
+     * Partial serialization of the state, meant for scripts: the state file content restricted to some slices.
+     * The index, name, slicing axis position (mm), selection status and channel names of each slice are added for readability.
+     * The slicing axis position is the one of the model, {@link SliceSources#getSlicingAxisPosition()}: the Z displayed
+     * in the user interface is this value minus {@link ReslicedAtlas#getZOffset()}.
+     * Sources are referred to by their index in the list of the original sources of the serialized slices.
+     *
+     * @param slices slices to serialize
+     * @param maxStringLength strings longer than this, like spline transforms, are elided; 0 or less keeps them all
+     * @return the json state of the slices
+     */
+    public String serializeSlices(List<SliceSources> slices, int maxStringLength) {
+        List<SourceAndConverter> sources = new ArrayList<>();
+        slices.forEach(slice -> sources.addAll(Arrays.asList(slice.getOriginalSources())));
+        Gson gson = getGsonStateSerializer(sources);
+        AlignerState state = new AlignerState(this, slices);
+        state.version = VersionUtils.getVersion(AlignerState.class);
+        JsonObject json = gson.toJsonTree(state).getAsJsonObject();
+        JsonArray slicesJson = new JsonArray();
+        for (int i = 0; i < slices.size(); i++) {
+            SliceSources slice = slices.get(i);
+            JsonObject sliceJson = new JsonObject();
+            sliceJson.addProperty("index", getSlices().indexOf(slice));
+            sliceJson.addProperty("name", slice.getName());
+            sliceJson.addProperty("slicing_axis_position", slice.getSlicingAxisPosition());
+            sliceJson.addProperty("selected", slice.isSelected());
+            JsonArray channels = new JsonArray();
+            Arrays.stream(slice.getOriginalSources()).forEach(sac -> channels.add(sac.getSpimSource().getName()));
+            sliceJson.add("channels", channels);
+            json.getAsJsonArray("slices_state_list").get(i).getAsJsonObject().entrySet()
+                    .forEach(entry -> sliceJson.add(entry.getKey(), entry.getValue()));
+            slicesJson.add(sliceJson);
+        }
+        json.add("slices_state_list", slicesJson);
+        return new Gson().toJson(maxStringLength > 0 ? elideLongStrings(json, maxStringLength) : json); // compact
+    }
+
+    private static JsonElement elideLongStrings(JsonElement element, int maxLength) {
+        if (element.isJsonObject()) {
+            element.getAsJsonObject().entrySet().forEach(entry -> entry.setValue(elideLongStrings(entry.getValue(), maxLength)));
+        } else if (element.isJsonArray()) {
+            JsonArray array = element.getAsJsonArray();
+            for (int i = 0; i < array.size(); i++) array.set(i, elideLongStrings(array.get(i), maxLength));
+        } else if (element.isJsonPrimitive() && element.getAsJsonPrimitive().isString()
+                && (element.getAsString().length() > maxLength)) {
+            return new JsonPrimitive("<" + element.getAsString().length() + " characters elided>");
+        }
+        return element;
+    }
+
+    /**
+     * Partial deserialization, meant for scripts: creates actions acting on an existing slice from their json
+     * description, in the format of the state file. For instance {"type":"MoveSliceAction","location":7.5}.
+     * The actions are not run: call {@link CancelableAction#runRequest()} on each of them.
+     * <p>
+     * A RegisterSliceAction with a transform appends this transform to the slice. Without a transform, the registration
+     * is computed from its parameters when run, at the slice position, within the positioner ROI by default. For instance
+     * {"type":"RegisterSliceAction","registration":{"type":"AffineRegistration","parameters":{"transform":"[m00,m01,m02,tx,m10,m11,m12,ty,m20,m21,m22,tz]"}}}
+     * maps each point p of the registered slice to M.p + t, in millimeters, in the aligner coordinates (x right, y down,
+     * as in {@link ch.epfl.biop.atlas.aligner.inspect.SliceSnapshot} rulers): a positive rotation about z is clockwise on screen.
+     *
+     * @param slice slice the actions apply to
+     * @param json a single action or an array of actions
+     * @return the deserialized actions, in the same order
+     */
+    public List<CancelableAction> deserializeActions(SliceSources slice, String json) {
+        Gson gson = getGsonStateSerializer(Arrays.asList(slice.getOriginalSources()), () -> slice);
+        JsonElement element = JsonParser.parseString(json);
+        JsonArray array = element.isJsonArray() ? element.getAsJsonArray() : new JsonArray();
+        if (!element.isJsonArray()) array.add(element);
+        List<CancelableAction> actions = new ArrayList<>();
+        array.forEach(action -> actions.add(gson.fromJson(action, CancelableAction.class)));
+        return actions;
     }
 
     private boolean stateChangedSinceLastSave = false;
