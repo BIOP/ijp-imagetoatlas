@@ -2062,8 +2062,7 @@ public class SliceSources {
         Displaysettings.GetDisplaySettingsFromCurrentConverter(getRegisteredSources()[channelIndex], ds);
         ds.min = min;
         ds.max = max;
-        registered_sacs_sequence.stream().forEach(registrationAndSources -> Displaysettings.applyDisplaysettings(registrationAndSources.sacs[channelIndex],ds));
-        Displaysettings.applyDisplaysettings(registered_sacs[channelIndex],ds);
+        applyDisplaySettings(channelIndex, ds);
         mp.converterChanged(this);
     }
 
@@ -2071,18 +2070,24 @@ public class SliceSources {
         Displaysettings ds = new Displaysettings(-1);
         Displaysettings.GetDisplaySettingsFromCurrentConverter(getRegisteredSources()[channelIndex], ds);
         ds.color = new int[]{r,g,b,a};
-        registered_sacs_sequence.stream().forEach(registrationAndSources -> Displaysettings.applyDisplaysettings(registrationAndSources.sacs[channelIndex],ds));
-        Displaysettings.applyDisplaysettings(registered_sacs[channelIndex],ds);
+        applyDisplaySettings(channelIndex, ds);
         mp.converterChanged(this);
     }
 
     public void setDisplaySettings(Displaysettings[] displaysettings) {
         for (int channelIndex = 0; channelIndex<nChannels; channelIndex++) {
-            for (RegistrationAndSources registrationAndSources: registered_sacs_sequence) {
-                Displaysettings.applyDisplaysettings(registrationAndSources.sacs[channelIndex], displaysettings[channelIndex]);
-            }
-            Displaysettings.applyDisplaysettings(registered_sacs[channelIndex], displaysettings[channelIndex]);
+            applyDisplaySettings(channelIndex, displaysettings[channelIndex]);
         }
+    }
+
+    /**
+     * Applies the display settings to all the sources of a channel. The original sources are included:
+     * they are the ones serialized in the state file, so that display settings are restored on loading.
+     */
+    private void applyDisplaySettings(int channelIndex, Displaysettings ds) {
+        registered_sacs_sequence.forEach(registrationAndSources -> Displaysettings.applyDisplaysettings(registrationAndSources.sacs[channelIndex], ds));
+        Displaysettings.applyDisplaysettings(registered_sacs[channelIndex], ds);
+        Displaysettings.applyDisplaysettings(original_sacs[channelIndex], ds);
     }
 
     public static class ABBABoundingBoxEstimator extends BoundingBoxEstimation {
