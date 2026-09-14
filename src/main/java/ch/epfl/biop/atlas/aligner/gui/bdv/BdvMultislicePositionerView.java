@@ -1,5 +1,6 @@
 package ch.epfl.biop.atlas.aligner.gui.bdv;
 
+import bdv.tools.brightness.ConverterSetup;
 import bdv.util.BdvFunctions;
 import bdv.util.BdvHandle;
 import bdv.util.BdvHandleFrame;
@@ -553,6 +554,41 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                 .show(bdvh, sacsToAppend.toArray(new SourceAndConverter[0]));
         bdvh.getViewerPanel().state().addSourcesToGroup(sacsToAppend, bdvh.getViewerPanel().state().getGroups().get(0));
 
+        for (int i = 0; i < msp.getAtlas().getMap().getStructuralImages().size(); i++) {
+            linkDisplaySettings(msp.getReslicedAtlas().extendedSlicedSources[i], msp.getReslicedAtlas().nonExtendedSlicedSources[i]);
+        }
+    }
+
+    /**
+     * The positioning mode displays the extended atlas sources, the review mode the non extended ones, but
+     * registration windows (manual affine, BigWarp, edition of a registration) display the non extended ones:
+     * the color and display range changed on one source are mirrored on the other one, whatever the mode.
+     */
+    private void linkDisplaySettings(SourceAndConverter<?> extended, SourceAndConverter<?> nonExtended) {
+        ConverterSetup extendedSetup = SourceServices.getSourceService().getConverterSetup(extended);
+        ConverterSetup nonExtendedSetup = SourceServices.getSourceService().getConverterSetup(nonExtended);
+        if ((extendedSetup == null) || (nonExtendedSetup == null)) return;
+        copyDisplaySettings(extendedSetup, nonExtendedSetup);
+        ConverterSetup.SetupChangeListener toNonExtended = setup -> copyDisplaySettings(extendedSetup, nonExtendedSetup);
+        ConverterSetup.SetupChangeListener toExtended = setup -> copyDisplaySettings(nonExtendedSetup, extendedSetup);
+        extendedSetup.setupChangeListeners().add(toNonExtended);
+        nonExtendedSetup.setupChangeListeners().add(toExtended);
+        addToCleanUpHook(() -> {
+            extendedSetup.setupChangeListeners().remove(toNonExtended);
+            nonExtendedSetup.setupChangeListeners().remove(toExtended);
+        });
+    }
+
+    /**
+     * Only sets what differs, so that the two listeners of {@link #linkDisplaySettings} do not call each other endlessly
+     */
+    private static void copyDisplaySettings(ConverterSetup from, ConverterSetup to) {
+        if ((from.getDisplayRangeMin() != to.getDisplayRangeMin()) || (from.getDisplayRangeMax() != to.getDisplayRangeMax())) {
+            to.setDisplayRange(from.getDisplayRangeMin(), from.getDisplayRangeMax());
+        }
+        if (from.supportsColor() && to.supportsColor() && (from.getColor().get() != to.getColor().get())) {
+            to.setColor(from.getColor());
+        }
     }
 
     public void addToCleanUpHook(Runnable runnable) {
