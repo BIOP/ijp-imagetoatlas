@@ -547,6 +547,27 @@ public class ReslicedAtlas implements RealInterval {
      * @return the transformation to concatenate in order to go from coronal section to the one defined in the arguments
      * @throws IllegalArgumentException if two axes are the same (singular matrix)
      */
+    /**
+     * Inverse of {@link #getTransformFromCoronal(String, String, String)}
+     * @param coronalTransform coronal transform of the atlas
+     * @param slicingTransform slicing transform, the coronal transform concatenated with an axes orientation
+     * @return the two letters code (AP, PA, RL, LR, SI or IS) of the x, y and z axes
+     */
+    public static String[] getAxesFromCoronal(AffineTransform3D coronalTransform, AffineTransform3D slicingTransform) {
+        AffineTransform3D orientation = coronalTransform.inverse().copy().concatenate(slicingTransform);
+        String[] positive = {"RL", "SI", "AP"};
+        String[] negative = {"LR", "IS", "PA"};
+        String[] axes = new String[3];
+        for (int column = 0; column < 3; column++) {
+            int row = 0;
+            for (int r = 1; r < 3; r++) {
+                if (Math.abs(orientation.get(r, column)) > Math.abs(orientation.get(row, column))) row = r;
+            }
+            axes[column] = orientation.get(row, column) > 0 ? positive[row] : negative[row];
+        }
+        return axes;
+    }
+
     public static AffineTransform3D getTransformFromCoronal(String xAxis, String yAxis, String zAxis) throws IllegalArgumentException {
         // First, make sure 3 axes are used
         boolean apUsed = false;

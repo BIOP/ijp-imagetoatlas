@@ -6,6 +6,7 @@ import ch.epfl.biop.atlas.aligner.gui.bdv.BdvMultislicePositionerView;
 import ch.epfl.biop.atlas.scijava.AtlasChooserCommand;
 import ch.epfl.biop.atlas.struct.Atlas;
 import ch.epfl.biop.java.utilities.TempDirectory;
+import ij.IJ;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -49,10 +50,12 @@ import static ch.epfl.biop.atlas.aligner.MultiSlicePositioner.pack;
 @SuppressWarnings("unused")
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Import>ABBA - Import Standardized ABBA Project (Zip)",
-        description = "Opens a previously created zipped ABBA project.")
+        description = "Opens a standardized ABBA project zip, created with 'Export Standardized ABBA Project (Zip)', "
+                + "in a new ABBA window: the atlas and slicing orientation stored in the zip are loaded, then the downscaled slices and their registrations.")
 public class ImportStdZipStateCommand implements Command {
 
-    @Parameter(style = "open")
+    @Parameter(style = "open", label = "Standardized project (.zip)",
+            description = "Zip file created with 'Export Standardized ABBA Project (Zip)'.")
     File zip_file;
 
     @Parameter
@@ -63,8 +66,8 @@ public class ImportStdZipStateCommand implements Command {
 
     @Override
     public void run() {
-        if (FilenameUtils.getExtension(zip_file.getName()).equals(".zip")) {
-            System.err.println("Zip file expected");
+        if (!FilenameUtils.getExtension(zip_file.getName()).equalsIgnoreCase("zip")) {
+            IJ.error("Import Standardized ABBA Project", "A zip file is expected: "+zip_file.getAbsolutePath());
             return;
         }
         Task importTask = taskService.createTask("Import of "+zip_file.getName());
