@@ -12,7 +12,17 @@ import java.util.Set;
 
 public class ABBATheme {
 
+    private static volatile boolean themeSet = false;
+
+    /**
+     * @return true if a theme has been applied to {@link ABBABdvViewPrefs}, false if some of its fields are still unset
+     */
+    public static boolean isThemeSet() {
+        return themeSet;
+    }
+
     public static void setTheme(ABBATheme theme) {
+        themeSet = true;
         try {
             // Get all instance fields from ABBATheme
             Field[] themeFields = ABBATheme.class.getDeclaredFields();

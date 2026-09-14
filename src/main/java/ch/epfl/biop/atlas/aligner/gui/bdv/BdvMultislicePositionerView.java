@@ -182,8 +182,20 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
     private long delayBetweenMessagesMs = 5000;
 
+    private volatile boolean blockingMessages = true;
+
+    /**
+     * @param blocking true (default): errors and warnings are shown in modal dialogs, which block the calling
+     *                 thread until a user closes them. false: they are shown in the non-blocking overlay of the viewer,
+     *                 which is required when ABBA is driven by a script or an agent that cannot close dialogs.
+     *                 In both cases, messages are still sent to the subscribers of the {@link MultiSlicePositioner}.
+     */
+    public void setBlockingMessages(boolean blocking) {
+        this.blockingMessages = blocking;
+    }
+
     private void blockingErrorMessageForUsers(String title, String message) {
-        if ((System.currentTimeMillis()-lastErrorMessageTimestampMs)>delayBetweenMessagesMs) {
+        if (blockingMessages && ((System.currentTimeMillis()-lastErrorMessageTimestampMs)>delayBetweenMessagesMs)) {
             JOptionPane.showMessageDialog(new JFrame(), message, title, JOptionPane.ERROR_MESSAGE);
         } else {
             infoMessageForUser(title, message); // Non blocking
@@ -192,7 +204,11 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     }
 
     private void warningMessageForUser(String title, String message) {
-        JOptionPane.showMessageDialog(new JFrame(), message, title, JOptionPane.WARNING_MESSAGE);
+        if (blockingMessages) {
+            JOptionPane.showMessageDialog(new JFrame(), message, title, JOptionPane.WARNING_MESSAGE);
+        } else {
+            infoMessageForUser(title, message); // Non blocking
+        }
     }
 
     final MessageOverlayAnimator moa;
@@ -843,6 +859,9 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         try {
 
             Recorder.record = false;
+
+            // Views created directly (from scripts for instance) may not have set a theme, leaving null strokes and colors
+            if (!ABBATheme.isThemeSet()) ABBATheme.setTheme(ABBATheme.createDarkTheme());
 
             // Final variable initialization
             this.bdvh = bdvh;
