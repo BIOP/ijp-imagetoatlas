@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Type;
+import java.util.HashMap;
 import java.util.Map;
 
 public class RegistrationAdapter implements JsonSerializer<Registration>,
@@ -44,8 +45,12 @@ public class RegistrationAdapter implements JsonSerializer<Registration>,
                 registration=(Registration) scijavacontext.getService(PluginService.class).getPlugin(typeOfT.getTypeName()).createInstance();
             }
             registration.setScijavaContext(scijavacontext);
-            registration.setTransform(json.getAsJsonObject().get("transform").getAsString());
-            registration.setRegistrationParameters(context.deserialize(json.getAsJsonObject().get("parameters"), Map.class));
+            // Without a transform, the registration is not done: it will be computed from its parameters when run
+            if (json.getAsJsonObject().has("transform")) {
+                registration.setTransform(json.getAsJsonObject().get("transform").getAsString());
+            }
+            registration.setRegistrationParameters(json.getAsJsonObject().has("parameters") ?
+                    context.deserialize(json.getAsJsonObject().get("parameters"), Map.class) : new HashMap<>());
             if (json.getAsJsonObject().has("name") && !json.getAsJsonObject().get("name").isJsonNull()) {
                 registration.setRegistrationName(json.getAsJsonObject().get("name").getAsString());
             }

@@ -22,6 +22,7 @@ public class MoveSliceAdapter implements JsonSerializer<MoveSliceAction>,
     @Override
     public MoveSliceAction deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
         JsonObject obj = jsonElement.getAsJsonObject();
+        if (!obj.has("location")) throw new JsonParseException("MoveSliceAction requires a 'location': the slicing axis position, in mm");
         double location = obj.get("location").getAsDouble();
         return new MoveSliceAction(mp, currentSliceGetter.get(), location);
     }

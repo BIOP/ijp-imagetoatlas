@@ -1,8 +1,6 @@
 package ch.epfl.biop.atlas.aligner;
 
 import ch.epfl.biop.registration.plugin.RegistrationPluginHelper;
-import ch.epfl.biop.source.processor.SourcesIdentity;
-import ch.epfl.biop.source.processor.SourcesProcessComposer;
 import ch.epfl.biop.source.processor.SourcesProcessor;
 import ch.epfl.biop.source.processor.SourcesProcessorHelper;
 
@@ -74,12 +72,8 @@ public class EditLastRegistrationAction extends CancelableAction {
         if (!reuseOriginalChannels) {
             // The z location may have changed between the registration and the edition
             // That's why I remove the previous z offset location and put back the new location
-            SourcesProcessor pA = SourcesProcessorHelper.compose(
-                    removeSourcesZOffset(rs.preprocessFixed),
-                    new SourcesZOffset(slice));
-            SourcesProcessor pS = SourcesProcessorHelper.compose(
-                    removeSourcesZOffset(rs.preprocessMoving),
-                    new SourcesZOffset(slice));
+            SourcesProcessor pA = SourcesZOffset.replaceIn(rs.preprocessFixed, slice);
+            SourcesProcessor pS = SourcesZOffset.replaceIn(rs.preprocessMoving, slice);
 
             slice.editLastRegistration(
                     SourcesProcessorHelper.compose(preprocessAtlas,
@@ -105,17 +99,6 @@ public class EditLastRegistrationAction extends CancelableAction {
         slice.sourcesChanged();
         getMP().stateHasBeenChanged();
         return result;
-    }
-
-    private static SourcesProcessor removeSourcesZOffset(SourcesProcessor processor) {
-        if (processor instanceof SourcesZOffset) {
-            return new SourcesIdentity();
-        } else if (processor instanceof SourcesProcessComposer) {
-            SourcesProcessComposer composer_in = (SourcesProcessComposer)processor;
-            return new SourcesProcessComposer(removeSourcesZOffset(composer_in.f2), removeSourcesZOffset(composer_in.f1));
-        } else {
-            return processor;
-        }
     }
 
 }

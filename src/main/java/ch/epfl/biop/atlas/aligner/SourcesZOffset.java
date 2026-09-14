@@ -1,7 +1,10 @@
 package ch.epfl.biop.atlas.aligner;
 
 import bdv.viewer.SourceAndConverter;
+import ch.epfl.biop.source.processor.SourcesIdentity;
+import ch.epfl.biop.source.processor.SourcesProcessComposer;
 import ch.epfl.biop.source.processor.SourcesProcessor;
+import ch.epfl.biop.source.processor.SourcesProcessorHelper;
 import net.imglib2.realtransform.AffineTransform3D;
 import sc.fiji.bdvpg.source.SourceAndTimeRange;
 import sc.fiji.bdvpg.source.transform.SourceTransformHelper;
@@ -37,5 +40,26 @@ public class SourcesZOffset implements SourcesProcessor {
 
     public String toString() {
         return "Z0";
+    }
+
+    /**
+     * @return the processor without its z offsets, followed by the z offset of the slice
+     */
+    public static SourcesProcessor replaceIn(SourcesProcessor processor, SliceSources slice) {
+        return SourcesProcessorHelper.compose(removeFrom(processor), new SourcesZOffset(slice));
+    }
+
+    /**
+     * @return the processor where z offsets are replaced by identities
+     */
+    public static SourcesProcessor removeFrom(SourcesProcessor processor) {
+        if (processor instanceof SourcesZOffset) {
+            return new SourcesIdentity();
+        } else if (processor instanceof SourcesProcessComposer) {
+            SourcesProcessComposer composer = (SourcesProcessComposer) processor;
+            return new SourcesProcessComposer(removeFrom(composer.f2), removeFrom(composer.f1));
+        } else {
+            return processor;
+        }
     }
 }
