@@ -19,16 +19,19 @@ import java.util.stream.Collectors;
 
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>ABBA - Export Registered Slices to BDV Json Dataset (Experimental)",
-        description = "Export registered slices as a BigDataViewer json dataset (very experimental).")
+        description = "Very experimental: saves the registered selected slices, placed in atlas coordinates, "
+                + "as a BigDataViewer-Playground json file which references the original images. Waits for all ABBA tasks to be done.")
 public class ExportSlicesToBDVJsonDatasetCommand implements Command {
 
-    @Parameter(label = "Please specify a json file to store the reconstructed data")
+    @Parameter(label = "Output file (.json)", style = "save",
+            description = "Json file to create.")
     File file;
 
-    @Parameter(label = "Enter a tag to identify the registered sources (metadata key = \"ABBA\")" )
+    @Parameter(label = "Tag",
+            description = "Text stored as the 'ABBA' metadata of each exported source, to identify them later in scripts." )
     String tag;
 
-    @Parameter
+    @Parameter(label = "ABBA session", description = "The ABBA session the command acts on.")
     MultiSlicePositioner mp;
 
     @Parameter

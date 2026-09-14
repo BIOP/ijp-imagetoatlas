@@ -9,11 +9,14 @@ import org.scijava.ui.UIService;
 @SuppressWarnings("CanBeFinal")
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>(Obsolete)>ABBA - DeepSlice Registration (Web)",
-        description = "Uses Deepslice for affine in plane and axial registration of selected slices",
+        description = "Obsolete, use 'ABBA - DeepSlice Registration' instead. Registers the selected slices with the DeepSlice "
+                + "web interface: the downsampled slices are sent to the website by hand, and the result file is loaded back. "
+                + "Requires a graphical user interface.",
         iconPath = "/graphics/DeepSlice.png")
 public class RegisterSlicesDeepSliceWebCommand extends RegisterSlicesDeepSliceAbstractCommand {
 
-    @Parameter(label = "Keep slices order")
+    @Parameter(label = "Keep slice order",
+            description = "If checked, slices keep their current order: slices swapped by DeepSlice are moved back.")
     boolean maintain_slices_order;
 
     @Override

@@ -2,7 +2,9 @@ package ch.epfl.biop.atlas.aligner.command;
 
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.gui.bdv.ABBABdvViewPrefs;
+import org.scijava.ItemVisibility;
 import org.scijava.command.Command;
+import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
 import javax.swing.BorderFactory;
@@ -21,8 +23,11 @@ import java.net.URL;
 
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Cite>ABBA - How to cite",
-        description = "How to cite")
+        description = "Shows how to cite ABBA and the tools it uses, in a window (requires an internet connection).")
 public class ABBACiteInfoCommand implements Command {
+
+    @Parameter(visibility = ItemVisibility.MESSAGE)
+    String message = "Needs an internet connection. The citation information is shown in a window.";
 
     @Override
     public void run() {

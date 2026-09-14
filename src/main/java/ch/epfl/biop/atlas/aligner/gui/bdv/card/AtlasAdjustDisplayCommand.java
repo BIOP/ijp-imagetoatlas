@@ -32,12 +32,14 @@ public class AtlasAdjustDisplayCommand extends InteractiveCommand implements
                 final MutableModuleItem<Boolean> modalityEnable = //
                         getInfo().getMutableInput(key + "_enable", Boolean.class);
                 modalityEnable.setLabel(key+" (Ch. "+idx_Channel+")");
+                modalityEnable.setDescription("Shows or hides the atlas channel "+key+" (index "+idx_Channel+" in the registration commands).");
                 modalityEnable.setDefaultValue(true);
 
                 addInput(key + "_slider", Double.class);
                 final MutableModuleItem<Double> modalitySlider = //
                         getInfo().getMutableInput(key + "_slider", Double.class);
                 modalitySlider.setLabel(" ");
+                modalitySlider.setDescription("Brightness of the atlas channel "+key+": higher values saturate the display.");
                 modalitySlider.setDefaultValue(0.5);
                 modalitySlider.setMinimumValue(0.0);
                 modalitySlider.setMaximumValue(1.0);
@@ -56,6 +58,7 @@ public class AtlasAdjustDisplayCommand extends InteractiveCommand implements
         slicingSteps.setMaximumValue(50);
         slicingSteps.setPersisted(false);
         slicingSteps.setLabel("Displayed slicing [atlas steps]");
+        slicingSteps.setDescription("Spacing between the atlas sections displayed in positioning mode, in multiples of the atlas resolution.");
         slicingSteps.setValue(this, (int) (view.msp.getReslicedAtlas().getStep())); // Initialisation to current state
         view.addToCleanUpHook(() -> view.removeModeListener(this));
     }

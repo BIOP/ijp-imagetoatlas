@@ -14,13 +14,16 @@ import java.util.List;
         description = "Rotates the selected slices around the center of the registration ROI. Z: in-plane rotation, clockwise on screen. X or Y: 180 or -180 degrees only (flip)")
 public class RotateSlicesCommand implements Command {
 
-    @Parameter
+    @Parameter(label = "ABBA session", description = "The ABBA session the command acts on.")
     MultiSlicePositioner mp;
 
-    @Parameter(label = "Rotation axis", choices = {"Z","Y","X"})
+    @Parameter(label = "Rotation axis", choices = {"Z","Y","X"},
+            description = "'Z': in-plane rotation, any angle. 'X' or 'Y': flips the section upside down or left-right, "
+                    + "only 180 or -180 degrees are accepted.")
     String axis_string;
 
-    @Parameter(label = "Angle (degrees)", style="format:0.00")
+    @Parameter(label = "Angle (degrees)", style="format:0.00",
+            description = "Rotation angle. Around Z, positive is clockwise on screen.")
     double angle_degrees;
 
     @Override

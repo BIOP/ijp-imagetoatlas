@@ -13,6 +13,7 @@ import ch.epfl.biop.atlas.rat.waxholm.spraguedawley.v4p2.WaxholmSpragueDawleyRat
 import ch.epfl.biop.atlas.rat.waxholm.spraguedawley.v4p2asr.command.WaxholmSpragueDawleyRatV4p2ASRCommand;
 import ch.epfl.biop.atlas.struct.AtlasHelper;
 import org.scijava.ItemIO;
+import org.scijava.ItemVisibility;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
@@ -24,14 +25,19 @@ import java.util.List;
 import java.util.Set;
 
 @Plugin(type = Command.class,
-        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Cite>ABBA - Get Prompt r methods writing",
-        description = "Outputs a summary of methods used for the registration. Can be copy pasted in the llm of your choice.")
+        menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Cite>ABBA - Get Prompt for Methods Writing",
+        description = "Generates a prompt describing how the selected slices were registered (atlas, slicing angles, positions, "
+                + "registration steps), to paste in a large language model to draft the methods section of a publication.")
 public class ABBAGenerateMethodsPrompt implements Command {
 
-    @Parameter
+    @Parameter(visibility = ItemVisibility.MESSAGE)
+    String message = "Waits for all tasks to be done. Only the selected slices are described. The prompt is returned as an output.";
+
+    @Parameter(label = "ABBA session", description = "The ABBA session the command acts on.")
     MultiSlicePositioner mp;
 
-    @Parameter(type = ItemIO.OUTPUT)
+    @Parameter(type = ItemIO.OUTPUT, label = "Prompt for the methods section",
+            description = "Text to copy into a large language model. Review the generated methods carefully.")
     String llm_prompt_for_methods;
 
     @Override
@@ -212,7 +218,7 @@ public class ABBAGenerateMethodsPrompt implements Command {
         if (javaAtlases.contains(mp.getAtlas().getName())) {
 
         } else {
-            llm_prompt_for_methods +="- BrainGlobe paper: "+ABBAHelper.URL_BigWarp+" (used to access the atlas data)\n";
+            llm_prompt_for_methods +="- BrainGlobe paper: "+ABBAHelper.URL_Brainglobe+" (used to access the atlas data)\n";
         }
 
         llm_prompt_for_methods+="\n\n";

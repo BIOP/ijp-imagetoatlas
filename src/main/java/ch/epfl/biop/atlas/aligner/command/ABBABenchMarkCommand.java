@@ -35,10 +35,12 @@ import java.util.Map;
 
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>ABBA - Run Benchmark",
-        description = "Complete ABBA process in a benchmark")
+        description = "Runs a complete ABBA workflow on a demo dataset (mouse atlas, import, two DeepSlice runs, "
+                + "Elastix affine and spline registrations, QuPath export for the remote datasets) and reports the time and memory used by each step.")
 public class ABBABenchMarkCommand implements Command {
 
-    @Parameter
+    @Parameter(label = "Comment",
+            description = "Free text copied in the report, for instance to describe the machine.")
     String comment;
 
     final static String SMALL_REMOTE = "25 sections (remote)";
@@ -46,14 +48,19 @@ public class ABBABenchMarkCommand implements Command {
     final static String SMALL_LOCAL = "1 slide local (cached, local)";
     final static String BIG_LOCAL = "97 sections (cached, local)";
 
-    @Parameter(choices = {
+    @Parameter(label = "Demo dataset",
+            description = "Remote datasets are streamed from a public OMERO server (needs the OMERO dependencies). "
+                    + "Local datasets are downloaded once from Zenodo and cached (about 1 GB per slide).",
+            choices = {
             SMALL_REMOTE,
             BIG_REMOTE,
             SMALL_LOCAL,
             BIG_LOCAL})
     String demo_dataset;
 
-    @Parameter(description = "Slower when check - wait for all sections to have finished their registration steps before starting the next one.")
+    @Parameter(label = "Time each registration step",
+            description = "If checked, each registration step waits for all sections to be done before the next one starts, "
+                    + "so that each step is timed separately. Slower.")
     boolean wait_between_each_step;
 
     @Parameter
@@ -65,10 +72,12 @@ public class ABBABenchMarkCommand implements Command {
     @Parameter
     SourceService source_service;
 
-    @Parameter(label = "Use graphical user interface")
+    @Parameter(label = "Use graphical user interface",
+            description = "If checked, the benchmark runs in an ABBA window; otherwise it runs without display.")
     boolean use_gui;
 
-    @Parameter(type = ItemIO.OUTPUT)
+    @Parameter(type = ItemIO.OUTPUT, label = "Report",
+            description = "Markdown report: configuration, time and memory per step. Also written to the ImageJ log.")
     String report;
 
     @Parameter
@@ -82,7 +91,6 @@ public class ABBABenchMarkCommand implements Command {
         }
 
         // Check whether the benchmark can work TODO:
-        // - Elastix and transformix set
         // - Access to internet (to DL the OMERO public dataset)
         // - OMERO dependencies present (OMERO 5.5-5.6)
         // - DeepSlice set
@@ -171,7 +179,7 @@ public class ABBABenchMarkCommand implements Command {
                 for (int index = 0; index < groupedSources.size(); index++) {
                     cs.run(ImportSliceFromSourcesCommand.class, true,
                             "mp", mp,
-                            "slice_axis_mm", 4.0 + index * 1.0, // False initial guess
+                            "slice_position_mm", 4.0 + index * 1.0, // False initial guess
                             "sources", groupedSources.get(index)
                     ).get();
                 }
@@ -206,13 +214,13 @@ public class ABBABenchMarkCommand implements Command {
             mp.getSlices().forEach(SliceSources::select);
             cs.run(SetSlicesDisplayRangeCommand.class, true,
                     "mp", mp,
-                    "channels_csv", "0",
+                    "slice_channels_csv", "0",
                     "display_min", 0.0,
                     "display_max", 800.0
             ).get();
             cs.run(SetSlicesDisplayRangeCommand.class, true,
                     "mp", mp,
-                    "channels_csv", "1",
+                    "slice_channels_csv", "1",
                     "display_min", 0.0,
                     "display_max", 1024.0
             ).get();
@@ -239,13 +247,13 @@ public class ABBABenchMarkCommand implements Command {
                 }
                 cs.run(RegisterSlicesDeepSliceApposeCommand.class, true,
                         "mp", mp,
-                        "channels", "0,1",
+                        "slice_channels_csv", "0,1",
                         "model", "mouse",
                         "allow_slicing_angle_change", true,
                         "ensemble", false,
                         "post_processing", RegisterSlicesDeepSliceApposeCommand.KEEP_ORDER_REGULAR_SPACING,
-                        "slices_spacing_micrometer", -1.0,
-                        "px_size_micron", 30
+                        "slice_spacing_um", -1.0,
+                        "pixel_size_um", 30
                 ).get();
                 if (wait_between_each_step) {
                     mp.waitForTasks();
@@ -259,11 +267,10 @@ public class ABBABenchMarkCommand implements Command {
             }
             cs.run(RegisterSlicesElastixAffineCommand.class, true,
                     "mp", mp,
-                    "channels_atlas_csv", "0,1",
-                    "channels_slice_csv", "0,1",
-                    "pixel_size_micrometer", 40.0,
-                    "show_imageplus_registration_result", false,
-                    "background_offset_value_moving", 0.0
+                    "atlas_channels_csv", "0,1",
+                    "slice_channels_csv", "0,1",
+                    "pixel_size_um", 40.0,
+                    "show_imageplus_registration_result", false
             ).get();
 
             if (wait_between_each_step) {
@@ -278,11 +285,10 @@ public class ABBABenchMarkCommand implements Command {
 
             cs.run(RegisterSlicesElastixSplineCommand.class, true,
                     "mp", mp,
-                    "channels_atlas_csv", "0,1",
-                    "channels_slice_csv", "0,1",
+                    "atlas_channels_csv", "0,1",
+                    "slice_channels_csv", "0,1",
                     "nb_control_points_x", 12,
-                    "pixel_size_micrometer", 20.0,
-                    "background_offset_value_moving", 0.0,
+                    "pixel_size_um", 20.0,
                     "show_imageplus_registration_result", false
             ).get();
 

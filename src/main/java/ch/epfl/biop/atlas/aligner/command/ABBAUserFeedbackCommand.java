@@ -1,5 +1,6 @@
 package ch.epfl.biop.atlas.aligner.command;
 
+import org.scijava.ItemVisibility;
 import org.scijava.command.Command;
 import org.scijava.platform.PlatformService;
 import org.scijava.plugin.Parameter;
@@ -10,8 +11,12 @@ import java.net.URL;
 @SuppressWarnings("unused")
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Help>ABBA - Give your feedback",
-        description = "Open an ABBA feedback form")
+        description = "Opens the ABBA user feedback form in a web browser.")
 public class ABBAUserFeedbackCommand implements Command {
+
+    @Parameter(visibility = ItemVisibility.MESSAGE)
+    String message = "Opens the ABBA feedback form in a web browser.";
+
     @Parameter
     PlatformService ps;
 

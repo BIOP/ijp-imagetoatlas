@@ -16,19 +16,23 @@ import java.util.function.Consumer;
  * Command triggered by the user when he is clicking on the table header of the slice
  * display card.
  */
-@Plugin(type = Command.class)
+@Plugin(type = Command.class,
+        description = "Sets the display settings (range and color) of a channel of the slices selected in the slices table.")
 public class DisplaySettingsCommand extends DynamicCommand implements
         Initializable {
 
     public static Displaysettings IniValue;
 
-    @Parameter(persist = false)
+    @Parameter(persist = false, label = "Display min",
+            description = "Pixel value displayed as black.")
     double min;
 
-    @Parameter(persist = false)
+    @Parameter(persist = false, label = "Display max",
+            description = "Pixel value displayed at full brightness; higher values are saturated.")
     double max;
 
-    @Parameter(persist = false)
+    @Parameter(persist = false, label = "Color",
+            description = "Display color of the channel.")
     ColorRGB color;
 
     @Parameter(type = ItemIO.OUTPUT)

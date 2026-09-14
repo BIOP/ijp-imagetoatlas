@@ -11,14 +11,16 @@ import java.util.stream.Collectors;
 
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Edit>ABBA - Set Slices Thickness",
-        description = "Set the selected slices thickness - useful for a fully reconstructed brain display.")
+        description = "Sets the thickness of the selected slices along the slicing axis. "
+                + "It affects the 3D display (reconstructed brain) and the 3D resampled export, not the registrations.")
 public class SetSlicesThicknessCommand implements Command {
 
-    @Parameter
+    @Parameter(label = "ABBA session", description = "The ABBA session the command acts on.")
     MultiSlicePositioner mp;
 
-    @Parameter(label = "Slice thickness in micrometer", style="format:0.00")
-    double thickness_in_micrometer;
+    @Parameter(label = "Slice thickness (micrometers)", style="format:0.00",
+            description = "Thickness of each selected slice, centered on its position.")
+    double thickness_um;
 
     @Override
     public void run() {
@@ -27,7 +29,7 @@ public class SetSlicesThicknessCommand implements Command {
             mp.errorMessageForUser.accept("No slice selected", "You did not select any slice to edit");
         } else {
             for (SliceSources slice : slices) {
-                slice.setSliceThickness(thickness_in_micrometer /1000.);
+                slice.setSliceThickness(thickness_um /1000.);
             }
         }
     }

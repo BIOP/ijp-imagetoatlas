@@ -34,7 +34,8 @@ import static ch.epfl.biop.atlas.aligner.ABBAHelper.getResource;
 
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>ABBA - Manual Affine Registration",
-        description = "Moves, rotates, scales and shears selected slices with a gizmo, in a dedicated window",
+        description = "Manual in-plane affine registration: moves, rotates, scales and shears the selected slices with a gizmo, "
+                + "in a single dedicated window. Selected channels are only used for display. The result can be edited later.",
         iconPath = "/graphics/InteractiveTransform.png")
 public class RegisterSlicesManualAffineCommand extends RegistrationMultiChannelCommand {
 

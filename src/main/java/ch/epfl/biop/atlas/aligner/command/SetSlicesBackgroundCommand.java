@@ -14,13 +14,16 @@ import java.util.stream.Collectors;
 @SuppressWarnings("CanBeFinal")
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Edit>ABBA - Set Slice Background",
-        description = "Allow to work with white background images.")
+        description = "For brightfield images with a white background: the area outside of the selected slices images "
+                + "is filled with this value instead of black, which avoids dark edges during registrations and exports. "
+                + "Works for 8-bit, 16-bit and RGB images.")
 public class SetSlicesBackgroundCommand implements Command {
 
-    @Parameter
+    @Parameter(label = "ABBA session", description = "The ABBA session the command acts on.")
     MultiSlicePositioner mp;
 
-    @Parameter(label = "White value (8-bit or rgb: 255, 16-bit:65535)")
+    @Parameter(label = "Background value",
+            description = "Pixel value used outside of the images: 255 for 8-bit or RGB images, 65535 for 16-bit images.")
     int white_background_value = 255;
 
     @Override

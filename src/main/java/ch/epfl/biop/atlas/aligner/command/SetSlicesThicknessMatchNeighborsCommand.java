@@ -3,6 +3,7 @@ package ch.epfl.biop.atlas.aligner.command;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ij.IJ;
+import org.scijava.ItemVisibility;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
@@ -12,11 +13,14 @@ import java.util.stream.Collectors;
 
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Edit>ABBA - Set Slices Thickness (fill gaps)",
-        description = "Modifies the selected slices thickness in such a way that no space is left between slices. "+
-                "This is visible only in the reconstructed volume in BigDataViewer")
+        description = "Sets the thickness of each selected slice so that it extends halfway to its neighbors, leaving no gap between slices. "+
+                "It affects the 3D display (reconstructed brain) and the 3D resampled export, not the registrations.")
 public class SetSlicesThicknessMatchNeighborsCommand implements Command {
 
-    @Parameter
+    @Parameter(visibility = ItemVisibility.MESSAGE)
+    String message = "Needs at least two slices. The neighbors of a slice are the slices before and after it along the slicing axis, selected or not.";
+
+    @Parameter(label = "ABBA session", description = "The ABBA session the command acts on.")
     MultiSlicePositioner mp;
 
     @Override

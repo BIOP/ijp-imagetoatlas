@@ -1,5 +1,6 @@
 package ch.epfl.biop.atlas.aligner.command;
 
+import org.scijava.ItemVisibility;
 import org.scijava.command.Command;
 import org.scijava.platform.PlatformService;
 import org.scijava.plugin.Parameter;
@@ -12,9 +13,12 @@ import java.net.URL;
 
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>DeepSlice>DeepSlice Info",
-        description = "Open deep slice reference webpage.",
+        description = "Opens the DeepSlice guide website in a web browser.",
         iconPath = "/graphics/AboutDeepslice.png")
 public class DeepSliceDocumentationCommand implements Command {
+
+    @Parameter(visibility = ItemVisibility.MESSAGE)
+    String message = "Opens https://www.deepslice.com.au/guide in a web browser.";
 
     @Parameter
     PlatformService ps;

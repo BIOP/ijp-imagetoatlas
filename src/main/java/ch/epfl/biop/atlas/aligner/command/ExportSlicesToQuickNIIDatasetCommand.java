@@ -30,6 +30,9 @@ import static ch.epfl.biop.atlas.aligner.gui.bdv.BdvMultislicePositionerView.get
 @SuppressWarnings("CanBeFinal")
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>ABBA - Export registered slices as QuickNII dataset",
+        description = "Exports the selected slices as a QuickNII dataset: registered (deformed) slice images resampled within "
+                + "the current region of interest, and a series JSON file with the position of each image in the atlas. "
+                + "The exported images already include all registrations. The folder is created if needed.",
         iconPath = "/graphics/ABBAToQNII.png")
 public class ExportSlicesToQuickNIIDatasetCommand implements Command {
 
@@ -37,28 +40,36 @@ public class ExportSlicesToQuickNIIDatasetCommand implements Command {
     String message = "<html><b>WARNING:</b> The QuickNII export will apply all registrations and resample the images.<br>" +
             "Only JPG seems to be supported.";
 
-    @Parameter
+    @Parameter(label = "ABBA session", description = "The ABBA session the command acts on.")
     MultiSlicePositioner mp;
 
-    @Parameter(label = "QuickNII dataset export folder", style="directory")
+    @Parameter(label = "Output folder", style="directory",
+            description = "Folder where the images ('<prefix>_s000.jpg'...) and the '<prefix>.json' series file are written.")
     File dataset_folder;
 
-    @Parameter(label="Pixel Size in micron", description = "The resolution at which the registered slices will be resampled")
-    double px_size_micron = 40;
+    @Parameter(label="Pixel size (micrometers)",
+            description = "Pixel size at which the registered slices are resampled.")
+    double pixel_size_um = 40;
 
-    @Parameter(label = "Slices channels, 0-based, comma separated, '*' for all channels", description = "'0,2' for channels 0 and 2")
-    String channels = "*";
+    @Parameter(label = "Slice channels",
+            description = "0-based indices of the slice channels to export, comma separated (e.g. '0,2'), or '*' for all channels.")
+    String slice_channels_csv = "*";
 
-    @Parameter(label = "Section Name Prefix")
+    @Parameter(label = "File name prefix",
+            description = "Prefix of the exported image files and name of the JSON series file.")
     String image_name = "Section";
 
-    @Parameter(label = "Convert to 8 bit image")
+    @Parameter(label = "Convert to 8-bit",
+            description = "If checked, images are converted to 8-bit before being saved.")
     boolean convert_to_8_bits = true;
 
-    @Parameter(label = "Convert to jpg (single channel recommended)")
+    @Parameter(label = "Save as JPEG",
+            description = "If checked, images are saved as JPEG, the format QuickNII reads; a single channel is recommended. "
+                    + "Otherwise they are saved as TIFF.")
     boolean convert_to_jpg = true;
 
-    @Parameter
+    @Parameter(label = "Interpolate",
+            description = "If checked, pixels are linearly interpolated when resampled; otherwise the nearest pixel is used.")
     boolean interpolate;
 
     @Override
@@ -68,8 +79,8 @@ public class ExportSlicesToQuickNIIDatasetCommand implements Command {
 
         SourcesProcessor preprocess = SourcesProcessorHelper.Identity();
 
-        if (!channels.trim().equals("*")) {
-            List<Integer> indices = Arrays.stream(channels.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
+        if (!slice_channels_csv.trim().equals("*")) {
+            List<Integer> indices = Arrays.stream(slice_channels_csv.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
 
             int maxIndex = indices.stream().mapToInt(e -> e).max().getAsInt();
 
@@ -92,12 +103,12 @@ public class ExportSlicesToQuickNIIDatasetCommand implements Command {
                     .slices(slicesToExport)
                     .name(image_name)
                     .folder(dataset_folder)
-                    .pixelSizeMicron(px_size_micron)
+                    .pixelSizeMicron(pixel_size_um)
                     .interpolate(interpolate)
                     .create()
                     .export();
 
-            double px_size_mm = px_size_micron/1000.0;
+            double px_size_mm = pixel_size_um/1000.0;
 
             QuickNIISeries series = new QuickNIISeries();
             series.slices = new ArrayList<>();

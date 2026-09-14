@@ -41,7 +41,9 @@ import static ch.epfl.biop.atlas.aligner.command.RegisterSlicesDeepSliceAbstract
 
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Import>ABBA - Import QuickNII Project",
-        description = "Import images of a QuickNII Project as slices into ABBA",
+        description = "Imports the images of a QuickNII series (JSON file, also produced by DeepSlice) as slices, together with their registration: "
+                + "slice positions, in-plane affine transforms and atlas slicing angle. "
+                + "The import is approximate: a single slicing angle (median of all slices) is applied to all slices.",
         iconPath = "/graphics/QNIIToABBA.png")
 public class ImportSlicesFromQuickNIICommand implements Command {
 
@@ -49,13 +51,15 @@ public class ImportSlicesFromQuickNIICommand implements Command {
     String message = "<html><b>WARNING:</b> The QuickNII import is not exact:<br>" +
             "The same slicing angle (median of all slices) will be applied for all slices.";
 
-    @Parameter
+    @Parameter(label = "ABBA session", description = "The ABBA session the command acts on.")
     MultiSlicePositioner mp;
 
-    @Parameter(label = "Split RGB channels")
+    @Parameter(label = "Split RGB channels",
+            description = "If checked, RGB images are split into three channels (red, green, blue); otherwise they are kept as a single RGB channel.")
     boolean split_rgb_channels = false;
 
-    @Parameter(label = "QuickNII file (.json)")
+    @Parameter(label = "QuickNII file (.json)",
+            description = "QuickNII series file, in JSON format. The images it references must be in the same folder.")
     File quicknii_project;
 
     @Parameter

@@ -17,14 +17,17 @@ import java.util.List;
 // TODO : make this command atlas agnostic
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>ABBA - Export Regions To Roi Manager",
-        description = "Export atlas regions to ROI Manager (for each selected slice).")
+        description = "Adds the atlas regions of each selected slice to the ImageJ ROI Manager, as ROIs in the pixel coordinates "
+                + "of the original (unregistered, full resolution) slice image.")
 public class ExportRegionsToRoiManagerCommand extends DynamicCommand implements
         Initializable {
 
-    @Parameter
+    @Parameter(label = "ABBA session", description = "The ABBA session the command acts on.")
     MultiSlicePositioner mp;
 
-    @Parameter(label="Roi Naming")
+    @Parameter(label="ROI naming",
+            description = "Atlas ontology property used to name each region ROI, for instance its acronym, name or id. "
+                    + "The available choices depend on the atlas.")
     String naming_choice; // Intellij claims it's not used. but it's wrong. It's use through scijava reflection
 
     @Override

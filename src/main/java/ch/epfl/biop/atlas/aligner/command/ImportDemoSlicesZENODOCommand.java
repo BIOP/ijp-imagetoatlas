@@ -18,7 +18,9 @@ import static ch.epfl.biop.atlas.aligner.ABBAHelper.getResource;
 
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>ABBA - Open Demo Slices From ZENODO",
-        description = "Open a set of demo brain sections",
+        description = "Imports demo mouse brain sections from whole slide images (vsi) downloaded from Zenodo and cached locally "
+                + "(about 1 GB per slide). The label and overview images of each slide are imported as extra slices "
+                + "(their name does not contain '10x'). All slices are selected at the end.",
         iconPath = "/graphics/zenodo-icon-blue.png")
 public class ImportDemoSlicesZENODOCommand implements Command {
 
@@ -31,7 +33,7 @@ public class ImportDemoSlicesZENODOCommand implements Command {
             "    <p>For more information, please visit <a href=https://zenodo.org/records/14918378>https://zenodo.org/records/14918378</a> </p>\n" +
             "\n</html>\n";
 
-    @Parameter
+    @Parameter(label = "ABBA session", description = "The ABBA session the command acts on.")
     MultiSlicePositioner mp;
 
     @Parameter
@@ -40,7 +42,8 @@ public class ImportDemoSlicesZENODOCommand implements Command {
     @Parameter
     TaskService taskService;
 
-    @Parameter(label = "Number of slides to use (7 max)", max = "7", min = "1")
+    @Parameter(label = "Number of slides", max = "7", min = "1",
+            description = "Number of slides to download, from 1 to 7, picked around the central slide. Each slide contains several sections.")
     int number_of_slides = 1;
 
     @Override
@@ -73,20 +76,20 @@ public class ImportDemoSlicesZENODOCommand implements Command {
                         "datasetname", "Zenodo Demo Sections ("+nSlides+" Slides)",
                         "files", files,
                         "split_rgb_channels", false,
-                        "slice_axis_initial_mm", 0,
-                        "increment_between_slices_mm", 0.08
+                        "first_slice_position_mm", 0,
+                        "slice_spacing_mm", 0.08
                     ).get();
 
             mp.getSlices().forEach(SliceSources::select);
             cs.run(SetSlicesDisplayRangeCommand.class, true,
                     "mp", mp,
-                    "channels_csv", "0",
+                    "slice_channels_csv", "0",
                     "display_min", 0.0,
                     "display_max", 800.0
             ).get();
             cs.run(SetSlicesDisplayRangeCommand.class, true,
                     "mp", mp,
-                    "channels_csv", "1",
+                    "slice_channels_csv", "1",
                     "display_min", 0.0,
                     "display_max", 1024.0
             ).get();

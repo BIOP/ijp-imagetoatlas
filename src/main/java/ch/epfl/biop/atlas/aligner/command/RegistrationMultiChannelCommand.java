@@ -30,14 +30,17 @@ abstract public class RegistrationMultiChannelCommand implements Command {
     @Parameter(style = "message", visibility = ItemVisibility.MESSAGE)
     String message = getMessage();
 
-    @Parameter
+    @Parameter(label = "ABBA session", description = "The ABBA session the command acts on.")
     MultiSlicePositioner mp;
 
-    @Parameter(label = "Atlas channels (channels comma separated)")
-    String channels_atlas_csv;
+    @Parameter(label = "Atlas channels",
+            description = "0-based indices of the atlas channels to use, comma separated (e.g. '0,1'). '*' is not accepted. "
+                    + "Channel indices are shown in the atlas display card.")
+    String atlas_channels_csv;
 
-    @Parameter(label = "Slices channels (channels comma separated)")
-    String channels_slice_csv;
+    @Parameter(label = "Slice channels",
+            description = "0-based indices of the slice channels to use, comma separated (e.g. '0,1'). '*' is not accepted.")
+    String slice_channels_csv;
 
     protected boolean validationError = false;
 
@@ -48,10 +51,10 @@ abstract public class RegistrationMultiChannelCommand implements Command {
     final public void run() {
 
         try {
-            atlas_channels = Arrays.stream(channels_atlas_csv.split(","))
+            atlas_channels = Arrays.stream(atlas_channels_csv.split(","))
                     .map(Integer::parseInt)
                     .collect(Collectors.toList());
-            slice_channels = Arrays.stream(channels_slice_csv.split(","))
+            slice_channels = Arrays.stream(slice_channels_csv.split(","))
                     .map(Integer::parseInt)
                     .collect(Collectors.toList());
         } catch (NumberFormatException e) {

@@ -8,22 +8,24 @@ import org.scijava.plugin.Plugin;
 
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Import>ABBA - Import Sources",
-        description = "Import a list of sources as a slice into ABBA",
+        description = "Imports BigDataViewer-Playground sources as a single slice: each source becomes one channel of the slice.",
         iconPath = "/graphics/BDVToABBA.png")
 public class ImportSliceFromSourcesCommand implements Command {
 
-    @Parameter
+    @Parameter(label = "ABBA session", description = "The ABBA session the command acts on.")
     MultiSlicePositioner mp;
 
-    @Parameter(label = "Initial axis position (0 = front, mm units)", style="format:0.000", stepSize = "0.1")
-    double slice_axis_mm;
+    @Parameter(label = "Slice position (mm)", style="format:0.000", stepSize = "0.1",
+            description = "Initial position of the slice along the atlas slicing axis, in mm, as the Z shown in the slice information (0 = front of the atlas).")
+    double slice_position_mm;
 
-    @Parameter(style="sorted")
+    @Parameter(style="sorted", label = "Sources (channels)",
+            description = "Sources forming the slice, one per channel, in channel order. Their calibration should be in mm.")
     SourceAndConverter<?>[] sources;
 
     @Override
     public void run() {
-        mp.createSlice(sources, slice_axis_mm);
+        mp.createSlice(sources, slice_position_mm + mp.getReslicedAtlas().getZOffset());
     }
 
 }

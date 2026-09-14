@@ -10,17 +10,20 @@ import java.io.File;
 @SuppressWarnings("unused")
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>File>ABBA - Load State",
-        description = "Loads a previous registration state into ABBA",
+        description = "Loads a saved ABBA state (.abba file): slices, their positions and registrations, and the atlas slicing angles. "
+                + "The slices are added to the current session. The image files must still be at the location where they were when the state was saved.",
         iconPath = "/graphics/LoadState.png")
 public class ABBAStateLoadCommand implements Command {
 
-    @Parameter
+    @Parameter(label = "ABBA session", description = "The ABBA session the command acts on.")
     MultiSlicePositioner mp;
 
-    @Parameter(style = "open")
+    @Parameter(style = "open", label = "State file (.abba)",
+            description = "ABBA state file to load. It must have been saved with the same atlas.")
     File state_file;
 
-    @Parameter(type = ItemIO.OUTPUT)
+    @Parameter(type = ItemIO.OUTPUT, label = "Success",
+            description = "True if the state was loaded.")
     Boolean success;
 
     @Override

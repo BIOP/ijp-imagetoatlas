@@ -22,7 +22,8 @@ import static ch.epfl.biop.atlas.aligner.ABBAHelper.getResource;
 
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>ABBA - Open Demo Slices From OMERO",
-        description = "Open a set of demo brain sections",
+        description = "Imports demo mouse brain sections streamed from a public OMERO server, "
+                + "through a QuPath project downloaded from Zenodo. Requires an internet connection and the OMERO dependencies.",
         iconPath = "/graphics/ImportDemoSlicesOMERO.png")
 public class ImportDemoSlicesOMEROCommand implements Command {
 
@@ -36,13 +37,16 @@ public class ImportDemoSlicesOMEROCommand implements Command {
             "    <p>The QuPath project containing these slices can also be directly downloaded from <a href=https://zenodo.org/records/14918378>Zenodo.</a></p>"+
             "\n</html>\n";
 
-    @Parameter
+    @Parameter(label = "ABBA session", description = "The ABBA session the command acts on.")
     MultiSlicePositioner mp;
 
-    @Parameter(choices = {"25 sections", "97 sections"}, label = "Choose the number of sections to import")
+    @Parameter(choices = {"25 sections", "97 sections"}, label = "Demo dataset",
+            description = "'25 sections': a subset, faster to try ABBA. '97 sections': the full brain.")
     String demo_dataset;
 
-    @Parameter(label = "Target directory for QuPath project (not required)", style = "directory", required = false)
+    @Parameter(label = "QuPath project folder (optional)", style = "directory", required = false,
+            description = "Existing folder where the demo QuPath project is downloaded, to keep it and export registrations to it. "
+                    + "If empty or missing, a temporary folder is used.")
     File project_directory;
 
     @Parameter
@@ -101,7 +105,7 @@ public class ImportDemoSlicesOMEROCommand implements Command {
             for (int index = 0; index < groupedSources.size(); index++) {
                 cs.run(ImportSliceFromSourcesCommand.class, true,
                         "mp", mp,
-                        "slice_axis_mm", 4.0 + index * 1.0, // False initial guess
+                        "slice_position_mm", 4.0 + index * 1.0, // False initial guess
                         "sources", groupedSources.get(index)
                 ).get();
             }
@@ -109,13 +113,13 @@ public class ImportDemoSlicesOMEROCommand implements Command {
             mp.getSlices().forEach(SliceSources::select);
             cs.run(SetSlicesDisplayRangeCommand.class, true,
                     "mp", mp,
-                    "channels_csv", "0",
+                    "slice_channels_csv", "0",
                     "display_min", 0.0,
                     "display_max", 800.0
             ).get();
             cs.run(SetSlicesDisplayRangeCommand.class, true,
                     "mp", mp,
-                    "channels_csv", "1",
+                    "slice_channels_csv", "1",
                     "display_min", 0.0,
                     "display_max", 1024.0
             ).get();

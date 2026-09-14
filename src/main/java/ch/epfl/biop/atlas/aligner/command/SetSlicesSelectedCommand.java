@@ -11,13 +11,16 @@ import java.util.List;
 @SuppressWarnings("CanBeFinal")
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Edit>ABBA - Select Slices",
-        description = "Set the slices to select.")
+        description = "Adds slices to the current selection, by index. Already selected slices stay selected. "
+                + "Most commands act on the selected slices.")
 public class SetSlicesSelectedCommand implements Command {
 
-    @Parameter
+    @Parameter(label = "ABBA session", description = "The ABBA session the command acts on.")
     MultiSlicePositioner mp;
 
-    @Parameter(label = "Slices to select, '*' for all slices, comma separated, 0-based")
+    @Parameter(label = "Slice indices",
+            description = "0-based indices of the slices, in the order along the slicing axis. '*' for all slices, "
+                    + "comma separated values ('0,3'), inclusive ranges ('2:5'), ranges with a step ('0:2:10'). Negative indices count from the end: -1 is the last slice.")
     String slices_csv = "*";
 
     @Override

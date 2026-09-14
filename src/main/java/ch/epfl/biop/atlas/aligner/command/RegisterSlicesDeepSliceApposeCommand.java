@@ -17,12 +17,15 @@ import java.io.File;
 @SuppressWarnings("CanBeFinal")
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>ABBA - DeepSlice Registration",
-        description = "Uses Deepslice for affine in plane and axial registration of selected slices",
+        description = "Runs DeepSlice (installed automatically in a local Python environment) on the selected slices: "
+                + "sets their position along the slicing axis, adds an in-plane affine registration "
+                + "and optionally adjusts the atlas slicing angle. The result depends on the slices display settings: avoid saturation.",
         iconPath = "/graphics/DeepSlice.png")
 public class RegisterSlicesDeepSliceApposeCommand extends RegisterSlicesDeepSliceAbstractCommand {
 
-    @Parameter(description = "Try with and without ensemble to find the model which best works for you",
-    label = "Average of several models (slower)")
+    @Parameter(label = "Ensemble (average of several models, slower)",
+            description = "If checked, DeepSlice averages the predictions of several models. "
+                    + "Results may be better or not depending on the dataset: try both.")
     boolean ensemble = false;
 
     final public static String KEEP_ORDER = "Keep order";
@@ -30,7 +33,13 @@ public class RegisterSlicesDeepSliceApposeCommand extends RegisterSlicesDeepSlic
     final public static String KEEP_ORDER_SET_SPACING = "Keep order + set spacing (parameter below)";
     final public static String NO_POST_PROCESSING = "No post-processing";
 
-    @Parameter(description = "DeepSlice post-processing", choices = {
+    @Parameter(label = "Position post-processing",
+            description = "How the slice positions predicted by DeepSlice are corrected. "
+                    + "'" + KEEP_ORDER + "': the current slice order is preserved. "
+                    + "'" + KEEP_ORDER_REGULAR_SPACING + "': order preserved and slices evenly spaced, spacing estimated by DeepSlice. "
+                    + "'" + KEEP_ORDER_SET_SPACING + "': order preserved and slices evenly spaced with the spacing given below. "
+                    + "'" + NO_POST_PROCESSING + "': raw DeepSlice positions, slices may be reordered.",
+            choices = {
             KEEP_ORDER,
             KEEP_ORDER_REGULAR_SPACING,
             KEEP_ORDER_SET_SPACING,
@@ -38,8 +47,9 @@ public class RegisterSlicesDeepSliceApposeCommand extends RegisterSlicesDeepSlic
     })
     String post_processing;
 
-    @Parameter(style = "format:0.0", label = "Spacing (micrometer), used only when 'Keep order + set spacing' is selected")
-    double slices_spacing_micrometer = -1;
+    @Parameter(style = "format:0.0", label = "Slice spacing (micrometers)",
+            description = "Distance between consecutive slices. Only used with '" + KEEP_ORDER_SET_SPACING + "'.")
+    double slice_spacing_um = -1;
 
     @Override
     boolean setSettings() {
@@ -70,7 +80,7 @@ public class RegisterSlicesDeepSliceApposeCommand extends RegisterSlicesDeepSlic
                 settings.enforce_index_order = true;
 
                 settings.use_enforce_index_spacing = true;
-                settings.enforce_index_spacing = Double.toString(slices_spacing_micrometer);
+                settings.enforce_index_spacing = Double.toString(slice_spacing_um);
                 break;
             case NO_POST_PROCESSING:
             default:

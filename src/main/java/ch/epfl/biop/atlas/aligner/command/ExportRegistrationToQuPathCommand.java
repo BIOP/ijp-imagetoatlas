@@ -12,14 +12,17 @@ import java.util.List;
 
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>ABBA - Export Registrations To QuPath Project",
-        description = "Export atlas regions and transformations to QuPath project (for each selected slice)",
+        description = "For each selected slice imported from a QuPath project, saves its atlas regions and its registration "
+                + "(ABBA-RoiSet and ABBA-Transform files) in the QuPath project folder of the image. "
+                + "They are then imported in QuPath with the ABBA extension. Slices not imported from a QuPath project are not exported.",
         iconPath = "/graphics/ExportRegistrationToQuPath.png")
 public class ExportRegistrationToQuPathCommand implements Command {
 
-    @Parameter
+    @Parameter(label = "ABBA session", description = "The ABBA session the command acts on.")
     MultiSlicePositioner mp;
 
-    @Parameter(label="Erase Previous ROIs")
+    @Parameter(label="Overwrite previous export",
+            description = "If checked, a previous ABBA export of the same image is replaced; otherwise an error is reported for this image.")
     boolean erase_previous_file;
 
     @Override

@@ -14,23 +14,25 @@ import java.util.stream.Collectors;
 @SuppressWarnings("CanBeFinal")
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Edit>ABBA - Raster slice",
-        description = "Speed up the display of slices by precomputing and caching"+
-                      " their pixel.")
+        description = "Speeds up the display of the selected slices by computing and caching their registered image "+
+                      "at a fixed pixel size. The cached image has a lower resolution than the original image. Experimental.")
 public class RasterSlicesCommand implements Command {
 
-    @Parameter
+    @Parameter(label = "ABBA session", description = "The ABBA session the command acts on.")
     MultiSlicePositioner mp;
 
-    @Parameter(label="Pixel size (micrometer)")
-    double pixel_size_micrometer = 10;
+    @Parameter(label="Pixel size (micrometers)",
+            description = "Pixel size of the cached images: larger is faster and uses less memory, but is blurrier.")
+    double pixel_size_um = 10;
 
-    @Parameter(label="Interpolate")
+    @Parameter(label="Interpolate",
+            description = "If checked, pixels are linearly interpolated when resampled; otherwise the nearest pixel is used.")
     boolean interpolate = false;
 
     @Override
     public void run() {
 
-        if (pixel_size_micrometer<0) {
+        if (pixel_size_um<0) {
             mp.errorMessageForUser.accept("Raster deformation error","Please use a positive value for the pixel size.");
             return;
         }
@@ -45,7 +47,7 @@ public class RasterSlicesCommand implements Command {
 
         new MarkActionSequenceBatchAction(mp).runRequest();
         for (SliceSources slice : slicesToProcess) {
-            RasterSliceAction rasterSliceAction = new RasterSliceAction(mp, slice, pixel_size_micrometer, interpolate);
+            RasterSliceAction rasterSliceAction = new RasterSliceAction(mp, slice, pixel_size_um, interpolate);
             rasterSliceAction.runRequest();
         }
         new MarkActionSequenceBatchAction(mp).runRequest();

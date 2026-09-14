@@ -18,20 +18,25 @@ import java.util.List;
 // TODO: make this command atlas agnostic
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>ABBA - Export Regions To File",
-        description = "Export the transformed atlas regions of currently selected slices as ImageJ roi zip files.")
+        description = "Saves the atlas regions of each selected slice as an ImageJ ROI set zip file, named after the slice, "
+                + "with ROIs in the pixel coordinates of the original (unregistered, full resolution) slice image.")
 public class ExportRegionsToRoisetFileCommand extends DynamicCommand implements
         Initializable {
 
-    @Parameter
+    @Parameter(label = "ABBA session", description = "The ABBA session the command acts on.")
     MultiSlicePositioner mp;
 
-    @Parameter(label="Roi Naming")
+    @Parameter(label="ROI naming",
+            description = "Atlas ontology property used to name each region ROI, for instance its acronym, name or id. "
+                    + "The available choices depend on the atlas.")
     String naming_choice; // Intellij claims it's not used. but it's wrong. It's use through scijava reflection
 
-    @Parameter(label="Directory for ROI Saving", style = "directory")
+    @Parameter(label="Output folder", style = "directory",
+            description = "Folder where one '<slice name>.zip' ROI set is written per selected slice.")
     File dir_output;
 
-    @Parameter(label="Erase Previous ROIs")
+    @Parameter(label="Overwrite existing files",
+            description = "If checked, existing ROI set files with the same name are replaced; otherwise these slices are skipped with a warning.")
     boolean erase_previous_file;
 
     @Override

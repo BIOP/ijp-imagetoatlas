@@ -11,7 +11,7 @@ import java.io.File;
 @SuppressWarnings("unused")
 @Plugin(type = BdvPlaygroundActionCommand.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>ABBA - Preferences",
-        description = "Sets actions linked to key / mouse event in ABBA (not functional)")
+        description = "Not functional: meant to edit the keyboard and mouse bindings of the ABBA viewer.")
 public class ABBASetBDVPreferencesCommand implements Command {
 
     @Parameter

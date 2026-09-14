@@ -19,27 +19,34 @@ import java.util.concurrent.ExecutionException;
 @SuppressWarnings("CanBeFinal")
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Import>ABBA - Import With Bio-Formats",
-        description = "Import a Bio-Formats compatible file as brain slices",
+        description = "Imports images from Bio-Formats compatible files (vsi, czi, ome.tiff, lif...) as slices. "
+                + "Each image series of each file becomes one slice, all channels included. The imported slices are selected.",
         iconPath = "/graphics/ImportSlicesFromFiles.png")
 public class ImportSlicesFromFilesCommand implements Command {
 
-    @Parameter
+    @Parameter(label = "ABBA session", description = "The ABBA session the command acts on.")
     MultiSlicePositioner mp;
 
-    @Parameter(label = "Dataset Name")
+    @Parameter(label = "Dataset name",
+            description = "Name of the dataset grouping the imported images in the BigDataViewer-Playground source tree.")
     String datasetname;
 
-    @Parameter(label = "Files to import")
+    @Parameter(label = "Files to import",
+            description = "Image files to open with Bio-Formats. Files should have a pixel size calibration.")
     File[] files;
 
-    @Parameter(label = "Split RGB channels")
+    @Parameter(label = "Split RGB channels",
+            description = "If checked, RGB images are split into three channels (red, green, blue); otherwise they are kept as a single RGB channel.")
     boolean split_rgb_channels = false;
 
-    @Parameter(label = "Initial axis position (0 = front, mm units)", style="format:0.000", stepSize = "0.1")
-    double slice_axis_initial_mm;
+    @Parameter(label = "Position of the first slice (mm)", style="format:0.000", stepSize = "0.1",
+            description = "Initial position of the first imported slice along the atlas slicing axis, in mm, as the Z shown in the slice information (0 = front of the atlas). "
+                    + "Positions can be adjusted later, for instance with DeepSlice.")
+    double first_slice_position_mm;
 
-    @Parameter(label = "Axis increment between slices (mm, can be negative for reverse order)", style="format:0.000", stepSize = "0.02")
-    double increment_between_slices_mm;
+    @Parameter(label = "Spacing between slices (mm)", style="format:0.000", stepSize = "0.02",
+            description = "Distance between consecutive imported slices along the slicing axis, in mm. Use a negative value to reverse their order.")
+    double slice_spacing_mm;
 
     @Parameter
     CommandService command_service;
@@ -68,9 +75,8 @@ public class ImportSlicesFromFilesCommand implements Command {
                     sac_service.getSourcesFromDataset(spimdata)
                             .toArray(new SourceAndConverter[0]);
 
-            List<SliceSources> slices = mp.createSlice(sacs, slice_axis_initial_mm, increment_between_slices_mm, Tile.class, new Tile(-1));
+            List<SliceSources> slices = mp.createSlice(sacs, first_slice_position_mm + mp.getReslicedAtlas().getZOffset(), slice_spacing_mm, Tile.class, new Tile(-1));
 
-            slice_axis_initial_mm += (slices.size()+1)* increment_between_slices_mm;
 
             mp.selectSlice(mp.getSlices());
         } catch (InterruptedException e) {

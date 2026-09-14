@@ -105,10 +105,9 @@ public class DemoRegistrationIJ1 {
         ij.command().run(RegisterSlicesElastixAffineCommand.class, true,
                     "mp", mp,
                     "show_imageplus_registration_result", true,
-                    "background_offset_value_moving", 0,
                     "atlas_image_channel",0,
                     "slice_image_channel",0,
-                    "pixel_size_micrometer", 20
+                    "pixel_size_um", 20
             ).get();
 
         IJ.log("*** Wait for end of all tasks");

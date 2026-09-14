@@ -18,26 +18,31 @@ import java.util.stream.IntStream;
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>ABBA - Export Atlas Coordinates of Original Slices to ImageJ",
         description =
-                "Exports physical coordinates of the atlas in a " +
-                "3 channel (x,y,z) image that matches pixels of the "+
-                "initial unregistered slice (for each selected slice). "+
-                "Resolution levels can be specified."
+                "For each selected slice, exports a 3-channel (x, y, z) 32-bit ImageJ image with the same pixels as the " +
+                "original unregistered slice image: each pixel holds its atlas coordinates, in mm. "+
+                "Waits for the registrations of the slices to be done."
 )
 public class ExportDeformationFieldToImageJCommand implements Command {
 
-    @Parameter
+    @Parameter(label = "ABBA session", description = "The ABBA session the command acts on.")
     MultiSlicePositioner mp;
 
-    @Parameter(label = "Resolution level (0 = max resolution)")
+    @Parameter(label = "Resolution level",
+            description = "Resolution level of the original image the exported image matches: 0 = full resolution, "
+                    + "1 = first downscaled level, etc. Must exist in the slice files.")
     int resolution_level = 0;
 
-    @Parameter(label = "Extra DownSampling")
+    @Parameter(label = "Additional downsampling factor",
+            description = "Integer factor to further downsample the exported image, on top of the resolution level. 1 = no downsampling.")
     int downsampling = 1;
 
-    @Parameter(label = "Max iterations in invertible transform computation (default 200)")
+    @Parameter(label = "Max iterations for transform inversion",
+            description = "Maximum number of iterations used to numerically invert non-linear (spline) registrations. "
+                    + "Increase it if the inversion does not converge. Default 200.")
     int max_number_of_iterations = 200;
 
-    @Parameter(type = ItemIO.OUTPUT)
+    @Parameter(type = ItemIO.OUTPUT, label = "Images",
+            description = "One coordinates image per selected slice.")
     ImagePlus[] images;
 
     @Override
@@ -62,7 +67,6 @@ public class ExportDeformationFieldToImageJCommand implements Command {
             export.runRequest();
         }
 
-        ImagePlus[] images = new ImagePlus[slicesToExport.size()];
         IntStream.range(0,slicesToExport.size()).parallel().forEach(i -> {
             SliceSources slice = slicesToExport.get(i);
             boolean success = slice.waitForEndOfAction(tasks.get(slice));

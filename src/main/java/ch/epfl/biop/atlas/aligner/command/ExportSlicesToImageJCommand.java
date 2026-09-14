@@ -34,30 +34,42 @@ import java.util.stream.IntStream;
 @SuppressWarnings("CanBeFinal")
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>ABBA - Export Registered Slices to ImageJ",
-        description = "Export registered (deformed) slices in the atlas coordinates. "+
-                      "A pixel size should be specified to resample the registered images.")
+        description = "Exports the registered (deformed) selected slices as an ImageJ image, one plane per slice, "+
+                      "resampled at the given pixel size within the current region of interest, "+
+                      "optionally with the atlas regions as overlay. Same geometry as 'Export Atlas to ImageJ'.")
 public class ExportSlicesToImageJCommand extends DynamicCommand implements
         Initializable {
 
-    @Parameter
+    @Parameter(label = "ABBA session", description = "The ABBA session the command acts on.")
     MultiSlicePositioner mp;
 
-    @Parameter(label="Pixel Size in micron")
-    double px_size_micron = 20;
+    @Parameter(label="Pixel size (micrometers)",
+            description = "Pixel size of the exported image.")
+    double pixel_size_um = 20;
 
-    @Parameter(label = "Slices channels, 0-based, comma separated, '*' for all channels", description = "'0,2' for channels 0 and 2")
-    String channels = "*";
+    @Parameter(label = "Slice channels",
+            description = "0-based indices of the slice channels to export, comma separated (e.g. '0,2'), or '*' for all channels.")
+    String slice_channels_csv = "*";
 
-    @Parameter(label="Atlas Roi Naming")
+    @Parameter(label="Add atlas regions overlay",
+            description = "If checked, the atlas regions of each slice are added as an overlay of ROIs.")
+    boolean add_regions_overlay = true;
+
+    @Parameter(label="ROI naming",
+            description = "Atlas ontology property used to name each region ROI of the overlay, for instance its acronym, name or id. "
+                    + "The available choices depend on the atlas. Ignored without overlay.")
     String naming_choice; // Intellij claims it's not used. but it's wrong. It's use through scijava reflection
 
-    @Parameter(label = "Exported image name")
+    @Parameter(label = "Image name",
+            description = "Title of the exported ImageJ image.")
     String image_name = "Untitled";
 
-    @Parameter
+    @Parameter(label = "Interpolate",
+            description = "If checked, pixels are linearly interpolated when resampled; otherwise the nearest pixel is used.")
     boolean interpolate;
 
-    @Parameter(type = ItemIO.OUTPUT)
+    @Parameter(type = ItemIO.OUTPUT, label = "Image",
+            description = "Exported image: one plane per selected slice.")
     ImagePlus image;
 
 
@@ -73,8 +85,8 @@ public class ExportSlicesToImageJCommand extends DynamicCommand implements
 
         SourcesProcessor preprocess = SourcesProcessorHelper.Identity();
 
-        if (!channels.trim().equals("*")) {
-            List<Integer> indices = Arrays.stream(channels.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
+        if (!slice_channels_csv.trim().equals("*")) {
+            List<Integer> indices = Arrays.stream(slice_channels_csv.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
 
             int maxIndex = indices.stream().mapToInt(e -> e).max().getAsInt();
 
@@ -95,7 +107,7 @@ public class ExportSlicesToImageJCommand extends DynamicCommand implements
             ExportSliceToImagePlusAction export = new ExportSliceToImagePlusAction(mp, slice,
                     preprocess,
                     roi[0], roi[1], roi[2], roi[3],
-                    px_size_micron / 1000.0, 0,interpolate);
+                    pixel_size_um / 1000.0, 0,interpolate);
 
             tasks.put(slice, export);
             export.runRequest();
@@ -163,11 +175,11 @@ public class ExportSlicesToImageJCommand extends DynamicCommand implements
     }
 
     private void addRegionsOverlay(ImagePlus image, SliceSources slice) {
-        if (!naming_choice.equals("Do not add regions")) {
+        if (add_regions_overlay) {
             try {
                 mp.addTask();
                 double atlas_px_in_microns = 1000.0 * mp.getAtlas().getMap().getAtlasPrecisionInMillimeter();
-                double scale = atlas_px_in_microns / (this.px_size_micron);
+                double scale = atlas_px_in_microns / (this.pixel_size_um);
 
                 image.setOverlay(new Overlay());
 
@@ -200,7 +212,6 @@ public class ExportSlicesToImageJCommand extends DynamicCommand implements
         final MutableModuleItem<String> naming_choice = //
                 getInfo().getMutableInput("naming_choice", String.class);
         List<String> names = new ArrayList<>(mp.getAtlas().getOntology().getRoot().data().keySet());
-        names.add(0, "Do not add regions");
         naming_choice.setChoices(names);
     }
 

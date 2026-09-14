@@ -60,6 +60,9 @@ public class ScijavaCommandToPython {
         commandClassName = commandClassName.replace("BigWarp", "Bigwarp");
         commandClassName = commandClassName.replace("ABBA", "Abba");
         commandClassName = commandClassName.replace("DeepSlice", "Deepslice");
+        commandClassName = commandClassName.replace("OMERO", "Omero");
+        commandClassName = commandClassName.replace("ZENODO", "Zenodo");
+        commandClassName = commandClassName.replace("BenchMark", "Benchmark");
         return commandClassName;
     }
 
@@ -142,7 +145,12 @@ public class ScijavaCommandToPython {
                     builder.append(tabStr + f.getName().toLowerCase() + " ");
                     addTypeHintIfPossible(builder, f, true);
                     builder.append(": ");
-                    builder.append(f.getAnnotation(Parameter.class).label());
+                    Parameter p = f.getAnnotation(Parameter.class);
+                    builder.append(p.label());
+                    if (!p.description().isEmpty()) {
+                        builder.append(p.label().isEmpty() ? "" : ". ");
+                        builder.append(p.description());
+                    }
                     builder.append("\n");
 
                     //doc += "* ["+f.getType().getSimpleName()+"] **" + f.getName() + "**:" + f.getAnnotation(Parameter.class).label() + "\n";
@@ -257,10 +265,9 @@ public class ScijavaCommandToPython {
 
         System.out.println("TAKE CARE!!! ADD JSTRING IN THE API for deepslice, and add JString(','.join(map(str, channels)))");
         System.out.println("also put defaults in  def register_slices_elastix_affine(self,\n" +
-                "                                       channels_atlas_csv: str,\n" +
-                "                                       channels_slice_csv: str,\n" +
-                "                                       pixel_size_micrometer: float,\n" +
-                "                                       background_offset_value_moving: float = 0,\n" +
+                "                                       atlas_channels_csv: str,\n" +
+                "                                       slice_channels_csv: str,\n" +
+                "                                       pixel_size_um: float,\n" +
                 "                                       show_imageplus_registration_result: bool = False):");
 
         System.out.println("Also add : .getOutput('success') to state open and state save");

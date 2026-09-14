@@ -21,16 +21,20 @@ import static ch.epfl.biop.atlas.aligner.adapter.AlignerState.filterSerializedAc
 @SuppressWarnings("CanBeFinal")
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>ABBA - Copy and Apply Registration",
-        description = "Copy the registration sequence of a slice and apply it to selected slices")
+        description = "Copies all registrations of a model slice and appends them, as they are (no new computation), "
+                + "to the registrations of each selected slice. The model slice itself is left unchanged.")
 public class RegisterSlicesCopyAndApplyCommand implements Command {
 
-    @Parameter
+    @Parameter(label = "ABBA session", description = "The ABBA session the command acts on.")
     MultiSlicePositioner mp;
 
-    @Parameter(label = "Index of the slice registrations you'd like to copy")
+    @Parameter(label = "Model slice index",
+            description = "0-based index of the slice whose registrations are copied, in the slice order along the slicing axis.")
     int model_slice_index;
 
-    @Parameter(label = "Skip the pre-transform (z part of X or Y flips, rotations from older ABBA versions). In-plane edits are always copied")
+    @Parameter(label = "Skip the pre-transform",
+            description = "If checked, the model slice pre-transform is not copied: the out-of-plane part of X or Y flips, "
+                    + "and rotations made with older ABBA versions. In-plane edits are registrations and are always copied.")
     boolean skip_pre_transform = false;
 
     public void run() {

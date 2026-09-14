@@ -11,13 +11,15 @@ import java.util.List;
 @SuppressWarnings("CanBeFinal")
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Edit>ABBA - Deselect Slices",
-        description = "Set the slices to deselect.")
+        description = "Removes slices from the current selection, by index. Other slices keep their selection state.")
 public class SetSlicesDeselectedCommand implements Command {
 
-    @Parameter
+    @Parameter(label = "ABBA session", description = "The ABBA session the command acts on.")
     MultiSlicePositioner mp;
 
-    @Parameter(label = "Slices to deselect, '*' for all slices, comma separated, 0-based")
+    @Parameter(label = "Slice indices",
+            description = "0-based indices of the slices, in the order along the slicing axis. '*' for all slices, "
+                    + "comma separated values ('0,3'), inclusive ranges ('2:5'), ranges with a step ('0:2:10'). Negative indices count from the end: -1 is the last slice.")
     String slices_csv = "*";
 
     @Override

@@ -13,19 +13,24 @@ import java.util.stream.Collectors;
 @SuppressWarnings("CanBeFinal")
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Edit>ABBA - Set Slices Min Max Display Range",
-        description = "Change min max displayed value (for each selected slice).")
+        description = "Sets the display range (min and max displayed values) of channels of the selected slices. "
+                + "Besides the display, it changes the images sent to DeepSlice: avoid saturated images.")
 public class SetSlicesDisplayRangeCommand implements Command {
 
-    @Parameter
+    @Parameter(label = "ABBA session", description = "The ABBA session the command acts on.")
     MultiSlicePositioner mp;
 
-    @Parameter(label = "Channels to adjust, '*' for all channels, comma separated, 0-based")//choices = {"Structural Images", "Border only", "Coordinates", "Left / Right", "Labels % 65000" })
-    String channels_csv = "*";//String export_type;
+    @Parameter(label = "Channels",
+            description = "0-based indices of the channels to adjust, comma separated (e.g. '0,2'), or '*' for all channels. "
+                    + "Channels missing in a slice are skipped.")
+    String slice_channels_csv = "*";
 
-    @Parameter(label = "Min displayed valued")
+    @Parameter(label = "Display min",
+            description = "Pixel value displayed as black.")
     double display_min;
 
-    @Parameter(label = "Max displayed valued")
+    @Parameter(label = "Display max",
+            description = "Pixel value displayed at full brightness; higher values are saturated.")
     double display_max;
 
     @Override
@@ -38,8 +43,8 @@ public class SetSlicesDisplayRangeCommand implements Command {
             return;
         }
 
-        if (!channels_csv.trim().equals("*")) {
-            List<Integer> indices = Arrays.stream(channels_csv.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
+        if (!slice_channels_csv.trim().equals("*")) {
+            List<Integer> indices = Arrays.stream(slice_channels_csv.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
             slicesToModify.stream().forEach(slice -> {
                 for (int iChannel:indices) {
                     if (iChannel<slice.nChannels) {

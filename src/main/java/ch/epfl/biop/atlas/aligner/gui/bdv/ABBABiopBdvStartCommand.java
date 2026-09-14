@@ -42,26 +42,35 @@ import static bdv.util.source.alpha.AlphaSourceHelper.ALPHA_SOURCE_KEY;
 @SuppressWarnings("unused")
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>ABBA - ABBA Start (alpha)",
-        description = "Starts ABBA from an Atlas with a BDV View",
+        description = "Experimental: starts ABBA in a BigDataViewer window with alpha blending of the sources, "
+                + "and optionally a white background, with an atlas sliced along the chosen orientation.",
         iconPath = "/graphics/ABBAStart.png")
 public class ABBABiopBdvStartCommand implements Command, Initializable {
 
     @Parameter(visibility = ItemVisibility.MESSAGE)
-    String message = "Select the atlas slicing orientation";
+    String message = "<html>Select the atlas slicing orientation:<br>"
+            + "click a preset or set the anatomical direction of each axis.</html>";
 
-    @Parameter(callback = "coronalCB")
+    @Parameter(callback = "coronalCB", label = "Coronal",
+            description = "Sets the axes for coronal sections: X = RL, Y = SI, Z = AP.")
     Button coronal;
 
-    @Parameter(callback = "sagittalCB")
+    @Parameter(callback = "sagittalCB", label = "Sagittal",
+            description = "Sets the axes for sagittal sections: X = AP, Y = SI, Z = LR.")
     Button sagittal;
 
-    @Parameter(callback = "horizontalCB")
+    @Parameter(callback = "horizontalCB", label = "Horizontal",
+            description = "Sets the axes for horizontal sections: X = LR, Y = AP, Z = SI.")
     Button horizontal;
 
-    @Parameter
+    @Parameter(label = "White background",
+            description = "If checked, the viewer has a white background and a light theme, convenient for brightfield images.")
     boolean white_background;
 
-    @Parameter(choices = {
+    @Parameter(label = "X axis (sections, left to right)",
+            description = "Anatomical direction of the horizontal axis of the displayed sections, from left to right on screen. "
+                    + "Coronal: RL, sagittal: AP, horizontal: LR.",
+            choices = {
             "AP (Anterior-Posterior)",
             "PA (Posterior-Anterior)",
             "SI (Superior-Inferior)",
@@ -70,7 +79,10 @@ public class ABBABiopBdvStartCommand implements Command, Initializable {
             "LR (Left-Right)"})
     String x_axis;
 
-    @Parameter(choices = {
+    @Parameter(label = "Y axis (sections, top to bottom)",
+            description = "Anatomical direction of the vertical axis of the displayed sections, from top to bottom on screen. "
+                    + "Coronal: SI, sagittal: SI, horizontal: AP.",
+            choices = {
             "AP (Anterior-Posterior)",
             "PA (Posterior-Anterior)",
             "SI (Superior-Inferior)",
@@ -79,7 +91,10 @@ public class ABBABiopBdvStartCommand implements Command, Initializable {
             "LR (Left-Right)"})
     String y_axis;
 
-    @Parameter(choices = {
+    @Parameter(label = "Z axis (slicing axis)",
+            description = "Anatomical direction of the slicing axis, along which the sections are positioned, in increasing position. "
+                    + "Coronal: AP, sagittal: LR, horizontal: SI. The three axes must be different.",
+            choices = {
             "AP (Anterior-Posterior)",
             "PA (Posterior-Anterior)",
             "SI (Superior-Inferior)",
@@ -88,13 +103,15 @@ public class ABBABiopBdvStartCommand implements Command, Initializable {
             "LR (Left-Right)"})
     String z_axis;
 
-    @Parameter
+    @Parameter(label = "Atlas",
+            description = "Atlas to register the slices to, as output by an atlas opening command.")
     public Atlas ba;
 
     @Parameter
     CommandService cs;
 
-    @Parameter(type = ItemIO.OUTPUT)
+    @Parameter(type = ItemIO.OUTPUT, label = "ABBA view",
+            description = "The ABBA BigDataViewer view; its aligner (MultiSlicePositioner) is used by the other ABBA commands.")
     BdvMultislicePositionerView view;
 
     @Override

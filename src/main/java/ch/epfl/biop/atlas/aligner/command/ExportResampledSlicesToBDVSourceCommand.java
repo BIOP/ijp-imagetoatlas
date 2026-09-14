@@ -22,59 +22,76 @@ import java.util.stream.Collectors;
 @SuppressWarnings("CanBeFinal")
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>ABBA - Export Resampled Slices as BDV Source ( experimental )",
-        description = "Export registered (deformed) slices in the atlas coordinates. "+
-                      "A pixel size should be specified to resample the registered images.")
+        description = "Experimental: fuses the registered selected slices into a 3D volume in atlas coordinates, "+
+                      "resampled at the given voxel size and within the current region of interest, "+
+                      "as multiresolution BigDataViewer sources (one per channel), computed lazily and cached.")
 public class ExportResampledSlicesToBDVSourceCommand implements Command {
 
-    @Parameter
+    @Parameter(label = "ABBA session", description = "The ABBA session the command acts on.")
     MultiSlicePositioner mp;
 
-    @Parameter(label = "Slices channels, 0-based, comma separated, '*' for all channels", description = "'0,2' for channels 0 and 2")
-    String channels = "*";
+    @Parameter(label = "Slice channels",
+            description = "0-based indices of the slice channels to export, comma separated (e.g. '0,2'), or '*' for all channels.")
+    String slice_channels_csv = "*";
 
-    @Parameter(label = "Exported source name")
+    @Parameter(label = "Source name",
+            description = "Base name of the exported sources, '_ch<index>' is appended for each channel.")
     String image_name = "Untitled";
 
-    @Parameter
+    @Parameter(label = "Interpolate",
+            description = "If checked, pixels are linearly interpolated when resampled; otherwise the nearest pixel is used.")
     boolean interpolate;
 
-    @Parameter(label="Pixel Size in micron (X)")
-    double px_size_micron_x = 20;
+    @Parameter(label="Voxel size X (micrometers)",
+            description = "Size of the output voxels along the X axis of the sections.")
+    double voxel_size_x_um = 20;
 
-    @Parameter(label="Pixel Size in micron (Y)")
-    double px_size_micron_y = 20;
+    @Parameter(label="Voxel size Y (micrometers)",
+            description = "Size of the output voxels along the Y axis of the sections.")
+    double voxel_size_y_um = 20;
 
-    @Parameter(label="Pixel Size in micron (Z)")
-    double px_size_micron_z = 20;
+    @Parameter(label="Voxel size Z (micrometers)",
+            description = "Size of the output voxels along the slicing axis.")
+    double voxel_size_z_um = 20;
 
-    @Parameter(label="Margin in Z in micron")
-    double margin_z = 0;
+    @Parameter(label="Z margin (micrometers)",
+            description = "Extra space added before the first and after the last selected slice along the slicing axis.")
+    double margin_z_um = 0;
 
-    @Parameter(label="X downsampling")
+    @Parameter(label="Downsampling between resolution levels X",
+            description = "Factor along X between two consecutive resolution levels of the output.")
     int downsample_x = 2;
 
-    @Parameter(label="Y downsampling")
+    @Parameter(label="Downsampling between resolution levels Y",
+            description = "Factor along Y between two consecutive resolution levels of the output.")
     int downsample_y = 2;
 
-    @Parameter(label="Z downsampling")
+    @Parameter(label="Downsampling between resolution levels Z",
+            description = "Factor along Z between two consecutive resolution levels of the output.")
     int downsample_z = 1;
 
-    @Parameter(label="Block Size X")
+    @Parameter(label="Cache block size X (pixels)",
+            description = "Size along X of the blocks computed and cached at once.")
     int block_size_x = 64;
 
-    @Parameter(label="Block Size Y")
+    @Parameter(label="Cache block size Y (pixels)",
+            description = "Size along Y of the blocks computed and cached at once.")
     int block_size_y = 64;
 
-    @Parameter(label="Block Size Z")
+    @Parameter(label="Cache block size Z (pixels)",
+            description = "Size along Z of the blocks computed and cached at once.")
     int block_size_z = 4;
 
-    @Parameter(label="Number of threads")
+    @Parameter(label="Number of threads",
+            description = "Number of threads used to compute the blocks.")
     int n_threads = 6;
 
-    @Parameter(label="Number of resolution levels (min 1)")
+    @Parameter(label="Number of resolution levels",
+            description = "Number of resolution levels of the output sources, at least 1.")
     int resolution_levels = 6;
 
-    @Parameter(type = ItemIO.OUTPUT)
+    @Parameter(type = ItemIO.OUTPUT, label = "Fused sources",
+            description = "One fused 3D source per exported channel.")
     SourceAndConverter<?>[] fusedImages;
 
     @Override
@@ -91,8 +108,8 @@ public class ExportResampledSlicesToBDVSourceCommand implements Command {
         
         SourcesProcessor preprocess = SourcesProcessorHelper.Identity();
 
-        if (!channels.trim().equals("*")) {
-            List<Integer> indices = Arrays.stream(channels.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
+        if (!slice_channels_csv.trim().equals("*")) {
+            List<Integer> indices = Arrays.stream(slice_channels_csv.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
 
             int maxIndex = indices.stream().mapToInt(e -> e).max().getAsInt();
 
@@ -120,13 +137,13 @@ public class ExportResampledSlicesToBDVSourceCommand implements Command {
         double sizeY = roi[3];
 
         SliceSources frontSlice = slicesToExport.get(0);
-        double minZ = frontSlice.getSlicingAxisPosition()-frontSlice.getThicknessInMm()/2.0-margin_z*0.001;
+        double minZ = frontSlice.getSlicingAxisPosition()-frontSlice.getThicknessInMm()/2.0-margin_z_um*0.001;
         SliceSources backSlice = slicesToExport.get(slicesToExport.size()-1);
-        double maxZ = backSlice.getSlicingAxisPosition()+backSlice.getThicknessInMm()/2.0+margin_z*0.001;
+        double maxZ = backSlice.getSlicingAxisPosition()+backSlice.getThicknessInMm()/2.0+margin_z_um*0.001;
         double sizeZ = maxZ-minZ;
 
         AffineTransform3D coord = new AffineTransform3D();
-        coord.scale(px_size_micron_x/1000.0, px_size_micron_y/1000.0, px_size_micron_z/1000.0);
+        coord.scale(voxel_size_x_um/1000.0, voxel_size_y_um/1000.0, voxel_size_z_um/1000.0);
         coord.translate(roi[0], roi[1], minZ);
 
         coord.preConcatenate(mp.getAffineTransformFromAlignerToAtlas());
@@ -180,9 +197,9 @@ public class ExportResampledSlicesToBDVSourceCommand implements Command {
         coord.set(m);
 
         model = new EmptyMultiResolutionSourceCreator("Model",
-                coord, (long)(sizeX/(px_size_micron_x/1000.0)),
-                (long)(sizeY/(px_size_micron_y/1000.0)),
-                (long)(sizeZ/(px_size_micron_z/1000.0)), 1, downsample_x, downsample_y, downsample_z, resolution_levels).get();
+                coord, (long)(sizeX/(voxel_size_x_um/1000.0)),
+                (long)(sizeY/(voxel_size_y_um/1000.0)),
+                (long)(sizeZ/(voxel_size_z_um/1000.0)), 1, downsample_x, downsample_y, downsample_z, resolution_levels).get();
 
         //SourceServices.getSourceService().register(model);
 

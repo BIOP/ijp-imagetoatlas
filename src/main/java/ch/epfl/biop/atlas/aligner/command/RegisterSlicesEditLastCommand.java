@@ -17,22 +17,30 @@ import java.util.stream.Collectors;
 @SuppressWarnings("CanBeFinal")
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>ABBA - Edit Last Registration",
-        description = "Edit the last registration of the current selected slices, if possible.")
+        description = "Manually edits the last registration of each selected slice, if it is editable: "
+                + "spline registrations (Elastix spline, BigWarp) open in BigWarp, affine registrations (Elastix affine, manual, DeepSlice) "
+                + "open in the affine editor.")
 public class RegisterSlicesEditLastCommand implements Command {
 
     protected static Logger logger = LoggerFactory.getLogger(RegisterSlicesEditLastCommand.class);
 
-    @Parameter
+    @Parameter(label = "ABBA session", description = "The ABBA session the command acts on.")
     MultiSlicePositioner mp;
 
-    @Parameter(label = "Reuse original channels of the registration")
+    @Parameter(label = "Display the channels used by the registration",
+            description = "If checked, the editor displays the channels used when the registration was made, "
+                    + "and the two channel fields below are ignored.")
     boolean reuse_original_channels;
 
-    @Parameter(label = "Atlas channels, 0-based, comma separated, '*' for all channels", description = "'0,2' for channels 0 and 2")
+    @Parameter(label = "Atlas channels displayed",
+            description = "0-based indices of the atlas channels displayed in the editor, comma separated (e.g. '0,2'), or '*' for all channels. "
+                    + "Ignored if the channels used by the registration are displayed.")
     String atlas_channels_csv = "*";
 
-    @Parameter(label = "Slices channels, 0-based, comma separated, '*' for all channels", description = "'0,2' for channels 0 and 2")
-    String slices_channels_csv = "*";
+    @Parameter(label = "Slice channels displayed",
+            description = "0-based indices of the slice channels displayed in the editor, comma separated (e.g. '0,2'), or '*' for all channels. "
+                    + "Ignored if the channels used by the registration are displayed.")
+    String slice_channels_csv = "*";
 
     @Override
     public void run() {
@@ -42,8 +50,8 @@ public class RegisterSlicesEditLastCommand implements Command {
 
         SourcesProcessor preprocessAtlas = SourcesProcessorHelper.Identity();
 
-        if (!slices_channels_csv.trim().equals("*")) {
-            List<Integer> indices = Arrays.stream(slices_channels_csv.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
+        if (!slice_channels_csv.trim().equals("*")) {
+            List<Integer> indices = Arrays.stream(slice_channels_csv.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
             int maxIndex = indices.stream().mapToInt(e -> e).max().getAsInt();
             if (maxIndex>=mp.getChannelBoundForSelectedSlices()) {
                 mp.errorMessageForUser.accept("Missing channel in selected slice(s).",

@@ -18,38 +18,45 @@ import org.slf4j.LoggerFactory;
 
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>ABBA - Define Rectangular ROI",
-        description = "Defines a rectangular ROI that will be considered for registrations")
+        description = "Defines the rectangular region of interest (ROI) of the sections: registrations only consider this region, "
+                + "and exports to images are cropped to it. It applies to all slices.")
 public class SliceDefineROICommand extends InteractiveCommand implements Initializable {
 
     protected static final Logger logger = LoggerFactory.getLogger(SliceDefineROICommand.class);
 
-    @Parameter
+    @Parameter(label = "ABBA session", description = "The ABBA session the command acts on.")
     MultiSlicePositioner mp;
 
     @Parameter
     BdvMultislicePositionerView view;
 
-    @Parameter(persist = false)
-    Double px;
+    @Parameter(persist = false, style = "format:0.000", label = "X (mm)",
+            description = "X coordinate of the top left corner of the region, in mm. The full atlas section is centered on 0.")
+    Double x_mm;
 
-    @Parameter(persist = false)
-    Double py;
+    @Parameter(persist = false, style = "format:0.000", label = "Y (mm)",
+            description = "Y coordinate of the top left corner of the region, in mm. The full atlas section is centered on 0.")
+    Double y_mm;
 
-    @Parameter(persist = false)
-    Double sx;
+    @Parameter(persist = false, style = "format:0.000", label = "Width (mm)",
+            description = "Width of the region, in mm.")
+    Double width_mm;
 
-    @Parameter(persist = false)
-    Double sy;
+    @Parameter(persist = false, style = "format:0.000", label = "Height (mm)",
+            description = "Height of the region, in mm.")
+    Double height_mm;
 
-    @Parameter(label = "Define Interactively", callback = "defineClicked")
+    @Parameter(label = "Define Interactively", callback = "defineClicked",
+            description = "Draw the rectangle in the viewer.")
     Button defineRegionInteractively;
 
-    @Parameter(label = "Full Size", callback = "fullSizeClicked")
+    @Parameter(label = "Full Size", callback = "fullSizeClicked",
+            description = "Sets the region to the full atlas section.")
     Button setRegionFullSize;
 
     @Override
     public void run() {
-        mp.setROI(px,py,sx,sy);
+        mp.setROI(x_mm,y_mm,width_mm,height_mm);
     }
 
     @Parameter
@@ -59,21 +66,21 @@ public class SliceDefineROICommand extends InteractiveCommand implements Initial
     public void initialize() {
         double[] roi = view.msp.getROI();
 
-        final MutableModuleItem<Double> px =
-                getInfo().getMutableInput("px", Double.class);
-        px.setValue(this, roi[0]);
+        final MutableModuleItem<Double> x_mm =
+                getInfo().getMutableInput("x_mm", Double.class);
+        x_mm.setValue(this, roi[0]);
 
-        final MutableModuleItem<Double> py =
-                getInfo().getMutableInput("py", Double.class);
-        py.setValue(this, roi[1]);
+        final MutableModuleItem<Double> y_mm =
+                getInfo().getMutableInput("y_mm", Double.class);
+        y_mm.setValue(this, roi[1]);
 
-        final MutableModuleItem<Double> sx =
-                getInfo().getMutableInput("sx", Double.class);
-        sx.setValue(this, roi[2]);
+        final MutableModuleItem<Double> width_mm =
+                getInfo().getMutableInput("width_mm", Double.class);
+        width_mm.setValue(this, roi[2]);
 
-        final MutableModuleItem<Double> sy =
-                getInfo().getMutableInput("sy", Double.class);
-        sy.setValue(this, roi[3]);
+        final MutableModuleItem<Double> height_mm =
+                getInfo().getMutableInput("height_mm", Double.class);
+        height_mm.setValue(this, roi[3]);
     }
 
     boolean inProcess = false;
@@ -95,26 +102,26 @@ public class SliceDefineROICommand extends InteractiveCommand implements Initial
                     RealPoint p2 = (RealPoint) cm.getOutput("p2");
 
                     {
-                        sx = Math.abs(p1.getDoublePosition(0) - p2.getDoublePosition(0));
-                        sy = Math.abs(p1.getDoublePosition(1) - p2.getDoublePosition(1));
+                        width_mm = Math.abs(p1.getDoublePosition(0) - p2.getDoublePosition(0));
+                        height_mm = Math.abs(p1.getDoublePosition(1) - p2.getDoublePosition(1));
 
                         double minx = Math.min(p1.getDoublePosition(0), p2.getDoublePosition(0));
                         double miny = Math.min(p1.getDoublePosition(1), p2.getDoublePosition(1));
 
                         if (view.getDisplayMode() == BdvMultislicePositionerView.POSITIONING_MODE_INT) {
-                            px = Math.IEEEremainder(minx + mp.sX * 0.5, mp.sX);
-                            py = miny;
+                            x_mm = Math.IEEEremainder(minx + mp.sX * 0.5, mp.sX);
+                            y_mm = miny;
                         }
 
                         if (view.getDisplayMode() == BdvMultislicePositionerView.REVIEW_MODE_INT) {
-                            px = minx;
-                            py = miny;
+                            x_mm = minx;
+                            y_mm = miny;
                         }
 
-                        logger.debug("px = " + px);
-                        logger.debug("py = " + py);
-                        logger.debug("sx = " + sx);
-                        logger.debug("sy = " + sy);
+                        logger.debug("x_mm = " + x_mm);
+                        logger.debug("y_mm = " + y_mm);
+                        logger.debug("width_mm = " + width_mm);
+                        logger.debug("height_mm = " + height_mm);
 
                         run();
                         inProcess = false;
@@ -131,10 +138,10 @@ public class SliceDefineROICommand extends InteractiveCommand implements Initial
     }
 
     public void fullSizeClicked() {
-        px = -mp.sX / 2.0;
-        py = -mp.sY / 2.0;
-        sx = mp.sX;
-        sy = mp.sY;
+        x_mm = -mp.sX / 2.0;
+        y_mm = -mp.sY / 2.0;
+        width_mm = mp.sX;
+        height_mm = mp.sY;
         run();
     }
 }

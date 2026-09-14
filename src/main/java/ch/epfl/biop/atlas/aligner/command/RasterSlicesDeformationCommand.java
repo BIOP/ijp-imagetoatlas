@@ -13,25 +13,27 @@ import java.util.stream.Collectors;
 @SuppressWarnings("CanBeFinal")
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Edit>ABBA - Raster and cache deformation field",
-        description = "Speed up the display of slices by precomputing and caching"+
-                      " their deformation field (useful after spline registrations only!).")
+        description = "Speeds up the display of the selected slices by computing their deformation field on a grid "+
+                      "and interpolating it. Only useful after spline registrations. Experimental.")
 public class RasterSlicesDeformationCommand implements Command {
 
-    @Parameter
+    @Parameter(label = "ABBA session", description = "The ABBA session the command acts on.")
     MultiSlicePositioner mp;
 
-    @Parameter(label="Deformation grid size (micrometer)")
-    double grid_spacing_in_micrometer = 150;
+    @Parameter(label="Grid spacing (micrometers)",
+            description = "Spacing of the grid on which the deformation is computed. Larger is faster but less accurate. "
+                    + "Must be above the atlas resolution.")
+    double grid_spacing_um = 150;
 
     @Override
     public void run() {
 
-        if (grid_spacing_in_micrometer<0) {
+        if (grid_spacing_um<0) {
             mp.errorMessageForUser.accept("Raster deformation error","Please use a positive value for the grid size.");
             return;
         }
 
-        if (grid_spacing_in_micrometer<mp.getAtlas().getMap().getAtlasPrecisionInMillimeter()*1000.0) {
+        if (grid_spacing_um<mp.getAtlas().getMap().getAtlasPrecisionInMillimeter()*1000.0) {
             mp.errorMessageForUser.accept("Raster deformation error","Raster size below the atlas resolution. Please increase your grid spacing.");
             return;
         }
@@ -46,7 +48,7 @@ public class RasterSlicesDeformationCommand implements Command {
 
         new MarkActionSequenceBatchAction(mp).runRequest();
         for (SliceSources slice : slicesToProcess) {
-            RasterDeformationAction rasterDeformation = new RasterDeformationAction(mp, slice,grid_spacing_in_micrometer);
+            RasterDeformationAction rasterDeformation = new RasterDeformationAction(mp, slice,grid_spacing_um);
             rasterDeformation.runRequest();
         }
         new MarkActionSequenceBatchAction(mp).runRequest();

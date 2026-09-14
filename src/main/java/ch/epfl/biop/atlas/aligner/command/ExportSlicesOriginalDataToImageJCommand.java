@@ -24,24 +24,28 @@ import java.util.stream.Collectors;
 @SuppressWarnings("CanBeFinal")
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>ABBA - Export Original Slices to ImageJ",
-        description = "Export to ImageJ the original unregistered slice data (for each selected slice)." +
-                "If the image has more than 2GPixels, this will fail. "+
-                "Resolution levels can be specified.")
+        description = "Opens in ImageJ the original, unregistered image of each selected slice, at the chosen resolution level. " +
+                "Fails for images larger than 2 billion pixels (use a lower resolution level). "+
+                "Useful together with the regions exported to the ROI Manager.")
 public class ExportSlicesOriginalDataToImageJCommand<T extends NativeType<T> & NumericType<T>> implements Command {
 
-    @Parameter
+    @Parameter(label = "ABBA session", description = "The ABBA session the command acts on.")
     MultiSlicePositioner mp;
 
-    @Parameter(label = "Slices channels, 0-based, comma separated, '*' for all channels", description = "'0,2' for channels 0 and 2")
-    String channels = "*";
+    @Parameter(label = "Slice channels",
+            description = "0-based indices of the slice channels to export, comma separated (e.g. '0,2'), or '*' for all channels.")
+    String slice_channels_csv = "*";
 
-    @Parameter(label = "Resolution level (0 = max resolution)")
+    @Parameter(label = "Resolution level",
+            description = "0 = full resolution, 1 = first downscaled level, etc. Must exist in all selected slices.")
     int resolution_level = 0;
 
-    @Parameter(label = "verbose")
+    @Parameter(label = "Verbose",
+            description = "If checked, logs the progress of the image loading.")
     boolean verbose = false;
 
-    @Parameter(type = ItemIO.OUTPUT)
+    @Parameter(type = ItemIO.OUTPUT, label = "Images",
+            description = "One ImageJ image per selected slice.")
     ImagePlus[] images;
 
     @Override
@@ -56,8 +60,8 @@ public class ExportSlicesOriginalDataToImageJCommand<T extends NativeType<T> & N
 
         SourcesProcessor preprocess = SourcesProcessorHelper.Identity();
 
-        if (!channels.trim().equals("*")) {
-            List<Integer> indices = Arrays.stream(channels.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
+        if (!slice_channels_csv.trim().equals("*")) {
+            List<Integer> indices = Arrays.stream(slice_channels_csv.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
 
             int maxIndex = indices.stream().mapToInt(e -> e).max().getAsInt();
 

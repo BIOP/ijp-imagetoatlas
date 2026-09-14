@@ -1,7 +1,9 @@
 package ch.epfl.biop.atlas.aligner.command;
 
 import ch.epfl.biop.atlas.aligner.gui.bdv.ABBABdvStartCommand;
+import org.scijava.ItemVisibility;
 import org.scijava.command.Command;
+import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.util.VersionUtils;
 import java.io.BufferedReader;
@@ -16,9 +18,12 @@ import javax.swing.JPanel;
 
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Help>ABBA - Check for updates",
-        description = "Check for updates",
+        description = "Compares the installed ABBA version with the latest release on GitHub and shows the result in a dialog.",
         iconPath = "/graphics/ABBAUpdate.png")
 public class ABBACheckForUpdateCommand implements Command {
+
+    @Parameter(visibility = ItemVisibility.MESSAGE)
+    String message = "Needs an internet connection. The result is shown in a dialog window.";
 
     private static final String REPO_API_URL = "https://api.github.com/repos/BIOP/ijp-imagetoatlas/releases/latest";
 

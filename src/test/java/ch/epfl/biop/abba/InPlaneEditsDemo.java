@@ -345,7 +345,7 @@ public class InPlaneEditsDemo {
             }
         }
         ij.command().run(ImportSlicesFromFilesCommand.class, true, "mp", mp, "datasetname", "demo", "files", new File[]{file},
-                "split_rgb_channels", false, "slice_axis_initial_mm", axisPosition, "increment_between_slices_mm", 0.0).get();
+                "split_rgb_channels", false, "first_slice_position_mm", axisPosition, "slice_spacing_mm", 0.0).get();
         mp.waitForTasks();
         mp.deselectSlice(mp.getSlices());
     }

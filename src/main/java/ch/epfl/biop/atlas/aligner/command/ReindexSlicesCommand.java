@@ -21,14 +21,18 @@ import java.util.stream.Collectors;
 @SuppressWarnings("CanBeFinal")
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>ABBA - Re-index channels of slices",
-        description = "Creates a new slice with reindexed channels.")
+        description = "Reorders, removes or duplicates the channels of the selected slices. Each selected slice is replaced by a new slice "
+                + "with the new channels, at the same position and with the same registrations. "
+                + "The same channel order is applied to all selected slices.")
 public class ReindexSlicesCommand implements Command {
 
-    @Parameter
+    @Parameter(label = "ABBA session", description = "The ABBA session the command acts on.")
     MultiSlicePositioner mp;
 
-    @Parameter(label = "New indices in csv", description = "For instance `0,2` to keep the first and third channels")
-    String new_indices;
+    @Parameter(label = "New channel order",
+            description = "Comma separated 0-based indices of the original channels, in their new order: "
+                    + "'0,2' keeps the first and third channels, '1,0' swaps the first two channels.")
+    String new_channel_order_csv;
 
     public void run() {
         List<SliceSources> selectedSlices = mp.getSelectedSlices();
@@ -40,7 +44,7 @@ public class ReindexSlicesCommand implements Command {
         List<Integer> indices;
 
         try {
-            indices = Arrays.stream(new_indices.split(",")).map(Integer::parseInt).collect(Collectors.toList());
+            indices = Arrays.stream(new_channel_order_csv.split(",")).map(Integer::parseInt).collect(Collectors.toList());
         } catch (NumberFormatException e) {
             mp.errorMessageForUser.accept("Invalid channels indices", "Could not parse indices");
             return;

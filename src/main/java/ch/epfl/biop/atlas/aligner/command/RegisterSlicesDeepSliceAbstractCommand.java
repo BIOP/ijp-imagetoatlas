@@ -25,6 +25,7 @@ import ij.ImagePlus;
 import ij.process.ColorProcessor;
 import net.imglib2.realtransform.AffineTransform3D;
 import org.scijava.Context;
+import org.scijava.Initializable;
 import org.scijava.InstantiableException;
 import org.scijava.ItemVisibility;
 import org.scijava.command.Command;
@@ -75,7 +76,7 @@ import static ch.epfl.biop.atlas.aligner.ABBAHelper.getResource;
  */
 
 @SuppressWarnings("CanBeFinal")
-abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command {
+abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command, Initializable {
 
     @Parameter(visibility = ItemVisibility.MESSAGE)
     public String message =
@@ -85,7 +86,7 @@ abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command 
                     "<br>  Almost 50% of images sent by ABBA users to DeepSlice are over-saturated. <br> " +
                     "(and thus, badly registered) </html>";
 
-    @Parameter
+    @Parameter(label = "ABBA session", description = "The ABBA session the command acts on.")
     MultiSlicePositioner mp;
 
     @Parameter
@@ -97,17 +98,40 @@ abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command 
     @Parameter
     PluginService pluginService;
 
-    @Parameter(choices = {"mouse", "rat"}, label = "('mouse', 'rat') Mouse or Rat ?")
+    @Parameter(choices = {"mouse", "rat"}, label = "DeepSlice model", callback = "modelChanged",
+            description = "Species DeepSlice was trained on: 'mouse' or 'rat'. It should match the atlas.")
     String model;
 
-    @Parameter(label = "Slices channels, 0-based, comma separated, '*' for all channels", description = "'0,2' for channels 0 and 2")
-    String channels = "*";
+    @Parameter(label = "Slice channels",
+            description = "0-based indices of the slice channels sent to DeepSlice, comma separated (e.g. '0,2'), or '*' for all channels. "
+                    + "Selected channels are merged into an RGB image with their current display settings (color and min/max).")
+    String slice_channels_csv = "*";
 
-    @Parameter(label = "Allow change of atlas slicing angle")
+    @Parameter(label = "Adjust atlas slicing angle",
+            description = "If checked, the atlas slicing angles (X and Y rotations) are set to the median angle found by DeepSlice. "
+                    + "This changes the slicing for all slices, not only the selected ones.")
     boolean allow_slicing_angle_change = true;
 
-    @Parameter(label = "Resampling pixel size (10 for mouse, 40 for rat)", description = "To go fast, you can use 30 microns for mouse, 60 for rat")
-    double px_size_micron = 10;
+    @Parameter(label = "Pixel size sent to DeepSlice (micrometers)", persist = false,
+            description = "Pixel size used to downsample the slices before sending them to DeepSlice. "
+                    + "Defaults to " + DEFAULT_PIXEL_SIZE_UM_MOUSE + " for mouse and " + DEFAULT_PIXEL_SIZE_UM_RAT + " for rat; larger values are faster.")
+    double pixel_size_um = Double.NaN; // Not set: the default of the model is used
+
+    public static final double DEFAULT_PIXEL_SIZE_UM_MOUSE = 10;
+    public static final double DEFAULT_PIXEL_SIZE_UM_RAT = 40;
+
+    @Override
+    public void initialize() {
+        // Initializers run after the inputs given by the caller are set: a given pixel size is kept
+        if (Double.isNaN(pixel_size_um)) modelChanged();
+    }
+
+    /**
+     * Sets the pixel size to the default of the model, when the model is preset or changed in the dialog
+     */
+    protected void modelChanged() {
+        pixel_size_um = "rat".equals(model) ? DEFAULT_PIXEL_SIZE_UM_RAT : DEFAULT_PIXEL_SIZE_UM_MOUSE;
+    }
 
     boolean allow_change_slicing_position = true;
     boolean maintain_rank = true;
@@ -123,6 +147,7 @@ abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command 
     protected Integer nSlicesToRegister;
 
     public void run() {
+        if (Double.isNaN(pixel_size_um)) modelChanged();
         try {
             mp.addTask();
             DeepSliceHelper.addJavaAtlases();
@@ -145,8 +170,8 @@ abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command 
                 return;
             }
 
-            if (!channels.trim().equals("*")) {
-                List<Integer> indices = Arrays.stream(channels.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
+            if (!slice_channels_csv.trim().equals("*")) {
+                List<Integer> indices = Arrays.stream(slice_channels_csv.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
 
                 int maxIndex = indices.stream().mapToInt(e -> e).max().getAsInt();
 
@@ -210,7 +235,7 @@ abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command 
 
                 if (affine_transform) {
                     try {
-                        affineTransformInPlane(ctx, mp, series, px_size_micron, slicesToRegister, newSliceRegistration);//, newSliceAffineTransformer);
+                        affineTransformInPlane(ctx, mp, series, pixel_size_um, slicesToRegister, newSliceRegistration);//, newSliceAffineTransformer);
                     } catch (InstantiableException e) {
                         e.printStackTrace();
                     }
@@ -441,7 +466,7 @@ abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command 
     static protected void  affineTransformInPlane(Context ctx,
                                                   MultiSlicePositioner mp,
                                                   QuickNIISeries series,
-                                                  double px_size_micron,
+                                                  double pixel_size_um,
                                                   final List<SliceSources> slices,
                                                   Map<SliceSources, DeepSliceHelper.Holder<Registration<SourceAndConverter<?>[]>>> newSliceTransform) throws InstantiableException {
         AffineTransform3D toABBA = mp.getReslicedAtlas().getSlicingTransformToAtlas().inverse();
@@ -468,10 +493,10 @@ abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command 
             // We need to transform the original image this way
 
             AffineTransform3D preTransform = new AffineTransform3D();
-            preTransform.scale(1000.0/px_size_micron);
+            preTransform.scale(1000.0/pixel_size_um);
             preTransform.set(1,2,2);
-            preTransform.set(-1000.0/px_size_micron*mp.getROI()[0], 0, 3);
-            preTransform.set(-1000.0/px_size_micron*mp.getROI()[1], 1, 3);
+            preTransform.set(-1000.0/pixel_size_um*mp.getROI()[0], 0, 3);
+            preTransform.set(-1000.0/pixel_size_um*mp.getROI()[1], 1, 3);
 
             // if pixel size micron is 1 -> scaling factor = 1000
             // if pixel size is 1000 micron -> scaling factor = 1
@@ -514,8 +539,8 @@ abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command 
 
         SourcesProcessor preprocess = SourcesProcessorHelper.Identity();
 
-        if (!channels.trim().equals("*")) {
-            List<Integer> indices = Arrays.stream(channels.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
+        if (!slice_channels_csv.trim().equals("*")) {
+            List<Integer> indices = Arrays.stream(slice_channels_csv.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
             preprocess = new SourcesChannelsSelect(indices);
         }
 
@@ -529,7 +554,7 @@ abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command 
                     .slices(slices)
                     .name(image_name_prefix)
                     .folder(dataset_folder)
-                    .pixelSizeMicron(px_size_micron)
+                    .pixelSizeMicron(pixel_size_um)
                     .interpolate(interpolate)
                     .create()
                     .export();

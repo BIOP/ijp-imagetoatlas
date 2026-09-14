@@ -23,25 +23,34 @@ import java.util.stream.IntStream;
 @SuppressWarnings("CanBeFinal")
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Export>ABBA - Export Atlas to ImageJ",
-        description = "Export atlas properties as an ImageJ stack (for each selected slice).")
+        description = "Exports the atlas section at the position of each selected slice as an ImageJ image, one plane per slice, "
+                + "within the current region of interest. Same geometry as 'Export Registered Slices to ImageJ' "
+                + "with the same pixel size, so both images can be overlaid.")
 public class ExportAtlasToImageJCommand implements Command {
 
-    @Parameter
+    @Parameter(label = "ABBA session", description = "The ABBA session the command acts on.")
     MultiSlicePositioner mp;
 
-    @Parameter(label="Pixel Size in micron")
-    double px_size_micron = 20;
+    @Parameter(label="Pixel size (micrometers)",
+            description = "Pixel size of the exported image.")
+    double pixel_size_um = 20;
 
-    @Parameter(label = "Channels to export, '*' for all channels")//choices = {"Structural Images", "Border only", "Coordinates", "Left / Right", "Labels % 65000" })
-    String atlas_channels = "*";//String export_type;
+    @Parameter(label = "Atlas channels",
+            description = "0-based indices of the atlas channels to export, comma separated (e.g. '0,1'), or '*' for all channels. "
+                    + "Depending on the atlas, channels include anatomical images, region borders, atlas coordinates, "
+                    + "a left/right indicator and region labels.")
+    String atlas_channels_csv = "*";
 
-    @Parameter(label = "Exported image name")
+    @Parameter(label = "Image name",
+            description = "Title of the exported ImageJ image.")
     String image_name = "Atlas";
 
-    @Parameter
+    @Parameter(label = "Interpolate",
+            description = "If checked, pixels are linearly interpolated when resampled; otherwise the nearest pixel is used (keep it unchecked for label channels).")
     boolean interpolate;
 
-    @Parameter(type = ItemIO.OUTPUT)
+    @Parameter(type = ItemIO.OUTPUT, label = "Image",
+            description = "Exported atlas image: one channel per atlas channel, one plane per selected slice.")
     ImagePlus image;
 
     @Override
@@ -51,8 +60,8 @@ public class ExportAtlasToImageJCommand implements Command {
 
         SourcesProcessor preprocess = SourcesProcessorHelper.Identity();
 
-        if (!atlas_channels.trim().equals("*")) {
-            List<Integer> indices = Arrays.stream(atlas_channels.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
+        if (!atlas_channels_csv.trim().equals("*")) {
+            List<Integer> indices = Arrays.stream(atlas_channels_csv.trim().split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
 
             int maxIndex = indices.stream().mapToInt(e -> e).max().getAsInt();
 
@@ -74,7 +83,7 @@ public class ExportAtlasToImageJCommand implements Command {
             ExportAtlasSliceToImagePlusAction export = new ExportAtlasSliceToImagePlusAction(mp, slice,
                     preprocess,
                     roi[0], roi[1], roi[2], roi[3],
-                    px_size_micron / 1000.0, 0,interpolate);
+                    pixel_size_um / 1000.0, 0,interpolate);
 
             tasks.put(slice, export);
             export.runRequest();
