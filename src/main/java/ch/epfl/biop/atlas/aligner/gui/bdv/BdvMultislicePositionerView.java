@@ -40,7 +40,6 @@ import ch.epfl.biop.viewer.bdv.BusyOverlay;
 import ch.epfl.biop.viewer.bdv.graphicalhandle.GraphicalHandle;
 import ch.epfl.biop.viewer.bdv.graphicalhandle.GraphicalHandleListener;
 import ch.epfl.biop.wrappers.deepslice.ij2commands.DeepSlicePrefsSet;
-import ch.epfl.biop.wrappers.ij2command.BiopWrappersSet;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import ij.IJ;
@@ -322,9 +321,6 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         BdvMenuHelper.addActionToBdvHandleMenu(bdvh,"Edit>Configuration>Mouse Options>Hide Atlas Position",0, this::hideAtlasPosition);
         BdvMenuHelper.addActionToBdvHandleMenu(bdvh,"Edit>Configuration>Mouse Options>Show Slice Info",0, this::showSliceInfo);
         BdvMenuHelper.addActionToBdvHandleMenu(bdvh,"Edit>Configuration>Mouse Options>Hide Slice Info",0, this::hideSliceInfo);
-
-        BdvMenuHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Edit>Configuration>Set Elastix & Transformix path", BiopWrappersSet.class);
-
         // Slice importer
         BdvMenuHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Import>Import QuPath Project", ImportSlicesFromQuPathCommand.class, "mp", msp );
         BdvMenuHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Import>Import Current ImageJ Window", ImportSliceFromImagePlusCommand.class, "mp", msp );
@@ -421,7 +417,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         BdvMenuHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export>ImageJ>Export Atlas To ImageJ", ExportAtlasToImageJCommand.class, "mp", msp);
         BdvMenuHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export>QuickNII>Export Registered Slices As Quick NII Dataset", ExportSlicesToQuickNIIDatasetCommand.class, "mp", msp);
         BdvMenuHelper.addSeparator(bdvh,"Export");
-        BdvMenuHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export>Export Standardized ABBA Project (Zip)", ExportStdZipStateCommand.class);
+        BdvMenuHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export>Export Standardized ABBA Project (Zip)", ExportStdZipStateCommand.class, "mp", msp);
 
         BdvMenuHelper.addSeparator(bdvh,"Register");
         BdvMenuHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Register>Edit Last Registration", RegisterSlicesEditLastCommand.class, "mp", msp);

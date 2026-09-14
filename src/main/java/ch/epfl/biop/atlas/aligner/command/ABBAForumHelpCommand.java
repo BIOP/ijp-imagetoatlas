@@ -7,14 +7,13 @@ import ch.epfl.biop.atlas.aligner.ABBAHelper;
 import ch.epfl.biop.bdv.img.bioformats.BioFormatsHelper;
 import ch.epfl.biop.source.register.Elastix2DSplineRegister;
 import ch.epfl.biop.wrappers.deepslice.DeepSlice;
-import ch.epfl.biop.wrappers.elastix.Elastix;
 import ch.epfl.biop.wrappers.elastix.ElastixTask;
-import ch.epfl.biop.wrappers.transformix.Transformix;
 import ij.IJ;
 import net.imagej.ImageJ;
 import net.imagej.updater.UpdateService;
 import net.imagej.updater.UpdateSite;
 import net.imagej.updater.util.AvailableSites;
+import org.scijava.ItemVisibility;
 import org.scijava.command.Command;
 import org.scijava.platform.PlatformService;
 import org.scijava.plugin.Parameter;
@@ -30,9 +29,12 @@ import java.util.Map;
 @SuppressWarnings("unused")
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Help>ABBA - Ask for help in the forum",
-        description = "Open a new post in the image.sc forum with current install information",
+        description = "Opens a new post draft on the image.sc forum in a web browser, pre-filled with the versions of ABBA and its dependencies.",
         iconPath = "/graphics/Discourse.png")
 public class ABBAForumHelpCommand implements Command {
+
+    @Parameter(visibility = ItemVisibility.MESSAGE)
+    String message = "Opens a web browser. Nothing is posted automatically: the post stays a draft until it is submitted on the forum.";
 
     @Parameter
     PlatformService ps;
@@ -117,16 +119,6 @@ public class ABBAForumHelpCommand implements Command {
         config +="Bdv Playground "+VersionUtils.getVersion(SourceServices.class)+nl;
         config +="Biop Image Loader "+VersionUtils.getVersion(BioFormatsHelper.class)+nl;
         config +="Biop Wrappers "+VersionUtils.getVersion(ElastixTask.class)+nl;
-        if (Elastix.exePath!=null) {
-            config += "Elastix Path: " + Elastix.exePath + " exists ?"+new File(Elastix.exePath).exists()+nl;
-        } else {
-            config += "Elastix path not set"+nl;
-        }
-        if (Transformix.exePath!=null) {
-            config += "Transformix Path: " + Transformix.exePath + " exists ?"+new File(Transformix.exePath).exists()+nl;
-        } else {
-            config += "Transformix path not set"+nl;
-        }
         if (DeepSlice.envDirPath!=null) {
             config += "DeepSlice env dir: " + DeepSlice.envDirPath + " exists ?"+new File(DeepSlice.envDirPath).exists()+nl;
         } else {
