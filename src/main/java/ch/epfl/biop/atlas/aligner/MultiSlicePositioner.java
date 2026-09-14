@@ -103,6 +103,9 @@ public class MultiSlicePositioner implements Closeable {
     // Stack of actions that have been performed by the user - used for undo
     protected List<CancelableAction> userActions = new ArrayList<>();
 
+    // Guards adding an action to the undo stack against its removal once run, see removeFromUndoStack
+    private final Object undoStackLock = new Object();
+
     // Stack of actions that have been cancelled by the user - used for redo
     protected List<CancelableAction> redoableUserActions = new ArrayList<>();
 
@@ -346,12 +349,13 @@ public class MultiSlicePositioner implements Closeable {
     }
 
     public String getUndoMessage() {
-        if (userActions.isEmpty()) {
+        int size = undoStackSizeWithoutEmptyBatches();
+        if (size == 0) {
             return "(None)";
         } else {
-            CancelableAction lastAction = userActions.get(userActions.size()-1);
+            CancelableAction lastAction = userActions.get(size-1);
             if (lastAction instanceof MarkActionSequenceBatchAction) {
-                CancelableAction lastlastAction = userActions.get(userActions.size()-2);
+                CancelableAction lastlastAction = userActions.get(size-2);
                 return "("+lastlastAction.actionClassString()+" [batch])";
             } else {
                 return "("+lastAction.actionClassString()+")";
@@ -494,22 +498,48 @@ public class MultiSlicePositioner implements Closeable {
                 removeTask();
             }
         }
-        if (action.isValid()) {
-            logger.debug("Action "+action+" on slice "+action.getSliceSources()+" is valid.");
-            userActions.add(action);
-            logger.debug("Action "+action+" on slice "+action.getSliceSources()+" added to userActions.");
-            if (!redoableUserActions.isEmpty()) {
-                if (redoableUserActions.get(redoableUserActions.size() - 1).equals(action)) {
-                    redoableUserActions.remove(redoableUserActions.size() - 1);
-                } else {
-                    logger.debug("DELETED REDOABLE ACTIONS");
-                    // different branch : clear redoable actions
-                    redoableUserActions.clear();
+        // An async action may already have run and become invalid, see removeFromUndoStack
+        synchronized (undoStackLock) {
+            if (action.isValid()) {
+                logger.debug("Action "+action+" on slice "+action.getSliceSources()+" is valid.");
+                userActions.add(action);
+                logger.debug("Action "+action+" on slice "+action.getSliceSources()+" added to userActions.");
+                if (!redoableUserActions.isEmpty()) {
+                    if (redoableUserActions.get(redoableUserActions.size() - 1).equals(action)) {
+                        redoableUserActions.remove(redoableUserActions.size() - 1);
+                    } else {
+                        logger.debug("DELETED REDOABLE ACTIONS");
+                        // different branch : clear redoable actions
+                        redoableUserActions.clear();
+                    }
                 }
+            } else {
+                logger.error("Invalid action "+action+" on slice "+action.getSliceSources());
             }
-        } else {
-            logger.error("Invalid action "+action+" on slice "+action.getSliceSources());
         }
+    }
+
+    /**
+     * Removes from the undo stack an action which ran successfully but became invalid while running: a registration
+     * skipped because none was supplied (see {@link RegisterSliceAction}), or an action with nothing to undo
+     * (see {@link LockAndRunOnceSliceAction}). Batch marks left with nothing between them are removed when undoing.
+     */
+    protected void removeFromUndoStack(CancelableAction action) {
+        synchronized (undoStackLock) {
+            if (userActions != null) userActions.remove(action);
+        }
+    }
+
+    /**
+     * @return the size of the undo stack, not counting the batches left empty at its end
+     */
+    private int undoStackSizeWithoutEmptyBatches() {
+        int size = userActions.size();
+        while ((size >= 2) && (userActions.get(size - 1) instanceof MarkActionSequenceBatchAction)
+                && (userActions.get(size - 2) instanceof MarkActionSequenceBatchAction)) {
+            size -= 2;
+        }
+        return size;
     }
 
     protected void cancelRequest(CancelableAction action) {
@@ -863,6 +893,11 @@ public class MultiSlicePositioner implements Closeable {
      * Cancels last action
      */
     public void cancelLastAction() {
+        // A batch whose actions were all skipped is not an undo step
+        synchronized (undoStackLock) {
+            int size = undoStackSizeWithoutEmptyBatches();
+            while (userActions.size() > size) userActions.remove(userActions.size() - 1);
+        }
         if (!userActions.isEmpty()) {
             CancelableAction action = userActions.get(userActions.size() - 1);
             if (action instanceof MarkActionSequenceBatchAction) {

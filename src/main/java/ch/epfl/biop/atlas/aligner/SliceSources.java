@@ -768,6 +768,8 @@ public class SliceSources {
                 logger.debug(this+": action "+action+" result "+result);
                 if (result) {
                     actionInProgress = null;
+                    // Skipped, or nothing to undo: out of the undo stack (the observer already removed it from the slice)
+                    if (!action.isValid()) mp.removeFromUndoStack(action);
                     postRun.run();
                 } else {
                     mp.errorMessageForUser.accept("Action failed", action.toString());

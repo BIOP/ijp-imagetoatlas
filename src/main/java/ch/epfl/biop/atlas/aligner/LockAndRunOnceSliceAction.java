@@ -6,7 +6,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 /**
- * Moves a slice to a new position along the slicing axis
+ * Runs a task once, when the action queues of several slices have all reached it: one such action is enqueued on
+ * each slice, sharing the counter, and nothing else runs on these slices until the task is done.
+ * Once run, the action is not kept in the undo stack: undoing it would do nothing.
  */
 public class LockAndRunOnceSliceAction extends CancelableAction {
 
@@ -18,7 +20,7 @@ public class LockAndRunOnceSliceAction extends CancelableAction {
 
     private final AtomicBoolean result;
 
-    private boolean done = false;
+    private volatile boolean done = false;
 
     public LockAndRunOnceSliceAction(MultiSlicePositioner mp,
                                      SliceSources sliceSource,
@@ -42,30 +44,34 @@ public class LockAndRunOnceSliceAction extends CancelableAction {
 
     protected boolean run() {
         if (!done) {
-            //sliceSource.setSlicingAxisPosition(newSlicingAxisPosition);
             int counterValue = counter.incrementAndGet();
             if (counterValue == counterTarget) {
                 // Run the thing
                 result.set(runnable.get());
-                counter.incrementAndGet();
                 synchronized (counter) {
+                    counter.incrementAndGet();
                     counter.notifyAll();
                 }
             } else {
-                while (counterValue != counterTarget + 1) {
-                    synchronized (counter) {
+                synchronized (counter) {
+                    // Checked while holding the monitor: the task may end before this thread waits
+                    while (counter.get() != counterTarget + 1) {
                         try {
                             counter.wait();
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
-                        counterValue = counter.get();
                     }
                 }
             }
             done = true;
         }
         return result.get();
+    }
+
+    @Override
+    public boolean isValid() {
+        return !done;
     }
 
     public String toString() {

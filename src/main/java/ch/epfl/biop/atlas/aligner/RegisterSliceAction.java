@@ -85,12 +85,22 @@ public class RegisterSliceAction extends CancelableAction {
         return preprocessMoving;
     }
 
-    boolean isValid = true;
+    volatile boolean isValid = true;
 
+    /**
+     * Runs the registration. If the supplier gives no registration, for instance because the user cancelled it,
+     * the action is skipped quietly: it becomes invalid and hidden, and is removed from the undo stack
+     * without an error message.
+     */
     @Override
     protected boolean run() { //
         if (registration == null) {
             registration = registrationSupplier.get();
+            if (registration == null) {
+                hide();
+                isValid = false;
+                return true;
+            }
             if (registrationName!=null) {
                 registration.setRegistrationName(registrationName);
             }
