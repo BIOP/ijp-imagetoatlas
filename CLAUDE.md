@@ -41,7 +41,6 @@ mvn test -Dtest=ABBABenchMarkCommand
 The `src/test/java` directory contains demo launchers and plugin examples rather than traditional unit tests. Key test files:
 - `ABBALaunchMouse.java`, `ABBALaunchRat.java` - Launch ABBA with demo atlases
 - `pluginexample/` - Examples for extending ABBA with custom registration methods
-- `ScijavaCommandToPython.java` - Generates Python API bindings
 
 ### CI Build
 The project uses SciJava's CI scripts:

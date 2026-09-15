@@ -128,8 +128,6 @@
 		<!-- JPEG-2000 codec, see the ome-jai dependency below -->
 		<ome-jai.version>0.1.5</ome-jai.version>
 
-		<!-- to generate python API, method put in tests -->
-		<reflections.version>0.10.2</reflections.version>
 		<pyimagej-scijava-command.version>0.2.1</pyimagej-scijava-command.version>
 
         <!-- appose runner for DeepSlice -->
@@ -238,13 +236,6 @@
         </dependency>
 
 		<!-- test dependencies -->
-
-		<dependency>
-			<groupId>org.reflections</groupId>
-			<artifactId>reflections</artifactId>
-			<version>${reflections.version}</version>
-			<scope>test</scope>
-		</dependency>
 
 		<dependency>
 			<groupId>ch.epfl.biop</groupId>
