@@ -32,18 +32,21 @@ public class RegisterSlicesDeepSliceApposeCommand extends RegisterSlicesDeepSlic
     final public static String KEEP_ORDER_REGULAR_SPACING = "Keep order + ensure regular spacing";
     final public static String KEEP_ORDER_SET_SPACING = "Keep order + set spacing (parameter below)";
     final public static String NO_POST_PROCESSING = "No post-processing";
+    final public static String KEEP_POSITIONS = "Keep current slice positions (in-plane registration only)";
 
     @Parameter(label = "Position post-processing",
             description = "How the slice positions predicted by DeepSlice are corrected. "
                     + "'" + KEEP_ORDER + "': the current slice order is preserved. "
                     + "'" + KEEP_ORDER_REGULAR_SPACING + "': order preserved and slices evenly spaced, spacing estimated by DeepSlice. "
                     + "'" + KEEP_ORDER_SET_SPACING + "': order preserved and slices evenly spaced with the spacing given below. "
-                    + "'" + NO_POST_PROCESSING + "': raw DeepSlice positions, slices may be reordered.",
+                    + "'" + NO_POST_PROCESSING + "': raw DeepSlice positions, slices may be reordered. "
+                    + "'" + KEEP_POSITIONS + "': the slices are not moved, only registered in plane.",
             choices = {
             KEEP_ORDER,
             KEEP_ORDER_REGULAR_SPACING,
             KEEP_ORDER_SET_SPACING,
-            NO_POST_PROCESSING
+            NO_POST_PROCESSING,
+            KEEP_POSITIONS
     })
     String post_processing;
 
@@ -81,6 +84,13 @@ public class RegisterSlicesDeepSliceApposeCommand extends RegisterSlicesDeepSlic
 
                 settings.use_enforce_index_spacing = true;
                 settings.enforce_index_spacing = Double.toString(slice_spacing_um);
+                break;
+            case KEEP_POSITIONS:
+                allow_change_slicing_position = false;
+                settings.enforce_index_order = true;
+
+                settings.use_enforce_index_spacing = false;
+                settings.enforce_index_spacing = "";
                 break;
             case NO_POST_PROCESSING:
             default:
