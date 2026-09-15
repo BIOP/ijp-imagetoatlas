@@ -21,6 +21,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import ij.IJ;
 import ij.ImagePlus;
+import net.imglib2.realtransform.AffineTransform3D;
 import ome.units.UNITS;
 import ome.units.quantity.Length;
 import org.scijava.Context;
@@ -200,10 +201,17 @@ public class ExportStdZipStateCommand implements Command {
                 createResampledData.setProgressValue(createResampledData.getProgressValue()+1);
             }
 
-            // - Rebuild the registration pipeline on the downscaled slices, in a new aligner with the same slicing
+            // - Rebuild the registration pipeline on the downscaled slices, in a new aligner with the same slicing.
+            // The slicing is rebuilt from the axes, as when ABBA starts: getSlicingTransform() returns the transform
+            // already scaled and shifted by the resliced atlas, which would be scaled and shifted again
+            String[] axes = ReslicedAtlas.getAxesFromCoronal(ba.getMap().getCoronalTransform(), mp.getReslicedAtlas().getSlicingTransform());
+            AffineTransform3D slicingTransform = new AffineTransform3D();
+            slicingTransform.set(ba.getMap().getCoronalTransform());
+            slicingTransform.concatenate(ReslicedAtlas.getTransformFromCoronal(axes[0], axes[1], axes[2]));
+
             ReslicedAtlas ra = new ReslicedAtlas(ba);
             ra.setResolution(ba.getMap().getAtlasPrecisionInMillimeter());
-            ra.setSlicingTransform(mp.getReslicedAtlas().getSlicingTransform());
+            ra.setSlicingTransform(slicingTransform);
 
             mpDS = new MultiSlicePositioner(ba, ra, ctx);
 
@@ -272,8 +280,6 @@ public class ExportStdZipStateCommand implements Command {
 
             // - Zip all for convenience of sharing
             exportTask.setStatusMessage("Zipping results...");
-
-            String[] axes = ReslicedAtlas.getAxesFromCoronal(ba.getMap().getCoronalTransform(), mp.getReslicedAtlas().getSlicingTransform());
 
             ABBAHelper.ABBAExportMeta meta = new ABBAHelper.ABBAExportMeta();
             meta.timestamp = Instant.now().toString();
