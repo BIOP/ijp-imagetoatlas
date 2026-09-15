@@ -1025,10 +1025,31 @@ public class MultiSlicePositioner implements Closeable {
     }
 
     /**
+     * The atlas has a margin before its first section, so that tilted slices fit in the slicing box. Positions along
+     * the slicing axis are stored with this margin included, while users and scripts work in the atlas convention:
+     * 0 at the first section of the atlas, negative before it. This is the Z displayed in the slice information and
+     * the position taken by the import commands.
+     *
+     * @param slicingAxisPosition position of a slice in the model, {@link SliceSources#getSlicingAxisPosition()}
+     * @return the same position in the atlas convention, in mm
+     */
+    public double toAtlasZ(double slicingAxisPosition) {
+        return slicingAxisPosition - reslicedAtlas.getZOffset();
+    }
+
+    /**
+     * @param atlasZ position along the slicing axis in the atlas convention, see {@link #toAtlasZ(double)}
+     * @return the position of the model, the one stored in state files, in mm
+     */
+    public double fromAtlasZ(double atlasZ) {
+        return atlasZ + reslicedAtlas.getZOffset();
+    }
+
+    /**
      * Partial serialization of the state, meant for scripts: the state file content restricted to some slices.
-     * The index, name, slicing axis position (mm), selection status and channel names of each slice are added for readability.
-     * The slicing axis position is the one of the model, {@link SliceSources#getSlicingAxisPosition()}: the Z displayed
-     * in the user interface is this value minus {@link ReslicedAtlas#getZOffset()}.
+     * The index, name, position along the slicing axis, selection status and channel names of each slice are added
+     * for readability. Positions come in both conventions: "z_mm" is the atlas one, the Z displayed in the user
+     * interface, and "slicing_axis_position" the model one, the value stored in state files, see {@link #toAtlasZ(double)}.
      * Sources are referred to by their index in the list of the original sources of the serialized slices.
      *
      * @param slices slices to serialize
@@ -1048,6 +1069,7 @@ public class MultiSlicePositioner implements Closeable {
             JsonObject sliceJson = new JsonObject();
             sliceJson.addProperty("index", getSlices().indexOf(slice));
             sliceJson.addProperty("name", slice.getName());
+            sliceJson.addProperty("z_mm", toAtlasZ(slice.getSlicingAxisPosition()));
             sliceJson.addProperty("slicing_axis_position", slice.getSlicingAxisPosition());
             sliceJson.addProperty("selected", slice.isSelected());
             JsonArray channels = new JsonArray();
@@ -1076,7 +1098,8 @@ public class MultiSlicePositioner implements Closeable {
 
     /**
      * Partial deserialization, meant for scripts: creates actions acting on an existing slice from their json
-     * description, in the format of the state file. For instance {"type":"MoveSliceAction","location":7.5}.
+     * description, in the format of the state file. For instance {"type":"MoveSliceAction","z_mm":6.5}, where "z_mm" is
+     * the position in the atlas convention, see {@link #toAtlasZ(double)} ("location", the model position, is accepted too).
      * The actions are not run: call {@link CancelableAction#runRequest()} on each of them.
      * <p>
      * A RegisterSliceAction with a transform appends this transform to the slice. Without a transform, the registration

@@ -65,7 +65,7 @@ public class ImportSlicesFromQuPathCommand implements Command {
                             .toArray(new SourceAndConverter[0]);
 
             if (sacs.length>0) { // Because the action could have been canceled
-                mp.createSlice(sacs, first_slice_position_mm + mp.getReslicedAtlas().getZOffset(), slice_spacing_mm, QuPathEntryIdEntity.class, new QuPathEntryIdEntity(-1));
+                mp.createSlice(sacs, mp.fromAtlasZ(first_slice_position_mm), slice_spacing_mm, QuPathEntryIdEntity.class, new QuPathEntryIdEntity(-1));
             }
         } catch (InterruptedException e) {
             e.printStackTrace();

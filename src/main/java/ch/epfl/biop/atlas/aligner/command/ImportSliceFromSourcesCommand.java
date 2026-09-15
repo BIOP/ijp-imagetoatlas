@@ -25,7 +25,7 @@ public class ImportSliceFromSourcesCommand implements Command {
 
     @Override
     public void run() {
-        mp.createSlice(sources, slice_position_mm + mp.getReslicedAtlas().getZOffset());
+        mp.createSlice(sources, mp.fromAtlasZ(slice_position_mm));
     }
 
 }

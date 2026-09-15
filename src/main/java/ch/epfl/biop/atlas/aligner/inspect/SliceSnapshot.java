@@ -54,8 +54,11 @@ public class SliceSnapshot {
         public int[] sliceChannels = null;
         /** 0: current registration, 1: state before the last registration, etc. */
         public int registrationStepBack = 0;
-        /** Position (mm) along the slicing axis where the atlas is rendered, NaN for the slice position */
-        public double atlasSlicingAxisPositionMm = Double.NaN;
+        /**
+         * Position (mm) along the slicing axis where the atlas is rendered, in the atlas convention
+         * ({@link MultiSlicePositioner#toAtlasZ(double)}), NaN for the position of the slice
+         */
+        public double atlasZMm = Double.NaN;
         /** Index of the atlas structural channel blended with the slice, -1 for none */
         public int atlasChannel = -1;
         /** Weight of the atlas channel in the additive blending */
@@ -78,11 +81,11 @@ public class SliceSnapshot {
     static final Color BORDER_COLOR = new Color(255, 255, 0, 150), LABEL_COLOR = new Color(0, 255, 255);
 
     /**
-     * @param slice the slice to render, or null to render the atlas alone, at options.atlasSlicingAxisPositionMm
+     * @param slice the slice to render, or null to render the atlas alone, at options.atlasZMm
      */
     public static BufferedImage render(MultiSlicePositioner mp, SliceSources slice, Options options) {
         Grid grid = new Grid(options.regionMm != null ? options.regionMm : mp.getROI(), options.pixelSizeMm);
-        double atlasZ = atlasPosition(slice, options);
+        double atlasZ = atlasPosition(mp, slice, options);
         int[] red = new int[grid.size()], green = new int[grid.size()], blue = new int[grid.size()];
         if (options.showSlice && (slice != null)) accumulateSlice(slice, options, grid, red, green, blue);
         if (options.atlasChannel >= 0) accumulateAtlas(mp, options, grid, atlasZ, red, green, blue);
@@ -184,9 +187,10 @@ public class SliceSnapshot {
         });
     }
 
-    private static double atlasPosition(SliceSources slice, Options options) {
-        if (!Double.isNaN(options.atlasSlicingAxisPositionMm)) return options.atlasSlicingAxisPositionMm;
-        if (slice == null) throw new IllegalArgumentException("Rendering the atlas alone requires options.atlasSlicingAxisPositionMm");
+    /** @return the position of the model, where the atlas is sampled */
+    private static double atlasPosition(MultiSlicePositioner mp, SliceSources slice, Options options) {
+        if (!Double.isNaN(options.atlasZMm)) return mp.fromAtlasZ(options.atlasZMm);
+        if (slice == null) throw new IllegalArgumentException("Rendering the atlas alone requires options.atlasZMm");
         return slice.getSlicingAxisPosition();
     }
 
@@ -369,13 +373,13 @@ public class SliceSnapshot {
             StringBuilder header = new StringBuilder();
             if (slice != null) {
                 header.append(String.format(Locale.ROOT, "#%d z=%.3f reg=%d", mp.getSlices().indexOf(slice),
-                        slice.getSlicingAxisPosition(), slice.getNumberOfRegistrations()));
+                        mp.toAtlasZ(slice.getSlicingAxisPosition()), slice.getNumberOfRegistrations()));
                 if (options.registrationStepBack > 0) header.append("-").append(options.registrationStepBack);
                 if (slice.isKeySlice()) header.append(" KEY");
                 if (slice.isSelected()) header.append(" SEL");
             }
             if ((slice == null) || (atlasZ != slice.getSlicingAxisPosition())) {
-                header.append(String.format(Locale.ROOT, " atlas z=%.3f", atlasZ));
+                header.append(String.format(Locale.ROOT, " atlas z=%.3f", mp.toAtlasZ(atlasZ)));
             }
             if (options.atlasChannel >= 0) header.append(" +atlas ch").append(options.atlasChannel);
             g.setColor(Color.WHITE);

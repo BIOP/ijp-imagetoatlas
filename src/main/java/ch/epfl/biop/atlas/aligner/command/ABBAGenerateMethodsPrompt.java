@@ -180,7 +180,7 @@ public class ABBAGenerateMethodsPrompt implements Command {
             String name = slice.getName();
             if (slice.isKeySlice()) name += " [Key]";
             llm_prompt_for_methods +=name+"\n";
-            llm_prompt_for_methods +="Z: "+df.format(slice.getSlicingAxisPosition()- mp.getReslicedAtlas().getZOffset())+" mm (Thickness: "+df2.format(slice.getThicknessInMm()*1000.0)+" um)\n";
+            llm_prompt_for_methods +="Z: "+df.format(mp.toAtlasZ(slice.getSlicingAxisPosition()))+" mm (Thickness: "+df2.format(slice.getThicknessInMm()*1000.0)+" um)\n";
             if (idxSlice!=0) {
                 llm_prompt_for_methods +="Dist from previous slice (micrometer): "+df.format((slice.getSlicingAxisPosition()-lastSlicePosition)*1000)+"\n";
                 lastSlicePosition = slice.getSlicingAxisPosition();

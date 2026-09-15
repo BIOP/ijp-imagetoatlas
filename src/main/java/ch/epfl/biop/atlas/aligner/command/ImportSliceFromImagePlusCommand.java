@@ -40,7 +40,7 @@ public class ImportSliceFromImagePlusCommand implements Command {
 
         SourceAndConverter[] sacs = sac_service.getSourcesFromDataset(asd).toArray(new SourceAndConverter[0]);
 
-        mp.createSlice(sacs, slice_position_mm + mp.getReslicedAtlas().getZOffset());
+        mp.createSlice(sacs, mp.fromAtlasZ(slice_position_mm));
     }
 
 }

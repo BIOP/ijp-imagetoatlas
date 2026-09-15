@@ -75,7 +75,7 @@ public class ImportSlicesFromFilesCommand implements Command {
                     sac_service.getSourcesFromDataset(spimdata)
                             .toArray(new SourceAndConverter[0]);
 
-            List<SliceSources> slices = mp.createSlice(sacs, first_slice_position_mm + mp.getReslicedAtlas().getZOffset(), slice_spacing_mm, Tile.class, new Tile(-1));
+            List<SliceSources> slices = mp.createSlice(sacs, mp.fromAtlasZ(first_slice_position_mm), slice_spacing_mm, Tile.class, new Tile(-1));
 
 
             mp.selectSlice(mp.getSlices());
