@@ -63,7 +63,8 @@ public class SliceGuiState {
 
     final Displaysettings[] displaysettings;
 
-    boolean sliceVisible = false;
+    // Shown by default: a user who sees only the slice handles thinks the import failed
+    boolean sliceVisible = true;
 
     double yShift = 0;
 
@@ -79,6 +80,7 @@ public class SliceGuiState {
         this.nChannels = iniSources.length;
 
         channelVisible = new boolean[nChannels];
+        Arrays.fill(channelVisible, true);
         displaysettings = new Displaysettings[nChannels];
         ini_sources = iniSources;
 
