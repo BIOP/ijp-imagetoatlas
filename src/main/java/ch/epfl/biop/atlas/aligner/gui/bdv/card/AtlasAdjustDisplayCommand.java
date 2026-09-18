@@ -91,6 +91,15 @@ public class AtlasAdjustDisplayCommand extends InteractiveCommand implements
     @Override
     public void modeChanged(BdvMultislicePositionerView mp, int oldMode, int newMode) {
 
+        // The channels shown before the change, which may have been set from code (setAtlasChannelVisibility)
+        // rather than with this card
+        SourceAndConverter<?>[] previouslyDisplayed = (oldMode == BdvMultislicePositionerView.REVIEW_MODE_INT) ?
+                view.msp.getReslicedAtlas().nonExtendedSlicedSources : view.msp.getReslicedAtlas().extendedSlicedSources;
+        boolean[] visible = new boolean[previouslyDisplayed.length];
+        for (int i = 0; i < visible.length; i++) {
+            visible[i] = view.getBdvh().getViewerPanel().state().isSourceActive(previouslyDisplayed[i]);
+        }
+
         if (newMode == BdvMultislicePositionerView.REVIEW_MODE_INT) {
             SourceHelper.transferColorConverters(view.msp.getReslicedAtlas().extendedSlicedSources, view.msp.getReslicedAtlas().nonExtendedSlicedSources);
         } else {
@@ -112,12 +121,12 @@ public class AtlasAdjustDisplayCommand extends InteractiveCommand implements
                     case BdvMultislicePositionerView.POSITIONING_MODE_INT:
                         view.getBdvh().getViewerPanel()
                                 .state()
-                                .setSourceActive(view.msp.getReslicedAtlas().extendedSlicedSources[iChannel], (Boolean) this.getInput(key + "_enable"));
+                                .setSourceActive(view.msp.getReslicedAtlas().extendedSlicedSources[iChannel], visible[iChannel]);
                         break;
                     case BdvMultislicePositionerView.REVIEW_MODE_INT:
                         view.getBdvh().getViewerPanel()
                                 .state()
-                                .setSourceActive(view.msp.getReslicedAtlas().nonExtendedSlicedSources[iChannel], (Boolean) this.getInput(key + "_enable"));
+                                .setSourceActive(view.msp.getReslicedAtlas().nonExtendedSlicedSources[iChannel], visible[iChannel]);
                         break;
                     default:
                 }

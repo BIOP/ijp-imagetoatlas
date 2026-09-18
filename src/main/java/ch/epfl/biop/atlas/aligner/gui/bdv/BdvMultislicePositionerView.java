@@ -362,6 +362,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         BdvMenuHelper.addActionToBdvHandleMenu(bdvh,"View>Navigate>Next Slice [Right]",0, this::navigateNextSlice);
         BdvMenuHelper.addActionToBdvHandleMenu(bdvh,"View>Navigate>Previous Slice [Left]",0, this::navigatePreviousSlice);
         BdvMenuHelper.addActionToBdvHandleMenu(bdvh,"View>Navigate>Center On Current Slice [C]",0, this::navigateCurrentSlice);
+        BdvMenuHelper.addActionToBdvHandleMenu(bdvh,"View>Navigate>Center On Atlas",0, this::centerOnAtlas);
         BdvMenuHelper.addSeparator(bdvh, "View");
         BdvMenuHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "View>Log", ABBAStartLogCommand.class, "mp", msp );
 
@@ -1628,15 +1629,61 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
      * @return the position of the center of the slice when displayed in BigDataViewer
      */
     public RealPoint getDisplayedCenter(SliceSources slice) {
+        return getDisplayedCenter(slice.getSlicingAxisPosition(), guiState.getXShift(slice), guiState.getYShift(slice));
+    }
+
+    /**
+     * @param slicingAxisPosition position along the slicing axis, in the model convention
+     * @param xShift shift along the slicing axis, in positioning mode
+     * @param yShift shift below the atlas in positioning mode, in atlas heights: 0 is on the atlas
+     * @return the center, in BigDataViewer, of what is displayed at this position
+     */
+    private RealPoint getDisplayedCenter(double slicingAxisPosition, double xShift, double yShift) {
         if (mode==POSITIONING_MODE_INT) {
-            double slicingAxisSnapped = (((int) ((slice.getSlicingAxisPosition()+guiState.getXShift(slice)) / msp.sizePixX)) * msp.sizePixX);
+            double slicingAxisSnapped = (((int) ((slicingAxisPosition+xShift) / msp.sizePixX)) * msp.sizePixX);
             double posX = ((slicingAxisSnapped) / msp.sizePixX * msp.sX / msp.getReslicedAtlas().getStep()) + (0.5) * (msp.sX);
-            double posY = msp.sY * guiState.getYShift(slice);
+            double posY = msp.sY * yShift;
             return new RealPoint(posX, posY, 0);
         } else if (mode==REVIEW_MODE_INT) {
-            return new RealPoint(0, 0, slice.getSlicingAxisPosition());
+            return new RealPoint(0, 0, slicingAxisPosition);
         } else {
             return new RealPoint(0, 0, 0);
+        }
+    }
+
+    /**
+     * Centers the view on the atlas section at the middle of the atlas, zoomed to fit the window
+     */
+    public void centerOnAtlas() {
+        centerOnAtlas(msp.toAtlasZ(msp.sZ / 2.0));
+    }
+
+    /**
+     * Centers the view on an atlas section, zoomed to fit the window. The positioning mode displays
+     * the atlas every {@link ReslicedAtlas#getStep()} pixels along the slicing axis: the view is centered
+     * on the displayed section closest to atlasZ.
+     * @param atlasZ position of the section along the slicing axis, in the atlas convention,
+     *               see {@link MultiSlicePositioner#toAtlasZ(double)}
+     */
+    public void centerOnAtlas(double atlasZ) {
+        double width = bdvh.getViewerPanel().getWidth();
+        double height = bdvh.getViewerPanel().getHeight();
+        if ((width == 0) || (height == 0)) return; // not laid out yet
+        double position = msp.fromAtlasZ(atlasZ);
+        if (mode == POSITIONING_MODE_INT) {
+            double spacing = msp.getReslicedAtlas().getStep() * msp.sizePixX;
+            position = Math.round(position / spacing) * spacing;
+        }
+        RealPoint center = getDisplayedCenter(position, 0, 0);
+        double scale = 0.9 * Math.min(width / msp.sX, height / msp.sY);
+        AffineTransform3D view = new AffineTransform3D();
+        view.scale(scale);
+        view.translate(width / 2.0 - scale * center.getDoublePosition(0),
+                height / 2.0 - scale * center.getDoublePosition(1),
+                -scale * center.getDoublePosition(2));
+        bdvh.getViewerPanel().state().setViewerTransform(view);
+        if (bdvRepaintEnabled()) {
+            bdvh.getViewerPanel().requestRepaint();
         }
     }
 
@@ -1946,6 +1993,24 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         }
     }
 
+    /**
+     * @param iChannel index of the atlas channel, as in the registration commands
+     * @return whether this atlas channel is shown
+     */
+    public boolean getAtlasChannelVisibility(int iChannel) {
+        return bdvh.getViewerPanel().state().isSourceActive(getDisplayedAtlasSources()[iChannel]);
+    }
+
+    /**
+     * Shows or hides an atlas channel. The atlas display card does not reflect it, and applies its own
+     * settings again when it is used
+     * @param iChannel index of the atlas channel, as in the registration commands
+     * @param visible whether to show it
+     */
+    public void setAtlasChannelVisibility(int iChannel, boolean visible) {
+        bdvh.getViewerPanel().state().setSourceActive(getDisplayedAtlasSources()[iChannel], visible);
+    }
+
     public static List<String> excludedKeys = new ArrayList<>();
 
     public boolean includedKey(String key) {
@@ -2058,6 +2123,11 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
     public void setSliceChannelVisibility(SliceSources slice, int iChannel, boolean visible) {
         guiState.runSlice(slice, sliceGuiState -> sliceGuiState.setChannelVisibility(iChannel, visible));
+        tableView.sliceDisplaySettingsChanged(slice);
+    }
+
+    public void setSliceVisibility(SliceSources slice, boolean visible) {
+        guiState.runSlice(slice, sliceGuiState -> sliceGuiState.setSliceVisibility(visible));
         tableView.sliceDisplaySettingsChanged(slice);
     }
 
