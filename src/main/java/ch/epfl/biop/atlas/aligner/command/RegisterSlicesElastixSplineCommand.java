@@ -42,8 +42,7 @@ public class RegisterSlicesElastixSplineCommand extends RegistrationMultiChannel
     public void runValidated() {
 
         if (atlas_channels.size()!=slice_channels.size()) {
-            mp.errorMessageForUser.accept("Number of channel issue", "The number of slice channel(s) should be equal to the number of atlas channel(s).");
-            return;
+            fail("Number of channel issue", "The number of slice channel(s) should be equal to the number of atlas channel(s).");
         }
 
         if (nb_control_points_x <2) {

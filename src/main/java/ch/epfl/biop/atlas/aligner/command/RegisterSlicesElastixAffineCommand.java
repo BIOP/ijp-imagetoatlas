@@ -37,8 +37,7 @@ public class RegisterSlicesElastixAffineCommand extends RegistrationMultiChannel
     public void runValidated() {
 
         if (atlas_channels.size()!=slice_channels.size()) {
-            mp.errorMessageForUser.accept("Number of channels issue", "The number of slice channel(s) should be equal to the number of atlas channel(s).");
-            return;
+            fail("Number of channels issue", "The number of slice channel(s) should be equal to the number of atlas channel(s).");
         }
 
         Map<String, Object> parameters = new HashMap<>();

@@ -96,13 +96,21 @@ public class ABBABdvStartCommand implements Command, Initializable {
             description = "The ABBA BigDataViewer view; its aligner (MultiSlicePositioner) is used by the other ABBA commands.")
     BdvMultislicePositionerView view;
 
+    @Parameter(type = ItemIO.OUTPUT, label = "ABBA session",
+            description = "The ABBA session (MultiSlicePositioner) shown in the window, used by the other ABBA commands.")
+    MultiSlicePositioner mp;
+
     @Override
     public void run() {
+        if (java.awt.GraphicsEnvironment.isHeadless()) {
+            throw new IllegalStateException("ABBA - ABBA Start needs a display, and this Fiji runs headless: "
+                    + "use 'ABBA - Align Big Brains and Atlases (no GUI)' instead.");
+        }
         try {
             // Avoid breaking recorder when running a command within a command
             boolean tmpRecord = Recorder.record;
             Recorder.record = false;
-            MultiSlicePositioner mp = (MultiSlicePositioner) cs
+            mp = (MultiSlicePositioner) cs
                 .run(ABBAStartCommand.class, true,
                     "ba", ba,
                         "x_axis", x_axis,
@@ -114,8 +122,7 @@ public class ABBABdvStartCommand implements Command, Initializable {
             Recorder.record = tmpRecord;
 
             if (mp==null) {
-                System.err.println("Error - could not create MultiSlicePositioner object.");
-                return;
+                throw new IllegalStateException("Could not create the ABBA session (MultiSlicePositioner), see the log.");
             }
 
             BdvHandle bdvh = new DefaultBdvSupplier(new SerializableBdvOptions()).get();
@@ -127,8 +134,8 @@ public class ABBABdvStartCommand implements Command, Initializable {
             StartupMessageHandler handler = new StartupMessageHandler();
             handler.checkAndShowMessage();
 
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (InterruptedException | java.util.concurrent.ExecutionException e) {
+            throw new RuntimeException("Could not start ABBA: " + e.getMessage(), e);
         }
     }
 
@@ -151,7 +158,8 @@ public class ABBABdvStartCommand implements Command, Initializable {
     }
 
     public void initialize() {
-        ABBAHelper.displayABBALogo(2000); // BDV implies the presence of a GUI
+        // BDV implies the presence of a GUI; without one, run() says which command to use instead
+        if (!java.awt.GraphicsEnvironment.isHeadless()) ABBAHelper.displayABBALogo(2000);
     }
 
     void coronalCB() {

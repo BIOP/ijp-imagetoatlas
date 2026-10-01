@@ -58,18 +58,15 @@ abstract public class RegistrationMultiChannelCommand implements Command {
                     .map(Integer::parseInt)
                     .collect(Collectors.toList());
         } catch (NumberFormatException e) {
-            mp.errorMessageForUser.accept("Error in numeric input", "Number parsing exception "+e.getMessage());
-            return;
+            fail("Error in numeric input", "Number parsing exception "+e.getMessage());
         }
 
         if (atlas_channels.isEmpty()) {
-            mp.errorMessageForUser.accept("No Atlas channel", "Error, you did not specify any atlas channel.");
-            return;
+            fail("No Atlas channel", "Error, you did not specify any atlas channel.");
         }
 
         if (slice_channels.isEmpty()) {
-            mp.errorMessageForUser.accept("No Slice channel", "Error, you did not specify any slice channel.");
-            return;
+            fail("No Slice channel", "Error, you did not specify any slice channel.");
         }
 
         int maxIndexAtlas = Collections.max(atlas_channels);
@@ -79,30 +76,29 @@ abstract public class RegistrationMultiChannelCommand implements Command {
         int minIndexSlices = Collections.min(slice_channels);
 
         if (minIndexAtlas<0) {
-            mp.errorMessageForUser.accept("Negative index!", "The atlas channels index should be positive");
-            return;
+            fail("Negative index!", "The atlas channels index should be positive");
         }
 
         if (minIndexSlices<0) {
-            mp.errorMessageForUser.accept("Negative index!", "The slices channels index should be positive");
-            return;
+            fail("Negative index!", "The slices channels index should be positive");
         }
 
         if (!validationError) {
             if (maxIndexAtlas >=mp.getNumberOfAtlasChannels()) {
-                mp.errorMessageForUser.accept("Issue with channels numbers","The atlas has only "+mp.getNumberOfAtlasChannels()+" channels !\n Maximum index : "+(mp.getNumberOfAtlasChannels()-1));
-                return;
+                fail("Issue with channels numbers","The atlas has only "+mp.getNumberOfAtlasChannels()+" channels !\n Maximum index : "+(mp.getNumberOfAtlasChannels()-1));
             }
             if (mp.getSelectedSlices().isEmpty()) {
-                mp.errorMessageForUser.accept("No selected slice", "Please select the slice(s) you want to register");
-                return;
+                fail("No selected slice", "Please select the slice(s) you want to register");
             }
             if (maxIndexSlices >=mp.getChannelBoundForSelectedSlices()) {
-                mp.errorMessageForUser.accept("Issue with channels numbers","Missing channel in selected slice(s)\n One selected slice only has "+mp.getChannelBoundForSelectedSlices()+" channel(s).\n Maximum index : "+(mp.getChannelBoundForSelectedSlices()-1) );
-                return;
+                fail("Issue with channels numbers","Missing channel in selected slice(s)\n One selected slice only has "+mp.getChannelBoundForSelectedSlices()+" channel(s).\n Maximum index : "+(mp.getChannelBoundForSelectedSlices()-1) );
             }
-            if (requiresConsistentPixelTypes() && !checkPixelTypesConsistency()) return;
-            runValidated();
+            if (requiresConsistentPixelTypes() && !checkPixelTypesConsistency()) {
+                throw new IllegalArgumentException("The selected channels do not share a pixel type: see the message shown");
+            }
+            runValidated(); // registerSelectedSlices already makes it a single undo step
+        } else {
+            throw new IllegalArgumentException("Invalid registration parameters: see the message shown");
         }
     }
 
@@ -176,6 +172,15 @@ abstract public class RegistrationMultiChannelCommand implements Command {
     }
 
     abstract public void runValidated();
+
+    /**
+     * Shows the error to the user, as before, and fails the command, so that scripts and agents see it too
+     * instead of a command that ends normally without doing anything.
+     */
+    protected void fail(String title, String message) {
+        mp.errorMessageForUser.accept(title, message);
+        throw new IllegalArgumentException(title + ": " + message);
+    }
 
     public SourcesProcessor getFixedFilter() {
         return new SourcesChannelsSelect(atlas_channels);
