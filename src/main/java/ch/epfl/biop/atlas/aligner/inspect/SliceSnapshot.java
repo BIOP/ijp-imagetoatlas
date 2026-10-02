@@ -384,6 +384,14 @@ public class SliceSnapshot {
             if (options.atlasChannel >= 0) header.append(" +atlas ch").append(options.atlasChannel);
             g.setColor(Color.WHITE);
             g.drawString(header.toString().trim(), 4, 14);
+            // Regions drawn on a slice that no registration placed are those of the atlas at the slice's
+            // position, which may be a placeholder: they must not read as a fit
+            boolean regionsShown = options.showRegionBorders || options.showRegionLabels;
+            if ((slice != null) && regionsShown
+                    && (slice.getNumberOfRegistrations() - options.registrationStepBack <= 0)) {
+                g.setColor(Color.ORANGE);
+                g.drawString("UNREGISTERED", 8 + g.getFontMetrics().stringWidth(header.toString().trim()), 14);
+            }
             g.setColor(Color.LIGHT_GRAY);
             g.drawString(slice != null ? slice.getName() : mp.getAtlas().getName(), 4, 30);
         }
