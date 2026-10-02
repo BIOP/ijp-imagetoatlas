@@ -1,6 +1,7 @@
 package ch.epfl.biop.atlas.aligner.command;
 
 import bdv.viewer.SourceAndConverter;
+import ch.epfl.biop.atlas.aligner.ErrorMessage;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.bdv.img.qupath.command.DatasetFromQuPathCreateCommand;
 import ch.epfl.biop.bdv.img.qupath.entity.QuPathEntryIdEntity;
@@ -71,9 +72,9 @@ public class ImportSlicesFromQuPathCommand implements Command {
             e.printStackTrace();
         } catch (ExecutionException e) {
             mp.errorMessageForUser.accept("QuPath Import Error",
-                    "QuPath project couldn't be imported.\n"+
+                    ErrorMessage.withCauses("QuPath project couldn't be imported.\n"+
                        "Check whether the project can be opened in QuPath, fix URI if necessary.\n"+
-                       "OpenSlide and ImageJ image servers are unsupported.");
+                       "OpenSlide and ImageJ image servers are unsupported.", e));
             e.printStackTrace();
         }
     }

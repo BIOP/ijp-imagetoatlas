@@ -1,6 +1,7 @@
 package ch.epfl.biop.atlas.aligner.command;
 
 import bdv.viewer.SourceAndConverter;
+import ch.epfl.biop.atlas.aligner.ErrorMessage;
 import ch.epfl.biop.atlas.aligner.DeepSliceHelper;
 import ch.epfl.biop.atlas.aligner.MoveSliceAction;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
@@ -199,7 +200,7 @@ public class ImportSlicesFromQuickNIICommand implements Command {
             e.printStackTrace();
         } catch (ExecutionException e) {
             mp.errorMessageForUser.accept("QuickNII Import Error",
-                    "QuickNII project couldn't be imported.");
+                    ErrorMessage.withCauses("QuickNII project couldn't be imported.", e));
             e.printStackTrace();
         } catch (FileNotFoundException e) {
             mp.errorMessageForUser.accept("QuickNII Import Error",

@@ -1,6 +1,7 @@
 package ch.epfl.biop.atlas.aligner.command;
 
 import bdv.viewer.SourceAndConverter;
+import ch.epfl.biop.atlas.aligner.ErrorMessage;
 import ch.epfl.biop.atlas.aligner.MultiSlicePositioner;
 import ch.epfl.biop.atlas.aligner.SliceSources;
 import ch.epfl.biop.bdv.img.bioformats.command.DatasetFromBioFormatsCreateCommand;
@@ -83,7 +84,7 @@ public class ImportSlicesFromFilesCommand implements Command {
             e.printStackTrace();
         }  catch (ExecutionException e) {
             mp.errorMessageForUser.accept("Image Import Error",
-                    "An image couldn't be imported.");
+                    ErrorMessage.withCauses("An image couldn't be imported.", e));
             e.printStackTrace();
         }
     }
