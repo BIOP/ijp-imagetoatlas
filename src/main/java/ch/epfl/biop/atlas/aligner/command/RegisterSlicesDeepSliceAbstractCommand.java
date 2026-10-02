@@ -338,8 +338,13 @@ abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command,
         angleUpdatedMessage+="Angle Y : "+df.format(reslicedAtlas.getRotateY()/Math.PI*180)+" deg\n";
 
         mp.infoMessageForUser.accept("Slicing angle changed", "Slicing angle adjusted. "+ angleUpdatedMessage);
-        mp.infoMessageForUser.accept("Angle spread (ignored)", "Range X: ["+df.format(rotCorr.get(2))+":"+df.format(rotCorr.get(3))+"]");
-        mp.infoMessageForUser.accept("Angle spread (ignored)", "Range Y: ["+df.format(rotCorr.get(3))+":"+df.format(rotCorr.get(4))+"]");
+        // rotCorr: median X and Y, then min X, max X, min Y, max Y of the per-slice angles, in degrees,
+        // relative to the adjusted atlas angle. They are all 0 when DeepSlice propagated its angle to all slices.
+        mp.infoMessageForUser.accept("Slicing angle spread",
+                "Slicing angles of the individual slices, relative to the adjusted atlas angle (which is their median, "
+                        + "applied to all slices): X from "+df.format(rotCorr.get(2))+" to "+df.format(rotCorr.get(3))
+                        + " deg, Y from "+df.format(rotCorr.get(4))+" to "+df.format(rotCorr.get(5))+" deg. "
+                        + "All 0 when DeepSlice propagated a common angle to all slices.");
 
     }
 
