@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.*;
+import java.io.File;
 
 public class ExportSliceRegionsToQuPathProjectAction extends CancelableAction {
 
@@ -15,17 +16,35 @@ public class ExportSliceRegionsToQuPathProjectAction extends CancelableAction {
 
     final SliceSources slice;
     final boolean erasePreviousFile;
+    final File projectFolder; // null: the project the slice was imported from
+    final File dataEntryFolder;
 
+    /**
+     * Exports the slice to the QuPath project it was imported from.
+     */
     public ExportSliceRegionsToQuPathProjectAction(MultiSlicePositioner mp, SliceSources slice, boolean erasePreviousFile) {
+        this(mp, slice, null, null, erasePreviousFile);
+    }
+
+    /**
+     * Exports the slice to an image of a QuPath project which has the same pixel grid as the slice.
+     */
+    public ExportSliceRegionsToQuPathProjectAction(MultiSlicePositioner mp, SliceSources slice, File projectFolder, File dataEntryFolder, boolean erasePreviousFile) {
         super(mp);
         this.slice = slice;
+        this.projectFolder = projectFolder;
+        this.dataEntryFolder = dataEntryFolder;
         this.erasePreviousFile = erasePreviousFile;
     }
 
     @Override
     protected boolean run() {
         logger.info("Exporting slice "+slice+" registration to QuPath");
-        slice.exportToQuPathProject(erasePreviousFile);
+        if (projectFolder == null) {
+            slice.exportToQuPathProject(erasePreviousFile);
+        } else {
+            slice.exportToQuPathEntry(projectFolder, dataEntryFolder, erasePreviousFile);
+        }
         return true;
     }
 

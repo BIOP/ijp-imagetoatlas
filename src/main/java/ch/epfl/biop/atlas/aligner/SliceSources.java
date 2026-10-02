@@ -132,6 +132,9 @@ public class SliceSources {
 
     protected static final Logger logger = LoggerFactory.getLogger(SliceSources.class);
 
+    public static final String NOT_LINKED_TO_QUPATH_HINT =
+            "Slices opened from files can be exported with 'Export Slices To New QuPath Project' instead.";
+
     //final private SliceSourcesGUIState guiState; // in here ? GOod idea ?
 
     // What are they ?
@@ -1195,7 +1198,7 @@ public class SliceSources {
         for (SourceAndConverter<?> source: original_sacs) {
             // All linked to QuPath ?
             if (!QuPathBdvHelper.isSourceLinkedToQuPath(source)) {
-                mp.errorMessageForUser.accept("Export to QuPath error!", "Slice "+this+" not linked to a QuPath dataset");
+                mp.errorMessageForUser.accept("Export to QuPath error!", "Slice "+this+" is not linked to a QuPath project.\n"+NOT_LINKED_TO_QUPATH_HINT);
                 return false;
             }
 
@@ -1384,17 +1387,45 @@ public class SliceSources {
     private void storeInQuPathProjectIfExists(ImageJRoisFile ijroisfile, boolean erasePreviousFile) {
 
         if (!QuPathBdvHelper.isSourceLinkedToQuPath(original_sacs[0])) {
-            mp.errorMessageForUser.accept("QuPath export error", "Slice "+this+" not linked to a QuPath dataset");
+            mp.errorMessageForUser.accept("QuPath export error", "Slice "+this+" is not linked to a QuPath project.\n"+NOT_LINKED_TO_QUPATH_HINT);
         }
-        File dataEntryFolder = null;
+        File dataEntryFolder;
+        String projectFolderPath;
 
         try {
             dataEntryFolder = QuPathBdvHelper.getDataEntryFolder(original_sacs[0]);
             logger.debug("Store in QuPath - DataEntryFolder = "+dataEntryFolder);
 
-            String projectFolderPath = QuPathBdvHelper.getProjectFile(original_sacs[0]).getParent();
-            logger.debug("Store in QuOath - QuPath Project Folder = "+projectFolderPath);
+            projectFolderPath = QuPathBdvHelper.getProjectFile(original_sacs[0]).getParent();
+            logger.debug("Store in QuPath - QuPath Project Folder = "+projectFolderPath);
+        } catch (Exception e) {
+            mp.errorMessageForUser.accept("QuPath export error",
+                    "Error message: "+e.getMessage()+"\n"+
+                    "Please also check the stack trace");
+            e.printStackTrace();
+            return;
+        }
 
+        storeInQuPathEntry(ijroisfile, projectFolderPath, dataEntryFolder, erasePreviousFile);
+    }
+
+    /**
+     * Saves the regions and the registration of this slice in a folder of an image of a QuPath project which is not
+     * necessarily the one the slice was imported from. The image of this entry should have the same pixel grid as
+     * the first channel of this slice: the regions and the transform are in its pixel coordinates.
+     * @param projectFolder folder of the QuPath project, where the atlas ontology is written
+     * @param dataEntryFolder data folder of the QuPath image, where the regions and the transform are written
+     * @param erasePreviousFile if true, replaces a previous export; otherwise an existing export is reported as an error
+     */
+    public void exportToQuPathEntry(File projectFolder, File dataEntryFolder, boolean erasePreviousFile) {
+        prepareExport("id", 0);
+        ImageJRoisFile ijroisfile = (ImageJRoisFile) cvtRoisTransformed.to(ImageJRoisFile.class);
+        storeInQuPathEntry(ijroisfile, projectFolder.getAbsolutePath(), dataEntryFolder, erasePreviousFile);
+    }
+
+    private void storeInQuPathEntry(ImageJRoisFile ijroisfile, String projectFolderPath, File dataEntryFolder, boolean erasePreviousFile) {
+
+        try {
             File f = new File(dataEntryFolder, "ABBA-RoiSet-"+mp.getAtlas().getName()+".zip");
             mp.infoMessageForUser.accept("Export to QuPath","Save slice ROI to quPath project " + f.getAbsolutePath());
 

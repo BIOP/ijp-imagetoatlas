@@ -423,6 +423,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         BdvMenuHelper.addSeparator(bdvh,"Export");
 
         BdvMenuHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export>QuPath>Export Registrations To QuPath Project", ExportRegistrationToQuPathCommand.class, "mp", msp);
+        BdvMenuHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export>QuPath>Export Slices To New QuPath Project", ExportSlicesToNewQuPathProjectCommand.class, "mp", msp);
         BdvMenuHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export>ImageJ>Export Regions To Roi Manager", ExportRegionsToRoiManagerCommand.class, "mp", msp);
         BdvMenuHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export>ImageJ>Export Regions To File", ExportRegionsToRoisetFileCommand.class, "mp", msp);
         BdvMenuHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Export>BigDataViewer>Export Registered Slices To BDV Json Dataset", ExportSlicesToBDVJsonDatasetCommand.class, "mp", msp);
