@@ -4,6 +4,7 @@ import bdv.tools.transformation.TransformedSource;
 import bdv.viewer.SourceAndConverter;
 import ch.epfl.biop.atlas.struct.AtlasMap;
 import ch.epfl.biop.atlas.struct.Atlas;
+import ch.epfl.biop.atlas.struct.AtlasHelper;
 import ch.epfl.biop.source.EmptyMultiResolutionSourceCreator;
 import ch.epfl.biop.registration.source.affine.AffineTransformedSourceWrapperRegistration;
 import ch.epfl.biop.source.transform.SourceMosaicZSlicer;
@@ -232,8 +233,6 @@ public class ReslicedAtlas implements RealInterval {
         SourceMosaicZSlicer mosaic = new SourceMosaicZSlicer(null, slicingModel, true, false, false,
                 this::getStep);
 
-        SourceResampler resampler = new SourceResampler(null, slicingModel,slicingModel.getSpimSource().getName(), true, false, false, 0);
-
         centerTransform = null;
 
         List<String> keys = map.getImagesKeys();
@@ -252,7 +251,9 @@ public class ReslicedAtlas implements RealInterval {
             }
 
             SourceAndConverter reslicedSac = mosaic.apply(sac);
-            tempNonExtendedSlicedSources[index] = resampler.apply(sac);
+            // Named after the atlas key (Nissl, Ara...), the name by which commands and users know the channel
+            String channelName = index<map.getStructuralImages().size() ? keys.get(index) : AtlasHelper.KEY_LABEL;
+            tempNonExtendedSlicedSources[index] = new SourceResampler(null, slicingModel, channelName, true, false, false, 0).apply(sac);
 
             if (centerTransform == null) {
                 centerTransform = new AffineTransform3D();
