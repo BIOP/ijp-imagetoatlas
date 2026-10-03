@@ -35,7 +35,7 @@ abstract public class RegistrationMultiChannelCommand implements Command {
 
     @Parameter(label = "Atlas channels",
             description = "0-based indices of the atlas channels to use, comma separated (e.g. '0,1'). '*' is not accepted. "
-                    + "Channel indices are shown in the atlas display card.")
+                    + "The channels in index order are 'atlas_channels' in 'ABBA - Get State', and in the atlas display card.")
     String atlas_channels_csv;
 
     @Parameter(label = "Slice channels",

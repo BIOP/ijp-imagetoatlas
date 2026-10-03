@@ -562,6 +562,14 @@ public class SliceSources {
         return registrations.size()-3;
     }
 
+    /**
+     * @return the class names of the registrations counted by {@link #getNumberOfRegistrations()}, in the order
+     * they apply
+     */
+    public List<String> getRegistrationNames() {
+        return registrations.stream().skip(3).map(reg -> reg.getClass().getSimpleName()).collect(Collectors.toList());
+    }
+
     protected boolean hideLastMirrorRegistration() {
         boolean performed = false;
         for (int iReg = registered_sacs_sequence.size()-1; iReg>0; iReg--) {
