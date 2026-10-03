@@ -130,6 +130,8 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
     public MultiSlicePositioner msp; // TODO : make accessor
     final BdvHandle bdvh;
+    /** 1 for the first view of the session, 2 for a second one open at the same time... */
+    final int viewNumber;
 
     TableView tableView;
 
@@ -869,6 +871,10 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             this.bdvh = bdvh;
             this.vp = bdvh.getViewerPanel();
             this.msp = msp;
+            // Numbered among the open views of the session, so that windows and their names can be told apart
+            this.viewNumber = 1 + msp.getContext().getService(ObjectService.class)
+                    .getObjects(BdvMultislicePositionerView.class).stream()
+                    .filter(view -> view.msp == msp).mapToInt(view -> view.viewNumber).max().orElse(0);
             this.sX = msp.sX;
             this.sY = msp.sY;
             roiChanged(); // initialize roi
@@ -1205,8 +1211,16 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
                 nTasks > 1 ? nTasks + " tasks running" : "1 task running");
     }
 
+    /**
+     * @return the name of this view: the window title without its modified marker, and with a view number when the
+     * session has several views. Scripts and agents pass it to pick a view.
+     */
+    public String getName() {
+        return "Aligning Big Brains and Atlases - "+msp.getAtlas().getName()+(viewNumber > 1 ? " (view "+viewNumber+")" : "");
+    }
+
     public String getViewName() {
-        String name = "Aligning Big Brains and Atlases - "+msp.getAtlas().getName();
+        String name = getName();
         if (msp.isModifiedSinceLastSave()) {
             return ABBABdvViewPrefs.title_prefix+name+"* (modified)"+ABBABdvViewPrefs.title_suffix;
         } else {
