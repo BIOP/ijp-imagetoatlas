@@ -28,8 +28,15 @@ public class SnapshotCommand implements Command {
     @Parameter(label = "Pixel size (mm)", description = "Pixel size of the rendered image; smaller is sharper and slower.")
     double pixel_size_mm = 0.025;
 
-    @Parameter(label = "Atlas channel", description = "Index of an atlas channel blended with the slice, -1 for none.")
+    @Parameter(label = "Atlas channel", description = "Index of an atlas channel blended with the slice, -1 for none "
+            + "('atlas_channels' in 'ABBA - Get State' lists them in index order).")
     int atlas_channel = -1;
+
+    @Parameter(label = "Region (mm)", required = false,
+            description = "Rendered region 'x,y,width,height' in mm, x and y being its top left corner as read on the rulers "
+                    + "(e.g. '-1,0.5,2,2' for a 2 mm square). Empty for the whole region of interest. With a small region, "
+                    + "lower the pixel size to see details.")
+    String region_mm = "";
 
     @Parameter(label = "Show region borders")
     boolean show_region_borders = true;
@@ -53,6 +60,13 @@ public class SnapshotCommand implements Command {
         options.atlasChannel = atlas_channel;
         options.showRegionBorders = show_region_borders;
         options.showRegionLabels = show_region_labels;
+        if (region_mm != null && !region_mm.trim().isEmpty()) {
+            String[] parts = region_mm.trim().split("\\s*,\\s*");
+            if (parts.length != 4) throw new IllegalArgumentException("region_mm: give 'x,y,width,height' in mm, not '" + region_mm + "'");
+            options.regionMm = new double[4];
+            for (int i = 0; i < 4; i++) options.regionMm[i] = Double.parseDouble(parts[i]);
+            if (options.regionMm[2] <= 0 || options.regionMm[3] <= 0) throw new IllegalArgumentException("region_mm: width and height must be positive");
+        }
         snapshot = new ImagePlus("ABBA snapshot", slices.size() == 1
                 ? SliceSnapshot.render(mp, slices.get(0), options)
                 : SliceSnapshot.overview(mp, slices, options, columns));
