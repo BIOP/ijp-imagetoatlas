@@ -19,6 +19,8 @@ import net.imglib2.realtransform.AffineTransform3D;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.scijava.Context;
+import org.scijava.log.LogLevel;
+import org.scijava.log.LogService;
 import org.scijava.InstantiableException;
 import org.scijava.convert.ConvertService;
 import org.scijava.object.ObjectService;
@@ -155,31 +157,49 @@ public class MultiSlicePositioner implements Closeable {
     }
 
     /**
-     * Blocking error message for users
+     * Error message for users: logged first, then sent to the subscribers (a view shows it)
      */
     public BiConsumer<String, String> errorMessageForUser = (title, message) -> {
+        logForUser(LogLevel.ERROR, title, message);
         synchronized (this) {
             errorSubscribers.forEach(logger -> logger.accept(title, message));
         }
-        logger.error(title+":"+message);
     };
 
     /**
-     * Blocking warning message for users
+     * Warning message for users: logged first, then sent to the subscribers (a view shows it)
      */
     public BiConsumer<String, String> warningMessageForUser = (title, message) -> {
+        logForUser(LogLevel.WARN, title, message);
         synchronized (this) {
             warnSubscribers.forEach(logger -> logger.accept(title, message));
         }
-        logger.warn(title+":"+message);
     };
 
     public BiConsumer<String, String> infoMessageForUser = (title, message) -> {
+        logForUser(LogLevel.INFO, title, message);
         synchronized (this) {
             infoSubscribers.forEach(logger -> logger.accept(title, message));
         }
-        logger.info(title+":"+message);
     };
+
+    /**
+     * Logs a message for users through SciJava's log service, where whoever runs a command - a script, an agent -
+     * collects the warnings and errors it raised. Without a context, through this class' logger.
+     */
+    private void logForUser(int level, String title, String message) {
+        String text = title + ": " + message;
+        LogService log = scijavaCtx == null ? null : scijavaCtx.getService(LogService.class);
+        if (log != null) {
+            log.log(level, text);
+        } else if (level == LogLevel.ERROR) {
+            logger.error(text);
+        } else if (level == LogLevel.WARN) {
+            logger.warn(text);
+        } else {
+            logger.info(text);
+        }
+    }
 
     final Object slicesLock = new Object();
 
