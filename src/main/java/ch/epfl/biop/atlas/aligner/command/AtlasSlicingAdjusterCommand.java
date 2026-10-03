@@ -10,7 +10,8 @@ import org.scijava.plugin.Plugin;
 @Plugin(type = InteractiveCommand.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>ABBA - Adjust Slicing",
         description = "Tilts the atlas slicing plane to match the sectioning angle of the slices. "
-                + "The angles apply to all slices.")
+                + "The angles apply to all slices. Interactive, from the Atlas Slicing card of an ABBA window: "
+                + "'ABBA - Set Atlas Slicing Angles' does the same from a script.")
 public class AtlasSlicingAdjusterCommand extends InteractiveCommand implements Initializable {
 
     @Parameter(label = "Lock rotations",

@@ -17,7 +17,7 @@ import java.util.List;
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Inspect>ABBA - Get State",
         description = "Returns the state of the session as JSON, once the queued work is done. Compact by default: the atlas, "
-                + "its channels in index order, the slicing angles, and per slice its index, name, position 'z_mm' (as "
+                + "its channels in index order, the slicing angles, the region of interest, and per slice its index, name, position 'z_mm' (as "
                 + "displayed), selection, key slice flag, channel names and registrations. With 'full': the content of a "
                 + "state file instead, plus per slice its index, name, channels, selection and position in both conventions "
                 + "('z_mm' as displayed, 'slicing_axis_position' as stored), long transforms elided.")
@@ -51,6 +51,7 @@ public class GetStateCommand implements Command {
         json.add("atlas_channels", atlasChannels(mp));
         json.addProperty("slicing_angle_x_deg", Math.toDegrees(mp.getReslicedAtlas().getRotateX()));
         json.addProperty("slicing_angle_y_deg", Math.toDegrees(mp.getReslicedAtlas().getRotateY()));
+        json.addProperty("roi_mm", SetRegionOfInterestCommand.format(mp.getROI()));
         json.addProperty("number_of_slices", mp.getSlices().size());
         JsonArray list = new JsonArray();
         for (SliceSources slice : slices) {

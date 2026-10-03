@@ -19,7 +19,8 @@ import org.slf4j.LoggerFactory;
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>ABBA - Define Rectangular ROI",
         description = "Defines the rectangular region of interest (ROI) of the sections: registrations only consider this region, "
-                + "and exports to images are cropped to it. It applies to all slices.")
+                + "and exports to images are cropped to it. It applies to all slices. Needs an ABBA window: "
+                + "'ABBA - Set Region Of Interest' does the same without one.")
 public class SliceDefineROICommand extends InteractiveCommand implements Initializable {
 
     protected static final Logger logger = LoggerFactory.getLogger(SliceDefineROICommand.class);
