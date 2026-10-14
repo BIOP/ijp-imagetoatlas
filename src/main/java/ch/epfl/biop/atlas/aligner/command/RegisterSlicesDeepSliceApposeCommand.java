@@ -17,7 +17,8 @@ import java.io.File;
 @SuppressWarnings("CanBeFinal")
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>ABBA - DeepSlice Registration",
-        description = "Runs DeepSlice (installed automatically in a local Python environment) on the selected slices: "
+        description = "Runs DeepSlice (installed automatically in a local Python environment) on the selected slices, "
+                + "after the command returns - follow it with 'ABBA - Wait': "
                 + "sets their position along the slicing axis, adds an in-plane affine registration "
                 + "and optionally adjusts the atlas slicing angle. The result depends on the slices display settings: avoid saturation.",
         iconPath = "/graphics/DeepSlice.png")
@@ -40,7 +41,9 @@ public class RegisterSlicesDeepSliceApposeCommand extends RegisterSlicesDeepSlic
                     + "'" + KEEP_ORDER_REGULAR_SPACING + "': order preserved and slices evenly spaced, spacing estimated by DeepSlice. "
                     + "'" + KEEP_ORDER_SET_SPACING + "': order preserved and slices evenly spaced with the spacing given below. "
                     + "'" + NO_POST_PROCESSING + "': raw DeepSlice positions, slices may be reordered. "
-                    + "'" + KEEP_POSITIONS + "': the slices are not moved, only registered in plane.",
+                    + "'" + KEEP_POSITIONS + "': the slices are not moved, only registered in plane. "
+                    + "Order and spacing only consider the selected slices: to re-register a few slices without moving "
+                    + "them past their neighbours, use '" + KEEP_POSITIONS + "'; with one slice, no order or spacing applies.",
             choices = {
             KEEP_ORDER,
             KEEP_ORDER_REGULAR_SPACING,
@@ -102,9 +105,14 @@ public class RegisterSlicesDeepSliceApposeCommand extends RegisterSlicesDeepSlic
         }
             deepSliceProcessor =
                 (input_folder, nSlices) -> {
-                    boolean pa = settings.propagate_angles; // store
+                    boolean pa = settings.propagate_angles, order = settings.enforce_index_order, spacing = settings.use_enforce_index_spacing; // store
                     if (nSlices<=2) {
                         settings.propagate_angles = false; // see https://github.com/BIOP/ijp-imagetoatlas/issues/214
+                    }
+                    if (nSlices<2) {
+                        // A single section can be neither ordered nor spaced ("Only one section found, cannot space according to index")
+                        settings.enforce_index_order = false;
+                        settings.use_enforce_index_spacing = false;
                     }
                     settings.input_folder = input_folder.getAbsolutePath();
 
@@ -117,8 +125,11 @@ public class RegisterSlicesDeepSliceApposeCommand extends RegisterSlicesDeepSlic
                                     input_folder,
                                     (message) -> mp.infoMessageForUser.accept("Appose DeepSlice Environment Installation...", message),
                                     (message) -> mp.infoMessageForUser.accept("Appose DeepSlice Run", message),
+                                    (message) -> mp.errorMessageForUser.accept("DeepSlice error", message),
                                     headless);
                     settings.propagate_angles = pa; // restore
+                    settings.enforce_index_order = order;
+                    settings.use_enforce_index_spacing = spacing;
                     return outDirectory;
                 };
         return true;

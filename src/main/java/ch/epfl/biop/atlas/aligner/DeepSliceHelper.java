@@ -13,8 +13,6 @@ import org.apposed.appose.Service;
 import org.scijava.platform.PlatformService;
 
 import javax.swing.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,7 +21,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
@@ -116,7 +113,12 @@ public class DeepSliceHelper {
         return new File(input_folder, "results.json");
     }
 
-    public static File deepSliceLocalApposeRunner(DeepSliceTaskSettings settings, File input_folder, Consumer<String> listenEnv, Consumer<String> listenProgress, boolean headless) {
+    /**
+     * Runs DeepSlice in its Appose environment
+     * @param listenError gets the error if DeepSlice fails, the Python error included
+     * @return the result file, missing if DeepSlice failed
+     */
+    public static File deepSliceLocalApposeRunner(DeepSliceTaskSettings settings, File input_folder, Consumer<String> listenEnv, Consumer<String> listenProgress, Consumer<String> listenError, boolean headless) {
         ApposeDeepSliceTask task = new ApposeDeepSliceTask();
         task.setSettings(settings);
         task.listenEnv(listenEnv);
@@ -128,7 +130,7 @@ public class DeepSliceHelper {
             // Not rethrown: the caller runs within LockAndRunOnceSliceAction, whose other slices would
             // then wait forever. The missing results.json aborts the registration instead.
             Throwable cause = e instanceof ExceptionInInitializerError ? e.getCause() : e;
-            IJ.log("Could not run DeepSlice: "+cause.getMessage());
+            listenError.accept("Could not run DeepSlice: "+cause.getMessage());
             e.printStackTrace();
         }
         return new File(input_folder, "results.json");
@@ -290,6 +292,7 @@ public class DeepSliceHelper {
 
         public void run() throws Exception {
             final Environment env = (cachedEnv == null && !headless) ? environmentWithDialog() : environment(listenEnv);
+            listenProgress.accept("DeepSlice environment ready (v"+DS_VERSION+")");
 
             try (Service python = env.python().init(callImports())) {
                 final Map<String, Object> inputs = new HashMap<>();
@@ -320,9 +323,9 @@ public class DeepSliceHelper {
             }
         }
 
-        /** Builds the environment while a modal dialog tells the user what is going on. */
+        /** Builds the environment while a dialog tells the user what is going on. Not modal: the application stays usable. */
         private Environment environmentWithDialog() throws Exception {
-            JDialog waitDialog = new JDialog((java.awt.Frame) null, "Loading DeepSlice...", true);
+            JDialog waitDialog = new JDialog((java.awt.Frame) null, "Loading DeepSlice...", false);
             JPanel panel = new JPanel();
             panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
             panel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
@@ -348,37 +351,14 @@ public class DeepSliceHelper {
             waitDialog.pack();
             waitDialog.setLocationRelativeTo(null);
 
-            // SwingWorker builds the environment in background; disposing the modal dialog from done()
-            // unblocks setVisible(true) below.
-            final AtomicReference<Environment> envRef = new AtomicReference<>();
-            final AtomicReference<Exception> errRef = new AtomicReference<>();
-            final SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
-                @Override
-                protected Void doInBackground() {
-                    try {
-                        envRef.set(environment(listenEnv));
-                    } catch (Exception e) {
-                        errRef.set(e);
-                    }
-                    return null;
-                }
-                @Override
-                protected void done() {
-                    waitDialog.dispose();
-                }
-            };
-            // Started only once the dialog shows: an environment already on disk builds almost at once,
-            // and a dispose() landing before setVisible(true) would leave the dialog open for good.
-            waitDialog.addWindowListener(new WindowAdapter() {
-                @Override
-                public void windowOpened(WindowEvent e) {
-                    worker.execute();
-                }
-            });
-            waitDialog.setVisible(true);
-
-            if (errRef.get() != null) throw errRef.get();
-            return envRef.get();
+            // Built in this thread, which is not the event dispatch thread. Shown and disposed on the event dispatch
+            // thread, in this order, even when an environment already on disk builds almost at once.
+            SwingUtilities.invokeLater(() -> waitDialog.setVisible(true));
+            try {
+                return environment(listenEnv);
+            } finally {
+                SwingUtilities.invokeLater(waitDialog::dispose);
+            }
         }
 
         /**

@@ -48,8 +48,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -157,14 +162,98 @@ public class MultiSlicePositioner implements Closeable {
     }
 
     /**
-     * Error message for users: logged first, then sent to the subscribers (a view shows it)
+     * Error message for users: recorded in the failures, logged, then sent to the subscribers (a view shows it)
      */
-    public BiConsumer<String, String> errorMessageForUser = (title, message) -> {
-        logForUser(LogLevel.ERROR, title, message);
+    public BiConsumer<String, String> errorMessageForUser = (title, message) -> errorForUser(null, null, title, message);
+
+    /**
+     * Error message for users about an action of a slice, see {@link #errorMessageForUser}: the failure is recorded
+     * with the action and the slice
+     * @param sliceName name of the slice, or null
+     * @param actionName name of the action, or null
+     */
+    void errorForUser(String sliceName, String actionName, String title, String message) {
+        recordFailure(sliceName, actionName, title + ": " + message);
+        String text = sliceName == null ? message : actionName + " on slice " + sliceName + ":\n" + message;
+        logForUser(LogLevel.ERROR, title, text);
         synchronized (this) {
-            errorSubscribers.forEach(logger -> logger.accept(title, message));
+            errorSubscribers.forEach(logger -> logger.accept(title, text));
         }
-    };
+    }
+
+    /**
+     * A failure of the session: an error shown to the user, or an action of a slice which failed. Kept so that
+     * whoever does not see the messages - a script, an agent - can ask what failed, see {@link #getFailures(int)}.
+     */
+    public static class Failure {
+        /** Rank of the failure in the session, from 1 */
+        public final int index;
+        public final long time;
+        /** Name of the action which failed, or null */
+        public final String action;
+        /** Names of the slices where the action failed for the same reason, or empty */
+        public final List<String> slices;
+        public final String reason;
+
+        Failure(int index, String action, List<String> slices, String reason) {
+            this.index = index;
+            this.time = System.currentTimeMillis();
+            this.action = action;
+            this.slices = Collections.unmodifiableList(slices);
+            this.reason = reason;
+        }
+
+        /**
+         * @return one line: '#index hh:mm:ss action on slices: reason'
+         */
+        @Override
+        public String toString() {
+            String where = "";
+            if (action != null) where += action;
+            if (slices.size() == 1) where += " on slice " + slices.get(0);
+            if (slices.size() > 1) where += " on " + slices.size() + " slices (" + String.join(", ", slices.subList(0, Math.min(3, slices.size())))
+                    + (slices.size() > 3 ? ", ..." : "") + ")";
+            return "#" + index + " " + new SimpleDateFormat("HH:mm:ss").format(new Date(time)) + " "
+                    + (where.isEmpty() ? "" : where + ": ") + reason.replaceAll("\\s*\n\\s*", " ");
+        }
+    }
+
+    // The last failures, oldest first, see recordFailure
+    private final LinkedList<Failure> failures = new LinkedList<>();
+
+    private int failureCount = 0;
+
+    /**
+     * Records a failure. The same failure of the same action on several slices, within a few seconds - a registration
+     * which can't start, the actions which were waiting for a failed one - is a single failure listing the slices:
+     * it replaces the previous one, with the next index.
+     */
+    private void recordFailure(String sliceName, String actionName, String reason) {
+        synchronized (failures) {
+            List<String> slices = new ArrayList<>();
+            if (actionName != null) {
+                failures.stream()
+                        .filter(f -> actionName.equals(f.action) && f.reason.equals(reason) && (System.currentTimeMillis() - f.time < 10000))
+                        .findFirst().ifPresent(previous -> {
+                            failures.remove(previous);
+                            slices.addAll(previous.slices);
+                        });
+            }
+            if (sliceName != null && !slices.contains(sliceName)) slices.add(sliceName);
+            failures.add(new Failure(++failureCount, actionName, slices, reason));
+            if (failures.size() > 100) failures.removeFirst();
+        }
+    }
+
+    /**
+     * @param after index of the last failure already known, 0 for all of them
+     * @return the failures recorded after it, oldest first - only the last 100 failures are kept
+     */
+    public List<Failure> getFailures(int after) {
+        synchronized (failures) {
+            return failures.stream().filter(f -> f.index > after).collect(Collectors.toList());
+        }
+    }
 
     /**
      * Warning message for users: logged first, then sent to the subscribers (a view shows it)
@@ -366,6 +455,32 @@ public class MultiSlicePositioner implements Closeable {
             safeList = new ArrayList<>(slices);
         }
         safeList.forEach(SliceSources::waitForEndOfTasks);
+    }
+
+    /**
+     * Waits for the actions queued on the slices, at most the given time
+     * @param timeoutMs longest wait, in milliseconds
+     * @return the number of actions still pending, 0 if all are done
+     */
+    public int waitForTasks(long timeoutMs) {
+        CompletableFuture<?>[] lastTasks = getSlices().stream()
+                .map(slice -> slice.getLastTask().handle((result, error) -> result)) // A failed or cancelled task ends the wait too
+                .toArray(CompletableFuture[]::new);
+        try {
+            CompletableFuture.allOf(lastTasks).get(timeoutMs, TimeUnit.MILLISECONDS);
+        } catch (TimeoutException | ExecutionException e) {
+            // The pending actions are counted below
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        return getPendingActions();
+    }
+
+    /**
+     * @return the number of actions queued on the slices and not finished yet, running ones included
+     */
+    public int getPendingActions() {
+        return getSlices().stream().mapToInt(SliceSources::getPendingActions).sum();
     }
 
     public String getUndoMessage() {

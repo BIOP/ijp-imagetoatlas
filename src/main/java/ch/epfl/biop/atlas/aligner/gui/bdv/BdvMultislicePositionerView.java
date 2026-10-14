@@ -282,9 +282,17 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
 
     int registrationStepBack = 0;
 
+    /**
+     * @return how many of their last registrations the slices are displayed without (View Previous / View Next),
+     * 0 when they are displayed at their current registration
+     */
+    public int getRegistrationStepBack() {
+        return registrationStepBack;
+    }
+
     public void viewPreviousRegistration() {
         // So : how many registrations max ?
-        int maxNRegistrations = msp.getSlices().stream().mapToInt(SliceSources::getNumberOfRegistrations).max().getAsInt();
+        int maxNRegistrations = msp.getSlices().stream().mapToInt(SliceSources::getNumberOfRegistrations).max().orElse(0);
         if (registrationStepBack<maxNRegistrations) {
             registrationStepBack++;
             guiState.forEachSlice(guiState -> guiState.setRegistrationStepBack(registrationStepBack));
@@ -519,8 +527,17 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     private void installBigDataViewerCards() {
         BdvHandleHelper.addCard(bdvh, NAME_CARD_ATLAS_INFORMATION, new AtlasInfoPanel(msp).getPanel(), true);
 
-        //TODO, FIX NULL
-        BdvHandleHelper.addCard(bdvh, NAME_CARD_ATLAS_DISPLAY, ScijavaSwingUI.getPanel(msp.getContext(), AtlasAdjustDisplayCommand.class, "view", this), true);
+        try {
+            // Built like the atlas slicing card below, to refresh its widgets when the display is changed from code
+            atlasDisplayModule = ScijavaSwingUI.createModule(msp.getContext(), AtlasAdjustDisplayCommand.class, "view", this);
+            SwingInputHarvester swingInputHarvester = new SwingInputHarvester();
+            msp.getContext().inject(swingInputHarvester);
+            atlasDisplayPanel = new SwingInputPanel();
+            swingInputHarvester.buildPanel(atlasDisplayPanel, atlasDisplayModule);
+            BdvHandleHelper.addCard(bdvh, NAME_CARD_ATLAS_DISPLAY, atlasDisplayPanel.getComponent(), true);
+        } catch (Exception e) {
+            msp.errorMessageForUser.accept("GUI Initialisation error", e.getMessage());
+        }
 
         logger.debug("Adding table view");
         addTableView();
@@ -1223,9 +1240,14 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         return "Aligning Big Brains and Atlases - "+msp.getAtlas().getName()+(viewNumber > 1 ? " (view "+viewNumber+")" : "");
     }
 
+    /** True once the session was closed by something else than this window, which then shows a dead session */
+    volatile boolean sessionClosed = false;
+
     public String getViewName() {
         String name = getName();
-        if (msp.isModifiedSinceLastSave()) {
+        if (sessionClosed) {
+            return ABBABdvViewPrefs.title_prefix+name+" (session closed)"+ABBABdvViewPrefs.title_suffix;
+        } else if (msp.isModifiedSinceLastSave()) {
             return ABBABdvViewPrefs.title_prefix+name+"* (modified)"+ABBABdvViewPrefs.title_suffix;
         } else {
             return ABBABdvViewPrefs.title_prefix+name+ABBABdvViewPrefs.title_suffix;
@@ -1706,6 +1728,41 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         }
     }
 
+    /**
+     * Zooms the view on a region of the displayed atlas section, fitted to the window: the region of
+     * ABBA - Snapshot, in the same coordinates. The section is kept: in review mode the current position along
+     * the slicing axis, in positioning mode the atlas section under the center of the window.
+     * Can be called from any thread, like {@link #centerOnAtlas(double)}: the viewer state is synchronized.
+     * @param x left of the region, in mm, as read on the rulers of ABBA - Snapshot
+     * @param y top of the region, in mm, as read on the rulers of ABBA - Snapshot
+     * @param width width of the region, in mm
+     * @param height height of the region, in mm
+     */
+    public void setViewRegionMm(double x, double y, double width, double height) {
+        if ((width <= 0) || (height <= 0)) throw new IllegalArgumentException("The region width and height must be positive");
+        double viewWidth = bdvh.getViewerPanel().getWidth();
+        double viewHeight = bdvh.getViewerPanel().getHeight();
+        if ((viewWidth == 0) || (viewHeight == 0)) return; // not laid out yet
+        RealPoint windowCenter = getCurrentBdvCenter();
+        RealPoint sectionCenter; // where the origin of the aligner coordinates of the section is displayed, see getDisplayedCenter
+        if (mode == POSITIONING_MODE_INT) {
+            // The atlas sections are displayed side by side, msp.sX apart, the k-th one centered at (k + 0.5) * msp.sX
+            sectionCenter = new RealPoint((Math.floor(windowCenter.getDoublePosition(0) / msp.sX) + 0.5) * msp.sX, 0, 0);
+        } else {
+            sectionCenter = new RealPoint(0, 0, windowCenter.getDoublePosition(2));
+        }
+        double scale = Math.min(viewWidth / width, viewHeight / height);
+        AffineTransform3D view = new AffineTransform3D();
+        view.scale(scale);
+        view.translate(viewWidth / 2.0 - scale * (sectionCenter.getDoublePosition(0) + x + width / 2.0),
+                viewHeight / 2.0 - scale * (sectionCenter.getDoublePosition(1) + y + height / 2.0),
+                -scale * sectionCenter.getDoublePosition(2));
+        bdvh.getViewerPanel().state().setViewerTransform(view);
+        if (bdvRepaintEnabled()) {
+            bdvh.getViewerPanel().requestRepaint();
+        }
+    }
+
     // ------------------------------------------- Block map
 
     /*
@@ -2020,14 +2077,24 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         return bdvh.getViewerPanel().state().isSourceActive(getDisplayedAtlasSources()[iChannel]);
     }
 
+    /** The atlas display card, whose checkboxes follow {@link #setAtlasChannelVisibility(int, boolean)} */
+    Module atlasDisplayModule;
+    InputPanel<JPanel, JPanel> atlasDisplayPanel;
+
     /**
-     * Shows or hides an atlas channel. The atlas display card does not reflect it, and applies its own
-     * settings again when it is used
+     * Shows or hides an atlas channel, and checks or unchecks it in the atlas display card accordingly
      * @param iChannel index of the atlas channel, as in the registration commands
      * @param visible whether to show it
      */
     public void setAtlasChannelVisibility(int iChannel, boolean visible) {
         bdvh.getViewerPanel().state().setSourceActive(getDisplayedAtlasSources()[iChannel], visible);
+        // The card applies all its checkboxes whenever it is used: they have to follow, see AtlasAdjustDisplayCommand
+        List<String> keys = msp.getAtlas().getMap().getImagesKeys(); // the card has no checkbox for the last channels
+        String input = (iChannel < keys.size() ? keys.get(iChannel) : "") + "_enable";
+        if ((atlasDisplayPanel != null) && (atlasDisplayPanel.getWidget(input) != null)) {
+            atlasDisplayModule.setInput(input, visible);
+            SwingUtilities.invokeLater(() -> atlasDisplayPanel.getWidget(input).refreshWidget());
+        }
     }
 
     public static List<String> excludedKeys = new ArrayList<>();
@@ -2123,7 +2190,10 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
     @Override
     public void closing(MultiSlicePositioner msp) {
         if ((msp == this.msp)&&(!cleanAllOnExit)) {
-            IJ.error("This ABBA session has been closed outside BigDataViewer, expect errors!");
+            // Said by the window title, not by a modal error, which would block the window and whoever drives it
+            sessionClosed = true;
+            SwingUtilities.invokeLater(() -> BdvHandleHelper.setWindowTitle(bdvh, getViewName()));
+            logger.warn("This ABBA session has been closed outside of its window: the window shows a closed session, close it");
         }
     }
 
@@ -2268,6 +2338,16 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
             busyOverlay.drawOverlays(g);
 
             g.setColor(ABBABdvViewPrefs.task_counter_color);
+
+            if (registrationStepBack > 0) {
+                // Without this line, nothing tells that the slices are not shown at their current registration
+                String stepBack = "View Previous: last " + registrationStepBack + " registration(s) hidden";
+                if ((iCurrentSlice >= 0) && (iCurrentSlice < slicesCopy.size())) {
+                    int nRegistrations = slicesCopy.get(iCurrentSlice).getNumberOfRegistrations();
+                    stepBack += " (current slice: " + Math.max(0, nRegistrations - registrationStepBack) + "/" + nRegistrations + " shown)";
+                }
+                g.drawString(stepBack, 5, h-30);
+            }
 
             if (msp.isModifiedSinceLastSave()) {
                 g.drawString("Modified since last save!", 5, h-15);

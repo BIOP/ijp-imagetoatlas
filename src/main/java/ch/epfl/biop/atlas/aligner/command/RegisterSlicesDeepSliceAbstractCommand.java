@@ -166,8 +166,7 @@ abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command,
             nSlicesToRegister = slicesToRegister.size();
 
             if (slicesToRegister.isEmpty()) {
-                mp.errorMessageForUser.accept("No selected slice", "Please select the slice(s) you want to register");
-                return;
+                fail("No selected slice", "Please select the slice(s) you want to register");
             }
 
             if (!slice_channels_csv.trim().equals("*")) {
@@ -176,9 +175,8 @@ abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command,
                 int maxIndex = indices.stream().mapToInt(e -> e).max().getAsInt();
 
                 if (maxIndex >= mp.getChannelBoundForSelectedSlices()) {
-                    mp.errorMessageForUser.accept("Missing channel in selected slice(s).",
+                    fail("Missing channel in selected slice(s).",
                             "Missing channel in selected slice(s)\n One selected slice only has " + mp.getChannelBoundForSelectedSlices() + " channel(s).\n Maximum index : " + (mp.getChannelBoundForSelectedSlices() - 1));
-                    return;
                 }
             }
 
@@ -186,7 +184,7 @@ abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command,
             dataset_folder = td.getPath().toFile();
             td.deleteOnExit();
 
-            if (!setSettings()) return;
+            if (!setSettings()) throw new IllegalArgumentException("DeepSlice can't run: see the message shown");
 
             Map<SliceSources, DeepSliceHelper.Holder<Double>> newAxisPosition = new HashMap<>();
             Map<SliceSources, DeepSliceHelper.Holder<Registration<SourceAndConverter<?>[]>>> newSliceRegistration = new HashMap<>();
@@ -268,6 +266,14 @@ abstract public class RegisterSlicesDeepSliceAbstractCommand implements Command,
     }
 
     abstract boolean setSettings();
+
+    /**
+     * Shows the error to the user and fails the command, see {@link RegistrationMultiChannelCommand#fail(String, String)}
+     */
+    protected void fail(String title, String message) {
+        mp.errorMessageForUser.accept(title, message);
+        throw new IllegalArgumentException(title + ": " + message);
+    }
 
     static protected void adjustSlicingAngle(MultiSlicePositioner mp, QuickNIISeries series, int nIterations, List<SliceSources> slices) {
 

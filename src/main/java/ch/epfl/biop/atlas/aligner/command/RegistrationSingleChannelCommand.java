@@ -30,24 +30,29 @@ abstract public class RegistrationSingleChannelCommand implements Command {
     final public void run() {
         if (!validationError) {
             if (atlas_channel >= mp.getNumberOfAtlasChannels()) {
-                mp.errorMessageForUser.accept("The atlas has only "+mp.getNumberOfAtlasChannels()+" channels!",
+                fail("The atlas has only "+mp.getNumberOfAtlasChannels()+" channels!",
                         "The atlas has only "+mp.getNumberOfAtlasChannels()+" channels !\n Maximum index : "+(mp.getNumberOfAtlasChannels()-1));
-                return;
             }
             if (mp.getSelectedSlices().isEmpty()) {
-                mp.errorMessageForUser.accept("No slice selected","Please select the slice(s) you want to register");
-                return;
+                fail("No slice selected","Please select the slice(s) you want to register");
             }
             if (slice_channel >=mp.getChannelBoundForSelectedSlices()) {
-                mp.errorMessageForUser.accept("Missing channel in selected slice(s).",
+                fail("Missing channel in selected slice(s).",
                         "Missing channel in selected slice(s)\n One selected slice only has "+mp.getChannelBoundForSelectedSlices()+" channel(s).\n Maximum index : "+(mp.getChannelBoundForSelectedSlices()-1) );
-                return;
             }
             runValidated();
         }
     }
 
     abstract public void runValidated();
+
+    /**
+     * Shows the error to the user and fails the command, see {@link RegistrationMultiChannelCommand#fail(String, String)}
+     */
+    protected void fail(String title, String message) {
+        mp.errorMessageForUser.accept(title, message);
+        throw new IllegalArgumentException(title + ": " + message);
+    }
 
     public SourcesProcessor getFixedFilter() {
         return new SourcesChannelsSelect(atlas_channel);

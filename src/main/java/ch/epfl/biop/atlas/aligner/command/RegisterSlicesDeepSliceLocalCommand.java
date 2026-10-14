@@ -94,13 +94,20 @@ public class RegisterSlicesDeepSliceLocalCommand extends RegisterSlicesDeepSlice
         if (new File(DeepSlice.envDirPath).exists()) {
             deepSliceProcessor =
                 (input_folder, nSlices) -> {
-                    boolean pa = settings.propagate_angles; // store
+                    boolean pa = settings.propagate_angles, order = settings.enforce_index_order, spacing = settings.use_enforce_index_spacing; // store
                     if (nSlices<=2) {
                         settings.propagate_angles = false; // see https://github.com/BIOP/ijp-imagetoatlas/issues/214
+                    }
+                    if (nSlices<2) {
+                        // A single section can be neither ordered nor spaced ("Only one section found, cannot space according to index")
+                        settings.enforce_index_order = false;
+                        settings.use_enforce_index_spacing = false;
                     }
                     settings.input_folder = input_folder.getAbsolutePath();
                     File outDirectory =  DeepSliceHelper.deepSliceLocalRunner(settings, input_folder);
                     settings.propagate_angles = pa; // restore
+                    settings.enforce_index_order = order;
+                    settings.use_enforce_index_spacing = spacing;
                     return outDirectory;
                 };
         } else {

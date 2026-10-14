@@ -119,6 +119,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ForkJoinPool;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 
@@ -174,7 +175,9 @@ public class SliceSources {
 
     private final List<Registration<SourceAndConverter<?>[]>> registrations = new ArrayList<>();
 
-    private final List<CompletableFuture<Boolean>> tasks = new ArrayList<>();
+    // Queue of the actions of this slice, each task starting once the previous one is done. Touched from several
+    // threads: compound operations synchronize on it
+    private final List<CompletableFuture<Boolean>> tasks = Collections.synchronizedList(new ArrayList<>());
 
     private final Map<CancelableAction, CompletableFuture<Boolean>> mapActionTask = new ConcurrentHashMap<>();
 
@@ -492,7 +495,7 @@ public class SliceSources {
         }
         if (mapActionTask.containsKey(action)) {
             if (tasks.contains(mapActionTask.get(action))) {
-                CompletableFuture<Boolean> future = tasks.get(tasks.indexOf(mapActionTask.get(action)));
+                CompletableFuture<Boolean> future = mapActionTask.get(action);
                 if (future.isDone()) {
                     return "(done)";
                 } else if (future.isCancelled()) {
@@ -509,15 +512,29 @@ public class SliceSources {
     }
 
     public void waitForEndOfTasks() {
+        try {
+            getLastTask().get();
+        } catch (Exception e) {
+            mp.errorMessageForUser.accept("Tasks were cancelled for slice "+this, "Error:"+e.getMessage());
+            e.printStackTrace();
+        }
+    }
 
-        if (!tasks.isEmpty()) {
-            try {
-                CompletableFuture<Boolean> lastTask = tasks.get(tasks.size()-1);
-                lastTask.get();
-            } catch (Exception e) {
-                mp.errorMessageForUser.accept("Tasks were cancelled for slice "+this, "Error:"+e.getMessage());
-                e.printStackTrace();
-            }
+    /**
+     * @return the last task queued on this slice, which ends after the others, or a completed one if there is none
+     */
+    CompletableFuture<Boolean> getLastTask() {
+        synchronized (tasks) {
+            return tasks.isEmpty() ? CompletableFuture.completedFuture(true) : tasks.get(tasks.size() - 1);
+        }
+    }
+
+    /**
+     * @return the number of actions queued on this slice and not finished yet, the running one included
+     */
+    public int getPendingActions() {
+        synchronized (tasks) {
+            return (int) tasks.stream().filter(task -> !task.isDone()).count();
         }
     }
 
@@ -684,7 +701,8 @@ public class SliceSources {
 
         boolean out = reg.register();
         if (!out) {
-            mp.errorMessageForUser.accept("Error during registration", "Registration "+reg.getClass().getSimpleName()+" errored:\n "+reg.getExceptionMessage());
+            // Shown to the user by enqueueRunAction, with the action and the slice, see failureMessage
+            logger.error("Registration "+reg.getClass().getSimpleName()+" of slice "+this+" errored: "+reg.getExceptionMessage());
         } else {
             appendRegistration(reg);
         }
@@ -750,17 +768,11 @@ public class SliceSources {
     Executor executor = ForkJoinPool.commonPool();
 
     protected void enqueueRunAction(CancelableAction action, Runnable postRun, boolean runInExtraThread) {
-        CompletableFuture<Boolean> startingPoint;
-        if (tasks.isEmpty()) {
-            startingPoint = CompletableFuture.supplyAsync(() -> true);
-        } else {
-            startingPoint = tasks.get(tasks.size() - 1);
-        }
         Executor e = executor;
         // Otherwise the synchronisation mechanism is locked forever...
         // This way of synchronizing is costly, and will not scale for a number of section > 1000, but we'll live with that
         if (runInExtraThread) e = new ThreadPerTaskExecutor();
-        tasks.add(startingPoint.thenApplyAsync((out) -> {
+        CompletableFuture<Boolean> task = enqueueTask((out) -> {
             if (out) {
                 mp.addTask();
                 actionInProgress = action;
@@ -783,7 +795,7 @@ public class SliceSources {
                     if (!action.isValid()) mp.removeFromUndoStack(action);
                     postRun.run();
                 } else {
-                    mp.errorMessageForUser.accept("Action failed", action.toString());
+                    mp.errorForUser(getName(), actionName(action), "Action failed", failureMessage(action));
                     if (mapActionTask.containsKey(action)) {
                         CompletableFuture future = mapActionTask.get(action);
                         tasks.remove(future);
@@ -796,7 +808,7 @@ public class SliceSources {
                 mp.removeTask();
                 return result;
             } else {
-                mp.errorMessageForUser.accept("Action not started","Upstream tasked failed, canceling action "+action);
+                mp.errorForUser(getName(), actionName(action), "Action not started", "an earlier action of the slice failed");
                 if (mapActionTask.containsKey(action)) {
                     CompletableFuture future = mapActionTask.get(action);
                     tasks.remove(future);
@@ -806,8 +818,42 @@ public class SliceSources {
                 mp.getActionsFromSlice(this).remove(action);
                 return false;
             }
-        }, e));
-        mapActionTask.put(action, tasks.get(tasks.size() - 1));
+        }, e);
+        mapActionTask.put(action, task);
+    }
+
+    /**
+     * Chains a task to the last one of the queue and makes it the last one, at once
+     * @param task gets the result of the previous task, false if it failed
+     */
+    private CompletableFuture<Boolean> enqueueTask(Function<Boolean, Boolean> task, Executor executor) {
+        synchronized (tasks) {
+            CompletableFuture<Boolean> future = getLastTask().thenApplyAsync(task, executor);
+            tasks.add(future);
+            return future;
+        }
+    }
+
+    /**
+     * @return the name of an action, for the failures: the registration class for a registration, as in
+     * {@link #getRegistrationNames()}
+     */
+    private static String actionName(CancelableAction action) {
+        if ((action instanceof RegisterSliceAction) && (((RegisterSliceAction) action).getRegistration() != null)) {
+            return ((RegisterSliceAction) action).getRegistration().getClass().getSimpleName();
+        }
+        return action.actionClassString();
+    }
+
+    /**
+     * @return why an action failed: the error of a registration, or else the action itself
+     */
+    private static String failureMessage(CancelableAction action) {
+        if ((action instanceof RegisterSliceAction) && (((RegisterSliceAction) action).getRegistration() != null)) {
+            String error = ((RegisterSliceAction) action).getRegistration().getExceptionMessage();
+            if (error != null) return error;
+        }
+        return action.toString();
     }
 
     boolean isBeingDeleted = false;
@@ -851,13 +897,7 @@ public class SliceSources {
                         mp.removeTask();
                    }
                 } else {
-                    CompletableFuture<Boolean> startingPoint;
-                    if (tasks.isEmpty()) {
-                        startingPoint = CompletableFuture.supplyAsync(() -> true);
-                    } else {
-                        startingPoint = tasks.get(tasks.size() - 1);
-                    }
-                    tasks.add(startingPoint.thenApplyAsync((out) -> {
+                    enqueueTask((out) -> {
                         if (out) {
                             mp.addTask();
                             mp.listeners.forEach(sliceChangeListener -> sliceChangeListener.actionCancelStarted(action.getSliceSources(), action));
@@ -872,7 +912,7 @@ public class SliceSources {
                             logger.error("Weird edge case!");
                             return false;
                         }
-                    }));
+                    }, executor);
                 }
             } else {
                 mp.addTask();

@@ -14,7 +14,8 @@ import static ch.epfl.biop.atlas.aligner.ABBAHelper.getResource;
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>ABBA - Elastix Registration (Affine)",
         description = "Automatic in-plane affine registration (translation, rotation, scaling, shear) of the selected slices "
-                + "to the atlas with Elastix, restricted to the current region of interest. "
+                + "to the atlas with Elastix, restricted to the current region of interest. Only queues the registrations: "
+                + "follow with 'ABBA - Wait'. "
                 + "Atlas and slice channels are paired in order and must be equal in number.",
         iconPath = "/graphics/ABBAAffine.png")
 public class RegisterSlicesElastixAffineCommand extends RegistrationMultiChannelCommand {

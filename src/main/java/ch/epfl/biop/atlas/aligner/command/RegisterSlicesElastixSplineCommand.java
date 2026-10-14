@@ -15,6 +15,7 @@ import static ch.epfl.biop.atlas.aligner.ABBAHelper.getResource;
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>Align>ABBA - Elastix Registration (Spline)",
         description = "Automatic in-plane non-linear (B-spline) registration of the selected slices to the atlas with Elastix, "
                 + "restricted to the current region of interest. Usually run after an affine registration. "
+                + "Only queues the registrations: follow with 'ABBA - Wait'. "
                 + "Atlas and slice channels are paired in order and must be equal in number. The result can be edited in BigWarp.",
         iconPath = "/graphics/ABBASpline.png")
 public class RegisterSlicesElastixSplineCommand extends RegistrationMultiChannelCommand {
@@ -46,9 +47,7 @@ public class RegisterSlicesElastixSplineCommand extends RegistrationMultiChannel
         }
 
         if (nb_control_points_x <2) {
-            mp.errorMessageForUser.accept("Cannot start registration", "Number of control points too low.");
-            validationError = true;
-            return;
+            fail("Cannot start registration", "Number of control points too low.");
         }
 
         //mp.registerElastixSpline(getFixedFilter(), getMovingFilter(), nbControlPointsX, showIJ1Result);

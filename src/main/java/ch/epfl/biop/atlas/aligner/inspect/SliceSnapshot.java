@@ -26,10 +26,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.function.ObjIntConsumer;
 import java.util.stream.IntStream;
 
@@ -75,6 +77,8 @@ public class SliceSnapshot {
         /** Draws rulers with millimeter coordinates */
         public boolean showRulers = true;
         public int timepoint = 0;
+        /** Filled while rendering: the acronym and full name of each labelled region, for whoever reads the image */
+        public final Map<String, String> labelledRegions = Collections.synchronizedMap(new TreeMap<>());
     }
 
     static final int RULER_LEFT = 44, RULER_BOTTOM = 22, HEADER_HEIGHT = 36, MARGIN = 6;
@@ -99,6 +103,7 @@ public class SliceSnapshot {
         if (options.showRegionBorders || options.showRegionLabels) {
             regions = mergeSmallRegions(mp.getAtlas().getOntology(), sampleLabels(mp, options, grid, atlasZ), options.regionMinArea);
             if (options.showRegionBorders) drawBorders(pixels, regions.ids, grid);
+            if (options.showRegionLabels) for (Map.Entry<Integer, String> e : regions.acronyms.entrySet()) options.labelledRegions.put(e.getValue(), regions.names.get(e.getKey()));
         }
 
         BufferedImage image = new BufferedImage(grid.w, grid.h, BufferedImage.TYPE_INT_RGB);
@@ -261,6 +266,7 @@ public class SliceSnapshot {
     static class Regions {
         final int[] ids;
         final Map<Integer, String> acronyms = new HashMap<>();
+        final Map<Integer, String> names = new HashMap<>();
         Regions(int[] ids) { this.ids = ids; }
     }
 
@@ -283,7 +289,10 @@ public class SliceSnapshot {
             AtlasNode n = ontology.getNodeFromId(label);
             while ((n != null) && (n.parent() != null) && (areas.get(n.getId()) < minPixels)) n = n.parent();
             labelToRegion.put(label, n == null ? 0 : n.getId());
-            if ((n != null) && (n.parent() != null)) regions.acronyms.put(n.getId(), acronym(ontology, n));
+            if ((n != null) && (n.parent() != null)) {
+                regions.acronyms.put(n.getId(), acronym(ontology, n));
+                regions.names.put(n.getId(), n.data().getOrDefault("name", acronym(ontology, n)));
+            }
         });
         for (int i = 0; i < labels.length; i++) regions.ids[i] = labelToRegion.get(labels[i]);
         return regions;
@@ -372,9 +381,12 @@ public class SliceSnapshot {
         if (options.showHeader) {
             StringBuilder header = new StringBuilder();
             if (slice != null) {
-                header.append(String.format(Locale.ROOT, "#%d z=%.3f reg=%d", mp.getSlices().indexOf(slice),
-                        mp.toAtlasZ(slice.getSlicingAxisPosition()), slice.getNumberOfRegistrations()));
-                if (options.registrationStepBack > 0) header.append("-").append(options.registrationStepBack);
+                int nRegistrations = slice.getNumberOfRegistrations();
+                header.append(String.format(Locale.ROOT, "#%d z=%.3f reg=", mp.getSlices().indexOf(slice),
+                        mp.toAtlasZ(slice.getSlicingAxisPosition())));
+                // With a step back, the registrations shown out of all of them, e.g. reg=2/4
+                if (options.registrationStepBack > 0) header.append(Math.max(0, nRegistrations - options.registrationStepBack)).append("/");
+                header.append(nRegistrations);
                 if (slice.isKeySlice()) header.append(" KEY");
                 if (slice.isSelected()) header.append(" SEL");
             }

@@ -8,6 +8,7 @@ import ch.epfl.biop.bdv.img.omero.command.OmeroConnectCommand;
 import ch.epfl.biop.bdv.img.qupath.command.DatasetFromQuPathCreateCommand;
 import org.scijava.ItemVisibility;
 import org.scijava.command.Command;
+import org.scijava.command.CommandModule;
 import org.scijava.command.CommandService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
@@ -22,7 +23,8 @@ import static ch.epfl.biop.atlas.aligner.ABBAHelper.getResource;
 
 @Plugin(type = Command.class,
         menuPath = "Plugins>BIOP>Atlas>Multi Image To Atlas>ABBA - Open Demo Slices From OMERO",
-        description = "Imports demo mouse brain sections streamed from a public OMERO server, "
+        description = "Imports demo mouse brain sections streamed from the German BioImaging OMERO server "
+                + "(shared read-only demo account, no credentials needed), "
                 + "through a QuPath project downloaded from Zenodo. Requires an internet connection and the OMERO dependencies.",
         iconPath = "/graphics/ImportDemoSlicesOMERO.png")
 public class ImportDemoSlicesOMEROCommand implements Command {
@@ -32,7 +34,7 @@ public class ImportDemoSlicesOMEROCommand implements Command {
     String message =  "<html>" +
             "<h1>Import Demo Slices</h1>\n" +
             "    <p><img src='"+getResource("graphics/ImportDemoSlicesOMERO.png")+"' width='80' height='80'></img></p>" +
-            "    <p>These Demo slices are kindly hosted within the public German-BioImaging OMERO instance.</p>\n" +
+            "    <p>These Demo slices are kindly hosted on the German BioImaging OMERO server, and streamed through a shared read-only demo account (no credentials needed).</p>\n" +
             "    <p>For more information, please visit <a href=https://forum.image.sc/t/trends-in-microscopy-2023-omero-server/101652>https://forum.image.sc/t/trends-in-microscopy-2023-omero-server/101652</a> </p>\n" +
             "    <p>The QuPath project containing these slices can also be directly downloaded from <a href=https://zenodo.org/records/14918378>Zenodo.</a></p>"+
             "\n</html>\n";
@@ -45,8 +47,8 @@ public class ImportDemoSlicesOMEROCommand implements Command {
     String demo_dataset;
 
     @Parameter(label = "QuPath project folder (optional)", style = "directory", required = false,
-            description = "Existing folder where the demo QuPath project is downloaded, to keep it and export registrations to it. "
-                    + "If empty or missing, a temporary folder is used.")
+            description = "Folder where the demo QuPath project is downloaded, to keep it and export registrations to it; "
+                    + "created if missing. If empty, a temporary folder is used.")
     File project_directory;
 
     @Parameter
@@ -60,6 +62,9 @@ public class ImportDemoSlicesOMEROCommand implements Command {
         try {
             mp.addTask();
             File qupathProjectFile;
+            if ((project_directory != null) && !project_directory.exists() && !project_directory.mkdirs()) {
+                throw new IllegalArgumentException("Cannot create the folder " + project_directory);
+            }
 
             System.gc();
             switch (demo_dataset) {
@@ -81,12 +86,17 @@ public class ImportDemoSlicesOMEROCommand implements Command {
                 default:
                     throw new IllegalArgumentException("Demo dataset not recognized: " + demo_dataset);
             }
-            cs.run(OmeroConnectCommand.class, true,
+            CommandModule connection = cs.run(OmeroConnectCommand.class, true,
                     "host", "omero-tim.gerbi-gmb.de",
                     "port", 4064,
                     "username", "read-tim",
                     "password", "read-tim"
             ).get();
+            if (!Boolean.TRUE.equals(connection.getOutput("success"))) {
+                Exception error = (Exception) connection.getOutput("error");
+                throw new IllegalStateException("Could not connect to the German BioImaging OMERO server omero-tim.gerbi-gmb.de"
+                        + (error == null ? "" : ": " + error.getMessage()), error);
+            }
 
             cs.run(DatasetFromQuPathCreateCommand.class, true,
                     "qupath_project", qupathProjectFile,

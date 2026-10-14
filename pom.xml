@@ -108,8 +108,8 @@
 
 		<!-- bdv playground related dependencies -->
 		<bigdataviewer-playground.version>0.23.1</bigdataviewer-playground.version>
-		<bigdataviewer-image-loaders.version>0.23.3</bigdataviewer-image-loaders.version>
-		<bigdataviewer-biop-tools.version>0.24.1</bigdataviewer-biop-tools.version>
+		<bigdataviewer-image-loaders.version>0.23.4</bigdataviewer-image-loaders.version>
+		<bigdataviewer-biop-tools.version>0.24.2</bigdataviewer-biop-tools.version>
 		<bigdataviewer-selector.version>0.23.0</bigdataviewer-selector.version>
 		<ijl-utilities-wrappers.version>0.12.1</ijl-utilities-wrappers.version>
 		<imglib2-realtransform.version>4.0.6</imglib2-realtransform.version>

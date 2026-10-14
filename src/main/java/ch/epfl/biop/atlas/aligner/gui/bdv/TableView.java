@@ -56,7 +56,10 @@ public class TableView implements MultiSlicePositioner.SliceChangeListener, List
     /** Lower case name filter, empty means 'show everything'. */
     volatile String nameFilter = "";
 
-    /** Guards against the selection rebuild re-entering {@link #valueChanged(ListSelectionEvent)}. */
+    /**
+     * True while the program, not the user, changes the table or its selection: {@link #valueChanged(ListSelectionEvent)}
+     * then leaves the selection of the slices alone. Only read and written on the EDT, see {@link #updateOnEdt(Runnable)}.
+     */
     boolean updatingSelection = false;
 
     public TableView(BdvMultislicePositionerView view) {
@@ -211,7 +214,8 @@ public class TableView implements MultiSlicePositioner.SliceChangeListener, List
 
     @Override
     public void valueChanged(ListSelectionEvent e) {
-        if (updatingSelection) return; // the table selection is being rebuilt, not edited by the user
+        // Only the final state of a user edit of the table selection is synced to the slices
+        if (updatingSelection || e.getValueIsAdjusting()) return;
         ListSelectionModel lsm = (ListSelectionModel) e.getSource();
         if (!lsm.isSelectionEmpty()) {
             // Only the filtered in slices are affected: a slice which is not in the table
@@ -237,13 +241,37 @@ public class TableView implements MultiSlicePositioner.SliceChangeListener, List
     }
 
     public void updateTable() {
-        model.fireTableStructureChanged(); // All changed!
+        updateOnEdt(() -> {
+            model.fireTableStructureChanged(); // All changed!
+            restoreSelection();
+        });
     }
 
     public void sliceDisplaySettingsChanged(SliceSources slice) {
-        int idx = rowOf(slice);
-        if (idx!=-1) {
-            ((AbstractTableModel) table.getModel()).fireTableRowsUpdated(idx, idx);
+        updateOnEdt(() -> {
+            int idx = rowOf(slice);
+            if (idx!=-1) {
+                model.fireTableRowsUpdated(idx, idx);
+            }
+        });
+    }
+
+    /**
+     * Runs a change of the table, or of its selection, made by the program: on the EDT, as Swing requires (the slice
+     * listeners are called from the threads of the slice actions), and without syncing the table selection back to
+     * the slices
+     */
+    private void updateOnEdt(Runnable change) {
+        if (!SwingUtilities.isEventDispatchThread()) {
+            SwingUtilities.invokeLater(() -> updateOnEdt(change));
+            return;
+        }
+        boolean wasUpdating = updatingSelection;
+        updatingSelection = true;
+        try {
+            change.run();
+        } finally {
+            updatingSelection = wasUpdating;
         }
     }
 
@@ -408,44 +436,45 @@ public class TableView implements MultiSlicePositioner.SliceChangeListener, List
             if (slice.isSelected()) slice.deSelect();
         }
 
-        model.fireTableDataChanged(); // this clears the table selection
-        restoreSelection();
+        rowsChanged();
+    }
+
+    /**
+     * Redraws all the rows, once listCopy changed. Not row by row: the event is handled later on the EDT, when the
+     * row indices it would carry may be outdated by further changes.
+     */
+    private void rowsChanged() {
+        updateOnEdt(() -> {
+            model.fireTableDataChanged(); // this clears the table selection
+            restoreSelection();
+        });
     }
 
     /**
      * Re-syncs the table selection with the selection state of the slices. Needed because
      * {@link AbstractTableModel#fireTableDataChanged()} clears the table selection.
+     * To be called within {@link #updateOnEdt(Runnable)}.
      */
     private void restoreSelection() {
-        updatingSelection = true;
-        try {
-            ListSelectionModel lsm = table.getSelectionModel();
-            lsm.setValueIsAdjusting(true);
-            lsm.clearSelection();
-            List<SliceSources> slices = getSlices();
-            for (int row = 0; row < slices.size(); row++) {
-                if (slices.get(row).isSelected()) {
-                    lsm.addSelectionInterval(row, row);
-                }
+        ListSelectionModel lsm = table.getSelectionModel();
+        lsm.setValueIsAdjusting(true);
+        lsm.clearSelection();
+        List<SliceSources> slices = getSlices();
+        for (int row = 0; row < slices.size(); row++) {
+            if (slices.get(row).isSelected()) {
+                lsm.addSelectionInterval(row, row);
             }
-            lsm.setValueIsAdjusting(false);
-        } finally {
-            updatingSelection = false;
         }
+        lsm.setValueIsAdjusting(false);
         table.repaint();
     }
 
     @Override
     public synchronized void sliceDeleted(SliceSources slice) {
         synchronized (slicesModifyLock) {
-            // The row has to be looked up before the list is updated, since the slice is
-            // already gone from the MultiSlicePositioner when this listener is called
-            int index = rowOf(slice);
             List<SliceSources> slices = mp.getSlices();
             listCopy = applyFilter(slices);
-            if (index!=-1) {
-                model.fireTableRowsDeleted(index, index);
-            }
+            rowsChanged();
 
             // What happens to the number of channels ?
             // Note : the filter is ignored here, the columns should not depend on it
@@ -464,7 +493,7 @@ public class TableView implements MultiSlicePositioner.SliceChangeListener, List
                 if (newMaxChannels < maxChannels) {
                     // The number of channels diminished... full update
                     maxChannels = newMaxChannels;
-                    model.fireTableStructureChanged();
+                    updateTable();
                 }
 
             } // else no change of number of channels
@@ -475,13 +504,10 @@ public class TableView implements MultiSlicePositioner.SliceChangeListener, List
     public void sliceCreated(SliceSources slice) {
         synchronized (slicesModifyLock) {
             listCopy = applyFilter(mp.getSlices());
-            int index = rowOf(slice); // -1 if the new slice does not match the filter
-            if (index!=-1) {
-                model.fireTableRowsInserted(index, index);
-            }
+            rowsChanged();
             if (slice.nChannels>maxChannels) {
                 maxChannels = slice.nChannels;
-                model.fireTableStructureChanged(); // All changed!
+                updateTable(); // All changed!
             }
         }
     }
@@ -492,30 +518,29 @@ public class TableView implements MultiSlicePositioner.SliceChangeListener, List
         synchronized (slicesModifyLock) { // new order
             listCopy = applyFilter(mp.getSlices());
         }
-        model.fireTableDataChanged();
-        restoreSelection(); // fireTableDataChanged cleared the selection, put it back
+        rowsChanged();
     }
 
     @Override
     public void sliceSelected(SliceSources slice) {
-        int idx = rowOf(slice);
-        if (idx!=-1) {
-            if (!table.getSelectionModel().isSelectedIndex(idx)) {
+        updateOnEdt(() -> {
+            int idx = rowOf(slice);
+            if ((idx!=-1) && (!table.getSelectionModel().isSelectedIndex(idx))) {
                 table.getSelectionModel().addSelectionInterval(idx, idx);
                 table.repaint();
             }
-        }
+        });
     }
 
     @Override
     public void sliceDeselected(SliceSources slice) {
-        int idx = rowOf(slice);
-        if (idx!=-1) {
-            if (table.getSelectionModel().isSelectedIndex(idx)) {
+        updateOnEdt(() -> {
+            int idx = rowOf(slice);
+            if ((idx!=-1) && (table.getSelectionModel().isSelectedIndex(idx))) {
                 table.getSelectionModel().removeSelectionInterval(idx, idx);
                 table.repaint();
             }
-        }
+        });
     }
 
     @Override
@@ -530,18 +555,12 @@ public class TableView implements MultiSlicePositioner.SliceChangeListener, List
 
     @Override
     public void sliceKeyOn(SliceSources slice) {
-        int idx = rowOf(slice);
-        if (idx!=-1) {
-            ((AbstractTableModel) table.getModel()).fireTableCellUpdated(idx, 0);
-        }
+        sliceNameCellChanged(slice);
     }
 
     @Override
     public void sliceKeyOff(SliceSources slice) {
-        int idx = rowOf(slice);
-        if (idx!=-1) {
-            ((AbstractTableModel) table.getModel()).fireTableCellUpdated(idx, 0);
-        }
+        sliceNameCellChanged(slice);
     }
 
     @Override
@@ -581,9 +600,14 @@ public class TableView implements MultiSlicePositioner.SliceChangeListener, List
 
     @Override
     public void converterChanged(SliceSources slice) {
-        int idx = rowOf(slice);
-        if (idx!=-1)
-            ((AbstractTableModel)table.getModel()).fireTableCellUpdated(idx, 0);
+        sliceNameCellChanged(slice);
+    }
+
+    private void sliceNameCellChanged(SliceSources slice) {
+        updateOnEdt(() -> {
+            int idx = rowOf(slice);
+            if (idx!=-1) model.fireTableCellUpdated(idx, 0);
+        });
     }
 
     public static class DisplaySettingsRenderer implements TableCellRenderer {
