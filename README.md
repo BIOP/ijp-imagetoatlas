@@ -1,6 +1,6 @@
 # Aligning Big Brains & Atlases
 
-ImageJ/Fiji plugin that align images with the Allen Brain Atlas within Fiji.
+Fiji plugin to register serial sections of brains to atlases (Allen mouse brain, Waxholm rat, BrainGlobe atlases).
 
 [![build](https://img.shields.io/github/actions/workflow/status/BIOP/ijp-imagetoatlas/build-main.yml?branch=master&style=flat-square&logo=github&logoColor=white&label=build)](https://github.com/BIOP/ijp-imagetoatlas/actions/workflows/build-main.yml)
 [![scijava](https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fmaven.scijava.org%2Fcontent%2Fgroups%2Fpublic%2Fch%2Fepfl%2Fbiop%2FImageToAtlasRegister%2Fmaven-metadata.xml&style=flat-square&logo=apachemaven&logoColor=white&label=scijava)](https://maven.scijava.org/#browse/browse:releases:ch%2Fepfl%2Fbiop%2FImageToAtlasRegister)
@@ -12,10 +12,15 @@ ImageJ/Fiji plugin that align images with the Allen Brain Atlas within Fiji.
 [![citations](https://img.shields.io/badge/dynamic/json?label=citations&query=%24.citationCount&url=https%3A%2F%2Fapi.semanticscholar.org%2Fgraph%2Fv1%2Fpaper%2FDOI%3A10.1016%2Fj.celrep.2025.115876%3Ffields%3DcitationCount&style=flat-square&logo=semanticscholar&logoColor=white&color=blue)](https://doi.org/10.1016/j.celrep.2025.115876)
 [![citations (preprint)](https://img.shields.io/badge/dynamic/json?label=citations%20%28preprint%29&query=%24.citationCount&url=https%3A%2F%2Fapi.semanticscholar.org%2Fgraph%2Fv1%2Fpaper%2FDOI%3A10.1101%2F2024.09.06.611625%3Ffields%3DcitationCount&style=flat-square&logo=semanticscholar&logoColor=white&color=blue)](https://doi.org/10.1101/2024.09.06.611625)
 
-Documentation: [https://abba-documentation.readthedocs.io](https://abba-documentation.readthedocs.io/en/latest/)
+Documentation: [https://abba-documentation.readthedocs.io](https://abba-documentation.readthedocs.io/en/stable/)
+
+**Installation**: with an AI assistant, with the ABBA installer, in your Fiji or from Python, see the
+[installation page](https://abba-documentation.readthedocs.io/en/stable/installation/installation.html).
 
 This repository is the core Java package that runs ABBA on the ImageJ/Fiji side. There are associated repositories:
 - [Documentation](https://github.com/BIOP/abba-documentation)
 - [QuPath extension](https://github.com/BIOP/qupath-extension-abba)
+- [Installer](https://github.com/BIOP/abba-installer)
+- [MCP server, for AI assistants](https://github.com/unige-biochem/abba-mcp)
 - [Python wrapper](https://github.com/BIOP/abba_python)
 - [BraiAn - **Brai**n **An**alysis for post-registration analysis](https://silvalab.codeberg.page/BraiAn/)
