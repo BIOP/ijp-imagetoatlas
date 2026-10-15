@@ -268,8 +268,12 @@ public class DeepSliceHelper {
             return matcher.group(1);
         }
 
-        /** Builds the DeepSlice environment on the first call, and returns the same one afterwards. */
-        static synchronized Environment environment(Consumer<String> listenEnv) throws BuildException {
+        /**
+         * Builds the DeepSlice environment on the first call, and returns the same one afterwards.
+         * Public so that an installer, or {@code ABBAPrepareEnvironmentsCommand}, can build it before the first
+         * registration. No dialog is shown.
+         */
+        public static synchronized Environment environment(Consumer<String> listenEnv) throws BuildException {
             if (cachedEnv == null) cachedEnv = buildEnvironment(listenEnv);
             return cachedEnv;
         }
