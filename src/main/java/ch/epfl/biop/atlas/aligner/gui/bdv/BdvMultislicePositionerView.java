@@ -502,6 +502,7 @@ public class BdvMultislicePositionerView implements MultiSlicePositioner.SliceCh
         BdvMenuHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Register>Affine>Elastix Registration (Affine)", RegisterSlicesElastixAffineCommand.class, "mp", msp);
         BdvMenuHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Register>Affine>Manual Affine Registration", RegisterSlicesManualAffineCommand.class, "mp", msp);
         BdvMenuHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Register>Spline>BigWarp Registration", RegisterSlicesBigWarpCommand.class, "mp", msp);
+        BdvMenuHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Register>Spline>Landmark Registration", RegisterSlicesLandmarksCommand.class, "mp", msp);
         BdvMenuHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Register>Spline>Elastix Registration (Spline)", RegisterSlicesElastixSplineCommand.class, "mp", msp);
         BdvMenuHelper.addSeparator(bdvh,"Slices");
         BdvMenuHelper.addCommandToBdvHandleMenu(bdvh, msp.getContext(), "Slices>Mirror Slices", MirrorDoCommand.class, "mp", msp);
