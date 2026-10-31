@@ -1,6 +1,7 @@
 package ch.epfl.biop.quicknii;
 
 import ch.epfl.biop.atlas.aligner.DeepSliceHelper;
+import com.google.gson.JsonElement;
 import net.imglib2.realtransform.AffineTransform3D;
 
 import java.text.DecimalFormat;
@@ -17,7 +18,11 @@ public class QuickNIISeries {
         public double height;
         public double width;
         public int nr;
-        // "markers": [] <- ignored for now
+        /**
+         * VisuAlign markers, [x, y, nx, ny] each, see {@link VisuAlignWarp}; null without nonlinear warp. Kept as read,
+         * so that a malformed marker does not prevent the QuickNII import, which does not use them
+         */
+        public JsonElement markers;
     }
 
 
